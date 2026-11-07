@@ -72,3 +72,5 @@ ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure
 ```
 
 This is an isolated review increment, not a functioning library backend. File hashing and file-version validation, actual DSP integration, typed public outcomes, individual job cancellation/progress, result schema, database location and pinning remain open. Do not use the prototype for user data. It does not write audio or tags.
+
+The follow-up prototype can be built with `-DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON` together with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE` and `BEATGLASS_BUILD_SLICE`; it requires OpenSSL development libraries as well as SQLite, aubio, and libsndfile. It hashes file content, runs the existing tempo replay on cache misses, and exposes cooperative cancellation and progress. Its separate decoder and hash opens leave a concurrent-replacement race, so it is not a user-facing backend; see the [contract proposal](docs/phase1-contract-proposals.md).
