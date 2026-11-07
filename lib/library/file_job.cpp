@@ -1,6 +1,7 @@
 #include "beatglass/library/detail/file_job.hpp"
 #include "beatglass/library/detail/file_fingerprint.hpp"
 #include "beatglass/library/detail/file_snapshot.hpp"
+#include "beatglass/library/detail/snapshot_store_job.hpp"
 #include "beatglass/capture/byte_source.hpp"
 #include "beatglass/core/tempo_tracker.hpp"
 #include "beatglass/core/channel_reduction.hpp"
@@ -164,6 +165,62 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
   } catch (const detail::VirtualOpenCancelled&) { return {FileJobStatus::cancelled, {}, {}}; }
     catch (const Cancelled&) { return {FileJobStatus::cancelled, {}, {}}; }
     catch (const std::exception& e) { return {FileJobStatus::error, {}, e.what()}; }
+}
+
+StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const std::filesystem::path& path,
+  const std::string& engine, const std::string& config, std::stop_token stop,
+  const std::function<void(std::uint64_t)>& progress) {
+  try {
+    if (engine.empty() || config.empty()) return {FileJobStatus::error, {}, "empty engine or configuration", {}};
+    auto opened = SnapshotOpen::create(path, stop);
+    if (opened.status == SnapshotStatus::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
+    if (opened.status == SnapshotStatus::stale_input || opened.status == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, opened.diagnostic, {}};
+    if (opened.status != SnapshotStatus::ok) return {FileJobStatus::error, {}, opened.diagnostic, {}};
+    auto modified = opened.value->modified_unix_ns();
+    if (!modified) return {FileJobStatus::stale_input, {}, "original modification time cannot be represented", {}};
+    FileVersion file{std::filesystem::absolute(path), opened.value->size(), *modified, opened.value->digest()};
+    AnalysisIdentity identity{opened.value->digest(), engine, config, "offline"};
+    auto found = store.find(file, identity, stop);
+    if (found.outcome == FindOutcome::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
+    if (found.outcome == FindOutcome::error) return {FileJobStatus::error, {}, found.diagnostic, {}};
+    if (found.outcome == FindOutcome::hit) {
+      if (!found.result) return {FileJobStatus::error, {}, "store returned hit without value", {}};
+      auto verified = opened.value->verify(stop);
+      if (verified == SnapshotStatus::cancelled || stop.stop_requested()) return {FileJobStatus::cancelled, {}, {}, {}};
+      if (verified == SnapshotStatus::stale_input || verified == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, {}, {}};
+      if (verified != SnapshotStatus::ok) return {FileJobStatus::error, {}, "source revalidation failed", {}};
+      return {FileJobStatus::cache_hit, std::move(found.result), {}, {}};
+    }
+    if (found.outcome != FindOutcome::miss) return {FileJobStatus::error, {}, "unknown store lookup outcome", {}};
+    SnapshotSource source(*opened.value); std::uint64_t observed = 0;
+    auto tempo = replay_snapshot(source, stop, [&](auto frames) { observed = frames; if (progress) progress(frames); });
+    CachedAnalysis value; value.identity = identity; value.result.state = tempo.state; value.result.bpm = tempo.bpm;
+    value.result.observed_through = {0, observed}; value.result.estimator_version = engine; value.result.configuration_id = config;
+    class Verifier final : public FileVersionVerifier {
+    public:
+      Verifier(FileSnapshot& source, std::stop_token token) : source_(source), token_(token) {}
+      FileVerificationResult verify() override {
+        auto result = source_.verify(token_); cancelled = result == SnapshotStatus::cancelled;
+        switch (result) {
+          case SnapshotStatus::ok: return {FileVerificationOutcome::match, {}};
+          case SnapshotStatus::stale_input: return {FileVerificationOutcome::changed, {}};
+          case SnapshotStatus::unverifiable: return {FileVerificationOutcome::unverifiable, {}};
+          case SnapshotStatus::cancelled: return {FileVerificationOutcome::error, "verification cancelled"};
+          default: return {FileVerificationOutcome::error, "source verification failed"};
+        }
+      }
+      bool cancelled = false;
+    private:
+      FileSnapshot& source_; std::stop_token token_;
+    } verifier(*opened.value, stop);
+    auto id = run_id(); auto published = store.publish(file, value, id, verifier, stop);
+    if (published.outcome == PublishOutcome::committed) return {FileJobStatus::committed, value, {}, {}};
+    if (published.outcome == PublishOutcome::cancelled || verifier.cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
+    if (published.outcome == PublishOutcome::stale_input) return {FileJobStatus::stale_input, {}, published.diagnostic, {}};
+    return {FileJobStatus::error, {}, published.diagnostic, id};
+  } catch (const detail::VirtualOpenCancelled&) { return {FileJobStatus::cancelled, {}, {}, {}}; }
+    catch (const Cancelled&) { return {FileJobStatus::cancelled, {}, {}, {}}; }
+    catch (const std::exception& e) { return {FileJobStatus::error, {}, e.what(), {}}; }
 }
 
 }

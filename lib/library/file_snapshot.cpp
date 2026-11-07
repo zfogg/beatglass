@@ -72,6 +72,18 @@ SnapshotRead FileSnapshot::read_at(std::uint64_t offset, std::span<std::byte> bu
   return n < 0 ? SnapshotRead{SnapshotStatus::error, 0} : SnapshotRead{SnapshotStatus::ok, static_cast<std::size_t>(n)};
 }
 std::uint64_t FileSnapshot::size() const noexcept { return impl_->size; }
+std::optional<std::int64_t> FileSnapshot::modified_unix_ns() const noexcept {
+#ifdef __APPLE__
+  auto sec = impl_->evidence.st_mtimespec.tv_sec; auto ns = impl_->evidence.st_mtimespec.tv_nsec;
+#else
+  auto sec = impl_->evidence.st_mtim.tv_sec; auto ns = impl_->evidence.st_mtim.tv_nsec;
+#endif
+  constexpr std::int64_t scale = 1000000000;
+  if (sec > std::numeric_limits<std::int64_t>::max() / scale || sec < std::numeric_limits<std::int64_t>::min() / scale || ns < 0 || ns >= scale) return std::nullopt;
+  auto base = static_cast<std::int64_t>(sec) * scale;
+  if (base > std::numeric_limits<std::int64_t>::max() - ns) return std::nullopt;
+  return base + ns;
+}
 const std::string& FileSnapshot::digest() const noexcept { return impl_->digest; }
 SnapshotStatus FileSnapshot::verify(std::stop_token stop) const {
   try {
@@ -180,6 +192,14 @@ SnapshotRead FileSnapshot::read_at(std::uint64_t offset, std::span<std::byte> bu
   return {SnapshotStatus::ok, static_cast<std::size_t>(read)};
 }
 std::uint64_t FileSnapshot::size() const noexcept { return impl_->size; }
+std::optional<std::int64_t> FileSnapshot::modified_unix_ns() const noexcept {
+  constexpr std::int64_t epoch_ticks = 116444736000000000LL;
+  auto ticks = impl_->evidence.basic.LastWriteTime.QuadPart;
+  if (ticks < 0) return std::nullopt;
+  auto unix_ticks = ticks - epoch_ticks;
+  if (unix_ticks > std::numeric_limits<std::int64_t>::max() / 100 || unix_ticks < std::numeric_limits<std::int64_t>::min() / 100) return std::nullopt;
+  return unix_ticks * 100;
+}
 const std::string& FileSnapshot::digest() const noexcept { return impl_->digest; }
 SnapshotStatus FileSnapshot::verify(std::stop_token stop) const {
   try {

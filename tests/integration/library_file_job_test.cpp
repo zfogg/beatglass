@@ -2,6 +2,8 @@
 #include "beatglass/library/detail/file_job.hpp"
 #include "beatglass/library/detail/job_executor.hpp"
 #include "beatglass/library/detail/file_snapshot.hpp"
+#include "beatglass/library/detail/snapshot_store_job.hpp"
+#include "beatglass/library/detail/tempo_analysis_store.hpp"
 #ifndef _WIN32
 #include <sndfile.h>
 #endif
@@ -158,4 +160,59 @@ TEST_CASE("snapshot virtual job cancels during decoding and retries") {
   INFO(cancelled.diagnostic); REQUIRE(cancelled.status == FileJobStatus::cancelled);
   auto retry = analyze_snapshot_tempo(cache, input, "snapshot-v1", "config");
   INFO(retry.diagnostic); REQUIRE(retry.status == FileJobStatus::committed);
+}
+
+TEST_CASE("snapshot virtual cache handles generated WAV and available codec fixtures") {
+  TempDirectory temp; auto db = temp.path / "library.sqlite"; auto wav = temp.path / "generated.wav";
+  {
+    std::ofstream out(wav, std::ios::binary);
+    auto u16 = [&](unsigned n) { out.put(static_cast<char>(n & 255)); out.put(static_cast<char>((n >> 8) & 255)); };
+    auto u32 = [&](unsigned n) { u16(n & 65535); u16(n >> 16); };
+    constexpr unsigned frames = 8192;
+    out.write("RIFF", 4); u32(36 + frames * 2); out.write("WAVEfmt ", 8); u32(16);
+    u16(1); u16(1); u32(44100); u32(88200); u16(2); u16(16); out.write("data", 4); u32(frames * 2);
+    for (unsigned i = 0; i < frames; ++i) u16(i % 2 ? 8192 : 0);
+    REQUIRE(out.good());
+  }
+  auto fixtures = std::filesystem::path(BEATGLASS_FIXTURES);
+  std::vector<std::filesystem::path> paths{wav, fixtures / "tone.aiff"};
+#ifdef BEATGLASS_REQUIRE_V1_CODECS
+  paths.push_back(fixtures / "tone.flac"); paths.push_back(fixtures / "tone.mp3");
+#endif
+  for (const auto& path : paths) {
+    CAPTURE(path.string()); int blocks = 0;
+    { SqliteCache cache(db.string()); auto first = analyze_snapshot_tempo(cache, path, "codec-test-v1", "default", {}, [&](auto) { ++blocks; });
+      INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.result); REQUIRE(blocks > 0); }
+    { SqliteCache cache(db.string()); blocks = 0; auto hit = analyze_snapshot_tempo(cache, path, "codec-test-v1", "default", {}, [&](auto) { ++blocks; });
+      INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(blocks == 0); }
+  }
+}
+
+TEST_CASE("snapshot job uses shared store and worker collection queries") {
+  TempDirectory temp; auto input = temp.path / "audio"; auto fixtures = std::filesystem::path(BEATGLASS_FIXTURES);
+  std::filesystem::copy_file(fixtures / "tone.aiff", input); auto db = temp.path / "library.sqlite";
+  {
+    TempoAnalysisStore concrete(db.string()); beatglass::AnalysisStore& store = concrete; int blocks = 0;
+    auto first = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "old", {}, [&](auto) { ++blocks; });
+    INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.value); REQUIRE(blocks > 0);
+    REQUIRE(first.value->result.observed_through.frame > 0);
+    CollectionEntry row; row.path = input.string(); row.title = "Fixture"; row.artist = "Example"; row.content_hash = first.value->identity.content_hash;
+    concrete.put_entry(row); auto page = concrete.entries({"fixture", CollectionOrder::title, false, 10, 0});
+    REQUIRE(page.size() == 1); REQUIRE(page[0].path == row.path); REQUIRE(concrete.entry(row.path));
+    bool modified = false;
+    auto changed = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", {}, [&](auto) {
+      if (!modified) { modified = true; std::ofstream out(input, std::ios::binary | std::ios::app); out << 'x'; }
+    });
+    INFO(changed.diagnostic); REQUIRE(modified); REQUIRE(changed.status == FileJobStatus::stale_input);
+  }
+  std::filesystem::copy_file(fixtures / "tone.aiff", input, std::filesystem::copy_options::overwrite_existing);
+  {
+    TempoAnalysisStore concrete(db.string()); beatglass::AnalysisStore& store = concrete; int blocks = 0;
+    auto hit = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "old", {}, [&](auto) { ++blocks; });
+    INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(hit.value); REQUIRE(blocks == 0);
+    auto after = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new");
+    INFO(after.diagnostic); REQUIRE(after.status == FileJobStatus::committed);
+    std::stop_source stop; stop.request_stop();
+    REQUIRE(analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", stop.get_token()).status == FileJobStatus::cancelled);
+  }
 }

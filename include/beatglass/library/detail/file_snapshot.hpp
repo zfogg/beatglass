@@ -3,6 +3,7 @@
 #include <functional>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <span>
 #include <cstddef>
 #include <stop_token>
@@ -31,6 +32,8 @@ public:
   SnapshotRead read_at(std::uint64_t offset, std::span<std::byte> buffer, std::stop_token stop = {}) const;
   /** Fixed length of the finalized snapshot in bytes. */
   std::uint64_t size() const noexcept;
+  /** Retained original modification time as signed Unix-epoch nanoseconds, or absent if not representable. This is evidence, not immutable identity. */
+  std::optional<std::int64_t> modified_unix_ns() const noexcept;
   /** Digest of finalized snapshot bytes, prefixed with sha256:. */
   const std::string& digest() const noexcept;
   /** Rehash the retained original and recheck original/path identity. Cancellation is checked between reads. A write or replacement after this check remains possible; unsupported identity evidence fails closed. */
