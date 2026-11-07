@@ -1,7 +1,8 @@
 # Windows platform work
 
 The provisional backend enumerates active render endpoints and opens a selected
-endpoint with WASAPI shared-mode loopback. It is not connected to the desktop.
+endpoint with WASAPI shared-mode loopback. This integration branch connects it
+to the Windows desktop DJ page for experimental default-output tempo only.
 Discovery is a snapshot: a device can change while the list is being read. A
 dedicated thread owns COM and WASAPI objects and copies float packets into a
 preallocated SPSC queue. Overflow drops complete chunks and marks the next
@@ -82,8 +83,7 @@ newly observed queue loss, discontinuous or untimed PCM, and stop. The callback
 must clear publication and reject in-flight work; the adapter does not revoke a
 packet already returned to an analysis worker. The control owner must poll and
 deliver invalidation promptly, install format before analysis, and ensure the
-callback and allocator outlive the session. The desktop does not yet use this
-adapter. WASAPI's device
+callback and allocator outlive the session. WASAPI's device
 position is currently not used to detect extra gaps: flagged discontinuities and
 timestamp errors are marked, but the epoch-relative frame count excludes unknown
 device gaps and must not be treated as an uninterrupted physical timeline.
@@ -100,8 +100,8 @@ An experimental worker-only path now feeds selected-endpoint packets through
 `reduce_loudest_channel` and the existing aubio `TempoTracker`. It publishes only
 an optional BPM to its caller and clears it on stop, source errors, queue loss,
 discontinuity, malformed PCM, one second of silence or a one-second packet stall.
-It must be pumped regularly by its owning worker; it is not connected to the UI,
-and it does not provide beat phase, key or chords. The one-second silence
+It must be pumped regularly by its owning worker and does not provide beat phase,
+key or chords. The one-second silence
 threshold is provisional.
 
 On Windows 11 Home 10.0.26300 x64, MSVC 19.44 and the existing pinned codec tree,
@@ -118,6 +118,14 @@ with `NOMINMAX`, and the rebuilt target passed. These synthetic and endpoint tes
 do not establish music accuracy, real physical
 interruption recovery, or complete native DJ and overlay qualification.
 
+Hosted Windows CI later reported three device-dependent tests as failures even
+though Catch2 skipped them because the runner had no active render endpoint.
+The Windows Catch discovery properties accidentally split a semicolon-separated
+label into malformed property pairs, preventing CTest from recognizing the skip
+exit code. The registration now uses a single label. A dedicated skip-propagation
+regression was recognized as skipped locally; the targeted CTest selection passed
+11 cases with that one deliberate skip. Hosted rerun results are pending.
+
 After an explicit start, the private default follower polls active render endpoints
 approximately once per second on the worker thread. Stop disables future polling
 until a new start. A changed or missing default clears evidence
@@ -126,8 +134,46 @@ epochs. It exposes waiting/starting/running/error status and coalesces
 strictly-revisioned `PresentationUpdate` snapshots and clears. The UI owner must
 transfer updates to the GUI thread, preserve clears and ordering, consume status,
 and call stop and deliver its clear before destruction. Revision exhaustion or a
-fatal error requires a separate session boundary to clear the display. No GUI
-bridge or DJ controls are connected by this work.
+fatal error requires a separate session boundary to clear the display. On this
+integration branch, the Windows DJ page connects the bridge to the shared
+presentation model and exposes default-output start/stop controls.
+
+The provisional Windows `DjBridge` exposes GUI-thread `start`/`stop`, an active
+flag and status, and emits revisioned presentation updates on the GUI thread.
+Its owned worker performs endpoint discovery and analysis; a single coalescing
+slot retains the latest update, including clears. The shared desktop should
+connect `presentationUpdate` to `LivePresentation::apply` on the GUI thread,
+bind start/stop controls and display status. It must stop, deliver the clear,
+and drain or otherwise guard old updates before recreating the bridge or
+presentation gate. A source revision is not a cross-process/session identity.
+Stop is asynchronous; destruction joins the worker and can wait for a stalled
+OS discovery call.
+
+Windows 11 x64, MSVC 19.44, Qt 6.8.3: serial
+`cmake --build "$env:TEMP/beatglass-overlay-build" --config Debug --target windows_dj_bridge_tests -j 1`
+and `ctest --test-dir "$env:TEMP/beatglass-overlay-build" -C Debug -R '^windows_dj_bridge$' --output-on-failure`
+passed. Qt tests exercise GUI-thread update delivery, rapid stop/start clears,
+delayed-update rejection, discovery error reporting, and destruction after a
+blocked discovery is released. An earlier test exposed a missing clear when a
+stop arrived before the worker observed a restart; the regression now passes.
+These tests use injected discovery and do not exercise the shared desktop's QML
+or prove responsiveness if an OS call stalls indefinitely.
+An additional opt-in `BEATGLASS_NATIVE_DJ_TEST=1` run of the same CTest target
+played a generated 120 BPM click track through the default Windows output and
+observed a tempo snapshot reach a GUI-thread `PresentationGate`; stopping the
+bridge cleared the gate, and it remained clear after a short wait. This is a
+native test of the private bridge and real capture/tempo path, not the actual
+QML control or overlay. The normal and opt-in test invocations both passed.
+
+The Windows QML integration branch connects the bridge's GUI-thread updates to
+`LivePresentation` and exposes default-output start/stop controls. Windows 11
+x64, MSVC 19.44 and Qt 6.8.3: serial desktop and test builds succeeded; CTest
+passed `desktop_navigation`, `live_presentation`, `windows_dj_bridge` and
+`windows_dj_ui` (4/4). With `BEATGLASS_NATIVE_DJ_TEST=1`, `windows_dj_ui` played
+a generated click track through the default endpoint, verified that the actual
+QML BPM label updated, and verified that stop cleared it. This is not an overlay
+test, physical disconnect/default-switch test, real-music evaluation, or v1
+qualification. The shared UI and Windows bridge PRs remain prerequisites.
 
 Windows 11 x64, MSVC 19.44: `cmake --build "$env:TEMP/beatglass-wasapi-slice" --config Debug --target windows_endpoint_tests -j 4`
 and `ctest --test-dir "$env:TEMP/beatglass-wasapi-slice" -C Debug -R 'Default follower|Discovery exceptions|Live tempo|Session|endpoint|capture startup' --output-on-failure`
@@ -142,3 +188,72 @@ failure, then restored a real endpoint and observed a running source with a fres
 attempt. The last parallel MSBuild invocation failed because the Windows paging
 file could not accommodate new processes; retrying the build with `-j 1` passed
 the same 11 CTest cases and both opt-in native cases.
+
+On Windows 11 Home 10.0.26300, MSVC 19.44, build `29ecc28` with the
+`[native-system-default]` test added, a manual Control Panel switch changed the
+multimedia default from Speakers (Realtek(R) Audio) to Speakers (Logitech G733
+Gaming Headset) and back. The test observed a clear and a running follower on
+each transition with fresh epochs; all 769 assertions passed. The original
+multimedia default was restored, and the Speakers (2K AUDIO) communications
+default remained unchanged. After a serial build of `windows_endpoint_tests`,
+the opt-in command was `windows_endpoint_tests.exe '[native-system-default]' -r compact`.
+This exercised actual OS default selection, not physical disconnection, real
+music, or QML interaction during the switch.
+
+The experimental Windows DJ page now owns a separate tempo overlay and uses
+the merged overlay controller. The main window provides show/hide, click-through
+unlock, opacity and on-screen recovery controls. The overlay displays the same
+live BPM model as the DJ page; key, chords and beat phase are not implemented.
+Windows 11 10.0.26300, MSVC 19.44 and Qt 6.8.3: a serial build of
+`beatglass-desktop`, `windows_dj_ui_tests` and `windows_overlay_tests` passed.
+With the pinned vcpkg debug and release DLL directories on `PATH`,
+`ctest --test-dir "$env:TEMP/beatglass-overlay-build" -C Debug -R '^(windows_dj_ui|windows_overlay|windows_dj_bridge|desktop_navigation|live_presentation)$' --output-on-failure`
+passed 5/5. The UI integration test operates the QML controls and checks the
+real controller, window visibility, click-through, opacity and recovery. The
+first run without those DLL paths timed out on two test launches; the rerun
+passed. This is automated integration coverage, not a manual product overlay,
+physical monitor removal or exclusive fullscreen qualification.
+
+On Windows 11 Home 10.0.26300, MSVC 19.44, Qt 6.8.3, desktop build based on
+`8df919d` with the drag changes, interactive testing showed the overlay over the
+DJ controls. The opacity slider visibly changed transparency. With click-through
+enabled, clicks on covered Start and Stop monitoring controls reached them;
+after Unlock, a click on the covered Start control did not reach it. The
+control-window labels tracked the state. The application was closed after the
+test. The unlocked overlay now has a drag surface and starts near the control
+window. The opt-in `BEATGLASS_NATIVE_OVERLAY_TEST=1` invocation
+`windows_dj_ui_tests.exe nativeOverlayDrag` passed with native pointer input and
+observed a position change on one display. An earlier run did not move the
+window, and a second-display version failed converting a point after changing
+screens. The drag surface now tracks pointer movement in Qt global coordinates;
+the native test reads the Windows window rectangle for pointer input. On build
+`38aad62` with these changes, an interactive desktop drag moved the overlay 240
+by 100 logical pixels. Three consecutive native `windows_dj_ui_tests.exe
+nativeOverlayDrag` runs passed on both LG ULTRAGEAR (100% scaling) and U2790B
+(150% scaling), checking a substantial position change on each screen. The five
+targeted CTest cases passed again. This covers drags started and completed
+within each display; a single drag crossing the monitor boundary, physical
+display removal and exclusive fullscreen product scenarios remain untested.
+
+Follow-up on build `7308514` with the mixed-DPI and settings changes: native
+pointer input dragged the QML overlay continuously from the 100% LG display to
+the 150% U2790B. Three consecutive boundary runs passed, and a final run checked
+both the crossed boundary and movement within each display; the test verifies
+the destination monitor and that the window still contains the pointer. Earlier
+attempts failed because the overlay stopped following the pointer during the
+DPI transition. The Windows controller now follows the native cursor until
+button release, including if Qt mouse events are interrupted. An initial
+per-display test also placed the second window on the wrong monitor; the test
+now checks actual native monitor membership before dragging.
+
+Position and opacity are now persisted through `QSettings`, restored to an
+available display, and reflected in the opacity slider. Visibility and
+click-through start disabled. Unit and QML restart tests use temporary settings;
+the actual desktop was also closed while default-output monitoring and
+click-through were active, then reopened with monitoring stopped, the overlay
+hidden and its previously selected opacity restored. The five targeted CTest
+cases passed with the required vcpkg DLL paths. The session epoch namespace is
+not yet shared by the live worker and offline sources; see
+`epoch-handoff-proposal.md`. Physical monitor removal, the reverse boundary
+direction, exclusive fullscreen product behavior and full native qualification
+remain open.

@@ -1,6 +1,6 @@
 # Beatglass
 
-Beatglass is planned as a local desktop music analysis application with a library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. Neither mode is complete yet. A preliminary file-tempo CLI and desktop shell with Library and DJ navigation are available when built with optional dependencies. The Library page can browse folders, inspect file metadata and play or seek a selected file through Qt Multimedia; library management and DJ capture are not yet available.
+Beatglass is planned as a local desktop music analysis application with a library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. Neither mode is complete yet. A preliminary file-tempo CLI and desktop shell with Library and DJ navigation are available when built with optional dependencies. The Library page can browse folders, inspect metadata and play or seek a selected file; library management remains experimental. On Windows, a draft DJ path can monitor a selected output or follow the default for tempo.
 
 The intended stack is C++20, CMake, Qt 6 Quick, SQLite, aubio and Essentia, with PipeWire, Core Audio taps and WASAPI loopback for Linux, macOS and Windows respectively. Dependency availability, versions and licenses must be verified before selection. No account or network service should be required at runtime.
 

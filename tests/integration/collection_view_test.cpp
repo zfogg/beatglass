@@ -9,11 +9,50 @@
 #include <limits>
 #ifdef _WIN32
 #include "windows_dj.hpp"
+#include "platform/windows_default_tempo.hpp"
 #endif
 
 class CollectionViewTest : public QObject {
   Q_OBJECT
 private slots:
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  void realCompositeWorkerDeliversOnlyUnverifiedEvidence() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    const auto audio = directory.filePath("tone.aiff");
+    QVERIFY(QFile::copy(QStringLiteral(BEATGLASS_FIXTURES "/tone.aiff"), audio));
+    beatglass::SourceEpochAllocator epochs;
+    CollectionView view(directory.filePath("library.sqlite"), epochs);
+    bool guiThread = true;
+    connect(&view, &CollectionView::changed, &view, [&] { guiThread &= QThread::currentThread() == view.thread(); });
+    QVERIFY(view.analyzeComposite(audio));
+    view.refresh("");
+    QTRY_COMPARE_WITH_TIMEOUT(view.analysisStatus(), QStringLiteral("Unverified composite evidence received; result remains gated."), 30000);
+    QVERIFY(guiThread); QVERIFY(view.compositeEvidence());
+    QVERIFY(!view.compositeEvidence()->cache_reusable());
+    QVERIFY(view.compositeEvidence()->value.epoch != 0);
+    QVERIFY(view.compositeEvidence()->value.engine_version.empty());
+    QVERIFY(view.compositeEvidence()->value.configuration_id.empty());
+    QVERIFY(!view.compositeEvidence()->value.validated_track_key);
+    QVERIFY(view.analyzeComposite(audio));
+    QVERIFY(!view.compositeEvidence());
+    view.cancelAnalysis();
+    QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus() != QStringLiteral("Cancellation requested; awaiting terminal outcome."), 30000);
+    QVERIFY(view.analysisStatus() == QStringLiteral("Composite analysis cancelled.") ||
+            view.analysisStatus() == QStringLiteral("Analysis cancelled.") ||
+            view.analysisStatus() == QStringLiteral("Unverified composite evidence received; result remains gated."));
+  }
+  void compositeDestructionJoinsWorker() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    const auto audio = directory.filePath("tone.aiff");
+    QVERIFY(QFile::copy(QStringLiteral(BEATGLASS_FIXTURES "/tone.aiff"), audio));
+    beatglass::SourceEpochAllocator epochs;
+    auto view = std::make_unique<CollectionView>(directory.filePath("library.sqlite"), epochs);
+    int notifications = 0; QObject observer;
+    connect(view.get(), &CollectionView::changed, &observer, [&] { ++notifications; });
+    QVERIFY(view->analyzeComposite(audio)); const auto beforeDestroy = notifications;
+    view.reset(); QCoreApplication::processEvents(); QCOMPARE(notifications, beforeDestroy);
+  }
+#endif
   void realWorkerDeliversOwnedCurrentPage() {
     QTemporaryDir directory; QVERIFY(directory.isValid());
     const auto path = directory.filePath("library.sqlite");
@@ -61,6 +100,27 @@ private slots:
       live.start(QStringLiteral("not-a-real-endpoint"));
       QTRY_VERIFY_WITH_TIMEOUT(!live.active(), 5000);
       QCOMPARE(live.status(), QStringLiteral("Capture could not start"));
+    }
+    QVERIFY(!epochs.next());
+  }
+  void defaultFollowerAndOfflineShareExhaustion() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    beatglass::SourceEpochAllocator epochs(std::numeric_limits<std::uint64_t>::max() - 2);
+    {
+      CollectionView view(directory.filePath("default.sqlite"), epochs);
+      beatglass::windows::DefaultTempoFollower follower(epochs, [] {
+        beatglass::windows::EndpointResult result;
+        result.endpoints.push_back({"not-a-real-endpoint", "missing", true});
+        return result;
+      });
+      QVERIFY(follower.start());
+      QVERIFY(view.analyzeIndexed(directory.filePath("missing.wav"), "integration-test-engine", "default"));
+      QVERIFY(follower.tick(std::chrono::steady_clock::now()));
+      QVERIFY(!epochs.next());
+      QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus() != QStringLiteral("Analysis running."), 10000);
+      QVERIFY(!view.analyzeIndexed(directory.filePath("missing.wav"), "integration-test-engine", "default"));
+      QCOMPARE(view.analysisStatus(), QStringLiteral("Analysis unavailable: epoch limit reached."));
+      follower.stop();
     }
     QVERIFY(!epochs.next());
   }

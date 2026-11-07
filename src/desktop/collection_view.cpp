@@ -50,6 +50,9 @@ bool CollectionView::analyzeIndexed(const QString& path, const QString& engine, 
   auto epoch = worker_->new_session_epoch(); if (!epoch) { analysisStatus_ = QStringLiteral("Analysis unavailable: epoch limit reached."); emit changed(); return false; }
   analysisToken_ = requests_.beginAnalysis();
   if (!analysisToken_) return false;
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  compositeEvidence_.reset();
+#endif
   analysisStatus_ = QStringLiteral("Analysis running.");
   analysisTicket_ = worker_->analyze_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), *epoch, {});
   poll_.start(); emit changed(); return true;
@@ -63,7 +66,8 @@ void CollectionView::pollAnalysis() {
   auto result = analysisTicket_->result(); if (!result) return;
   poll_.stop(); analysisTicket_.reset();
   if (!requests_.finishAnalysis(analysisToken_, std::move(*result))) return;
-  const auto& outcome = *requests_.terminal();
+  auto held = requests_.takeAnalysis();
+  auto& outcome = *held;
   if (!outcome.error.empty()) analysisStatus_ = QStringLiteral("Analysis error: %1").arg(QString::fromStdString(outcome.error));
   else if (outcome.cancelled) analysisStatus_ = QStringLiteral("Analysis cancelled.");
   else if (const auto* analysis = std::get_if<LibraryBridge::Analysis>(&outcome.value)) {
@@ -76,9 +80,35 @@ void CollectionView::pollAnalysis() {
       case S::error: analysisStatus_ = QStringLiteral("Analysis error: %1; recovery run: %2").arg(QString::fromStdString(analysis->diagnostic), QString::fromStdString(analysis->recovery_run_id)); break;
     }
     if (!outcome.association_error.empty()) analysisStatus_ += QStringLiteral(" Index association failed: %1").arg(QString::fromStdString(outcome.association_error));
-  } else analysisStatus_ = QStringLiteral("Unexpected analysis response.");
-  requests_.acknowledgeAnalysis(); analysisToken_.reset(); emit changed();
+  }
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  else if (auto* composite = std::get_if<LibraryBridge::Composite>(&outcome.value)) {
+    using S = beatglass::library_detail::CompositeJobStatus;
+    switch (composite->status) {
+      case S::complete:
+        if (composite->value && !composite->value->cache_reusable()) { compositeEvidence_ = std::move(composite->value); analysisStatus_ = QStringLiteral("Unverified composite evidence received; result remains gated."); }
+        else analysisStatus_ = QStringLiteral("Composite error: invalid result.");
+        break;
+      case S::cancelled: analysisStatus_ = QStringLiteral("Composite analysis cancelled."); break;
+      case S::stale_input: analysisStatus_ = QStringLiteral("Source changed during composite analysis."); break;
+      case S::error: analysisStatus_ = QStringLiteral("Composite error: %1").arg(QString::fromStdString(composite->diagnostic)); break;
+    }
+  }
+#endif
+  else analysisStatus_ = QStringLiteral("Unexpected analysis response.");
+  analysisToken_.reset(); emit changed();
 }
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+bool CollectionView::analyzeComposite(const QString& path) {
+  if (path.isEmpty() || analysisTicket_) return false;
+  auto epoch = worker_->new_session_epoch();
+  if (!epoch) { analysisStatus_ = QStringLiteral("Analysis unavailable: epoch limit reached."); emit changed(); return false; }
+  analysisToken_ = requests_.beginAnalysis(); if (!analysisToken_) return false;
+  compositeEvidence_.reset(); analysisStatus_ = QStringLiteral("Composite analysis running.");
+  analysisTicket_ = worker_->analyze_composite(nativePath(path), *epoch, {});
+  poll_.start(); emit changed(); return true;
+}
+#endif
 void CollectionView::lookupIndexed(const QString& path, const QString& engine, const QString& configuration) {
   auto token = requests_.beginBrowse(); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear();
   if (path.isEmpty() || engine.isEmpty() || configuration.isEmpty()) { status_ = QStringLiteral("Lookup unavailable: identity or epoch missing."); emit changed(); return; }

@@ -31,6 +31,12 @@ public:
   void cancelAnalysis();
   /** Look up an indexed file under the exact runtime identity and a fresh process epoch. A hit remains provisional and its value is not exposed. This replaces pending browse work. */
   void lookupIndexed(const QString& path, const QString& engine, const QString& configuration);
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  /** Start uncached real composite analysis with a fresh process epoch. The caller must ensure process-wide serialized Essentia construction. The owned result is provisional and never exposed to QML. */
+  bool analyzeComposite(const QString& path);
+  /** Read the last owned, explicitly non-cacheable composite evidence. A new analysis or destruction invalidates the reference. */
+  const std::optional<beatglass::UnverifiedMusicAnalysis>& compositeEvidence() const { return compositeEvidence_; }
+#endif
   /** Request a bounded page for a verified identity. An empty run starts a new process epoch; continuation requires the previously returned run and keeps its epoch. Results remain provisional and hidden from product UI. */
   void requestOfflinePage(const QString& path, beatglass::library_detail::OfflineKey identity, const std::string& run, std::size_t beatOffset, std::size_t beatCount, std::size_t windowOffset, std::size_t windowCount);
   /** Read the last owned provisional page; invalidated immediately by another browse, lookup, or page request. */
@@ -50,6 +56,9 @@ private:
   QTimer poll_;
   Requests::Token analysisToken_;
   std::shared_ptr<LibraryBridge::Ticket> analysisTicket_;
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  std::optional<beatglass::UnverifiedMusicAnalysis> compositeEvidence_;
+#endif
   std::optional<beatglass::library_detail::OfflinePage> offlinePage_;
   void pollAnalysis();
   std::unique_ptr<LibraryBridge> worker_;

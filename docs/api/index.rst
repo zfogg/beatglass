@@ -68,7 +68,17 @@ Desktop application internals
 
    Cancel and join the worker on the GUI thread. Filesystem I/O may delay destruction.
 
+.. cpp:function:: bool CollectionView::analyzeComposite(const QString& path)
+
+   When the private composite build is enabled, start uncached snapshot analysis with a fresh process epoch. The caller must serialize Essentia construction process-wide. Evidence remains provisional and is not exposed to QML.
+
+.. cpp:function:: const std::optional<beatglass::UnverifiedMusicAnalysis>& CollectionView::compositeEvidence() const
+
+   Return the last owned, non-cacheable composite evidence on the GUI thread. A new analysis or destruction invalidates the reference.
+
 .. cpp:autodoc:: src/desktop/library_bridge.hpp src/desktop/collection_requests.hpp src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/playback_guard.hpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp
+
+.. cpp:autodoc:: src/desktop/platform/windows_dj_bridge.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
@@ -86,6 +96,11 @@ Desktop application internals
 
    Unlock the overlay and remove event filters. The caller retains ownership of
    both windows. Call on the GUI thread.
+
+.. cpp:function:: beatglass::windows::DjBridge::~DjBridge()
+
+   Stop and join the worker before destruction. Call on the GUI thread; an OS
+   device operation that stalls can delay destruction.
 
 .. cpp:function:: WindowsDj::~WindowsDj()
 
