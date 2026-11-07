@@ -1,5 +1,6 @@
 #include "windows_endpoints.hpp"
 #include "windows_live_tempo.hpp"
+#include "windows_default_tempo.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <windows.h>
 #include <mmsystem.h>
@@ -32,6 +33,14 @@ TEST_CASE("Generated playback reaches live aubio tempo through WASAPI", "[.][nat
   INFO("Render endpoint: " << endpoint->name);
   beatglass::SourceEpochAllocator epochs;
   beatglass::windows::LiveTempo tempo(epochs);
+  beatglass::SourceEpochAllocator follower_epochs;
+  beatglass::windows::DefaultTempoFollower follower(follower_epochs, [&] { return list; });
+  REQUIRE(follower.start());
+  beatglass::PresentationGate gate;
+  REQUIRE(follower.tick(std::chrono::steady_clock::now()));
+  auto clear = follower.takeUpdate();
+  REQUIRE(clear);
+  REQUIRE(gate.apply(*clear));
   REQUIRE(tempo.start(endpoint->id));
   for (int i = 0; i < 300 && tempo.state() == beatglass::SourceState::starting; ++i) {
     REQUIRE(tempo.pump());
@@ -54,20 +63,41 @@ TEST_CASE("Generated playback reaches live aubio tempo through WASAPI", "[.][nat
   REQUIRE(waveOutPrepareHeader(output, &playback.header, sizeof(playback.header)) == MMSYSERR_NOERROR);
   playback.prepared = true;
   REQUIRE(waveOutWrite(output, &playback.header, sizeof(playback.header)) == MMSYSERR_NOERROR);
+  std::optional<beatglass::PresentationUpdate> prior_snapshot;
   for (int i = 0; i < 2000 && !tempo.bpm(); ++i) {
     REQUIRE(tempo.pump());
+    REQUIRE(follower.tick(std::chrono::steady_clock::now()));
+    if (auto update = follower.takeUpdate()) { if (update->snapshot) prior_snapshot = *update; gate.apply(*update); }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   REQUIRE(tempo.bpm());
   INFO("Detected BPM: " << *tempo.bpm());
   const auto bpm = *tempo.bpm();
   REQUIRE((std::abs(bpm - 60.0f) < 6.0f || std::abs(bpm - 120.0f) < 12.0f || std::abs(bpm - 240.0f) < 24.0f));
+  for (int i = 0; i < 400 && !gate.current(); ++i) {
+    REQUIRE(follower.tick(std::chrono::steady_clock::now()));
+    if (auto update = follower.takeUpdate()) { if (update->snapshot) prior_snapshot = *update; gate.apply(*update); }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  REQUIRE(gate.current());
+  REQUIRE(gate.current()->bpm);
   REQUIRE(waveOutReset(output) == MMSYSERR_NOERROR);
   for (int i = 0; i < 300 && tempo.bpm(); ++i) {
     REQUIRE(tempo.pump());
+    REQUIRE(follower.tick(std::chrono::steady_clock::now()));
+    if (auto update = follower.takeUpdate()) gate.apply(*update);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   REQUIRE_FALSE(tempo.bpm());
+  for (int i = 0; i < 300 && gate.current(); ++i) {
+    REQUIRE(follower.tick(std::chrono::steady_clock::now()));
+    if (auto update = follower.takeUpdate()) gate.apply(*update);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  REQUIRE_FALSE(gate.current());
+  REQUIRE(prior_snapshot);
+  REQUIRE_FALSE(gate.apply(*prior_snapshot));
+  REQUIRE_FALSE(gate.current());
   tempo.stop();
   REQUIRE_FALSE(tempo.bpm());
 }

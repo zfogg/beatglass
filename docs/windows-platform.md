@@ -16,8 +16,9 @@ consecutive running and interrupted transitions for each start. The control owne
 must map startup interruption to an error, apply the running event before allowing
 PCM, and clear retained evidence on interruption. Events and PCM have no shared
 delivery order; the integration owner must handle in-flight packets and event
-invalidation. Device notifications, automatic
-restart, default-following and overlay behavior remain to be implemented. WASAPI loopback captures the shared endpoint
+invalidation. A worker-owned follower polls for the multimedia default and
+retries after source failure; native notification callbacks and full desktop
+integration remain outstanding. WASAPI loopback captures the shared endpoint
 mix; exclusive-mode, ASIO and other paths that bypass that mix are not guaranteed
 to be captured. Playback is not rerouted.
 
@@ -38,11 +39,10 @@ they do not establish the presence of a real device, capture, audio quality,
 device switching, UI or overlay qualification. The README's Docker Sphinx
 warnings-as-errors documentation build passed with output in `/tmp`.
 
-Before integration, the shared source API needs typed enumeration/start errors,
-ordered device and interruption notifications, process-owned epochs, and an
-explicit validity and clock-domain representation for WASAPI timing. See
-`phase1-contract-proposals.md`; these requirements are proposals, not changes to
-the shared contract.
+The merged shared source contract defines typed outcomes, ordered transitions,
+process-owned epochs and optional clock anchors. The Windows private adapter
+uses its lifecycle and epoch allocator; typed discovery/start outcomes and clock
+anchor conversion remain integration work.
 
 ## Loopback development check
 
@@ -94,15 +94,15 @@ Against reviewed source-contract PR #28 at `5b81fcc`, Windows 11 x64 GCC 15.2.0
 passed 34/34. Tests covered synchronous and asynchronous start failure, mandatory
 invalidation, process epoch retention, running transition and repeated stop/start.
 Physical device interruption, stale-result rejection by a real analysis worker,
-default-device following and the desktop integration remain untested or absent.
+and the desktop integration remain untested or absent.
 
 An experimental worker-only path now feeds selected-endpoint packets through
 `reduce_loudest_channel` and the existing aubio `TempoTracker`. It publishes only
 an optional BPM to its caller and clears it on stop, source errors, queue loss,
 discontinuity, malformed PCM, one second of silence or a one-second packet stall.
 It must be pumped regularly by its owning worker; it is not connected to the UI,
-and it does not provide beat phase, key or chords. Retained UI values still need
-revisioned invalidation delivery. The one-second silence threshold is provisional.
+and it does not provide beat phase, key or chords. The one-second silence
+threshold is provisional.
 
 On Windows 11 Home 10.0.26300 x64, MSVC 19.44 and the existing pinned codec tree,
 `cmake --build "$env:TEMP/beatglass-wasapi-slice" --config Debug --target windows_endpoint_tests -j 4`
@@ -115,5 +115,30 @@ it did not change the OS default or physically disconnect either endpoint.
 The regular CTest selection `-R 'Live tempo|Session|endpoint|capture startup'`
 passed 8/8. The first MSVC build exposed a Windows `max` macro conflict, corrected
 with `NOMINMAX`, and the rebuilt target passed. These synthetic and endpoint tests
-do not establish music accuracy, automatic default following, real physical
+do not establish music accuracy, real physical
 interruption recovery, or complete native DJ and overlay qualification.
+
+After an explicit start, the private default follower polls active render endpoints
+approximately once per second on the worker thread. Stop disables future polling
+until a new start. A changed or missing default clears evidence
+before stopping the old source; failures are retried after a delay with fresh
+epochs. It exposes waiting/starting/running/error status and coalesces
+strictly-revisioned `PresentationUpdate` snapshots and clears. The UI owner must
+transfer updates to the GUI thread, preserve clears and ordering, consume status,
+and call stop and deliver its clear before destruction. Revision exhaustion or a
+fatal error requires a separate session boundary to clear the display. No GUI
+bridge or DJ controls are connected by this work.
+
+Windows 11 x64, MSVC 19.44: `cmake --build "$env:TEMP/beatglass-wasapi-slice" --config Debug --target windows_endpoint_tests -j 4`
+and `ctest --test-dir "$env:TEMP/beatglass-wasapi-slice" -C Debug -R 'Default follower|Discovery exceptions|Live tempo|Session|endpoint|capture startup' --output-on-failure`
+passed 11/11. Opt-in `[native-default],[native-tempo]` tests passed: injected
+discovery changed between two real active endpoints, and generated playback
+produced a revisioned tempo snapshot followed by a clear that rejected a delayed
+older snapshot through `PresentationGate`. These tests did not change the OS
+default, disconnect a device, use the actual GUI delivery path, or establish
+accuracy on real music. Automatic recovery after real device loss remains unverified.
+The injected discovery scenario also forced an asynchronous invalid-endpoint
+failure, then restored a real endpoint and observed a running source with a fresh
+attempt. The last parallel MSBuild invocation failed because the Windows paging
+file could not accommodate new processes; retrying the build with `-j 1` passed
+the same 11 CTest cases and both opt-in native cases.
