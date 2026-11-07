@@ -18,3 +18,12 @@ TEST_CASE("tempo consumes arbitrary contiguous chunks without future samples") {
  whole.process(silence, 3, audio.size(), true); CHECK_FALSE(whole.estimate().bpm); CHECK(whole.estimate().beats == 0);
 }
 TEST_CASE("invalid tempo sample rate is rejected") { CHECK_THROWS(TempoTracker(0)); }
+
+#include "../../src/cli/state_label.hpp"
+#include <string>
+TEST_CASE("CLI state labels preserve errors and unknown enum values") {
+  using beatglass::cli::state_label;
+  CHECK(std::string(state_label(TrackingState::error)) == "error");
+  CHECK(std::string(state_label(static_cast<TrackingState>(999))) == "unknown");
+  CHECK(std::string(state_label(TrackingState::acquiring)) == "acquiring");
+}
