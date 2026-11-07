@@ -56,7 +56,10 @@ the selected default Speakers (Realtek(R) Audio) endpoint captured a generated
 440 Hz tone at 48 kHz stereo; the observed peak packet correlation amplitude was
 0.119918. Deliberately withholding the consumer caused dropped frames and a
 subsequent discontinuity at a frame-position gap. The test produces sound and is
-excluded from ordinary CTest runs. A prior version of the tone assertion failed
+excluded from ordinary CTest runs. A subsequent native run also stopped and
+restarted that endpoint while playback remained active and verified that the
+first new packet carried the fresh epoch 102 rather than the old epoch 101.
+A prior version of the tone assertion failed
 when phase changed between packets; the current assertion uses packet-local
 correlation. These checks used base commit `6f927cb` plus the endpoint and draft
 loopback changes. Endpoint disconnection, default-device changes, long-session

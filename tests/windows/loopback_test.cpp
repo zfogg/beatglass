@@ -137,4 +137,22 @@ TEST_CASE("Generated default endpoint playback is captured and overflow marks a 
   REQUIRE(discontinuity);
   REQUIRE(capture.state() == beatglass::windows::Loopback::State::running);
   capture.stop();
+  REQUIRE(capture.start(endpoint->id, 102));
+  for (int i = 0; i < 300 && capture.state() == beatglass::windows::Loopback::State::starting; ++i) std::this_thread::sleep_for(10ms);
+  REQUIRE(capture.state() == beatglass::windows::Loopback::State::running);
+  beatglass::windows::Loopback::Event restart;
+  REQUIRE(capture.pop_event(restart));
+  REQUIRE(restart.state == beatglass::windows::Loopback::State::running);
+  REQUIRE(restart.sequence == 1);
+  REQUIRE(restart.epoch == 102);
+  bool got_fresh_packet = false;
+  for (int i = 0; i < 100 && !got_fresh_packet; ++i) {
+    if (capture.pop(packet)) {
+      REQUIRE(packet.epoch == 102);
+      got_fresh_packet = true;
+    }
+    std::this_thread::sleep_for(10ms);
+  }
+  REQUIRE(got_fresh_packet);
+  capture.stop();
 }
