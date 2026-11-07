@@ -25,8 +25,8 @@ uniqueness does not order independent publications or make an old result
 current: the existing generation, revision and invalidation gates remain
 necessary. Concurrent tests must cover uniqueness, exhaustion and teardown.
 
-The isolated Windows integration draft based on allocator PR #63 prepares the
-worker-side alternative: the GUI application constructs one allocator before
+The Windows integration adopts the worker-side alternative using the allocator
+merged in PR #63: the GUI application constructs one allocator before
 the bridge, passes it by reference, and destroys the bridge and joins its worker
 before the allocator is destroyed. The worker's existing serialized follower
 uses that reference for every live restart; no capture callback issues tokens.
@@ -34,8 +34,8 @@ An opt-in Windows test concurrently issues tokens from a simulated offline
 worker during real loopback startup and bridge destruction; another seeds the
 allocator at exhaustion and verifies no live snapshot is delivered. These do
 not establish that an actual offline product path has adopted the allocator.
-The implementation depends on review and integration of #63 and the offline
-seek contract; it must not be advertised as complete process-wide uniqueness yet.
+The implementation depends on review and integration of the offline seek
+contract; it must not be advertised as complete process-wide uniqueness yet.
 The noninteractive Windows bridge regression also opens a real generated WAV
 with a coordinator-issued initial epoch, starts and restarts a failed live
 endpoint with that same allocator, and verifies the reader block retains its
