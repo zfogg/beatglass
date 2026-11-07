@@ -42,10 +42,14 @@ def main():
         folder = args.work_dir / extension
         folder.mkdir(exist_ok=True)
         target = folder / f"tone.{extension}"
+        second_frequency = frequency + 200
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
                         "-f", "lavfi", "-i",
-                        f"sine=frequency={frequency}:sample_rate=48000:duration=2",
-                        "-ac", "1", *codec, str(target)], check=True)
+                        f"sine=frequency={frequency}:sample_rate=48000:duration=4",
+                        "-f", "lavfi", "-i",
+                        f"sine=frequency={second_frequency}:sample_rate=48000:duration=4",
+                        "-filter_complex", "[0:a][1:a]concat=n=2:v=0:a=1[out]",
+                        "-map", "[out]", "-ac", "1", *codec, str(target)], check=True)
         qml = '''import QtQuick
 import QtTest
 import QtMultimedia
@@ -61,10 +65,10 @@ TestCase {
   tryVerify(() => { for (let i = 0; i < s.count; ++i) if (s.model[i].description === DEVICE) { selected = i; return true } return false }, 10000)
   s.currentIndex = selected; s.activated(selected); a.browseFolder = FOLDER
   let m = findChild(a, "fileModel"); tryVerify(() => m.count === 1, 10000); a.activateEntry(0)
-  let p = findChild(a, "player"); tryVerify(() => p.duration >= 1800 && p.seekable, 10000)
+  let p = findChild(a, "player"); tryVerify(() => p.duration >= 7800 && p.seekable, 10000)
   findChild(a, "playButton").clicked(); tryCompare(p, "playbackState", MediaPlayer.PlayingState, 10000)
-  tryVerify(() => p.position > 200, 5000); p.position = 1000; tryVerify(() => p.position >= 900, 5000)
-  wait(500); p.stop(); a.destroy()
+  tryVerify(() => p.position > 600, 5000); p.position = 5000; tryVerify(() => p.position >= 4900, 5000)
+  wait(700); p.stop(); a.destroy()
  }
 }
 '''.replace("import SOURCE", "import " + json.dumps(source)).replace("DEVICE", json.dumps(args.device)).replace("FOLDER", json.dumps(folder.resolve().as_uri()))
@@ -86,10 +90,13 @@ TestCase {
         blocks = mono[:len(mono) // block_size * block_size].reshape(-1, block_size)
         spectrum = np.abs(np.fft.rfft(blocks * np.hanning(block_size), axis=1))
         frequencies = np.fft.rfftfreq(block_size, 1 / 48000)
-        index = int(np.argmin(abs(frequencies - frequency)))
-        peak = float(np.max(spectrum[:, max(0, index - 1):index + 2]))
-        print(f"{extension}: QtTest exit={code}, {frequency} Hz peak={peak:.3f}", flush=True)
-        if code or peak < args.minimum_peak:
+        def peak_at(target_frequency):
+            index = int(np.argmin(abs(frequencies - target_frequency)))
+            return float(np.max(spectrum[:, max(0, index - 1):index + 2]))
+        first_peak, second_peak = peak_at(frequency), peak_at(second_frequency)
+        print(f"{extension}: QtTest exit={code}, {frequency}/{second_frequency} Hz "
+              f"peaks={first_peak:.3f}/{second_peak:.3f}", flush=True)
+        if code or min(first_peak, second_peak) < args.minimum_peak:
             raise RuntimeError(f"{extension} playback probe failed; see {result}")
 
 
