@@ -101,6 +101,11 @@ if(BUILD_TESTING)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     add_executable(metadata_tests tests/unit/metadata_test.cpp)
     target_link_libraries(metadata_tests PRIVATE beatglass_desktop_metadata Qt6::Test)
+    add_test(NAME desktop_navigation COMMAND Qt6::qmltestrunner
+      -input ${CMAKE_CURRENT_SOURCE_DIR}/tests/qml
+      -import ${CMAKE_CURRENT_SOURCE_DIR}/src/desktop/qml)
+    set_tests_properties(desktop_navigation PROPERTIES LABELS unit TIMEOUT 30
+      ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software")
     add_test(NAME metadata_worker COMMAND metadata_tests)
     set_tests_properties(metadata_worker PROPERTIES LABELS unit TIMEOUT 15)
     if(WIN32)
