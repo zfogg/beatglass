@@ -10,7 +10,7 @@ class FakeBackend final : public SourceBackend {
 public:
   TapStatus native{TapState::stopped, {}, {}};
   CaptureBlock block{};
-  bool available{}, stop_ok{true}, start_ok{true};
+  bool available{}, stop_ok{true}, start_ok{true}, interrupt_after_pop{};
   std::uint64_t epoch{};
   EnumerationResult enumerate() override { return {EnumerationOutcome::ok, {{"output", "Output", true, false}}, {}, {}}; }
   bool start(const std::string&, std::uint64_t e) override {
@@ -20,7 +20,12 @@ public:
   }
   std::optional<AudioFormat> format() const override { return AudioFormat{48000, 2, ChannelLayout::stereo}; }
   TapStatus status() override { return native; }
-  bool pop(CaptureBlock& out) override { if (!available) return false; out = block; available = false; return true; }
+  bool pop(CaptureBlock& out) override {
+    if (!available) return false;
+    out = block; available = false;
+    if (interrupt_after_pop) native = {TapState::interrupted, "device changed during dequeue", TapFailure::device_lost};
+    return true;
+  }
   bool stop() noexcept override { if (stop_ok) native.state = TapState::stopped; return stop_ok; }
   std::optional<std::int64_t> host_time_ns(std::uint64_t ticks) const noexcept override { return static_cast<std::int64_t>(ticks); }
   void prepare(bool valid = true) {
@@ -94,4 +99,17 @@ TEST_CASE("Core Audio control invalidates a throwing consumer", "[coreaudio]") {
   const auto event = source.take_event(); REQUIRE(event);
   CHECK(event->state == SourceState::interrupted); CHECK(event->sequence == 2);
   CHECK_FALSE(source.pump());
+}
+
+TEST_CASE("Core Audio control drops PCM when the device changes during dequeue", "[coreaudio]") {
+  SourceEpochAllocator epochs;
+  auto fake = std::make_unique<FakeBackend>(); auto* backend = fake.get();
+  SourceAdapter source(epochs, std::move(fake)); int calls = 0;
+  const auto started = source.start("output", [&](const AudioBlock&) { ++calls; }); REQUIRE(started.attempt);
+  REQUIRE(source.take_event()); REQUIRE(source.acknowledge_running(*started.attempt, 1));
+  backend->prepare(); backend->interrupt_after_pop = true;
+  CHECK_FALSE(source.pump()); CHECK(calls == 0); CHECK_FALSE(source.latest_anchor());
+  const auto event = source.take_event(); REQUIRE(event);
+  CHECK(event->state == SourceState::interrupted); CHECK(event->sequence == 2);
+  CHECK(event->status.error == SourceError::device_lost);
 }
