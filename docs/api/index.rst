@@ -85,3 +85,8 @@ CLI application internals
 -------------------------
 
 .. cpp:autodoc:: src/cli/state_label.hpp
+
+Experimental composite snapshot worker
+--------------------------------------
+
+.. cpp:autodoc:: include/beatglass/library/detail/composite_snapshot_job.hpp
