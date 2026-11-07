@@ -14,6 +14,17 @@
       }
     },
     {
+      "name": "prebuilt-qt-desktop",
+      "inherits": "vcpkg-core",
+      "binaryDir": "${sourceDir}/build/prebuilt-qt-desktop",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "$env{BEATGLASS_QT_ROOT}",
+        "Qt6_DIR": "$env{BEATGLASS_QT_ROOT}/lib/cmake/Qt6",
+        "BEATGLASS_QT_VERSION": "6.8.3",
+        "BEATGLASS_BUILD_DESKTOP": "ON"
+      }
+    },
+    {
       "name": "vcpkg-desktop",
       "inherits": "vcpkg-core",
       "binaryDir": "${sourceDir}/build/vcpkg-desktop",
@@ -25,10 +36,12 @@
   ],
   "buildPresets": [
     { "name": "vcpkg-core", "configurePreset": "vcpkg-core", "configuration": "Debug" },
+    { "name": "prebuilt-qt-desktop", "configurePreset": "prebuilt-qt-desktop", "configuration": "Debug" },
     { "name": "vcpkg-desktop", "configurePreset": "vcpkg-desktop", "configuration": "Debug" }
   ],
   "testPresets": [
     { "name": "vcpkg-core", "configurePreset": "vcpkg-core", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "prebuilt-qt-desktop", "configurePreset": "prebuilt-qt-desktop", "configuration": "Debug", "output": { "outputOnFailure": true } },
     { "name": "vcpkg-desktop", "configurePreset": "vcpkg-desktop", "configuration": "Debug", "output": { "outputOnFailure": true } }
   ]
 }
