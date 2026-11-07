@@ -1,12 +1,5 @@
 # Progress and handoff
 
-Windows DJ integration branch: the shared DJ page can start and stop
-experimental default-output WASAPI tempo monitoring, with revisioned updates
-delivered to the GUI model. This is tempo only and does not qualify the product.
-See [Windows platform evidence](windows-platform.md) for serial build commands,
-generated-output/QML test results and the remaining physical-device, overlay,
-accuracy and cross-platform gaps. The shared UI and capture PRs are prerequisites.
-
 Phase 0 is **not complete**. No feature work should start until its exit gate is met.
 
 - [x] Initial repository guidance and README.
@@ -170,7 +163,7 @@ The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
 
-Concurrent process-epoch issuance is proposed with contention and exhaustion
+PR #63 merged concurrent process-epoch issuance with contention and exhaustion
 tests. The application must still share one allocator across live and offline
 paths and coordinate each source's lifecycle.
 
@@ -192,18 +185,34 @@ The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
 
+## Shared causal tempo replay proposal
+
+`CausalTempoReplay` consumes borrowed interleaved blocks on one worker, buffers at most one 512-frame hop, and runs the existing aubio tempo and signal lifecycle logic. File replay now uses this same engine; a future snapshot job can feed it without reopening the path. State reports both the exclusive accepted boundary and the last complete analyzed hop. At EOF an incomplete hop is not analyzed. Gaps and new epochs discard buffered evidence; old epochs, overlap, malformed PCM and same-epoch format changes fail closed. The caller must allocate epochs and deliver invalidation/clear notifications around source lifecycle events; the engine is not an audio callback, decoder, cache or GUI publisher. This is a proposed shared API pending integration-owner review. Tonal and timestamped beat trackers are separate unmerged increments and are not yet integrated into this engine.
+
+## Experimental beat events
+
+The worker-only aubio beat-event experiment reports epoch-local sample positions and the exclusive observed boundary for each detection. Its 1024-sample window/512-sample hop and aubio's estimated event time are not a measured latency guarantee. An event at the current exclusive boundary waits for a subsequent observed sample; it is not flushed at EOF. Partial hops are retained, and gaps, epoch changes and explicit discontinuities reset aubio state. The experiment is not connected to CLI replay or snapshots; silence invalidation, event strength, publication delay, longer-than-32-bit aubio counters, native capture and measured beat accuracy remain integration work. Generated click tests at 44.1/48 kHz check causal bounds, chunking and broad beat intervals, not full-mix accuracy.
+
 After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea57372aaab89`, WSL Ubuntu 22.04 with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, slice disabled and pinned Catch2 source reused passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 32/32. Windows 10.0.26300 x64/MSVC 19.44 with the previously configured static CRT and static SQLite development tree passed `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` 34/34. These are development checks only; WSL is not native Linux qualification and no decoder slice was included.
 
 ## Same-source integration proposal
 
 The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
-read-only byte boundary. The existing decoder does not consume it. Secure
+read-only byte boundary. The existing CLI decoder does not consume it. Secure
 snapshot creation, native file identity and decoder integration remain open;
 see [same-source proposal](same-source-proposal.md).
 
-## Offline result contract proposal
+## Experimental virtual decoder
 
-An owned offline result and bounded structural validator are proposed for
+A private libsndfile virtual-I/O adapter can synchronously decode a borrowed `ByteSource`; it is not connected to the CLI or cache. It keeps the source borrowed until decoder close, translates callback errors and cancellation to worker-visible outcomes, and is invalidated after mid-read cancellation or failure. Generated WAV, AIFF, FLAC and MP3 tests exercise the adapter on the codec-enabled Windows development build. The byte-source contract was merged in PR #41; snapshot creation, original-file revalidation, secure cleanup, and native platform race tests remain unimplemented. No file is made immutable by this adapter.
+
+Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built this adapter and passed 53/53 CTest cases with `BEATGLASS_TEST_V1_CODECS=OFF`; the virtual codec fixture check covered AIFF there. This is not native desktop qualification, and the older decoder does not qualify MP3 support.
+
+The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. The provisional public FileReader borrowed-source constructor and explicit-epoch seek expose this adapter for review; the legacy path-based seek retains local increment behavior. Snapshot creation and publication are still separate responsibilities.
+
+## Offline result contract
+
+PR #57 merged an owned offline result and bounded structural validator for
 composite evidence. Actual composite persistence, paged retrieval, native
 qualification and a validated track-level key remain open.
 
@@ -211,9 +220,8 @@ qualification and a validated track-level key remain open.
 
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
 
-The Windows DJ integration now connects the shared tempo presentation to the merged overlay controller and exposes show/hide, click-through, opacity and recovery controls. Targeted Windows desktop and overlay tests passed 5/5 with the required vcpkg DLLs on PATH; [Windows platform status](windows-platform.md) records the environment and limitations. Native full-product overlay qualification remains open.
+The Windows overlay controller now supports caller-owned persistence of position and opacity, on-screen recovery, and native cursor dragging across mixed-DPI screens. It does not instantiate a DJ UI; the selected/default integration is separate. Windows unit tests cover restoration and immediate persistence after recovery; see [Windows platform status](windows-platform.md) for the prior native evidence and remaining qualification gaps.
 
-Windows desktop interaction verified overlay opacity, click-through/unlock against covered DJ controls, and unlocked dragging. The native pointer regression passed three consecutive runs on each of two mixed-scale displays after fixing its coordinate conversion and the drag handler. A drag crossing the display boundary remains unqualified; the platform status records the earlier failures and remaining native gaps.
-
-The Windows DJ overlay now persists position and opacity and starts hidden and unlocked. Native tests passed a continuous drag from the 100% display to the 150% display, including pointer containment after the DPI transition; settings restart and active-monitoring shutdown were exercised. Reverse-direction crossing and the shared live/offline epoch handoff remain open. See [Windows platform status](windows-platform.md) and the [epoch handoff proposal](epoch-handoff-proposal.md).
 After merging main `6aade6e`, the provisional library option was configured with `cmake -S . -B /tmp/beatglass-foundation-review -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, then `cmake --build /tmp/beatglass-foundation-review -j 1` and `ctest --test-dir /tmp/beatglass-foundation-review --output-on-failure` passed 38/38 on Ubuntu 22.04 WSL. This configuration does not enable desktop, native audio or macOS qualification. CMake emitted an author warning that `SQLite::SQLite3` is deprecated in favor of `SQLite3::SQLite3` in the installed CMake version; host SQLite remains unpinned.
+
+After the concurrent allocator contract merged, the provisional borrowed `FileReader` rejects epoch zero before source access, requires caller-issued increasing seek epochs and rejects its legacy one-argument seek. The caller must keep one process allocator, serialize reader operations, and discard stale publications. With `BEATGLASS_TEST_V1_CODECS=OFF`, WSL `cmake --build /tmp/beatglass-virtual-check -j1` and `ctest --test-dir /tmp/beatglass-virtual-check --output-on-failure` passed 59/59. Windows MSVC codec-enabled `cmake --build C:/Users/zachf/.codex/build/beatglass-phase1-verify --config Debug -- /m:1` and `ctest --test-dir C:/Users/zachf/.codex/build/beatglass-phase1-verify -C Debug --output-on-failure` passed 62/62. The desktop and library prototypes are not yet wired to one process-owned allocator; legacy path-based overloads remain isolated compatibility APIs.
