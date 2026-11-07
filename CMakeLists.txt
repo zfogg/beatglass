@@ -157,6 +157,11 @@ if(BEATGLASS_BUILD_DESKTOP)
   endif()
   qt_add_executable(beatglass-desktop src/desktop/main.cpp src/desktop/resources.qrc)
   target_link_libraries(beatglass-desktop PRIVATE beatglass_desktop_metadata Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2)
+  if(APPLE)
+    set_target_properties(beatglass-desktop PROPERTIES
+      MACOSX_BUNDLE TRUE
+      MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/desktop_info.plist")
+  endif()
   if(WIN32)
     if(NOT TARGET Qt6::windeployqt)
       message(FATAL_ERROR "Qt windeployqt is required for the Windows desktop build")
