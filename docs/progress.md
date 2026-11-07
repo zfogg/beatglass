@@ -150,6 +150,12 @@ On Windows 10.0.26300 x64, MSVC 19.44 and Qt 6.8.3, the shared desktop shell gai
 On Windows 10.0.26300 x64 with MSVC 19.44 and Qt 6.8.3, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4` and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 36/36 using the existing vcpkg installation described above. After extending the QML test to activate a file with the keyboard, `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug -R desktop_navigation --output-on-failure` passed. The offscreen test browses checked-in audio fixtures; it does not qualify the native folder dialog or desktop accessibility. The current directory view is not an indexed or persistent collection, and cannot report a precise reason for an unreadable or empty folder. The GUI-thread presentation adapter rejects older revisions and clears estimates on invalidation/non-tracking states; no live producer is connected. Database integration, real capture, overlay and native platform qualification remain pending.
 The API index coverage check (`python docs/api/check_headers.py`) covered 22 headers; the warnings-as-errors Docker Sphinx build and `python docs/api/check_rendered.py "$env:TEMP/beatglass-docs-output/html/index.html"` passed. The new adapter is application-private and has no cross-thread delivery mechanism; integration must supply ordered GUI-thread delivery including clears and session/restart protection.
 
+# Source contract integration
+
+The proposed shared source types and ordered lifecycle helper have regression
+coverage. Native adapters, control queues and actual source clock measurements
+remain unimplemented and require integration and platform qualification.
+
 # Cache contract integration
 
 Typed cache outcomes and a worker-local commit decision have regression
