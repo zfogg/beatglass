@@ -199,3 +199,16 @@ failed live starts and restarts, and allocation across bridge recreation. The
 legacy file reader seek still increments locally and must not be used in a
 shared epoch namespace; coordinated seeks require the explicit-epoch reader
 contract proposed in PR #45. Full live/library integration remains open.
+
+Queue-overflow review found that clearing tempo evidence alone allowed queued
+pre-gap PCM to be consumed after the clear. On observing dropped frames the
+session now fails the attempt, invalidates evidence, stops capture and discards
+the backlog; a later restart obtains a fresh epoch. A control-thread fake
+backend regression covers both a drop before a pop and a drop during the pop,
+rejects queued pre-gap packets, and accepts a fresh-epoch packet after restart.
+Windows 11 10.0.26300 x64, MSVC 19.44, existing pinned vcpkg libraries: serial
+`cmake --build "$env:TEMP/beatglass-overlay-build" --config Debug --target windows_endpoint_tests windows_dj_bridge_tests -j 1`
+and the targeted CTest expression `Queue overflow invalidates|Session|Default follower|Live tempo|Discovery exceptions|capture startup|shared epoch allocator|shared epoch exhaustion|^windows_dj_bridge$`
+passed 11/11. This deterministic test does not reproduce hardware queue
+overflow. The default follower can retry after failure; selected-output UI
+recovery remains an integration behavior to verify.
