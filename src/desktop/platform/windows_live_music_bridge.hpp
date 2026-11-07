@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTimer>
 #include <condition_variable>
+#include <functional>
 #include <mutex>
 #include <optional>
 #include <thread>
@@ -19,8 +20,10 @@ namespace beatglass::windows {
 class LiveMusicBridge final : public QObject {
   Q_OBJECT
 public:
-  /** Borrow a process-owned epoch allocator; parent lives on the GUI thread. */
-  explicit LiveMusicBridge(SourceEpochAllocator& epochs,QObject* parent=nullptr);
+  /** Borrow a process-owned epoch allocator; parent lives on the GUI thread.
+   * Optional startHook is a worker-only test seam and must not retain arguments. */
+  explicit LiveMusicBridge(SourceEpochAllocator& epochs,QObject* parent=nullptr,
+                           std::function<bool(LiveMusic&,const std::string&)> startHook={});
   // Documented manually in the API reference due to Hawkmoth destructor parsing.
   ~LiveMusicBridge() override;
   /** Request one selected endpoint; false for empty ID or exhausted sessions.
@@ -28,14 +31,14 @@ public:
   bool start(const QString& endpoint);
   /** Invalidate prior state immediately and request worker stop. */
   void stop();
-  /** GUI-thread delivery; receivers must apply a session/revision gate if they
-   * queue or forward updates, and label estimates as provisional windows. */
+  /** GUI-thread update or terminal error clear; receivers must gate queued deliveries and label estimates as provisional windows. */
   Q_SIGNAL void musicUpdate(beatglass::windows::MusicUiUpdate update);
 private:
   void run();
   void drain();
   bool advanceSession();
   SourceEpochAllocator& epochs_;
+  std::function<bool(LiveMusic&,const std::string&)> start_hook_;
   std::mutex mutex_;
   std::condition_variable wake_;
   std::optional<MusicUiUpdate> pending_;

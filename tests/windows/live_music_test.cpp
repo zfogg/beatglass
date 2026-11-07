@@ -94,8 +94,11 @@ TEST_CASE("live composite rejects delayed snapshots across gaps and silence with
 }
 
 TEST_CASE("composite UI gate rejects delayed sessions generations and revisions") {
-  MusicUiGate gate; CausalMusicState first; first.rolling_key="C major";
-  CausalMusicState second; second.rolling_key="A minor";
+  MusicUiGate gate; CausalMusicState malformed;
+  CHECK_FALSE(gate.apply({1,0,1,malformed})); CHECK_FALSE(gate.apply({1,1,0,malformed}));
+  CHECK_FALSE(gate.apply({1,1,1,malformed}));
+  CausalMusicState first; first.tempo.epoch=1; first.rolling_key="C major";
+  CausalMusicState second; second.tempo.epoch=1; second.rolling_key="A minor";
   REQUIRE(gate.apply({1,1,1,first})); REQUIRE(gate.current());
   REQUIRE(gate.apply({1,1,2,second}));
   CHECK_FALSE(gate.apply({1,1,1,first})); CHECK(gate.current()->rolling_key=="A minor");
