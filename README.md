@@ -65,6 +65,18 @@ On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the co
 
 The experimental worker-only aubio beat tracker is not connected to the CLI or snapshots; see [progress](docs/progress.md) for its timing and qualification limits.
 
+## Provisional library storage increment
+
+`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables private, not yet product-wired SQLite and job-executor primitives. SQLite is currently found from the host and is not pinned. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
+
+```sh
+cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src
+cmake --build /tmp/beatglass-library-phase1 -j 3
+ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure
+```
+
+This is an isolated review increment, not a functioning library backend. File hashing and file-version validation, actual DSP integration, typed public outcomes, individual job cancellation/progress, result schema, database location and pinning remain open. Do not use the prototype for user data. It does not write audio or tags.
+
 The [Essentia dependency spike](docs/essentia-spike.md) records research builds and the proposed tonal architecture; it is not integrated into the CLI or product.
 
 The experimental CLI also accepts `--json`, alone or with `--replay`. Normal JSON output is one object; replay emits one JSON object per observed block followed by a final result object (JSON Lines). `schema_version` is 1, `observed_through` is an exclusive frame boundary, and `bpm: null` means unknown. The beat count covers the current acquisition. These are preliminary tempo-only outputs: they do not contain key or chord estimates, and replay runs without real-time pacing. Errors are reported on stderr with a nonzero exit status; a replay error can leave a partial JSON Lines stream without a final result.
