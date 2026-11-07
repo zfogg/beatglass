@@ -34,7 +34,7 @@ public:
    * @param samples Borrowed mono PCM in frame order.
    * @param epoch Source epoch, changed when source timing resets.
    * @param first Frame position of the first sample within the epoch.
-   * @param observer Optional callback for each detected event; not retained. Events without an observer are discarded.
+   * @param observer Optional callback for eligible events; not retained. Events eligible during a call without an observer are discarded.
    * @param discontinuity Force reacquisition even for contiguous PCM.
    * @throws std::exception on invalid PCM, overflow, initialization or observer
    * failure. Discard the tracker after any exception. The
