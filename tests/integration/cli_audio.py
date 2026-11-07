@@ -74,9 +74,22 @@ with tempfile.TemporaryDirectory() as directory:
     assert abs(result_json["bpm"] - bpm) < .01
     replay_json = [json.loads(line) for line in subprocess.run([exe, "--json", "--replay", str(clicks)], capture_output=True, text=True, check=True).stdout.splitlines()]
     assert replay_json[-1] == result_json
-    observations = replay_json[:-1]
+    beat_events = [item for item in replay_json if item.get("type") == "beat"]
+    assert beat_events and all(item["frame"] < item["observed_through"] for item in beat_events)
+    observations = [item for item in replay_json[:-1] if item.get("type") == "replay"]
     assert observations[0]["bpm"] is None and observations[-1]["observed_through"] == 44100 * 20
-    prefix_json = [json.loads(line) for line in subprocess.run([exe, "--replay", "--json", str(prefix)], capture_output=True, text=True, check=True).stdout.splitlines()][:-1]
+    prefix_json = [
+        item for item in (
+            json.loads(line)
+            for line in subprocess.run(
+                [exe, "--replay", "--json", str(prefix)],
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.splitlines()
+        )
+        if item.get("type") == "replay"
+    ]
     # Metadata frames describes the whole input, so compare only causal fields.
     for earlier, full in zip(prefix_json, observations):
         for field in ("observed_through", "bpm", "beats", "state"):
