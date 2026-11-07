@@ -6,6 +6,7 @@ CausalMusicState replay_music_file(const std::filesystem::path& path, std::uint6
                                   const CausalMusicReplay::BeatObserver& observer, std::stop_token cancel,
                                   const CausalMusicReplay::TonalObserver& tonal_observer,
                                   const CausalMusicReplay::StateObserver& state_observer) {
+  if (!epoch) throw std::invalid_argument("Music replay requires a nonzero epoch");
   if (cancel.stop_requested()) throw MusicReplayCancelled();
   FileReader file(path, epoch);
   CausalMusicReplay replay;
