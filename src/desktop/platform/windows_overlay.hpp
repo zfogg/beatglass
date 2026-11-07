@@ -18,7 +18,7 @@ public:
   ~OverlayController() override;
   /** Set whole-window opacity, clamped to the range zero through one. */
   void setOpacity(qreal opacity);
-  /** Enable click-through only while the control window is visible and not minimized; return whether the requested state was applied. Hiding, minimizing, closing or destroying the control window unlocks the overlay. */
+  /** Enable click-through only while the distinct control window is visible and not minimized; return whether the requested state was applied. Hiding, minimizing, closing or destroying the control window unlocks the overlay. */
   bool setClickThrough(bool enabled);
   /** Return the current click-through state. */
   bool clickThrough() const;

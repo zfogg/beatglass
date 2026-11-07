@@ -26,7 +26,7 @@ void OverlayController::setOpacity(qreal opacity) {
   if (overlay_ && std::isfinite(opacity)) overlay_->setOpacity(std::clamp(opacity, qreal(0), qreal(1)));
 }
 bool OverlayController::setClickThrough(bool enabled) {
-  if (enabled && (!overlay_ || !control_ || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) return false;
+  if (enabled && (!overlay_ || !control_ || overlay_.data() == control_.data() || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) return false;
   const bool changed = click_through_ != enabled;
   click_through_ = enabled;
   applyFlags();
