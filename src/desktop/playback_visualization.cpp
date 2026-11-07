@@ -32,7 +32,8 @@ struct Shared {
   std::atomic<unsigned> state{static_cast<unsigned>(Status::active)};
   std::atomic_flag producer = ATOMIC_FLAG_INIT;
   std::mutex latestMutex;
-  std::optional<beatglass::VisualizationFrame> latest;
+  std::optional<PlaybackVisualization::Frame> latest;
+  std::atomic<unsigned> publishedRevision{0};
   std::uint64_t epoch{};
   void stop(Status reason) noexcept {
     unsigned expected = static_cast<unsigned>(Status::active);
@@ -101,7 +102,16 @@ void run(const std::shared_ptr<Shared>& shared, std::stop_token stop) {
         const auto count = std::min<unsigned>(beatglass::VisualizationFrame::window_size, chunk.frames - first);
         auto result = processor.process(shared->epoch, position, rate, std::span<const float>(mono.data() + first, count));
         position += count;
-        if (result && shared->active()) { std::lock_guard lock(shared->latestMutex); if (shared->active()) shared->latest = *result; }
+        if (result && shared->active()) {
+          std::lock_guard lock(shared->latestMutex);
+          if (shared->active()) {
+            const auto previous = shared->publishedRevision.load(std::memory_order_relaxed);
+            if (previous >= std::numeric_limits<unsigned>::max() - 1) { shared->stop(Status::overflow); break; }
+            const auto revision = previous + 1;
+            shared->latest = PlaybackVisualization::Frame{*result, revision};
+            shared->publishedRevision.store(revision, std::memory_order_release);
+          }
+        }
       }
     } catch (...) { shared->stop(Status::unsupported_audio); break; }
     shared->tail.store(read + 1, std::memory_order_release);
@@ -128,9 +138,13 @@ PlaybackVisualization::~PlaybackVisualization() = default;
 QAudioBufferOutput* PlaybackVisualization::output() const noexcept { return impl_->output.get(); }
 void PlaybackVisualization::retire() noexcept { impl_->state->stop(Status::retired); }
 PlaybackVisualization::Status PlaybackVisualization::status() const noexcept { return static_cast<Status>(impl_->state->state.load(std::memory_order_acquire)); }
-unsigned PlaybackVisualization::revision() const noexcept { return impl_->state->active() ? 0u : 1u; }
-bool PlaybackVisualization::isCurrent(std::uint64_t epoch, unsigned revision) const noexcept { return revision == 0 && impl_->state->epoch == epoch && impl_->state->active(); }
-std::optional<beatglass::VisualizationFrame> PlaybackVisualization::takeLatest() {
+unsigned PlaybackVisualization::revision() const noexcept {
+  return impl_->state->active() ? impl_->state->publishedRevision.load(std::memory_order_acquire) : std::numeric_limits<unsigned>::max();
+}
+bool PlaybackVisualization::isCurrent(std::uint64_t epoch, unsigned revision) const noexcept {
+  return revision != 0 && revision != std::numeric_limits<unsigned>::max() && impl_->state->epoch == epoch && impl_->state->active() && impl_->state->publishedRevision.load(std::memory_order_acquire) == revision && impl_->state->active();
+}
+std::optional<PlaybackVisualization::Frame> PlaybackVisualization::takeLatest() {
   if (!impl_->state->active()) return {};
   std::lock_guard lock(impl_->state->latestMutex);
   if (!impl_->state->active()) return {};

@@ -17,14 +17,24 @@ class QAudioBufferOutput;
  * identity proof. Frame positions are counts from the first accepted buffer in
  * this generation and are not a track-relative seek position. Timestamps must be
  * present, at most seven days, and contiguous to within two microseconds; otherwise it fails closed.
- * This single-use generation has revision zero while active and one once
- * invalidated; it never wraps or becomes active again. The UI must recheck
- * isCurrent() before painting cached output and clear it on invalidation.
+ * Every publication has a strictly increasing revision; terminal invalidation
+ * reserves the maximum revision and never wraps. The UI must reject stale
+ * epoch/revision pairs, recheck isCurrent() before painting cached output,
+ * and clear the frame on invalidation. This check is momentary: a concurrent
+ * invalidation cannot revoke an already painted or in-flight frame. The UI
+ * must serialize its acceptance and clearing with painting, poll status even
+ * when motion is reduced, and arrange a subsequent clear; scheduling means
+ * no hard wall-clock bound is guaranteed.
  */
 class PlaybackVisualization {
 public:
   /** Terminal status; any status other than active requires a new generation. */
   enum class Status : unsigned { active, retired, end_of_stream, unsupported_audio, overflow };
+  /** An owned frame and its strictly increasing, generation-local publication revision. */
+  struct Frame {
+    /** PCM-derived waveform and spectrum. */ beatglass::VisualizationFrame value;
+    /** Nonzero revision; the maximum unsigned value is reserved for invalidation. */ unsigned revision{};
+  };
   /** Create a bounded preallocated tap and worker; throws for zero epoch or allocation failure. */
   explicit PlaybackVisualization(std::uint64_t epoch);
   /** Stop and join the worker after the caller has quiesced the player; control thread only. */
@@ -37,12 +47,12 @@ public:
   void retire() noexcept;
   /** Return current status. An inactive generation never becomes active again. */
   Status status() const noexcept;
-  /** Return the most recent owned frame once; all returned frames have revision zero. Inactive generations return empty. Control thread only. */
-  std::optional<beatglass::VisualizationFrame> takeLatest();
-  /** Copy the monotonic one-shot revision: zero while active, one once terminal. */
+  /** Return the most recent owned frame once; inactive generations return empty. Control thread only. */
+  std::optional<Frame> takeLatest();
+  /** Copy the latest publication revision, or the reserved maximum once terminal. */
   unsigned revision() const noexcept;
-  /** Recheck frame epoch and revision immediately before display; clear when false. */
-  bool isCurrent(std::uint64_t epoch, unsigned revision = 0) const noexcept;
+  /** Momentary frame epoch/revision check; the caller must serialize presentation and arrange a later clear after invalidation. */
+  bool isCurrent(std::uint64_t epoch, unsigned revision) const noexcept;
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
