@@ -48,14 +48,18 @@ object outside platform and feature conditionals, inject it into both bridges,
 and destroy and join both bridges before the allocator. Do not merge two
 separately owned allocators into the combined application.
 
-At the time of this review, #51's desktop entry point already constructs one
-allocator and passes it to `WindowsDj` and `CollectionView`, whereas #53 uses
-`DjBridge` and a different overlay integration. The combined draft #71 retains
-`WindowsDj` as the sole active adapter and brings the overlay behavior around
-it. It passes the same allocator to `WindowsDj` and `CollectionView`; both
-workers must stop and join before the owner is destroyed. The merged reader
-provides an explicit-epoch seek; coordinated product seeks must use that
-overload and be tested with this owner.
+#51's desktop entry point constructs one allocator and passes it to
+`WindowsDj` and `CollectionView`; `WindowsDj` is the sole active DJ adapter.
+Both workers must stop and join before the owner is destroyed. PR #53 merged
+the standalone Windows overlay controller; its integration with this desktop
+remains in #51. The merged reader provides an explicit-epoch seek; coordinated
+product seeks must use that overload and be tested with this owner.
+
+Native qualification remains incomplete: physical device hotplug and hardware
+overflow, reverse mixed-DPI monitor crossing, physical monitor removal, and
+exclusive fullscreen behavior have not been qualified. Hosted checks and
+noninteractive tests do not replace native desktop, audio, and overlay testing
+on Linux, Windows, and macOS as required by issue #1.
 
 The legacy file-reader seek increments its own epoch; merely injecting a shared
 initial value does not prevent it colliding with an epoch issued to another
