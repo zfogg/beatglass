@@ -7,7 +7,7 @@ bool valid_estimate(const std::optional<OfflineEstimate>& e) noexcept {
 }
 }
 OfflineValidation validate_offline_analysis(const OfflineAnalysis& r, OfflineLimits limits) noexcept {
-  if (!r.sample_rate || r.analyzed_through > r.observed_through || r.engine_version.empty() ||
+  if (!r.epoch || !r.sample_rate || r.analyzed_through > r.observed_through || r.engine_version.empty() ||
       r.configuration_id.empty() || r.algorithms.empty() || (r.mode != OfflineMode::causal && r.mode != OfflineMode::refined) ||
       (r.bpm && (!std::isfinite(*r.bpm) || *r.bpm <= 0)) || !valid_estimate(r.validated_track_key))
     return OfflineValidation::invalid_metadata;
@@ -19,11 +19,12 @@ OfflineValidation validate_offline_analysis(const OfflineAnalysis& r, OfflineLim
     if (a.algorithm.empty() || a.version.empty()) return OfflineValidation::invalid_metadata;
     if (a.algorithm.size() > limits.max_text_bytes || a.version.size() > limits.max_text_bytes) return OfflineValidation::limit_exceeded;
   }
-  std::uint64_t previous = 0; bool first = true;
+  std::uint64_t previous = 0, previous_observed = 0; bool first = true;
   for (const auto& b : r.beats) {
     if (b.frame >= b.observed_through || b.observed_through > r.analyzed_through ||
-        (!first && b.frame < previous) || (b.strength && !std::isfinite(*b.strength))) return OfflineValidation::invalid_beat;
-    previous = b.frame; first = false;
+        (!first && (b.frame < previous || b.observed_through < previous_observed)) ||
+        (b.strength && !std::isfinite(*b.strength))) return OfflineValidation::invalid_beat;
+    previous = b.frame; previous_observed = b.observed_through; first = false;
   }
   previous = 0; first = true;
   for (const auto& w : r.tonal_windows) {

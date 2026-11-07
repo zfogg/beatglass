@@ -34,9 +34,10 @@ struct OfflineTonalWindow {
   std::optional<OfflineEstimate> local_chord; ///< Local candidate, not a segment.
 };
 /** Owned provisional offline value; no decoder or callback memory is retained.
- * All positions count frames in this result's epoch; sample_rate converts them
- * to time. The epoch is process-session scoped: persistence must rebind or
- * otherwise distinguish it across sessions. observed_through is exclusive and
+ * All positions count frames in this result's nonzero coordinator-issued epoch;
+ * sample_rate converts them to time. Zero is invalid, including for persisted
+ * results. The epoch is process-session scoped: persistence must rebind to a
+ * new nonzero epoch or otherwise distinguish sessions. observed_through is exclusive and
  * may include a final partial hop beyond analyzed_through. Empty lists and
  * absent estimates mean unknown; gaps do not inherit preceding labels.
  * validated_track_key must only be populated by a separately validated
@@ -50,7 +51,7 @@ struct OfflineTonalWindow {
  * they cannot be established, do not invent them or reuse a cached result.
  */
 struct OfflineAnalysis {
-  std::uint64_t epoch{}; ///< Coordinator-issued epoch for this analysis session.
+  std::uint64_t epoch{}; ///< Nonzero coordinator-issued epoch for this analysis session.
   std::uint32_t sample_rate{}; ///< Source frames per second.
   std::uint64_t observed_through{}, analyzed_through{}; ///< Exclusive boundaries.
   OfflineMode mode{OfflineMode::causal}; ///< Causal or refined analysis.
@@ -58,7 +59,7 @@ struct OfflineAnalysis {
   std::vector<OfflineAlgorithmVersion> algorithms; ///< Per-component versions.
   std::optional<float> bpm; ///< Tempo estimate, absent when unknown.
   std::optional<OfflineEstimate> validated_track_key; ///< Separately validated track-wide key only.
-  std::vector<OfflineBeat> beats; ///< Ordered by event frame.
+  std::vector<OfflineBeat> beats; ///< Ordered by event frame and nondecreasing observed-at-emission boundary.
   std::vector<OfflineTonalWindow> tonal_windows; ///< Ordered by exclusive end; may overlap.
 };
 /** Caller-selected maximum counts and bytes per text field; no global policy is implied. */

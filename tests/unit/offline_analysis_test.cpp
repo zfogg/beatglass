@@ -30,6 +30,10 @@ TEST_CASE("offline result validation enforces exclusive boundaries and chronolog
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_beat);
  r = example(); r.beats[1].frame = 8;
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_beat);
+ r = example(); r.beats = {{9, 70, std::nullopt}, {49, 60, std::nullopt}};
+ CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_beat);
+ r.beats[1].observed_through = 70;
+ CHECK(validate_offline_analysis(r, limits) == OfflineValidation::valid);
  r = example(); r.tonal_windows[1].end_frame = r.tonal_windows[1].start_frame;
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_window);
  r = example(); r.tonal_windows[1].end_frame = 101;
@@ -49,6 +53,8 @@ TEST_CASE("offline results bound storage and distinguish absent from invalid est
  r.validated_track_key->strength = std::numeric_limits<float>::quiet_NaN();
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_metadata);
  r = example(); r.analyzed_through = 111;
+ CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_metadata);
+ r = example(); r.epoch = 0;
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_metadata);
  r = example(); r.algorithms.clear();
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_metadata);
