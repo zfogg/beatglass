@@ -12,7 +12,12 @@ expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_l
             'id="beatglass::TrackingMachine::discontinuity__std::uint64_t"',
             'id="beatglass::TrackingMachine::silence__void"', 'id="beatglass::TrackingMachine::signal__void"',
             'id="beatglass::TrackingMachine::expire__void"', 'id="beatglass::TrackingMachine::accept__AcquisitionToken"',
-            'id="beatglass::TempoResult::state__TrackingState"', "TempoEstimator", "KeyEstimator", "ChordEstimator", "PresentationAdapter",
+            'id="beatglass::TempoResult::state__TrackingState"',
+            'id="beatglass::SnapshotPublisher"', 'id="beatglass::SnapshotPublisher::SnapshotPublisher__std::s.std::s"',
+            'id="beatglass::SnapshotPublisher::begin_acquisition__AcquisitionToken"',
+            'id="beatglass::SnapshotPublisher::clear__void"',
+            'id="beatglass::SnapshotPublisher::publish__AcquisitionToken.Snapshot"',
+            'id="beatglass::SnapshotPublisher::latest__voidC"', "TempoEstimator", "KeyEstimator", "ChordEstimator", "PresentationAdapter",
             "AnalysisStore", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
             'id="beatglass::ChordEstimator::take_segments__void"',
             'id="beatglass::PresentationAdapter::present__SnapshotCRC"')

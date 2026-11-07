@@ -31,7 +31,7 @@ public:
     epoch_ = token.epoch; generation_ = token.generation; active_ = true; have_frame_ = false;
     std::atomic_store_explicit(&latest_, PublishedSnapshot{}, std::memory_order_release);
   }
-  /// Invalidate pending publications and clear latest on stop, silence or error.
+  /** Invalidate pending publications and clear latest on stop, silence or error. */
   void clear() noexcept {
     active_ = false; have_frame_ = false;
     std::atomic_store_explicit(&latest_, PublishedSnapshot{}, std::memory_order_release);
