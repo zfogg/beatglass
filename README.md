@@ -78,6 +78,7 @@ The same `CausalMusicReplay` consumes worker-delivered live `AudioBlock`s; its e
 
 The [Essentia dependency spike](docs/essentia-spike.md) records research builds, licensing considerations and the proposed tonal architecture; the combined CLI remains experimental.
 
+
 The experimental worker-only aubio beat tracker is not connected to the CLI or snapshots; see [progress](docs/progress.md) for its timing and qualification limits.
 
 ## Provisional library storage increment
