@@ -1,4 +1,5 @@
 #include "../../lib/capture/file/virtual_io.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <algorithm>
@@ -157,4 +158,15 @@ TEST_CASE("FileReader borrowed source reports open and mid-read cancellation") {
 TEST_CASE("FileReader borrowed source fails closed on a partial I/O error") {
   auto source=wav(); source.limit=1024; FileReader reader(source, 1); std::array<float,1024> output{};
   source.fail_after=source.calls; CHECK_THROWS_AS(reader.read(output),std::runtime_error); CHECK_THROWS(reader.read(output));
+}
+
+TEST_CASE("borrowed reader rejects zero and accepts process allocated epochs") {
+  auto source=wav();
+  CHECK_THROWS_AS(FileReader(source,0),std::invalid_argument); CHECK(source.calls==0);
+  SourceEpochAllocator epochs; auto first=epochs.next(); auto second=epochs.next(); REQUIRE(first); REQUIRE(second);
+  FileReader reader(source,*first); std::array<float,4> samples{};
+  auto block=reader.read(samples); REQUIRE(block.status==FileReadStatus::data); CHECK(block.block.epoch==*first);
+  const auto before=source.calls; CHECK_THROWS_AS(reader.seek(0,*first),std::invalid_argument); CHECK(source.calls==before);
+  CHECK_THROWS_AS(reader.seek(0),std::logic_error); CHECK(source.calls==before);
+  reader.seek(0,*second); auto after=reader.read(samples); REQUIRE(after.status==FileReadStatus::data); CHECK(after.block.epoch==*second);
 }

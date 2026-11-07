@@ -52,9 +52,10 @@ public:
   explicit FileReader(const std::filesystem::path& path, std::uint64_t initial_epoch = 0);
   /** Open a borrowed, seekable byte source synchronously on the worker.
    * @param source Source that outlives this reader, including its destructor.
-   * @param initial_epoch Process-coordinator-issued epoch for this source.
+   * @param initial_epoch Nonzero process-coordinator-issued epoch for this source.
    * @param cancel Checked before and during reads; blocking I/O may not stop promptly.
-   * @throws FileOpenCancelled if cancellation is observed while opening;
+   * @throws std::invalid_argument for zero epoch before accessing the source;
+   * FileOpenCancelled if cancellation is observed while opening;
    * std::runtime_error on source or decoder errors.
    * The source must be an immutable snapshot for cacheable analysis. No source
    * is created, copied, verified or retained beyond the borrow by this class.

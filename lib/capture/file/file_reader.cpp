@@ -29,8 +29,10 @@ struct FileReader::Impl {
   ~Impl() { if (handle) sf_close(handle); }
 };
 FileReader::FileReader(const std::filesystem::path& path, std::uint64_t epoch) : impl_(std::make_unique<Impl>(path, epoch)) {}
-FileReader::FileReader(ByteSource& source, std::uint64_t epoch, std::stop_token cancel)
-    : impl_(std::make_unique<Impl>(source, epoch, cancel)) {}
+FileReader::FileReader(ByteSource& source, std::uint64_t epoch, std::stop_token cancel) {
+  if (!epoch) throw std::invalid_argument("Borrowed source epoch must be nonzero");
+  impl_ = std::make_unique<Impl>(source, epoch, cancel);
+}
 FileReader::~FileReader() = default;
 const FileMetadata& FileReader::metadata() const noexcept { return impl_->metadata; }
 FileReadResult FileReader::read(std::span<float> buffer, std::stop_token cancel) {
