@@ -1,4 +1,5 @@
 #include "windows_live_music.hpp"
+#include "music_ui_handoff.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <cmath>
 #include <deque>
@@ -91,3 +92,18 @@ TEST_CASE("live composite rejects delayed snapshots across gaps and silence with
   REQUIRE(accept(live.generation(),live.revision()));
   CHECK_FALSE(accept(delayed_generation,delayed_revision));
 }
+
+TEST_CASE("composite UI gate rejects delayed sessions generations and revisions") {
+  MusicUiGate gate; CausalMusicState first; first.rolling_key="C major";
+  CausalMusicState second; second.rolling_key="A minor";
+  REQUIRE(gate.apply({1,1,1,first})); REQUIRE(gate.current());
+  REQUIRE(gate.apply({1,1,2,second}));
+  CHECK_FALSE(gate.apply({1,1,1,first})); CHECK(gate.current()->rolling_key=="A minor");
+  REQUIRE(gate.apply({1,2,3,{}})); CHECK_FALSE(gate.current());
+  CHECK_FALSE(gate.apply({1,1,4,first})); CHECK_FALSE(gate.current());
+  REQUIRE(gate.apply({2,0,0,{}}));
+  CHECK_FALSE(gate.apply({1,2,100,first})); CHECK_FALSE(gate.current());
+  REQUIRE(gate.apply({2,3,5,second})); CHECK(gate.current()->rolling_key=="A minor");
+  CHECK_FALSE(gate.apply({0,4,6,first}));
+}
+

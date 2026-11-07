@@ -72,7 +72,7 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_live_music.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/macos_overlay.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_live_music.hpp src/desktop/platform/music_ui_handoff.hpp src/desktop/platform/windows_live_music_bridge.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/macos_overlay.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
@@ -82,6 +82,10 @@ Desktop application internals
 .. cpp:function:: beatglass::windows::LiveTempo::~LiveTempo()
 
    Stop capture and clear the estimate on the owning worker thread.
+
+.. cpp:function:: beatglass::windows::LiveMusicBridge::~LiveMusicBridge()
+
+   Stop and join the worker on the GUI thread before releasing its allocator.
 
 .. cpp:function:: beatglass::windows::DjBridge::~DjBridge()
 
