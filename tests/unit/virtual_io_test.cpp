@@ -1,4 +1,5 @@
 #include "../../lib/capture/file/virtual_io.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <algorithm>
@@ -25,9 +26,9 @@ public:
   ByteReadResult read_at(std::uint64_t pos, std::span<std::byte> out, std::stop_token token) override {
     ++calls;
     if (throws) throw std::runtime_error("read");
-    if ((cancel_on_read || (cancel_after >= 0 && calls > cancel_after)) && stop) { stop->request_stop(); return {ByteReadStatus::cancelled, 0}; }
+    if ((cancel_on_read || (cancel_after >= 0 && calls > cancel_after)) && stop) { if (!out.empty()) out[0]=std::byte{0x5a}; stop->request_stop(); return {ByteReadStatus::cancelled, 0}; }
     if (token.stop_requested()) return {ByteReadStatus::cancelled, 0};
-    if (fail_after >= 0 && calls > fail_after) return {ByteReadStatus::error, 0};
+    if (fail_after >= 0 && calls > fail_after) { if (!out.empty()) out[0]=std::byte{0x6b}; return {ByteReadStatus::error, 0}; }
     if (pos >= bytes.size()) return {ByteReadStatus::end, 0};
     auto n = std::min({limit, out.size(), bytes.size() - static_cast<std::size_t>(pos)});
     std::copy_n(bytes.begin() + static_cast<std::size_t>(pos), n, out.begin()); return {ByteReadStatus::data, n};
@@ -58,13 +59,13 @@ TEST_CASE("virtual I/O accumulates short reads and validates signed seeks") {
 }
 TEST_CASE("virtual I/O retains partial failures cancellation and exceptions") {
   auto src = wav(); std::array<std::byte,10> out{}; src.fail_after = 1; VirtualIo error(src);
-  CHECK(error.read(out.data(), out.size()) == 3); CHECK(error.status() == VirtualIoStatus::error); CHECK(error.read(out.data(), 1) == 0);
+  CHECK(error.read(out.data(), out.size()) == 3); CHECK(error.status() == VirtualIoStatus::error); CHECK(std::to_integer<int>(out[3]) == 0x6b); CHECK(error.read(out.data(), 1) == 0);
   auto throwing = wav(); VirtualIo bad(throwing); throwing.throws = true; CHECK(bad.read(out.data(), 1) == 0); CHECK(bad.status() == VirtualIoStatus::error);
   auto cancelled = wav(); std::stop_source stop; cancelled.stop = &stop; cancelled.cancel_on_read = true; VirtualIo io(cancelled); io.set_cancel(stop.get_token());
-  CHECK(io.read(out.data(), 1) == 0); CHECK(io.status() == VirtualIoStatus::cancelled);
+  CHECK(io.read(out.data(), 1) == 0); CHECK(io.status() == VirtualIoStatus::cancelled); CHECK(std::to_integer<int>(out[0]) == 0x5a);
   CHECK(io.tell() == -1); CHECK(io.status() == VirtualIoStatus::cancelled);
   auto partial = wav(); std::stop_source later; partial.stop = &later; partial.cancel_after = 1; VirtualIo partial_io(partial); partial_io.set_cancel(later.get_token());
-  CHECK(partial_io.read(out.data(), 10) == 3); CHECK(partial_io.status() == VirtualIoStatus::cancelled);
+  CHECK(partial_io.read(out.data(), 10) == 3); CHECK(partial_io.status() == VirtualIoStatus::cancelled); CHECK(std::to_integer<int>(out[3]) == 0x5a);
 }
 TEST_CASE("virtual libsndfile decoder reads and seeks the borrowed bytes") {
   auto src = wav(); VirtualFileReader decoder(src, 7); REQUIRE(decoder.metadata().frames == 8192); REQUIRE(decoder.metadata().channels == 1);
@@ -81,7 +82,8 @@ TEST_CASE("virtual decoder reports callback failures and cancellation") {
   auto src = wav(); src.limit = 1024; VirtualFileReader decoder(src, 1); std::array<float,1024> samples{};
   src.fail_after = src.calls; CHECK_THROWS(decoder.read(samples)); CHECK_THROWS(decoder.read(samples));
   auto other = wav(); other.limit = 1024; VirtualFileReader cancelled(other, 1); std::stop_source stop; other.stop = &stop; other.cancel_on_read = true;
-  CHECK(cancelled.read(samples, stop.get_token()).status == FileReadStatus::cancelled); CHECK_THROWS(cancelled.read(samples));
+  const auto cancelled_read = cancelled.read(samples, stop.get_token());
+  CHECK(cancelled_read.status == FileReadStatus::cancelled); CHECK(cancelled_read.block.samples.empty()); CHECK_THROWS(cancelled.read(samples));
 }
 TEST_CASE("virtual decoder matches path decoder on generated v1 codec fixtures") {
   const auto root = std::filesystem::path(__FILE__).parent_path().parent_path() / "fixtures" / "generated";
@@ -109,9 +111,9 @@ TEST_CASE("virtual decoder matches path decoder on generated v1 codec fixtures")
 }
 TEST_CASE("virtual decoder distinguishes open cancellation from failure") {
   auto src = wav(); std::stop_source stop; stop.request_stop();
-  CHECK_THROWS_AS(VirtualFileReader(src, 0, stop.get_token()), VirtualOpenCancelled);
+  CHECK_THROWS_AS(VirtualFileReader(src, 0, stop.get_token()), FileOpenCancelled);
   auto during = wav(); std::stop_source mid; during.stop = &mid; during.cancel_on_read = true;
-  CHECK_THROWS_AS(VirtualFileReader(during, 0, mid.get_token()), VirtualOpenCancelled);
+  CHECK_THROWS_AS(VirtualFileReader(during, 0, mid.get_token()), FileOpenCancelled);
   auto failing = wav(); failing.fail_after = 0;
   CHECK_THROWS_AS(VirtualFileReader(failing, 1), std::runtime_error);
 }
@@ -132,12 +134,47 @@ TEST_CASE("virtual decoder accepts coordinator epochs without wrapping") {
   const auto block = decoder.read(samples); REQUIRE(block.status == FileReadStatus::data);
   CHECK(block.block.epoch == std::numeric_limits<std::uint64_t>::max()); CHECK(block.block.first_frame == 10);
 }
+TEST_CASE("FileReader borrows byte source and requires externally allocated seek epochs") {
+  auto source=wav(); const auto before=source.bytes;
+  {
+    FileReader reader(source, 10); REQUIRE(reader.metadata().frames==8192);
+    std::array<float,4> output{}; auto first=reader.read(output); REQUIRE(first.status==FileReadStatus::data);
+    CHECK(first.block.epoch==10); CHECK(first.block.first_frame==0); CHECK(output[1]==Catch::Approx(.25));
+    CHECK_THROWS_AS(reader.seek(2),std::logic_error);
+    CHECK_THROWS_AS(reader.seek(2,10),std::invalid_argument);
+    auto next=reader.read(output); REQUIRE(next.status==FileReadStatus::data); CHECK(next.block.first_frame==4); CHECK(next.block.epoch==10);
+    reader.seek(2,42); auto after=reader.read(output); REQUIRE(after.status==FileReadStatus::data); CHECK(after.block.epoch==42); CHECK(after.block.first_frame==2);
+    reader.seek(reader.metadata().frames,100); CHECK(reader.read(output).status==FileReadStatus::end);
+  }
+  CHECK((source.bytes==before));
+}
+TEST_CASE("FileReader borrowed source reports open and mid-read cancellation") {
+  auto source=wav(); std::stop_source early; early.request_stop();
+  CHECK_THROWS_AS(FileReader(source, 1, early.get_token()),FileOpenCancelled);
+  auto later=wav(); later.limit=1024; FileReader reader(later,2); std::stop_source stop; later.stop=&stop; later.cancel_on_read=true;
+  std::array<float,1024> output{}; const auto result=reader.read(output,stop.get_token());
+  CHECK(result.status==FileReadStatus::cancelled); CHECK(result.block.samples.empty()); CHECK_THROWS(reader.read(output));
+}
+TEST_CASE("FileReader borrowed source fails closed on a partial I/O error") {
+  auto source=wav(); source.limit=1024; FileReader reader(source, 1); std::array<float,1024> output{};
+  source.fail_after=source.calls; CHECK_THROWS_AS(reader.read(output),std::runtime_error); CHECK_THROWS(reader.read(output));
+}
+
+TEST_CASE("borrowed reader rejects zero and accepts process allocated epochs") {
+  auto source=wav();
+  CHECK_THROWS_AS(FileReader(source,0),std::invalid_argument); CHECK(source.calls==0);
+  SourceEpochAllocator epochs; auto first=epochs.next(); auto second=epochs.next(); REQUIRE(first); REQUIRE(second);
+  FileReader reader(source,*first); std::array<float,4> samples{};
+  auto block=reader.read(samples); REQUIRE(block.status==FileReadStatus::data); CHECK(block.block.epoch==*first);
+  const auto before=source.calls; CHECK_THROWS_AS(reader.seek(0,*first),std::invalid_argument); CHECK(source.calls==before);
+  CHECK_THROWS_AS(reader.seek(0),std::logic_error); CHECK(source.calls==before);
+  reader.seek(0,*second); auto after=reader.read(samples); REQUIRE(after.status==FileReadStatus::data); CHECK(after.block.epoch==*second);
+}
 
 TEST_CASE("virtual seek consumes a coordinator epoch and fails before I/O on exhaustion") {
   auto source = wav(); SourceEpochAllocator epochs; auto first = epochs.next(); REQUIRE(first);
   VirtualFileReader decoder(source, *first); std::array<float, 2> samples{};
   decoder.seek(10, epochs); auto read = decoder.read(samples); REQUIRE(read.status == FileReadStatus::data); REQUIRE(read.block.epoch == 2); REQUIRE(read.block.first_frame == 10);
-  SourceEpochAllocator exhausted(std::numeric_limits<std::uint64_t>::max());
-  REQUIRE_THROWS_AS(decoder.seek(100, exhausted), std::overflow_error);
+  SourceEpochAllocator exhausted(std::numeric_limits<std::uint64_t>::max()); REQUIRE_THROWS_AS(decoder.seek(100, exhausted), std::overflow_error);
   auto next = decoder.read(samples); REQUIRE(next.status == FileReadStatus::data); REQUIRE(next.block.epoch == 2); REQUIRE(next.block.first_frame == 12);
 }
