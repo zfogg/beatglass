@@ -3,10 +3,12 @@
 #include <cstdint>
 #include <limits>
 namespace beatglass {
-/// Identifies one acquisition attempt and its source epoch.
+/** Identifies one acquisition attempt and its source epoch. */
 struct AcquisitionToken {
-  std::uint64_t epoch{}; ///< Epoch whose samples feed the attempt.
-  std::uint64_t generation{}; ///< Monotonically increasing attempt identifier.
+  /** Epoch whose samples feed the attempt. */
+  std::uint64_t epoch{};
+  /** Monotonically increasing attempt identifier. */
+  std::uint64_t generation{};
 };
 /**
  * Worker-owned musical tracking lifecycle; not thread-safe.
@@ -19,10 +21,10 @@ struct AcquisitionToken {
  */
 class TrackingMachine {
 public:
-  /// Current lifecycle state. Initially stopped.
+  /** Current lifecycle state. Initially stopped. */
   TrackingState state() const noexcept { return state_; }
-  /// Current acquisition token. Valid for results only while acquiring,
-  /// reacquiring or tracking and only if no later transition invalidated it.
+  /** Current token, valid only during an active nonsilent acquisition and
+   * until a later transition invalidates it. */
   AcquisitionToken token() const noexcept { return {epoch_, generation_}; }
   /** Start or restart after stop/error on the worker thread.
    * @param epoch Source epoch of the new session.
@@ -33,9 +35,9 @@ public:
     if (!advance()) return false;
     epoch_ = epoch; state_ = TrackingState::acquiring; return true;
   }
-  /// End the session; pending results are rejected until a new start.
+  /** End the session; pending results are rejected until a new start. */
   void stop() noexcept { state_ = TrackingState::stopped; }
-  /// Record a source or estimator error; pending results are rejected.
+  /** Record a source or estimator error; pending results are rejected. */
   void fail() noexcept { if (state_ != TrackingState::stopped) state_ = TrackingState::error; }
   /** Invalidate evidence on a gap, reset, format change or source interruption.
    * @param epoch Epoch of the next accepted samples.
@@ -45,20 +47,20 @@ public:
     if (!active() || !advance()) return false;
     epoch_ = epoch; state_ = TrackingState::reacquiring; return true;
   }
-  /// Mark a period of silence and invalidate prior estimates once per period.
+  /** Mark silence and invalidate prior estimates once per period. */
   bool silence() noexcept {
     if (!active()) return false;
     if (state_ == TrackingState::silent) return true;
     if (!advance()) return false;
     state_ = TrackingState::silent; return true;
   }
-  /// Signal resumption after silence; other active states remain unchanged.
+  /** Signal resumption after silence; other active states remain unchanged. */
   bool signal() noexcept {
     if (!active()) return false;
     if (state_ == TrackingState::silent) state_ = TrackingState::acquiring;
     return true;
   }
-  /// Expire stale evidence, requiring a fresh acquisition attempt.
+  /** Expire stale evidence, requiring a fresh acquisition attempt. */
   bool expire() noexcept {
     if (!active() || state_ == TrackingState::silent || !advance()) return false;
     state_ = TrackingState::reacquiring; return true;

@@ -13,3 +13,7 @@ The capture callback may only copy into preallocated bounded storage and record 
 ## Testing and qualification
 
 Every implementing agent writes and runs meaningful unit tests alongside its work, runs relevant existing tests, and reports exact commands and results. Every bug fix requires a regression test or an appropriate integration/native scenario. Use CTest and pinned Catch2 v3 for shared C++ tests; keep CI passing on Linux, macOS and Windows. Record unrun checks honestly. Native qualification on actual Linux, Windows and macOS machines, including real desktop UI, audio and overlay scenarios, is required by issue #1; headless or CI results do not replace it. Record build identity, environment, evidence and limitations. Do not claim completion until all issue gates have been met.
+
+## API documentation
+
+Document every new or changed C++ header and its relevant declarations with Hawkmoth-compatible comments. Describe actual ownership, threading, timing, error behavior and provisional status where applicable; update the API reference and run the warnings-as-errors documentation build described in README.md. Coordinate shared-header comments and contracts with the integration owner.
