@@ -37,11 +37,7 @@ class VisualizationProcessor {
 public:
   /** Maximum accepted frames per call; callers split larger blocks on the worker. */
   static constexpr unsigned max_input_frames = 4096;
-  /** Synchronous worker-thread invalidation hook. It must not throw or reenter.
-   * The owner synchronously advances the shared source invalidation generation and issues a
-   * monotonically increasing clear revision before returning. It must fail closed
-   * before either counter wraps and must synchronize cross-thread visibility. The GUI must reject
-   * old generations and older revisions, including already queued frames. */
+  /** Synchronous worker-thread invalidation hook. The owner advances the shared generation and clear revision before return; reject stale generations and revisions, synchronize visibility, and fail closed before counter overflow. The hook must not throw or reenter. */
   using Invalidate = void (*)(void*) noexcept;
   /** Construct with a required callback and borrowed context, valid for this object's lifetime.
    * @throws std::invalid_argument if the callback is null. */
