@@ -254,3 +254,11 @@ is required before publishing. The desktop bridge must retain and cancel its own
 Stop, switch and destruction, gate stale deliveries, and join the worker. This
 contract has deterministic fake-backend coverage; the bridge integration and
 physical device timing remain unqualified.
+
+The provisional live composite consumer rejects untimed, future, and more than
+one second old QPC capture packets. It checks age before and after DSP and
+polls the capture session again before publishing each result. Deterministic
+fake-backend tests exercise queued stale PCM and loss during DSP. A failed
+capture clock fails the attempt. Native WASAPI QPC behavior and production
+latency are not yet qualified; generation/token gates remain necessary for
+loss or cancellation racing the final check.
