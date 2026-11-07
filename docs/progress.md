@@ -145,6 +145,12 @@ After merging PR #18 at 2f66515 (documentation changes), the existing prebuilt Q
 
 On Windows 10.0.26300 x64, MSVC 19.44 and Qt 6.8.3, the shared desktop shell gained Library and DJ navigation while retaining real asynchronous file metadata inspection. Library indexing, analysis, playback, capture and overlay remain unavailable. From this worktree at base 6f927cb with `VCPKG_ROOT=C:/Users/zachf/.codex/worktrees/beatglass-vcpkg-prebuilt` and `BEATGLASS_QT_ROOT=$env:TEMP/beatglass-qt/6.8.3/msvc2022_64`, `cmake --preset prebuilt-qt-desktop -G "Visual Studio 17 2022" -A x64 -B "$env:TEMP/beatglass-ui-build" -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=C:/Users/zachf/.codex/worktrees/beatglass-codecs/build-pinned-win/vcpkg_installed`, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4`, and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 35/35, including the offscreen Qt Quick navigation test. The existing installed vcpkg tree was reused; this is not a fresh dependency qualification. `docker build -f docs/api/Dockerfile -t beatglass-docs .` and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html` passed. No native interactive UI, audio, or overlay qualification was performed for this increment.
 
+# Cache contract integration
+
+Typed cache outcomes and a worker-local commit decision have regression
+coverage. SQLite, file-version revalidation, crash recovery and unchanged-file
+reuse acceptance tests remain backend work.
+
 # Shared timeline contract
 
 The snapshot publisher enforces exclusive observed-frame and nonempty
