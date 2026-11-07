@@ -1,4 +1,5 @@
 #include "windows_loopback.hpp"
+#include "windows_device_position.hpp"
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -76,7 +77,7 @@ struct Loopback::Impl {
     gap = false;
     write.store(next, std::memory_order_release);
   }
-  void run(std::wstring id, std::uint64_t epoch) {
+  void run(std::wstring id, std::uint64_t epoch, std::shared_ptr<LoopbackStartAuthorization> authorization) {
     HRESULT hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
     if (FAILED(hr)) { fail(hr); return; }
     {
@@ -97,13 +98,16 @@ struct Loopback::Impl {
       if (SUCCEEDED(hr) && (!float_format(format.p) || format.p->nChannels > LoopbackPacket::max_samples)) hr = AUDCLNT_E_UNSUPPORTED_FORMAT;
       if (SUCCEEDED(hr)) hr = audio->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK, 1000000, 0, format.p, nullptr);
       if (SUCCEEDED(hr)) hr = audio->GetService(__uuidof(IAudioCaptureClient), reinterpret_cast<void**>(capture.out()));
+      if (SUCCEEDED(hr) && authorization && authorization->cancelled()) hr = HRESULT_FROM_WIN32(ERROR_CANCELLED);
       if (SUCCEEDED(hr)) hr = audio->Start();
+      if (SUCCEEDED(hr) && authorization && authorization->cancelled()) { audio->Stop(); hr = HRESULT_FROM_WIN32(ERROR_CANCELLED); }
       if (FAILED(hr)) fail(hr);
       else {
         publish(State::running, S_OK);
         std::uint64_t position = 0;
+        DevicePositionContinuity device_position;
         unsigned polls = 0;
-        while (!cancel.load(std::memory_order_acquire)) {
+        while (!cancel.load(std::memory_order_acquire) && !(authorization && authorization->cancelled())) {
           Sleep(10);
           if (++polls == 100) {
             polls = 0;
@@ -114,19 +118,25 @@ struct Loopback::Impl {
           }
           UINT32 available{};
           hr = capture->GetNextPacketSize(&available);
-          while (SUCCEEDED(hr) && available && !cancel.load(std::memory_order_acquire)) {
+          while (SUCCEEDED(hr) && available && !cancel.load(std::memory_order_acquire) && !(authorization && authorization->cancelled())) {
             BYTE* data{}; UINT32 frames{}; DWORD flags{}; UINT64 device_pos{}, qpc{};
             hr = capture->GetBuffer(&data, &frames, &flags, &device_pos, &qpc);
             if (FAILED(hr)) break;
             const auto channels = format.p->nChannels;
             const unsigned chunk_limit = LoopbackPacket::max_samples / channels;
             const bool valid = !(flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR);
+            if (!captureBufferArithmeticValid(position, frames, qpc, valid, format.p->nSamplesPerSec, chunk_limit)) {
+              const auto release_result = capture->ReleaseBuffer(frames);
+              hr = FAILED(release_result) ? release_result : HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
+              break;
+            }
+            const bool position_discontinuity = device_position.observe(device_pos, frames, valid, (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) != 0);
             for (unsigned offset = 0; offset < frames;) {
               const unsigned count = (std::min)(chunk_limit, frames - offset);
               const auto time_offset = static_cast<std::uint64_t>(offset) * 10000000 / format.p->nSamplesPerSec;
               const auto* samples = reinterpret_cast<const float*>(data);
               push(samples ? samples + static_cast<std::size_t>(offset) * channels : nullptr, count, channels, format.p->nSamplesPerSec, epoch,
-                   position + offset, qpc + time_offset, valid, offset == 0 && ((flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) || !valid), (flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0);
+                   position + offset, valid ? qpc + time_offset : 0, valid, offset == 0 && position_discontinuity, (flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0);
               offset += count;
             }
             position += frames;
@@ -135,6 +145,7 @@ struct Loopback::Impl {
           }
           if (FAILED(hr)) { fail(hr); break; }
         }
+        if (authorization && authorization->cancelled() && SUCCEEDED(hr)) fail(HRESULT_FROM_WIN32(ERROR_CANCELLED));
         audio->Stop();
       }
     }
@@ -143,13 +154,15 @@ struct Loopback::Impl {
 };
 Loopback::Loopback() : impl_(std::make_unique<Impl>()) {}
 Loopback::~Loopback() { stop(); }
-bool Loopback::start(const std::string& id, std::uint64_t epoch) {
+bool Loopback::start(const std::string& id, std::uint64_t epoch) { return start(id, epoch, {}); }
+bool Loopback::start(const std::string& id, std::uint64_t epoch, std::shared_ptr<LoopbackStartAuthorization> authorization) {
+  if (authorization && authorization->cancelled()) return false;
   if (impl_->current.load() != State::stopped || impl_->worker.joinable()) return false;
   auto wide = widen(id);
   if (wide.empty()) return false;
   impl_->read = 0; impl_->write = 0; impl_->event_read = 0; impl_->event_write = 0; impl_->event_sequence = 0; impl_->epoch = epoch; impl_->dropped = 0; impl_->error = 0; impl_->cancel = false; impl_->gap = false;
   impl_->current.store(State::starting, std::memory_order_release);
-  try { impl_->worker = std::thread(&Impl::run, impl_.get(), std::move(wide), epoch); }
+  try { impl_->worker = std::thread(&Impl::run, impl_.get(), std::move(wide), epoch, std::move(authorization)); }
   catch (...) { impl_->current.store(State::stopped); return false; }
   return true;
 }

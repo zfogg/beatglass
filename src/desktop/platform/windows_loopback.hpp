@@ -6,7 +6,7 @@
 #include <string>
 
 namespace beatglass::windows {
-/** One owned interleaved float packet copied from a selected render endpoint. Positions count delivered or dropped complete frames from the capture epoch's origin; WASAPI device-position jumps are not included in that count. A discontinuity or invalid timestamp requires the consumer to discard tracking evidence and reacquire. */
+/** One owned interleaved float packet copied from a selected render endpoint. Positions count delivered or dropped complete frames from the capture epoch's origin; WASAPI device-position jumps are marked discontinuous but are not included in that count. A discontinuity or invalid timestamp requires the consumer to discard tracking evidence and reacquire. */
 struct LoopbackPacket {
   /** Maximum interleaved sample values in one packet. */
   static constexpr unsigned max_samples = 8192;
@@ -19,7 +19,20 @@ struct LoopbackPacket {
   std::uint64_t first_frame{}; /**< Epoch-relative count of frames processed by the backend, including queue drops but excluding unknown device gaps. */
   std::uint64_t qpc_100ns{}; /**< Windows QPC timestamp for the first frame, in 100-nanosecond units, meaningful only when timestamp_valid is true. */
   bool timestamp_valid{}; /**< False when WASAPI flags a timestamp error; qpc_100ns must then be ignored. */
-  bool discontinuity{}; /**< True on a WASAPI discontinuity, timestamp error or preceding queue drop; downstream must reset and reacquire. */
+  bool discontinuity{}; /**< True on a WASAPI discontinuity, device-position jump, timestamp error, position overflow or preceding queue drop; downstream must reset and reacquire. */
+};
+
+/** Shared one-attempt start authorization. Any thread may cancel; one control worker may claim. Cancellation before the claim prevents startup; after the claim it requests shutdown; the session must reject cancelled deliveries. No operation allocates or blocks. */
+class LoopbackStartAuthorization {
+public:
+  /** Atomically commit the sole start unless cancellation won first. */
+  bool claim() noexcept { unsigned expected = 0; return state_.compare_exchange_strong(expected, 1, std::memory_order_acq_rel); }
+  /** Revoke the attempt. Safe concurrently with claim and native startup. */
+  void cancel() noexcept { state_.store(2, std::memory_order_release); }
+  /** True after revocation. */
+  bool cancelled() const noexcept { return state_.load(std::memory_order_acquire) == 2; }
+private:
+  std::atomic<unsigned> state_{0};
 };
 
 /** Provisional selected-endpoint capture, independent of the shared source contract. Virtual control methods allow deterministic adapter tests; production capture callbacks do not dispatch through this interface. */
@@ -42,6 +55,8 @@ public:
   Loopback& operator=(const Loopback&) = delete;
   /** Start the opaque UTF-8 render endpoint ID using a caller-allocated, never-reused epoch. Call on the control thread while stopped; errors are observable through state and error_code. */
   virtual bool start(const std::string& endpoint_id, std::uint64_t epoch);
+  /** Start with a claimed authorization retained by the capture worker. Cancellation is observed between native calls and after a blocked call returns; an already executing OS call is not preempted. */
+  virtual bool start(const std::string& endpoint_id, std::uint64_t epoch, std::shared_ptr<LoopbackStartAuthorization> authorization);
   /** Stop and join the capture thread. Call on the control thread; queued packets are discarded. */
   virtual void stop();
   /** Read current state from any non-capture thread. */
