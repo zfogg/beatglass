@@ -199,3 +199,17 @@ default remained unchanged. After a serial build of `windows_endpoint_tests`,
 the opt-in command was `windows_endpoint_tests.exe '[native-system-default]' -r compact`.
 This exercised actual OS default selection, not physical disconnection, real
 music, or QML interaction during the switch.
+
+The experimental Windows DJ page now owns a separate tempo overlay and uses
+the merged overlay controller. The main window provides show/hide, click-through
+unlock, opacity and on-screen recovery controls. The overlay displays the same
+live BPM model as the DJ page; key, chords and beat phase are not implemented.
+Windows 11 10.0.26300, MSVC 19.44 and Qt 6.8.3: a serial build of
+`beatglass-desktop`, `windows_dj_ui_tests` and `windows_overlay_tests` passed.
+With the pinned vcpkg debug and release DLL directories on `PATH`,
+`ctest --test-dir "$env:TEMP/beatglass-overlay-build" -C Debug -R '^(windows_dj_ui|windows_overlay|windows_dj_bridge|desktop_navigation|live_presentation)$' --output-on-failure`
+passed 5/5. The UI integration test operates the QML controls and checks the
+real controller, window visibility, click-through, opacity and recovery. The
+first run without those DLL paths timed out on two test launches; the rerun
+passed. This is automated integration coverage, not a manual product overlay,
+physical monitor removal or exclusive fullscreen qualification.

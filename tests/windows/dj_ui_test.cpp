@@ -1,6 +1,8 @@
 #include "metadata.hpp"
 #include "live_presentation.hpp"
 #include "windows_dj_bridge.hpp"
+#include "windows_overlay.hpp"
+#include <QQuickWindow>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtTest>
@@ -15,6 +17,45 @@
 class DjUiTest : public QObject {
   Q_OBJECT
 private slots:
+  void overlayControlsUseRealController() {
+    Metadata metadata;
+    LivePresentation presentation;
+    QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("metadata", &metadata);
+    engine.rootContext()->setContextProperty("livePresentation", &presentation);
+    engine.load(QUrl("qrc:/Main.qml"));
+    QVERIFY(!engine.rootObjects().isEmpty());
+    auto* root = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+    QVERIFY(root);
+    auto* overlay = root->findChild<QQuickWindow*>("overlayWindow");
+    QVERIFY(overlay);
+    beatglass::windows::OverlayController controller(overlay, root);
+    QVERIFY(root->setProperty("overlayControl", QVariant::fromValue(static_cast<QObject*>(&controller))));
+    auto* navigation = root->findChild<QObject*>("navigation");
+    QVERIFY(navigation); QVERIFY(navigation->setProperty("currentIndex", 1));
+    auto* toggle = root->findChild<QObject*>("toggleOverlay");
+    auto* lock = root->findChild<QObject*>("toggleClickThrough");
+    auto* recover = root->findChild<QObject*>("recoverOverlay");
+    auto* opacity = root->findChild<QObject*>("overlayOpacity");
+    QVERIFY(toggle); QVERIFY(lock); QVERIFY(recover); QVERIFY(opacity);
+    QVERIFY(QMetaObject::invokeMethod(toggle, "clicked"));
+    QTRY_VERIFY(overlay->isVisible());
+    QVERIFY(QMetaObject::invokeMethod(lock, "clicked"));
+    QTRY_VERIFY(controller.clickThrough());
+    QVERIFY(QMetaObject::invokeMethod(lock, "clicked"));
+    QTRY_VERIFY(!controller.clickThrough());
+    QVERIFY(opacity->setProperty("value", 0.4));
+    QVERIFY(QMetaObject::invokeMethod(opacity, "moved"));
+    QTRY_VERIFY(qAbs(overlay->opacity() - 0.4) < 0.02);
+    overlay->setPosition(-30000, -30000);
+    QVERIFY(QMetaObject::invokeMethod(recover, "clicked"));
+    QVERIFY(QGuiApplication::primaryScreen()->availableGeometry().contains(overlay->geometry()));
+    QVERIFY(QMetaObject::invokeMethod(lock, "clicked"));
+    QVERIFY(controller.clickThrough());
+    QVERIFY(QMetaObject::invokeMethod(toggle, "clicked"));
+    QTRY_VERIFY(!overlay->isVisible());
+    QVERIFY(!controller.clickThrough());
+  }
   void controlsUseRealBridge() {
     Metadata metadata;
     LivePresentation presentation;

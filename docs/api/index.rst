@@ -53,7 +53,12 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp
+
+.. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
+
+   Unlock the overlay and remove event filters. The caller retains ownership of
+   both windows. Call on the GUI thread.
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 

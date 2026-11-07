@@ -14,10 +14,27 @@ ApplicationWindow {
     property var metadataBridge: metadata
     property var liveBridge: livePresentation
     property var djControl: null
+    property var overlayControl: null
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+
+    Window {
+        id: overlay
+        objectName: "overlayWindow"
+        width: 320; height: 110
+        visible: false
+        color: "transparent"
+        Rectangle {
+            anchors.fill: parent; radius: 10; color: "#cc181820"
+            Column {
+                anchors.centerIn: parent; spacing: 6
+                Label { text: "Beatglass · live tempo"; color: "white" }
+                Label { objectName: "overlayTempo"; text: "BPM: " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24 }
+            }
+        }
+    }
 
     function activateEntry(index) {
         if (index < 0 || index >= files.count) return
@@ -143,7 +160,7 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 Label { text: window.djControl ? "Monitor the Windows default output" : "Live output monitoring is not available yet."; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Tempo is experimental. Key, chords and overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                Label { text: "Tempo and the overlay are experimental. Key and chords are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
                     visible: window.djControl !== null
                     Button { objectName: "startMonitoring"; text: "Start monitoring"; enabled: window.djControl !== null && !window.djControl.active; onClicked: window.djControl.start() }
@@ -151,6 +168,14 @@ ApplicationWindow {
                 }
                 Label { text: "Status: " + (window.djControl ? window.djControl.status : window.liveBridge.status) }
                 Label { objectName: "liveEstimates"; text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
+                RowLayout {
+                    visible: window.overlayControl !== null
+                    Button { objectName: "toggleOverlay"; text: overlay.visible ? "Hide overlay" : "Show overlay"; onClicked: { if (overlay.visible) { window.overlayControl.setClickThrough(false); overlay.hide() } else { window.overlayControl.keepOnScreen(); overlay.show() } } }
+                    Button { objectName: "toggleClickThrough"; text: window.overlayControl && window.overlayControl.clickThrough ? "Unlock overlay" : "Make click-through"; enabled: overlay.visible; onClicked: window.overlayControl.setClickThrough(!window.overlayControl.clickThrough) }
+                    Button { objectName: "recoverOverlay"; text: "Move on screen"; onClicked: window.overlayControl.keepOnScreen() }
+                    Label { text: "Opacity" }
+                    Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: 1; onMoved: window.overlayControl.setOpacity(value); Accessible.name: "Overlay opacity" }
+                }
                 Item { Layout.fillHeight: true }
             }
         }
