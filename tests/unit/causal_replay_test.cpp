@@ -104,6 +104,8 @@ TEST_CASE("hop observers are synchronous borrowed and independent of source chun
     CHECK(single[i].epoch==9); CHECK(single[i].first==37+i*512); CHECK(single[i].rate==44100);
     CHECK(single[i].reset==(i==0)); CHECK(split[i].first==single[i].first);
     CHECK(split[i].reset==single[i].reset); CHECK(split[i].samples==single[i].samples);
+    for (std::size_t sample=0;sample<single[i].samples.size();++sample)
+      CHECK(single[i].samples[sample]==pcm[(i*512+sample)*2]);
   }
 }
 TEST_CASE("hop observer exceptions and reentrant process fail closed") {
