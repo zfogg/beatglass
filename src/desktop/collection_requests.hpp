@@ -8,7 +8,8 @@
  * marshal owned results to the GUI thread and suppress callbacks after this object dies.
  * Browse replacement never invalidates an analysis; cancellation must be requested from
  * the corresponding backend separately. At most one analysis terminal is retained until
- * acknowledged. This is not connected to product UI while the backend remains gated.
+ * acknowledged. The collection view uses this state for provisional requests; cached
+ * analysis remains gated pending source and dependency identity verification.
  */
 template <class Page, class Terminal> class CollectionRequests {
 public:
