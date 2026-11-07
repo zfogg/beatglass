@@ -43,10 +43,23 @@ struct Loopback::Impl {
   std::atomic<State> current{State::stopped};
   std::atomic<std::int32_t> error{0};
   std::atomic<bool> cancel{false};
+  std::array<Event, 4> events{};
+  std::atomic<unsigned> event_read{0}, event_write{0};
+  std::uint64_t event_sequence{}, epoch{};
   std::thread worker;
   bool gap{};
 
-  void fail(HRESULT hr) { error.store(static_cast<std::int32_t>(hr), std::memory_order_relaxed); current.store(State::interrupted, std::memory_order_release); }
+  void publish(State state, HRESULT hr) noexcept {
+    const auto index = event_write.load(std::memory_order_relaxed);
+    const auto next = (index + 1) % events.size();
+    // A start emits at most running followed by interrupted, so the four-slot
+    // queue cannot overflow before stop joins and resets it.
+    events[index] = {state, ++event_sequence, epoch, static_cast<std::int32_t>(hr)};
+    event_write.store(static_cast<unsigned>(next), std::memory_order_release);
+    error.store(static_cast<std::int32_t>(hr), std::memory_order_relaxed);
+    current.store(state, std::memory_order_release);
+  }
+  void fail(HRESULT hr) { publish(State::interrupted, hr); }
   void push(const float* data, unsigned frames, unsigned channels, unsigned rate, std::uint64_t epoch,
             std::uint64_t position, std::uint64_t qpc, bool valid, bool discontinuity, bool silent) noexcept {
     const unsigned next = (write.load(std::memory_order_relaxed) + 1) % slots;
@@ -84,7 +97,7 @@ struct Loopback::Impl {
       if (SUCCEEDED(hr)) hr = audio->Start();
       if (FAILED(hr)) fail(hr);
       else {
-        current.store(State::running, std::memory_order_release);
+        publish(State::running, S_OK);
         std::uint64_t position = 0;
         unsigned polls = 0;
         while (!cancel.load(std::memory_order_acquire)) {
@@ -131,7 +144,7 @@ bool Loopback::start(const std::string& id, std::uint64_t epoch) {
   if (impl_->current.load() != State::stopped || impl_->worker.joinable()) return false;
   auto wide = widen(id);
   if (wide.empty()) return false;
-  impl_->read = 0; impl_->write = 0; impl_->dropped = 0; impl_->error = 0; impl_->cancel = false; impl_->gap = false;
+  impl_->read = 0; impl_->write = 0; impl_->event_read = 0; impl_->event_write = 0; impl_->event_sequence = 0; impl_->epoch = epoch; impl_->dropped = 0; impl_->error = 0; impl_->cancel = false; impl_->gap = false;
   impl_->current.store(State::starting, std::memory_order_release);
   try { impl_->worker = std::thread(&Impl::run, impl_.get(), std::move(wide), epoch); }
   catch (...) { impl_->current.store(State::stopped); return false; }
@@ -142,9 +155,17 @@ void Loopback::stop() {
   if (impl_->worker.joinable()) impl_->worker.join();
   impl_->current.store(State::stopped, std::memory_order_release);
   impl_->read = 0; impl_->write = 0;
+  impl_->event_read = 0; impl_->event_write = 0;
 }
 Loopback::State Loopback::state() const { return impl_->current.load(std::memory_order_acquire); }
 std::int32_t Loopback::error_code() const { return impl_->error.load(std::memory_order_relaxed); }
+bool Loopback::pop_event(Event& event) {
+  const auto read = impl_->event_read.load(std::memory_order_relaxed);
+  if (read == impl_->event_write.load(std::memory_order_acquire)) return false;
+  event = impl_->events[read];
+  impl_->event_read.store((read + 1) % impl_->events.size(), std::memory_order_release);
+  return true;
+}
 bool Loopback::pop(LoopbackPacket& packet) {
   if (state() != State::running) return false;
   const auto read = impl_->read.load(std::memory_order_relaxed);

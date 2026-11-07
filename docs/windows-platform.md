@@ -11,8 +11,12 @@ within the epoch. Timestamp errors and WASAPI discontinuities require
 reacquisition. Only 32-bit float mix formats are accepted. HRESULT failures are
 observable; stop joins before discarding queued data. The caller must invalidate
 presentation on interruption, discard retained packets and supply a new epoch
-before restart. Status polling and the packet queue do not provide ordered control
-notifications; integration must handle that race. Device notifications, automatic
+before restart. A separate bounded event queue carries the capture thread's
+consecutive running and interrupted transitions for each start. The control owner
+must map startup interruption to an error, apply the running event before allowing
+PCM, and clear retained evidence on interruption. Events and PCM have no shared
+delivery order; the integration owner must handle in-flight packets and event
+invalidation. Device notifications, automatic
 restart, default-following and overlay behavior remain to be implemented. WASAPI loopback captures the shared endpoint
 mix; exclusive-mode, ASIO and other paths that bypass that mix are not guaranteed
 to be captured. Playback is not rerouted.
@@ -61,3 +65,15 @@ the selected endpoint's state approximately once per second and interrupts when
 it is no longer active; this path has not been exercised by disconnecting a
 device. The API documentation Docker build passed with Sphinx warnings treated as
 errors. This draft does not satisfy the native audio/overlay qualification gate.
+
+The control event stream has capacity for three events and emits at most two per
+attempt, with one producer and one consumer. A 30-cycle test alternated immediate
+stop with waiting for running; each stop joined the thread and discarded pending
+events, and a new attempt started its event sequence at one. The test did not
+disconnect hardware or test an interruption following a running event. This
+private stream does not yet supply a shared `SourceAttempt`; the integration
+adapter must bind an attempt identity, order delivery relative to epoch setup,
+translate startup failures, and invalidate in-flight analysis. WASAPI's device
+position is currently not used to detect extra gaps: flagged discontinuities and
+timestamp errors are marked, but the epoch-relative frame count excludes unknown
+device gaps and must not be treated as an uninterrupted physical timeline.

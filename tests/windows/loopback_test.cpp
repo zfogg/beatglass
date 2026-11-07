@@ -17,6 +17,13 @@ TEST_CASE("Invalid endpoint interrupts and can be stopped and retried") {
   for (int i = 0; i < 200 && capture.state() == beatglass::windows::Loopback::State::starting; ++i) std::this_thread::sleep_for(10ms);
   REQUIRE(capture.state() == beatglass::windows::Loopback::State::interrupted);
   REQUIRE(capture.error_code() != 0);
+  beatglass::windows::Loopback::Event event;
+  REQUIRE(capture.pop_event(event));
+  REQUIRE(event.state == beatglass::windows::Loopback::State::interrupted);
+  REQUIRE(event.sequence == 1);
+  REQUIRE(event.epoch == 1);
+  REQUIRE(event.error_code != 0);
+  REQUIRE_FALSE(capture.pop_event(event));
   beatglass::windows::LoopbackPacket packet;
   REQUIRE_FALSE(capture.pop(packet));
   capture.stop();
@@ -34,11 +41,38 @@ TEST_CASE("Selected active render endpoint starts and stops loopback when availa
   for (int i = 0; i < 300 && capture.state() == beatglass::windows::Loopback::State::starting; ++i) std::this_thread::sleep_for(10ms);
   INFO("WASAPI HRESULT: " << capture.error_code());
   REQUIRE(capture.state() == beatglass::windows::Loopback::State::running);
+  beatglass::windows::Loopback::Event event;
+  REQUIRE(capture.pop_event(event));
+  REQUIRE(event.state == beatglass::windows::Loopback::State::running);
+  REQUIRE(event.sequence == 1);
+  REQUIRE(event.epoch == 42);
   REQUIRE_FALSE(capture.start(list.endpoints.front().id, 43));
   capture.stop();
   REQUIRE(capture.state() == beatglass::windows::Loopback::State::stopped);
   beatglass::windows::LoopbackPacket packet;
   REQUIRE_FALSE(capture.pop(packet));
+}
+
+TEST_CASE("Repeated capture startup and shutdown discard prior attempt events") {
+  const auto list = beatglass::windows::enumerate_render_endpoints();
+  REQUIRE(list.error.empty());
+  if (list.endpoints.empty()) SKIP("No active render endpoint on this machine");
+  beatglass::windows::Loopback capture;
+  for (std::uint64_t epoch = 1; epoch <= 30; ++epoch) {
+    REQUIRE(capture.start(list.endpoints.front().id, epoch));
+    if (epoch % 2 == 0) {
+      for (int i = 0; i < 200 && capture.state() == beatglass::windows::Loopback::State::starting; ++i) std::this_thread::sleep_for(5ms);
+      REQUIRE(capture.state() == beatglass::windows::Loopback::State::running);
+      beatglass::windows::Loopback::Event event;
+      REQUIRE(capture.pop_event(event));
+      REQUIRE(event.sequence == 1);
+      REQUIRE(event.epoch == epoch);
+    }
+    capture.stop();
+    beatglass::windows::Loopback::Event event;
+    REQUIRE_FALSE(capture.pop_event(event));
+    REQUIRE(capture.state() == beatglass::windows::Loopback::State::stopped);
+  }
 }
 
 TEST_CASE("Generated default endpoint playback is captured and overflow marks a gap", "[.][native-audio]") {
