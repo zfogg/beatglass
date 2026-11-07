@@ -28,6 +28,12 @@ struct TempoResult {
   /** Current lifecycle state. */
   TrackingState state{TrackingState::stopped};
 };
+/** One causal beat event from a replay epoch. */
+struct ReplayBeat {
+  std::uint64_t epoch{};
+  std::uint64_t frame{};
+  std::uint64_t observed_through{};
+};
 /** Read file properties on a worker thread; this may block on filesystem I/O.
  * @param path Local file path; the source file is not modified.
  * @return A value independent of the decoder's lifetime.
@@ -45,11 +51,14 @@ TempoResult analyze_file(const std::filesystem::path& path);
  * the second is borrowed only for the call. Observers must copy retained data.
  */
 using ReplayObserver = std::function<void(std::uint64_t observed_frames, const TempoResult&)>;
+/** Synchronous observer for causal beat events; the callback is not retained. */
+using ReplayBeatObserver = std::function<void(const ReplayBeat&)>;
 /** Replay a file causally, faster than real time, on the caller's worker thread.
  * @param path Local audio file; no source tags or content are modified.
  * @param observer Optional synchronous progress observer; it is not retained.
  * @return The final state after all complete decoded blocks.
  * @throws std::exception on decoder, invalid PCM, estimator or observer errors.
  */
-TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver& observer);
+TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver& observer,
+                        const ReplayBeatObserver& beat_observer = {});
 }

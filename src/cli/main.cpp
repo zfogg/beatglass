@@ -51,6 +51,10 @@ int main(int argc, char** argv) {
       std::cout << "observed frame: " << frame << " tempo: ";
       if (state.bpm) std::cout << *state.bpm; else std::cout << "unknown";
       std::cout << " state: " << beatglass::cli::state_label(state.state) << "\n";
+    }, [json](const beatglass::ReplayBeat& beat) {
+      if (!json) return;
+      std::cout << "{\"type\":\"beat\",\"schema_version\":1,\"epoch\":" << beat.epoch
+                << ",\"frame\":" << beat.frame << ",\"observed_through\":" << beat.observed_through << "}\n";
     }) : beatglass::analyze_file(path);
     if (json) { json_result("result", r); return 0; }
     std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nbeats: " << r.beats << "\ntempo: ";
