@@ -5,11 +5,11 @@
 namespace beatglass {
 // Immutable shared snapshots may be handed to a presentation thread; the
 // publisher bounds timeline lengths before publication. GUI types stay local.
-/// Shared immutable snapshot; the publisher is responsible for bounding timeline lengths before publication.
+/** Shared immutable snapshot; the publisher is responsible for bounding timeline lengths before publication. */
 using PublishedSnapshot = std::shared_ptr<const Snapshot>;
-/// Application-facing labels and stale flag.
+/** Application-facing labels and stale flag. */
 struct PresentationState { std::string status, tempo, key, chord; bool stale{}; };
-/// Provisional presentation interface; GUI types remain local to the application.
+/** Provisional presentation interface; GUI types remain local to the application. */
 class PresentationAdapter {
 public:
   virtual ~PresentationAdapter() = default;

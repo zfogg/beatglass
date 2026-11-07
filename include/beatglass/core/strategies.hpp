@@ -5,7 +5,7 @@
 namespace beatglass {
 // Worker-owned. process() consumes observed PCM only; spans expire on return.
 // A reset discards all evidence before a new epoch, format, seek or gap.
-/// Provisional worker-owned strategy. Reset discards evidence on a new epoch, format, seek, or gap; process consumes borrowed observed PCM.
+/** Provisional worker-owned strategy. Reset discards evidence on a new epoch, format, seek, or gap; process consumes borrowed observed PCM. */
 class TempoEstimator {
 public:
   virtual ~TempoEstimator() = default;
@@ -14,7 +14,7 @@ public:
   virtual std::vector<Candidate> candidates() const = 0;
   virtual std::vector<Beat> take_beats() = 0;
 };
-/// Provisional worker-owned key strategy with the same reset and borrowed PCM rules.
+/** Provisional worker-owned key strategy with the same reset and borrowed PCM rules. */
 class KeyEstimator {
 public:
   virtual ~KeyEstimator() = default;
@@ -22,7 +22,7 @@ public:
   virtual void process(const AudioBlock&) = 0;
   virtual std::vector<Candidate> candidates() const = 0;
 };
-/// Provisional worker-owned chord strategy with the same reset and borrowed PCM rules.
+/** Provisional worker-owned chord strategy with the same reset and borrowed PCM rules. */
 class ChordEstimator {
 public:
   virtual ~ChordEstimator() = default;

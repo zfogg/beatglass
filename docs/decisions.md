@@ -16,3 +16,7 @@ Windows x64 MSVC builds used vcpkg aubio 2024-01-03#1 (upstream commit 152d6819b
 The experimental vcpkg manifest pins registry baseline `9e593bb18ea69cc5095e012465dcd675a822ed0d`, which selects aubio 2024-01-03#1, libsndfile 1.2.2#2, and optional Qt Declarative 6.11.1. Core-only features intentionally omit optional codecs. The manifest and presets still require validation across all triplets and desktop deployment; they are not a release distribution or a completed license review. Ambient system packages remain supported only for development experiments.
 
 The experimental `TempoTracker` accepts arbitrary contiguous mono chunks on a worker thread, preserving partial hops and resetting on explicit discontinuity, epoch changes, or gaps. It provides an uncalibrated BPM and beat count only; source timing, beat timestamps, live replay and full estimator/snapshot integration remain open. The file path uses this same tracker.
+
+## API reference
+
+Use Hawkmoth with Sphinx to extract provisional C++ header comments, and publish the strict HTML build through GitHub Actions and Pages. The reference includes application-private headers without making them public API. The image and direct tool versions are pinned; Ubuntu transitive packages are not snapshot-pinned and remain a reproducibility limitation.
