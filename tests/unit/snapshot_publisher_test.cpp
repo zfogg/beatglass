@@ -31,3 +31,12 @@ TEST_CASE("snapshot publisher supports concurrent readers") {
  for (std::uint64_t i=0; i<10000; ++i) { Snapshot s; s.observed_through = {1,i}; if (!p.publish({1,1}, std::move(s))) published = false; }
  done.store(true); reader.join(); CHECK(published); CHECK_FALSE(bad.load());
 }
+TEST_CASE("snapshot timelines use exclusive observed and half-open chord boundaries") {
+ SnapshotPublisher p(3,3); p.begin_acquisition({2,1}); Snapshot s; s.observed_through = {2,10};
+ s.beats = {{{2,9},1}}; s.chords = {{{2,0},{2,10},{"C",1}}}; REQUIRE(p.publish({2,1}, s));
+ s.beats[0].time.frame = 10; CHECK_FALSE(p.publish({2,1}, s));
+ s.beats.clear(); s.chords[0].start.frame = 10; CHECK_FALSE(p.publish({2,1}, s));
+ CHECK(p.latest()->chords[0].start.frame == 0);
+ s.observed_through.frame = 0; s.chords.clear(); s.beats = {{{2,0},1}};
+ SnapshotPublisher empty(3,3); empty.begin_acquisition({2,1}); CHECK_FALSE(empty.publish({2,1}, s));
+}

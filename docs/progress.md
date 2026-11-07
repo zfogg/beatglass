@@ -53,7 +53,7 @@ Hawkmoth/Sphinx reference and an Actions-based Pages workflow cover the current 
 - Ubuntu 22.04 WSL2, GCC 11.4, system aubio/libsndfile/Qt, build 43f9bbd: `cmake --build /tmp/beatglass-slice -j 6` and `ctest --test-dir /tmp/beatglass-slice --output-on-failure`: 16/16 passed. WSL is not native Linux qualification.
 - Intel macOS Darwin 25.6.0, Clang 23.1.5, build 43f9bbd, over `ssh zachbook-pro`: aubio upstream commit 152d6819b360c2e7b379ee3f373d444ab3df0895 was built into `/tmp/beatglass-aubio-spike/install` with the local vcpkg port CMake file, `WITH_DEPENDENCIES=OFF` and `BUILD_TOOLS=OFF`; libsndfile 1.2.2 and Qt 6.12.0 were existing Homebrew installations. `cmake -S /tmp/beatglass-phase0-lifecycle-src -B /tmp/beatglass-phase0-lifecycle-build -G Ninja -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBUILD_TESTING=ON -DCMAKE_PREFIX_PATH="/tmp/beatglass-aubio-spike/install;/usr/local/opt/libsndfile;/usr/local/opt/qtbase;/usr/local/opt/qtdeclarative" -DQT_ADDITIONAL_PACKAGES_PREFIX_PATH=/usr/local/opt/qtdeclarative`, then `cmake --build /tmp/beatglass-phase0-lifecycle-build -j 4` and `ctest --test-dir /tmp/beatglass-phase0-lifecycle-build --output-on-failure`: 16/16 passed. Linker warned that `/lib` search path was absent. An offscreen shell stayed running for three seconds; no interactive dialog, native overlay or real audio was tested. This is not a pinned Qt manifest build or native GUI/audio qualification.
 
-The repository's proposed handoff still requires actual capture source adapters, clock anchoring and interruption semantics, tested store and presentation implementations, reproducible pinned platform dependencies and native qualification. The foundation gate remains closed.
+The accepted handoff leaves actual capture source adapters, clock anchoring and interruption semantics, tested store and presentation implementations, reproducible pinned platform dependencies and native qualification as open work.
 
 ## Tracking lifecycle and gate audit increment
 
@@ -140,3 +140,26 @@ On Windows 10.0.26300 x64, the deployed Qt 6.8.3/MSVC Debug desktop build from c
 After merging the codec manifest in PR #13 at 2b74e90, a lock-free combined Windows test used the previously installed codec-enabled pinned vcpkg tree: with `VCPKG_ROOT=C:/Users/zachf/.codex/worktrees/beatglass-vcpkg-prebuilt` and `BEATGLASS_QT_ROOT=<temp>/beatglass-qt/6.8.3/msvc2022_64`, `cmake --preset prebuilt-qt-desktop -G "Visual Studio 17 2022" -A x64 -B build/prebuilt-qt-codecs -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=C:/Users/zachf/.codex/worktrees/beatglass-codecs/build-pinned-win/vcpkg_installed -DFETCHCONTENT_SOURCE_DIR_CATCH2=C:/Users/zachf/.codex/worktrees/c429/beatglass/build-slice/_deps/catch2-src`, `cmake --build build/prebuilt-qt-codecs --config Debug -j 4`, and `ctest --test-dir build/prebuilt-qt-codecs -C Debug --output-on-failure` passed 34/34, including the desktop metadata worker and AIFF/FLAC/MP3 replay fixtures. Manifest installation was disabled only for this rerun to avoid a vcpkg lock; the codec tree had been installed from the pinned manifest as documented above.
 
 After merging PR #18 at 2f66515 (documentation changes), the existing prebuilt Qt and codec-enabled Windows executable passed `ctest --test-dir build/prebuilt-qt-codecs -C Debug --output-on-failure` 34/34 without acquiring a vcpkg lock. The strict Docker Sphinx build passed with 21 indexed headers and 71 rendered declarations. The Mac smoke and current codec/Qt gate evidence are retained.
+# Source contract integration
+
+The proposed shared source types and ordered lifecycle helper have regression
+coverage. Native adapters, control queues and actual source clock measurements
+remain unimplemented and require integration and platform qualification.
+
+# Cache contract integration
+
+Typed cache outcomes and a worker-local commit decision have regression
+coverage. SQLite, file-version revalidation, crash recovery and unchanged-file
+reuse acceptance tests remain backend work.
+
+# Shared timeline contract
+
+The snapshot publisher enforces exclusive observed-frame and nonempty
+half-open chord boundaries. The remaining Phase 1 contracts and native
+qualification are still in progress.
+
+# Phase 0 handoff decision
+
+The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
+commit `6f927cb`. Shared contracts, dependency and SDK integrity across
+platforms, licensing, and native v1 qualification remain open.
