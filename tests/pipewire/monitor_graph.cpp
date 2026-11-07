@@ -27,6 +27,12 @@ int main(int argc, char** argv) {
   auto block = std::make_unique<MonitorIngress::Block>();
   MonitorIngress::Block before_install;
   if (monitor.pop(before_install)) { std::cerr << "PCM escaped before worker installation\n"; return 11; }
+  const auto state_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(8);
+  while (std::chrono::steady_clock::now() < state_deadline && monitor.state() == MonitorState::starting)
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+  if (monitor.install_worker_epoch(*epoch, {48000, 2, beatglass::ChannelLayout::stereo})) {
+    std::cerr << "worker installed before control consumed running event\n"; return 15;
+  }
   MonitorEvent running;
   const auto start_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(8);
   while (std::chrono::steady_clock::now() < start_deadline && !monitor.pop_event(running))

@@ -106,6 +106,7 @@ public:
   // Stop is control-thread-only. The process callback runs on this main loop,
   // never on PipeWire's RT thread; joining the loop quiesces our callbacks.
   void stop() noexcept {
+    running_delivered_.store(false, std::memory_order_release);
     worker_epoch_.store(0, std::memory_order_release);
     state_.store(MonitorState::stopped, std::memory_order_release);
     stop_requested_.store(true, std::memory_order_release);
@@ -121,7 +122,8 @@ public:
   // drain old blocks at stop, and install an epoch before accepting new ones.
   bool install_worker_epoch(std::uint64_t epoch, AudioFormat format) noexcept {
     if (epoch != epoch_ || format.sample_rate != 48000 || format.channels != 2 ||
-        format.layout != ChannelLayout::stereo || state() != MonitorState::streaming) return false;
+        format.layout != ChannelLayout::stereo || !running_delivered_.load(std::memory_order_acquire) ||
+        state() != MonitorState::streaming) return false;
     worker_epoch_.store(epoch, std::memory_order_release);
     if (state() == MonitorState::streaming) return true;
     worker_epoch_.store(0, std::memory_order_release);
@@ -145,6 +147,8 @@ public:
       event_read_.store(event_write_.load(std::memory_order_acquire), std::memory_order_release);
       event = {attempt_, 0, std::nullopt, SourceState::error, std::nullopt, SourceError::backend_error, true};
     }
+    if (!event.delivery_lost && event.state == SourceState::running)
+      running_delivered_.store(true, std::memory_order_release);
     return true;
   }
   int diagnostic_code() const noexcept { return diagnostic_.load(); }
@@ -165,7 +169,10 @@ private:
   void transition(MonitorState next) noexcept {
     const auto current = state();
     if (current == MonitorState::stopped || current == MonitorState::error || current == MonitorState::interrupted || current == next) return;
-    if (next != MonitorState::streaming) worker_epoch_.store(0, std::memory_order_release);
+    if (next != MonitorState::streaming) {
+      running_delivered_.store(false, std::memory_order_release);
+      worker_epoch_.store(0, std::memory_order_release);
+    }
     const auto write = event_write_.load(std::memory_order_relaxed);
     const auto after = (write + 1) % events_queue_.size();
     if (after == event_read_.load(std::memory_order_acquire) || event_sequence_ == UINT64_MAX) {
@@ -333,7 +340,7 @@ private:
   SourceAttempt attempt_{};
   std::array<MonitorEvent, 16> events_queue_{};
   std::atomic<std::size_t> event_read_{0}, event_write_{0};
-  std::atomic<bool> event_loss_{false};
+  std::atomic<bool> event_loss_{false}, running_delivered_{false};
   std::atomic<std::uint64_t> worker_epoch_{0};
   std::atomic<std::uint64_t> clock_seq_{0}, clock_ticks_{0}, clock_queued_{0};
   std::atomic<std::int64_t> clock_now_{0}, clock_delay_{0};
