@@ -90,3 +90,8 @@ Experimental composite snapshot worker
 --------------------------------------
 
 .. cpp:autodoc:: include/beatglass/library/detail/composite_snapshot_job.hpp
+
+Experimental loaded module observation
+--------------------------------------
+
+.. cpp:autodoc:: include/beatglass/library/detail/loaded_module.hpp
