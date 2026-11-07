@@ -58,3 +58,45 @@ For Windows x64, Qt's official repository reported the following SHA-256 values 
 - `qttools`: `76ac7b8c86ca72b6608f1d41ee848aeab19663536990b4968ce52db8ec980bc3`
 
 They were read from the respective `.sha256` files in the [official Qt repository](https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_683/qt6_683/qt.qt6.683.win64_msvc2022_64/). They are upstream-published checksums, not independently retained or rehashed original archives from the prior smoke run. Future automated acquisition must verify fixed hashes against downloaded archives and lock the acquisition tool's transitive dependencies; other platforms need their own artifact manifests.
+# Phase 1 source contract proposal
+
+The proposed source API distinguishes enumeration cancellation/errors and
+typed start failures. Control notifications carry attempt and serial sequence;
+gaps and delivery loss fail closed. The process coordinator owns epoch
+allocation, while optional anchors expose clock domain and known uncertainty
+and latency. Existing adapters must migrate; no platform backend is provided.
+
+# Process epoch allocation
+
+PR #63 made a single coordinator-owned allocator safe to issue epochs concurrently to live and
+offline control/workers. It is not an audio-callback API and issuance does not
+replace per-source transition ordering or cross-session identity/draining.
+Application ownership and injection into each active path remain integration work.
+
+# Phase 1 cache contract proposal
+
+Lookup and publication report typed outcomes. The database worker decides
+cancellation before starting commit; after that point it resolves commit or
+error and must recover indeterminate outcomes by run ID. This is an interface
+proposal, not a claim that database transactions or filesystem identity races
+have been implemented or qualified.
+
+# Phase 1 snapshot boundary
+
+Snapshot publication uses exclusive `observed_through` frame boundaries and
+nonempty half-open chord intervals. A beat at the boundary and an empty chord
+are now rejected; existing producers must adjust. This does not qualify any
+native capture or presentation path.
+
+# Offline result contract
+
+PR #57 defined owned offline results separately from live snapshots. Preserve overlapping
+local tonal evidence and optional beat strengths; rolling keys are not
+track-level keys. Storage, paging, cache identity and result serialization
+remain subject to integration review and are not implemented by this value type.
+
+## Composite analysis identity (provisional)
+
+A build manifest may record pinned dependency digests and the complete effective analysis configuration, but embedded build metadata alone is not proof of dynamically loaded code. Cache eligibility must be granted only after the actual executable and linked dependency artifacts have been verified under a platform-specific, race-resistant policy, including relevant transitive DSP dependencies. Unknown provenance disables composite cache lookup and publication. The worker may still return bounded in-memory evidence after successful source verification; it must not fill identity fields with invented values. This remains a proposal, not a claim of a verified packaging mechanism.
+
+The provisional [dependency identity proposal](dependency-identity-proposal.md) distinguishes platform loader and code-signature evidence from exact mapped-artifact verification, covers transitive dependencies and effective configuration, and specifies fail-closed tests. It does not enable cache reuse.

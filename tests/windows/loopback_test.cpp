@@ -1,15 +1,139 @@
 #include "windows_endpoints.hpp"
 #include "windows_loopback.hpp"
+#include "windows_loopback_session.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <chrono>
 #include <thread>
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <deque>
 #include <windows.h>
 #include <mmsystem.h>
 
 using namespace std::chrono_literals;
+namespace {
+class FakeLoopback final : public beatglass::windows::Loopback {
+public:
+  bool start(const std::string&, std::uint64_t epoch) override {
+    current = State::running; currentEpoch = epoch; dropped = 0; events.push_back({State::running, 1, epoch, 0}); return true;
+  }
+  void stop() override { current = State::stopped; packets.clear(); events.clear(); ++stops; }
+  State state() const override { return current; }
+  bool pop_event(Event& event) override {
+    if (events.empty()) return false;
+    event = events.front(); events.pop_front(); return true;
+  }
+  bool pop(beatglass::windows::LoopbackPacket& packet) override {
+    if (packets.empty()) return false;
+    packet = packets.front(); packets.pop_front();
+    if (dropDuringPop) { dropped += 64; dropDuringPop = false; }
+    return true;
+  }
+  std::uint64_t dropped_frames() const override { return dropped; }
+  State current{State::stopped};
+  std::uint64_t currentEpoch{}, dropped{};
+  unsigned stops{};
+  bool dropDuringPop{};
+  std::deque<Event> events;
+  std::deque<beatglass::windows::LoopbackPacket> packets;
+};
+}
+TEST_CASE("Queue overflow invalidates and discards pre-gap PCM before fresh-epoch reacquisition") {
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  auto backend = std::make_unique<FakeLoopback>();
+  auto* fake = backend.get();
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; }, std::move(backend));
+  REQUIRE(session.start("fake"));
+  session.poll();
+  REQUIRE(session.state() == beatglass::SourceState::running);
+  beatglass::windows::LoopbackPacket pre{};
+  pre.epoch = fake->currentEpoch; pre.first_frame = 10; pre.timestamp_valid = true;
+  fake->packets.push_back(pre); fake->packets.push_back(pre);
+  fake->dropped = 64;
+  beatglass::windows::LoopbackPacket delivered{};
+  REQUIRE_FALSE(session.pop(delivered));
+  REQUIRE(session.state() == beatglass::SourceState::error);
+  REQUIRE(invalidations == 1);
+  REQUIRE(fake->packets.empty());
+  REQUIRE_FALSE(session.pop(delivered));
+  const auto previousEpoch = pre.epoch;
+  session.stop();
+  REQUIRE(session.start("fake"));
+  session.poll();
+  REQUIRE(fake->currentEpoch > previousEpoch);
+  beatglass::windows::LoopbackPacket fresh{};
+  fresh.epoch = fake->currentEpoch; fresh.first_frame = 0; fresh.timestamp_valid = true;
+  fake->packets.push_back(fresh);
+  REQUIRE(session.pop(delivered));
+  REQUIRE(delivered.epoch == fresh.epoch);
+  fake->packets.push_back(fresh);
+  fake->dropDuringPop = true;
+  const auto before = invalidations;
+  REQUIRE_FALSE(session.pop(delivered));
+  REQUIRE(invalidations == before + 1);
+  REQUIRE(session.state() == beatglass::SourceState::error);
+  REQUIRE(fake->packets.empty());
+}
+TEST_CASE("Session invalidates before shutdown and preserves process epochs") {
+  beatglass::SourceEpochAllocator epochs;
+  beatglass::windows::LoopbackSession no_invalidation(epochs, {});
+  REQUIRE_FALSE(no_invalidation.start("any endpoint"));
+  REQUIRE(no_invalidation.state() == beatglass::SourceState::stopped);
+  unsigned invalidations = 0;
+  {
+    beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+    REQUIRE_FALSE(session.start(""));
+    REQUIRE(session.state() == beatglass::SourceState::error);
+    REQUIRE(invalidations == 1);
+    session.stop();
+    REQUIRE(session.state() == beatglass::SourceState::stopped);
+  }
+  const auto next = epochs.next();
+  REQUIRE(next);
+  REQUIRE(*next == 2);
+}
+
+TEST_CASE("Session applies running before packets and invalidates on stop") {
+  const auto list = beatglass::windows::enumerate_render_endpoints();
+  REQUIRE(list.error.empty());
+  if (list.endpoints.empty()) SKIP("No active render endpoint on this machine");
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+  REQUIRE(session.start(list.endpoints.front().id));
+  beatglass::windows::LoopbackPacket packet;
+  for (int i = 0; i < 300 && session.state() == beatglass::SourceState::starting; ++i) {
+    session.poll();
+    std::this_thread::sleep_for(10ms);
+  }
+  REQUIRE(session.state() == beatglass::SourceState::running);
+  REQUIRE(invalidations == 0);
+  session.stop();
+  REQUIRE(invalidations == 1);
+  REQUIRE_FALSE(session.pop(packet));
+  REQUIRE(session.start(list.endpoints.front().id));
+  session.stop();
+  REQUIRE(invalidations == 2);
+}
+
+TEST_CASE("Asynchronous endpoint failure invalidates and needs stop before restart") {
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+  REQUIRE(session.start("not-a-real-endpoint"));
+  for (int i = 0; i < 200 && session.state() == beatglass::SourceState::starting; ++i) {
+    session.poll();
+    std::this_thread::sleep_for(10ms);
+  }
+  REQUIRE(session.state() == beatglass::SourceState::error);
+  REQUIRE(invalidations == 1);
+  REQUIRE_FALSE(session.start("not-a-real-endpoint"));
+  session.stop();
+  REQUIRE(session.start("not-a-real-endpoint"));
+  session.stop();
+}
 TEST_CASE("Invalid endpoint interrupts and can be stopped and retried") {
   beatglass::windows::Loopback capture;
   REQUIRE_FALSE(capture.start("", 1));
@@ -73,6 +197,27 @@ TEST_CASE("Repeated capture startup and shutdown discard prior attempt events") 
     REQUIRE_FALSE(capture.pop_event(event));
     REQUIRE(capture.state() == beatglass::windows::Loopback::State::stopped);
   }
+}
+
+TEST_CASE("Switch between two active render endpoints with fresh lifecycle attempts", "[.][native-switch]") {
+  const auto list = beatglass::windows::enumerate_render_endpoints();
+  REQUIRE(list.error.empty());
+  if (list.endpoints.size() < 2) SKIP("At least two active render endpoints are required");
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+  for (unsigned index = 0; index < 2; ++index) {
+    INFO("Endpoint: " << list.endpoints[index].name);
+    REQUIRE(session.start(list.endpoints[index].id));
+    for (int i = 0; i < 300 && session.state() == beatglass::SourceState::starting; ++i) {
+      session.poll();
+      std::this_thread::sleep_for(10ms);
+    }
+    REQUIRE(session.state() == beatglass::SourceState::running);
+    session.stop();
+    REQUIRE(invalidations == index + 1);
+  }
+  REQUIRE(epochs.next() == 3);
 }
 
 TEST_CASE("Generated default endpoint playback is captured and overflow marks a gap", "[.][native-audio]") {
