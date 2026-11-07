@@ -23,12 +23,15 @@ FileFingerprint fingerprint_file(const std::filesystem::path& path, std::stop_to
       input.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
       const auto n = input.gcount();
       if (n > 0) {
+        const auto bytes_read = static_cast<std::uintmax_t>(n);
+        // count never exceeds before_size, so subtraction and addition cannot wrap.
+        if (bytes_read > before_size - count) { out.status = FingerprintStatus::changed; return out; }
         if (EVP_DigestUpdate(context.get(), buffer.data(), static_cast<std::size_t>(n)) != 1) { out.diagnostic = "digest update failed"; return out; }
-        count += static_cast<std::uintmax_t>(n);
+        count += bytes_read;
         if (observer) observer(count);
       }
     }
-    if (!input.eof()) { out.diagnostic = "file read failed"; return out; }
+    if (input.bad() || !input.eof()) { out.diagnostic = "file read failed"; return out; }
     if (stop.stop_requested()) { out.status = FingerprintStatus::cancelled; return out; }
     if (count != before_size || std::filesystem::file_size(path) != before_size || std::filesystem::last_write_time(path) != before_time) {
       out.status = FingerprintStatus::changed; return out;
