@@ -6,19 +6,27 @@
 #include <optional>
 #include <string>
 namespace beatglass {
-/// Decoded file properties; no reference to the open file is retained.
+/** Decoded file properties; no reference to the open file is retained. */
 struct FileMetadata {
-  std::uint32_t sample_rate{}; ///< Frames per second.
-  std::uint32_t channels{}; ///< Number of interleaved channels.
-  std::uint64_t frames{}; ///< Number of frames reported by the decoder.
-  std::string format; ///< Decoder container label.
+  /** Frames per second. */
+  std::uint32_t sample_rate{};
+  /** Number of interleaved channels. */
+  std::uint32_t channels{};
+  /** Number of frames reported by the decoder. */
+  std::uint64_t frames{};
+  /** Decoder container label. */
+  std::string format;
 };
-/// Snapshot of preliminary file tempo analysis, owned by the caller.
+/** Snapshot of preliminary file tempo analysis, owned by the caller. */
 struct TempoResult {
-  FileMetadata metadata; ///< Source format and duration.
-  std::optional<float> bpm; ///< Current uncalibrated estimate, if available.
-  unsigned beats{}; ///< Detected beats in the current acquisition.
-  TrackingState state{TrackingState::stopped}; ///< Current lifecycle state.
+  /** Source format and duration. */
+  FileMetadata metadata;
+  /** Current uncalibrated estimate, if available. */
+  std::optional<float> bpm;
+  /** Detected beats in the current acquisition. */
+  unsigned beats{};
+  /** Current lifecycle state. */
+  TrackingState state{TrackingState::stopped};
 };
 /** Read file properties on a worker thread; this may block on filesystem I/O.
  * @param path Local file path; the source file is not modified.
