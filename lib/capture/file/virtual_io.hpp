@@ -56,8 +56,9 @@ public:
  */
 class VirtualFileReader {
 public:
-  /** Open synchronously; throws VirtualOpenCancelled for cancellation and std::runtime_error for failure. */
-  explicit VirtualFileReader(ByteSource& source, std::uint64_t epoch = 0, std::stop_token cancel = {});
+  /** Open with a coordinator-allocated initial epoch; throws VirtualOpenCancelled
+   * for cancellation and std::runtime_error for failure. */
+  explicit VirtualFileReader(ByteSource& source, std::uint64_t epoch, std::stop_token cancel = {});
   /** Close the decoder before releasing the borrowed source. */
   ~VirtualFileReader();
   VirtualFileReader(const VirtualFileReader&) = delete;
@@ -70,8 +71,12 @@ public:
    * have modified the caller buffer, but publishes no samples.
    */
   FileReadResult read(std::span<float> buffer, std::stop_token cancel = {});
-  /** Seek to a valid frame and advance epoch; failure makes this reader unusable. */
-  void seek(std::uint64_t frame);
+  /** Seek using an externally allocated, strictly increasing epoch.
+   * Reject an invalid frame or reused/non-increasing epoch before decoder I/O;
+   * a decoder failure invalidates the reader. The coordinator must guarantee
+   * process-wide uniqueness, including across recreated readers.
+   */
+  void seek(std::uint64_t frame, std::uint64_t new_epoch);
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;

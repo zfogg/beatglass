@@ -70,13 +70,17 @@ TEST_CASE("virtual libsndfile decoder reads and seeks the borrowed bytes") {
   auto src = wav(); VirtualFileReader decoder(src, 7); REQUIRE(decoder.metadata().frames == 8192); REQUIRE(decoder.metadata().channels == 1);
   std::array<float,4> samples{}; auto first = decoder.read(samples); REQUIRE(first.status == FileReadStatus::data);
   CHECK(first.block.epoch == 7); CHECK(first.block.first_frame == 0); CHECK(samples[1] == Catch::Approx(.25));
-  decoder.seek(2); auto after = decoder.read(samples); REQUIRE(after.status == FileReadStatus::data); CHECK(after.block.epoch == 8); CHECK(after.block.first_frame == 2);
-  decoder.seek(decoder.metadata().frames); CHECK(decoder.read(samples).status == FileReadStatus::end);
+  CHECK_THROWS_AS(decoder.seek(2, 7), std::invalid_argument);
+  CHECK_THROWS_AS(decoder.seek(2, 6), std::invalid_argument);
+  const auto unchanged = decoder.read(samples); REQUIRE(unchanged.status == FileReadStatus::data);
+  CHECK(unchanged.block.first_frame == 4); CHECK(unchanged.block.epoch == 7);
+  decoder.seek(2, 42); auto after = decoder.read(samples); REQUIRE(after.status == FileReadStatus::data); CHECK(after.block.epoch == 42); CHECK(after.block.first_frame == 2);
+  decoder.seek(decoder.metadata().frames, 100); CHECK(decoder.read(samples).status == FileReadStatus::end);
 }
 TEST_CASE("virtual decoder reports callback failures and cancellation") {
-  auto src = wav(); src.limit = 1024; VirtualFileReader decoder(src); std::array<float,1024> samples{};
+  auto src = wav(); src.limit = 1024; VirtualFileReader decoder(src, 1); std::array<float,1024> samples{};
   src.fail_after = src.calls; CHECK_THROWS(decoder.read(samples)); CHECK_THROWS(decoder.read(samples));
-  auto other = wav(); other.limit = 1024; VirtualFileReader cancelled(other); std::stop_source stop; other.stop = &stop; other.cancel_on_read = true;
+  auto other = wav(); other.limit = 1024; VirtualFileReader cancelled(other, 1); std::stop_source stop; other.stop = &stop; other.cancel_on_read = true;
   CHECK(cancelled.read(samples, stop.get_token()).status == FileReadStatus::cancelled); CHECK_THROWS(cancelled.read(samples));
 }
 TEST_CASE("virtual decoder matches path decoder on generated v1 codec fixtures") {
@@ -92,7 +96,7 @@ TEST_CASE("virtual decoder matches path decoder on generated v1 codec fixtures")
     std::vector<char> bytes(std::istreambuf_iterator<char>{in}, {}); REQUIRE_FALSE(bytes.empty());
     MemorySource source; source.limit = 37; source.bytes.reserve(bytes.size());
     for (char c : bytes) source.bytes.push_back(static_cast<std::byte>(static_cast<unsigned char>(c)));
-    FileReader path_reader(path); VirtualFileReader virtual_reader(source);
+    FileReader path_reader(path); VirtualFileReader virtual_reader(source, 1);
     CHECK(virtual_reader.metadata().sample_rate == path_reader.metadata().sample_rate);
     CHECK(virtual_reader.metadata().channels == path_reader.metadata().channels);
     CHECK(virtual_reader.metadata().frames == path_reader.metadata().frames);
@@ -109,7 +113,7 @@ TEST_CASE("virtual decoder distinguishes open cancellation from failure") {
   auto during = wav(); std::stop_source mid; during.stop = &mid; during.cancel_on_read = true;
   CHECK_THROWS_AS(VirtualFileReader(during, 0, mid.get_token()), VirtualOpenCancelled);
   auto failing = wav(); failing.fail_after = 0;
-  CHECK_THROWS_AS(VirtualFileReader(failing), std::runtime_error);
+  CHECK_THROWS_AS(VirtualFileReader(failing, 1), std::runtime_error);
 }
 TEST_CASE("virtual I/O rejects unrepresentable sizes and unsupported writes") {
   class HugeSource : public ByteSource {
@@ -120,4 +124,11 @@ TEST_CASE("virtual I/O rejects unrepresentable sizes and unsupported writes") {
   VirtualIo io(huge); CHECK(io.length() == -1); CHECK(io.status() == VirtualIoStatus::error);
   auto source = wav(); VirtualIo writer(source); CHECK(writer.reject_write() == 0); CHECK(writer.status() == VirtualIoStatus::error);
   VirtualIo origin(source); CHECK(origin.seek(0, -1) == -1); CHECK(origin.status() == VirtualIoStatus::error);
+}
+TEST_CASE("virtual decoder accepts coordinator epochs without wrapping") {
+  auto src = wav(); VirtualFileReader decoder(src, 1); std::array<float, 2> samples{};
+  decoder.seek(10, std::numeric_limits<std::uint64_t>::max());
+  CHECK_THROWS_AS(decoder.seek(0, std::numeric_limits<std::uint64_t>::max()), std::invalid_argument);
+  const auto block = decoder.read(samples); REQUIRE(block.status == FileReadStatus::data);
+  CHECK(block.block.epoch == std::numeric_limits<std::uint64_t>::max()); CHECK(block.block.first_frame == 10);
 }
