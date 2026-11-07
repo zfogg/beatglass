@@ -31,6 +31,8 @@ public:
   std::int64_t tell() noexcept;
   /** Fill up to count bytes, accumulating short reads; zero count is a no-op.
    * Return bytes copied (possibly partial) and retain any terminal failure in status().
+   * If status is non-ok, discard the entire output: the source may have
+   * modified bytes beyond the reported prefix before failing.
    */
   std::int64_t read(void* output, std::int64_t count) noexcept;
   /** Reject a write attempt and record a sticky error. */
