@@ -15,7 +15,8 @@ RUN sed -i s/i686-w64-mingw32/x86_64-w64-mingw32/g wscript && \
       --include-algos=Windowing,Spectrum,SpectralPeaks,HPCP,Key,FFT,Magnitude,PeakDetection \
       --pkg-config-path=/usr/share/pkgconfig && python3 waf -j2
 WORKDIR /src/aubio
-RUN cp /src/essentia/waf ./waf && \
+RUN ln -s /usr/bin/x86_64-w64-mingw32-nm /usr/local/bin/nm && \
+    cp /src/essentia/waf ./waf && \
     CC=x86_64-w64-mingw32-gcc AR=x86_64-w64-mingw32-ar python3 waf configure \
       --with-target-platform=win64 --disable-tests --disable-examples --disable-fftw3 \
       --disable-sndfile --disable-avcodec --disable-samplerate --disable-wavread --disable-wavwrite && \
