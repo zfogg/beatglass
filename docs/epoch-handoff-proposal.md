@@ -38,6 +38,13 @@ allocator at exhaustion and verifies no live snapshot is delivered. These do
 not establish that an actual offline product path has adopted the allocator.
 The implementation depends on review and integration of #63 and the offline
 seek contract; it must not be advertised as complete process-wide uniqueness yet.
+The noninteractive Windows bridge regression also opens a real generated WAV
+with a coordinator-issued initial epoch, starts and restarts a failed live
+endpoint with that same allocator, and verifies the reader block retains its
+epoch while live attempts consume distinct values. This test deliberately does
+not use the legacy seek overload. PR #45 proposes an explicit new-epoch seek;
+that reader change and a combined library/live product integration are still
+required for coordinated seeks.
 The collection integration in #51 independently introduces an application-level
 allocator. Before combining these branches, reconcile them into exactly one
 object outside platform and feature conditionals, inject it into both bridges,

@@ -1,6 +1,11 @@
 #include "windows_dj_bridge.hpp"
+#include "beatglass/capture/file_reader.hpp"
 #include <QtTest>
 #include <QThread>
+#include <QTemporaryDir>
+#include <QFile>
+#include <QDataStream>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <utility>
@@ -17,6 +22,70 @@
 class DjBridgeTest : public QObject {
   Q_OBJECT
 private slots:
+  void fileReaderAndLiveRestartShareEpochs() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    QFile file(directory.filePath("input.wav"));
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    QDataStream stream(&file);
+    stream.setByteOrder(QDataStream::LittleEndian);
+    QCOMPARE(stream.writeRawData("RIFF", 4), 4); stream << quint32(44);
+    QCOMPARE(stream.writeRawData("WAVEfmt ", 8), 8); stream << quint32(16) << quint16(1) << quint16(1) << quint32(44100) << quint32(88200) << quint16(2) << quint16(16);
+    QCOMPARE(stream.writeRawData("data", 4), 4); stream << quint32(8) << qint16(0) << qint16(1000) << qint16(-1000) << qint16(0);
+    QCOMPARE(stream.status(), QDataStream::Ok);
+    file.close();
+    beatglass::SourceEpochAllocator epochs;
+    const auto offlineEpoch = epochs.next();
+    QVERIFY(offlineEpoch);
+    beatglass::FileReader reader(std::filesystem::path(file.fileName().toStdWString()), *offlineEpoch);
+    auto discovery = [] { return beatglass::windows::EndpointResult{{{"not-a-real-endpoint", "unavailable", true}}, {}}; };
+    beatglass::windows::DjBridge bridge(epochs, nullptr, discovery);
+    bridge.start();
+    QTRY_VERIFY(bridge.status() != QStringLiteral("Stopped"));
+    std::array<float, 4> output{};
+    const auto block = reader.read(output);
+    QCOMPARE(block.status, beatglass::FileReadStatus::data);
+    QCOMPARE(block.block.epoch, *offlineEpoch);
+    const auto afterLive = epochs.next();
+    QVERIFY(afterLive);
+    QVERIFY(*afterLive > *offlineEpoch + 1);
+    bridge.stop();
+    QTRY_COMPARE(bridge.status(), QStringLiteral("Stopped"));
+    bridge.start();
+    QTRY_VERIFY(bridge.status() != QStringLiteral("Stopped"));
+    const auto afterRestart = epochs.next();
+    QVERIFY(afterRestart);
+    QVERIFY(*afterRestart > *afterLive + 1);
+    bridge.stop();
+  }
+  void allocatorSurvivesStopRestartAndBridgeRecreation() {
+    beatglass::SourceEpochAllocator epochs;
+    const auto discovery = [] {
+      return beatglass::windows::EndpointResult{{{"not-a-real-endpoint", "unavailable", true}}, {}};
+    };
+    auto first = std::make_unique<beatglass::windows::DjBridge>(epochs, nullptr, discovery);
+    first->start();
+    QTRY_VERIFY(first->status() != QStringLiteral("Stopped"));
+    const auto offlineBeforeStop = epochs.next();
+    QVERIFY(offlineBeforeStop);
+    QVERIFY(*offlineBeforeStop > 1);
+    first->stop();
+    QTRY_COMPARE(first->status(), QStringLiteral("Stopped"));
+    first->start();
+    QTRY_VERIFY(first->status() != QStringLiteral("Stopped"));
+    const auto offlineAfterRestart = epochs.next();
+    QVERIFY(offlineAfterRestart);
+    QVERIFY(*offlineAfterRestart > *offlineBeforeStop + 1);
+    first.reset();
+    auto second = std::make_unique<beatglass::windows::DjBridge>(epochs, nullptr, discovery);
+    second->start();
+    QTRY_VERIFY(second->status() != QStringLiteral("Stopped"));
+    const auto offlineAfterRecreation = epochs.next();
+    QVERIFY(offlineAfterRecreation);
+    QVERIFY(*offlineAfterRecreation > *offlineAfterRestart + 1);
+    second.reset();
+    QVERIFY(epochs.next().value() > *offlineAfterRecreation);
+  }
   void stopStartCannotSkipClear() {
     beatglass::SourceEpochAllocator epochs;
     beatglass::windows::DjBridge bridge(epochs, nullptr, [] { return beatglass::windows::EndpointResult{}; });
