@@ -7,7 +7,8 @@ static_assert(std::atomic<std::size_t>::is_always_lock_free && std::atomic<std::
 CaptureFifo::CaptureFifo(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) noexcept
     : epoch_(epoch), sample_rate_(sample_rate), channels_(channels) {}
 
-bool CaptureFifo::push(std::span<const float> samples, std::uint64_t host_time, bool valid, bool discontinuity) noexcept {
+bool CaptureFifo::push(std::span<const float> samples, std::uint64_t host_time, bool valid, bool discontinuity,
+                       double source_sample_time, bool source_sample_time_valid) noexcept {
   const auto frames = channels_ ? samples.size() / channels_ : 0;
   if (exhausted_.load(std::memory_order_relaxed) || frames > std::numeric_limits<std::uint64_t>::max() - next_frame_) {
     exhausted_.store(true, std::memory_order_relaxed); discontinuity_ = true; return false;
@@ -24,6 +25,7 @@ bool CaptureFifo::push(std::span<const float> samples, std::uint64_t host_time, 
   }
   auto& out = blocks_[write];
   out.epoch = epoch_; out.first_frame = first; out.host_time = host_time;
+  out.source_sample_time = source_sample_time; out.source_sample_time_valid = source_sample_time_valid;
   out.sample_rate = sample_rate_; out.channels = channels_; out.sample_count = static_cast<std::uint32_t>(samples.size());
   out.host_time_valid = valid; out.discontinuity = discontinuity || discontinuity_;
   std::copy(samples.begin(), samples.end(), out.samples.begin());

@@ -6,12 +6,13 @@
 #include <span>
 
 namespace beatglass::coreaudio {
-/** Provisional, non-installed Core Audio transfer format. One block owns its PCM. Host ticks are in the macOS host clock domain and are valid only when host_time_valid is true; they are not nanoseconds. first_frame counts frames since this capture epoch began. */
+/** Provisional, non-installed Core Audio transfer format. One block owns its PCM. Host ticks are in the macOS host clock domain and are valid only when host_time_valid is true; they are not nanoseconds. source_sample_time is the native input timestamp and is meaningful only when source_sample_time_valid is true. first_frame counts frames since this capture epoch began, including whole frames rejected by the FIFO. */
 struct CaptureBlock {
   static constexpr std::size_t max_samples = 8192;
   std::uint64_t epoch{}, first_frame{}, host_time{};
+  double source_sample_time{};
   std::uint32_t sample_rate{}, channels{}, sample_count{};
-  bool host_time_valid{}, discontinuity{};
+  bool host_time_valid{}, source_sample_time_valid{}, discontinuity{};
   std::array<float, max_samples> samples{};
 };
 
@@ -21,7 +22,8 @@ public:
   /** Set immutable epoch/format before callbacks start. A new instance is required for each epoch. */
   CaptureFifo(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) noexcept;
   /** Copy complete interleaved float frames. Returns false on an oversized block, malformed input, full queue or timeline exhaustion; no memory is allocated. */
-  bool push(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid, bool discontinuity = false) noexcept;
+  bool push(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid, bool discontinuity = false,
+            double source_sample_time = 0, bool source_sample_time_valid = false) noexcept;
   /** Copy the next block into consumer-owned storage, or return false when empty. */
   bool pop(CaptureBlock& block) noexcept;
   /** Number of complete frames rejected by the producer (saturates at uint64 maximum). */

@@ -7,7 +7,7 @@ using namespace beatglass::coreaudio;
 TEST_CASE("Core Audio FIFO retains owned samples and host clock validity", "[coreaudio]") {
   CaptureFifo fifo(17, 48000, 2);
   std::array<float, 4> input{1, 2, 3, 4};
-  REQUIRE(fifo.push(input, 123, true));
+  REQUIRE(fifo.push(input, 123, true, false, 100.0, true));
   input.fill(0);
   CaptureBlock block;
   REQUIRE(fifo.pop(block));
@@ -15,6 +15,8 @@ TEST_CASE("Core Audio FIFO retains owned samples and host clock validity", "[cor
   CHECK(block.first_frame == 0);
   CHECK(block.host_time_valid);
   CHECK(block.host_time == 123);
+  CHECK(block.source_sample_time_valid);
+  CHECK(block.source_sample_time == 100.0);
   CHECK(block.sample_rate == 48000);
   CHECK(block.channels == 2);
   CHECK(block.sample_count == 4);
@@ -37,6 +39,7 @@ TEST_CASE("Core Audio FIFO reports loss and advances sample position", "[coreaud
   CHECK(block.first_frame == 32);
   CHECK(block.discontinuity);
   CHECK_FALSE(block.host_time_valid);
+  CHECK_FALSE(block.source_sample_time_valid);
 }
 
 TEST_CASE("Core Audio FIFO rejects malformed or oversized blocks", "[coreaudio]") {
