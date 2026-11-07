@@ -1,0 +1,30 @@
+# macOS qualification checklist
+
+This checklist records native macOS audio and overlay evidence. Do not mark a case passed from a Windows build, a silent buffer, or a successful API call alone.
+
+## Build identity
+
+Record the commit, macOS version, hardware model, Xcode and SDK versions, Qt version, signing state, selected output UID and display arrangement. Record whether the run used the production desktop bundle or a smoke bundle, plus the exact configure, build and CTest commands.
+
+## Permission and capture
+
+1. Start the signed bundle with `NSAudioCaptureUsageDescription` present. Record whether macOS shows the system-audio permission prompt.
+2. Allow access in **System Settings → Privacy & Security → Screen & System Audio Recording**. Relaunch the same bundle and record the listed application identity.
+3. Play a generated tone through the selected output from a separate process. Record frames, nonzero samples, FIFO drops, discontinuities, timestamp validity and exit status.
+4. Repeat after selecting another output. Verify the selected UID and that no microphone or unrelated output is used.
+5. Deny access, revoke it in System Settings, and restore it. Record the typed error or unknown state, stale-evidence clearing, and whether a fresh start recovers.
+
+The tap path is scoped to macOS 14.2 or later and the selected output stream. Silence or a successful start does not prove permission. See [Apple’s Core Audio tap reference](https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps).
+
+## Overlay and recovery
+
+1. Launch the production bundle with visible controls. Show the overlay, move it, change opacity and select each display.
+2. Enable click-through and verify the overlay receives no pointer events while controls or a verified recovery route remain available.
+3. Hide, minimize, close and destroy controls. Verify the overlay unlocks or hides when recovery is unavailable.
+4. Exercise the menu-bar item: show controls, unlock/edit, hide overlay and quit. Reopen from the Dock and verify the existing instance is restored rather than duplicated.
+5. Remove or change a display, work area or DPI. Verify the overlay is clamped and the selected display refreshes.
+6. Test over a fullscreen or Spaces window and record whether the overlay remains visible; AppKit behavior is a request, not a guarantee.
+
+## Evidence rules
+
+Record `PASS`, `FAIL`, or `UNRUN` for each case with timestamp, action or command, observed output, and log or screenshot path. `UNRUN` is correct while the Mac is unavailable or interactive testing is not authorized. Qualification is complete only when every required case has evidence on the intended production build.
