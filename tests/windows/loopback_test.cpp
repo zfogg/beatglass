@@ -7,10 +7,75 @@
 #include <algorithm>
 #include <cmath>
 #include <vector>
+#include <deque>
 #include <windows.h>
 #include <mmsystem.h>
 
 using namespace std::chrono_literals;
+namespace {
+class FakeLoopback final : public beatglass::windows::Loopback {
+public:
+  bool start(const std::string&, std::uint64_t epoch) override {
+    current = State::running; currentEpoch = epoch; dropped = 0; events.push_back({State::running, 1, epoch, 0}); return true;
+  }
+  void stop() override { current = State::stopped; packets.clear(); events.clear(); ++stops; }
+  State state() const override { return current; }
+  bool pop_event(Event& event) override {
+    if (events.empty()) return false;
+    event = events.front(); events.pop_front(); return true;
+  }
+  bool pop(beatglass::windows::LoopbackPacket& packet) override {
+    if (packets.empty()) return false;
+    packet = packets.front(); packets.pop_front();
+    if (dropDuringPop) { dropped += 64; dropDuringPop = false; }
+    return true;
+  }
+  std::uint64_t dropped_frames() const override { return dropped; }
+  State current{State::stopped};
+  std::uint64_t currentEpoch{}, dropped{};
+  unsigned stops{};
+  bool dropDuringPop{};
+  std::deque<Event> events;
+  std::deque<beatglass::windows::LoopbackPacket> packets;
+};
+}
+TEST_CASE("Queue overflow invalidates and discards pre-gap PCM before fresh-epoch reacquisition") {
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  auto backend = std::make_unique<FakeLoopback>();
+  auto* fake = backend.get();
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; }, std::move(backend));
+  REQUIRE(session.start("fake"));
+  session.poll();
+  REQUIRE(session.state() == beatglass::SourceState::running);
+  beatglass::windows::LoopbackPacket pre{};
+  pre.epoch = fake->currentEpoch; pre.first_frame = 10; pre.timestamp_valid = true;
+  fake->packets.push_back(pre); fake->packets.push_back(pre);
+  fake->dropped = 64;
+  beatglass::windows::LoopbackPacket delivered{};
+  REQUIRE_FALSE(session.pop(delivered));
+  REQUIRE(session.state() == beatglass::SourceState::error);
+  REQUIRE(invalidations == 1);
+  REQUIRE(fake->packets.empty());
+  REQUIRE_FALSE(session.pop(delivered));
+  const auto previousEpoch = pre.epoch;
+  session.stop();
+  REQUIRE(session.start("fake"));
+  session.poll();
+  REQUIRE(fake->currentEpoch > previousEpoch);
+  beatglass::windows::LoopbackPacket fresh{};
+  fresh.epoch = fake->currentEpoch; fresh.first_frame = 0; fresh.timestamp_valid = true;
+  fake->packets.push_back(fresh);
+  REQUIRE(session.pop(delivered));
+  REQUIRE(delivered.epoch == fresh.epoch);
+  fake->packets.push_back(fresh);
+  fake->dropDuringPop = true;
+  const auto before = invalidations;
+  REQUIRE_FALSE(session.pop(delivered));
+  REQUIRE(invalidations == before + 1);
+  REQUIRE(session.state() == beatglass::SourceState::error);
+  REQUIRE(fake->packets.empty());
+}
 TEST_CASE("Session invalidates before shutdown and preserves process epochs") {
   beatglass::SourceEpochAllocator epochs;
   beatglass::windows::LoopbackSession no_invalidation(epochs, {});
