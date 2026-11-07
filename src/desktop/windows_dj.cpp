@@ -1,6 +1,7 @@
 #include "windows_dj.hpp"
 #include "platform/windows_endpoints.hpp"
 #include "platform/windows_live_tempo.hpp"
+#include "platform/windows_default_tempo.hpp"
 #include <QTimer>
 #include <QVariantMap>
 #include <chrono>
@@ -34,13 +35,18 @@ void WindowsDj::refresh() { { std::lock_guard lock(mutex_); refresh_ = true; } w
 void WindowsDj::drain() {
   Value value;
   { std::lock_guard lock(mutex_); if (!pending_) return; pending_ = false; value = latest_; if (value.generation != generation_) return; }
-  sources_ = value.sources; status_ = value.status; active_ = value.active;
-  tempo_ = value.bpm ? QString::number(*value.bpm, 'f', 1) : QStringLiteral("\u2014");
-  emit changed();
+  if (sources_ != value.sources) { sources_ = value.sources; emit sourcesChanged(); }
+  const auto tempo = value.bpm ? QString::number(*value.bpm, 'f', 1) : QStringLiteral("\u2014");
+  if (status_ != value.status || active_ != value.active || tempo_ != tempo) {
+    status_ = value.status; active_ = value.active; tempo_ = tempo; emit changed();
+  }
 }
 void WindowsDj::run() {
   beatglass::SourceEpochAllocator epochs;
   beatglass::windows::LiveTempo capture(epochs);
+  beatglass::windows::DefaultTempoFollower follower(epochs);
+  std::optional<float> followedBpm;
+  bool following = false;
   std::uint64_t applied = 0;
   QVariantList sources;
   QString enumerationError;
@@ -54,21 +60,38 @@ void WindowsDj::run() {
     if (enumerate) {
       const auto result = beatglass::windows::enumerate_render_endpoints();
       sources.clear(); enumerationError = QString::fromStdString(result.error);
+      sources.push_back(QVariantMap{{QStringLiteral("name"), QStringLiteral("System default (follow changes)")}, {QStringLiteral("id"), QStringLiteral("__beatglass_default__")}});
       if (result.error.empty()) for (const auto& item : result.endpoints)
         sources.push_back(QVariantMap{{QStringLiteral("name"), QString::fromStdString(item.name)}, {QStringLiteral("id"), QString::fromStdString(item.id)}});
     }
     if (generation != applied || requested != appliedRequested) {
-      capture.stop(); running = false; applied = generation; appliedRequested = requested;
-      if (requested) running = capture.start(endpoint);
+      capture.stop(); follower.stop(); followedBpm.reset(); running = false;
+      applied = generation; appliedRequested = requested;
+      following = endpoint == "__beatglass_default__";
+      if (requested) running = following ? follower.start() : capture.start(endpoint);
     }
     Value value; value.generation = generation; value.sources = sources; value.active = requested && running;
     if (requested && !running) value.status = QStringLiteral("Capture could not start");
-    else if (running && !capture.pump()) { capture.stop(); running = false; value.active = false; value.status = QStringLiteral("Capture interrupted or failed"); }
+    else if (running && following) {
+      if (!follower.tick(std::chrono::steady_clock::now())) {
+        followedBpm.reset(); running = false; value.active = false; value.status = QStringLiteral("Capture interrupted or failed");
+      } else {
+        if (const auto update = follower.takeUpdate()) followedBpm = update->snapshot ? update->snapshot->bpm : std::nullopt;
+        value.bpm = followedBpm;
+        using Status = beatglass::windows::DefaultTempoFollower::Status;
+        switch (follower.status()) {
+          case Status::waiting: value.status = QStringLiteral("Waiting for default output"); break;
+          case Status::starting: value.status = QStringLiteral("Starting"); break;
+          case Status::running: value.status = value.bpm ? QStringLiteral("Tracking") : QStringLiteral("Acquiring"); break;
+          case Status::error: value.status = QStringLiteral("Capture error: ") + QString::fromStdString(follower.diagnostic()); break;
+        }
+      }
+    } else if (running && !capture.pump()) { capture.stop(); running = false; value.active = false; value.status = QStringLiteral("Capture interrupted or failed"); }
     else if (running) {
       value.bpm = capture.bpm();
       value.status = capture.state() == beatglass::SourceState::starting ? QStringLiteral("Starting") : (value.bpm ? QStringLiteral("Tracking") : QStringLiteral("Acquiring"));
     } else value.status = enumerationError.isEmpty() ? QStringLiteral("Stopped") : QStringLiteral("Output discovery failed: ") + enumerationError;
     { std::lock_guard lock(mutex_); if (generation == generation_ && requested == requested_) { latest_ = std::move(value); pending_ = true; } }
   }
-  capture.stop();
+  capture.stop(); follower.stop();
 }

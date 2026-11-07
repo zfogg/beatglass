@@ -11,10 +11,10 @@
 #include <vector>
 class QTimer;
 
-/** Windows-only GUI-thread bridge to a worker-owned experimental tempo source. The worker coalesces updates for nominal 50 ms GUI polling; invalidation is visible after polling, while stop clears immediately and rejects older generations. Destruction joins the worker. It does not provide key, chords, beat phase or default-device following. */
+/** Windows-only GUI-thread bridge to a worker-owned experimental tempo source. The worker coalesces updates for nominal 50 ms GUI polling; invalidation is visible after polling, while stop clears immediately and rejects older generations. Destruction joins the worker. It supports the Windows default follower but does not provide key, chords or beat phase. */
 class WindowsDj : public QObject {
   Q_OBJECT
-  Q_PROPERTY(QVariantList sources READ sources NOTIFY changed)
+  Q_PROPERTY(QVariantList sources READ sources NOTIFY sourcesChanged)
   Q_PROPERTY(QString status READ status NOTIFY changed)
   Q_PROPERTY(QString tempo READ tempo NOTIFY changed)
   Q_PROPERTY(bool active READ active NOTIFY changed)
@@ -31,14 +31,16 @@ public:
   QString tempo() const { return tempo_; }
   /** Whether capture has been requested and not stopped or failed. */
   bool active() const { return active_; }
-  /** Start monitoring an opaque endpoint ID; empty IDs are ignored. */
+  /** Start monitoring an opaque endpoint ID or the reserved __beatglass_default__ selection; empty IDs are ignored. */
   Q_INVOKABLE void start(const QString& endpoint);
   /** Invalidate the visible result and request stop. */
   Q_INVOKABLE void stop();
   /** Ask the worker to enumerate output endpoints again. */
   Q_INVOKABLE void refresh();
 signals:
-  /** Emitted on the GUI thread after visible state changes. */
+  /** Emitted on the GUI thread only when the endpoint list changes. */
+  void sourcesChanged();
+  /** Emitted on the GUI thread after status, tempo or active changes. */
   void changed();
 private:
   struct Value { std::uint64_t generation{}; QString status; std::optional<float> bpm; bool active{}; QVariantList sources; };

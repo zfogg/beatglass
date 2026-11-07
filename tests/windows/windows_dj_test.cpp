@@ -1,5 +1,6 @@
 #include "windows_dj.hpp"
 #include <QtTest>
+#include <QSignalSpy>
 #include "windows_endpoints.hpp"
 #include <windows.h>
 #include <mmsystem.h>
@@ -9,6 +10,14 @@
 class WindowsDjTest : public QObject {
  Q_OBJECT
 private slots:
+ void sourceListDoesNotResetOnPolling() {
+   WindowsDj model;
+   QTRY_VERIFY_WITH_TIMEOUT(!model.sources().isEmpty(), 5000);
+   QSignalSpy spy(&model, &WindowsDj::sourcesChanged);
+   model.start(QStringLiteral("not-a-real-endpoint"));
+   QTRY_VERIFY_WITH_TIMEOUT(!model.active(), 5000);
+   QTest::qWait(250); QCOMPARE(spy.count(), 0);
+ }
  void stopInvalidatesPendingFailure() {
    WindowsDj model;
    model.start(QStringLiteral("not-a-real-endpoint"));
@@ -20,14 +29,19 @@ private slots:
    QCOMPARE(model.status(), QStringLiteral("Stopped"));
    QVERIFY(!model.active());
  }
+ void nativeTempoAndStop_data() {
+   QTest::addColumn<bool>("followDefault");
+   QTest::newRow("selected") << false; QTest::newRow("default") << true;
+ }
  void nativeTempoAndStop() {
+   QFETCH(bool, followDefault);
    if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_DJ_TEST")) QSKIP("Set BEATGLASS_NATIVE_DJ_TEST to exercise real output capture");
    const auto endpoints = beatglass::windows::enumerate_render_endpoints();
    QVERIFY(endpoints.error.empty());
    const auto endpoint = std::find_if(endpoints.endpoints.begin(), endpoints.endpoints.end(), [](const auto& x) { return x.is_default; });
    QVERIFY(endpoint != endpoints.endpoints.end());
    WindowsDj model;
-   model.start(QString::fromStdString(endpoint->id));
+   model.start(followDefault ? QStringLiteral("__beatglass_default__") : QString::fromStdString(endpoint->id));
    WAVEFORMATEX format{}; format.wFormatTag = WAVE_FORMAT_PCM; format.nChannels = 1; format.nSamplesPerSec = 44100;
    format.wBitsPerSample = 16; format.nBlockAlign = 2; format.nAvgBytesPerSec = 88200;
    std::vector<short> samples(44100 * 20);
