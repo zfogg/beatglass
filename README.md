@@ -65,4 +65,6 @@ On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the co
 
 The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
 
+The [Essentia dependency spike](docs/essentia-spike.md) records research builds and the proposed tonal architecture; it is not integrated into the CLI or product.
+
 The experimental CLI also accepts `--json`, alone or with `--replay`. Normal JSON output is one object; replay emits one JSON object per observed block followed by a final result object (JSON Lines). `schema_version` is 1, `observed_through` is an exclusive frame boundary, and `bpm: null` means unknown. The beat count covers the current acquisition. These are preliminary tempo-only outputs: they do not contain key or chord estimates, and replay runs without real-time pacing. Errors are reported on stderr with a nonzero exit status; a replay error can leave a partial JSON Lines stream without a final result.

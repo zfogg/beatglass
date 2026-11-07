@@ -172,3 +172,7 @@ platforms, licensing, and native v1 qualification remain open.
 ## Phase 1 private tonal tracker
 
 The optional private Essentia tracker is a worker-only experiment tested on generated triads and discontinuities. It is disabled by default and not connected to file analysis or live capture. Release licensing, Windows MSVC dependency build, key/chord quality, timestamped segment policy and native qualification remain open; see [tonal experiment](tonal-experiment.md).
+
+## Phase 1 tonal dependency experiment
+
+The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
