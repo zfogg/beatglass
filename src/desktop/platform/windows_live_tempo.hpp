@@ -1,0 +1,46 @@
+#pragma once
+#include "windows_loopback_session.hpp"
+#include "beatglass/core/tempo_tracker.hpp"
+#include "beatglass/core/results.hpp"
+#include <chrono>
+#include <memory>
+#include <optional>
+#include <vector>
+
+namespace beatglass::windows {
+/** Experimental worker-owned WASAPI-to-aubio tempo path. This is not a UI model and does not estimate key or chords. Every method runs on one analysis/control thread. Virtual control methods support deterministic worker tests; capture callbacks do not dispatch through this interface. */
+class LiveTempo {
+public:
+  /** Borrow the process epoch allocator, which must outlive this object. */
+  explicit LiveTempo(SourceEpochAllocator& epochs);
+  // Documented manually in the API reference due to Hawkmoth destructor parsing.
+  virtual ~LiveTempo();
+  /** Request capture of a selected endpoint. True means requested, not running. Stop before retrying a failed attempt. */
+  virtual bool start(const std::string& endpoint);
+  /** Drain pending capture, update the real tempo tracker, and clear stale evidence on silence, interruption, loss, format changes or errors. Call regularly on the owning worker. Returns false on a source or analysis error. */
+  virtual bool pump();
+  /** Return the latest tempo in BPM, or empty while stopped, silent, stale or acquiring. The caller must not retain a displayed value across invalidation. */
+  virtual std::optional<float> bpm() const;
+  /** Exclusive frame boundary and epoch of the latest analyzed packet, or empty after invalidation. */
+  std::optional<EventTime> observedThrough() const;
+  /** Monotonic invalidation generation; changes whenever retained evidence is cleared. Exhaustion stops analysis rather than wrapping. */
+  std::uint64_t invalidationGeneration() const;
+  /** Return the source lifecycle state on the owning thread. */
+  virtual SourceState state() const;
+  /** Clear tempo and stop/join capture on the owning thread. */
+  virtual void stop();
+private:
+  void clear() noexcept;
+  std::unique_ptr<TempoTracker> tracker_;
+  std::vector<float> mono_;
+  std::optional<float> bpm_;
+  std::optional<EventTime> observed_;
+  std::uint32_t rate_{}, channels_{};
+  std::uint64_t silent_frames_{};
+  std::uint64_t invalidation_generation_{};
+  std::chrono::steady_clock::time_point last_audio_{};
+  bool analysis_error_{};
+  bool generation_exhausted_{};
+  LoopbackSession session_;
+};
+}

@@ -17,10 +17,44 @@ ApplicationWindow {
     property var playbackDevice: playbackDevices.defaultAudioOutput
     readonly property string playbackWarning: playbackGuardBridge.diagnostic(playbackDevice)
     property var liveBridge: livePresentation
+    property var collectionBridge: typeof experimentalCollection === "undefined" ? null : experimentalCollection
+    property var djBridge: typeof windowsDj === "undefined" ? null : windowsDj
+    property var overlayBridge: typeof macOverlayController === "undefined" ? null : macOverlayController
+    property var lifecycleBridge: typeof appLifecycle === "undefined" ? null : appLifecycle
+    readonly property bool macOverlay: !!overlayBridge && typeof overlayBridge.showOverlay === "function"
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    onClosing: if (!lifecycleBridge || !lifecycleBridge.recoveryAvailable) Qt.quit()
+    function hideOverlay() {
+        if (!overlayBridge) return
+        if (macOverlay) overlayBridge.hideOverlay()
+        else { overlayBridge.endDrag(); overlayBridge.setClickThrough(false); djOverlay.hide() }
+    }
+    function showOverlay() {
+        if (!overlayBridge) return
+        if (macOverlay) overlayBridge.showOverlay()
+        else { overlayBridge.keepOnScreen(); djOverlay.show() }
+        if (djOverlay.visible && lifecycleBridge) lifecycleBridge.hideControls()
+    }
+    onBrowseFolderChanged: {
+        invalidateSelection()
+    }
+    onSortDescendingChanged: invalidateSelection()
+
+    function invalidateSelection() {
+        browser.currentIndex = -1
+        selectEntry(-1)
+    }
+
+    function selectEntry(index) {
+        const isFile = index >= 0 && index < files.count && !files.isFolder(index)
+        selectedName = isFile ? files.get(index, "fileName") : ""
+        const url = isFile ? files.get(index, "fileUrl") : ""
+        if (window.collectionBridge) window.collectionBridge.selectSource(url)
+        metadataBridge.inspect(url)
+    }
 
     function formatTime(ms) {
         const tenths = Math.floor(Math.max(0, ms) / 100)
@@ -36,8 +70,7 @@ ApplicationWindow {
         } else {
             player.stop()
             player.source = url
-            selectedName = files.get(index, "fileName")
-            metadataBridge.inspect(url)
+            selectEntry(index)
         }
     }
 
@@ -50,6 +83,17 @@ ApplicationWindow {
         caseSensitive: false
         sortField: FolderListModel.Name
         sortReversed: window.sortDescending
+    }
+    Connections {
+        target: files
+        ignoreUnknownSignals: true
+        function onCountChanged() { window.invalidateSelection() }
+        function onRowsInserted() { window.invalidateSelection() }
+        function onRowsRemoved() { window.invalidateSelection() }
+        function onRowsMoved() { window.invalidateSelection() }
+        function onModelReset() { window.invalidateSelection() }
+        function onLayoutChanged() { window.invalidateSelection() }
+        function onDataChanged() { window.invalidateSelection() }
     }
     MediaDevices {
         id: playbackDevices
@@ -65,7 +109,10 @@ ApplicationWindow {
             if (playbackDevices.audioOutputs[i].isDefault) { playbackOutputSelector.currentIndex = i; break }
         }
     }
-    Component.onCompleted: selectDefaultPlaybackOutput()
+    Component.onCompleted: {
+        selectDefaultPlaybackOutput()
+        if (overlayBridge && typeof overlayBridge.attach === "function") overlayBridge.attach(djOverlay, window)
+    }
     MediaPlayer {
         id: player
         objectName: "player"
@@ -93,8 +140,20 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
                 Label { text: "Library"; font.pixelSize: 28; font.bold: true }
                 Label {
-                    text: "Browse local folders. Indexing, analysis and saved results are not available yet."
+                    text: window.collectionBridge && window.collectionBridge.compositeAvailable ? "Browse local folders and run provisional, uncached analysis." : "Browse local folders. Indexing, analysis and saved results are not available yet."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
+                }
+                RowLayout {
+                    visible: !!window.collectionBridge
+                    Label { text: "Experimental indexed files" }
+                    Button { objectName: "refreshCollection"; text: "Refresh"; onClicked: window.collectionBridge.refresh("") }
+                    Label { objectName: "collectionStatus"; text: window.collectionBridge ? window.collectionBridge.status : ""; Layout.fillWidth: true }
+                }
+                ListView {
+                    objectName: "collectionRows"; visible: !!window.collectionBridge
+                    Layout.fillWidth: true; Layout.preferredHeight: visible ? 100 : 0; clip: true
+                    model: window.collectionBridge ? window.collectionBridge.rows : []
+                    delegate: Label { required property var modelData; width: ListView.view.width; text: modelData.path; elide: Text.ElideMiddle }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -114,7 +173,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true; onTextChanged: window.invalidateSelection() }
                     Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
@@ -131,6 +190,7 @@ ApplicationWindow {
                         clip: true
                         model: window.browseFolder.toString() === "" ? null : files
                         currentIndex: -1
+                        onCurrentIndexChanged: window.selectEntry(currentIndex)
                         keyNavigationEnabled: true
                         activeFocusOnTab: true
                         Accessible.name: "Folder contents"
@@ -163,6 +223,25 @@ ApplicationWindow {
                         anchors.fill: parent
                         Label { text: window.selectedName || "No file selected"; font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true }
                         Label { objectName: "metadataStatus"; text: window.metadataStatus; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        Label { text: player.source.toString() === "" ? "No file loaded for playback" : "Playback source: " + player.source.toString(); elide: Text.ElideMiddle; Layout.fillWidth: true }
+                        RowLayout {
+                            visible: !!window.collectionBridge && window.collectionBridge.compositeAvailable
+                            Button { objectName: "analyzeSelected"; text: "Analyze provisionally"; enabled: !!window.collectionBridge && !!window.selectedName && !window.collectionBridge.analysisActive; onClicked: window.collectionBridge.analyzeSelected() }
+                            Button { objectName: "cancelAnalysis"; text: "Cancel"; enabled: !!window.collectionBridge && window.collectionBridge.analysisActive; onClicked: window.collectionBridge.cancelSelected() }
+                            Label { objectName: "analysisStatus"; text: window.collectionBridge ? window.collectionBridge.analysisStatus : ""; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                        }
+                        Label { objectName: "provisionalSummary"; visible: !!window.collectionBridge && window.collectionBridge.compositeAvailable; text: window.collectionBridge ? window.collectionBridge.provisionalSummary : ""; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                        ListView {
+                            objectName: "provisionalWindows"; visible: !!window.collectionBridge && window.collectionBridge.compositeAvailable && count > 0
+                            Layout.fillWidth: true; Layout.preferredHeight: visible ? 120 : 0; clip: true
+                            model: window.collectionBridge ? window.collectionBridge.provisionalWindows : []
+                            ScrollBar.vertical: ScrollBar {}
+                            delegate: Label {
+                                required property var modelData
+                                width: ListView.view.width; wrapMode: Text.WordWrap
+                                text: modelData.range + ": rolling/local key " + modelData.key + " (evidence from frame " + modelData.keyFrom + ", raw strength " + modelData.keyStrength + "); local chord " + modelData.chord + " (raw strength " + modelData.chordStrength + ")"
+                            }
+                        }
                         RowLayout {
                             Label { text: "Playback output" }
                             ComboBox {
@@ -219,13 +298,80 @@ ApplicationWindow {
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
-                Label { text: "Live output monitoring is not available yet."; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Capture, live estimates and the overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Status: " + window.liveBridge.status }
-                Label { text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
+                Label { text: window.djBridge ? "Monitor a selected Windows output. Other sounds on that output are included." : "Live output monitoring is not available on this platform yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                RowLayout {
+                    ComboBox { id: sourceBox; objectName: "sourceBox"; model: window.djBridge ? window.djBridge.sources : []; textRole: "name"; Layout.fillWidth: true; Accessible.name: "Output to monitor"; enabled: window.djBridge && !window.djBridge.active }
+                    Button { text: "Refresh outputs"; enabled: !!window.djBridge; onClicked: window.djBridge.refresh() }
+                }
+                RowLayout {
+                    Button { objectName: "startMonitor"; text: "Start monitoring"; enabled: !!window.djBridge && !window.djBridge.active && sourceBox.currentIndex >= 0; onClicked: window.djBridge.start(sourceBox.model[sourceBox.currentIndex].id) }
+                    Button { objectName: "stopMonitor"; text: "Stop monitoring"; enabled: !!window.djBridge && window.djBridge.active; onClicked: window.djBridge.stop() }
+                }
+                Label { objectName: "djStatus"; text: "Status: " + (window.djBridge ? window.djBridge.status : "Unavailable") }
+                Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
+                Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                RowLayout {
+                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge && (!window.macOverlay || window.overlayBridge.available); onClicked: { if (djOverlay.visible) window.hideOverlay(); else window.showOverlay() } }
+                    Button { objectName: "lockOverlay"; text: window.overlayBridge && window.overlayBridge.clickThrough ? "Unlock overlay" : "Enable click-through"; enabled: !!window.overlayBridge && djOverlay.visible; onClicked: window.overlayBridge.setClickThrough(!window.overlayBridge.clickThrough) }
+                    Button { objectName: "recoverOverlay"; text: "Move on screen"; enabled: !!window.overlayBridge; onClicked: window.overlayBridge.keepOnScreen() }
+                    Label { text: "Drag when unlocked. Unlock: Ctrl+Shift+U while Beatglass is active"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                }
+                Label { visible: !!window.lifecycleBridge && !window.lifecycleBridge.recoveryAvailable; text: "Controls stay open until tray recovery is verified."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                RowLayout {
+                    Label { text: "Overlay opacity" }
+                    Slider { objectName: "overlayOpacity"; from: 0.25; to: 1.0; value: window.overlayBridge ? window.overlayBridge.opacity : 1; enabled: !!window.overlayBridge; Accessible.name: "Overlay opacity"; onMoved: window.overlayBridge.setOpacity(value); Layout.fillWidth: true }
+                }
+                RowLayout {
+                    visible: window.macOverlay
+                    Label { text: "Display" }
+                    ComboBox { objectName: "overlayDisplay"; model: window.macOverlay ? window.overlayBridge.screenNames : []; enabled: window.macOverlay && window.overlayBridge.available && count > 0; Layout.fillWidth: true; onActivated: window.overlayBridge.moveToScreen(currentIndex) }
+                    Label { text: "Size" }
+                    ComboBox { objectName: "overlaySize"; model: ["Compact", "Medium", "Large"]; currentIndex: 1; enabled: window.macOverlay && window.overlayBridge.available; onActivated: { const sizes = [[250, 110], [310, 130], [430, 180]]; window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1]) } }
+                }
+                Label { visible: window.macOverlay && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
                 Item { Layout.fillHeight: true }
             }
         }
+    }
+    Window {
+        id: djOverlay
+        objectName: "djOverlay"
+        visible: false
+        width: 240; height: 110
+        Component.onCompleted: { x = window.x + 100; y = window.y + 100 }
+        title: "Beatglass overlay"
+        color: "transparent"
+        Rectangle {
+            anchors.fill: parent; radius: 10; color: "#d9202530"; border.color: "#92a2b8"
+            MouseArea {
+                anchors.fill: parent; cursorShape: Qt.SizeAllCursor
+                property bool fallbackMove: false
+                property point lastGlobal: Qt.point(0, 0)
+                onPressed: function(mouse) {
+                    if (window.macOverlay) {
+                        fallbackMove = typeof djOverlay.startSystemMove !== "function"
+                        if (fallbackMove) lastGlobal = mapToGlobal(mouse.x, mouse.y)
+                        else djOverlay.startSystemMove()
+                    } else if (window.overlayBridge) window.overlayBridge.beginDrag()
+                }
+                onPositionChanged: function(mouse) {
+                    if (!pressed || !window.overlayBridge) return
+                    if (!window.macOverlay) window.overlayBridge.dragToCursor()
+                    else if (fallbackMove) { const p = mapToGlobal(mouse.x, mouse.y); djOverlay.x += p.x - lastGlobal.x; djOverlay.y += p.y - lastGlobal.y; lastGlobal = p }
+                }
+            }
+            Column {
+                anchors.centerIn: parent; spacing: 5
+                Label { text: window.djBridge ? window.djBridge.status : "Unavailable"; color: "white"; font.pixelSize: 16 }
+                Label { text: "BPM " + (window.djBridge ? window.djBridge.tempo : "—"); color: "white"; font.pixelSize: 30; font.bold: true }
+            }
+        }
+    }
+    Shortcut { sequence: "Ctrl+Shift+U"; context: Qt.ApplicationShortcut; enabled: !!window.overlayBridge; onActivated: window.overlayBridge.setClickThrough(false) }
+    Connections {
+        target: window.lifecycleBridge
+        function onEditOverlayRequested() { if (window.overlayBridge) window.overlayBridge.setClickThrough(false) }
+        function onHideOverlayRequested() { window.hideOverlay() }
     }
     Connections {
         target: window.metadataBridge

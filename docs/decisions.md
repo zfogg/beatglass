@@ -66,6 +66,13 @@ gaps and delivery loss fail closed. The process coordinator owns epoch
 allocation, while optional anchors expose clock domain and known uncertainty
 and latency. Existing adapters must migrate; no platform backend is provided.
 
+# Process epoch allocation proposal
+
+A single coordinator-owned allocator can issue epochs concurrently to live and
+offline control/workers. It is not an audio-callback API and issuance does not
+replace per-source transition ordering or cross-session identity/draining.
+Application ownership and injection into each active path remain integration work.
+
 # Phase 1 cache contract proposal
 
 Lookup and publication report typed outcomes. The database worker decides
@@ -85,6 +92,20 @@ native capture or presentation path.
 
 The desktop playback increment proposes Qt Multimedia 6.8.3 alongside the existing Qt SDK. It plays through the selected Qt multimedia backend, which can use different codecs from the libsndfile analysis path; support varies by platform and backend. The Windows development check used the official Qt 6.8.3 `qtmultimedia` module installed with aqt 3.3.0 and the SDK's FFmpeg backend. The module's complete archive hash and transitive acquisition lock have not yet been recorded, and Linux/macOS builds and codec behavior remain unverified. FFmpeg, Qt Multimedia and any platform codec distribution/license obligations require review along with the existing combined-distribution decision before release; this is a development dependency proposal, not a packaging approval.
 
+### Windows playback backend probe
+
+On the tested Windows machine, Qt 6.8.3's default FFmpeg backend reported an empty unsupported output channel layout and the synthetic playback loopback did not establish usable output. Qt's [backend guidance](https://doc.qt.io/qt-6.8/qtmultimedia-index.html) permits selecting the Windows Media Foundation backend with `QT_MEDIA_BACKEND=windows`; in an opt-in native test it produced both synthetic WAV tones on loopback. A separate Windows-backend FLAC load probe did not report either duration or an error within 10 seconds; other formats and machines were not qualified. Switching the whole application to that backend would trade one observed failure for unverified and potentially missing codec support, so this draft leaves the default unchanged. Backend selection is process-wide and must be decided before Multimedia initialization. Investigate the output device channel configuration and test codec/error/timeout behavior before choosing a supported default or fallback.
+
 ### Windows output layout mitigation
 
 The Qt 6.8.3 device probe reported channel configuration mask `1` (the unknown-position bit) for the default Realtek speakers while their preferred format reported stereo mask `6`; Qt's FFmpeg audio renderer uses the device channel configuration for its output format. Explicitly rebinding that same default did not restore output. A user-selected Sonic Studio Virtual Mixer endpoint reported mask `6`; with the default FFmpeg backend, a generated two-tone WAV reached that endpoint's WASAPI loopback and a seek produced both tones. Loopback discontinuities and absence of physical listening limit this evidence. The UI now blocks Play with an explicit diagnostic on an absent device or an invalid Windows FFmpeg channel mask and offers a user-selected playback output; it never changes the OS default. This is a workaround, not a correction to Qt or the Realtek endpoint. Qt's renderer source is at https://github.com/qt/qtmultimedia/blob/v6.8.3/src/plugins/multimedia/ffmpeg/playbackengine/qffmpegaudiorenderer.cpp. The Windows Media Foundation FLAC timeout and all previously stated codec and platform qualification gaps remain open.
+# Offline result contract proposal
+
+Keep owned offline results separate from live snapshots. Preserve overlapping
+local tonal evidence and optional beat strengths; rolling keys are not
+track-level keys. Storage, paging, cache identity and result serialization
+remain subject to integration review and are not implemented by this value type.
+
+## Composite analysis identity (provisional)
+
+A build manifest may record pinned dependency digests and the complete effective analysis configuration, but embedded build metadata alone is not proof of dynamically loaded code. Cache eligibility must be granted only after the actual executable and linked dependency artifacts have been verified under a platform-specific, race-resistant policy, including relevant transitive DSP dependencies. Unknown provenance disables composite cache lookup and publication. The worker may still return bounded in-memory evidence after successful source verification; it must not fill identity fields with invented values. This remains a proposal, not a claim of a verified packaging mechanism.
