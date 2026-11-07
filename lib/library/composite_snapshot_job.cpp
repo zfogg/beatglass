@@ -54,7 +54,7 @@ CompositeJobResult analyze_snapshot_music(const std::filesystem::path& path, std
     if (verified!=SnapshotStatus::ok) return failure(verified,"source revalidation failed");
     if (stop.stop_requested()) return {CompositeJobStatus::cancelled,{},{}};
     return {CompositeJobStatus::complete,collector.finish(),{}};
-  } catch (const detail::VirtualOpenCancelled&) { return {CompositeJobStatus::cancelled,{},{}}; }
+  } catch (const FileOpenCancelled&) { return {CompositeJobStatus::cancelled,{},{}}; }
     catch (const std::exception& e) { return {CompositeJobStatus::error,{},e.what()}; }
 }
 }

@@ -234,6 +234,7 @@ A follow-up Qt Quick regression verifies that changing the selection index alone
 
 The optional private Essentia tracker is a worker-only experiment tested on generated triads and discontinuities. It is disabled by default and not connected to file analysis or live capture. Release licensing, Windows MSVC dependency build, key/chord quality, timestamped segment policy and native qualification remain open; see [tonal experiment](tonal-experiment.md).
 
+
 ## Experimental beat events
 
 The worker-only aubio beat-event experiment reports epoch-local sample positions and the exclusive observed boundary for each detection. Its 1024-sample window/512-sample hop and aubio's estimated event time are not a measured latency guarantee. An event at the current exclusive boundary waits for a subsequent observed sample; it is not flushed at EOF. Partial hops are retained, and gaps, epoch changes and explicit discontinuities reset aubio state. The experiment is not connected to CLI replay or snapshots; silence invalidation, event strength, publication delay, longer-than-32-bit aubio counters, native capture and measured beat accuracy remain integration work. Generated click tests at 44.1/48 kHz check causal bounds, chunking and broad beat intervals, not full-mix accuracy.
@@ -265,6 +266,8 @@ Windows 10.0.26300 x64/MSVC 19.44 with the existing static CRT/SQLite/OpenSSL de
 
 WSL Ubuntu 22.04 using the previously recorded full prototype/tempo configuration passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 58/58; WSL is not native Linux qualification. Header inventory and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html10` passed. `ssh -o BatchMode=yes -o ConnectTimeout=10 -T zachbook-pro` reached `100.92.127.58` but timed out during SSH banner exchange on both attempts, so no native macOS test was run.
 
+After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea57372aaab89`, WSL Ubuntu 22.04 with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, slice disabled and pinned Catch2 source reused passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 32/32. Windows 10.0.26300 x64/MSVC 19.44 with the previously configured static CRT and static SQLite development tree passed `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` 34/34. These are development checks only; WSL is not native Linux qualification and no decoder slice was included.
+
 ## Same-source integration proposal
 
 The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
@@ -272,6 +275,14 @@ read-only byte boundary. The existing decoder does not consume it. Secure
 snapshot creation, native file identity and decoder integration remain open;
 see [same-source proposal](same-source-proposal.md).
 
+
+## Experimental virtual decoder
+
+A private libsndfile virtual-I/O adapter can synchronously decode a borrowed `ByteSource`; it is not connected to the CLI or cache. It keeps the source borrowed until decoder close, translates callback errors and cancellation to worker-visible outcomes, and is invalidated after mid-read cancellation or failure. Generated WAV, AIFF, FLAC and MP3 tests exercise the adapter on the codec-enabled Windows development build. The byte-source contract was merged in PR #41; snapshot creation, original-file revalidation, secure cleanup, and native platform race tests remain unimplemented. No file is made immutable by this adapter.
+
+Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built this adapter and passed 53/53 CTest cases with `BEATGLASS_TEST_V1_CODECS=OFF`; the virtual codec fixture check covered AIFF there. This is not native desktop qualification, and the older decoder does not qualify MP3 support.
+
+The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. The provisional public FileReader borrowed-source constructor and explicit-epoch seek expose this adapter for review; the legacy path-based seek retains local increment behavior. Snapshot creation and publication are still separate responsibilities.
 
 ## Offline result contract proposal
 
@@ -439,3 +450,7 @@ Windows desktop interaction verified overlay opacity, click-through/unlock again
 The Windows DJ overlay now persists position and opacity and starts hidden and unlocked. Native tests passed a continuous drag from the 100% display to the 150% display, including pointer containment after the DPI transition; settings restart and active-monitoring shutdown were exercised. Reverse-direction crossing and the shared live/offline epoch handoff remain open. See [Windows platform status](windows-platform.md) and the [epoch handoff proposal](epoch-handoff-proposal.md).
 
 An isolated integration draft based on proposed PR #63 injects the GUI-owned session epoch allocator into the Windows live worker and joins that worker before allocator destruction. Windows tests passed simultaneous simulated offline issuance with real live startup and an exhausted-allocator no-snapshot case; actual offline injection and coordinated seek remain open.
+
+After merging main `6aade6e`, the provisional library option was configured with `cmake -S . -B /tmp/beatglass-foundation-review -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, then `cmake --build /tmp/beatglass-foundation-review -j 1` and `ctest --test-dir /tmp/beatglass-foundation-review --output-on-failure` passed 38/38 on Ubuntu 22.04 WSL. This configuration does not enable desktop, native audio or macOS qualification. CMake emitted an author warning that `SQLite::SQLite3` is deprecated in favor of `SQLite3::SQLite3` in the installed CMake version; host SQLite remains unpinned.
+
+After the concurrent allocator contract merged, the provisional borrowed `FileReader` rejects epoch zero before source access, requires caller-issued increasing seek epochs and rejects its legacy one-argument seek. The caller must keep one process allocator, serialize reader operations, and discard stale publications. With `BEATGLASS_TEST_V1_CODECS=OFF`, WSL `cmake --build /tmp/beatglass-virtual-check -j1` and `ctest --test-dir /tmp/beatglass-virtual-check --output-on-failure` passed 59/59. Windows MSVC codec-enabled `cmake --build C:/Users/zachf/.codex/build/beatglass-phase1-verify --config Debug -- /m:1` and `ctest --test-dir C:/Users/zachf/.codex/build/beatglass-phase1-verify -C Debug --output-on-failure` passed 62/62. The desktop and library prototypes are not yet wired to one process-owned allocator; legacy path-based overloads remain isolated compatibility APIs.
