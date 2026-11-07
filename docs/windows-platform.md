@@ -242,3 +242,31 @@ interrupts the attempt; invalid timestamps are not added. Empty invalid or
 flagged buffers retain a discontinuity for the next nonempty packet. Boundary
 checks are simulated; actual driver overflow and empty flagged buffers have not
 been observed or qualified.
+
+The provisional composite worker can use a shared one-attempt start
+authorization: Stop or replacement cancels it without waiting for the worker,
+and only one worker can claim it. A pre-claim cancellation prevents the start;
+after a claim, cancellation is checked before and after the audio start call
+and during capture polling; earlier initialization calls are not individually
+checked. A native call already in progress is not preempted. A racing poll or
+pop may return a packet, so synchronized authorization or generation gating
+is required before publishing. The desktop bridge must retain and cancel its own authorization on
+Stop, switch and destruction, gate stale deliveries, and join the worker. This
+contract has deterministic fake-backend coverage; the bridge integration and
+physical device timing remain unqualified.
+
+Selected and default Windows tempo paths now reject untimed, future, and
+over-one-second-old QPC packets, and check session loss and packet age after
+DSP before publishing an observed boundary or BPM. A capture-clock failure
+clears evidence and fails the attempt. Windows 11 10.0.26300 x64/MSVC 19.44
+fake-backend tests cover age boundaries, post-DSP interruption, aging and clock
+failure; native WASAPI timestamp compatibility and actual DJ output remain
+unqualified. Consumers still need synchronized delivery gates.
+
+The provisional live composite consumer rejects untimed, future, and more than
+one second old QPC capture packets. It checks age before and after DSP and
+polls the capture session again before publishing each result. Deterministic
+fake-backend tests exercise queued stale PCM and loss during DSP. A failed
+capture clock fails the attempt. Native WASAPI QPC behavior and production
+latency are not yet qualified; generation/token gates remain necessary for
+loss or cancellation racing the final check.

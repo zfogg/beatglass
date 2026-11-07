@@ -3,6 +3,7 @@
 #include "beatglass/core/music_replay.hpp"
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -20,12 +21,17 @@ public:
   explicit LiveMusic(SourceEpochAllocator& epochs);
   /** Take ownership of a backend for deterministic worker tests. */
   LiveMusic(SourceEpochAllocator& epochs, std::unique_ptr<Loopback> backend);
+  /** Test seam: clock returns current QPC time in 100 ns units, or empty on failure; afterProcess runs on the worker after DSP and before validation. Neither callback is retained beyond this object. */
+  LiveMusic(SourceEpochAllocator& epochs, std::unique_ptr<Loopback> backend,
+            std::function<std::optional<std::uint64_t>()> clock, std::function<void()> afterProcess = {});
   /** Stop and join capture on the owning worker. */
   ~LiveMusic();
   /** Start the selected endpoint with a fresh epoch; true means requested. */
   bool start(const std::string& endpoint);
+  /** Start using a shared one-attempt authorization; cancellation is thread-safe, while this method remains worker-only. An already executing native call cannot be preempted. Cancellation can race a pump; synchronized generation or authorization gating is required before publishing its output. */
+  bool start(const std::string& endpoint, std::shared_ptr<LoopbackStartAuthorization> authorization);
   /** Drain at most 16 packets and run DSP on this worker. On failure clears
-   * evidence, stops capture, and returns false. Poll regularly to detect loss. */
+   * evidence, stops capture, and returns false. Untimed, future or over-one-second-old capture is discarded; a failed clock fails the attempt. Poll regularly to detect loss. */
   bool pump();
   /** Clear evidence and stop/join capture. */
   void stop();
@@ -41,6 +47,8 @@ public:
 private:
   void invalidate_publication() noexcept;
   void clear() noexcept;
+  std::function<std::optional<std::uint64_t>()> clock_;
+  std::function<void()> after_process_;
   std::unique_ptr<CausalMusicReplay> replay_;
   std::optional<CausalMusicState> latest_;
   std::uint64_t generation_{}, revision_{};

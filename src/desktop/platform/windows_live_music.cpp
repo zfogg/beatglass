@@ -3,10 +3,36 @@
 #include <limits>
 #include <span>
 #include <utility>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 namespace beatglass::windows {
-LiveMusic::LiveMusic(SourceEpochAllocator& epochs) : session_(epochs,[this]{ clear(); }) {}
+namespace {
+std::optional<std::uint64_t> captureClock() {
+#ifdef _WIN32
+  LARGE_INTEGER counter{}, frequency{};
+  if (!QueryPerformanceCounter(&counter) || !QueryPerformanceFrequency(&frequency) || counter.QuadPart < 0 || frequency.QuadPart <= 0) return {};
+  const auto value = static_cast<std::uint64_t>(counter.QuadPart), freq = static_cast<std::uint64_t>(frequency.QuadPart);
+  constexpr std::uint64_t scale=10000000, max=std::numeric_limits<std::uint64_t>::max();
+  const auto whole=value/freq, remainder=value%freq;
+  if (whole>max/scale || remainder>max/scale) return {};
+  const auto base=whole*scale, fraction=remainder*scale/freq;
+  if (base>max-fraction) return {};
+  return base+fraction;
+#else
+  return {};
+#endif
+}
+}
+LiveMusic::LiveMusic(SourceEpochAllocator& epochs) : clock_(captureClock), session_(epochs,[this]{ clear(); }) {}
 LiveMusic::LiveMusic(SourceEpochAllocator& epochs,std::unique_ptr<Loopback> backend)
-    : session_(epochs,[this]{ clear(); },std::move(backend)) {}
+    : LiveMusic(epochs,std::move(backend),captureClock) {}
+LiveMusic::LiveMusic(SourceEpochAllocator& epochs,std::unique_ptr<Loopback> backend,
+                     std::function<std::optional<std::uint64_t>()> clock, std::function<void()> afterProcess)
+    : clock_(std::move(clock)), after_process_(std::move(afterProcess)), session_(epochs,[this]{ clear(); },std::move(backend)) {}
 LiveMusic::~LiveMusic() { stop(); }
 void LiveMusic::invalidate_publication() noexcept {
   latest_.reset();
@@ -15,11 +41,12 @@ void LiveMusic::invalidate_publication() noexcept {
   else { ++generation_; ++revision_; }
 }
 void LiveMusic::clear() noexcept { replay_.reset(); invalidate_publication(); }
-bool LiveMusic::start(const std::string& endpoint) {
+bool LiveMusic::start(const std::string& endpoint) { return start(endpoint, {}); }
+bool LiveMusic::start(const std::string& endpoint, std::shared_ptr<LoopbackStartAuthorization> authorization) {
   if (exhausted_ || session_.state()!=SourceState::stopped) return false;
   clear(); failed_=false; last_audio_=std::chrono::steady_clock::now();
   if (exhausted_) return false;
-  return session_.start(endpoint);
+  return session_.start(endpoint, std::move(authorization));
 }
 bool LiveMusic::pump() {
   if (failed_ || exhausted_) return false;
@@ -32,6 +59,13 @@ bool LiveMusic::pump() {
           packet.channels>std::numeric_limits<std::uint16_t>::max() ||
           !packet.sample_count || packet.sample_count>packet.max_samples ||
           packet.sample_count%packet.channels) throw std::invalid_argument("invalid capture packet");
+      const auto fresh = [&] {
+        if (!clock_) throw std::runtime_error("capture clock unavailable");
+        const auto now=clock_();
+        if (!now) throw std::runtime_error("capture clock unavailable");
+        return packet.timestamp_valid && packet.qpc_100ns<=*now && *now-packet.qpc_100ns<=10000000ULL;
+      };
+      if (!fresh()) { clear(); continue; }
       last_audio_=std::chrono::steady_clock::now();
       if (!replay_) replay_=std::make_unique<CausalMusicReplay>();
       const auto prior=replay_->state().tempo;
@@ -48,6 +82,11 @@ bool LiveMusic::pump() {
           offset==0 && (packet.discontinuity || !packet.timestamp_valid),
           std::span<const float>(packet.samples.data()+offset*packet.channels,count*packet.channels)};
         auto state=replay_->process(block);
+        if (after_process_) after_process_();
+        const auto before_poll=generation_;
+        session_.poll();
+        if (generation_!=before_poll || session_.state()!=SourceState::running) break;
+        if (!fresh()) { clear(); break; }
         const auto after=state.tempo.state;
         if ((before==TrackingState::silent)!=(after==TrackingState::silent)) invalidate_publication();
         if (exhausted_) throw std::overflow_error("publication generation exhausted");
