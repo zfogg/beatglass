@@ -201,7 +201,6 @@ std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::offline_page(std::string k
     result.value = std::move(read); return result;
   }, std::move(completion));
 }
-}
 #ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
 std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::analyze_composite(std::filesystem::path path, std::uint64_t epoch, Completion completion) {
   return state_->submit(1, [path = std::move(path), epoch](TempoAnalysisStore&, std::stop_token stop) {
