@@ -163,7 +163,7 @@ The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
 
-Concurrent process-epoch issuance is proposed with contention and exhaustion
+PR #63 merged concurrent process-epoch issuance with contention and exhaustion
 tests. The application must still share one allocator across live and offline
 paths and coordinate each source's lifecycle.
 

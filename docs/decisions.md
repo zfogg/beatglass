@@ -66,9 +66,9 @@ gaps and delivery loss fail closed. The process coordinator owns epoch
 allocation, while optional anchors expose clock domain and known uncertainty
 and latency. Existing adapters must migrate; no platform backend is provided.
 
-# Process epoch allocation proposal
+# Process epoch allocation
 
-A single coordinator-owned allocator can issue epochs concurrently to live and
+PR #63 made a single coordinator-owned allocator safe to issue epochs concurrently to live and
 offline control/workers. It is not an audio-callback API and issuance does not
 replace per-source transition ordering or cross-session identity/draining.
 Application ownership and injection into each active path remain integration work.
