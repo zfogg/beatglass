@@ -101,6 +101,12 @@ TestCase {
         mouseClick(blue, blue.width / 2, blue.height / 2)
         compare(app.selectedTheme, "Blue")
         compare(app.selectedThemeIndex, 4)
+        let yellow = findChild(app, "themePreview5")
+        verify(yellow !== null)
+        yellow.forceActiveFocus()
+        keyClick(Qt.Key_Return)
+        compare(app.selectedTheme, "Yellow")
+        compare(app.selectedThemeIndex, 5)
         app.destroy()
     }
     function test_realFolderNavigationAndSelection() {
