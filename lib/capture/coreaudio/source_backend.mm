@@ -1,6 +1,7 @@
 #include "beatglass/capture/coreaudio_internal.hpp"
 #include "beatglass/capture/coreaudio_source_internal.hpp"
 #import <CoreAudio/CoreAudio.h>
+#import <CoreAudio/HostTime.h>
 #include <limits>
 #include <memory>
 #include <utility>
