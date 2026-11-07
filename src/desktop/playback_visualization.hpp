@@ -37,7 +37,7 @@ public:
   void retire() noexcept;
   /** Return current status. An inactive generation never becomes active again. */
   Status status() const noexcept;
-  /** Return the most recent owned frame once; inactive generations return empty. Control thread only. */
+  /** Return the most recent owned frame once; all returned frames have revision zero. Inactive generations return empty. Control thread only. */
   std::optional<beatglass::VisualizationFrame> takeLatest();
   /** Copy the monotonic one-shot revision: zero while active, one once terminal. */
   unsigned revision() const noexcept;
