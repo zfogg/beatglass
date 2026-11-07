@@ -58,6 +58,14 @@ For Windows x64, Qt's official repository reported the following SHA-256 values 
 - `qttools`: `76ac7b8c86ca72b6608f1d41ee848aeab19663536990b4968ce52db8ec980bc3`
 
 They were read from the respective `.sha256` files in the [official Qt repository](https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_683/qt6_683/qt.qt6.683.win64_msvc2022_64/). They are upstream-published checksums, not independently retained or rehashed original archives from the prior smoke run. Future automated acquisition must verify fixed hashes against downloaded archives and lock the acquisition tool's transitive dependencies; other platforms need their own artifact manifests.
+# Phase 1 source contract proposal
+
+The proposed source API distinguishes enumeration cancellation/errors and
+typed start failures. Control notifications carry attempt and serial sequence;
+gaps and delivery loss fail closed. The process coordinator owns epoch
+allocation, while optional anchors expose clock domain and known uncertainty
+and latency. Existing adapters must migrate; no platform backend is provided.
+
 # Phase 1 cache contract proposal
 
 Lookup and publication report typed outcomes. The database worker decides
