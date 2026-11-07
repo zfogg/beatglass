@@ -23,7 +23,8 @@ SourceAdapter::SourceAdapter(SourceEpochAllocator& epochs, std::unique_ptr<Sourc
 SourceAdapter::~SourceAdapter() { (void)stop(); }
 EnumerationResult SourceAdapter::enumerate() {
   if (!backend_) return {EnumerationOutcome::error, {}, SourceError::backend_error, "Core Audio backend unavailable"};
-  return backend_->enumerate();
+  try { return backend_->enumerate(); }
+  catch (...) { return {EnumerationOutcome::error, {}, SourceError::backend_error, "Core Audio enumeration failed"}; }
 }
 SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consumer consumer) {
   if (!backend_ || !consumer || id.empty()) return {{}, SourceError::backend_error, "Invalid source request"};
@@ -33,15 +34,24 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
   if (!epoch) return {{}, SourceError::backend_error, "Source epoch exhausted"};
   auto attempt = lifecycle_.start();
   if (!attempt) return {{}, SourceError::backend_error, "Source attempt exhausted"};
-  if (!backend_->start(id, *epoch)) {
-    auto failure = backend_->status();
+  TapStatus failure;
+  bool native_started = false;
+  try {
+    native_started = backend_->start(id, *epoch);
+    if (!native_started) failure = backend_->status();
+  } catch (...) {
+    failure = {TapState::error, "Core Audio startup threw", TapFailure::backend_error};
+  }
+  if (!native_started) {
     const bool stopped = backend_->stop(); quiescence_failed_ = !stopped;
     lifecycle_.stop();
     const auto error = stopped ? source_error(failure) : SourceError::backend_error;
     status_ = {SourceState::error, error, stopped ? failure.message : "Failed start and backend stop"};
     return {{}, error, status_.message};
   }
-  auto format = backend_->format();
+  std::optional<AudioFormat> format;
+  try { format = backend_->format(); }
+  catch (...) { format.reset(); }
   if (!format || !format->sample_rate || !format->channels) {
     const bool stopped = backend_->stop(); quiescence_failed_ = !stopped; lifecycle_.stop();
     status_ = {SourceState::error, SourceError::backend_error, stopped ? "Invalid capture format" : "Invalid format; backend stop failed"};
@@ -79,8 +89,10 @@ void SourceAdapter::interrupt(const TapStatus& native) {
 }
 std::optional<SourceEvent> SourceAdapter::take_event() {
   if (!pending_ && lifecycle_.state() == SourceState::running) {
-    const auto current = backend_->status();
-    if (current.state != TapState::running) interrupt(current);
+    try {
+      const auto current = backend_->status();
+      if (current.state != TapState::running) interrupt(current);
+    } catch (...) { interrupt({TapState::error, "Core Audio status threw", TapFailure::backend_error}); }
   }
   auto result = std::move(pending_); pending_.reset();
   if (result && result->state == SourceState::running) running_taken_ = true;
@@ -93,6 +105,7 @@ bool SourceAdapter::acknowledge_running(SourceAttempt attempt, std::uint64_t seq
 }
 bool SourceAdapter::pump() {
   if (!running_acknowledged_ || pending_ || lifecycle_.state() != SourceState::running) return false;
+  try {
   auto current = backend_->status();
   if (current.state != TapState::running) { interrupt(current); return false; }
   if (!backend_->pop(block_)) {
@@ -113,6 +126,10 @@ bool SourceAdapter::pump() {
   try { consumer_(borrowed); }
   catch (...) { interrupt({TapState::interrupted, "PCM consumer threw", TapFailure::backend_error}); return false; }
   return true;
+  } catch (...) {
+    interrupt({TapState::error, "Core Audio polling threw", TapFailure::backend_error});
+    return false;
+  }
 }
 std::optional<AudioClockAnchor> SourceAdapter::latest_anchor() const noexcept { return anchor_; }
 }

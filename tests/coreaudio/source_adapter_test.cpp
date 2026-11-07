@@ -10,16 +10,17 @@ class FakeBackend final : public SourceBackend {
 public:
   TapStatus native{TapState::stopped, {}, {}};
   CaptureBlock block{};
-  bool available{}, stop_ok{true}, start_ok{true}, interrupt_after_pop{};
+  bool available{}, stop_ok{true}, start_ok{true}, interrupt_after_pop{}, throw_start{}, throw_status{};
   std::uint64_t epoch{};
   EnumerationResult enumerate() override { return {EnumerationOutcome::ok, {{"output", "Output", true, false}}, {}, {}}; }
   bool start(const std::string&, std::uint64_t e) override {
     epoch = e;
+    if (throw_start) throw 1;
     if (!start_ok) { native = {TapState::error, "denied", TapFailure::permission_denied}; return false; }
     native = {TapState::running, {}, {}}; return true;
   }
   std::optional<AudioFormat> format() const override { return AudioFormat{48000, 2, ChannelLayout::stereo}; }
-  TapStatus status() override { return native; }
+  TapStatus status() override { if (throw_status) throw 1; return native; }
   bool pop(CaptureBlock& out) override {
     if (!available) return false;
     out = block; available = false;
@@ -112,4 +113,22 @@ TEST_CASE("Core Audio control drops PCM when the device changes during dequeue",
   const auto event = source.take_event(); REQUIRE(event);
   CHECK(event->state == SourceState::interrupted); CHECK(event->sequence == 2);
   CHECK(event->status.error == SourceError::device_lost);
+}
+
+TEST_CASE("Core Audio control fails closed on backend exceptions", "[coreaudio]") {
+  SourceEpochAllocator epochs;
+  auto fake = std::make_unique<FakeBackend>(); auto* backend = fake.get();
+  SourceAdapter source(epochs, std::move(fake));
+  backend->throw_start = true;
+  const auto failed = source.start("output", [](const AudioBlock&) {});
+  CHECK_FALSE(failed.attempt); CHECK(failed.error == SourceError::backend_error);
+  CHECK(source.status().state == SourceState::error);
+  backend->throw_start = false;
+  int calls = 0;
+  const auto started = source.start("output", [&](const AudioBlock&) { ++calls; }); REQUIRE(started.attempt);
+  REQUIRE(source.take_event()); REQUIRE(source.acknowledge_running(*started.attempt, 1));
+  backend->prepare(); backend->throw_status = true;
+  CHECK_FALSE(source.pump()); CHECK(calls == 0); CHECK_FALSE(source.latest_anchor());
+  const auto event = source.take_event(); REQUIRE(event);
+  CHECK(event->state == SourceState::interrupted); CHECK(event->status.error == SourceError::backend_error);
 }

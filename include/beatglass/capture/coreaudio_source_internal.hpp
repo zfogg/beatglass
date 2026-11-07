@@ -44,9 +44,9 @@ public:
   SourceAdapter(SourceEpochAllocator& epochs, std::unique_ptr<SourceBackend> backend);
   /** Stop and quiesce on the owner thread. */
   ~SourceAdapter();
-  /** Enumerate through the backend. */
+  /** Enumerate through the backend; translate a backend exception to an error outcome. */
   EnumerationResult enumerate();
-  /** Start synchronously and return an attempt or typed failure. An accepted attempt has a pending running event; the consumer must remain safe for callback restrictions. */
+  /** Start synchronously and return an attempt or typed failure. A backend exception triggers cleanup and an error. An accepted attempt has a pending running event; the consumer must remain safe for callback restrictions. */
   SourceStartResult start(const std::string& id, AudioSource::Consumer consumer);
   /** Invalidate the attempt and attempt to quiesce the backend. False reports an OS stop failure; this provisional adapter is not yet an AudioSource because that shared contract cannot express failed quiescence. */
   bool stop() noexcept;
@@ -56,7 +56,7 @@ public:
   std::optional<SourceEvent> take_event();
   /** Confirm that the running event's format and reset boundary have been installed. Reject a stale or mismatched attempt/sequence. */
   bool acknowledge_running(SourceAttempt attempt, std::uint64_t sequence) noexcept;
-  /** Deliver at most one borrowed PCM block after the running event was taken. Returns false for no data or an event requiring handling. Unknown or unrepresentable host time fails closed rather than being encoded as zero. */
+  /** Deliver at most one borrowed PCM block after the running event was acknowledged. Returns false for no data or an event requiring handling. Unknown or unrepresentable host time and backend or consumer exceptions fail closed rather than publishing untrusted PCM. */
   bool pump();
   /** Anchor for the most recently delivered block; absent before delivery or after interruption/stop. Uncertainty and latency are unknown. */
   std::optional<AudioClockAnchor> latest_anchor() const noexcept;
