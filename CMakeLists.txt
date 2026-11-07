@@ -376,5 +376,3 @@ if(BUILD_TESTING)
     set_tests_properties(windows_ctest_registration PROPERTIES LABELS unit TIMEOUT 15)
   endif()
 endif()
-
-
