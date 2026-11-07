@@ -1,5 +1,6 @@
 #pragma once
 #include "beatglass/capture/coreaudio_fifo_internal.hpp"
+#include "beatglass/core/audio.hpp"
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -27,10 +28,12 @@ public:
   bool start(const std::string& uid, std::uint64_t epoch);
   /** Check device liveness and tap format on the control owner. A change/failure invalidates this stream and returns interrupted; stop and restart with a fresh epoch. Invoke regularly even while not popping. */
   TapStatus status();
+  /** Return the current epoch format after successful startup, otherwise empty. */
+  std::optional<AudioFormat> format() const noexcept;
   /** Copy the next block only while status remains running. The returned block is caller-owned; the consumer must invalidate already-delivered data on interruption. */
   bool pop(CaptureBlock& block);
   /** Attempt to stop and quiesce the callback; safe to call repeatedly. If Core Audio refuses, status becomes error and the still-live callback context is retained rather than freed; destroying the adapter in that state intentionally leaks its native resources. */
-  void stop() noexcept;
+  bool stop() noexcept;
   /** Return dropped complete-frame count for the current stream on the control owner. */
   std::uint64_t dropped_frames() const noexcept;
 private:

@@ -19,7 +19,17 @@ delivery loss invalidates the active epoch. Clock anchors are optional and
 carry a clock domain and optional uncertainty and latency; absence is not zero.
 These interfaces require adapter integration and do not implement capture.
 
-.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/coreaudio_fifo_internal.hpp include/beatglass/capture/coreaudio_tap_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
+.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/coreaudio_fifo_internal.hpp include/beatglass/capture/coreaudio_tap_internal.hpp include/beatglass/capture/coreaudio_source_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
+
+.. cpp:function:: bool beatglass::coreaudio::SourceBackend::stop() noexcept
+
+   Attempt to quiesce capture. Return false and retain any callback context if
+   the OS refuses to stop it. Call on the control owner, not the audio thread.
+
+.. cpp:function:: std::optional<std::int64_t> beatglass::coreaudio::SourceBackend::host_time_ns(std::uint64_t ticks) const noexcept
+
+   Convert valid host ticks to backend monotonic nanoseconds, or return empty
+   on failure or overflow. This is called on the control owner.
 
 AudioSource stop
 ~~~~~~~~~~~~~~~~

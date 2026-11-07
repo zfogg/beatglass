@@ -180,13 +180,19 @@ TapStatus OutputTap::status() {
   }
   return impl_->current;
 }
+std::optional<AudioFormat> OutputTap::format() const noexcept {
+  if (impl_->current.state != TapState::running) return std::nullopt;
+  const auto channels = static_cast<std::uint16_t>(impl_->format.mChannelsPerFrame);
+  const auto layout = channels == 1 ? ChannelLayout::mono : channels == 2 ? ChannelLayout::stereo : ChannelLayout::multichannel;
+  return AudioFormat{static_cast<std::uint32_t>(impl_->format.mSampleRate), channels, layout};
+}
 bool OutputTap::pop(CaptureBlock& block) {
   if (status().state != TapState::running || !impl_->fifo->pop(block)) return false;
   return status().state == TapState::running;
 }
-void OutputTap::stop() noexcept {
-  if (impl_->cleanup()) { impl_->current.state = TapState::stopped; impl_->current.message.clear(); impl_->current.failure.reset(); }
-  else { impl_->current.state = TapState::error; impl_->current.failure = TapFailure::backend_error; }
+bool OutputTap::stop() noexcept {
+  if (impl_->cleanup()) { impl_->current.state = TapState::stopped; impl_->current.message.clear(); impl_->current.failure.reset(); return true; }
+  impl_->current.state = TapState::error; impl_->current.failure = TapFailure::backend_error; return false;
 }
 std::uint64_t OutputTap::dropped_frames() const noexcept { return impl_->fifo ? impl_->fifo->dropped_frames() : 0; }
 }
