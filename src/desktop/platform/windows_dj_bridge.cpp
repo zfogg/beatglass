@@ -23,8 +23,8 @@ void DjBridge::start() {
     std::lock_guard lock(mutex_);
     if (requested_) return;
     exhausted = commands_exhausted_ || request_generation_ == std::numeric_limits<std::uint64_t>::max();
-    if (exhausted) { commands_exhausted_ = true; requested_ = false; reset_pending_ = true; }
-    else { requested_ = true; ++request_generation_; }
+    if (exhausted) { commands_exhausted_ = true; requested_ = false; reset_pending_ = true; have_status_ = false; }
+    else { requested_ = true; ++request_generation_; have_status_ = false; }
   }
   if (exhausted) status_ = QStringLiteral("Control sequence exhausted");
   wake_.notify_one(); emit stateChanged();
@@ -32,7 +32,7 @@ void DjBridge::start() {
 void DjBridge::stop() {
   {
     std::lock_guard lock(mutex_);
-    requested_ = false; reset_pending_ = true;
+    requested_ = false; reset_pending_ = true; have_status_ = false;
     if (pending_ && pending_->snapshot) pending_.reset();
     if (request_generation_ == std::numeric_limits<std::uint64_t>::max()) commands_exhausted_ = true;
     else ++request_generation_;
@@ -56,7 +56,12 @@ void DjBridge::drain() {
   }
 }
 void DjBridge::run(std::function<EndpointResult()> discovery) {
-  DefaultTempoFollower follower(epochs_, std::move(discovery));
+  std::uint64_t attemptGeneration{};
+  DefaultTempoFollower follower(epochs_, std::move(discovery), [this, &attemptGeneration](const std::function<bool()>& start) {
+    std::lock_guard lock(mutex_);
+    if (quitting_ || !requested_ || request_generation_ != attemptGeneration) return false;
+    return start();
+  });
   bool active = false;
   bool fatal = false;
   for (;;) {
@@ -68,6 +73,7 @@ void DjBridge::run(std::function<EndpointResult()> discovery) {
       requested = requested_; quitting = quitting_; reset = reset_pending_; reset_pending_ = false; generation = request_generation_; exhausted = commands_exhausted_;
     }
     if (quitting) break;
+    attemptGeneration = generation;
     if (reset) { follower.stop(); active = false; fatal = false; }
     bool ok = true;
     if (requested != active) {
@@ -86,7 +92,7 @@ void DjBridge::run(std::function<EndpointResult()> discovery) {
       std::lock_guard lock(mutex_);
       if (!ok) { if (generation == request_generation_) requested_ = false; active = false; }
       if (update && (!update->snapshot || (requested_ && generation == request_generation_))) pending_ = std::move(update);
-      pending_status_ = std::move(text); have_status_ = true;
+      if (generation == request_generation_) { pending_status_ = std::move(text); have_status_ = true; }
     }
   }
   follower.stop();

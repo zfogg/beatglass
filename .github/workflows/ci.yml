@@ -29,8 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
-      - run: cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON
+      - run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev libssl-dev
+      - run: cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON
       - run: cmake --build build --parallel 4
       - run: ctest --test-dir build --output-on-failure
 

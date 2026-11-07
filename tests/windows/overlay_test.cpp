@@ -19,6 +19,34 @@ protected:
 class OverlayTest : public QObject {
   Q_OBJECT
 private slots:
+  void recoveredPositionIsPersistedImmediately() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto path = directory.filePath("overlay.ini");
+    QPoint recovered;
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      QQuickWindow overlay;
+      overlay.resize(320, 110);
+      QWindow control;
+      beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
+      overlay.setPosition(-30000, -30000);
+      controller.keepOnScreen();
+      recovered = overlay.position();
+      QVERIFY(QGuiApplication::primaryScreen()->availableGeometry().contains(overlay.geometry()));
+      settings.sync();
+      QCOMPARE(settings.value(QStringLiteral("overlay/position")).toPoint(), recovered);
+      QCOMPARE(settings.status(), QSettings::NoError);
+    }
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      QQuickWindow overlay;
+      overlay.resize(320, 110);
+      QWindow control;
+      beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
+      QCOMPARE(overlay.position(), recovered);
+    }
+  }
   void restoresSavedPositionAndOpacity() {
     QTemporaryDir directory;
     QVERIFY(directory.isValid());
