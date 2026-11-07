@@ -221,3 +221,14 @@ Windows 11/MSVC 19.44, blocked-discovery Stop and destruction regressions
 verified that no epoch was consumed after cancellation; the targeted capture,
 allocator and bridge CTest selection passed 11/11. Physical endpoint removal
 and return were not part of this deterministic check.
+
+The provisional overlay controller can persist position and opacity through a
+caller-owned `QSettings`, recover off-screen geometry and follow native cursor
+movement across mixed-DPI displays. Visibility remains caller-controlled and
+click-through starts disabled.
+The controller does not create content or instantiate a desktop DJ path; the
+selected/default integration is reviewed separately in #71. Tests use temporary
+settings and cover restoration and immediate persistence after recovery. Earlier
+native testing on Windows 11 Home 10.0.26300 with LG ULTRAGEAR at 100% and
+U2790B at 150% exercised one boundary-crossing direction; reverse crossing,
+physical display removal and exclusive-fullscreen product behavior remain open.
