@@ -30,3 +30,19 @@ TEST_CASE("snapshot music worker discards cancelled or changed results") {
   CHECK(changed.status==CompositeJobStatus::stale_input); CHECK_FALSE(changed.value);
   auto invalid=analyze_snapshot_music(path,0,{1000,1000,100}); CHECK(invalid.status==CompositeJobStatus::error); CHECK_FALSE(invalid.value);
 }
+TEST_CASE("snapshot music worker rejects failures without publishing evidence") {
+  Directory d; auto path=d.path/"audio.aiff";
+  SECTION("zero epoch before source access") {
+    auto result=analyze_snapshot_music(d.path/"missing.aiff",0,{1000,1000,100});
+    CHECK(result.status==CompositeJobStatus::error); CHECK_FALSE(result.value);
+    CHECK(result.diagnostic=="epoch must be nonzero");
+  }
+  SECTION("collector limit") {
+    auto result=analyze_snapshot_music(path,1,{1000,0,100});
+    CHECK(result.status==CompositeJobStatus::error); CHECK_FALSE(result.value);
+  }
+  SECTION("progress callback exception") {
+    auto result=analyze_snapshot_music(path,1,{1000,1000,100},{},[](auto){ throw std::runtime_error("progress failed"); });
+    CHECK(result.status==CompositeJobStatus::error); CHECK_FALSE(result.value);
+  }
+}
