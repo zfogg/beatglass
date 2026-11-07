@@ -14,5 +14,7 @@ TEST_CASE("tempo consumes arbitrary contiguous chunks without future samples") {
  std::vector<float> silence(4096);
  chunked.process(silence, 1, audio.size()+2); CHECK_FALSE(chunked.estimate().bpm); CHECK(chunked.estimate().beats == 0);
  whole.process(silence, 2, 0); CHECK_FALSE(whole.estimate().bpm);
+ whole.process(audio, 3, 0); REQUIRE(whole.estimate().bpm);
+ whole.process(silence, 3, audio.size(), true); CHECK_FALSE(whole.estimate().bpm); CHECK(whole.estimate().beats == 0);
 }
 TEST_CASE("invalid tempo sample rate is rejected") { CHECK_THROWS(TempoTracker(0)); }
