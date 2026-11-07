@@ -80,7 +80,7 @@ Desktop application internals
 
 .. cpp:function:: bool CollectionView::analyzeComposite(const QString& path)
 
-   When the private composite build is enabled, start uncached snapshot analysis with a fresh process epoch. The caller must serialize Essentia construction process-wide. Evidence remains provisional and is not exposed to QML.
+   When the private composite build is enabled, start uncached snapshot analysis with a fresh process epoch. The caller must serialize Essentia construction process-wide. The raw evidence is provisional and is not exposed directly to QML.
 
 .. cpp:function:: const std::optional<beatglass::UnverifiedMusicAnalysis>& CollectionView::compositeEvidence() const
 

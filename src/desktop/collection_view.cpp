@@ -22,6 +22,76 @@ CollectionView::CollectionView(const QString& database, beatglass::SourceEpochAl
   connect(&poll_, &QTimer::timeout, this, &CollectionView::pollAnalysis);
 }
 CollectionView::~CollectionView() { worker_.reset(); }
+bool CollectionView::compositeAvailable() const {
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  return true;
+#else
+  return false;
+#endif
+}
+QString CollectionView::provisionalSummary() const {
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  if (compositeEvidence_ && evidenceSelection_ && evidenceSelection_ == selectionToken_) {
+    const auto& value = compositeEvidence_->value;
+    return QStringLiteral("Provisional uncached estimates; source and dependency identity are not fully verified. Track-level key: %1. %2 local windows (showing up to 64).")
+      .arg(value.validated_track_key ? QString::fromStdString(value.validated_track_key->label) : QStringLiteral("Unknown"))
+      .arg(static_cast<qulonglong>(value.tonal_windows.size()));
+  }
+#endif
+  return QStringLiteral("No provisional analysis for this selection. Track-level key: Unknown.");
+}
+QVariantList CollectionView::provisionalWindows() const {
+  QVariantList rows;
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  if (!compositeEvidence_ || !evidenceSelection_ || evidenceSelection_ != selectionToken_) return rows;
+  const auto& windows = compositeEvidence_->value.tonal_windows;
+  for (std::size_t i = 0; i < windows.size() && i < 64; ++i) {
+    const auto& window = windows[i];
+    auto strength = [](const std::optional<beatglass::OfflineEstimate>& estimate) {
+      return estimate && estimate->strength ? QString::number(*estimate->strength, 'g', 4) : QStringLiteral("Unknown");
+    };
+    QVariantMap row;
+    row.insert(QStringLiteral("range"), QStringLiteral("Frames [%1, %2)").arg(static_cast<qulonglong>(window.start_frame)).arg(static_cast<qulonglong>(window.end_frame)));
+    row.insert(QStringLiteral("key"), window.rolling_key ? QString::fromStdString(window.rolling_key->label) : QStringLiteral("Unknown"));
+    row.insert(QStringLiteral("keyFrom"), window.rolling_key_from ? QString::number(static_cast<qulonglong>(*window.rolling_key_from)) : QStringLiteral("Unknown"));
+    row.insert(QStringLiteral("keyStrength"), strength(window.rolling_key));
+    row.insert(QStringLiteral("chord"), window.local_chord ? QString::fromStdString(window.local_chord->label) : QStringLiteral("Unknown"));
+    row.insert(QStringLiteral("chordStrength"), strength(window.local_chord));
+    rows.push_back(std::move(row));
+  }
+#endif
+  return rows;
+}
+void CollectionView::selectSource(const QUrl& url) {
+  selectionToken_ = std::make_shared<const char>(); evidenceSelection_.reset();
+  selectedPath_ = url.isLocalFile() ? url.toLocalFile() : QString();
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  compositeEvidence_.reset();
+#endif
+  if (analysisTicket_) worker_->cancel_analysis();
+  analysisStatus_ = selectedPath_.isEmpty() ? QStringLiteral("Select a local file.") : QStringLiteral("Ready for provisional analysis.");
+  emit changed();
+}
+bool CollectionView::analyzeSelected() {
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  if (selectedPath_.isEmpty() || !selectionToken_ || analysisTicket_) return false;
+  submittedSelection_ = selectionToken_;
+  submittedPath_ = selectedPath_;
+  if (analyzeComposite(selectedPath_)) return true;
+  submittedSelection_.reset(); submittedPath_.clear();
+#endif
+  return false;
+}
+void CollectionView::cancelSelected() {
+  evidenceSelection_.reset();
+  if (submittedSelection_) submittedSelection_ = std::make_shared<const char>();
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  compositeEvidence_.reset();
+#endif
+  cancelAnalysis();
+  analysisStatus_ = analysisTicket_ ? QStringLiteral("Cancellation requested; result hidden.") : QStringLiteral("Result hidden.");
+  emit changed();
+}
 void CollectionView::refresh(const QString& search) {
   auto token = requests_.beginBrowse([this] { worker_->cancel_browse(); }); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
   beatglass::library_detail::CollectionQuery query; query.search = search.toUtf8().toStdString(); query.limit = 100;
@@ -68,6 +138,10 @@ void CollectionView::pollAnalysis() {
   if (!requests_.finishAnalysis(analysisToken_, std::move(*result))) return;
   auto held = requests_.takeAnalysis();
   auto& outcome = *held;
+  if (submittedSelection_ && (submittedSelection_ != selectionToken_ || submittedPath_ != selectedPath_)) {
+    if (analysisStatus_ == QStringLiteral("Cancellation requested; result hidden.")) analysisStatus_ = QStringLiteral("Analysis finished; result hidden.");
+    analysisToken_.reset(); submittedSelection_.reset(); submittedPath_.clear(); emit changed(); return;
+  }
   if (!outcome.error.empty()) analysisStatus_ = QStringLiteral("Analysis error: %1").arg(QString::fromStdString(outcome.error));
   else if (outcome.cancelled) analysisStatus_ = QStringLiteral("Analysis cancelled.");
   else if (const auto* analysis = std::get_if<LibraryBridge::Analysis>(&outcome.value)) {
@@ -86,7 +160,7 @@ void CollectionView::pollAnalysis() {
     using S = beatglass::library_detail::CompositeJobStatus;
     switch (composite->status) {
       case S::complete:
-        if (composite->value && !composite->value->cache_reusable()) { compositeEvidence_ = std::move(composite->value); analysisStatus_ = QStringLiteral("Unverified composite evidence received; result remains gated."); }
+        if (composite->value && !composite->value->cache_reusable()) { compositeEvidence_ = std::move(composite->value); evidenceSelection_ = submittedSelection_; analysisStatus_ = QStringLiteral("Provisional analysis complete; caching is disabled."); }
         else analysisStatus_ = QStringLiteral("Composite error: invalid result.");
         break;
       case S::cancelled: analysisStatus_ = QStringLiteral("Composite analysis cancelled."); break;
@@ -96,7 +170,7 @@ void CollectionView::pollAnalysis() {
   }
 #endif
   else analysisStatus_ = QStringLiteral("Unexpected analysis response.");
-  analysisToken_.reset(); emit changed();
+  analysisToken_.reset(); submittedSelection_.reset(); submittedPath_.clear(); emit changed();
 }
 #ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
 bool CollectionView::analyzeComposite(const QString& path) {
@@ -104,7 +178,7 @@ bool CollectionView::analyzeComposite(const QString& path) {
   auto epoch = worker_->new_session_epoch();
   if (!epoch) { analysisStatus_ = QStringLiteral("Analysis unavailable: epoch limit reached."); emit changed(); return false; }
   analysisToken_ = requests_.beginAnalysis(); if (!analysisToken_) return false;
-  compositeEvidence_.reset(); analysisStatus_ = QStringLiteral("Composite analysis running.");
+  compositeEvidence_.reset(); evidenceSelection_.reset(); analysisStatus_ = QStringLiteral("Composite analysis running.");
   analysisTicket_ = worker_->analyze_composite(nativePath(path), *epoch, {});
   poll_.start(); emit changed(); return true;
 }
