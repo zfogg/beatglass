@@ -101,6 +101,8 @@ private slots:
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Provisional offline page received; result remains gated."), 10000);
     QVERIFY(view.offlinePage()); QCOMPARE(QString::fromStdString(view.offlinePage()->run_id), QStringLiteral("run-2"));
     QVERIFY(!view.offlinePage()->beats.front().strength); QVERIFY(!view.offlinePage()->windows.front().rolling_key->strength);
+    QCOMPARE(view.offlinePage()->header.beats.capacity(), std::size_t(0));
+    QCOMPARE(view.offlinePage()->header.tonal_windows.capacity(), std::size_t(0));
     view.requestOfflinePage(audio, identity, "run-2", 1, 1, 1, 1, 11);
     QVERIFY(!view.offlinePage());
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Provisional offline page received; result remains gated."), 10000);
