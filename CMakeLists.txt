@@ -171,6 +171,10 @@ if(BUILD_TESTING)
       endif()
     endif()
     target_link_libraries(windows_endpoint_tests PRIVATE beatglass_windows_endpoints Catch2::Catch2WithMain winmm)
-    catch_discover_tests(windows_endpoint_tests PROPERTIES LABELS "unit;platform" TIMEOUT 30)
+    catch_discover_tests(windows_endpoint_tests PROPERTIES LABELS platform TIMEOUT 30)
+    add_test(NAME windows_ctest_registration COMMAND ${CMAKE_COMMAND}
+      -DCTEST=${CMAKE_CTEST_COMMAND} -DBUILD=${CMAKE_BINARY_DIR} -DCONFIG=$<CONFIG>
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/integration/ctest_registration.cmake)
+    set_tests_properties(windows_ctest_registration PROPERTIES LABELS unit TIMEOUT 15)
   endif()
 endif()
