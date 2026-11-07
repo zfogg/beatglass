@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 namespace beatglass::library_detail {
-/** Worker-confined, provisional SQLite AnalysisStore adapter for tempo-only snapshots. Not thread-safe or installed. It rejects candidate, beat and chord collections rather than silently discarding them. Input identity must already be validated by the caller; publication invokes the supplied verifier. */
+/** Worker-confined, provisional SQLite AnalysisStore adapter for tempo-only snapshots. Not thread-safe or installed. Its versioned serialization namespace is distinct from the earlier private tempo-result blob. It rejects candidate, beat and chord collections rather than silently discarding them. Input identity must already be validated by the caller; publication invokes the supplied verifier. */
 class TempoAnalysisStore final : public AnalysisStore {
 public:
   /** Open the exclusively owned database; may block and throws on storage errors. */
@@ -17,9 +17,9 @@ public:
   /** Delete only an index row, never the user's source file. */
   bool remove_entry(const std::string& path);
   /** Copy one exact-path metadata row, if present. */
-  std::optional<CollectionEntry> entry(const std::string& path);
+  std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop = {});
   /** Copy a bounded metadata page; queries remain on the owning worker. */
-  std::vector<CollectionEntry> entries(const CollectionQuery& query);
+  std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});
   /** Look up a validated identity; returns cancellation, miss, hit, or storage/format error. */
   FindResult find(const FileVersion&, const AnalysisIdentity&, std::stop_token) override;
   /** Stage and atomically publish after verifier approval. The current shared verifier cannot observe a stop token while blocking. */

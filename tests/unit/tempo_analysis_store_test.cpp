@@ -68,3 +68,16 @@ TEST_CASE("typed tempo store rejects data it cannot preserve and mismatched iden
   REQUIRE(store.publish(file, item, "wrong", verifier, {}).outcome == PublishOutcome::error);
   REQUIRE(store.find(file, item.identity, {}).outcome == FindOutcome::error);
 }
+
+TEST_CASE("typed snapshot cache does not misread older private tempo blobs") {
+  TempDb db; auto item = sample(); auto file = version();
+  { beatglass::library_detail::SqliteCache old(db.path.string());
+    beatglass::library_detail::CacheKey key{item.identity.content_hash, item.identity.engine_version, item.identity.configuration_id, item.identity.mode};
+    old.begin("legacy", key); REQUIRE(old.publish("legacy", key, "tempo-v1 legacy", {}, [] { return true; }) == beatglass::library_detail::Publish::committed); }
+  { TempoAnalysisStore store(db.path.string()); Verifier verifier;
+    REQUIRE(store.find(file, item.identity, {}).outcome == FindOutcome::miss);
+    REQUIRE(store.publish(file, item, "new", verifier, {}).outcome == PublishOutcome::committed);
+    REQUIRE(store.find(file, item.identity, {}).outcome == FindOutcome::hit); }
+  { beatglass::library_detail::SqliteCache old(db.path.string()); std::string value;
+    REQUIRE(old.find({item.identity.content_hash, item.identity.engine_version, item.identity.configuration_id, item.identity.mode}, value)); REQUIRE(value == "tempo-v1 legacy"); }
+}

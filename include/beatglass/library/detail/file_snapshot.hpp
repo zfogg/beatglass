@@ -19,7 +19,7 @@ enum class SnapshotStatus {
 };
 /** A bounded snapshot read result; zero bytes indicate EOF or failure. */
 struct SnapshotRead { /** Status of the read. */ SnapshotStatus status{SnapshotStatus::error}; /** Bytes copied, or zero on failure. */ std::size_t bytes{}; };
-/** Private immutable byte snapshot and retained original source, confined to one worker. Provisional platform implementation; no product integration. Not a complete product integration or an installation API. */
+/** Private immutable byte snapshot and retained original source, confined to one worker. Provisional platform implementation; no product integration. Linux requires O_TMPFILE and /proc self-descriptor access and fails closed without them. Other platforms retain their documented limitations. Not a complete product integration or an installation API. */
 class FileSnapshot {
 public:
   /** Release snapshot and original descriptors. A borrowing decoder must already be destroyed. */

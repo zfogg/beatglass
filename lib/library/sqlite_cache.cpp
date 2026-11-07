@@ -48,7 +48,7 @@ public:
   ~Impl() { sqlite3_close(db_); }
   // All calls, including destruction, belong to one database worker.
   void put_entry(const CollectionEntry& e) {
-    if (e.path.empty() || e.size_bytes > static_cast<std::uint64_t>(std::numeric_limits<sqlite3_int64>::max()) ||
+    if (e.path.empty() || e.path.find('\0') != std::string::npos || e.title.find('\0') != std::string::npos || e.artist.find('\0') != std::string::npos || e.content_hash.find('\0') != std::string::npos || e.diagnostic.find('\0') != std::string::npos || e.path.size() > 262144 || e.title.size() > 16384 || e.artist.size() > 16384 || e.diagnostic.size() > 16384 || e.content_hash.size() > 512 || e.size_bytes > static_cast<std::uint64_t>(std::numeric_limits<sqlite3_int64>::max()) ||
         (e.frames && *e.frames > static_cast<std::uint64_t>(std::numeric_limits<sqlite3_int64>::max())) ||
         (e.sample_rate && *e.sample_rate == 0) || static_cast<int>(e.availability) < 0 || static_cast<int>(e.availability) > 2)
       throw std::invalid_argument("invalid collection entry");
@@ -62,20 +62,22 @@ public:
   bool remove_entry(const std::string& path) {
     Statement s(db_, "DELETE FROM collection WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1;
   }
-  std::optional<CollectionEntry> entry(const std::string& path) {
+  std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop) {
+    if (stop.stop_requested()) throw CollectionCancelled(); Progress progress(db_, stop);
     Statement s(db_, "SELECT path,title,artist,content_hash,size_bytes,modified_ns,frames,sample_rate,availability,diagnostic FROM collection WHERE path=?");
-    bind(s.p,1,path); int rc = sqlite3_step(s.p); if (rc == SQLITE_DONE) return std::nullopt;
+    bind(s.p,1,path); int rc = sqlite3_step(s.p); if (stop.stop_requested()) throw CollectionCancelled(); if (rc == SQLITE_DONE) return std::nullopt;
     if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_)); return read_entry(s.p);
   }
-  std::vector<CollectionEntry> entries(const CollectionQuery& q) {
-    if (q.limit == 0 || q.limit > 200) throw std::invalid_argument("invalid collection page size");
+  std::vector<CollectionEntry> entries(const CollectionQuery& q, std::stop_token stop) {
+    if (stop.stop_requested()) throw CollectionCancelled(); Progress progress(db_, stop);
+    if (q.limit == 0 || q.limit > 200 || q.search.size() > 4096 || q.search.find('\0') != std::string::npos) throw std::invalid_argument("invalid collection page size");
     const char* order = nullptr;
     switch (q.order) { case CollectionOrder::path: order = "path"; break; case CollectionOrder::title: order = "title"; break; case CollectionOrder::artist: order = "artist"; break; default: throw std::invalid_argument("invalid collection order"); }
     std::string sql = "SELECT path,title,artist,content_hash,size_bytes,modified_ns,frames,sample_rate,availability,diagnostic FROM collection WHERE instr(lower(path),lower(?1))>0 OR instr(lower(title),lower(?1))>0 OR instr(lower(artist),lower(?1))>0 ORDER BY ";
     sql += order; sql += " COLLATE NOCASE "; sql += q.descending ? "DESC" : "ASC"; sql += ", path COLLATE BINARY ASC LIMIT ?2 OFFSET ?3";
     Statement s(db_, sql.c_str()); bind(s.p,1,q.search); check(sqlite3_bind_int64(s.p,2,q.limit)); check(sqlite3_bind_int64(s.p,3,q.offset));
     std::vector<CollectionEntry> result;
-    for (;;) { int rc = sqlite3_step(s.p); if (rc == SQLITE_DONE) break; if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_)); result.push_back(read_entry(s.p)); }
+    for (;;) { int rc = sqlite3_step(s.p); if (stop.stop_requested()) throw CollectionCancelled(); if (rc == SQLITE_DONE) break; if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_)); result.push_back(read_entry(s.p)); }
     return result;
   }
   void begin(const std::string& id, const CacheKey& key) {
@@ -133,13 +135,20 @@ public:
     } catch (...) { rollback(); return Publish::error; }
   }
 private:
+  struct Progress {
+    sqlite3* db; const std::stop_token* token;
+    Progress(sqlite3* connection, const std::stop_token& stop) : db(connection), token(&stop) {
+      sqlite3_progress_handler(db, 1000, [](void* value) { return static_cast<Progress*>(value)->token->stop_requested() ? 1 : 0; }, this);
+    }
+    ~Progress() { sqlite3_progress_handler(db, 0, nullptr, nullptr); }
+  };
   struct Statement {
     sqlite3_stmt* p = nullptr;
     Statement(sqlite3* db, const char* sql) { if (sqlite3_prepare_v2(db, sql, -1, &p, nullptr) != SQLITE_OK) throw std::runtime_error(sqlite3_errmsg(db)); }
     ~Statement() { sqlite3_finalize(p); }
   };
   CollectionEntry read_entry(sqlite3_stmt* s) {
-    auto str = [this,s](int col) { auto p = sqlite3_column_text(s,col); auto n = sqlite3_column_bytes(s,col); if (!p) throw std::runtime_error("invalid collection text"); return std::string(reinterpret_cast<const char*>(p), static_cast<std::size_t>(n)); };
+    auto str = [this,s](int col) { auto p = sqlite3_column_text(s,col); auto n = sqlite3_column_bytes(s,col); if (n > 262144) throw std::runtime_error("collection text too large"); if (!p) throw std::runtime_error("invalid collection text"); return std::string(reinterpret_cast<const char*>(p), static_cast<std::size_t>(n)); };
     CollectionEntry e; e.path=str(0); e.title=str(1); e.artist=str(2); e.content_hash=str(3);
     auto size = sqlite3_column_int64(s,4); auto frames = sqlite3_column_int64(s,6); auto rate = sqlite3_column_int64(s,7); auto availability = sqlite3_column_int(s,8);
     if (size < 0 || (sqlite3_column_type(s,6) != SQLITE_NULL && frames < 0) || (sqlite3_column_type(s,7) != SQLITE_NULL && (rate <= 0 || rate > std::numeric_limits<std::uint32_t>::max())) || availability < 0 || availability > 2) throw std::runtime_error("invalid collection values");
@@ -160,8 +169,8 @@ SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>
 SqliteCache::~SqliteCache() = default;
 void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }
 bool SqliteCache::remove_entry(const std::string& path) { return impl_->remove_entry(path); }
-std::optional<CollectionEntry> SqliteCache::entry(const std::string& path) { return impl_->entry(path); }
-std::vector<CollectionEntry> SqliteCache::entries(const CollectionQuery& q) { return impl_->entries(q); }
+std::optional<CollectionEntry> SqliteCache::entry(const std::string& path, std::stop_token stop) { return impl_->entry(path, stop); }
+std::vector<CollectionEntry> SqliteCache::entries(const CollectionQuery& q, std::stop_token stop) { return impl_->entries(q, stop); }
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
 RunRecovery SqliteCache::recover(const std::string& id, const CacheKey& key) { return impl_->recover(id, key); }

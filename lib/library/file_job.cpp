@@ -10,6 +10,7 @@
 #include "../capture/file/virtual_io.hpp"
 #include <algorithm>
 #include <cmath>
+#include <chrono>
 #include <vector>
 #include <atomic>
 #include <iomanip>
@@ -20,6 +21,7 @@
 namespace beatglass::library_detail {
 namespace {
 struct Cancelled {};
+std::int64_t publication_time() { return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count(); }
 std::string run_id() {
   static std::atomic<unsigned long long> counter{0};
   std::random_device random;
@@ -98,11 +100,11 @@ private:
 };
 // Temporary integration adapter. DSP should own a shared replay pipeline once
 // its virtual reader interface is accepted; this mirrors the current tempo slice.
-TempoResult replay_snapshot(ByteSource& source, std::stop_token stop, const std::function<void(std::uint64_t)>& progress) {
-  detail::VirtualFileReader file(source, 0, stop); constexpr std::size_t hop = 512;
+TempoResult replay_snapshot(ByteSource& source, std::uint64_t epoch, std::stop_token stop, const std::function<void(std::uint64_t)>& progress) {
+  detail::VirtualFileReader file(source, epoch, stop); constexpr std::size_t hop = 512;
   const auto metadata = file.metadata(); TempoTracker tracker(metadata.sample_rate);
   std::uint64_t position = 0, silent_frames = 0; StreamContinuity continuity; TrackingMachine lifecycle;
-  if (!lifecycle.start(0)) throw std::runtime_error("Could not start tracking");
+  if (!lifecycle.start(epoch)) throw std::runtime_error("Could not start tracking");
   std::vector<float> pcm(hop * metadata.channels), mono(hop); TempoResult result{metadata, std::nullopt, 0};
   for (;;) {
     auto read = file.read(pcm, stop);
@@ -155,7 +157,7 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
     }
     const auto id = run_id(); cache.begin(id, key);
     SnapshotSource source(*opened.value);
-    auto result = replay_snapshot(source, stop, progress);
+    auto result = replay_snapshot(source, 0, stop, progress);
     SnapshotStatus verified = SnapshotStatus::error;
     auto published = cache.publish(id, key, encode(result), stop, [&] { verified = opened.value->verify(stop); return verified == SnapshotStatus::ok; });
     if (published == Publish::cancelled) return {FileJobStatus::cancelled, {}, {}};
@@ -168,7 +170,7 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
 }
 
 StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const std::filesystem::path& path,
-  const std::string& engine, const std::string& config, std::stop_token stop,
+  const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop,
   const std::function<void(std::uint64_t)>& progress) {
   try {
     if (engine.empty() || config.empty()) return {FileJobStatus::error, {}, "empty engine or configuration", {}};
@@ -189,13 +191,17 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
       if (verified == SnapshotStatus::cancelled || stop.stop_requested()) return {FileJobStatus::cancelled, {}, {}, {}};
       if (verified == SnapshotStatus::stale_input || verified == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, {}, {}};
       if (verified != SnapshotStatus::ok) return {FileJobStatus::error, {}, "source revalidation failed", {}};
+      auto& snapshot = found.result->result; const auto old_epoch = snapshot.observed_through.epoch;
+      for (auto& beat : snapshot.beats) { if (beat.time.epoch != old_epoch) return {FileJobStatus::error, {}, "cached beat epoch mismatch", {}}; beat.time.epoch = epoch; }
+      for (auto& chord : snapshot.chords) { if (chord.start.epoch != old_epoch || chord.end.epoch != old_epoch) return {FileJobStatus::error, {}, "cached chord epoch mismatch", {}}; chord.start.epoch = epoch; chord.end.epoch = epoch; }
+      snapshot.observed_through.epoch = epoch; snapshot.publication_monotonic_ns = publication_time();
       return {FileJobStatus::cache_hit, std::move(found.result), {}, {}};
     }
     if (found.outcome != FindOutcome::miss) return {FileJobStatus::error, {}, "unknown store lookup outcome", {}};
     SnapshotSource source(*opened.value); std::uint64_t observed = 0;
-    auto tempo = replay_snapshot(source, stop, [&](auto frames) { observed = frames; if (progress) progress(frames); });
+    auto tempo = replay_snapshot(source, epoch, stop, [&](auto frames) { observed = frames; if (progress) progress(frames); });
     CachedAnalysis value; value.identity = identity; value.result.state = tempo.state; value.result.bpm = tempo.bpm;
-    value.result.observed_through = {0, observed}; value.result.estimator_version = engine; value.result.configuration_id = config;
+    value.result.observed_through = {epoch, observed}; value.result.publication_monotonic_ns = publication_time(); value.result.estimator_version = engine; value.result.configuration_id = config;
     class Verifier final : public FileVersionVerifier {
     public:
       Verifier(FileSnapshot& source, std::stop_token token) : source_(source), token_(token) {}
@@ -214,7 +220,7 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
       FileSnapshot& source_; std::stop_token token_;
     } verifier(*opened.value, stop);
     auto id = run_id(); auto published = store.publish(file, value, id, verifier, stop);
-    if (published.outcome == PublishOutcome::committed) return {FileJobStatus::committed, value, {}, {}};
+    if (published.outcome == PublishOutcome::committed) { value.result.publication_monotonic_ns = publication_time(); return {FileJobStatus::committed, value, {}, {}}; }
     if (published.outcome == PublishOutcome::cancelled || verifier.cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
     if (published.outcome == PublishOutcome::stale_input) return {FileJobStatus::stale_input, {}, published.diagnostic, {}};
     return {FileJobStatus::error, {}, published.diagnostic, id};

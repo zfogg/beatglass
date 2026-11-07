@@ -2,6 +2,7 @@
 #include "beatglass/library/detail/file_job.hpp"
 #include "beatglass/library/detail/job_executor.hpp"
 #include "beatglass/library/detail/file_snapshot.hpp"
+#include "beatglass/library/detail/file_fingerprint.hpp"
 #include "beatglass/library/detail/snapshot_store_job.hpp"
 #include "beatglass/library/detail/tempo_analysis_store.hpp"
 #ifndef _WIN32
@@ -180,11 +181,12 @@ TEST_CASE("snapshot virtual cache handles generated WAV and available codec fixt
   paths.push_back(fixtures / "tone.flac"); paths.push_back(fixtures / "tone.mp3");
 #endif
   for (const auto& path : paths) {
-    CAPTURE(path.string()); int blocks = 0;
+    CAPTURE(path.string()); auto before = fingerprint_file(path); REQUIRE(before.status == FingerprintStatus::ok); int blocks = 0;
     { SqliteCache cache(db.string()); auto first = analyze_snapshot_tempo(cache, path, "codec-test-v1", "default", {}, [&](auto) { ++blocks; });
       INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.result); REQUIRE(blocks > 0); }
     { SqliteCache cache(db.string()); blocks = 0; auto hit = analyze_snapshot_tempo(cache, path, "codec-test-v1", "default", {}, [&](auto) { ++blocks; });
       INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(blocks == 0); }
+    auto after = fingerprint_file(path); REQUIRE(after.status == FingerprintStatus::ok); REQUIRE(after.digest == before.digest);
   }
 }
 
@@ -193,14 +195,14 @@ TEST_CASE("snapshot job uses shared store and worker collection queries") {
   std::filesystem::copy_file(fixtures / "tone.aiff", input); auto db = temp.path / "library.sqlite";
   {
     TempoAnalysisStore concrete(db.string()); beatglass::AnalysisStore& store = concrete; int blocks = 0;
-    auto first = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "old", {}, [&](auto) { ++blocks; });
+    auto first = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "old", 101, {}, [&](auto) { ++blocks; });
     INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.value); REQUIRE(blocks > 0);
-    REQUIRE(first.value->result.observed_through.frame > 0);
+    REQUIRE(first.value->result.observed_through.frame > 0); REQUIRE(first.value->result.observed_through.epoch == 101);
     CollectionEntry row; row.path = input.string(); row.title = "Fixture"; row.artist = "Example"; row.content_hash = first.value->identity.content_hash;
     concrete.put_entry(row); auto page = concrete.entries({"fixture", CollectionOrder::title, false, 10, 0});
     REQUIRE(page.size() == 1); REQUIRE(page[0].path == row.path); REQUIRE(concrete.entry(row.path));
     bool modified = false;
-    auto changed = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", {}, [&](auto) {
+    auto changed = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", 102, {}, [&](auto) {
       if (!modified) { modified = true; std::ofstream out(input, std::ios::binary | std::ios::app); out << 'x'; }
     });
     INFO(changed.diagnostic); REQUIRE(modified); REQUIRE(changed.status == FileJobStatus::stale_input);
@@ -208,11 +210,22 @@ TEST_CASE("snapshot job uses shared store and worker collection queries") {
   std::filesystem::copy_file(fixtures / "tone.aiff", input, std::filesystem::copy_options::overwrite_existing);
   {
     TempoAnalysisStore concrete(db.string()); beatglass::AnalysisStore& store = concrete; int blocks = 0;
-    auto hit = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "old", {}, [&](auto) { ++blocks; });
-    INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(hit.value); REQUIRE(blocks == 0);
-    auto after = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new");
+    auto hit = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "old", 105, {}, [&](auto) { ++blocks; });
+    INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(hit.value); REQUIRE(hit.value->result.observed_through.epoch == 105); REQUIRE(blocks == 0);
+    auto after = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", 103);
     INFO(after.diagnostic); REQUIRE(after.status == FileJobStatus::committed);
+    bool replaced = false;
+    auto stale = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "replacement", 106, {}, [&](auto) {
+      if (!replaced) { replaced = true; std::filesystem::rename(input, temp.path / "old-file"); std::filesystem::copy_file(fixtures / "tone.aiff", input); }
+    });
+    REQUIRE(replaced); REQUIRE(stale.status == FileJobStatus::stale_input);
+    std::filesystem::remove(input); std::filesystem::rename(temp.path / "old-file", input);
+    REQUIRE(analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "old", 107).status == FileJobStatus::cache_hit);
+    std::stop_source in_flight;
+    auto cancelled = analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "cancel", 108, in_flight.get_token(), [&](auto) { in_flight.request_stop(); });
+    REQUIRE(cancelled.status == FileJobStatus::cancelled);
+    REQUIRE(analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "cancel", 109).status == FileJobStatus::committed);
     std::stop_source stop; stop.request_stop();
-    REQUIRE(analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", stop.get_token()).status == FileJobStatus::cancelled);
+    REQUIRE(analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", 104, stop.get_token()).status == FileJobStatus::cancelled);
   }
 }

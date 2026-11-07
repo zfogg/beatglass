@@ -7,6 +7,7 @@
 #include <vector>
 #include <stop_token>
 #include <string>
+#include <stdexcept>
 namespace beatglass::library_detail {
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;
@@ -49,9 +50,14 @@ struct CollectionEntry {
   /** Last observed availability. */ EntryAvailability availability{EntryAvailability::present};
   /** Optional diagnostic from the indexing worker. */ std::string diagnostic;
 };
+/** Cooperative collection-query cancellation; no partial results are returned. */
+class CollectionCancelled : public std::runtime_error {
+public:
+  /** Construct the cancellation signal. */ CollectionCancelled() : std::runtime_error("collection query cancelled") {}
+};
 /** Whitelisted collection ordering. */
 enum class CollectionOrder { /** Path key. */ path, /** Title with path tie-break. */ title, /** Artist with path tie-break. */ artist };
-/** Bounded literal-search query; text matching and case-insensitive ordering use SQLite's ASCII-only lower/NOCASE behavior. Pages can shift if the collection changes between queries. */
+/** Bounded literal-search query; text matching and case-insensitive ordering use SQLite's ASCII-only lower/NOCASE behavior. Search is capped at 4096 bytes; embedded NULs are rejected. Pages can shift if the collection changes between queries. */
 struct CollectionQuery {
   /** Literal search across path, title and artist. */ std::string search;
   /** Sort field. */ CollectionOrder order{CollectionOrder::path};
@@ -71,10 +77,10 @@ public:
   void put_entry(const CollectionEntry& entry);
   /** Remove only the index row; returns whether a row existed. Never removes a source file. */
   bool remove_entry(const std::string& path);
-  /** Return an owned exact-path entry or absence; throws on storage errors. */
-  std::optional<CollectionEntry> entry(const std::string& path);
-  /** Return up to the requested bounded page of owned entries; throws on invalid query or storage errors. */
-  std::vector<CollectionEntry> entries(const CollectionQuery& query);
+  /** Return an owned exact-path entry or absence; throws CollectionCancelled on observed stop and throws on storage errors. */
+  std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop = {});
+  /** Return up to the requested bounded page of owned entries; throws CollectionCancelled on observed stop and throws on invalid query or storage errors. */
+  std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});
   /** Insert a uniquely identified running job; throws on SQLite error or duplicate ID. */
   void begin(const std::string& id, const CacheKey& key);
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */

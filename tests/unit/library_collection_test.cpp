@@ -28,7 +28,15 @@ TEST_CASE("collection indexing returns bounded owned pages and never deletes aud
   auto literal = cache.entries({"%", CollectionOrder::path, false, 20, 0}); REQUIRE(literal.size() == 1); REQUIRE(literal[0].path == a.path);
   auto reverse = cache.entries({"artist", CollectionOrder::artist, true, 20, 0}); REQUIRE(reverse.size() == 3); REQUIRE(reverse[0].artist == "Artist C");
   a.title = "Updated"; cache.put_entry(a); REQUIRE(cache.entry(a.path)->title == "Updated"); REQUIRE(detail->title == "100% tune");
+  std::stop_source cancelled; cancelled.request_stop();
+  REQUIRE_THROWS_AS(cache.entries({"", CollectionOrder::path, false, 20, 0}, cancelled.get_token()), CollectionCancelled);
+  REQUIRE_THROWS_AS(cache.entry(a.path, cancelled.get_token()), CollectionCancelled);
+  REQUIRE(cache.entry(a.path));
   REQUIRE_THROWS(cache.entries({"", CollectionOrder::path, false, 0, 0}));
+  REQUIRE_THROWS(cache.entries({std::string(4097, 'x'), CollectionOrder::path, false, 1, 0}));
+  auto oversized = a; oversized.title = std::string(16385, 'x'); REQUIRE_THROWS(cache.put_entry(oversized));
+  auto nul = a; nul.path = std::string("a\0b", 3); REQUIRE_THROWS(cache.put_entry(nul));
+  REQUIRE_THROWS(cache.entries({std::string("a\0b", 3), CollectionOrder::path, false, 1, 0}));
   a.size_bytes = std::numeric_limits<std::uint64_t>::max(); REQUIRE_THROWS(cache.put_entry(a));
   REQUIRE(cache.remove_entry(a.path)); REQUIRE_FALSE(cache.remove_entry(a.path)); REQUIRE_FALSE(cache.entry(a.path));
   REQUIRE(std::filesystem::exists(audio)); std::ifstream f(audio); std::string bytes; std::getline(f, bytes); REQUIRE(bytes == "user audio");

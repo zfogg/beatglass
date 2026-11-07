@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/detail/file_snapshot.hpp"
 #include <chrono>
+#include <cstdlib>
 #include <array>
 #include <filesystem>
 #include <fstream>
@@ -9,6 +10,7 @@
 #include <windows.h>
 #else
 #include <unistd.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <cerrno>
 #endif
@@ -66,21 +68,21 @@ TEST_CASE("snapshot copying observes cancellation between chunks") {
   TempDir temp; auto file = temp.path / "source"; write(file, std::string(200000, 'x'));
   std::stop_source stop; int notifications = 0;
 #ifdef __linux__
-  std::filesystem::path temporary;
+  int temporary_fd = -1;
 #endif
   auto snapshot = SnapshotOpen::create(file, stop.get_token(), [&](auto) {
     ++notifications;
 #ifdef __linux__
     for (const auto& entry : std::filesystem::directory_iterator("/proc/self/fd")) {
       std::error_code error; auto target = std::filesystem::read_symlink(entry.path(), error);
-      if (!error && target.filename().string().starts_with("beatglass-snapshot-")) temporary = target;
+      if (!error && target.parent_path() == std::filesystem::temp_directory_path() && target.filename().string().starts_with("#") && target.filename().string().ends_with(" (deleted)")) temporary_fd = std::stoi(entry.path().filename().string());
     }
 #endif
     stop.request_stop();
   });
   REQUIRE(notifications == 1); REQUIRE(snapshot.status == SnapshotStatus::cancelled); REQUIRE_FALSE(snapshot.value);
 #ifdef __linux__
-  REQUIRE_FALSE(temporary.empty()); REQUIRE_FALSE(std::filesystem::exists(temporary));
+  REQUIRE(temporary_fd >= 0); errno = 0; REQUIRE(::fcntl(temporary_fd, F_GETFD) == -1); REQUIRE(errno == EBADF);
 #endif
   REQUIRE(std::filesystem::file_size(file) == 200000);
 #endif
@@ -137,5 +139,33 @@ TEST_CASE("Windows snapshot retains bytes after original content restoration") {
   auto status = snapshot.value->verify(); REQUIRE((status == SnapshotStatus::ok || status == SnapshotStatus::stale_input));
   std::array<std::byte, 3> out{}; auto result = snapshot.value->read_at(0, out);
   REQUIRE(result.status == SnapshotStatus::ok); REQUIRE(result.bytes == 3); REQUIRE(std::to_integer<char>(out[0]) == 'a');
+}
+#endif
+
+TEST_CASE("snapshot reports original modification time as Unix nanoseconds") {
+  TempDir temp; auto file = temp.path / "source"; write(file, "abc");
+  auto snapshot = SnapshotOpen::create(file); INFO(snapshot.diagnostic); REQUIRE(snapshot.status == SnapshotStatus::ok);
+  auto actual = snapshot.value->modified_unix_ns(); REQUIRE(actual);
+#ifdef _WIN32
+  WIN32_FILE_ATTRIBUTE_DATA data{}; REQUIRE(GetFileAttributesExW(file.c_str(), GetFileExInfoStandard, &data));
+  ULARGE_INTEGER ticks{}; ticks.LowPart = data.ftLastWriteTime.dwLowDateTime; ticks.HighPart = data.ftLastWriteTime.dwHighDateTime;
+  REQUIRE(*actual == (static_cast<std::int64_t>(ticks.QuadPart) - 116444736000000000LL) * 100);
+#else
+  struct stat st{}; REQUIRE(::stat(file.c_str(), &st) == 0);
+#ifdef __APPLE__
+  REQUIRE(*actual == static_cast<std::int64_t>(st.st_mtimespec.tv_sec) * 1000000000LL + st.st_mtimespec.tv_nsec);
+#else
+  REQUIRE(*actual == static_cast<std::int64_t>(st.st_mtim.tv_sec) * 1000000000LL + st.st_mtim.tv_nsec);
+#endif
+#endif
+}
+#ifdef __linux__
+TEST_CASE("Linux snapshot fails closed when anonymous temporary creation is unavailable") {
+  TempDir temp; auto file = temp.path / "source"; write(file, "abc");
+  const char* current = std::getenv("TMPDIR"); const bool had = current != nullptr; std::string old = current ? current : "";
+  struct Restore { bool had; std::string value; ~Restore() { if (had) ::setenv("TMPDIR", value.c_str(), 1); else ::unsetenv("TMPDIR"); } } restore{had, old};
+  REQUIRE(::setenv("TMPDIR", "/proc", 1) == 0);
+  auto result = SnapshotOpen::create(file);
+  REQUIRE(result.status == SnapshotStatus::unverifiable); REQUIRE_FALSE(result.value);
 }
 #endif

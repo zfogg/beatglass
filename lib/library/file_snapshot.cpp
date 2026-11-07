@@ -106,22 +106,37 @@ SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_t
     struct stat before{}, after{}, named{};
     check(::fstat(impl->original.value, &before) == 0, "stat source");
     if (!S_ISREG(before.st_mode)) return {SnapshotStatus::unverifiable, {}, "source is not a regular file"};
+    Fd writer;
+#ifdef __linux__
+    // Require an anonymous filesystem temporary: no named writable snapshot is exposed.
+    writer.value = ::open(std::filesystem::temp_directory_path().c_str(), O_TMPFILE | O_RDWR | O_CLOEXEC, S_IRUSR | S_IWUSR);
+    if (writer.value < 0) return {SnapshotStatus::unverifiable, {}, "anonymous temporary files unavailable"};
+#else
     auto name = (std::filesystem::temp_directory_path() / "beatglass-snapshot-XXXXXX").string();
     std::vector<char> writable(name.begin(), name.end()); writable.push_back('\0');
-    Fd writer; writer.value = ::mkstemp(writable.data()); check(writer.value >= 0, "create snapshot");
+    writer.value = ::mkstemp(writable.data()); check(writer.value >= 0, "create snapshot");
     TempName temporary{writable.data()};
     check(::fcntl(writer.value, F_SETFD, FD_CLOEXEC) == 0, "protect snapshot descriptor");
+#endif
     auto copied_digest = hash_fd(impl->original.value, stop, writer.value, progress);
     check(::fstat(impl->original.value, &after) == 0, "restat source");
     check(::stat(impl->path.c_str(), &named) == 0, "stat source path");
     if (!same(before, after) || !same(after, named)) throw Stale{};
     check(::fchmod(writer.value, S_IRUSR) == 0, "restrict snapshot");
     struct stat written{}, readback{}; check(::fstat(writer.value, &written) == 0, "stat snapshot");
+#ifdef __linux__
+    auto descriptor_path = std::string("/proc/self/fd/") + std::to_string(writer.value);
+    impl->snapshot.value = ::open(descriptor_path.c_str(), O_RDONLY | O_CLOEXEC);
+    if (impl->snapshot.value < 0) return {SnapshotStatus::unverifiable, {}, "cannot reopen anonymous snapshot read-only"};
+#else
     impl->snapshot.value = ::open(temporary.name.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
     check(impl->snapshot.value >= 0, "open snapshot read-only");
+#endif
     check(::fstat(impl->snapshot.value, &readback) == 0, "stat read-only snapshot");
     if (written.st_dev != readback.st_dev || written.st_ino != readback.st_ino) throw Stale{};
+#ifndef __linux__
     check(::unlink(temporary.name.c_str()) == 0, "unlink snapshot"); temporary.name.clear();
+#endif
     check(::close(writer.release()) == 0, "close snapshot writer");
     impl->digest = hash_fd(impl->snapshot.value, stop);
     if (impl->digest != copied_digest) throw Stale{};

@@ -7,12 +7,13 @@
 #include <stdexcept>
 namespace beatglass::library_detail {
 namespace {
-CacheKey key_of(const AnalysisIdentity& id) { return {id.content_hash, id.engine_version, id.configuration_id, id.mode}; }
+CacheKey key_of(const AnalysisIdentity& id) { return {id.content_hash, "snapshot-store-v1:" + id.engine_version, id.configuration_id, id.mode}; }
 bool valid_identity(const FileVersion& file, const AnalysisIdentity& id) {
-  return !file.content_hash.empty() && file.content_hash == id.content_hash && !id.engine_version.empty() && !id.configuration_id.empty() && (id.mode == "offline" || id.mode == "live");
+  return !file.content_hash.empty() && file.content_hash.size() <= 512 && file.content_hash == id.content_hash && !id.engine_version.empty() && id.engine_version.size() <= 4096 && !id.configuration_id.empty() && id.configuration_id.size() <= 4096 && (id.mode == "offline" || id.mode == "live");
 }
 std::string encode(const Snapshot& s) {
   if (!s.tempo_candidates.empty() || !s.key_candidates.empty() || !s.beats.empty() || !s.chords.empty()) throw std::invalid_argument("tempo-only store cannot serialize event or candidate collections");
+  if (s.estimator_version.size() > 4096 || s.configuration_id.size() > 4096) throw std::invalid_argument("snapshot identity too large");
   if (s.bpm && !std::isfinite(*s.bpm)) throw std::invalid_argument("invalid BPM");
   if (static_cast<int>(s.state) < 0 || static_cast<int>(s.state) > static_cast<int>(TrackingState::error)) throw std::invalid_argument("invalid tracking state");
   std::ostringstream out; out.imbue(std::locale::classic());
@@ -36,8 +37,8 @@ TempoAnalysisStore::TempoAnalysisStore(const std::string& path) : impl_(std::mak
 TempoAnalysisStore::~TempoAnalysisStore() = default;
 void TempoAnalysisStore::put_entry(const CollectionEntry& entry) { impl_->cache.put_entry(entry); }
 bool TempoAnalysisStore::remove_entry(const std::string& path) { return impl_->cache.remove_entry(path); }
-std::optional<CollectionEntry> TempoAnalysisStore::entry(const std::string& path) { return impl_->cache.entry(path); }
-std::vector<CollectionEntry> TempoAnalysisStore::entries(const CollectionQuery& query) { return impl_->cache.entries(query); }
+std::optional<CollectionEntry> TempoAnalysisStore::entry(const std::string& path, std::stop_token stop) { return impl_->cache.entry(path, stop); }
+std::vector<CollectionEntry> TempoAnalysisStore::entries(const CollectionQuery& query, std::stop_token stop) { return impl_->cache.entries(query, stop); }
 FindResult TempoAnalysisStore::find(const FileVersion& file, const AnalysisIdentity& id, std::stop_token stop) {
   if (stop.stop_requested()) return {FindOutcome::cancelled, {}, {}};
   if (!valid_identity(file, id)) return {FindOutcome::error, {}, "invalid content or analysis identity"};
@@ -52,7 +53,7 @@ FindResult TempoAnalysisStore::find(const FileVersion& file, const AnalysisIdent
 }
 PublishResult TempoAnalysisStore::publish(const FileVersion& file, const CachedAnalysis& value, const std::string& run, FileVersionVerifier& verifier, std::stop_token stop) {
   if (stop.stop_requested()) return {PublishOutcome::cancelled, {}};
-  if (run.empty() || !valid_identity(file, value.identity) || value.result.estimator_version != value.identity.engine_version || value.result.configuration_id != value.identity.configuration_id) return {PublishOutcome::error, "invalid content, run or analysis identity"};
+  if (run.empty() || run.size() > 4096 || !valid_identity(file, value.identity) || value.result.estimator_version != value.identity.engine_version || value.result.configuration_id != value.identity.configuration_id) return {PublishOutcome::error, "invalid content, run or analysis identity"};
   try {
     auto blob = encode(value.result); if (blob.size() > 1024 * 1024) return {PublishOutcome::error, "result too large"};
     auto key = key_of(value.identity); impl_->cache.begin(run, key);
