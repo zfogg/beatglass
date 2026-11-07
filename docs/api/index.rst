@@ -22,7 +22,17 @@ One process-owned ``SourceEpochAllocator`` may serve concurrent control and
 worker requests; it must outlive those callers and is never called by an audio
 callback. Issuance does not order worker completion or install stream formats.
 
-.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/byte_source.hpp include/beatglass/capture/file_reader.hpp
+.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/coreaudio_fifo_internal.hpp include/beatglass/capture/coreaudio_tap_internal.hpp include/beatglass/capture/coreaudio_source_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/byte_source.hpp include/beatglass/capture/file_reader.hpp
+
+.. cpp:function:: bool beatglass::coreaudio::SourceBackend::stop() noexcept
+
+   Attempt to quiesce capture. Return false and retain any callback context if
+   the OS refuses to stop it. Call on the control owner, not the audio thread.
+
+.. cpp:function:: std::optional<std::int64_t> beatglass::coreaudio::SourceBackend::host_time_ns(std::uint64_t ticks) const noexcept
+
+   Convert valid host ticks to backend monotonic nanoseconds, or return empty
+   on failure or overflow. This is called on the control owner.
 
 AudioSource stop
 ~~~~~~~~~~~~~~~~
@@ -73,6 +83,11 @@ Experimental tonal worker internals
 -----------------------------------
 
 .. cpp:autodoc:: lib/core/tonal_tracker.hpp
+
+Experimental beat-event worker
+------------------------------
+
+.. cpp:autodoc:: lib/core/beat_tracker.hpp
 
 CLI application internals
 -------------------------
