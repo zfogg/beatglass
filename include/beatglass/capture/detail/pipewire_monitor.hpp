@@ -7,18 +7,25 @@
 namespace beatglass::pipewire {
 /** Provisional monitor state; interruption and error require a new instance. */
 enum class MonitorState : unsigned { stopped, starting, streaming, interrupted, error };
+/** Ordered event for one start attempt; a loss indication invalidates all evidence. */
+struct MonitorEvent {
+  std::uint64_t attempt{}, sequence{}, epoch{};
+  MonitorState state{MonitorState::stopped};
+  bool delivery_lost{};
+};
 /**
  * Private PipeWire sink-monitor prototype. The control thread owns start, stop,
  * state and lifetime; one worker may pop. The worker must be stopped before
  * stop/destruction. One instance supports one attempt and one supplied epoch.
- * This is not an AudioSource implementation or an installed API. Status is a
- * polling hint, not an ordered notification; production integration must add
- * fail-closed ordered event delivery and an epoch/format installation barrier.
+ * This is not an AudioSource implementation or an installed API. Running is
+ * gated on a registry sync and both monitor-port links from the selected sink.
+ * Events are ordered and bounded, but a control-to-worker epoch/format barrier
+ * and ordering between graph changes and already queued audio remain unresolved.
  */
 class Monitor {
 public:
-  /** Create an instance with a process-unique nonzero epoch. */
-  explicit Monitor(std::uint64_t epoch);
+  /** Create an instance with a process-unique nonzero epoch and nonzero attempt. */
+  explicit Monitor(std::uint64_t epoch, std::uint64_t attempt);
   /** Destroy after quiescing the consumer; also stops the PipeWire loop. */
   ~Monitor();
   Monitor(const Monitor&) = delete;
@@ -29,7 +36,10 @@ public:
   void stop() noexcept;
   /** Read an atomic status; any non-streaming state invalidates retained analysis. */
   MonitorState state() const noexcept;
-  /** Copy one block on the sole consumer; caller must recheck state and epoch. */
+  /** Pop the next ordered event on the sole control consumer. Delivery loss is
+   * returned out of band and invalidates the entire attempt; queued events are discarded. */
+  bool pop_event(MonitorEvent& event) noexcept;
+  /** Copy on the sole consumer; caller must install epoch/format, reject old data and recheck status. */
   bool pop(MonitorIngress::Block& block) noexcept;
   /** Backend diagnostic code, provisional and zero when no error has been recorded. */
   int diagnostic_code() const noexcept;

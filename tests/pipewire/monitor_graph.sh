@@ -61,7 +61,15 @@ other_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in js
 wpctl set-default "$other_id"
 sink_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in json.load(sys.stdin) if x.get("info",{}).get("props",{}).get("node.name")=="beatglass_test_sink"))')
 pw-play --target "$sink_id" "$XDG_RUNTIME_DIR/tone.wav" >"$XDG_RUNTIME_DIR/play.log" 2>&1 & player=$!
-"$1" & test_pid=$!
+"$1" "$XDG_RUNTIME_DIR/capturing" & test_pid=$!
+ready=0
+for _ in $(seq 1 200); do
+ if [ -f "$XDG_RUNTIME_DIR/capturing" ]; then ready=1; break; fi
+ if ! kill -0 "$test_pid" 2>/dev/null; then break; fi
+ sleep 0.05
+done
+if [ "$ready" != 1 ]; then wait "$test_pid" || true; cat "$XDG_RUNTIME_DIR/session.log"; exit 1; fi
+pw-cli destroy "$sink_id"
 if ! wait "$test_pid"; then
  cat "$XDG_RUNTIME_DIR/session.log"
  exit 1
