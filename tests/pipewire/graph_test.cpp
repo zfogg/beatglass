@@ -60,3 +60,24 @@ TEST_CASE("reused graph node ID does not recover selected sink identity") {
  MonitorGraph::Endpoints endpoints{};
  CHECK(graph.endpoints(5, endpoints) != MonitorGraph::Result::verified);
 }
+
+TEST_CASE("graph model rejects changed endpoint properties") {
+ MonitorGraph graph("original", "sink");
+ graph.node(3, "original", "sink", true);
+ graph.port(10,{3,"FL",true,true}); graph.port(11,{3,"FR",true,true});
+ graph.port(20,{5,"FL",false,false}); graph.port(21,{5,"FR",false,false});
+ graph.link(30,{3,10,5,20}); graph.link(31,{3,11,5,21});
+ REQUIRE(graph.verify(5) == MonitorGraph::Result::verified);
+ SECTION("sink identity changes") {
+   graph.node(3, "replacement", "sink", true);
+   CHECK(graph.verify(5) != MonitorGraph::Result::verified);
+ }
+ SECTION("monitor flag changes") {
+   graph.port(10,{3,"FL",false,true});
+   CHECK(graph.verify(5) == MonitorGraph::Result::invalid);
+ }
+ SECTION("channel changes") {
+   graph.port(20,{5,"FR",false,false});
+   CHECK(graph.verify(5) == MonitorGraph::Result::invalid);
+ }
+}
