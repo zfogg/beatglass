@@ -1,7 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <filesystem>
 #include <chrono>
-#include "../../lib/library/sqlite_cache.cpp"
+#include <limits>
+#include "beatglass/library/detail/sqlite_cache.hpp"
 using namespace beatglass::library_detail;
 TEST_CASE("SQLite cache replaces only completed revalidated runs") {
   SqliteCache cache(":memory:"); CacheKey key{"sha256:a", "engine1", "config1", "offline"};
@@ -51,4 +52,23 @@ TEST_CASE("SQLite cache observes cancellation immediately before commit") {
   cache.begin("one", key); std::stop_source stop;
   REQUIRE(cache.publish("one", key, "result", stop.get_token(), [&] { stop.request_stop(); return true; }) == Publish::cancelled);
   std::string result; REQUIRE_FALSE(cache.find(key, result));
+}
+
+TEST_CASE("SQLite binding lengths are checked before narrowing") {
+  auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
+  REQUIRE(sqlite_length_representable(maximum));
+  REQUIRE_FALSE(sqlite_length_representable(maximum + 1));
+}
+TEST_CASE("SQLite cache holds exclusive ownership during recovery and use") {
+  auto path = std::filesystem::temp_directory_path() /
+    ("beatglass-exclusive-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  {
+    SqliteCache first(path.string());
+    CacheKey key{"hash", "engine", "config", "offline"};
+    first.begin("running", key);
+    REQUIRE_THROWS(SqliteCache(path.string()));
+    REQUIRE(first.publish("running", key, "result", {}, [] { return true; }) == Publish::committed);
+  }
+  { SqliteCache next(path.string()); std::string result; REQUIRE(next.find({"hash", "engine", "config", "offline"}, result)); }
+  REQUIRE(std::filesystem::remove(path));
 }

@@ -1,69 +1,53 @@
-// Private worker primitive. Integration into the public job API is pending.
+#include "beatglass/library/detail/job_executor.hpp"
 #include <algorithm>
 #include <condition_variable>
-#include <cstddef>
 #include <deque>
-#include <functional>
 #include <mutex>
-#include <stop_token>
 #include <thread>
 #include <utility>
-
 namespace beatglass::library_detail {
-// A single worker owns execution. Capacity counts waiting jobs, not the running
-// job. Higher priority runs first; equal priority remains FIFO. Destruction
-// rejects new work, requests cancellation, discards queued work, and joins.
-class JobExecutor {
-public:
-  using Work = std::function<void(std::stop_token)>;
-  explicit JobExecutor(std::size_t capacity) : capacity_(capacity), worker_([this](std::stop_token stop) { run(stop); }) {}
-  JobExecutor(const JobExecutor&) = delete;
-  JobExecutor& operator=(const JobExecutor&) = delete;
-  ~JobExecutor() { shutdown(); }
-
-  bool submit(int priority, Work work) {
-    if (!work) return false;
-    std::lock_guard lock(mutex_);
-    if (stopping_ || queue_.size() >= capacity_) return false;
-    auto pos = std::find_if(queue_.begin(), queue_.end(), [priority](const Job& job) { return job.priority < priority; });
-    queue_.insert(pos, Job{priority, std::move(work)});
-    ready_.notify_one();
-    return true;
-  }
-
-  // Control thread only, never from a job: waits for the active job to return.
-  // Work must cooperate with its stop token; exceptions are contained.
-  void shutdown() {
-    {
-      std::lock_guard lock(mutex_);
-      if (stopping_) return;
-      stopping_ = true;
-      queue_.clear();
-    }
-    worker_.request_stop();
-    ready_.notify_all();
-    if (worker_.joinable()) worker_.join();
-  }
-private:
+struct JobExecutor::Impl {
   struct Job { int priority; Work work; };
+  explicit Impl(std::size_t n) : capacity(n), worker([this](std::stop_token stop) { run(stop); }) {}
   void run(std::stop_token stop) {
     for (;;) {
       Work work;
       {
-        std::unique_lock lock(mutex_);
-        ready_.wait(lock, [this] { return stopping_ || !queue_.empty(); });
-        if (stopping_) return;
-        work = std::move(queue_.front().work);
-        queue_.pop_front();
+        std::unique_lock lock(mutex);
+        ready.wait(lock, [this] { return stopping || !queue.empty(); });
+        if (stopping) return;
+        work = std::move(queue.front().work); queue.pop_front();
       }
-      try { work(stop); } catch (...) { /* Job adapter must report its own errors. */ }
+      try { work(stop); } catch (...) { /* Adapter must report its own errors. */ }
     }
   }
-  const std::size_t capacity_;
-  std::mutex mutex_;
-  std::condition_variable ready_;
-  std::deque<Job> queue_;
-  bool stopping_ = false;
-  std::jthread worker_;
+  std::size_t capacity;
+  std::mutex mutex;
+  std::condition_variable ready;
+  std::deque<Job> queue;
+  bool stopping = false;
+  std::jthread worker;
 };
+JobExecutor::JobExecutor(std::size_t capacity) : impl_(std::make_unique<Impl>(capacity)) {}
+JobExecutor::~JobExecutor() { shutdown(); }
+bool JobExecutor::submit(int priority, Work work) {
+  if (!work) return false;
+  std::lock_guard lock(impl_->mutex);
+  if (impl_->stopping || impl_->queue.size() >= impl_->capacity) return false;
+  auto pos = std::find_if(impl_->queue.begin(), impl_->queue.end(), [priority](const Impl::Job& job) { return job.priority < priority; });
+  impl_->queue.insert(pos, Impl::Job{priority, std::move(work)});
+  impl_->ready.notify_one();
+  return true;
+}
+void JobExecutor::shutdown() {
+  {
+    std::lock_guard lock(impl_->mutex);
+    if (impl_->stopping) return;
+    impl_->stopping = true;
+    impl_->queue.clear();
+  }
+  impl_->worker.request_stop();
+  impl_->ready.notify_all();
+  if (impl_->worker.joinable()) impl_->worker.join();
+}
 }

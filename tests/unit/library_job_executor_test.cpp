@@ -3,7 +3,7 @@
 #include <future>
 #include <mutex>
 #include <vector>
-#include "../../lib/library/job_executor.cpp"
+#include "beatglass/library/detail/job_executor.hpp"
 using namespace std::chrono_literals;
 using beatglass::library_detail::JobExecutor;
 

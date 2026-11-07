@@ -1,5 +1,7 @@
 // Private SQLite cache primitive; public API and identity policy need integration review.
+#include "beatglass/library/detail/sqlite_cache.hpp"
 #include <sqlite3.h>
+#include <limits>
 #include <functional>
 #include <stdexcept>
 #include <stop_token>
@@ -7,14 +9,16 @@
 #include <utility>
 
 namespace beatglass::library_detail {
-struct CacheKey { std::string content, engine, config, mode; };
-enum class Publish { committed, cancelled, stale_input, error };
-class SqliteCache {
+bool sqlite_length_representable(std::size_t size) noexcept { return size <= static_cast<std::size_t>(std::numeric_limits<int>::max()); }
+struct SqliteCache::Impl {
 public:
-  explicit SqliteCache(const std::string& path) {
+  explicit Impl(const std::string& path) {
     if (sqlite3_open(path.c_str(), &db_) != SQLITE_OK) { auto e = std::string(sqlite3_errmsg(db_)); sqlite3_close(db_); db_ = nullptr; throw std::runtime_error(e); }
     try {
       exec("PRAGMA foreign_keys=ON");
+      exec("PRAGMA locking_mode=EXCLUSIVE");
+      exec("BEGIN EXCLUSIVE");
+      exec("COMMIT");
       sqlite3_stmt* version = nullptr;
       check(sqlite3_prepare_v2(db_, "PRAGMA user_version", -1, &version, nullptr));
       int rc = sqlite3_step(version);
@@ -33,9 +37,7 @@ public:
       exec("UPDATE runs SET status='retryable' WHERE status='running'");
     } catch (...) { sqlite3_close(db_); db_ = nullptr; throw; }
   }
-  ~SqliteCache() { sqlite3_close(db_); }
-  SqliteCache(const SqliteCache&) = delete;
-  SqliteCache& operator=(const SqliteCache&) = delete;
+  ~Impl() { sqlite3_close(db_); }
   // All calls, including destruction, belong to one database worker.
   void begin(const std::string& id, const CacheKey& key) {
     Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status) VALUES(?,?,?,?,?,'running')");
@@ -55,6 +57,7 @@ public:
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
                   std::stop_token stop, const std::function<bool()>& revalidate) {
     try {
+      if (!sqlite_length_representable(result.size())) return Publish::error;
       exec("BEGIN IMMEDIATE");
       if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
       if (!revalidate()) { rollback(); return Publish::stale_input; }
@@ -78,9 +81,17 @@ private:
   void check(int rc) { if (rc != SQLITE_OK) throw std::runtime_error(sqlite3_errmsg(db_)); }
   void exec(const char* sql) { check(sqlite3_exec(db_, sql, nullptr, nullptr, nullptr)); }
   void rollback() noexcept { sqlite3_exec(db_, "ROLLBACK", nullptr, nullptr, nullptr); }
-  void bind(sqlite3_stmt* s, int i, const std::string& value) { check(sqlite3_bind_text(s, i, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT)); }
+  void bind(sqlite3_stmt* s, int i, const std::string& value) { if (!sqlite_length_representable(value.size())) throw std::length_error("SQLite value too large"); check(sqlite3_bind_text(s, i, value.data(), static_cast<int>(value.size()), SQLITE_TRANSIENT)); }
   void bind_key(sqlite3_stmt* s, int i, const CacheKey& k) { bind(s,i,k.content); bind(s,i+1,k.engine); bind(s,i+2,k.config); bind(s,i+3,k.mode); }
   void done(sqlite3_stmt* s) { if (sqlite3_step(s) != SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_)); }
   sqlite3* db_ = nullptr;
 };
+SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>(path)) {}
+SqliteCache::~SqliteCache() = default;
+void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
+bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
+Publish SqliteCache::publish(const std::string& id, const CacheKey& key, const std::string& result,
+                             std::stop_token stop, const std::function<bool()>& revalidate) {
+  return impl_->publish(id, key, result, stop, revalidate);
+}
 }
