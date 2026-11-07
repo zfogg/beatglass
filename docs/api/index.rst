@@ -13,7 +13,13 @@ aspirational behavior; see the repository README and progress notes.
 Audio and capture
 -----------------
 
-.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/source.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
+Source adapters report typed enumeration and start outcomes and deliver
+causally ordered notifications to the control owner. A sequence gap or
+delivery loss invalidates the active epoch. Clock anchors are optional and
+carry a clock domain and optional uncertainty and latency; absence is not zero.
+These interfaces require adapter integration and do not implement capture.
+
+.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
 
 AudioSource stop
 ~~~~~~~~~~~~~~~~
@@ -39,7 +45,8 @@ Library jobs
 
 The provisional storage interface distinguishes a cache miss, cancellation,
 stale input and storage error. Its worker owns the cancellation-versus-commit
-decision; the interface and helper do not implement SQLite transactions.
+decision; file verification accepts cooperative cancellation before that
+decision. The interface and helper do not implement SQLite transactions.
 
 .. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp
 
@@ -47,3 +54,8 @@ Desktop application internals
 -----------------------------
 
 .. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp
+
+CLI application internals
+-------------------------
+
+.. cpp:autodoc:: src/cli/state_label.hpp
