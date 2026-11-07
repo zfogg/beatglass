@@ -1,5 +1,4 @@
 Beatglass API reference
-=======================
 
 These interfaces describe the current foundation and are provisional. Headers
 under ``include/beatglass`` are library interfaces, not a promise of an
@@ -88,6 +87,10 @@ Desktop application internals
 
    Destroy the private native adapter on the GUI thread. It never owns the Qt
    window passed to its operations.
+Experimental beat-event worker
+------------------------------
+
+.. cpp:autodoc:: lib/core/beat_tracker.hpp
 
 CLI application internals
 -------------------------
