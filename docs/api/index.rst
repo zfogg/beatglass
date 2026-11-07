@@ -92,6 +92,11 @@ Desktop application internals
    Unlock the overlay and remove event filters. The caller retains ownership of
    both windows. Call on the GUI thread.
 
+Experimental tonal worker internals
+-----------------------------------
+
+.. cpp:autodoc:: lib/core/tonal_tracker.hpp
+
 Experimental virtual file I/O
 -----------------------------
 
