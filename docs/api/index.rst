@@ -16,12 +16,12 @@ Audio and capture
 Analysis
 --------
 
-.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/file_analysis.hpp
+.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/file_analysis.hpp
 
 Library jobs
 ------------
 
-.. cpp:autodoc:: include/beatglass/library/jobs.hpp
+.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/store.hpp
 
 Desktop application internals
 -----------------------------

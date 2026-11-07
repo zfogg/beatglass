@@ -1,5 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/core/audio_queue.hpp"
+#include "beatglass/core/strategies.hpp"
+#include "beatglass/core/presentation.hpp"
+#include "beatglass/capture/source.hpp"
+#include "beatglass/library/store.hpp"
+#include <type_traits>
 #include <array>
 #include <atomic>
 #include <thread>
@@ -62,4 +67,13 @@ TEST_CASE("concurrent producer and consumer preserve order through wraparound") 
   });
   producer.join(); consumer.join();
   CHECK_FALSE(ordering_error.load());
+}
+
+TEST_CASE("foundation ports cannot be instantiated without adapters") {
+  CHECK(std::is_abstract_v<AudioSource>);
+  CHECK(std::is_abstract_v<TempoEstimator>);
+  CHECK(std::is_abstract_v<KeyEstimator>);
+  CHECK(std::is_abstract_v<ChordEstimator>);
+  CHECK(std::is_abstract_v<AnalysisStore>);
+  CHECK(std::is_abstract_v<PresentationAdapter>);
 }

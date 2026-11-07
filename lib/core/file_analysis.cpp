@@ -22,7 +22,7 @@ FileMetadata metadata() const { return {static_cast<std::uint32_t>(info.samplera
 };
 }
 FileMetadata read_metadata(const std::filesystem::path& path) { File f(path); return f.metadata(); }
-TempoResult analyze_file(const std::filesystem::path& path) {
+TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver& observer) {
   File file(path); constexpr std::size_t hop = 512;
   TempoTracker tracker(static_cast<std::uint32_t>(file.info.samplerate));
   std::uint64_t position = 0;
@@ -40,8 +40,11 @@ TempoResult analyze_file(const std::filesystem::path& path) {
     for (std::size_t i = 0; i < mono.size(); ++i) mono[i] = pcm[i*file.info.channels+channel];
     tracker.process(mono, 0, position);
     position += mono.size();
+    const auto current = tracker.estimate(); result.beats = static_cast<unsigned>(current.beats); result.bpm = current.bpm;
+    if (observer) observer(position, result);
   }
   const auto estimate = tracker.estimate(); result.beats = static_cast<unsigned>(estimate.beats); result.bpm = estimate.bpm;
   return result;
 }
+TempoResult analyze_file(const std::filesystem::path& path) { return replay_file(path, {}); }
 }

@@ -43,3 +43,6 @@ docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b h
 ```
 
 Open `build/docs/html/index.html`. On Windows PowerShell, use `${PWD}` in the volume argument. Python dependencies are version-pinned; the Ubuntu 24.04 package repositories supply Clang 18 and Qt 6, so their patch versions may change. Pull requests validate the build; pushes to main deploy it through GitHub Pages when Pages is configured for GitHub Actions. The documentation does not establish native platform qualification or API stability.
+### Pinned development dependencies (experimental)
+
+`vcpkg.json` pins the registry baseline and requests aubio and libsndfile without default features. Set `VCPKG_ROOT` to a vcpkg checkout containing the baseline, then run `cmake --preset vcpkg-core`, `cmake --build --preset vcpkg-core`, and `ctest --preset vcpkg-core`. The optional `vcpkg-desktop` preset enables the manifest's Qt feature. These presets are not yet verified across all platforms or configurations and do not establish a release distribution or codec coverage. The CLI also accepts `--replay <file>` to print incremental estimates after observed blocks, without real-time pacing. See [contracts and handoff](docs/contracts.md).

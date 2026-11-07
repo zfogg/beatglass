@@ -1,0 +1,19 @@
+# Preliminary foundation contracts and handoff
+
+These interfaces are a review proposal, not a completed Phase 0 handoff. No feature delegation is authorized by this document; the issue's exit gate remains open. The integration owner owns all headers, schema, CMake, dependency selection and CI. Future workstreams own their code under `lib/core` and `src/cli` (DSP); `lib/library` (storage/jobs); `src/desktop` (shared presentation); and `lib/capture/{pipewire,coreaudio,wasapi}` plus corresponding `src/desktop/platform` adapters. Propose shared changes before depending on them.
+
+## Audio and timing
+
+`AudioBlock` is a borrowed view of interleaved float PCM; a source normalizes to float and declares rate, channel count and layout. A consumer must copy before the callback returns; `AudioQueue` supplies bounded preallocated SPSC transfer with one reserved slot. The callback may only copy into such storage and record timing/status. Each source epoch identifies a continuous format and timeline. Frame 0 is its origin; seeks, restart, device or format changes require a new epoch. Frame offsets are authoritative, and monotonic nanoseconds are capture-clock anchors, not musical event times. Backends must document mapping accuracy/drift and invalid timestamps before integration. Overflow drops a whole block, counts complete frames and marks the next accepted block discontinuous. Consumers may drain stale backlog and must reset/reacquire after any gap or discontinuity. `stop()` quiesces callbacks before returning, and callers must stop before destruction. A capture callback must never call `status()`, allocate, log, lock, do DSP, or call UI/database. Source adapter implementations and bounded control/status delivery remain open.
+
+## Estimators and publication
+
+The provisional strategy ports consume observed audio on worker threads; reset on epoch/format changes or gaps. Scores are uncalibrated strengths, not probabilities. `EventTime` is an epoch and frame, separate from snapshot publication time and known delay. Snapshots should be published as immutable copies with bounded beat/chord histories and a latest-value handoff; the GUI owns its presentation adapter and update cadence. Implementations must explicitly expire stale data and transition stopped/silent/acquiring/tracking/reacquiring/error. `TempoTracker` currently exposes only BPM and beat count, and does not yet implement the broader strategy port or timestamp beats. The channel reduction policy is provisional.
+
+## Jobs and storage
+
+`AnalysisStore` describes a worker-owned boundary, not a SQLite implementation. The identity includes content hash, engine/config version and analysis mode. A store must ensure writes are serialized, compare pre/post file versions and validate identity before atomically publishing completed results. Cancellation and failures cannot replace a successful cached run. Fast stat checks, hashing policy, migration/schema and race-free transactional behavior still need an implemented, reviewed contract and acceptance tests; the current interface alone cannot guarantee them. No database calls belong on GUI/audio threads.
+
+## Replay and limitations
+
+`beatglass-cli --replay <file>` reads blocks faster than real time, feeding the same incremental tracker and printing estimates after observed blocks; it does not simulate wall clock scheduling or a real capture device. See tests for generated silence, clicks and anti-phase stereo. Synthetic fixtures do not establish accuracy on full mixes. Reset, sample-rate changes, live capture, state transitions, bounded snapshot publication, persistence, UI thread handoff and native device behavior need integration tests. Platform minimum versions, decoder/codec coverage, resampling, packaging, dependency licenses and all native qualification remain incomplete.
