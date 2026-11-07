@@ -132,3 +132,21 @@ TEST_CASE("Core Audio control fails closed on backend exceptions", "[coreaudio]"
   const auto event = source.take_event(); REQUIRE(event);
   CHECK(event->state == SourceState::interrupted); CHECK(event->status.error == SourceError::backend_error);
 }
+
+TEST_CASE("Core Audio consumer cannot reenter delivery or stop its source", "[coreaudio]") {
+  SourceEpochAllocator epochs;
+  auto fake = std::make_unique<FakeBackend>(); auto* backend = fake.get();
+  SourceAdapter source(epochs, std::move(fake)); int calls = 0;
+  const auto started = source.start("output", [&](const AudioBlock& block) {
+    ++calls;
+    CHECK_FALSE(source.pump());
+    CHECK_FALSE(source.stop());
+    CHECK_FALSE(source.take_event());
+    CHECK(block.samples[0] == 0.5f);
+  });
+  REQUIRE(started.attempt); REQUIRE(source.take_event());
+  REQUIRE(source.acknowledge_running(*started.attempt, 1));
+  backend->prepare(); REQUIRE(source.pump()); CHECK(calls == 1);
+  CHECK(source.status().state == SourceState::running);
+  CHECK(source.stop());
+}

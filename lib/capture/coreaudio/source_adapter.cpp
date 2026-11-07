@@ -67,6 +67,7 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
   return {attempt, {}, {}};
 }
 bool SourceAdapter::stop() noexcept {
+  if (delivering_) return false;
   lifecycle_.stop(); pending_.reset(); attempt_.reset(); format_.reset(); anchor_.reset();
   running_taken_ = running_acknowledged_ = false; consumer_ = {};
   const bool stopped = !backend_ || backend_->stop();
@@ -88,6 +89,7 @@ void SourceAdapter::interrupt(const TapStatus& native) {
   pending_ = SourceEvent{*attempt_, sequence_, status_.state, {}, {}, status_};
 }
 std::optional<SourceEvent> SourceAdapter::take_event() {
+  if (delivering_) return std::nullopt;
   if (!pending_ && lifecycle_.state() == SourceState::running) {
     try {
       const auto current = backend_->status();
@@ -99,12 +101,12 @@ std::optional<SourceEvent> SourceAdapter::take_event() {
   return result;
 }
 bool SourceAdapter::acknowledge_running(SourceAttempt attempt, std::uint64_t sequence) noexcept {
-  if (!running_taken_ || !attempt_ || attempt_->generation != attempt.generation || sequence != 1 ||
+  if (delivering_ || !running_taken_ || !attempt_ || attempt_->generation != attempt.generation || sequence != 1 ||
       lifecycle_.state() != SourceState::running) return false;
   running_acknowledged_ = true; return true;
 }
 bool SourceAdapter::pump() {
-  if (!running_acknowledged_ || pending_ || lifecycle_.state() != SourceState::running) return false;
+  if (delivering_ || !running_acknowledged_ || pending_ || lifecycle_.state() != SourceState::running) return false;
   try {
   auto current = backend_->status();
   if (current.state != TapState::running) { interrupt(current); return false; }
@@ -123,6 +125,8 @@ bool SourceAdapter::pump() {
   anchor_ = AudioClockAnchor{block_.epoch, block_.first_frame, *ns, AudioClockDomain::backend_monotonic, {}, {}};
   const AudioBlock borrowed{*format_, block_.epoch, block_.first_frame, *ns, block_.discontinuity,
                             std::span<const float>(block_.samples.data(), block_.sample_count)};
+  delivering_ = true;
+  struct DeliveryDone { bool& active; ~DeliveryDone() { active = false; } } delivery_done{delivering_};
   try { consumer_(borrowed); }
   catch (...) { interrupt({TapState::interrupted, "PCM consumer threw", TapFailure::backend_error}); return false; }
   return true;

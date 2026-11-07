@@ -37,7 +37,7 @@ struct SourceEvent {
   SourceStatus status;
 };
 
-/** Provisional serialized Core Audio source adapter. One owner calls every method on a non-audio control thread. The process-level epoch allocator must outlive this object and be shared across source recreation. Backend IOProc only copies PCM; pump calls the borrowed-block consumer synchronously on the owner. Take the running event and install its format/reset boundary before pumping; after an interruption/error event invalidate analysis and stop/restart with a fresh epoch. This polling interface has no cross-thread notification queue and does not revoke previously delivered results. */
+/** Provisional serialized Core Audio source adapter. One owner calls every method on a non-audio control thread. The process-level epoch allocator must outlive this object and be shared across source recreation. Backend IOProc only copies PCM; pump calls the borrowed-block consumer synchronously on the owner. The consumer must not destroy this adapter; reentrant pump, stop, event handling and acknowledgement are rejected. Take the running event and install its format/reset boundary before pumping; after an interruption/error event invalidate analysis and stop/restart with a fresh epoch. This polling interface has no cross-thread notification queue and does not revoke previously delivered results. */
 class SourceAdapter final {
 public:
   /** Take exclusive ownership of a backend; allocator remains borrowed. */
@@ -73,7 +73,7 @@ private:
   std::optional<AudioClockAnchor> anchor_;
   CaptureBlock block_;
   std::uint64_t sequence_{};
-  bool running_taken_{}, running_acknowledged_{}, quiescence_failed_{};
+  bool running_taken_{}, running_acknowledged_{}, quiescence_failed_{}, delivering_{};
 };
 
 /** Create a native Core Audio backend on macOS. The returned object is owned by the caller and is not a stable or installed API. */
