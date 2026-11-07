@@ -15,6 +15,9 @@ void CallbackGate::leave() noexcept { state_.fetch_sub(1, std::memory_order_rele
 void CallbackGate::close() noexcept { state_.fetch_or(closed_bit, std::memory_order_acq_rel); }
 bool CallbackGate::drained() const noexcept { return state_.load(std::memory_order_acquire) == closed_bit; }
 void CallbackGate::reopen() noexcept { state_.store(0, std::memory_order_relaxed); }
+bool cleanup_in_order(void* context, const CleanupOps& ops) noexcept {
+  return ops.stop_io(context) && ops.destroy_io(context) && ops.destroy_aggregate(context) && ops.destroy_tap(context);
+}
 
 bool NativeTimeline::observe(double sample_time, bool valid, std::uint32_t frames) noexcept {
   valid = valid && std::isfinite(sample_time);

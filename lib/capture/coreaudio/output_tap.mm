@@ -90,22 +90,28 @@ public:
   bool cleanup() noexcept {
     callback_gate.close();
     while (!callback_gate.drained()) std::this_thread::yield();
-    if (started) {
-      if (AudioDeviceStop(aggregate, io) != noErr) return false;
-      started = false;
-    }
-    if (io) {
-      if (AudioDeviceDestroyIOProcID(aggregate, io) != noErr) return false;
-      io = nullptr;
-    }
-    if (aggregate != kAudioObjectUnknown) { AudioHardwareDestroyAggregateDevice(aggregate); aggregate = kAudioObjectUnknown; }
-    if (tap != kAudioObjectUnknown) { AudioHardwareDestroyProcessTap(tap); tap = kAudioObjectUnknown; }
+    const CleanupOps operations{
+      [](void* p) noexcept { auto& s = *static_cast<Impl*>(p); if (!s.started) return true;
+        if (AudioDeviceStop(s.aggregate, s.io) != noErr) return false; s.started = false; return true; },
+      [](void* p) noexcept { auto& s = *static_cast<Impl*>(p); if (!s.io) return true;
+        if (AudioDeviceDestroyIOProcID(s.aggregate, s.io) != noErr) return false; s.io = nullptr; return true; },
+      [](void* p) noexcept { auto& s = *static_cast<Impl*>(p); if (s.aggregate == kAudioObjectUnknown) return true;
+        if (AudioHardwareDestroyAggregateDevice(s.aggregate) != noErr) return false; s.aggregate = kAudioObjectUnknown; return true; },
+      [](void* p) noexcept { auto& s = *static_cast<Impl*>(p); if (s.tap == kAudioObjectUnknown) return true;
+        if (AudioHardwareDestroyProcessTap(s.tap) != noErr) return false; s.tap = kAudioObjectUnknown; return true; }
+    };
+    if (!cleanup_in_order(this, operations)) return false;
     device = kAudioObjectUnknown; fifo.reset(); return true;
   }
   bool fail(const char* operation, OSStatus code) {
     const bool cleaned = cleanup();
     current = {TapState::error, std::string(operation) + " (OSStatus " + std::to_string(code) + ")" + (cleaned ? "" : "; cleanup failed"),
                cleaned ? classify_osstatus(code) : TapFailure::backend_error}; return false;
+  }
+  bool fail_message(const char* message, TapFailure failure) {
+    const bool cleaned = cleanup();
+    current = {TapState::error, cleaned ? message : "Core Audio cleanup failed", cleaned ? failure : TapFailure::backend_error};
+    return false;
   }
 };
 
@@ -114,12 +120,11 @@ OutputTap::~OutputTap() {
   stop();
   // If Core Audio refuses to quiesce or destroy the IOProc, its context must
   // remain alive. Deliberately retain resources rather than risk callback UAF.
-  if (impl_ && impl_->io) (void)impl_.release();
+  if (impl_ && (impl_->io || impl_->aggregate != kAudioObjectUnknown || impl_->tap != kAudioObjectUnknown)) (void)impl_.release();
 }
 
 bool OutputTap::start(const std::string& uid, std::uint64_t epoch) {
-  stop();
-  if (impl_->io) return false;
+  if (!stop()) return false;
   if (uid.empty() || epoch == 0) { impl_->current = {TapState::error, "Output UID and nonzero epoch required", TapFailure::invalid_argument}; return false; }
   if (@available(macOS 14.2, *)) {
     @autoreleasepool {
@@ -130,7 +135,7 @@ bool OutputTap::start(const std::string& uid, std::uint64_t epoch) {
       UInt32 size = sizeof(impl_->device);
       OSStatus s = AudioObjectGetPropertyData(kAudioObjectSystemObject, &address, sizeof(key), &key, &size, &impl_->device);
       if (s != noErr) return impl_->fail("Resolve output device", s);
-      if (impl_->device == kAudioObjectUnknown) { impl_->cleanup(); impl_->current = {TapState::error, "Output device not found", TapFailure::not_found}; return false; }
+      if (impl_->device == kAudioObjectUnknown) return impl_->fail_message("Output device not found", TapFailure::not_found);
       if (!first_output_stream(impl_->device, impl_->stream)) return impl_->fail("Output has no readable stream", kAudioHardwareBadDeviceError);
       CATapDescription* description = [[CATapDescription alloc] initExcludingProcesses:@[] andDeviceUID:output withStream:0];
       description.name = @"Beatglass Output Tap"; description.privateTap = YES; description.muteBehavior = CATapUnmuted;
@@ -138,7 +143,7 @@ bool OutputTap::start(const std::string& uid, std::uint64_t epoch) {
       if (s != noErr) return impl_->fail("Create process tap", s);
       s = get(impl_->tap, kAudioTapPropertyFormat, impl_->format);
       if (s != noErr) return impl_->fail("Read tap format", s);
-      if (!compatible(impl_->format)) { impl_->cleanup(); impl_->current = {TapState::error, "Tap format is not interleaved float32 PCM", TapFailure::unsupported}; return false; }
+      if (!compatible(impl_->format)) return impl_->fail_message("Tap format is not interleaved float32 PCM", TapFailure::unsupported);
       CFStringRef tapUID = nullptr;
       s = get(impl_->tap, kAudioTapPropertyUID, tapUID);
       if (s != noErr || !tapUID) return impl_->fail("Read tap UID", s);
@@ -161,7 +166,7 @@ bool OutputTap::start(const std::string& uid, std::uint64_t epoch) {
       if (!compatible(inputFormat) || inputFormat.mSampleRate != impl_->format.mSampleRate ||
           inputFormat.mChannelsPerFrame != impl_->format.mChannelsPerFrame ||
           inputFormat.mFormatFlags != impl_->format.mFormatFlags || inputFormat.mBytesPerFrame != impl_->format.mBytesPerFrame) {
-        impl_->cleanup(); impl_->current = {TapState::error, "Aggregate input format differs from the tap format", TapFailure::unsupported}; return false;
+        return impl_->fail_message("Aggregate input format differs from the tap format", TapFailure::unsupported);
       }
       impl_->fifo = std::make_unique<CaptureFifo>(epoch, static_cast<std::uint32_t>(impl_->format.mSampleRate), impl_->format.mChannelsPerFrame);
       impl_->callback_fault.store(false, std::memory_order_relaxed); impl_->timeline = NativeTimeline{};

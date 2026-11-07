@@ -25,6 +25,20 @@ private:
   std::atomic<std::uint32_t> state_{0};
 };
 
+/** Internal control-thread teardown operations. Each must be idempotent, nonthrowing, and return false if its resource remains live. */
+struct CleanupOps {
+  /** Stop native I/O. */
+  bool (*stop_io)(void*) noexcept;
+  /** Destroy the IOProc. */
+  bool (*destroy_io)(void*) noexcept;
+  /** Destroy the aggregate device. */
+  bool (*destroy_aggregate)(void*) noexcept;
+  /** Destroy the process tap. */
+  bool (*destroy_tap)(void*) noexcept;
+};
+/** Run teardown in dependency order, stopping at the first failure. Safe retry depends on each operation retaining its resource state until it succeeds. The callback gate must already be closed and drained. */
+bool cleanup_in_order(void* context, const CleanupOps& operations) noexcept;
+
 /** Provisional, non-installed Core Audio transfer format. One block owns its PCM. Host ticks are in the macOS host clock domain and are valid only when host_time_valid is true; they are not nanoseconds. source_sample_time is the native input timestamp and is meaningful only when source_sample_time_valid is true. first_frame counts frames since this capture epoch began, including whole frames rejected by the FIFO. */
 struct CaptureBlock {
   static constexpr std::size_t max_samples = 8192;

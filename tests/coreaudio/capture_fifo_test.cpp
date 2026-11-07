@@ -97,3 +97,26 @@ TEST_CASE("Core Audio sample-time gaps and missing timestamps force reacquisitio
   CHECK(timeline.observe(std::numeric_limits<double>::quiet_NaN(), true, 128));
   CHECK(timeline.observe(2000, true, 128));
 }
+
+TEST_CASE("native cleanup stops on failure and retries remaining dependencies in order", "[coreaudio]") {
+  struct State { std::array<bool, 4> live{true, true, true, true}; std::array<int, 8> calls{}; int used = 0; int fail = -1; };
+  const CleanupOps ops{
+    [](void* p) noexcept { auto& s = *static_cast<State*>(p); if (!s.live[0]) return true; s.calls[s.used++] = 0; if (s.fail == 0) return false; s.live[0] = false; return true; },
+    [](void* p) noexcept { auto& s = *static_cast<State*>(p); if (!s.live[1]) return true; s.calls[s.used++] = 1; if (s.fail == 1) return false; s.live[1] = false; return true; },
+    [](void* p) noexcept { auto& s = *static_cast<State*>(p); if (!s.live[2]) return true; s.calls[s.used++] = 2; if (s.fail == 2) return false; s.live[2] = false; return true; },
+    [](void* p) noexcept { auto& s = *static_cast<State*>(p); if (!s.live[3]) return true; s.calls[s.used++] = 3; if (s.fail == 3) return false; s.live[3] = false; return true; }
+  };
+  for (int failure = 0; failure != 4; ++failure) {
+    State state; state.fail = failure;
+    CHECK_FALSE(cleanup_in_order(&state, ops));
+    REQUIRE(state.used == failure + 1);
+    for (int i = 0; i != 4; ++i) CHECK(state.live[i] == (i >= failure));
+    state.fail = -1;
+    REQUIRE(cleanup_in_order(&state, ops));
+    for (bool live : state.live) CHECK_FALSE(live);
+    REQUIRE(state.used == 5);
+    CHECK(state.calls[failure] == failure);
+    CHECK(state.calls[failure + 1] == failure);
+    for (int i = failure + 1; i != 4; ++i) CHECK(state.calls[i + 1] == i);
+  }
+}
