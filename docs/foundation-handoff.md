@@ -18,7 +18,7 @@ Audio callbacks may only copy into preallocated bounded storage and record timin
 
 1. Define typed source enumeration/start failures and control-event ordering, bounded transfer and epoch allocation across source object recreation; preserve stop/quiescence and callback rules.
 2. Decide how cancellation and typed cache lookup/publish outcomes cross the worker-owned `AnalysisStore` boundary, including file-version recheck and the cancellation-versus-commit point. SQLite schema, migrations and implementation belong to the library workstream.
-3. Define how the UI receives ordered snapshot and invalidation notifications and owns retained values. The publisher does not automatically revoke copies held by GUI code. PR #16 proposes one ordering helper for review; integration must choose an actual delivery contract before relying on it.
+3. Define how the UI receives ordered snapshot and invalidation notifications and owns retained values. The publisher does not automatically revoke copies held by GUI code. `PresentationGate` is a merged ordering helper; integration must choose an actual delivery contract before relying on it.
 4. Fix the estimator adapter/result schema details needed by each initial workstream, including beat/chord boundary semantics and unknown/confidence meaning. Distinguish current implementations from interface targets.
 5. Resolve dependency/distribution choices, including Essentia and codec license obligations, and record the selected platform builds. Until then, no release-distribution compatibility is asserted.
 

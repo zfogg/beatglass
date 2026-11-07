@@ -19,3 +19,9 @@ Status: **under review; not yet declared passed**. The CLI and metadata shell ex
 - End-to-end library/DJ flows are integrated-alpha work. Real-music measurement, packaging and native Windows/macOS/Linux product, audio and overlay qualification are required before v1 completion. WSL, hosted CI and SSH/headless runs do not replace those checks.
 
 Every workstream uses isolated branches/worktrees and explicit module ownership. The integration owner coordinates shared headers, schemas, CMake, dependencies and CI. Every implementing agent adds meaningful tests, runs relevant checks and records commands, evidence and limitations. Product paths must use actual capture and analysis; no handoff makes a stub a completed feature.
+
+## Recommendation to the integration owner
+
+After this Qt SDK proposal is reviewed, its CI passes, and the owner accepts the published contracts and assigns explicit worktree ownership, recommend declaring the Phase 0 exit gate passed for starting Phase 1 work. The working tempo CLI, deterministic replay, minimal interactive Windows and Mac shells, test infrastructure and named team integration points satisfy the narrow shape of the issue's gate; they do not establish a usable product. The owner should explicitly accept the exact-version SDK as a development baseline with the unresolved archive/installer hashes, Linux/macOS prebuilt builds, and release license/packaging review recorded as follow-up work, rather than silently treating those checks as passed.
+
+The source adapters, library backend, DSP and UI agents can propose the typed error/event and epoch rules, cache/commit outcomes, estimator semantics and UI delivery details identified in this handoff. The integration owner must approve shared header/schema changes before other work depends on them. Device implementations, SQLite behavior, cross-platform packaging and native v1 audio/overlay qualification remain later-phase requirements.
