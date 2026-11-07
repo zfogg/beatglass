@@ -212,3 +212,12 @@ and the targeted CTest expression `Queue overflow invalidates|Session|Default fo
 passed 11/11. This deterministic test does not reproduce hardware queue
 overflow. The default follower can retry after failure; selected-output UI
 recovery remains an integration behavior to verify.
+
+The private default bridge also guards capture start after endpoint discovery:
+Stop, replacement or destruction invalidates the request before the worker may
+start an endpoint. Stop is asynchronous for an already started capture and may
+wait for the short start request, which does not wait for WASAPI startup. On
+Windows 11/MSVC 19.44, blocked-discovery Stop and destruction regressions
+verified that no epoch was consumed after cancellation; the targeted capture,
+allocator and bridge CTest selection passed 11/11. Physical endpoint removal
+and return were not part of this deterministic check.
