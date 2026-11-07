@@ -180,12 +180,17 @@ TEST_CASE("snapshot virtual cache handles generated WAV and available codec fixt
 #ifdef BEATGLASS_REQUIRE_V1_CODECS
   paths.push_back(fixtures / "tone.flac"); paths.push_back(fixtures / "tone.mp3");
 #endif
+  std::uint64_t epoch = 1000;
   for (const auto& path : paths) {
     CAPTURE(path.string()); auto before = fingerprint_file(path); REQUIRE(before.status == FingerprintStatus::ok); int blocks = 0;
     { SqliteCache cache(db.string()); auto first = analyze_snapshot_tempo(cache, path, "codec-test-v1", "default", {}, [&](auto) { ++blocks; });
       INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.result); REQUIRE(blocks > 0); }
     { SqliteCache cache(db.string()); blocks = 0; auto hit = analyze_snapshot_tempo(cache, path, "codec-test-v1", "default", {}, [&](auto) { ++blocks; });
       INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(blocks == 0); }
+    { TempoAnalysisStore store(db.string()); blocks = 0; auto first = analyze_snapshot_to_store(store, path, "shared-codec-test-v1", "default", epoch++, {}, [&](auto) { ++blocks; });
+      INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.value); REQUIRE(blocks > 0); }
+    { TempoAnalysisStore store(db.string()); blocks = 0; auto hit = analyze_snapshot_to_store(store, path, "shared-codec-test-v1", "default", epoch++, {}, [&](auto) { ++blocks; });
+      INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(hit.value); REQUIRE(blocks == 0); }
     auto after = fingerprint_file(path); REQUIRE(after.status == FingerprintStatus::ok); REQUIRE(after.digest == before.digest);
   }
 }
@@ -228,4 +233,29 @@ TEST_CASE("snapshot job uses shared store and worker collection queries") {
     std::stop_source stop; stop.request_stop();
     REQUIRE(analyze_snapshot_to_store(store, input, "shared-snapshot-v1", "new", 104, stop.get_token()).status == FileJobStatus::cancelled);
   }
+}
+
+TEST_CASE("shared store preserves cache when real snapshot verification is cancelled") {
+  TempDirectory temp; auto input = temp.path / "audio";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
+  TempoAnalysisStore store((temp.path / "library.sqlite").string());
+  auto first = analyze_snapshot_to_store(store, input, "verify-v1", "config", 201);
+  INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.value);
+  auto snapshot = SnapshotOpen::create(input); INFO(snapshot.diagnostic); REQUIRE(snapshot.status == SnapshotStatus::ok);
+  auto modified = snapshot.value->modified_unix_ns(); REQUIRE(modified);
+  beatglass::FileVersion version{std::filesystem::absolute(input), snapshot.value->size(), *modified, snapshot.value->digest()};
+  std::stop_source stop;
+  class Verifier final : public beatglass::FileVersionVerifier {
+  public:
+    Verifier(FileSnapshot& s, std::stop_source& c) : snapshot(s), cancel(c) {}
+    beatglass::FileVerificationResult verify(std::stop_token token) override {
+      auto result = snapshot.verify(token, [&](auto) { cancel.request_stop(); });
+      return {result == SnapshotStatus::cancelled ? beatglass::FileVerificationOutcome::cancelled : beatglass::FileVerificationOutcome::error, {}};
+    }
+    FileSnapshot& snapshot; std::stop_source& cancel;
+  } verifier(*snapshot.value, stop);
+  auto cancelled = store.publish(version, *first.value, "cancel-during-real-verify", verifier, stop.get_token());
+  REQUIRE(cancelled.outcome == beatglass::PublishOutcome::cancelled);
+  auto old = store.find(version, first.value->identity, {}); REQUIRE(old.outcome == beatglass::FindOutcome::hit); REQUIRE(old.result);
+  REQUIRE(old.result->result.bpm == first.value->result.bpm);
 }

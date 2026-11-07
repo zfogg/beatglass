@@ -204,24 +204,23 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
     value.result.observed_through = {epoch, observed}; value.result.publication_monotonic_ns = publication_time(); value.result.estimator_version = engine; value.result.configuration_id = config;
     class Verifier final : public FileVersionVerifier {
     public:
-      Verifier(FileSnapshot& source, std::stop_token token) : source_(source), token_(token) {}
-      FileVerificationResult verify() override {
-        auto result = source_.verify(token_); cancelled = result == SnapshotStatus::cancelled;
+      explicit Verifier(FileSnapshot& source) : source_(source) {}
+      FileVerificationResult verify(std::stop_token token) override {
+        auto result = source_.verify(token);
         switch (result) {
           case SnapshotStatus::ok: return {FileVerificationOutcome::match, {}};
           case SnapshotStatus::stale_input: return {FileVerificationOutcome::changed, {}};
           case SnapshotStatus::unverifiable: return {FileVerificationOutcome::unverifiable, {}};
-          case SnapshotStatus::cancelled: return {FileVerificationOutcome::error, "verification cancelled"};
+          case SnapshotStatus::cancelled: return {FileVerificationOutcome::cancelled, "verification cancelled"};
           default: return {FileVerificationOutcome::error, "source verification failed"};
         }
       }
-      bool cancelled = false;
     private:
-      FileSnapshot& source_; std::stop_token token_;
-    } verifier(*opened.value, stop);
+      FileSnapshot& source_;
+    } verifier(*opened.value);
     auto id = run_id(); auto published = store.publish(file, value, id, verifier, stop);
     if (published.outcome == PublishOutcome::committed) { value.result.publication_monotonic_ns = publication_time(); return {FileJobStatus::committed, value, {}, {}}; }
-    if (published.outcome == PublishOutcome::cancelled || verifier.cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
+    if (published.outcome == PublishOutcome::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
     if (published.outcome == PublishOutcome::stale_input) return {FileJobStatus::stale_input, {}, published.diagnostic, {}};
     return {FileJobStatus::error, {}, published.diagnostic, id};
   } catch (const detail::VirtualOpenCancelled&) { return {FileJobStatus::cancelled, {}, {}, {}}; }

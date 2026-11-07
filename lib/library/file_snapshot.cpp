@@ -85,13 +85,13 @@ std::optional<std::int64_t> FileSnapshot::modified_unix_ns() const noexcept {
   return base + ns;
 }
 const std::string& FileSnapshot::digest() const noexcept { return impl_->digest; }
-SnapshotStatus FileSnapshot::verify(std::stop_token stop) const {
+SnapshotStatus FileSnapshot::verify(std::stop_token stop, const std::function<void(std::uintmax_t)>& progress) const {
   try {
     if (stop.stop_requested()) return SnapshotStatus::cancelled;
     struct stat before{}, after{}, path_stat{};
     if (::fstat(impl_->original.value, &before) != 0) return SnapshotStatus::error;
     if (!same(before, impl_->evidence)) return SnapshotStatus::stale_input;
-    auto digest = hash_fd(impl_->original.value, stop);
+    auto digest = hash_fd(impl_->original.value, stop, -1, progress);
     if (::fstat(impl_->original.value, &after) != 0) return SnapshotStatus::error;
     if (::stat(impl_->path.c_str(), &path_stat) != 0) return errno == ENOENT ? SnapshotStatus::stale_input : SnapshotStatus::error;
     return same(before, after) && same(after, path_stat) && digest == impl_->digest ? SnapshotStatus::ok : SnapshotStatus::stale_input;
@@ -216,11 +216,11 @@ std::optional<std::int64_t> FileSnapshot::modified_unix_ns() const noexcept {
   return unix_ticks * 100;
 }
 const std::string& FileSnapshot::digest() const noexcept { return impl_->digest; }
-SnapshotStatus FileSnapshot::verify(std::stop_token stop) const {
+SnapshotStatus FileSnapshot::verify(std::stop_token stop, const std::function<void(std::uintmax_t)>& progress) const {
   try {
     if (stop.stop_requested()) return SnapshotStatus::cancelled;
     auto before = evidence(impl_->original.value); if (!same(before, impl_->evidence)) return SnapshotStatus::stale_input;
-    auto digest = hash_handle(impl_->original.value, stop); auto after = evidence(impl_->original.value);
+    auto digest = hash_handle(impl_->original.value, stop, INVALID_HANDLE_VALUE, progress); auto after = evidence(impl_->original.value);
     WinHandle named; named.value = CreateFileW(impl_->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (named.value == INVALID_HANDLE_VALUE) return GetLastError() == ERROR_FILE_NOT_FOUND || GetLastError() == ERROR_PATH_NOT_FOUND ? SnapshotStatus::stale_input : SnapshotStatus::error;
     return same(before, after) && same(after, evidence(named.value)) && digest == impl_->digest ? SnapshotStatus::ok : SnapshotStatus::stale_input;

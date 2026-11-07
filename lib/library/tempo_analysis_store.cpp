@@ -58,9 +58,10 @@ PublishResult TempoAnalysisStore::publish(const FileVersion& file, const CachedA
     auto blob = encode(value.result); if (blob.size() > 1024 * 1024) return {PublishOutcome::error, "result too large"};
     auto key = key_of(value.identity); impl_->cache.begin(run, key);
     FileVerificationResult verification; bool verified = false;
-    auto status = impl_->cache.publish(run, key, blob, stop, [&] { verification = verifier.verify(); verified = true; return verification.outcome == FileVerificationOutcome::match; });
+    auto status = impl_->cache.publish(run, key, blob, stop, [&] { verification = verifier.verify(stop); verified = true; return verification.outcome == FileVerificationOutcome::match; });
     if (status == Publish::committed) return {PublishOutcome::committed, {}};
     if (status == Publish::cancelled || (status == Publish::stale_input && stop.stop_requested())) return {PublishOutcome::cancelled, {}};
+    if (status == Publish::stale_input && verified && verification.outcome == FileVerificationOutcome::cancelled) return {PublishOutcome::cancelled, verification.diagnostic};
     if (status == Publish::stale_input && verified && (verification.outcome == FileVerificationOutcome::changed || verification.outcome == FileVerificationOutcome::unverifiable)) return {PublishOutcome::stale_input, verification.diagnostic};
     if (status == Publish::stale_input && verified) return {PublishOutcome::error, verification.diagnostic.empty() ? "input verifier failed" : verification.diagnostic};
     return {PublishOutcome::error, "storage failure; commit outcome may be unknown; recover by run ID"};

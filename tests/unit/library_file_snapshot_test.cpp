@@ -169,3 +169,12 @@ TEST_CASE("Linux snapshot fails closed when anonymous temporary creation is unav
   REQUIRE(result.status == SnapshotStatus::unverifiable); REQUIRE_FALSE(result.value);
 }
 #endif
+
+TEST_CASE("snapshot verification observes cancellation between hash chunks") {
+  TempDir temp; auto file = temp.path / "source"; write(file, std::string(200000, 'x'));
+  auto opened = SnapshotOpen::create(file); INFO(opened.diagnostic); REQUIRE(opened.status == SnapshotStatus::ok);
+  std::stop_source stop; int callbacks = 0;
+  auto result = opened.value->verify(stop.get_token(), [&](auto) { ++callbacks; stop.request_stop(); });
+  REQUIRE(callbacks == 1); REQUIRE(result == SnapshotStatus::cancelled);
+  REQUIRE(opened.value->verify() == SnapshotStatus::ok);
+}

@@ -36,8 +36,8 @@ public:
   std::optional<std::int64_t> modified_unix_ns() const noexcept;
   /** Digest of finalized snapshot bytes, prefixed with sha256:. */
   const std::string& digest() const noexcept;
-  /** Rehash the retained original and recheck original/path identity. Cancellation is checked between reads. A write or replacement after this check remains possible; unsupported identity evidence fails closed. */
-  SnapshotStatus verify(std::stop_token stop = {}) const;
+  /** Rehash the retained original and recheck original/path identity. Cancellation is checked between reads; the optional byte-progress callback runs synchronously on the owning worker. A write or replacement after this check remains possible; unsupported identity evidence fails closed. */
+  SnapshotStatus verify(std::stop_token stop = {}, const std::function<void(std::uintmax_t)>& progress = {}) const;
 private:
   struct Impl;
   explicit FileSnapshot(std::unique_ptr<Impl> impl);

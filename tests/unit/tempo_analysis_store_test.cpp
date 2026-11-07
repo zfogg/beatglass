@@ -13,7 +13,7 @@ struct TempDb {
 };
 struct Verifier : FileVersionVerifier {
   FileVerificationOutcome outcome{FileVerificationOutcome::match}; std::stop_source* cancel{}; int calls{};
-  FileVerificationResult verify() override { ++calls; if (cancel) cancel->request_stop(); return {outcome, "verification diagnostic"}; }
+  FileVerificationResult verify(std::stop_token) override { ++calls; if (cancel) cancel->request_stop(); return {outcome, "verification diagnostic"}; }
 };
 CachedAnalysis sample() {
   CachedAnalysis item; item.identity = {"sha256:input", "engine-v1", "config-v1", "offline"};
@@ -54,6 +54,8 @@ TEST_CASE("typed tempo store keeps old cache on changed input cancellation and e
   REQUIRE(store.publish(file, item, "unverifiable", verifier, {}).outcome == PublishOutcome::stale_input);
   verifier.outcome = FileVerificationOutcome::error;
   REQUIRE(store.publish(file, item, "error", verifier, {}).outcome == PublishOutcome::error);
+  verifier.outcome = FileVerificationOutcome::cancelled;
+  REQUIRE(store.publish(file, item, "verify-cancel", verifier, {}).outcome == PublishOutcome::cancelled);
   std::stop_source stop; verifier.outcome = FileVerificationOutcome::match; verifier.cancel = &stop;
   REQUIRE(store.publish(file, item, "cancel", verifier, stop.get_token()).outcome == PublishOutcome::cancelled);
   auto hit = store.find(file, item.identity, {}); REQUIRE(hit.outcome == FindOutcome::hit); REQUIRE(hit.result->result.bpm == item.result.bpm);

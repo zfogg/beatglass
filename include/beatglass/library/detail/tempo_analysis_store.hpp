@@ -9,7 +9,7 @@ class TempoAnalysisStore final : public AnalysisStore {
 public:
   /** Open the exclusively owned database; may block and throws on storage errors. */
   explicit TempoAnalysisStore(const std::string& path);
-  /** Close on the owning worker after all operations finish. */ ~TempoAnalysisStore() override;
+  /** Close on the owning worker after all operations finish. */ ~TempoAnalysisStore();
   TempoAnalysisStore(const TempoAnalysisStore&) = delete;
   TempoAnalysisStore& operator=(const TempoAnalysisStore&) = delete;
   /** Index or update metadata on the owning worker; no source file is modified. */
@@ -22,7 +22,7 @@ public:
   std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});
   /** Look up a validated identity; returns cancellation, miss, hit, or storage/format error. */
   FindResult find(const FileVersion&, const AnalysisIdentity&, std::stop_token) override;
-  /** Stage and atomically publish after verifier approval. The current shared verifier cannot observe a stop token while blocking. */
+  /** Stage and atomically publish after verifier approval. Passes the stop token to the verifier; an in-flight blocking I/O operation may not be interruptible. */
   PublishResult publish(const FileVersion&, const CachedAnalysis&, const std::string&, FileVersionVerifier&, std::stop_token) override;
   /** Query a run ID after reopening; a non-completed run maps to not_found. */
   RecoveryResult recover(const std::string&) override;
