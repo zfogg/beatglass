@@ -527,3 +527,5 @@ Subsequent independent disassembly places the null dereference in Qt GUI initial
 ## Bounded file fingerprint review
 
 A separately reviewable, opt-in fingerprint primitive hashes a file using a bounded buffer and supports cooperative cancellation and change detection. It does not connect to the cache or decoder. File replacement, mutation and ABA can evade attribute checks, so the result cannot prove decoder input identity. OpenSSL remains an unpinned development dependency; native product qualification remains open.
+
+After #74 merged as `e6c207b`, #72 merged main at `bd2d557`; its fingerprint source, header and tests match main. The original Qt platform-initialization crash remains unresolved; the offscreen deployment and process-local dialog-suppression changes are retained. Hosted CI and Pages deployment are paused at the user's request; previous hosted results describe only their recorded heads. No post-merge composite or native qualification is claimed.
