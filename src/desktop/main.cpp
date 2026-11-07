@@ -13,6 +13,7 @@
 #include "windows_dj.hpp"
 #include "windows_overlay_bridge.hpp"
 #include <QQuickWindow>
+#include <QSettings>
 #endif
 int main(int argc, char** argv) {
   QGuiApplication app(argc, argv);
@@ -22,6 +23,7 @@ int main(int argc, char** argv) {
   PlaybackGuard playbackGuard;
 #ifdef _WIN32
   WindowsDj windowsDj(epochs);
+  QSettings overlaySettings(QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
 #endif
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);
@@ -44,8 +46,7 @@ int main(int argc, char** argv) {
   auto* control = qobject_cast<QQuickWindow*>(engine.rootObjects().front());
   auto* overlay = control ? control->findChild<QQuickWindow*>(QStringLiteral("djOverlay")) : nullptr;
   if (!control || !overlay) return 1;
-  WindowsOverlay overlayBridge(overlay, control);
-  overlayBridge.setOpacity(0.85);
+  WindowsOverlay overlayBridge(overlay, control, nullptr, &overlaySettings);
   control->setProperty("overlayBridge", QVariant::fromValue(static_cast<QObject*>(&overlayBridge)));
 #endif
   return app.exec();
