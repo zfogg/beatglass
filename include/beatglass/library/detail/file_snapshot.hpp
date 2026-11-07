@@ -10,10 +10,8 @@
 #include <string>
 #include <string_view>
 namespace beatglass::library_detail {
-#ifdef _WIN32
-/** Classify resolved Windows path, drive type and filesystem evidence for the restricted policy. This is necessary but not sufficient evidence of source safety. */
+/** Classify resolved Windows path, Windows drive-type value and filesystem evidence for the restricted policy. This is necessary but not sufficient evidence of source safety. Safe to call on any platform. */
 bool windows_restricted_volume_supported(std::wstring_view resolved_path, unsigned drive_type, std::wstring_view filesystem) noexcept;
-#endif
 /** Source sharing policy for a provisional snapshot. */
 enum class SnapshotSourcePolicy {
   detect_changes, ///< Allow concurrent opens and detect changes with evidence checks.

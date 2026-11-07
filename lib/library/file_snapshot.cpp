@@ -17,6 +17,14 @@
 #include <unistd.h>
 #endif
 namespace beatglass::library_detail {
+bool windows_restricted_volume_supported(std::wstring_view path, unsigned drive_type, std::wstring_view filesystem) noexcept {
+  if (drive_type != 3 /* DRIVE_FIXED */ || path.size() < 7 || path.substr(0, 4) != L"\\\\?\\" || path[5] != L':' || path[6] != L'\\') return false;
+  const wchar_t drive = path[4]; if (!((drive >= L'A' && drive <= L'Z') || (drive >= L'a' && drive <= L'z'))) return false;
+  if (filesystem.size() != 4) return false;
+  constexpr wchar_t ntfs[] = L"NTFS";
+  for (std::size_t i=0; i<4; ++i) { auto c=filesystem[i]; if (c >= L'a' && c <= L'z') c -= L'a' - L'A'; if (c != ntfs[i]) return false; }
+  return true;
+}
 #ifndef _WIN32
 namespace {
 struct Cancelled {};
@@ -195,14 +203,7 @@ std::string hash_handle(HANDLE input, std::stop_token stop, HANDLE output = INVA
   return out;
 }
 }
-bool windows_restricted_volume_supported(std::wstring_view path, unsigned drive_type, std::wstring_view filesystem) noexcept {
-  if (drive_type != DRIVE_FIXED || path.size() < 7 || path.substr(0, 4) != L"\\\\?\\" || path[5] != L':' || path[6] != L'\\') return false;
-  const wchar_t drive = path[4]; if (!((drive >= L'A' && drive <= L'Z') || (drive >= L'a' && drive <= L'z'))) return false;
-  if (filesystem.size() != 4) return false;
-  constexpr wchar_t ntfs[] = L"NTFS";
-  for (std::size_t i=0; i<4; ++i) { auto c=filesystem[i]; if (c >= L'a' && c <= L'z') c -= L'a' - L'A'; if (c != ntfs[i]) return false; }
-  return true;
-}
+
 namespace {
 bool restricted_volume(HANDLE source) {
   std::array<wchar_t, 32768> final_path{};
