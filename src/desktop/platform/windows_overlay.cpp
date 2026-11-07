@@ -76,7 +76,11 @@ void OverlayController::dragToCursor() {
                window_x_ + cursor.x - cursor_x_, window_y_ + cursor.y - cursor_y_,
                0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
-void OverlayController::endDrag() { dragging_ = false; drag_timer_->stop(); }
+void OverlayController::endDrag() {
+  const bool wasDragging = dragging_;
+  dragging_ = false; drag_timer_->stop();
+  if (wasDragging && settings_ && overlay_) settings_->setValue(QStringLiteral("overlay/position"), overlay_->position());
+}
 void OverlayController::applyFlags() {
   if (!overlay_) return;
   auto flags = overlay_->flags() | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool;
@@ -101,5 +105,6 @@ void OverlayController::keepOnScreen() {
   geometry.moveLeft(std::clamp(geometry.left(), bounds.left(), bounds.right() - geometry.width() + 1));
   geometry.moveTop(std::clamp(geometry.top(), bounds.top(), bounds.bottom() - geometry.height() + 1));
   overlay_->setGeometry(geometry);
+  if (settings_) settings_->setValue(QStringLiteral("overlay/position"), geometry.topLeft());
 }
 }
