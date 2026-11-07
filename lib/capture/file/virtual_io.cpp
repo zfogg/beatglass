@@ -63,11 +63,11 @@ SF_VIRTUAL_IO callbacks{filelen, seek_cb, read_cb, write_cb, tell_cb};
 struct VirtualFileReader::Impl {
   VirtualIo io; SNDFILE* handle{}; SF_INFO info{}; FileMetadata meta; std::uint64_t epoch{}, position{}; bool ended{}, failed{};
   Impl(ByteSource& source, std::uint64_t e, std::stop_token token) : io(source), epoch(e) {
-    if (token.stop_requested()) throw VirtualOpenCancelled();
+    if (token.stop_requested()) throw FileOpenCancelled();
     io.set_cancel(token); handle = sf_open_virtual(&callbacks, SFM_READ, &info, &io);
     if (!handle || io.status() != VirtualIoStatus::ok) {
       if (handle) sf_close(handle);
-      if (io.status() == VirtualIoStatus::cancelled) throw VirtualOpenCancelled();
+      if (io.status() == VirtualIoStatus::cancelled) throw FileOpenCancelled();
       throw std::runtime_error("Virtual audio open failed");
     }
     if (info.samplerate <= 0 || info.channels <= 0 || info.channels > std::numeric_limits<std::uint16_t>::max() || info.frames < 0) {
@@ -93,12 +93,12 @@ FileReadResult VirtualFileReader::read(std::span<float> buffer, std::stop_token 
   const auto start = f.position; f.position += static_cast<std::uint64_t>(n);
   return {FileReadStatus::data, {{f.meta.sample_rate, static_cast<std::uint16_t>(f.meta.channels)}, f.epoch, start, 0, false, buffer.first(static_cast<std::size_t>(n) * f.meta.channels)}};
 }
-void VirtualFileReader::seek(std::uint64_t frame) {
+void VirtualFileReader::seek(std::uint64_t frame, std::uint64_t new_epoch) {
   auto& f = *impl_; if (f.failed) throw std::runtime_error("Virtual reader failed");
   if (frame > f.meta.frames) throw std::out_of_range("Seek outside file");
-  if (f.epoch == std::numeric_limits<std::uint64_t>::max()) throw std::overflow_error("Epoch exhausted");
+  if (new_epoch <= f.epoch) throw std::invalid_argument("Epoch must increase");
   f.io.set_cancel({}); const auto actual = sf_seek(f.handle, static_cast<sf_count_t>(frame), SEEK_SET);
   if (f.io.status() != VirtualIoStatus::ok || actual < 0 || static_cast<std::uint64_t>(actual) != frame) { f.failed = true; throw std::runtime_error("Virtual audio seek failed"); }
-  ++f.epoch; f.position = frame; f.ended = false;
+  f.epoch = new_epoch; f.position = frame; f.ended = false;
 }
 }

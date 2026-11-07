@@ -2,6 +2,7 @@
 #include "beatglass/library/detail/file_fingerprint.hpp"
 #include <chrono>
 #include <fstream>
+#include <stdexcept>
 using namespace beatglass::library_detail;
 namespace {
 struct TempFile {
@@ -27,4 +28,28 @@ TEST_CASE("file fingerprint observes cancellation and changes during read") {
   bool changed = false;
   auto result = fingerprint_file(f.path, {}, [&](auto) { if (!changed) { changed = true; std::ofstream out(f.path, std::ios::binary | std::ios::app); out << 'a'; } });
   REQUIRE(result.status == FingerprintStatus::changed);
+}
+
+TEST_CASE("file fingerprint handles empty and buffer boundary lengths") {
+  TempFile f;
+  for (const std::size_t size : {std::size_t{0}, std::size_t{65535}, std::size_t{65536}, std::size_t{65537}, std::size_t{131072}}) {
+    f.write(std::string(size, 'x')); std::uintmax_t observed = 0;
+    const auto result = fingerprint_file(f.path, {}, [&](auto count) { observed = count; });
+    REQUIRE(result.status == FingerprintStatus::ok); REQUIRE(result.size == size); REQUIRE(observed == size);
+  }
+  f.write(""); REQUIRE(fingerprint_file(f.path).digest == "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+}
+TEST_CASE("file fingerprint honors stop from final observer and detects truncation") {
+  TempFile f; f.write(std::string(65537, 'x')); std::stop_source stop;
+  auto cancelled = fingerprint_file(f.path, stop.get_token(), [&](auto n) { if (n == 65537) stop.request_stop(); });
+  REQUIRE(cancelled.status == FingerprintStatus::cancelled);
+  f.write(std::string(140000, 'x'));
+  bool truncated = false;
+  auto shortened = fingerprint_file(f.path, {}, [&](auto) { if (!truncated) { truncated = true; std::filesystem::resize_file(f.path, 65536); } });
+  REQUIRE(shortened.status == FingerprintStatus::changed);
+}
+TEST_CASE("file fingerprint reports observer exceptions") {
+  TempFile f; f.write("abc");
+  auto failed = fingerprint_file(f.path, {}, [](auto) { throw std::runtime_error("observer failed"); });
+  REQUIRE(failed.status == FingerprintStatus::error); REQUIRE(failed.diagnostic == "observer failed");
 }

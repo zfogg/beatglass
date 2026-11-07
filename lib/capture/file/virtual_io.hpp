@@ -31,6 +31,8 @@ public:
   std::int64_t tell() noexcept;
   /** Fill up to count bytes, accumulating short reads; zero count is a no-op.
    * Return bytes copied (possibly partial) and retain any terminal failure in status().
+   * If status is non-ok, discard the entire output: the source may have
+   * modified bytes beyond the reported prefix before failing.
    */
   std::int64_t read(void* output, std::int64_t count) noexcept;
   /** Reject a write attempt and record a sticky error. */
@@ -43,12 +45,6 @@ private:
   std::stop_token cancel_;
   VirtualIoStatus status_{VirtualIoStatus::ok};
 };
-/** Open was cancelled before or during virtual I/O. */
-class VirtualOpenCancelled : public std::runtime_error {
-public:
-  /** Construct the cancellation exception. */
-  VirtualOpenCancelled() : std::runtime_error("Virtual audio open cancelled") {}
-};
 /** Experimental worker-owned libsndfile decoder over borrowed virtual I/O.
  * The source outlives this reader, including its destructor. It must denote an
  * immutable snapshot for cacheable work; this class does not create one. No
@@ -56,8 +52,9 @@ public:
  */
 class VirtualFileReader {
 public:
-  /** Open synchronously; throws VirtualOpenCancelled for cancellation and std::runtime_error for failure. */
-  explicit VirtualFileReader(ByteSource& source, std::uint64_t epoch = 0, std::stop_token cancel = {});
+  /** Open with a coordinator-allocated initial epoch; throws FileOpenCancelled
+   * for cancellation and std::runtime_error for failure. */
+  explicit VirtualFileReader(ByteSource& source, std::uint64_t epoch, std::stop_token cancel = {});
   /** Close the decoder before releasing the borrowed source. */
   ~VirtualFileReader();
   VirtualFileReader(const VirtualFileReader&) = delete;
@@ -70,8 +67,12 @@ public:
    * have modified the caller buffer, but publishes no samples.
    */
   FileReadResult read(std::span<float> buffer, std::stop_token cancel = {});
-  /** Seek to a valid frame and advance epoch; failure makes this reader unusable. */
-  void seek(std::uint64_t frame);
+  /** Seek using an externally allocated, strictly increasing epoch.
+   * Reject an invalid frame or reused/non-increasing epoch before decoder I/O;
+   * a decoder failure invalidates the reader. The coordinator must guarantee
+   * process-wide uniqueness, including across recreated readers.
+   */
+  void seek(std::uint64_t frame, std::uint64_t new_epoch);
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
