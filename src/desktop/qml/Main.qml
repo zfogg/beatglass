@@ -14,6 +14,7 @@ ApplicationWindow {
     property var metadataBridge: metadata
     property var liveBridge: livePresentation
     property url browseFolder: ""
+    property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
 
@@ -36,6 +37,7 @@ ApplicationWindow {
         nameFilters: ["*" + search.text + "*.wav", "*" + search.text + "*.flac", "*" + search.text + "*.mp3", "*" + search.text + "*.aiff", "*" + search.text + "*.aif"]
         caseSensitive: false
         sortField: FolderListModel.Name
+        sortReversed: window.sortDescending
     }
     header: ToolBar {
         RowLayout {
@@ -81,7 +83,7 @@ ApplicationWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true }
-                    Button { text: files.sortReversed ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: files.sortReversed = !files.sortReversed }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true

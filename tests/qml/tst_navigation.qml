@@ -48,6 +48,14 @@ TestCase {
         for (let i = 0; i < model.count; ++i)
             if (model.get(i, "fileName") === "tone.flac") audio = i
         verify(audio >= 0)
+        let sort = findChild(app, "sortOrder")
+        compare(sort.text, "Name ↑")
+        sort.clicked()
+        compare(sort.text, "Name ↓")
+        tryVerify(() => model.get(0, "fileName") === "tone.mp3")
+        sort.clicked()
+        compare(sort.text, "Name ↑")
+        tryVerify(() => model.get(0, "fileName") === "tone.aiff")
         findChild(app, "search").text = "no-such-file"
         tryCompare(model, "count", 0)
         findChild(app, "search").text = "tone"
