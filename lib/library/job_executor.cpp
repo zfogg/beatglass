@@ -90,10 +90,10 @@ void JobExecutor::shutdown() {
     impl_->stopping = true;
     discarded.swap(impl_->queue);
   }
-  for (const auto& job : discarded) if (job.handle) job.handle->cancel();
-  discarded.clear();
   impl_->worker.request_stop();
   impl_->ready.notify_all();
+  for (const auto& job : discarded) if (job.handle) job.handle->cancel();
+  discarded.clear();
   if (impl_->worker.joinable()) impl_->worker.join();
 }
 }

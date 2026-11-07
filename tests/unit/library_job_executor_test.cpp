@@ -168,3 +168,25 @@ TEST_CASE("tracked cancellation runs stop callbacks outside the state lock") {
   executor.shutdown();
   REQUIRE(handle->state() == TrackedState::cancelled);
 }
+
+TEST_CASE("shutdown signals active work before destroying queued closures") {
+  struct WaitForStop {
+    std::shared_future<void> observed;
+    std::promise<bool>* result;
+    ~WaitForStop() { result->set_value(observed.wait_for(5s) == std::future_status::ready); }
+  };
+  JobExecutor executor(1);
+  std::promise<void> started, observed;
+  std::promise<bool> destructor_saw_stop;
+  REQUIRE(executor.submit(0, [&](std::stop_token stop) {
+    started.set_value();
+    while (!stop.stop_requested()) std::this_thread::yield();
+    observed.set_value();
+  }));
+  REQUIRE(started.get_future().wait_for(5s) == std::future_status::ready);
+  auto capture = std::make_shared<WaitForStop>(observed.get_future().share(), &destructor_saw_stop);
+  REQUIRE(executor.submit(0, [capture](std::stop_token) {}));
+  capture.reset();
+  executor.shutdown();
+  REQUIRE(destructor_saw_stop.get_future().get());
+}
