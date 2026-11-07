@@ -16,6 +16,10 @@ borrows this same `ByteSource` and its own `ByteCursor`; it must not reopen the
 original path. Reads and seeks are confined to the worker, never to an audio
 callback or GUI thread. Snapshot creation, cleanup and OS handle conversion
 are platform implementations, not guarantees supplied by the new interface.
+The libsndfile adapter must catch all exceptions at each C callback boundary,
+record read/seek/cancellation failure in adapter-owned state, and translate it
+on the worker after the library returns. Signed seeks must reject underflow,
+overflow and positions beyond EOF without moving the cursor.
 
 Before publication the worker checks the retained original identity, contents,
 version evidence and intended path binding; changed or unverifiable evidence

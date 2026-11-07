@@ -12,6 +12,8 @@ struct ByteReadResult {
   ByteReadStatus status{ByteReadStatus::error}; ///< Result category.
   std::size_t bytes{}; ///< Bytes written to the caller's buffer.
 };
+/** Base for a signed relative seek. */
+enum class ByteSeekOrigin { begin, current, end };
 /** Provisional seekable read-only byte source, confined to one worker.
  * A job may lend the same source to fingerprinting and a decoder sequentially.
  * The owner keeps the source alive until all borrowers finish. Reads may block;
@@ -48,6 +50,30 @@ public:
   bool seek(std::uint64_t offset) {
     if (offset > source_.size()) return false;
     position_ = offset; return true;
+  }
+  /** Seek by a signed displacement from begin, current position or EOF.
+   * Reject underflow, overflow and positions past EOF without changing position.
+   */
+  bool seek_relative(std::int64_t displacement, ByteSeekOrigin origin) {
+    const auto size = source_.size();
+    std::uint64_t base;
+    switch (origin) {
+      case ByteSeekOrigin::begin: base = 0; break;
+      case ByteSeekOrigin::current: base = position_; break;
+      case ByteSeekOrigin::end: base = size; break;
+      default: return false;
+    }
+    if (base > size) return false;
+    if (displacement < 0) {
+      const auto magnitude = static_cast<std::uint64_t>(-(displacement + 1)) + 1;
+      if (magnitude > base) return false;
+      position_ = base - magnitude;
+    } else {
+      const auto magnitude = static_cast<std::uint64_t>(displacement);
+      if (magnitude > size - base) return false;
+      position_ = base + magnitude;
+    }
+    return true;
   }
   /** Read nonempty output, retaining position on cancellation or error.
    * Reject malformed source responses; successful EOF does not advance.

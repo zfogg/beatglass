@@ -2,6 +2,7 @@
 #include "beatglass/capture/byte_source.hpp"
 #include <algorithm>
 #include <array>
+#include <limits>
 using namespace beatglass;
 namespace {
 class MemorySource : public ByteSource {
@@ -35,4 +36,14 @@ TEST_CASE("byte cursor rejects malformed reads and preserves position on cancell
  source.premature_end = false; std::stop_source stop; stop.request_stop();
  CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled); CHECK(cursor.position() == 0);
  CHECK(cursor.read({}).status == ByteReadStatus::error); CHECK(cursor.position() == 0);
+}
+TEST_CASE("signed byte seeks handle origins and extreme displacements") {
+ MemorySource source; ByteCursor cursor(source);
+ REQUIRE(cursor.seek_relative(-1, ByteSeekOrigin::end)); CHECK(cursor.position() == 2);
+ REQUIRE(cursor.seek_relative(-2, ByteSeekOrigin::current)); CHECK(cursor.position() == 0);
+ REQUIRE(cursor.seek_relative(3, ByteSeekOrigin::begin)); CHECK(cursor.position() == 3);
+ CHECK_FALSE(cursor.seek_relative(1, ByteSeekOrigin::current));
+ CHECK_FALSE(cursor.seek_relative(std::numeric_limits<std::int64_t>::min(), ByteSeekOrigin::end));
+ CHECK_FALSE(cursor.seek_relative(std::numeric_limits<std::int64_t>::max(), ByteSeekOrigin::current));
+ CHECK(cursor.position() == 3);
 }
