@@ -66,6 +66,13 @@ gaps and delivery loss fail closed. The process coordinator owns epoch
 allocation, while optional anchors expose clock domain and known uncertainty
 and latency. Existing adapters must migrate; no platform backend is provided.
 
+# Process epoch allocation proposal
+
+A single coordinator-owned allocator can issue epochs concurrently to live and
+offline control/workers. It is not an audio-callback API and issuance does not
+replace per-source transition ordering or cross-session identity/draining.
+Application ownership and injection into each active path remain integration work.
+
 # Phase 1 cache contract proposal
 
 Lookup and publication report typed outcomes. The database worker decides
@@ -80,3 +87,10 @@ Snapshot publication uses exclusive `observed_through` frame boundaries and
 nonempty half-open chord intervals. A beat at the boundary and an empty chord
 are now rejected; existing producers must adjust. This does not qualify any
 native capture or presentation path.
+
+# Offline result contract proposal
+
+Keep owned offline results separate from live snapshots. Preserve overlapping
+local tonal evidence and optional beat strengths; rolling keys are not
+track-level keys. Storage, paging, cache identity and result serialization
+remain subject to integration review and are not implemented by this value type.
