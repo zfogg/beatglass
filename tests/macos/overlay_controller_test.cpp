@@ -78,6 +78,12 @@ private slots:
     QVERIFY(controller.attach(&overlay, &control));
     overlay.setGeometry(-30000, -30000, 300, 200); controller.keepOnScreen();
     QVERIFY(QGuiApplication::primaryScreen()->availableGeometry().contains(overlay.geometry()));
+    QVERIFY(!controller.moveToScreen(-1));
+    QVERIFY(!controller.moveToScreen(controller.screenNames().size()));
+    QVERIFY(!controller.resizeOverlay(0, 200));
+    QVERIFY(controller.resizeOverlay(250, 120));
+    QVERIFY(controller.moveToScreen(0));
+    QVERIFY(QGuiApplication::screens().at(0)->availableGeometry().contains(overlay.geometry()));
   }
   void qmlAttachesTheRealController() {
     FakeMetadata metadata; FakeLive live;

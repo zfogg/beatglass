@@ -217,6 +217,27 @@ ApplicationWindow {
                     Label { text: "Opacity" }
                     Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: 0.9; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                 }
+                RowLayout {
+                    visible: window.overlayBridge !== null
+                    Label { text: "Display" }
+                    ComboBox {
+                        objectName: "overlayDisplay"
+                        enabled: window.overlayBridge && window.overlayBridge.available && count > 0
+                        model: window.overlayBridge ? window.overlayBridge.screenNames : []
+                        onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
+                        Layout.fillWidth: true
+                    }
+                    Label { text: "Size" }
+                    ComboBox {
+                        objectName: "overlaySize"
+                        model: ["Compact", "Medium", "Large"]; currentIndex: 1
+                        enabled: window.overlayBridge && window.overlayBridge.available
+                        onActivated: if (window.overlayBridge) {
+                            const sizes = [[250, 110], [310, 130], [430, 180]]
+                            window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
+                        }
+                    }
+                }
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
                 Item { Layout.fillHeight: true }
             }

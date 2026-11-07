@@ -12,8 +12,9 @@ namespace beatglass::macos {
 OverlayController::OverlayController(std::unique_ptr<OverlayNative> native, QObject* parent)
     : QObject(parent), native_(std::move(native)) {
   connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) {
-    QTimer::singleShot(0, this, [this] { keepOnScreen(); });
+    QTimer::singleShot(0, this, [this] { keepOnScreen(); emit screensChanged(); });
   });
+  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen*) { emit screensChanged(); });
 }
 OverlayController::~OverlayController() { detach(); }
 void OverlayController::setAvailable(bool value) {
@@ -79,6 +80,28 @@ bool OverlayController::setClickThrough(bool enabled) {
 }
 bool OverlayController::clickThrough() const { return click_through_; }
 bool OverlayController::available() const { return available_; }
+QStringList OverlayController::screenNames() const {
+  QStringList names;
+  for (const auto* screen : QGuiApplication::screens())
+    names.append(screen->name().isEmpty() ? QStringLiteral("Display %1").arg(names.size() + 1) : screen->name());
+  return names;
+}
+bool OverlayController::moveToScreen(int index) {
+  const auto screens = QGuiApplication::screens();
+  if (!overlay_ || index < 0 || index >= screens.size()) return false;
+  auto* screen = screens.at(index);
+  const auto bounds = screen->availableGeometry();
+  if (bounds.isEmpty()) return false;
+  const auto size = overlay_->size().boundedTo(bounds.size());
+  const QPoint topLeft(bounds.center().x() - size.width() / 2, bounds.center().y() - size.height() / 2);
+  overlay_->setScreen(screen);
+  overlay_->setGeometry(QRect(topLeft, size));
+  keepOnScreen(); return true;
+}
+bool OverlayController::resizeOverlay(int width, int height) {
+  if (!overlay_ || width <= 0 || height <= 0) return false;
+  overlay_->resize(width, height); keepOnScreen(); return true;
+}
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
       (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) setClickThrough(false);
