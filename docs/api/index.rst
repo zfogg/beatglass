@@ -39,7 +39,8 @@ Library jobs
 
 The provisional storage interface distinguishes a cache miss, cancellation,
 stale input and storage error. Its worker owns the cancellation-versus-commit
-decision; the interface and helper do not implement SQLite transactions.
+decision; file verification accepts cooperative cancellation before that
+decision. The interface and helper do not implement SQLite transactions.
 
 .. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp
 
