@@ -5,11 +5,14 @@
 #include <QQmlContext>
 #ifdef Q_OS_MACOS
 #include "platform/macos_overlay.hpp"
+#include <QSettings>
 #endif
 int main(int argc, char** argv) {
   QGuiApplication app(argc, argv); Metadata metadata; LivePresentation livePresentation;
 #ifdef Q_OS_MACOS
-  beatglass::macos::OverlayController macOverlayController(beatglass::macos::makeOverlayNative());
+  beatglass::macos::OverlayController macOverlayController(
+      beatglass::macos::makeOverlayNative(), nullptr,
+      std::make_unique<QSettings>(QSettings::NativeFormat, QSettings::UserScope, QStringLiteral("Beatglass"), QStringLiteral("Beatglass")));
 #endif
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);

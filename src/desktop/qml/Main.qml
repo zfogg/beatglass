@@ -19,7 +19,7 @@ ApplicationWindow {
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     Component.onCompleted: {
-        if (overlayBridge && overlayBridge.attach(djOverlay, window)) overlayBridge.setOpacity(0.9)
+        if (overlayBridge) overlayBridge.attach(djOverlay, window)
     }
 
     Window {
@@ -215,7 +215,7 @@ ApplicationWindow {
                         }
                     }
                     Label { text: "Opacity" }
-                    Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: 0.9; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
+                    Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null

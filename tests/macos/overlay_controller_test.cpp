@@ -2,6 +2,8 @@
 #include <QGuiApplication>
 #include <QQuickWindow>
 #include <QScreen>
+#include <QSettings>
+#include <QTemporaryDir>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtTest>
@@ -62,6 +64,14 @@ private slots:
     QVERIFY(!controller.available()); QVERIFY(!controller.clickThrough());
     QVERIFY(!controller.setClickThrough(true));
   }
+  void attachFailureDoesNotExposeAnOverlay() {
+    QQuickWindow overlay; QWindow control;
+    auto native = std::make_unique<FakeNative>(); native->fail = true;
+    OverlayController controller(std::move(native));
+    QVERIFY(!controller.attach(&overlay, &control));
+    QVERIFY(!controller.available()); QVERIFY(!overlay.isVisible());
+    QVERIFY(!controller.showOverlay());
+  }
   void invalidWindowsAndDestroyedControl() {
     QQuickWindow overlay;
     auto native = std::make_unique<FakeNative>(); auto* backend = native.get();
@@ -101,6 +111,43 @@ private slots:
     QVERIFY(controller.showOverlay());
     QVERIFY(controller.setClickThrough(true)); QVERIFY(backend->mode);
     root->hide(); QTRY_VERIFY(!controller.clickThrough()); QVERIFY(!backend->mode);
+  }
+  void restoresGeometryAndOpacityWithoutRestoringClickThrough() {
+    QTemporaryDir dir; QVERIFY(dir.isValid());
+    const auto path = dir.filePath(QStringLiteral("overlay.ini"));
+    QRect saved;
+    {
+      QQuickWindow overlay; QWindow control; control.show();
+      OverlayController controller(std::make_unique<FakeNative>(), nullptr, std::make_unique<QSettings>(path, QSettings::IniFormat));
+      QVERIFY(controller.attach(&overlay, &control)); QVERIFY(controller.showOverlay());
+      const auto bounds = QGuiApplication::primaryScreen()->availableGeometry();
+      overlay.setGeometry(QRect(bounds.topLeft() + QPoint(10, 10), QSize(260, 120)));
+      controller.setOpacity(0.55); QVERIFY(controller.setClickThrough(true));
+      saved = overlay.geometry();
+    }
+    {
+      QQuickWindow overlay; QWindow control; control.show();
+      OverlayController controller(std::make_unique<FakeNative>(), nullptr, std::make_unique<QSettings>(path, QSettings::IniFormat));
+      QVERIFY(controller.attach(&overlay, &control));
+      QCOMPARE(overlay.geometry(), saved);
+      QVERIFY(qAbs(controller.opacity() - 0.55) < 0.02);
+      QVERIFY(!controller.clickThrough());
+    }
+  }
+  void unsafeSavedSettingsAreRecovered() {
+    QTemporaryDir dir; QVERIFY(dir.isValid());
+    const auto path = dir.filePath(QStringLiteral("overlay.ini"));
+    {
+      QSettings seed(path, QSettings::IniFormat);
+      seed.setValue(QStringLiteral("overlay/geometry"), QRect(-30000, -30000, 280, 120));
+      seed.setValue(QStringLiteral("overlay/opacity"), 0.0);
+    }
+    QQuickWindow overlay; QWindow control;
+    OverlayController controller(std::make_unique<FakeNative>(), nullptr, std::make_unique<QSettings>(path, QSettings::IniFormat));
+    QVERIFY(controller.attach(&overlay, &control));
+    QVERIFY(QGuiApplication::primaryScreen()->availableGeometry().contains(overlay.geometry()));
+    QVERIFY(qAbs(controller.opacity() - 0.2) < 0.02);
+    QVERIFY(!controller.clickThrough());
   }
 };
 QTEST_MAIN(OverlayControlTest)

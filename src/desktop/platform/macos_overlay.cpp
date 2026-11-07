@@ -4,13 +4,16 @@
 #include <QQuickWindow>
 #include <QPlatformSurfaceEvent>
 #include <QScreen>
+#include <QSettings>
 #include <QTimer>
 #include <algorithm>
 #include <cmath>
 
 namespace beatglass::macos {
-OverlayController::OverlayController(std::unique_ptr<OverlayNative> native, QObject* parent)
-    : QObject(parent), native_(std::move(native)) {
+OverlayController::OverlayController(std::unique_ptr<OverlayNative> native, QObject* parent, std::unique_ptr<QSettings> settings)
+    : QObject(parent), native_(std::move(native)), settings_(std::move(settings)) {
+  save_timer_.setSingleShot(true); save_timer_.setInterval(250);
+  connect(&save_timer_, &QTimer::timeout, this, [this] { saveSettings(); });
   connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) {
     QTimer::singleShot(0, this, [this] { keepOnScreen(); emit screensChanged(); });
   });
@@ -32,11 +35,29 @@ bool OverlayController::attach(QQuickWindow* overlay, QWindow* control) {
   overlay_->installEventFilter(this); control_->installEventFilter(this);
   connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; detach(); });
   connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; detach(); });
+  connect(overlay_, &QWindow::xChanged, this, [this] { scheduleSave(); });
+  connect(overlay_, &QWindow::yChanged, this, [this] { scheduleSave(); });
+  connect(overlay_, &QWindow::widthChanged, this, [this] { scheduleSave(); });
+  connect(overlay_, &QWindow::heightChanged, this, [this] { scheduleSave(); });
+  connect(overlay_, &QWindow::opacityChanged, this, [this] { emit opacityChanged(); scheduleSave(); });
   overlay_->create();
   if (!native_->apply(overlay_, false)) { detach(); return false; }
-  setAvailable(true); return true;
+  setAvailable(true);
+  restoring_ = true;
+  overlay_->setOpacity(0.9);
+  if (settings_) {
+    const QRect saved = settings_->value(QStringLiteral("overlay/geometry")).toRect();
+    if (saved.isValid() && saved.width() <= 10000 && saved.height() <= 10000) overlay_->setGeometry(saved);
+    bool validOpacity = false;
+    const auto savedOpacity = settings_->value(QStringLiteral("overlay/opacity"), 0.9).toDouble(&validOpacity);
+    if (validOpacity && std::isfinite(savedOpacity)) overlay_->setOpacity(std::clamp(savedOpacity, 0.2, 1.0));
+  }
+  keepOnScreen(); restoring_ = false;
+  emit opacityChanged();
+  return true;
 }
 void OverlayController::detach() {
+  save_timer_.stop(); saveSettings();
   if (overlay_) {
     if (native_ && !native_->apply(overlay_, false)) overlay_->hide();
     overlay_->hide();
@@ -64,6 +85,15 @@ void OverlayController::hideOverlay() {
 }
 void OverlayController::setOpacity(qreal value) {
   if (overlay_ && std::isfinite(value)) overlay_->setOpacity(std::clamp(value, qreal(0), qreal(1)));
+}
+qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(0.9); }
+void OverlayController::scheduleSave() {
+  if (settings_ && available_ && !restoring_) save_timer_.start();
+}
+void OverlayController::saveSettings() {
+  if (!settings_ || !overlay_ || !available_ || restoring_) return;
+  settings_->setValue(QStringLiteral("overlay/geometry"), overlay_->geometry());
+  settings_->setValue(QStringLiteral("overlay/opacity"), overlay_->opacity());
 }
 bool OverlayController::setClickThrough(bool enabled) {
   if (!overlay_ || !native_) return !enabled;
@@ -104,7 +134,9 @@ bool OverlayController::resizeOverlay(int width, int height) {
 }
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
-      (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) setClickThrough(false);
+      (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) {
+    saveSettings(); setClickThrough(false);
+  }
   if (watched == overlay_ && event->type() == QEvent::PlatformSurface &&
       static_cast<QPlatformSurfaceEvent*>(event)->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
     const QPointer<QQuickWindow> expected = overlay_;

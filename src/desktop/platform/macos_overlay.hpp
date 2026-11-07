@@ -2,6 +2,8 @@
 #include <QObject>
 #include <QPointer>
 #include <QStringList>
+#include <QSettings>
+#include <QTimer>
 #include <memory>
 
 class QEvent;
@@ -20,15 +22,16 @@ public:
 /** Create the AppKit implementation on macOS. Caller owns the result. */
 std::unique_ptr<OverlayNative> makeOverlayNative();
 
-/** Provisional GUI-thread-only overlay controller. The caller owns both distinct windows and supplies a separate visible control-window escape path. AppKit hints do not guarantee visibility over other applications or fullscreen Spaces. */
+/** Provisional GUI-thread-only overlay controller. The caller owns both distinct windows and supplies a separate visible control-window escape path. An optional owned QSettings store records geometry and opacity on the GUI thread; write failures are not currently surfaced, and click-through is never restored. AppKit hints do not guarantee visibility over other applications or fullscreen Spaces. */
 class OverlayController final : public QObject {
   Q_OBJECT
   Q_PROPERTY(bool clickThrough READ clickThrough NOTIFY clickThroughChanged)
   Q_PROPERTY(bool available READ available NOTIFY availableChanged)
   Q_PROPERTY(QStringList screenNames READ screenNames NOTIFY screensChanged)
+  Q_PROPERTY(qreal opacity READ opacity NOTIFY opacityChanged)
 public:
-  /** Own the native adapter; the Qt parent, if any, owns this controller. All methods run on the GUI thread. */
-  explicit OverlayController(std::unique_ptr<OverlayNative> native, QObject* parent = nullptr);
+  /** Own the native adapter and optional settings store; the Qt parent, if any, owns this controller. All methods run on the GUI thread. */
+  explicit OverlayController(std::unique_ptr<OverlayNative> native, QObject* parent = nullptr, std::unique_ptr<QSettings> settings = {});
   // Destructor documented manually in the API reference due to Hawkmoth parsing.
   ~OverlayController() override;
   /** Attach distinct caller-owned windows. Returns false on invalid arguments or failed native setup. */
@@ -39,6 +42,8 @@ public:
   Q_INVOKABLE void hideOverlay();
   /** Set whole-window opacity, clamped to [0,1]; ignore non-finite input. */
   Q_INVOKABLE void setOpacity(qreal value);
+  /** Return the current overlay opacity or the default before attachment. */
+  qreal opacity() const;
   /** Apply input transparency only when a separate control window is visible and not minimized. A failed unlock hides the overlay. */
   Q_INVOKABLE bool setClickThrough(bool enabled);
   /** True if click-through was successfully requested and remains active. */
@@ -59,15 +64,21 @@ public:
   Q_SIGNAL void availableChanged();
   /** Emitted on display addition or removal; callers must refresh any selected index. */
   Q_SIGNAL void screensChanged();
+  /** Emitted when the overlay opacity changes. */
+  Q_SIGNAL void opacityChanged();
 protected:
   /** Reconfigure on surface recreation and unlock on control hide, close or minimization. */
   bool eventFilter(QObject* watched, QEvent* event) override;
 private:
   void setAvailable(bool available);
   void detach();
+  void scheduleSave();
+  void saveSettings();
   std::unique_ptr<OverlayNative> native_;
+  std::unique_ptr<QSettings> settings_;
+  QTimer save_timer_;
   QPointer<QQuickWindow> overlay_;
   QPointer<QWindow> control_;
-  bool available_{}, click_through_{};
+  bool available_{}, click_through_{}, restoring_{};
 };
 }

@@ -17,6 +17,7 @@ TestCase {
         id: fakeOverlay
         property bool available: true
         property bool clickThrough: false
+        property real opacity: 0.9
         property int attaches: 0
         property int shows: 0
         property int hides: 0
@@ -28,7 +29,7 @@ TestCase {
         function showOverlay() { shows++; return true }
         function hideOverlay() { hides++; clickThrough = false }
         function setClickThrough(value) { if (value && refuseClickThrough) return false; clickThrough = value; return true }
-        function setOpacity(value) {}
+        function setOpacity(value) { opacity = value }
         function moveToScreen(index) { selectedScreen = index; return true }
         function resizeOverlay(width, height) { requestedWidth = width; return true }
     }
