@@ -9,6 +9,8 @@ TEST_CASE("Core Audio tap rejects missing UID or epoch without starting", "[core
   CHECK(tap.status().state == TapState::error);
   CHECK_FALSE(tap.start("test", 0));
   CHECK(tap.status().state == TapState::error);
+  CHECK_FALSE(tap.start("org.beatglass.test.missing-output-device", 1));
+  CHECK(tap.status().state == TapState::error);
   tap.stop();
   CHECK(tap.status().state == TapState::stopped);
   CaptureBlock block;
