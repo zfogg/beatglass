@@ -172,6 +172,10 @@ The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
 
+Concurrent process-epoch issuance is proposed with contention and exhaustion
+tests. The application must still share one allocator across live and offline
+paths and coordinate each source's lifecycle.
+
 # Cache contract integration
 
 Typed cache outcomes and a worker-local commit decision have regression
