@@ -3,13 +3,27 @@
 #include <cstdint>
 #include <limits>
 namespace beatglass {
-enum class StreamTransition { invalid, acquire, contiguous, reacquire };
-// Consumer-thread state machine. Never called from a capture callback.
-// Each accepted block updates the expected next frame. Invalid input does not
-// advance state. A format change inside an epoch is invalid: the source must
-// create a new epoch. Once a gap is observed, callers reset all estimators.
+/// Result of inspecting a block against the previous accepted block.
+enum class StreamTransition {
+  invalid, ///< Malformed block or format changed within an epoch.
+  acquire, ///< First accepted block after construction or stop.
+  contiguous, ///< Same epoch and format, with no missing frames.
+  reacquire ///< Gap, explicit discontinuity, or a different epoch.
+};
+/**
+ * Consumer-owned continuity state; not thread-safe or capture-callback work.
+ *
+ * Each accepted block updates the expected next frame. Invalid input leaves
+ * the state unchanged. A format change within an epoch is invalid: the source
+ * must create a new epoch. Reset estimators when reacquisition is requested.
+ */
 class StreamContinuity {
 public:
+  /**
+   * Inspect borrowed block metadata and update the expected frame position.
+   * @param block Interleaved PCM view valid for this call; it is not retained.
+   * @return The transition, or invalid for malformed geometry or overflow.
+   */
   StreamTransition observe(const AudioBlock& block) noexcept {
     const auto& f = block.format;
     if (!f.sample_rate || !f.channels || block.samples.empty() || block.samples.size() % f.channels) return StreamTransition::invalid;
@@ -21,6 +35,7 @@ public:
     started_ = true; epoch_ = block.epoch; format_ = f; next_ = block.first_frame + frames;
     return transition;
   }
+  /// Forget the active stream; the next accepted block starts acquisition.
   void stop() noexcept { started_ = false; }
 private:
   bool started_ = false; std::uint64_t epoch_ = 0, next_ = 0; AudioFormat format_{};
