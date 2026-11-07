@@ -17,7 +17,7 @@ public:
   ~LoopbackSession();
   /** Start a selected endpoint with a fresh epoch. True means accepted, not running. Call on the control thread while stopped; stop after an error before retrying. */
   bool start(const std::string& endpoint);
-  /** Claim a caller-owned attempt before allocating an epoch. Cancellation may be requested concurrently and is passed to capture; stop and all other session calls remain on the control worker. A native call already in progress is not preempted. */
+  /** Claim a caller-owned attempt before allocating an epoch. Cancellation may be requested concurrently and is passed to capture; stop and all other session calls remain on the control worker. A native call already in progress is not preempted. A cancellation racing a poll or pop may still return a packet; the consumer must gate delivery against synchronized authorization or generation state. */
   bool start(const std::string& endpoint, std::shared_ptr<LoopbackStartAuthorization> authorization);
   /** Apply pending transitions and synchronously invalidate on interruption, error, ordering failure or queue loss. Queue loss fails the attempt and stops capture, discarding the complete backlog; call stop before a fresh-epoch restart. Call on the control thread. */
   void poll();

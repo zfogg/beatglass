@@ -24,7 +24,7 @@ public:
   ~LiveMusic();
   /** Start the selected endpoint with a fresh epoch; true means requested. */
   bool start(const std::string& endpoint);
-  /** Start using a shared one-attempt authorization; cancellation is thread-safe, while this method remains worker-only. An already executing native call cannot be preempted. */
+  /** Start using a shared one-attempt authorization; cancellation is thread-safe, while this method remains worker-only. An already executing native call cannot be preempted. Cancellation can race a pump; synchronized generation or authorization gating is required before publishing its output. */
   bool start(const std::string& endpoint, std::shared_ptr<LoopbackStartAuthorization> authorization);
   /** Drain at most 16 packets and run DSP on this worker. On failure clears
    * evidence, stops capture, and returns false. Poll regularly to detect loss. */

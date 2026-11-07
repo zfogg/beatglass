@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <future>
+#include <latch>
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -356,4 +357,23 @@ TEST_CASE("Cancellation after accepted start invalidates and discards queued pac
   fake->packets.push_back(packet); authorization->cancel();
   REQUIRE_FALSE(session.pop(packet)); CHECK(clears==1); CHECK(fake->packets.empty());
   CHECK(session.state()==beatglass::SourceState::error);
+}
+
+TEST_CASE("Claim and cancellation have ordered concurrent outcomes") {
+  using beatglass::windows::LoopbackStartAuthorization;
+  SECTION("cancellation completes before a competing claim") {
+    LoopbackStartAuthorization authorization; std::latch cancelled{1};
+    auto worker = std::async(std::launch::async, [&] { cancelled.wait(); return authorization.claim(); });
+    authorization.cancel(); cancelled.count_down();
+    CHECK_FALSE(worker.get()); CHECK(authorization.cancelled());
+  }
+  SECTION("a completed claim can be revoked by another thread") {
+    LoopbackStartAuthorization authorization; std::latch claimed{1}, cancelled{1};
+    auto worker = std::async(std::launch::async, [&] {
+      const bool acquired = authorization.claim(); claimed.count_down(); cancelled.wait();
+      return acquired && authorization.cancelled();
+    });
+    claimed.wait(); authorization.cancel(); cancelled.count_down();
+    CHECK(worker.get()); CHECK_FALSE(authorization.claim());
+  }
 }

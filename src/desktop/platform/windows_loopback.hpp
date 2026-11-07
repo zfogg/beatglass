@@ -22,7 +22,7 @@ struct LoopbackPacket {
   bool discontinuity{}; /**< True on a WASAPI discontinuity, device-position jump, timestamp error, position overflow or preceding queue drop; downstream must reset and reacquire. */
 };
 
-/** Shared one-attempt start authorization. Any thread may cancel; one control worker may claim. Cancellation before the claim prevents startup; after the claim it requests shutdown; the session must reject cancelled deliveries. No operation allocates or blocks. */
+/** Shared one-attempt start authorization. Any thread may cancel; one control worker may claim. Cancellation before the claim prevents startup; after the claim it requests shutdown. Polling is asynchronous and may race cancellation; the consumer must synchronize its own generation or token gate before publishing. No operation allocates or blocks. */
 class LoopbackStartAuthorization {
 public:
   /** Atomically commit the sole start unless cancellation won first. */
@@ -55,7 +55,7 @@ public:
   Loopback& operator=(const Loopback&) = delete;
   /** Start the opaque UTF-8 render endpoint ID using a caller-allocated, never-reused epoch. Call on the control thread while stopped; errors are observable through state and error_code. */
   virtual bool start(const std::string& endpoint_id, std::uint64_t epoch);
-  /** Start with a claimed authorization retained by the capture worker. Cancellation is observed between native calls and after a blocked call returns; an already executing OS call is not preempted. */
+  /** Start with a claimed authorization retained by the capture worker. Cancellation is checked immediately before and after the audio start call, and during capture polling; earlier initialization calls are not individually checked. An already executing OS call is not preempted. */
   virtual bool start(const std::string& endpoint_id, std::uint64_t epoch, std::shared_ptr<LoopbackStartAuthorization> authorization);
   /** Stop and join the capture thread. Call on the control thread; queued packets are discarded. */
   virtual void stop();
