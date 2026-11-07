@@ -56,13 +56,15 @@ import math, struct, sys, wave
 for path, hz in zip(sys.argv[1:3], (440, 880)):
     with wave.open(path, 'wb') as out:
         out.setparams((2, 2, 48000, 0, 'NONE', 'not compressed'))
-        out.writeframes(b''.join(struct.pack('<hh', int(12000*math.sin(2*math.pi*hz*i/48000)), int(12000*math.sin(2*math.pi*hz*i/48000))) for i in range(48000*8)))
+        for start in range(0, 48000*8, 4096):
+            out.writeframesraw(b''.join(struct.pack('<hh', int(12000*math.sin(2*math.pi*hz*i/48000)), int(12000*math.sin(2*math.pi*hz*i/48000))) for i in range(start, min(start+4096, 48000*8))))
 with wave.open(sys.argv[3], 'wb') as out:
     out.setparams((2, 2, 48000, 0, 'NONE', 'not compressed'))
     def click(i):
         phase = i % 24000
         return int(26000 * math.exp(-phase / 100) * math.sin(phase * .4)) if phase < 1000 else 0
-    out.writeframes(b''.join(struct.pack('<hh', click(i), click(i)) for i in range(48000*20)))
+    for start in range(0, 48000*20, 4096):
+        out.writeframesraw(b''.join(struct.pack('<hh', click(i), click(i)) for i in range(start, min(start+4096, 48000*20))))
 PY
 other_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in json.load(sys.stdin) if x.get("info",{}).get("props",{}).get("node.name")=="beatglass_other_sink"))')
 wpctl set-default "$other_id"
