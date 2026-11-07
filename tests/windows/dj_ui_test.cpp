@@ -110,7 +110,8 @@ private slots:
   void shutdownDuringMonitoringAndClickThrough() {
     Metadata metadata;
     LivePresentation presentation;
-    beatglass::windows::DjBridge bridge;
+    beatglass::SourceEpochAllocator epochs;
+    beatglass::windows::DjBridge bridge(epochs);
     connect(&bridge, &beatglass::windows::DjBridge::presentationUpdate, &presentation,
             [&presentation](beatglass::PresentationUpdate update) { presentation.apply(std::move(update)); });
     QPointer<QQuickWindow> rootPointer;
@@ -239,7 +240,8 @@ private slots:
   void controlsUseRealBridge() {
     Metadata metadata;
     LivePresentation presentation;
-    beatglass::windows::DjBridge bridge;
+    beatglass::SourceEpochAllocator epochs;
+    beatglass::windows::DjBridge bridge(epochs);
     connect(&bridge, &beatglass::windows::DjBridge::presentationUpdate, &presentation,
             [&presentation](beatglass::PresentationUpdate update) { presentation.apply(std::move(update)); });
     QQmlApplicationEngine engine;
@@ -267,7 +269,8 @@ private slots:
     if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_DJ_TEST")) QSKIP("Set BEATGLASS_NATIVE_DJ_TEST to play a generated click track");
     Metadata metadata;
     LivePresentation presentation;
-    beatglass::windows::DjBridge bridge;
+    beatglass::SourceEpochAllocator epochs;
+    beatglass::windows::DjBridge bridge(epochs);
     connect(&bridge, &beatglass::windows::DjBridge::presentationUpdate, &presentation,
             [&presentation](beatglass::PresentationUpdate update) { presentation.apply(std::move(update)); });
     QQmlApplicationEngine engine;

@@ -1,5 +1,6 @@
 #include "metadata.hpp"
 #include "live_presentation.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -13,8 +14,9 @@
 #endif
 int main(int argc, char** argv) {
   QGuiApplication app(argc, argv); Metadata metadata; LivePresentation livePresentation;
+  beatglass::SourceEpochAllocator sourceEpochs;
 #ifdef Q_OS_WIN
-  beatglass::windows::DjBridge djBridge;
+  beatglass::windows::DjBridge djBridge(sourceEpochs);
   QSettings overlaySettings(QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
   QObject::connect(&djBridge, &beatglass::windows::DjBridge::presentationUpdate, &livePresentation,
                    [&livePresentation](beatglass::PresentationUpdate update) { livePresentation.apply(std::move(update)); });

@@ -16,8 +16,8 @@ class DjBridge final : public QObject {
   Q_PROPERTY(bool active READ active NOTIFY stateChanged)
   Q_PROPERTY(QString status READ status NOTIFY stateChanged)
 public:
-  /** Construct on the GUI thread. The optional discovery function is a test seam; production uses Windows endpoint discovery. */
-  explicit DjBridge(QObject* parent = nullptr, std::function<EndpointResult()> discovery = {});
+  /** Construct on the GUI thread with the process-session allocator. The caller retains ownership and must keep it alive until after this bridge is destroyed and its worker has joined. Issuance happens on the worker, never the capture callback. The optional discovery function is a test seam. */
+  explicit DjBridge(SourceEpochAllocator& epochs, QObject* parent = nullptr, std::function<EndpointResult()> discovery = {});
   // Documented manually in the API reference due to Hawkmoth destructor parsing.
   ~DjBridge() override;
   /** Request default-output capture; it starts asynchronously on the owned worker. */
@@ -35,6 +35,7 @@ public:
 private:
   void run(std::function<EndpointResult()> discovery);
   void drain();
+  SourceEpochAllocator& epochs_;
   mutable std::mutex mutex_;
   std::condition_variable wake_;
   bool requested_{}, quitting_{}, reset_pending_{}, commands_exhausted_{};

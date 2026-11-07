@@ -5,7 +5,7 @@
 #include <utility>
 
 namespace beatglass::windows {
-DjBridge::DjBridge(QObject* parent, std::function<EndpointResult()> discovery) : QObject(parent) {
+DjBridge::DjBridge(SourceEpochAllocator& epochs, QObject* parent, std::function<EndpointResult()> discovery) : QObject(parent), epochs_(epochs) {
   qRegisterMetaType<PresentationUpdate>();
   connect(&timer_, &QTimer::timeout, this, &DjBridge::drain);
   timer_.start(50);
@@ -56,8 +56,7 @@ void DjBridge::drain() {
   }
 }
 void DjBridge::run(std::function<EndpointResult()> discovery) {
-  SourceEpochAllocator epochs;
-  DefaultTempoFollower follower(epochs, std::move(discovery));
+  DefaultTempoFollower follower(epochs_, std::move(discovery));
   bool active = false;
   bool fatal = false;
   for (;;) {

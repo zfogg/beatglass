@@ -1,13 +1,11 @@
 # Proposed process-session epoch handoff
 
 This is a proposed integration contract, not a claim that the current desktop
-already provides process-wide unique epochs. The Windows `DjBridge::run`
-currently constructs a private `SourceEpochAllocator`; a concurrent offline
-source can therefore issue the same value. Do not combine those publications
-under a process-wide uniqueness assumption until the shared contract and both
-adapters have changed and have integration coverage.
+already provides process-wide unique epochs. The Windows `DjBridge` now takes
+an allocator from the application owner; the collection path must use that
+same object before their publications can share a process-wide namespace.
 
-The application control owner creates exactly one session allocator before any
+One possible serialized handoff is for the application control owner to create exactly one session allocator before any
 live or offline worker and retains it until every worker, source callback and
 queued publication has quiesced. It serializes issuance and passes a fresh,
 nonzero token to the relevant worker for every source start, restart, seek and
