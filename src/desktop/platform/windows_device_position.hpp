@@ -3,10 +3,7 @@
 #include <limits>
 
 namespace beatglass::windows {
-/** Validate all frame and timestamp additions for one WASAPI buffer before
- * publishing any part of it. Arguments are native 32-bit buffer dimensions;
- * invalid timestamps are ignored. A false result requires releasing the buffer
- * and interrupting the current capture attempt. No allocation or locking. */
+/** Validate frame and timestamp additions before publishing a WASAPI buffer. Arguments use native 32-bit buffer dimensions; invalid timestamps are ignored. False requires releasing the buffer and interrupting capture. No allocation or locking. */
 inline bool captureBufferArithmeticValid(std::uint64_t first_frame, std::uint32_t frames,
                                          std::uint64_t qpc_100ns, bool timestamp_valid,
                                          std::uint32_t rate, std::uint32_t chunk_limit) noexcept {
