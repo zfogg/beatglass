@@ -58,3 +58,8 @@ Experimental tonal worker internals
 -----------------------------------
 
 .. cpp:autodoc:: lib/core/tonal_tracker.hpp
+
+Experimental beat-event worker
+------------------------------
+
+.. cpp:autodoc:: lib/core/beat_tracker.hpp
