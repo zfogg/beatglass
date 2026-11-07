@@ -13,6 +13,7 @@ ApplicationWindow {
     title: "Beatglass"
     property var metadataBridge: metadata
     property var liveBridge: livePresentation
+    property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property url browseFolder: ""
     property bool sortDescending: false
@@ -23,7 +24,7 @@ ApplicationWindow {
     readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]
     readonly property var themeForegrounds: ["#20242b", "#f4f6fb", "#ffffff", "#f4eaff", "#eaf4ff", "#fffbe6"]
     readonly property var themeAccentColors: ["#3f51b5", "#90caf9", "#ffff00", "#c084fc", "#60a5fa", "#facc15"]
-    property int selectedThemeIndex: 0
+    property int selectedThemeIndex: themePreferencesBridge ? themePreferencesBridge.themeIndex : 0
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
     }
@@ -115,6 +116,7 @@ ApplicationWindow {
                 onActivated: {
                     window.selectedThemeIndex = currentIndex
                     window.selectedTheme = currentText
+                    if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = currentIndex
                 }
             }
             Row {
@@ -140,6 +142,7 @@ ApplicationWindow {
                             window.selectedThemeIndex = index
                             window.selectedTheme = window.themeNames[index]
                             themeSelector.currentIndex = index
+                                if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = index
                         }
                     }
                 }

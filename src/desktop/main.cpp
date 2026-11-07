@@ -1,5 +1,6 @@
 #include "metadata.hpp"
 #include "live_presentation.hpp"
+#include "theme_preferences.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -8,7 +9,7 @@
 #include <QSettings>
 #endif
 int main(int argc, char** argv) {
-  QGuiApplication app(argc, argv); Metadata metadata; LivePresentation livePresentation;
+  QGuiApplication app(argc, argv); Metadata metadata; LivePresentation livePresentation; ThemePreferences themePreferences;
 #ifdef Q_OS_MACOS
   beatglass::macos::OverlayController macOverlayController(
       beatglass::macos::makeOverlayNative(), nullptr,
@@ -17,6 +18,7 @@ int main(int argc, char** argv) {
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
+  engine.rootContext()->setContextProperty("themePreferences", &themePreferences);
 #ifdef Q_OS_MACOS
   engine.rootContext()->setContextProperty("macOverlayController", &macOverlayController);
 #endif
