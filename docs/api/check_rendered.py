@@ -30,7 +30,7 @@ expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_l
             'id="beatglass::FileReader::~FileReader__void"', 'id="beatglass::FileReader::FileReader__FileReaderCR"',
             'id="beatglass::FileReader::assign-operator__FileReaderCR"', 'id="beatglass::FileReader::metadata__voidC"',
             'id="beatglass::FileReader::read__std::span:float:.std::stop_token"',
-            'id="beatglass::FileReader::seek__std::uint64_t"', "AnalysisStore", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
+            'id="beatglass::FileReader::seek__std::uint64_t"', "AnalysisStore", "JobLifecycle", "JobSnapshot", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
             'id="beatglass::ChordEstimator::take_segments__void"',
             'id="beatglass::PresentationAdapter::present__SnapshotCRC"')
 missing = [name for name in expected if name not in html]
