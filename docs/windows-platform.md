@@ -46,8 +46,18 @@ On the same Windows 11 machine and compiler, the loopback increment built with
 `cmake --build "$env:TEMP/beatglass-windows-main" -j 6` and passed
 `ctest --test-dir "$env:TEMP/beatglass-windows-main" --output-on-failure`
 (26/26). An active render endpoint opened and stopped; an invalid ID reported
-interruption and could be stopped and retried. No sound was played or inspected,
-and queue overflow, disconnect, default-device changes, audio continuity, and
-actual product UI remain unqualified. The API documentation Docker build passed
-with Sphinx warnings treated as errors. This is a draft implementation and does
-not satisfy the native audio/overlay qualification gate.
+interruption and could be stopped and retried. With generated playback explicitly
+enabled using `& "$env:TEMP/beatglass-windows-main/windows_endpoint_tests.exe" '[native-audio]' -s`,
+the selected default Speakers (Realtek(R) Audio) endpoint captured a generated
+440 Hz tone at 48 kHz stereo; the observed peak packet correlation amplitude was
+0.119918. Deliberately withholding the consumer caused dropped frames and a
+subsequent discontinuity at a frame-position gap. The test produces sound and is
+excluded from ordinary CTest runs. A prior version of the tone assertion failed
+when phase changed between packets; the current assertion uses packet-local
+correlation. These checks used base commit `6f927cb` plus the endpoint and draft
+loopback changes. Endpoint disconnection, default-device changes, long-session
+continuity, actual product UI and overlay remain unqualified. The backend polls
+the selected endpoint's state approximately once per second and interrupts when
+it is no longer active; this path has not been exercised by disconnecting a
+device. The API documentation Docker build passed with Sphinx warnings treated as
+errors. This draft does not satisfy the native audio/overlay qualification gate.

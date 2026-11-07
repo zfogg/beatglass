@@ -86,8 +86,16 @@ struct Loopback::Impl {
       else {
         current.store(State::running, std::memory_order_release);
         std::uint64_t position = 0;
+        unsigned polls = 0;
         while (!cancel.load(std::memory_order_acquire)) {
           Sleep(10);
+          if (++polls == 100) {
+            polls = 0;
+            DWORD device_state{};
+            hr = device->GetState(&device_state);
+            if (SUCCEEDED(hr) && device_state != DEVICE_STATE_ACTIVE) hr = AUDCLNT_E_DEVICE_INVALIDATED;
+            if (FAILED(hr)) { fail(hr); break; }
+          }
           UINT32 available{};
           hr = capture->GetNextPacketSize(&available);
           while (SUCCEEDED(hr) && available && !cancel.load(std::memory_order_acquire)) {
