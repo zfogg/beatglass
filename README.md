@@ -36,3 +36,5 @@ For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` a
 ### Pinned development dependencies (experimental)
 
 `vcpkg.json` pins the registry baseline and requests aubio and libsndfile without default features. Set `VCPKG_ROOT` to a vcpkg checkout containing the baseline, then run `cmake --preset vcpkg-core`, `cmake --build --preset vcpkg-core`, and `ctest --preset vcpkg-core`. The optional `vcpkg-desktop` preset enables the manifest's Qt feature. These presets are not yet verified across all platforms or configurations and do not establish a release distribution or codec coverage. The CLI also accepts `--replay <file>` to print incremental estimates after observed blocks, without real-time pacing. See [contracts and handoff](docs/contracts.md).
+
+The [Phase 0 gate audit](docs/phase0-gate.md) lists remaining prerequisites and proposed module ownership. The gate is closed; the current experimental shell is not the full application.

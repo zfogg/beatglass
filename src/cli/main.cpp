@@ -13,7 +13,10 @@ int main(int argc, char** argv) {
     const auto r = replay ? beatglass::replay_file(path, [](std::uint64_t frame, const beatglass::TempoResult& state) {
       std::cout << "observed frame: " << frame << " tempo: ";
       if (state.bpm) std::cout << *state.bpm; else std::cout << "unknown";
-      std::cout << "\n";
+      const char* label = state.state == beatglass::TrackingState::silent ? "silent" :
+          state.state == beatglass::TrackingState::tracking ? "tracking" :
+          state.state == beatglass::TrackingState::reacquiring ? "reacquiring" : "acquiring";
+      std::cout << " state: " << label << "\n";
     }) : beatglass::analyze_file(path);
     std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nbeats: " << r.beats << "\ntempo: ";
     if (r.bpm) std::cout << *r.bpm << " BPM\n"; else std::cout << "unknown\n";

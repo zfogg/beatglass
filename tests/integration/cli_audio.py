@@ -45,5 +45,23 @@ with tempfile.TemporaryDirectory() as directory:
     prefix_lines = [line for line in prefix_output.splitlines() if line.startswith("observed frame:")]
     assert prefix_lines == lines[:len(prefix_lines)], "future samples changed an earlier estimate"
     assert result.split("tempo: ")[-1] == replay.split("tempo: ")[-1], (result, replay[-500:])
+    transition_file = root / "silence-after-clicks.wav"
+    with wave.open(str(clicks), "rb") as source, wave.open(str(transition_file), "wb") as target:
+        target.setparams(source.getparams())
+        target.writeframes(source.readframes(44100 * 20) + bytes(44100 * 2 * 3))
+    transition_output = subprocess.run([exe, "--replay", str(transition_file)], capture_output=True, text=True, check=True).stdout
+    transition_lines = [line for line in transition_output.splitlines() if line.startswith("observed frame:")]
+    assert any("state: tracking" in line for line in transition_lines), "never acquired"
+    assert "tempo: unknown state: silent" in transition_lines[-1], transition_lines[-1]
+    resume_file = root / "resume.wav"
+    with wave.open(str(clicks), "rb") as source, wave.open(str(resume_file), "wb") as target:
+        target.setparams(source.getparams())
+        click_frames = source.readframes(44100 * 20)
+        target.writeframes(click_frames + bytes(44100 * 2 * 3) + click_frames)
+    resume_output = subprocess.run([exe, "--replay", str(resume_file)], capture_output=True, text=True, check=True).stdout
+    resume_lines = [line for line in resume_output.splitlines() if line.startswith("observed frame:")]
+    after_resume = next(line for line in resume_lines if int(line.split()[2]) > 44100 * 23 + 512)
+    assert "tempo: unknown state: acquiring" in after_resume, after_resume
+    assert "state: tracking" in resume_lines[-1], resume_lines[-1]
     missing = subprocess.run([exe, str(root / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0
