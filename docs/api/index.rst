@@ -46,6 +46,12 @@ the value type does not itself provide database paging or persistence.
 
 .. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp
 
+Offline results preserve overlapping local tonal evidence separately from an
+optional validated track-level key. Missing windows and scores remain unknown;
+the value type does not itself provide database paging or persistence.
+
+.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp
+
 Library jobs
 ------------
 
