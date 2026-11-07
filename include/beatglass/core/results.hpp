@@ -13,9 +13,9 @@ struct EventTime { std::uint64_t epoch{}, frame{}; };
 struct Candidate { std::string label; float score{}; };
 /** Beat event position and strength. */
 struct Beat { EventTime time; float strength{}; };
-/** Chord candidate with start and end frame positions. Boundary semantics are not yet specified. */
+/** Chord candidate over the nonempty half-open interval [start, end), within one epoch. */
 struct ChordSegment { EventTime start, end; Candidate chord; };
-/** Value snapshot of provisional analysis results. observed_through is an audio position; publication_monotonic_ns is publication time, and analysis_delay_frames records delay in frames. Empty candidates and absent BPM express missing results. No synchronization or history bounds are imposed by this type. */
+/** Value snapshot of provisional analysis results. observed_through is the exclusive audio-frame boundary: observed frames are [0, observed_through), beats precede it, and chord ends may equal it. publication_monotonic_ns is publication time, and analysis_delay_frames records delay in frames. Empty candidates and absent BPM express missing results. No synchronization or history bounds are imposed by this type. */
 struct Snapshot {
   TrackingState state{TrackingState::stopped};
   EventTime observed_through{};
