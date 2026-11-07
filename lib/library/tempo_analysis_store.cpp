@@ -39,6 +39,7 @@ void TempoAnalysisStore::put_entry(const CollectionEntry& entry) { impl_->cache.
 bool TempoAnalysisStore::remove_entry(const std::string& path) { return impl_->cache.remove_entry(path); }
 std::optional<CollectionEntry> TempoAnalysisStore::entry(const std::string& path, std::stop_token stop) { return impl_->cache.entry(path, stop); }
 std::vector<CollectionEntry> TempoAnalysisStore::entries(const CollectionQuery& query, std::stop_token stop) { return impl_->cache.entries(query, stop); }
+SqliteCache& TempoAnalysisStore::offline_cache() { return impl_->cache; }
 FindResult TempoAnalysisStore::find(const FileVersion& file, const AnalysisIdentity& id, std::stop_token stop) {
   if (stop.stop_requested()) return {FindOutcome::cancelled, {}, {}};
   if (!valid_identity(file, id)) return {FindOutcome::error, {}, "invalid content or analysis identity"};
@@ -52,13 +53,20 @@ FindResult TempoAnalysisStore::find(const FileVersion& file, const AnalysisIdent
   } catch (const std::exception& e) { return {FindOutcome::error, {}, e.what()}; }
 }
 PublishResult TempoAnalysisStore::publish(const FileVersion& file, const CachedAnalysis& value, const std::string& run, FileVersionVerifier& verifier, std::stop_token stop) {
+  return publish_impl(file, value, run, nullptr, verifier, stop);
+}
+PublishResult TempoAnalysisStore::publish_indexed(const FileVersion& file, const CachedAnalysis& value, const std::string& run, const std::string& path, FileVersionVerifier& verifier, std::stop_token stop) {
+  return publish_impl(file, value, run, &path, verifier, stop);
+}
+PublishResult TempoAnalysisStore::publish_impl(const FileVersion& file, const CachedAnalysis& value, const std::string& run, const std::string* path, FileVersionVerifier& verifier, std::stop_token stop) {
   if (stop.stop_requested()) return {PublishOutcome::cancelled, {}};
   if (run.empty() || run.size() > 4096 || !valid_identity(file, value.identity) || value.result.estimator_version != value.identity.engine_version || value.result.configuration_id != value.identity.configuration_id) return {PublishOutcome::error, "invalid content, run or analysis identity"};
   try {
     auto blob = encode(value.result); if (blob.size() > 1024 * 1024) return {PublishOutcome::error, "result too large"};
     auto key = key_of(value.identity); impl_->cache.begin(run, key);
     FileVerificationResult verification; bool verified = false;
-    auto status = impl_->cache.publish(run, key, blob, stop, [&] { verification = verifier.verify(stop); verified = true; return verification.outcome == FileVerificationOutcome::match; });
+    auto revalidate = [&] { verification = verifier.verify(stop); verified = true; return verification.outcome == FileVerificationOutcome::match; };
+    auto status = path ? impl_->cache.publish_indexed(run, key, blob, *path, stop, revalidate) : impl_->cache.publish(run, key, blob, stop, revalidate);
     if (status == Publish::committed) return {PublishOutcome::committed, {}};
     if (status == Publish::cancelled || (status == Publish::stale_input && stop.stop_requested())) return {PublishOutcome::cancelled, {}};
     if (status == Publish::stale_input && verified && verification.outcome == FileVerificationOutcome::cancelled) return {PublishOutcome::cancelled, verification.diagnostic};
@@ -66,6 +74,16 @@ PublishResult TempoAnalysisStore::publish(const FileVersion& file, const CachedA
     if (status == Publish::stale_input && verified) return {PublishOutcome::error, verification.diagnostic.empty() ? "input verifier failed" : verification.diagnostic};
     return {PublishOutcome::error, "storage failure; commit outcome may be unknown; recover by run ID"};
   } catch (const std::exception& e) { return {PublishOutcome::error, e.what()}; }
+}
+PublishResult TempoAnalysisStore::associate(const FileVersion& file, const AnalysisIdentity& identity, const std::string& path, FileVersionVerifier& verifier, std::stop_token stop) {
+  if (stop.stop_requested()) return {PublishOutcome::cancelled, {}};
+  if (!valid_identity(file, identity) || path.empty()) return {PublishOutcome::error, "invalid identity or path"};
+  FileVerificationResult verification; bool verified = false;
+  auto status = impl_->cache.associate(key_of(identity), path, stop, [&] { verification = verifier.verify(stop); verified = true; return verification.outcome == FileVerificationOutcome::match; });
+  if (status == Publish::committed) return {PublishOutcome::committed, {}};
+  if (status == Publish::cancelled || (status == Publish::stale_input && verified && verification.outcome == FileVerificationOutcome::cancelled)) return {PublishOutcome::cancelled, {}};
+  if (status == Publish::stale_input && verified && (verification.outcome == FileVerificationOutcome::changed || verification.outcome == FileVerificationOutcome::unverifiable)) return {PublishOutcome::stale_input, verification.diagnostic};
+  return {PublishOutcome::error, "association failed or verifier error"};
 }
 RecoveryResult TempoAnalysisStore::recover(const std::string& run) {
   if (run.empty()) return {RecoveryOutcome::error, "empty run ID"};

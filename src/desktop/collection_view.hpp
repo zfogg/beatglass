@@ -30,6 +30,10 @@ public:
   void cancelAnalysis();
   /** Look up an indexed file under the exact runtime identity and a nonzero process-coordinator-issued epoch. A hit is reported as provisional and its value is not exposed. This replaces pending browse work. */
   void lookupIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch);
+  /** Request one independently bounded page for a caller-verified identity and coordinator-issued epoch. Empty run selects the active run; subsequent requests must pass its run ID. A result is provisional and is never shown by the product UI. Replaces pending browse work. */
+  void requestOfflinePage(const QString& path, beatglass::library_detail::OfflineKey identity, const std::string& run, std::size_t beatOffset, std::size_t beatCount, std::size_t windowOffset, std::size_t windowCount, quint64 epoch);
+  /** Read the last owned provisional page; invalidated immediately by another browse, lookup, or page request. */
+  const std::optional<beatglass::library_detail::OfflinePage>& offlinePage() const { return offlinePage_; }
 signals:
   /** Page or query status changed on the GUI thread. */
   void changed();
@@ -42,6 +46,7 @@ private:
   QTimer poll_;
   Requests::Token analysisToken_;
   std::shared_ptr<LibraryBridge::Ticket> analysisTicket_;
+  std::optional<beatglass::library_detail::OfflinePage> offlinePage_;
   void pollAnalysis();
   std::unique_ptr<LibraryBridge> worker_;
 };

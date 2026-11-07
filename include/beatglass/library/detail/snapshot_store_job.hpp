@@ -3,6 +3,7 @@
 #include "beatglass/library/store.hpp"
 #include <optional>
 namespace beatglass::library_detail {
+class TempoAnalysisStore;
 /** Build the exact tempo-only cache identity used by the snapshot job. The content digest must be validated separately; engine and configuration must be nonempty. */
 AnalysisIdentity snapshot_tempo_identity(const std::string& content, const std::string& engine, const std::string& configuration);
 /** Outcome of the experimental shared-store snapshot job. */
@@ -16,4 +17,9 @@ struct StoredSnapshotJobResult {
 StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const std::filesystem::path& path,
   const std::string& engine_version, const std::string& configuration_id, std::uint64_t epoch,
   std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});
+/** Run snapshot analysis and atomically publish its result with an existing index row. Cache hits are revalidated and associated in a separate transaction. Returns an error if the row is absent or the transaction fails; platform verification races remain. */
+StoredSnapshotJobResult analyze_indexed_snapshot_to_store(TempoAnalysisStore& store, const std::string& index_path, const std::filesystem::path& path,
+  const std::string& engine_version, const std::string& configuration_id, std::uint64_t epoch,
+  std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});
+
 }

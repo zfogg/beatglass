@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include "library_bridge.hpp"
+#include "beatglass/library/detail/file_snapshot.hpp"
 #include <chrono>
 #include <condition_variable>
 #include <deque>
@@ -91,9 +92,11 @@ TEST_CASE("indexed analysis links content for verified lookup and rejects change
     LibraryBridge bridge(db.string(), [&](auto call) { queue.post(std::move(call)); });
     bridge.analyze_indexed(blocked_key, blocked_audio, "blocked-v1", "default", 8, [&](auto r) { result = std::move(r); });
     auto blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call();
-    REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::committed); REQUIRE_FALSE(result->association_error.empty());
+    REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::error);
     bridge.lookup_indexed(blocked_key, blocked_audio, "blocked-v1", "default", 9, [&](auto r) { result = std::move(r); });
     blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::miss);
+    bridge.analyze(blocked_audio, "blocked-v1", "default", 14, [&](auto r) { result = std::move(r); });
+    blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call(); REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::committed);
     bridge.lookup_indexed(key, audio, "indexed-v1", "default", 10, [&](auto r) { result = std::move(r); });
     auto call = queue.take(); REQUIRE(call); call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::miss);
     bridge.analyze_indexed(key, audio, "indexed-v1", "default", 11, [&](auto r) { result = std::move(r); });
@@ -129,4 +132,25 @@ TEST_CASE("browsing does not cancel queued analysis") {
     REQUIRE(value.status == FileJobStatus::committed); REQUIRE(browse->result()); REQUIRE_FALSE(browse->result()->cancelled);
   }
   std::error_code ignored; std::filesystem::remove_all(dir, ignored);
+}
+
+TEST_CASE("offline bridge delivers an owned verified page and rejects changed source") {
+  auto dir = std::filesystem::temp_directory_path() / ("beatglass-offline-ui-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+  std::filesystem::create_directory(dir); auto db = dir / "cache.sqlite"; auto audio = dir / "tone.aiff";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", audio); auto key = audio.generic_string();
+  auto snapshot = SnapshotOpen::create(audio); REQUIRE(snapshot.status == SnapshotStatus::ok);
+  beatglass::FileVersion file{audio, snapshot.value->size(), *snapshot.value->modified_unix_ns(), snapshot.value->digest()};
+  OfflineKey identity{file.content_hash,"engine","config",beatglass::OfflineMode::causal,{{"tempo","1"}}};
+  beatglass::OfflineAnalysis data; data.epoch=1; data.sample_rate=48000; data.observed_through=512; data.analyzed_through=512; data.engine_version="engine"; data.configuration_id="config"; data.algorithms=identity.algorithms; data.beats={{100,200,{}}};
+  struct SourceVerifier : beatglass::FileVersionVerifier { FileSnapshot& snapshot; explicit SourceVerifier(FileSnapshot& s) : snapshot(s) {} beatglass::FileVerificationResult verify(std::stop_token stop) override { return {snapshot.verify(stop)==SnapshotStatus::ok ? beatglass::FileVerificationOutcome::match : beatglass::FileVerificationOutcome::changed,{}}; } } verifier(*snapshot.value);
+  { TempoAnalysisStore store(db.string()); CollectionEntry entry; entry.path=key; store.put_entry(entry); OfflineArchive archive(store.offline_cache()); REQUIRE(archive.publish(file,identity,data,"offline-run",key,verifier,{}).outcome==beatglass::PublishOutcome::committed); }
+  snapshot.value.reset(); Dispatcher queue; std::optional<LibraryBridge::Result> result;
+  { LibraryBridge bridge(db.string(), [&](auto call) { queue.post(std::move(call)); });
+    bridge.offline_page(key,audio,identity,"",0,1,0,1,9,[&](auto r){ result=std::move(r); });
+    auto call=queue.take(); REQUIRE(call); call(); auto page=std::get<OfflineReadResult>(result->value); REQUIRE(page.status==OfflineReadStatus::hit); REQUIRE(page.page); REQUIRE(page.page->run_id=="offline-run"); REQUIRE(page.page->header.epoch==9); REQUIRE_FALSE(page.page->beats[0].strength);
+    { std::ofstream out(audio,std::ios::binary|std::ios::app); out << 'x'; }
+    bridge.offline_page(key,audio,identity,"offline-run",0,1,0,1,10,[&](auto r){ result=std::move(r); });
+    call=queue.take(); REQUIRE(call); call(); REQUIRE(std::get<OfflineReadResult>(result->value).status==OfflineReadStatus::changed);
+  }
+  std::error_code ignored; std::filesystem::remove_all(dir,ignored);
 }

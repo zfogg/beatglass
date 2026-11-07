@@ -23,7 +23,7 @@ CollectionView::CollectionView(const QString& database, QObject* parent) : QObje
 }
 CollectionView::~CollectionView() { worker_.reset(); }
 void CollectionView::refresh(const QString& search) {
-  auto token = requests_.beginBrowse(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
+  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
   beatglass::library_detail::CollectionQuery query; query.search = search.toUtf8().toStdString(); query.limit = 100;
   worker_->entries(std::move(query), [this, token](LibraryBridge::Result result) {
     if (!result.error.empty() || result.cancelled) {
@@ -79,7 +79,7 @@ void CollectionView::pollAnalysis() {
   requests_.acknowledgeAnalysis(); analysisToken_.reset(); emit changed();
 }
 void CollectionView::lookupIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch) {
-  auto token = requests_.beginBrowse(); rows_.clear(); status_ = QStringLiteral("Checking indexed analysis…");
+  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear(); status_ = QStringLiteral("Checking indexed analysis…");
   worker_->lookup_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), epoch, [this, token](LibraryBridge::Result result) {
     if (!requests_.finishBrowse(token, {})) return;
     if (!result.error.empty()) status_ = QStringLiteral("Lookup error: %1").arg(QString::fromStdString(result.error));
@@ -94,6 +94,29 @@ void CollectionView::lookupIndexed(const QString& path, const QString& engine, c
         case S::error: status_ = QStringLiteral("Lookup error: %1").arg(QString::fromStdString(lookup->diagnostic)); break;
       }
     } else status_ = QStringLiteral("Unexpected lookup response.");
+    emit changed();
+  });
+  emit changed();
+}
+void CollectionView::requestOfflinePage(const QString& path, beatglass::library_detail::OfflineKey identity, const std::string& run, std::size_t beatOffset, std::size_t beatCount, std::size_t windowOffset, std::size_t windowCount, quint64 epoch) {
+  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear(); status_ = QStringLiteral("Checking offline page…");
+  worker_->offline_page(path.toUtf8().toStdString(), nativePath(path), std::move(identity), run, beatOffset, beatCount, windowOffset, windowCount, epoch, [this, token](LibraryBridge::Result result) {
+    if (!requests_.finishBrowse(token, {})) return;
+    if (!result.error.empty()) status_ = QStringLiteral("Offline page error: %1").arg(QString::fromStdString(result.error));
+    else if (result.cancelled) status_ = QStringLiteral("Offline page cancelled.");
+    else if (auto* read = std::get_if<beatglass::library_detail::OfflineReadResult>(&result.value)) {
+      using S = beatglass::library_detail::OfflineReadStatus;
+      switch (read->status) {
+        case S::hit:
+          if (read->page) { offlinePage_ = std::move(read->page); status_ = QStringLiteral("Provisional offline page received; result remains gated."); }
+          else status_ = QStringLiteral("Offline page error: missing page.");
+          break;
+        case S::miss: status_ = QStringLiteral("No offline analysis."); break;
+        case S::changed: status_ = QStringLiteral("Offline source or active run changed."); break;
+        case S::cancelled: status_ = QStringLiteral("Offline page cancelled."); break;
+        case S::error: status_ = QStringLiteral("Offline page error: %1").arg(QString::fromStdString(read->diagnostic)); break;
+      }
+    } else status_ = QStringLiteral("Unexpected offline page response.");
     emit changed();
   });
   emit changed();
