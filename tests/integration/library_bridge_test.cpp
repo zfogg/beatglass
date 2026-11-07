@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <deque>
 #include <fstream>
+#include <sqlite3.h>
 #include <mutex>
 #include <thread>
 using namespace beatglass::library_detail;
@@ -79,9 +80,20 @@ TEST_CASE("indexed analysis links content for verified lookup and rejects change
   std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", audio);
   auto key = audio.generic_string();
   { TempoAnalysisStore store(db.string()); CollectionEntry row; row.path = key; row.title = "Indexed"; store.put_entry(row); }
+  auto blocked_audio = dir / "blocked.aiff";
+  std::filesystem::copy_file(audio, blocked_audio); auto blocked_key = blocked_audio.generic_string();
+  { TempoAnalysisStore store(db.string()); CollectionEntry row; row.path = blocked_key; row.title = "Blocked"; store.put_entry(row); }
+  sqlite3* raw = nullptr; REQUIRE(sqlite3_open(db.string().c_str(), &raw) == SQLITE_OK);
+  REQUIRE(sqlite3_exec(raw, "CREATE TRIGGER deny_index_update BEFORE UPDATE ON collection WHEN NEW.title='Blocked' BEGIN SELECT RAISE(ABORT, 'blocked'); END", nullptr, nullptr, nullptr) == SQLITE_OK);
+  REQUIRE(sqlite3_close(raw) == SQLITE_OK);
   Dispatcher queue; std::optional<LibraryBridge::Result> result;
   {
     LibraryBridge bridge(db.string(), [&](auto call) { queue.post(std::move(call)); });
+    bridge.analyze_indexed(blocked_key, blocked_audio, "blocked-v1", "default", 8, [&](auto r) { result = std::move(r); });
+    auto blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call();
+    REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::committed); REQUIRE_FALSE(result->association_error.empty());
+    bridge.lookup_indexed(blocked_key, blocked_audio, "blocked-v1", "default", 9, [&](auto r) { result = std::move(r); });
+    blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::miss);
     bridge.lookup_indexed(key, audio, "indexed-v1", "default", 10, [&](auto r) { result = std::move(r); });
     auto call = queue.take(); REQUIRE(call); call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::miss);
     bridge.analyze_indexed(key, audio, "indexed-v1", "default", 11, [&](auto r) { result = std::move(r); });
