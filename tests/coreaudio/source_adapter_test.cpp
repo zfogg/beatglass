@@ -11,12 +11,13 @@ public:
   TapStatus native{TapState::stopped, {}, {}};
   CaptureBlock block{};
   bool available{}, stop_ok{true}, start_ok{true}, interrupt_after_pop{}, throw_start{}, throw_status{};
+  TapFailure start_failure{TapFailure::permission_denied};
   std::uint64_t epoch{};
   EnumerationResult enumerate() override { return {EnumerationOutcome::ok, {{"output", "Output", true, false}}, {}, {}}; }
   bool start(const std::string&, std::uint64_t e) override {
     epoch = e;
     if (throw_start) throw 1;
-    if (!start_ok) { native = {TapState::error, "denied", TapFailure::permission_denied}; return false; }
+    if (!start_ok) { native = {TapState::error, "start failed", start_failure}; return false; }
     native = {TapState::running, {}, {}}; return true;
   }
   std::optional<AudioFormat> format() const override { return AudioFormat{48000, 2, ChannelLayout::stereo}; }
@@ -88,6 +89,18 @@ TEST_CASE("Core Audio control maps only explicit permission denial", "[coreaudio
   const auto result = source.start("output", [](const AudioBlock&) {});
   CHECK_FALSE(result.attempt); CHECK(result.error == SourceError::permission_denied);
   CHECK(source.status().error == SourceError::permission_denied);
+}
+
+TEST_CASE("Core Audio control does not infer permission denial from unknown failure", "[coreaudio]") {
+  SourceEpochAllocator epochs;
+  auto fake = std::make_unique<FakeBackend>();
+  fake->start_ok = false;
+  fake->start_failure = TapFailure::backend_error;
+  SourceAdapter source(epochs, std::move(fake));
+  const auto result = source.start("output", [](const AudioBlock&) {});
+  CHECK_FALSE(result.attempt);
+  CHECK(result.error == SourceError::backend_error);
+  CHECK(source.status().error == SourceError::backend_error);
 }
 
 TEST_CASE("Core Audio control invalidates a throwing consumer", "[coreaudio]") {
