@@ -74,6 +74,7 @@ int main(int argc, char** argv) {
   beatglass::TempoTracker tempo(48000);
   std::array<float, 8192> mono{};
   bool tempo_acquired = false;
+  float captured_bpm = 0.0f;
 #endif
   bool nonzero = false;
   unsigned positive_crossings = 0;
@@ -94,7 +95,8 @@ int main(int argc, char** argv) {
         if (!beatglass::reduce_loudest_channel(view.samples, 2, {mono.data(), frames})) return 24;
         tempo.process({mono.data(), frames}, block->epoch, block->first_frame, block->discontinuity);
         const auto estimate = tempo.estimate();
-        tempo_acquired = estimate.bpm && estimate.beats >= 3 && *estimate.bpm > 80 && *estimate.bpm < 160;
+        tempo_acquired = estimate.bpm && estimate.beats >= 3 && *estimate.bpm > 110 && *estimate.bpm < 130;
+        if (tempo_acquired) captured_bpm = *estimate.bpm;
       }
 #endif
       if (!published) {
@@ -183,7 +185,8 @@ int main(int argc, char** argv) {
     std::cout << "missing target did not fall back\n"; return 0;
   }
 #ifdef BEATGLASS_TEST_CAPTURE_TEMPO
-  if (tempo_test && !tempo_acquired) { std::cerr << "aubio did not acquire captured pulse train\n"; return 26; }
+  if (tempo_test && !tempo_acquired) { std::cerr << "aubio did not acquire captured pulse train near 120 BPM\n"; return 26; }
+  if (tempo_test) std::cout << "Captured aubio tempo: " << captured_bpm << " BPM\n";
 #endif
   if (!nonzero || positive_crossings < 20) { std::cerr << "no output PCM, state=" << static_cast<unsigned>(state) << " diagnostic=" << diagnostic << '\n'; return 4; }
   std::cout << "observed virtual sink PCM\n";
