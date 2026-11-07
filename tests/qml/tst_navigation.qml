@@ -11,11 +11,21 @@ TestCase {
         id: fakeMetadata
         property url lastFile
         signal statusChanged(string status)
-        function inspect(url) { lastFile = url }
+        function inspect(url) { lastFile = url; statusChanged(url.toString() === "" ? "Select a local file." : "Metadata for " + url) }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
     QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
-    QtObject { id: fakeCollection; property var rows: []; property string status: "Ready"; function refresh(search) { rows = [{path: "indexed.wav"}]; status = "Loaded" } }
+    QtObject {
+        id: fakeCollection
+        property var rows: []; property string status: "Ready"
+        property bool compositeAvailable: true; property bool analysisActive: false
+        property string analysisStatus: "Ready"; property string provisionalSummary: "Track-level key: Unknown"
+        property var provisionalWindows: []
+        function refresh(search) { rows = [{path: "indexed.wav"}]; status = "Loaded" }
+        function selectSource(url) { provisionalWindows = []; provisionalSummary = "Track-level key: Unknown" }
+        function analyzeSelected() { analysisStatus = "Provisional analysis complete"; provisionalWindows = [{range:"Frames [0, 100)", key:"C", keyFrom:"0", keyStrength:"Unknown", chord:"Unknown", chordStrength:"Unknown"}]; return true }
+        function cancelSelected() { analysisActive = false; provisionalWindows = [] }
+    }
     QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
     QtObject { id: fakeOverlay; property bool clickThrough: false; property real opacity: 1; property int endCount: 0; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) { opacity = value } function beginDrag() { return true } function dragToCursor() {} function endDrag() { endCount++ } }
     Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay; playbackGuardBridge: fakeGuard } }
@@ -27,6 +37,43 @@ TestCase {
         findChild(app, "refreshCollection").clicked()
         compare(findChild(app, "collectionStatus").text, "Loaded")
         compare(findChild(app, "collectionRows").count, 1)
+        app.selectedName = "tone.aiff"
+        fakeCollection.selectSource(Qt.resolvedUrl("../fixtures/generated/tone.aiff"))
+        findChild(app, "analyzeSelected").clicked()
+        compare(findChild(app, "provisionalWindows").count, 1)
+        verify(findChild(app, "provisionalSummary").text.includes("Track-level key: Unknown"))
+        fakeCollection.selectSource(Qt.resolvedUrl("../fixtures/generated/tone.flac"))
+        compare(findChild(app, "provisionalWindows").count, 0)
+        fakeCollection.analyzeSelected()
+        compare(findChild(app, "provisionalWindows").count, 1)
+        app.browseFolder = Qt.resolvedUrl("../fixtures")
+        compare(app.selectedName, "")
+        compare(findChild(app, "provisionalWindows").count, 0)
+        app.destroy()
+    }
+    function test_selectionInvalidatesOnModelChanges() {
+        let app = collectionShell.createObject(null)
+        let model = findChild(app, "fileModel")
+        let browser = findChild(app, "browser")
+        app.browseFolder = Qt.resolvedUrl("../fixtures/generated")
+        tryCompare(model, "count", 3)
+        browser.currentIndex = 0
+        compare(app.selectedName, "tone.aiff")
+        fakeCollection.analyzeSelected()
+        compare(findChild(app, "provisionalWindows").count, 1)
+        findChild(app, "sortOrder").clicked()
+        compare(browser.currentIndex, -1)
+        compare(app.selectedName, "")
+        compare(findChild(app, "provisionalWindows").count, 0)
+        tryVerify(() => model.get(0, "fileName") === "tone.mp3")
+        browser.currentIndex = 0
+        verify(fakeMetadata.lastFile.toString().endsWith("/tone.mp3"))
+        verify(app.metadataStatus.includes("tone.mp3"))
+        fakeCollection.analyzeSelected()
+        findChild(app, "search").text = "no-such-file"
+        compare(browser.currentIndex, -1)
+        compare(findChild(app, "provisionalWindows").count, 0)
+        tryCompare(model, "count", 0)
         app.destroy()
     }
     function test_destinationsAndMetadata() {

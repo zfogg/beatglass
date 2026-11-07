@@ -31,7 +31,10 @@ int main(int argc, char** argv) {
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
 #ifdef BEATGLASS_EXPERIMENTAL_COLLECTION
   std::unique_ptr<CollectionView> collection;
-  const auto database = qEnvironmentVariable("BEATGLASS_EXPERIMENTAL_LIBRARY_DB");
+  auto database = qEnvironmentVariable("BEATGLASS_EXPERIMENTAL_LIBRARY_DB");
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  if (database.isEmpty()) database = QStringLiteral(":memory:");
+#endif
   if (!database.isEmpty()) {
     collection = std::make_unique<CollectionView>(database, epochs);
     engine.rootContext()->setContextProperty("experimentalCollection", collection.get());
