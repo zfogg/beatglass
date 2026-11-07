@@ -192,32 +192,17 @@ private slots:
 #endif
   void realIndexedAnalysisAndLookupRemainGated() {
     QTemporaryDir directory; QVERIFY(directory.isValid());
-    const auto path = directory.filePath("library.sqlite");
-    const auto audio = directory.filePath("tone.aiff");
+    const auto path = directory.filePath("library.sqlite"); const auto audio = directory.filePath("tone.aiff");
     QVERIFY(QFile::copy(QStringLiteral(BEATGLASS_FIXTURES "/tone.aiff"), audio));
-    {
-      beatglass::library_detail::SqliteCache db(path.toStdString());
-      beatglass::library_detail::CollectionEntry row; row.path = audio.toUtf8().toStdString(); db.put_entry(row);
-    }
-    beatglass::SourceEpochAllocator epochs; CollectionView view(path, epochs);
+    { beatglass::library_detail::SqliteCache db(path.toStdString());
+      beatglass::library_detail::CollectionEntry row; row.path = audio.toUtf8().toStdString(); db.put_entry(row); }
+    { beatglass::SourceEpochAllocator epochs; CollectionView view(path, epochs);
     view.lookupIndexed(audio, "integration-test-engine", "default");
-    QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("No indexed analysis."), 10000);
+    QTRY_VERIFY_WITH_TIMEOUT(view.status().contains(QStringLiteral("disabled")), 10000);
     QVERIFY(view.analyzeIndexed(audio, "integration-test-engine", "default"));
-    QVERIFY(!view.analyzeIndexed(audio, "integration-test-engine", "default"));
-    view.refresh("");
-    QTRY_COMPARE_WITH_TIMEOUT(view.analysisStatus(), QStringLiteral("Analysis committed; result remains gated."), 15000);
-    view.lookupIndexed(audio, "integration-test-engine", "default");
-    QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Provisional analysis found; result remains gated."), 10000);
-    QFile changed(audio); QVERIFY(changed.open(QIODevice::Append)); QCOMPARE(changed.write("x", 1), 1); changed.close();
-    view.lookupIndexed(audio, "integration-test-engine", "default");
-    QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Source changed or cannot be verified."), 10000);
-    QVERIFY(view.analyzeIndexed(audio, "integration-test-engine", "default"));
-    view.cancelAnalysis();
-    QCOMPARE(view.analysisStatus(), QStringLiteral("Cancellation requested; awaiting terminal outcome."));
-    QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus() != QStringLiteral("Cancellation requested; awaiting terminal outcome."), 15000);
-    QVERIFY(view.analysisStatus() == QStringLiteral("Analysis cancelled.") ||
-            view.analysisStatus() == QStringLiteral("Analysis committed; result remains gated.") ||
-            view.analysisStatus() == QStringLiteral("Existing analysis found; result remains gated."));
+    QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus().contains(QStringLiteral("disabled")), 10000); }
+    beatglass::library_detail::SqliteCache db(path.toStdString());
+    QVERIFY(db.entry(audio.toUtf8().toStdString())->content_hash.empty());
   }
   void ownedOfflinePagesKeepRunAndEvidence() {
     using namespace beatglass;

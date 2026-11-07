@@ -80,9 +80,9 @@ public:
   std::shared_ptr<Ticket> analyze(std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
   /** Look up exactly the supplied content/engine/configuration/mode against a fresh source snapshot, without starting analysis. Epoch is nonzero and session-issued; cached positions are rebound. No result is returned on source mismatch or failed verification. */
   std::shared_ptr<Ticket> lookup(std::filesystem::path path, beatglass::AnalysisIdentity identity, std::uint64_t epoch, Completion completion);
-  /** Analyze an indexed path and associate its validated content hash after a hit or commit. The active result and index update commit atomically; failure rolls back both. The normalized key must name the supplied path. */
+  /** Indexed analysis is disabled until source exclusion is established; completes with an error without reading or writing cached data or the index. */
   std::shared_ptr<Ticket> analyze_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
-  /** Look up an indexed path's recorded content under the requested tempo engine/configuration; snapshots and revalidates before returning an active value. Missing row/hash is a miss. */
+  /** Indexed cache lookup is disabled until source exclusion is established; completes with an error without reading cached data. */
   std::shared_ptr<Ticket> lookup_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
   /** Fetch an owned, bounded offline page from an indexed path after snapshot verification. Empty run selects the active run; subsequent pages should use the returned run ID. */
   std::shared_ptr<Ticket> offline_page(std::string key, std::filesystem::path path, beatglass::library_detail::OfflineKey identity, std::string run, std::size_t beat_offset, std::size_t beat_count, std::size_t window_offset, std::size_t window_count, std::uint64_t epoch, Completion completion);

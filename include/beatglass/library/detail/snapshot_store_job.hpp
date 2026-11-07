@@ -17,7 +17,7 @@ struct StoredSnapshotJobResult {
 StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const std::filesystem::path& path,
   const std::string& engine_version, const std::string& configuration_id, std::uint64_t epoch,
   std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});
-/** Run snapshot analysis and atomically publish its result with an existing index row. Cache hits are revalidated and associated in a separate transaction. Returns an error if the row is absent or the transaction fails; platform verification races remain. */
+/** Indexed snapshot caching is disabled pending source exclusion through publication and delivery. Returns cancelled for a requested stop, otherwise an error without reading or writing the store or source. */
 StoredSnapshotJobResult analyze_indexed_snapshot_to_store(TempoAnalysisStore& store, const std::string& index_path, const std::filesystem::path& path,
   const std::string& engine_version, const std::string& configuration_id, std::uint64_t epoch,
   std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});

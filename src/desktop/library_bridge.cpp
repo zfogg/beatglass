@@ -147,22 +147,19 @@ std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::lookup(std::filesystem::pa
   }, std::move(completion));
 }
 std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::analyze_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion) {
-  return state_->submit(1, [key = std::move(key), path = std::move(path), engine = std::move(engine), configuration = std::move(configuration), epoch](TempoAnalysisStore& store, std::stop_token stop) {
-    Result result;
-    if (!epoch || !key_matches(key, path)) { result.error = "invalid epoch or index path mismatch"; return result; }
-    auto entry = store.entry(key, stop);
-    if (!entry) { result.error = "indexed entry not found"; return result; }
-    auto analysis = analyze_indexed_snapshot_to_store(store, key, path, engine, configuration, epoch, stop);
-    result.value = std::move(analysis); return result;
+  (void)key; (void)path; (void)engine; (void)configuration; (void)epoch;
+  return state_->submit(1, [](TempoAnalysisStore&, std::stop_token stop) {
+    Result result; if (stop.stop_requested()) result.cancelled = true;
+    else result.error = "Indexed snapshot caching is disabled pending source exclusion.";
+    return result;
   }, std::move(completion));
 }
 std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::lookup_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion) {
-  return state_->submit(0, [key = std::move(key), path = std::move(path), engine = std::move(engine), configuration = std::move(configuration), epoch](TempoAnalysisStore& store, std::stop_token stop) {
-    Result result;
-    if (!epoch || engine.empty() || configuration.empty() || !key_matches(key, path)) { result.error = "invalid identity, epoch or index path mismatch"; return result; }
-    auto entry = store.entry(key, stop);
-    if (!entry || entry->content_hash.empty()) { Lookup absent; absent.status = LookupStatus::miss; result.value = std::move(absent); return result; }
-    return lookup_active(store, path, snapshot_tempo_identity(entry->content_hash, engine, configuration), epoch, stop);
+  (void)key; (void)path; (void)engine; (void)configuration; (void)epoch;
+  return state_->submit(0, [](TempoAnalysisStore&, std::stop_token stop) {
+    Result result; if (stop.stop_requested()) result.cancelled = true;
+    else result.error = "Indexed snapshot caching is disabled pending source exclusion.";
+    return result;
   }, std::move(completion));
 }
 

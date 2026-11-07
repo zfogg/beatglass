@@ -225,7 +225,9 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
   return analyze_store_impl(store, nullptr, nullptr, path, engine, config, epoch, stop, progress);
 }
 StoredSnapshotJobResult analyze_indexed_snapshot_to_store(TempoAnalysisStore& store, const std::string& index_path, const std::filesystem::path& path, const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop, const std::function<void(std::uint64_t)>& progress) {
-  return analyze_store_impl(store, &store, &index_path, path, engine, config, epoch, stop, progress);
+  (void)store; (void)index_path; (void)path; (void)engine; (void)config; (void)epoch; (void)progress;
+  if (stop.stop_requested()) return {FileJobStatus::cancelled, {}, {}, {}};
+  return {FileJobStatus::error, {}, "indexed snapshot caching is disabled pending source exclusion", {}};
 }
 
 }

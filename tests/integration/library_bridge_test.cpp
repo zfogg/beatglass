@@ -75,40 +75,26 @@ TEST_CASE("library bridge retains cancellation of pending requests") {
   std::error_code ignored; std::filesystem::remove_all(dir, ignored);
 }
 
-TEST_CASE("indexed analysis links content for verified lookup and rejects changed source") {
+TEST_CASE("indexed cache operations fail closed without source exclusion") {
   auto dir = std::filesystem::temp_directory_path() / ("beatglass-indexed-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
   std::filesystem::create_directory(dir); auto db = dir / "cache.sqlite"; auto audio = dir / "tone.aiff";
   std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", audio);
   auto key = audio.generic_string();
-  { TempoAnalysisStore store(db.string()); CollectionEntry row; row.path = key; row.title = "Indexed"; store.put_entry(row); }
-  auto blocked_audio = dir / "blocked.aiff";
-  std::filesystem::copy_file(audio, blocked_audio); auto blocked_key = blocked_audio.generic_string();
-  { TempoAnalysisStore store(db.string()); CollectionEntry row; row.path = blocked_key; row.title = "Blocked"; store.put_entry(row); }
-  sqlite3* raw = nullptr; REQUIRE(sqlite3_open(db.string().c_str(), &raw) == SQLITE_OK);
-  REQUIRE(sqlite3_exec(raw, "CREATE TRIGGER deny_index_update BEFORE UPDATE ON collection WHEN NEW.title='Blocked' BEGIN SELECT RAISE(ABORT, 'blocked'); END", nullptr, nullptr, nullptr) == SQLITE_OK);
-  REQUIRE(sqlite3_close(raw) == SQLITE_OK);
+  { TempoAnalysisStore store(db.string()); CollectionEntry row; row.path = key; row.title = "Indexed"; store.put_entry(row);
+    auto seed = analyze_snapshot_to_store(store, audio, "indexed-v1", "default", 10);
+    REQUIRE(seed.status == FileJobStatus::committed);
+    auto direct = analyze_indexed_snapshot_to_store(store, key, audio, "indexed-v1", "default", 11);
+    REQUIRE(direct.status == FileJobStatus::error); REQUIRE_FALSE(direct.value);
+    REQUIRE(store.entry(key)->content_hash.empty()); }
   Dispatcher queue; std::optional<LibraryBridge::Result> result;
   {
     LibraryBridge bridge(db.string(), [&](auto call) { queue.post(std::move(call)); });
-    bridge.analyze_indexed(blocked_key, blocked_audio, "blocked-v1", "default", 8, [&](auto r) { result = std::move(r); });
-    auto blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call();
-    REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::error);
-    bridge.lookup_indexed(blocked_key, blocked_audio, "blocked-v1", "default", 9, [&](auto r) { result = std::move(r); });
-    blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::miss);
-    bridge.analyze(blocked_audio, "blocked-v1", "default", 14, [&](auto r) { result = std::move(r); });
-    blocked_call = queue.take(); REQUIRE(blocked_call); blocked_call(); REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::committed);
-    bridge.lookup_indexed(key, audio, "indexed-v1", "default", 10, [&](auto r) { result = std::move(r); });
-    auto call = queue.take(); REQUIRE(call); call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::miss);
     bridge.analyze_indexed(key, audio, "indexed-v1", "default", 11, [&](auto r) { result = std::move(r); });
-    call = queue.take(); REQUIRE(call); call(); REQUIRE(result->association_error.empty());
-    REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::committed);
+    auto call = queue.take(); REQUIRE(call); call(); REQUIRE(result->error.find("disabled") != std::string::npos);
     bridge.lookup_indexed(key, audio, "indexed-v1", "default", 12, [&](auto r) { result = std::move(r); });
-    call = queue.take(); REQUIRE(call); call(); auto found = std::get<LibraryBridge::Lookup>(result->value);
-    REQUIRE(found.status == LibraryBridge::LookupStatus::hit); REQUIRE(found.value); REQUIRE(found.value->result.observed_through.epoch == 12);
-    { std::ofstream out(audio, std::ios::binary | std::ios::app); out << 'x'; }
-    bridge.lookup_indexed(key, audio, "indexed-v1", "default", 13, [&](auto r) { result = std::move(r); });
-    call = queue.take(); REQUIRE(call); call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::changed);
+    call = queue.take(); REQUIRE(call); call(); REQUIRE(result->error.find("disabled") != std::string::npos);
   }
+  { TempoAnalysisStore store(db.string()); REQUIRE(store.entry(key)->content_hash.empty()); }
   std::error_code ignored; std::filesystem::remove_all(dir, ignored);
 }
 
