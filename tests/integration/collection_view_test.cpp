@@ -9,6 +9,7 @@
 #include <limits>
 #ifdef _WIN32
 #include "windows_dj.hpp"
+#include "platform/windows_default_tempo.hpp"
 #endif
 
 class CollectionViewTest : public QObject {
@@ -99,6 +100,27 @@ private slots:
       live.start(QStringLiteral("not-a-real-endpoint"));
       QTRY_VERIFY_WITH_TIMEOUT(!live.active(), 5000);
       QCOMPARE(live.status(), QStringLiteral("Capture could not start"));
+    }
+    QVERIFY(!epochs.next());
+  }
+  void defaultFollowerAndOfflineShareExhaustion() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    beatglass::SourceEpochAllocator epochs(std::numeric_limits<std::uint64_t>::max() - 2);
+    {
+      CollectionView view(directory.filePath("default.sqlite"), epochs);
+      beatglass::windows::DefaultTempoFollower follower(epochs, [] {
+        beatglass::windows::EndpointResult result;
+        result.endpoints.push_back({"not-a-real-endpoint", "missing", true});
+        return result;
+      });
+      QVERIFY(follower.start());
+      QVERIFY(view.analyzeIndexed(directory.filePath("missing.wav"), "integration-test-engine", "default"));
+      QVERIFY(follower.tick(std::chrono::steady_clock::now()));
+      QVERIFY(!epochs.next());
+      QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus() != QStringLiteral("Analysis running."), 10000);
+      QVERIFY(!view.analyzeIndexed(directory.filePath("missing.wav"), "integration-test-engine", "default"));
+      QCOMPARE(view.analysisStatus(), QStringLiteral("Analysis unavailable: epoch limit reached."));
+      follower.stop();
     }
     QVERIFY(!epochs.next());
   }

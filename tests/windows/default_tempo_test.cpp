@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 #include <stdexcept>
+#include <iostream>
 
 using namespace std::chrono_literals;
 TEST_CASE("Default follower clears on selection loss and failed startup") {
@@ -110,4 +111,38 @@ TEST_CASE("Default follower changes selected active endpoints without changing t
   }
   REQUIRE(follower.status() == beatglass::windows::DefaultTempoFollower::Status::running);
   follower.stop();
+}
+
+TEST_CASE("Actual Windows default-output changes clear and reacquire", "[.][native-system-default]") {
+  const auto initial = beatglass::windows::enumerate_render_endpoints();
+  REQUIRE(initial.error.empty());
+  std::string original;
+  for (const auto& endpoint : initial.endpoints) if (endpoint.is_default) original = endpoint.id;
+  if (original.empty() || initial.endpoints.size() < 2) SKIP("A default and a second active render endpoint are required");
+  beatglass::SourceEpochAllocator epochs;
+  beatglass::windows::DefaultTempoFollower follower(epochs);
+  REQUIRE(follower.start());
+  bool sawClear = false;
+  auto spinUntil = [&](auto condition, int iterations) {
+    for (int i = 0; i < iterations; ++i) {
+      REQUIRE(follower.tick(std::chrono::steady_clock::now()));
+      if (auto update = follower.takeUpdate()) sawClear = sawClear || !update->snapshot;
+      if (condition()) return true;
+      std::this_thread::sleep_for(100ms);
+    }
+    return false;
+  };
+  REQUIRE(spinUntil([&] { return follower.endpoint() == original && follower.status() == beatglass::windows::DefaultTempoFollower::Status::running; }, 100));
+  sawClear = false;
+  std::cout << "READY: change the Windows multimedia default to the other render endpoint" << std::endl;
+  REQUIRE(spinUntil([&] { return !follower.endpoint().empty() && follower.endpoint() != original && follower.status() == beatglass::windows::DefaultTempoFollower::Status::running; }, 1200));
+  REQUIRE(sawClear);
+  sawClear = false;
+  std::cout << "CHANGED: restore the original Windows multimedia default" << std::endl;
+  REQUIRE(spinUntil([&] { return follower.endpoint() == original && follower.status() == beatglass::windows::DefaultTempoFollower::Status::running; }, 1200));
+  REQUIRE(sawClear);
+  follower.stop();
+  const auto next = epochs.next();
+  REQUIRE(next);
+  REQUIRE(*next >= 4);
 }
