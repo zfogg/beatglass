@@ -19,12 +19,12 @@ bool SnapshotPublisher::publish(AcquisitionToken token, Snapshot snapshot) {
       !valid_candidates(snapshot.tempo_candidates) || !valid_candidates(snapshot.key_candidates)) return false;
   std::uint64_t previous = 0; bool first = true;
   for (const auto& beat : snapshot.beats) {
-    if (beat.time.epoch != epoch_ || beat.time.frame > through.frame || (!first && beat.time.frame < previous)) return false;
+    if (beat.time.epoch != epoch_ || beat.time.frame >= through.frame || (!first && beat.time.frame < previous)) return false;
     first = false; previous = beat.time.frame;
   }
   first = true; previous = 0;
   for (const auto& chord : snapshot.chords) {
-    if (chord.start.epoch != epoch_ || chord.end.epoch != epoch_ || chord.start.frame > chord.end.frame ||
+    if (chord.start.epoch != epoch_ || chord.end.epoch != epoch_ || chord.start.frame >= chord.end.frame ||
         chord.end.frame > through.frame || (!first && chord.start.frame < previous) || chord.chord.label.size() > 128) return false;
     first = false; previous = chord.end.frame;
   }

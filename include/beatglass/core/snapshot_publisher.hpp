@@ -40,7 +40,9 @@ public:
    * @param token Acquisition token captured when this result was produced.
    * @param snapshot A value owned by the caller; moved into immutable storage.
    * @return False for inactive, mismatched or stale tokens/epochs/frames, events
-   *         outside observed time, unordered events or text over 128 bytes.
+   *         outside the exclusive observed boundary, empty chord intervals,
+   *         unordered events or text over 128 bytes. Beats must be strictly
+   *         before the boundary; nonempty half-open chords may end at it.
    *         Invalid snapshots leave the previous publication unchanged.
    * @throws std::bad_alloc if allocation for the bounded copy fails.
    */
