@@ -72,5 +72,6 @@ void LoopbackSession::stop() {
   if (backend_) backend_->stop();
   authorization_.reset();
 }
+std::shared_ptr<const LoopbackLossToken> LoopbackSession::lossToken() const noexcept { return backend_ ? backend_->lossToken() : nullptr; }
 SourceState LoopbackSession::state() const { return lifecycle_.state(); }
 }

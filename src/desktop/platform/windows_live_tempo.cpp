@@ -30,7 +30,7 @@ LiveTempo::LiveTempo(SourceEpochAllocator& epochs, std::unique_ptr<Loopback> bac
     : clock_(std::move(clock)), after_process_(std::move(afterProcess)), session_(epochs, [this] { clear(); }, std::move(backend)) {}
 LiveTempo::~LiveTempo() { stop(); }
 void LiveTempo::clear() noexcept {
-  tracker_.reset(); bpm_.reset(); observed_.reset(); rate_ = channels_ = 0; silent_frames_ = 0;
+  tracker_.reset(); bpm_.reset(); observed_.reset(); loss_stamp_.reset(); rate_ = channels_ = 0; silent_frames_ = 0;
   if (invalidation_generation_ == std::numeric_limits<std::uint64_t>::max()) generation_exhausted_ = true;
   else ++invalidation_generation_;
 }
@@ -73,7 +73,9 @@ bool LiveTempo::pump() {
       const auto before_poll=invalidation_generation_;
       session_.poll();
       if (before_poll != invalidation_generation_ || session_.state() != SourceState::running) break;
-      if (!fresh()) { clear(); break; }
+      const auto token=session_.lossToken();
+      if (!fresh() || !token || !token->matches(packet.loss_stamp)) { clear(); break; }
+      loss_stamp_ = packet.loss_stamp;
       observed_ = EventTime{packet.epoch, packet.first_frame + frames};
       bpm_ = bpm;
     }
@@ -85,6 +87,12 @@ bool LiveTempo::pump() {
 }
 std::optional<float> LiveTempo::bpm() const { return bpm_; }
 std::optional<EventTime> LiveTempo::observedThrough() const { return observed_; }
+StampedLiveTempo LiveTempo::stampedTempo() const noexcept {
+  if (!bpm_ || !observed_ || !loss_stamp_) return {{}, {}, session_.lossToken(), {}};
+  return {bpm_, observed_, session_.lossToken(), loss_stamp_};
+}
+std::shared_ptr<const LoopbackLossToken> LiveTempo::lossToken() const noexcept { return session_.lossToken(); }
+std::optional<std::uint64_t> LiveTempo::lossStamp() const noexcept { return loss_stamp_; }
 std::uint64_t LiveTempo::invalidationGeneration() const { return invalidation_generation_; }
 SourceState LiveTempo::state() const { return session_.state(); }
 void LiveTempo::stop() { session_.stop(); clear(); }

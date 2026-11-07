@@ -359,6 +359,30 @@ TEST_CASE("Cancellation after accepted start invalidates and discards queued pac
   CHECK(session.state()==beatglass::SourceState::error);
 }
 
+TEST_CASE("Discontinuous packet invalidates before delivery") {
+  beatglass::SourceEpochAllocator epochs;
+  unsigned clears = 0;
+  auto backend = std::make_unique<FakeLoopback>();
+  auto* fake = backend.get();
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++clears; }, std::move(backend));
+  REQUIRE(session.start("selected"));
+  session.poll();
+  REQUIRE(session.state() == beatglass::SourceState::running);
+
+  beatglass::windows::LoopbackPacket queued{};
+  queued.epoch = fake->currentEpoch;
+  queued.discontinuity = true;
+  queued.timestamp_valid = true;
+  queued.loss_stamp = 41;
+  fake->packets.push_back(queued);
+
+  beatglass::windows::LoopbackPacket delivered{};
+  REQUIRE(session.pop(delivered));
+  CHECK(clears == 1);
+  CHECK(delivered.discontinuity);
+  CHECK(delivered.loss_stamp == 41);
+}
+
 TEST_CASE("Claim and cancellation have ordered concurrent outcomes") {
   using beatglass::windows::LoopbackStartAuthorization;
   SECTION("cancellation completes before a competing claim") {
@@ -376,4 +400,29 @@ TEST_CASE("Claim and cancellation have ordered concurrent outcomes") {
     claimed.wait(); authorization.cancel(); cancelled.count_down();
     CHECK(worker.get()); CHECK_FALSE(authorization.claim());
   }
+}
+
+TEST_CASE("Loss token rejects queued evidence and recovers with a new packet stamp") {
+  beatglass::windows::LoopbackLossToken token;
+  const auto queued=token.stamp(); REQUIRE(token.matches(queued));
+  token.invalidate(); CHECK_FALSE(token.matches(queued));
+  const auto fresh=token.stamp(); CHECK(token.matches(fresh));
+  // Delayed queued work cannot be relabeled with a later token.
+  token.invalidate(); CHECK_FALSE(token.matches(fresh)); CHECK_FALSE(token.matches(queued));
+}
+TEST_CASE("Loss token is visible across capture and GUI threads") {
+  beatglass::windows::LoopbackLossToken token; const auto pending=token.stamp();
+  std::latch begin{1}, invalidated{1};
+  auto worker=std::async(std::launch::async,[&] { begin.wait(); token.invalidate(); invalidated.count_down(); });
+  begin.count_down(); invalidated.wait(); CHECK_FALSE(token.matches(pending)); worker.get();
+}
+
+TEST_CASE("Capture loss events invalidate prior stamps and exhaustion fails closed") {
+  using beatglass::windows::LoopbackLossToken;
+  using beatglass::windows::LoopbackLossEvents;
+  SECTION("queue full") { LoopbackLossToken token; LoopbackLossEvents events(token); auto old=events.packetStamp(false); events.queueFull(); CHECK_FALSE(token.matches(old)); CHECK(token.matches(events.packetStamp(false))); }
+  SECTION("flagged discontinuity") { LoopbackLossToken token; LoopbackLossEvents events(token); auto old=events.packetStamp(false); auto after=events.packetStamp(true); CHECK_FALSE(token.matches(old)); CHECK(token.matches(after)); }
+  SECTION("empty discontinuity") { LoopbackLossToken token; LoopbackLossEvents events(token); auto old=events.packetStamp(false); events.emptyDiscontinuity(); CHECK_FALSE(token.matches(old)); CHECK(token.matches(events.packetStamp(false))); }
+  SECTION("failure") { LoopbackLossToken token; LoopbackLossEvents events(token); auto old=events.packetStamp(false); events.failure(); CHECK_FALSE(token.matches(old)); }
+  SECTION("saturation") { const auto max=(std::numeric_limits<std::uint64_t>::max)(); LoopbackLossToken token(max-1); LoopbackLossEvents events(token); REQUIRE(token.matches(max-1)); events.failure(); CHECK_FALSE(token.matches(max-1)); CHECK_FALSE(token.matches(max)); events.queueFull(); CHECK(token.stamp()==max); CHECK_FALSE(token.matches(max)); }
 }

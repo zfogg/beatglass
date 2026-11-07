@@ -9,6 +9,18 @@
 #include <vector>
 
 namespace beatglass::windows {
+/** One selected-source tempo result and its originating token stamp. An empty BPM is a clear and has no stamp. */
+struct StampedLiveTempo {
+  /** Optional BPM. */
+  std::optional<float> bpm;
+  /** Exclusive boundary of the evidence. */
+  std::optional<EventTime> observed;
+  /** Shared source token. */
+  std::shared_ptr<const LoopbackLossToken> loss_token;
+  /** Original capture stamp, absent on a clear. */
+  std::optional<std::uint64_t> loss_stamp;
+};
+
 /** Experimental worker-owned WASAPI-to-aubio tempo path. This is not a UI model and does not estimate key or chords. Every method runs on one analysis/control thread. */
 class LiveTempo {
 public:
@@ -26,6 +38,12 @@ public:
   std::optional<float> bpm() const;
   /** Exclusive frame boundary and epoch of the latest analyzed packet, or empty after invalidation. */
   std::optional<EventTime> observedThrough() const;
+  /** Copy BPM, observed boundary, token and originating stamp together on the control worker. GUI delivery still requires its own session and revision gate. */
+  StampedLiveTempo stampedTempo() const noexcept;
+  /** Share the capture loss token on the control worker; callers may retain it across threads. */
+  std::shared_ptr<const LoopbackLossToken> lossToken() const noexcept;
+  /** Packet token stamp associated with the current observed result, absent after a clear. Never replace it with a newer token snapshot. */
+  std::optional<std::uint64_t> lossStamp() const noexcept;
   /** Monotonic invalidation generation; changes whenever retained evidence is cleared. Exhaustion stops analysis rather than wrapping. */
   std::uint64_t invalidationGeneration() const;
   /** Return the source lifecycle state on the owning thread. */
@@ -40,6 +58,7 @@ private:
   std::vector<float> mono_;
   std::optional<float> bpm_;
   std::optional<EventTime> observed_;
+  std::optional<std::uint64_t> loss_stamp_;
   std::uint32_t rate_{}, channels_{};
   std::uint64_t silent_frames_{};
   std::uint64_t invalidation_generation_{};

@@ -20,7 +20,7 @@ bool DefaultTempoFollower::nextRevision() {
 bool DefaultTempoFollower::publishClear() {
   published_bpm_.reset();
   if (!nextRevision()) return false;
-  pending_ = PresentationUpdate{revision_, {}};
+  pending_ = StampedTempoUpdate{PresentationUpdate{revision_, {}}, {}, {}};
   return true;
 }
 bool DefaultTempoFollower::publishTempo(float bpm, EventTime observed) {
@@ -32,7 +32,9 @@ bool DefaultTempoFollower::publishTempo(float bpm, EventTime observed) {
   snapshot.publication_monotonic_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
   snapshot.estimator_version = "aubio-tempo";
   snapshot.configuration_id = "windows-live-tempo-experimental";
-  pending_ = PresentationUpdate{revision_, std::make_shared<const Snapshot>(std::move(snapshot))};
+  const auto token = tempo_.lossToken(); const auto stamp = tempo_.lossStamp();
+  if (!token || !stamp || !token->matches(*stamp)) return publishClear();
+  pending_ = StampedTempoUpdate{PresentationUpdate{revision_, std::make_shared<const Snapshot>(std::move(snapshot))}, token, stamp};
   published_bpm_ = bpm;
   return true;
 }
@@ -53,7 +55,17 @@ bool DefaultTempoFollower::tick(std::chrono::steady_clock::time_point now) {
   }
   if (now >= next_probe_) {
     next_probe_ = now + std::chrono::seconds(1);
-    const auto result = discovery_();
+    EndpointResult result;
+    try {
+      result = discovery_();
+    } catch (const std::exception& error) {
+      // Device enumeration can fail transiently while an endpoint is being
+      // removed or its audio service is restarting. Treat that as a recoverable
+      // empty snapshot and let the next probe retry discovery.
+      result.error = error.what();
+    } catch (...) {
+      result.error = "Endpoint discovery failed";
+    }
     std::string selected;
     bool ambiguous = false;
     if (result.error.empty()) for (const auto& item : result.endpoints) if (item.is_default) {
@@ -88,7 +100,7 @@ bool DefaultTempoFollower::tick(std::chrono::steady_clock::time_point now) {
     return false;
   }
 }
-std::optional<PresentationUpdate> DefaultTempoFollower::takeUpdate() { auto result = std::move(pending_); pending_.reset(); return result; }
+std::optional<StampedTempoUpdate> DefaultTempoFollower::takeUpdate() { auto result = std::move(pending_); pending_.reset(); return result; }
 void DefaultTempoFollower::stop() { enabled_ = false; if (!exhausted_) publishClear(); tempo_.stop(); endpoint_.clear(); next_probe_ = {}; if (!exhausted_) { status_ = Status::waiting; diagnostic_.clear(); } }
 const std::string& DefaultTempoFollower::endpoint() const { return endpoint_; }
 DefaultTempoFollower::Status DefaultTempoFollower::status() const { return status_; }

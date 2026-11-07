@@ -270,3 +270,26 @@ fake-backend tests exercise queued stale PCM and loss during DSP. A failed
 capture clock fails the attempt. Native WASAPI QPC behavior and production
 latency are not yet qualified; generation/token gates remain necessary for
 loss or cancellation racing the final check.
+
+The provisional capture loss token advances on capture interruption, queue
+overflow and discontinuity, including an empty discontinuous buffer. Each PCM
+packet carries the token stamp from its capture interval. Consumers must retain
+the packet stamp with derived evidence; sampling the current token for old
+evidence can incorrectly validate it. The capture worker is the token's sole
+writer and never allocates or blocks to invalidate it; exhaustion permanently
+rejects stamps. Session generation and publication revision remain necessary.
+
+The selected tempo consumer returns its result and originating stamp together.
+The default follower bundles the token and stamp with each pending update at
+publication; clears carry no stamp. A later result cannot retag an older
+pending update. This is a capture-side contract only. The desktop does not
+yet transfer the token to the GUI or clear already displayed results when it changes. A GUI
+owner must reject queued stale stamps and check displayed stamps on its own
+thread; a physical loss cannot be reflected until that thread is scheduled.
+The actual loss-to-display delay, physical device behavior and token-integrated
+GUI tests remain unqualified.
+
+Composite live analysis and its GUI bridge do not use this token yet and remain
+outside this change. Device-loss notification is invalidated before the native
+interruption event is published. Fake event and pending-delivery regressions do
+not establish physical device behavior or GUI scheduling.
