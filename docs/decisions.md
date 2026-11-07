@@ -80,3 +80,10 @@ Snapshot publication uses exclusive `observed_through` frame boundaries and
 nonempty half-open chord intervals. A beat at the boundary and an empty chord
 are now rejected; existing producers must adjust. This does not qualify any
 native capture or presentation path.
+
+# Offline result contract proposal
+
+Keep owned offline results separate from live snapshots. Preserve overlapping
+local tonal evidence and optional beat strengths; rolling keys are not
+track-level keys. Storage, paging, cache identity and result serialization
+remain subject to integration review and are not implemented by this value type.
