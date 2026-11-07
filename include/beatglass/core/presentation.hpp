@@ -13,6 +13,7 @@ struct PresentationState { std::string status, tempo, key, chord; bool stale{}; 
 class PresentationAdapter {
 public:
   virtual ~PresentationAdapter() = default;
+  /** Convert a borrowed snapshot into presentation labels and stale status. Threading and error behavior depend on the implementation. */
   virtual PresentationState present(const Snapshot&) const = 0;
 };
 }
