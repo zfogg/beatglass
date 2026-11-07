@@ -253,3 +253,5 @@ A provisional [runtime dependency identity proposal](dependency-identity-proposa
 ## Bounded file fingerprint review
 
 A separately reviewable, opt-in fingerprint primitive hashes a file using a bounded buffer and supports cooperative cancellation and change detection. It does not connect to the cache or decoder. File replacement, mutation and ABA can evade attribute checks, so the result cannot prove decoder input identity. OpenSSL remains an unpinned development dependency; native product qualification remains open.
+
+The opt-in Windows `LiveMusic` worker experiment drains bounded loopback packets into the same composite engine. It keeps only the latest provisional rolling key and local chord, invalidates via a generation token, and requires a UI owner to apply those clears. This is not wired into the desktop, does not establish track-level key or chord segments, and has not been qualified with native Windows Essentia or live audio. It performs no cache access.
