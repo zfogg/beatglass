@@ -14,10 +14,11 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
+    QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
     QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
     QtObject { id: fakeOverlay; property bool clickThrough: false; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) {} }
-    Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay } }
-    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
+    Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay; playbackGuardBridge: fakeGuard } }
+    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard } }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)
@@ -84,6 +85,10 @@ TestCase {
         compare(app.selectedName, "tone.flac")
         verify(fakeMetadata.lastFile.toString().endsWith("/tone.flac"))
         compare(app.formatTime(123400), "2:03.4")
+        fakeGuard.warning = "Unsupported output"
+        compare(findChild(app, "playbackDeviceWarning").text, "Unsupported output")
+        verify(!findChild(app, "playButton").enabled)
+        fakeGuard.warning = ""
         let player = findChild(app, "player")
         compare(player.playbackState, MediaPlayer.StoppedState)
         tryVerify(() => player.duration >= 200, 10000)

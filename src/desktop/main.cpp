@@ -1,5 +1,6 @@
 #include "metadata.hpp"
 #include "live_presentation.hpp"
+#include "playback_guard.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -12,11 +13,13 @@ int main(int argc, char** argv) {
   QGuiApplication app(argc, argv);
   Metadata metadata;
   LivePresentation livePresentation;
+  PlaybackGuard playbackGuard;
 #ifdef _WIN32
   WindowsDj windowsDj;
 #endif
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);
+  engine.rootContext()->setContextProperty("playbackGuard", &playbackGuard);
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
 #ifdef _WIN32
   engine.rootContext()->setContextProperty("windowsDj", &windowsDj);
