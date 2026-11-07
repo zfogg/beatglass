@@ -7,6 +7,7 @@
 #include "platform/windows_dj_bridge.hpp"
 #include "platform/windows_overlay.hpp"
 #include <QQuickWindow>
+#include <QSettings>
 #include <QVariant>
 #include <utility>
 #endif
@@ -14,6 +15,7 @@ int main(int argc, char** argv) {
   QGuiApplication app(argc, argv); Metadata metadata; LivePresentation livePresentation;
 #ifdef Q_OS_WIN
   beatglass::windows::DjBridge djBridge;
+  QSettings overlaySettings(QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
   QObject::connect(&djBridge, &beatglass::windows::DjBridge::presentationUpdate, &livePresentation,
                    [&livePresentation](beatglass::PresentationUpdate update) { livePresentation.apply(std::move(update)); });
 #endif
@@ -26,7 +28,7 @@ int main(int argc, char** argv) {
   auto* root = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
   auto* overlay = root ? root->findChild<QQuickWindow*>("overlayWindow") : nullptr;
   if (!root || !overlay) return 1;
-  auto* overlayControl = new beatglass::windows::OverlayController(overlay, root, root);
+  auto* overlayControl = new beatglass::windows::OverlayController(overlay, root, root, &overlaySettings);
   root->setProperty("overlayControl", QVariant::fromValue(static_cast<QObject*>(overlayControl)));
 #endif
   return app.exec();

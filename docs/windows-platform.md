@@ -234,3 +234,26 @@ nativeOverlayDrag` runs passed on both LG ULTRAGEAR (100% scaling) and U2790B
 targeted CTest cases passed again. This covers drags started and completed
 within each display; a single drag crossing the monitor boundary, physical
 display removal and exclusive fullscreen product scenarios remain untested.
+
+Follow-up on build `7308514` with the mixed-DPI and settings changes: native
+pointer input dragged the QML overlay continuously from the 100% LG display to
+the 150% U2790B. Three consecutive boundary runs passed, and a final run checked
+both the crossed boundary and movement within each display; the test verifies
+the destination monitor and that the window still contains the pointer. Earlier
+attempts failed because the overlay stopped following the pointer during the
+DPI transition. The Windows controller now follows the native cursor until
+button release, including if Qt mouse events are interrupted. An initial
+per-display test also placed the second window on the wrong monitor; the test
+now checks actual native monitor membership before dragging.
+
+Position and opacity are now persisted through `QSettings`, restored to an
+available display, and reflected in the opacity slider. Visibility and
+click-through start disabled. Unit and QML restart tests use temporary settings;
+the actual desktop was also closed while default-output monitoring and
+click-through were active, then reopened with monitoring stopped, the overlay
+hidden and its previously selected opacity restored. The five targeted CTest
+cases passed with the required vcpkg DLL paths. The session epoch namespace is
+not yet shared by the live worker and offline sources; see
+`epoch-handoff-proposal.md`. Physical monitor removal, the reverse boundary
+direction, exclusive fullscreen product behavior and full native qualification
+remain open.

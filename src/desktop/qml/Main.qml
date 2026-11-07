@@ -24,7 +24,7 @@ ApplicationWindow {
         id: overlay
         objectName: "overlayWindow"
         width: 320; height: 110
-        x: window.x + 100; y: window.y + 100
+        Component.onCompleted: { x = window.x + 100; y = window.y + 100 }
         visible: false
         color: "transparent"
         Rectangle {
@@ -32,15 +32,8 @@ ApplicationWindow {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.SizeAllCursor
-                property point lastGlobal
-                onPressed: function(mouse) { lastGlobal = mapToGlobal(mouse.x, mouse.y) }
-                onPositionChanged: function(mouse) {
-                    if (!pressed) return
-                    const current = mapToGlobal(mouse.x, mouse.y)
-                    overlay.x += current.x - lastGlobal.x
-                    overlay.y += current.y - lastGlobal.y
-                    lastGlobal = current
-                }
+                onPressed: if (window.overlayControl) window.overlayControl.beginDrag()
+                onPositionChanged: if (pressed && window.overlayControl) window.overlayControl.dragToCursor()
             }
             Column {
                 anchors.centerIn: parent; spacing: 6
@@ -184,11 +177,11 @@ ApplicationWindow {
                 Label { objectName: "liveEstimates"; text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
                 RowLayout {
                     visible: window.overlayControl !== null
-                    Button { objectName: "toggleOverlay"; text: overlay.visible ? "Hide overlay" : "Show overlay"; onClicked: { if (overlay.visible) { window.overlayControl.setClickThrough(false); overlay.hide() } else { window.overlayControl.keepOnScreen(); overlay.show() } } }
+                    Button { objectName: "toggleOverlay"; text: overlay.visible ? "Hide overlay" : "Show overlay"; onClicked: { if (overlay.visible) { window.overlayControl.endDrag(); window.overlayControl.setClickThrough(false); overlay.hide() } else { window.overlayControl.keepOnScreen(); overlay.show() } } }
                     Button { objectName: "toggleClickThrough"; text: window.overlayControl && window.overlayControl.clickThrough ? "Unlock overlay" : "Make click-through"; enabled: overlay.visible; onClicked: window.overlayControl.setClickThrough(!window.overlayControl.clickThrough) }
                     Button { objectName: "recoverOverlay"; text: "Move on screen"; onClicked: window.overlayControl.keepOnScreen() }
                     Label { text: "Opacity" }
-                    Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: 1; onMoved: window.overlayControl.setOpacity(value); Accessible.name: "Overlay opacity" }
+                    Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: window.overlayControl ? window.overlayControl.opacity : 1; onMoved: window.overlayControl.setOpacity(value); Accessible.name: "Overlay opacity" }
                 }
                 Label { visible: window.overlayControl !== null; text: "Drag the unlocked overlay to move it."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Item { Layout.fillHeight: true }

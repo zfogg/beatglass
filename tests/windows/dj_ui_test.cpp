@@ -4,6 +4,8 @@
 #include "windows_overlay.hpp"
 #include <QQuickWindow>
 #include <QScreen>
+#include <QSettings>
+#include <QTemporaryDir>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtTest>
@@ -19,6 +21,127 @@
 class DjUiTest : public QObject {
   Q_OBJECT
 private slots:
+  void overlaySettingsReachQmlAfterRestart() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto path = directory.filePath("settings.ini");
+    const auto position = QGuiApplication::primaryScreen()->availableGeometry().topLeft() + QPoint(150, 160);
+    Metadata metadata;
+    LivePresentation presentation;
+    for (int run = 0; run != 2; ++run) {
+      QSettings settings(path, QSettings::IniFormat);
+      QQmlApplicationEngine engine;
+      engine.rootContext()->setContextProperty("metadata", &metadata);
+      engine.rootContext()->setContextProperty("livePresentation", &presentation);
+      engine.load(QUrl("qrc:/Main.qml"));
+      QVERIFY(!engine.rootObjects().isEmpty());
+      auto* root = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+      QVERIFY(root);
+      auto* overlay = root->findChild<QQuickWindow*>("overlayWindow");
+      auto* slider = root->findChild<QObject*>("overlayOpacity");
+      QVERIFY(overlay); QVERIFY(slider);
+      auto* controller = new beatglass::windows::OverlayController(overlay, root, root, &settings);
+      QVERIFY(root->setProperty("overlayControl", QVariant::fromValue(static_cast<QObject*>(controller))));
+      if (run == 0) {
+        overlay->setPosition(position);
+        controller->setOpacity(0.4);
+        settings.sync();
+        QCOMPARE(settings.status(), QSettings::NoError);
+      } else {
+        QCOMPARE(overlay->position(), position);
+        QVERIFY(qAbs(slider->property("value").toReal() - 0.4) < 0.02);
+        QVERIFY(!controller->clickThrough());
+        QVERIFY(!overlay->isVisible());
+      }
+    }
+  }
+  void nativeCrossDisplayDrag() {
+    if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_OVERLAY_TEST")) QSKIP("Set BEATGLASS_NATIVE_OVERLAY_TEST for native pointer input");
+    struct RestoreCursor { POINT position{}; RestoreCursor() { GetCursorPos(&position); } ~RestoreCursor() { SetCursorPos(position.x, position.y); } } restore;
+    Metadata metadata;
+    LivePresentation presentation;
+    QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("metadata", &metadata);
+    engine.rootContext()->setContextProperty("livePresentation", &presentation);
+    engine.load(QUrl("qrc:/Main.qml"));
+    QVERIFY(!engine.rootObjects().isEmpty());
+    auto* root = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+    QVERIFY(root);
+    auto* overlay = root->findChild<QQuickWindow*>("overlayWindow");
+    QVERIFY(overlay);
+    beatglass::windows::OverlayController controller(overlay, root);
+    QVERIFY(root->setProperty("overlayControl", QVariant::fromValue(static_cast<QObject*>(&controller))));
+    overlay->setPosition(QGuiApplication::primaryScreen()->availableGeometry().topLeft() + QPoint(20, 300));
+    overlay->show();
+    QTRY_VERIFY(overlay->isExposed());
+    QTest::qWait(200);
+    const auto hwnd = reinterpret_cast<HWND>(overlay->winId());
+    const auto source = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO monitor{}; monitor.cbSize = sizeof(monitor);
+    QVERIFY(GetMonitorInfoW(source, &monitor));
+    RECT rect{};
+    QVERIFY(GetWindowRect(hwnd, &rect));
+    POINT start{rect.left + 30, rect.top + 30};
+    POINT destination{monitor.rcMonitor.left - 500, start.y};
+    const auto target = MonitorFromPoint(destination, MONITOR_DEFAULTTONULL);
+    if (!target || target == source) QSKIP("A display immediately to the left of the primary is required");
+    QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE));
+    SetForegroundWindow(hwnd);
+    std::jthread pointer([start, destination] {
+      SetCursorPos(start.x, start.y);
+      INPUT input{}; input.type = INPUT_MOUSE; input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+      SendInput(1, &input, sizeof(INPUT));
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+      for (int step = 1; step <= 30; ++step) {
+        SetCursorPos(start.x + (destination.x - start.x) * step / 30, start.y);
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+      }
+      input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+      SendInput(1, &input, sizeof(INPUT));
+    });
+    QTest::qWait(2000);
+    pointer.join();
+    QVERIFY(GetWindowRect(hwnd, &rect));
+    qInfo() << "Cross-display final bounds" << rect.left << rect.top << rect.right << rect.bottom << "destination" << destination.x << destination.y;
+    QCOMPARE(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), target);
+    QVERIFY(GetWindowRect(hwnd, &rect));
+    QVERIFY2(PtInRect(&rect, destination), "The overlay must remain beneath the pointer after crossing the DPI boundary");
+  }
+  void shutdownDuringMonitoringAndClickThrough() {
+    Metadata metadata;
+    LivePresentation presentation;
+    beatglass::windows::DjBridge bridge;
+    connect(&bridge, &beatglass::windows::DjBridge::presentationUpdate, &presentation,
+            [&presentation](beatglass::PresentationUpdate update) { presentation.apply(std::move(update)); });
+    QPointer<QQuickWindow> rootPointer;
+    QPointer<QQuickWindow> overlayPointer;
+    {
+      QQmlApplicationEngine engine;
+      engine.rootContext()->setContextProperty("metadata", &metadata);
+      engine.rootContext()->setContextProperty("livePresentation", &presentation);
+      engine.load(QUrl("qrc:/Main.qml"));
+      QVERIFY(!engine.rootObjects().isEmpty());
+      auto* root = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+      QVERIFY(root);
+      auto* overlay = root->findChild<QQuickWindow*>("overlayWindow");
+      QVERIFY(overlay);
+      rootPointer = root;
+      overlayPointer = overlay;
+      auto* controller = new beatglass::windows::OverlayController(overlay, root, root);
+      QVERIFY(root->setProperty("overlayControl", QVariant::fromValue(static_cast<QObject*>(controller))));
+      QVERIFY(root->setProperty("djControl", QVariant::fromValue(static_cast<QObject*>(&bridge))));
+      overlay->show();
+      QVERIFY(controller->setClickThrough(true));
+      bridge.start();
+      QVERIFY(bridge.active());
+      root->close();
+      QTRY_VERIFY(!controller->clickThrough());
+    }
+    QVERIFY(rootPointer.isNull());
+    QVERIFY(overlayPointer.isNull());
+    bridge.stop();
+    QTRY_VERIFY(!bridge.active());
+  }
   void nativeOverlayDrag() {
     if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_OVERLAY_TEST")) QSKIP("Set BEATGLASS_NATIVE_OVERLAY_TEST for native pointer input");
     struct RestoreCursor { POINT position{}; RestoreCursor() { GetCursorPos(&position); } ~RestoreCursor() { SetCursorPos(position.x, position.y); } } restore;
@@ -41,16 +164,21 @@ private slots:
     QTRY_VERIFY(overlay->isVisible());
     QTest::qWait(200);
     for (auto* screen : QGuiApplication::screens()) {
-      const auto available = screen->availableGeometry();
-      overlay->setPosition(available.topLeft() + QPoint(100, 100));
-      QTest::qWait(300);
-      const auto before = overlay->position();
       const auto hwnd = reinterpret_cast<HWND>(overlay->winId());
-      qInfo() << "Testing native overlay drag on" << screen->name() << "scale" << screen->devicePixelRatio();
-      QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE));
+      qInfo() << "Testing native overlay drag on" << screen->name() << "scale" << screen->devicePixelRatio() << "geometry" << screen->geometry();
+      MONITORINFO monitor{}; monitor.cbSize = sizeof(monitor);
+      POINT screenOrigin{screen->geometry().x() + 1, screen->geometry().y() + 1};
+      const auto expectedMonitor = MonitorFromPoint(screenOrigin, MONITOR_DEFAULTTONULL);
+      QVERIFY(expectedMonitor);
+      QVERIFY(GetMonitorInfoW(expectedMonitor, &monitor));
+      QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, monitor.rcWork.left + 100, monitor.rcWork.top + 100, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE));
+      QTRY_COMPARE(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), expectedMonitor);
+      QTest::qWait(200);
+      const auto before = overlay->position();
       SetForegroundWindow(hwnd);
       RECT rect{};
       QVERIFY(GetWindowRect(hwnd, &rect));
+      qInfo() << "Native monitor bounds" << monitor.rcMonitor.left << monitor.rcMonitor.top << monitor.rcMonitor.right << monitor.rcMonitor.bottom;
       POINT native{rect.left + 30, rect.top + 30};
       std::jthread pointer([native] {
         SetCursorPos(native.x, native.y);
