@@ -22,7 +22,15 @@ expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_l
             'id="beatglass::FileMetadata::format__ss"', 'id="beatglass::TempoResult"',
             'id="beatglass::TempoResult::metadata__FileMetadata"', 'id="beatglass::TempoResult::bpm__std::optional:float:"',
             'id="beatglass::TempoResult::beats__unsigned-i"', 'id="beatglass::TempoResult::state__TrackingState"', "TempoEstimator", "KeyEstimator", "ChordEstimator", "PresentationAdapter",
-            "AnalysisStore", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
+            'id="_CPPv4N9beatglass14FileReadStatusE"', 'id="_CPPv4N9beatglass14FileReadStatus4dataE"',
+            'id="_CPPv4N9beatglass14FileReadStatus3endE"', 'id="_CPPv4N9beatglass14FileReadStatus9cancelledE"',
+            'id="beatglass::FileReadResult"', 'id="beatglass::FileReadResult::status__FileReadStatus"',
+            'id="beatglass::FileReadResult::block__AudioBlock"', 'id="beatglass::FileReader"',
+            'id="beatglass::FileReader::FileReader__std::filesystem::pathCR.std::uint64_t"',
+            'id="beatglass::FileReader::~FileReader__void"', 'id="beatglass::FileReader::FileReader__FileReaderCR"',
+            'id="beatglass::FileReader::assign-operator__FileReaderCR"', 'id="beatglass::FileReader::metadata__voidC"',
+            'id="beatglass::FileReader::read__std::span:float:.std::stop_token"',
+            'id="beatglass::FileReader::seek__std::uint64_t"', "AnalysisStore", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
             'id="beatglass::ChordEstimator::take_segments__void"',
             'id="beatglass::PresentationAdapter::present__SnapshotCRC"')
 missing = [name for name in expected if name not in html]
