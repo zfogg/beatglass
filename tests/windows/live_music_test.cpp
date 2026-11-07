@@ -58,3 +58,36 @@ TEST_CASE("live composite fails closed on malformed packet") {
   REQUIRE(live.pump()); REQUIRE(live.latest()); source->add(512); source->packets.back().channels=0;
   CHECK_FALSE(live.pump()); CHECK_FALSE(live.latest());
 }
+TEST_CASE("live composite rejects delayed snapshots across gaps and silence within a packet") {
+  SourceEpochAllocator epochs; auto fake=std::make_unique<FakeLoopback>(); auto* source=fake.get();
+  LiveMusic live(epochs,std::move(fake)); REQUIRE(live.start("endpoint")); source->add(0);
+  REQUIRE(live.pump()); REQUIRE(live.latest());
+  const auto old_generation=live.generation(), old_revision=live.revision();
+  source->add(1024); REQUIRE(live.pump()); REQUIRE(live.latest());
+  CHECK(live.generation()>old_generation);
+  // A presentation gate must keep the newest generation/revision and reject delayed data.
+  auto shown_generation=live.generation(), shown_revision=live.revision();
+  auto accept=[&](std::uint64_t g,std::uint64_t r) {
+    if (g<shown_generation || (g==shown_generation && r<=shown_revision)) return false;
+    shown_generation=g; shown_revision=r; return true;
+  };
+  CHECK_FALSE(accept(old_generation,old_revision));
+  const auto same_generation=live.generation(), earlier_revision=live.revision();
+  source->add(1536); REQUIRE(live.pump());
+  REQUIRE(live.generation()==same_generation); REQUIRE(live.revision()>earlier_revision);
+  REQUIRE(accept(live.generation(),live.revision())); CHECK_FALSE(accept(same_generation,earlier_revision));
+  std::uint64_t frame=2048;
+  for (unsigned i=0;i<86;++i) { source->add(frame); source->packets.back().samples.fill(0); frame+=512; }
+  while (!source->packets.empty()) REQUIRE(live.pump());
+  REQUIRE(live.latest()); REQUIRE(live.latest()->tempo.state!=TrackingState::silent);
+  const auto before_silence=live.generation();
+  source->add(frame); auto& packet=source->packets.back(); packet.sample_count=1024;
+  for (unsigned i=0;i<512;++i) packet.samples[i]=0;
+  for (unsigned i=512;i<1024;++i) packet.samples[i]=0.2f*std::sin(float(frame+i)*0.037f);
+  REQUIRE(live.pump()); REQUIRE(live.latest());
+  CHECK(live.latest()->tempo.state!=TrackingState::silent);
+  CHECK(live.generation()>=before_silence+2);
+  const auto delayed_generation=shown_generation, delayed_revision=shown_revision;
+  REQUIRE(accept(live.generation(),live.revision()));
+  CHECK_FALSE(accept(delayed_generation,delayed_revision));
+}

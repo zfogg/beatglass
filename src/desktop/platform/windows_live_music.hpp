@@ -9,7 +9,8 @@
 namespace beatglass::windows {
 /** Provisional worker-owned live composite consumer. Never call from the capture
  * callback or GUI thread. The caller serializes all methods and delivers clears
- * to presentation consumers when generation changes. Rolling key and local chord
+ * to presentation consumers when generation changes and rejects out-of-order
+ * deliveries using revision. Rolling key and local chord
  * are provisional windows, not track key or chord segments. No cache is used.
  * Serialize Essentia construction across workers until its factory is qualified.
  */
@@ -33,13 +34,16 @@ public:
   const std::optional<CausalMusicState>& latest() const noexcept { return latest_; }
   /** Monotonic clear token; consumers must reject results from older tokens. */
   std::uint64_t generation() const noexcept { return generation_; }
+  /** Monotonic revision for clears and updates; reject older delivered revisions. */
+  std::uint64_t revision() const noexcept { return revision_; }
   /** Current source lifecycle state on the owning worker. */
   SourceState state() const { return session_.state(); }
 private:
+  void invalidate_publication() noexcept;
   void clear() noexcept;
   std::unique_ptr<CausalMusicReplay> replay_;
   std::optional<CausalMusicState> latest_;
-  std::uint64_t generation_{};
+  std::uint64_t generation_{}, revision_{};
   bool failed_{}, exhausted_{};
   std::chrono::steady_clock::time_point last_audio_{};
   LoopbackSession session_;
