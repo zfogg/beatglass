@@ -23,11 +23,12 @@ public:
   /** Borrow a process-owned epoch allocator; parent lives on the GUI thread.
    * Optional startHook is a worker-only test seam and must not retain arguments. */
   explicit LiveMusicBridge(SourceEpochAllocator& epochs,QObject* parent=nullptr,
-                           std::function<bool(LiveMusic&,const std::string&)> startHook={});
+                           std::function<bool(LiveMusic&,const std::string&,std::shared_ptr<LoopbackStartAuthorization>)> startHook={});
   // Documented manually in the API reference due to Hawkmoth destructor parsing.
   ~LiveMusicBridge() override;
   /** Request one selected endpoint; false for empty ID or exhausted sessions.
-   * Invalidates prior GUI state immediately; actual capture starts asynchronously. */
+   * Invalidates prior GUI state immediately; actual capture starts asynchronously.
+   * A claimed native start can remain in flight until its native call returns. */
   bool start(const QString& endpoint);
   /** Invalidate prior state immediately and request worker stop. */
   void stop();
@@ -38,7 +39,8 @@ private:
   void drain();
   bool advanceSession();
   SourceEpochAllocator& epochs_;
-  std::function<bool(LiveMusic&,const std::string&)> start_hook_;
+  std::function<bool(LiveMusic&,const std::string&,std::shared_ptr<LoopbackStartAuthorization>)> start_hook_;
+  std::shared_ptr<LoopbackStartAuthorization> authorization_;
   std::mutex mutex_;
   std::condition_variable wake_;
   std::optional<MusicUiUpdate> pending_;

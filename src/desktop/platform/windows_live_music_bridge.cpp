@@ -5,14 +5,14 @@
 #include <utility>
 namespace beatglass::windows {
 LiveMusicBridge::LiveMusicBridge(SourceEpochAllocator& epochs,QObject* parent,
-    std::function<bool(LiveMusic&,const std::string&)> startHook)
+    std::function<bool(LiveMusic&,const std::string&,std::shared_ptr<LoopbackStartAuthorization>)> startHook)
     : QObject(parent),epochs_(epochs),start_hook_(std::move(startHook)) {
   qRegisterMetaType<MusicUiUpdate>();
   connect(&timer_,&QTimer::timeout,this,&LiveMusicBridge::drain);
   timer_.start(50); worker_=std::thread(&LiveMusicBridge::run,this);
 }
 LiveMusicBridge::~LiveMusicBridge() {
-  timer_.stop(); { std::lock_guard lock(mutex_); quitting_=true; requested_=false; pending_.reset(); }
+  timer_.stop(); { std::lock_guard lock(mutex_); quitting_=true; requested_=false; if(authorization_) authorization_->cancel(); pending_.reset(); }
   wake_.notify_one(); if(worker_.joinable()) worker_.join();
 }
 bool LiveMusicBridge::advanceSession() {
@@ -22,12 +22,14 @@ bool LiveMusicBridge::advanceSession() {
 }
 bool LiveMusicBridge::start(const QString& endpoint) {
   if(endpoint.isEmpty()) return false;
-  std::string selected;
-  try { selected=endpoint.toUtf8().toStdString(); } catch (...) { return false; }
+  std::string selected; std::shared_ptr<LoopbackStartAuthorization> authorization;
+  try { selected=endpoint.toUtf8().toStdString(); authorization=std::make_shared<LoopbackStartAuthorization>(); } catch (...) { return false; }
   MusicUiUpdate clear; bool accepted=false, can_clear=false;
   {
     std::lock_guard lock(mutex_);
     if(!exhausted_ && advanceSession()) {
+      if(authorization_) authorization_->cancel();
+      authorization_=std::move(authorization);
       clear.session=session_; can_clear=true; pending_.reset();
       accepted=!exhausted_; requested_=accepted;
       if(accepted) endpoint_=std::move(selected);
@@ -40,7 +42,7 @@ bool LiveMusicBridge::start(const QString& endpoint) {
 void LiveMusicBridge::stop() {
   MusicUiUpdate clear; bool can_clear;
   {
-    std::lock_guard lock(mutex_); requested_=false; pending_.reset(); can_clear=advanceSession(); clear.session=session_;
+    std::lock_guard lock(mutex_); requested_=false; if(authorization_) authorization_->cancel(); pending_.reset(); can_clear=advanceSession(); clear.session=session_;
   }
   wake_.notify_one();
   if(can_clear && gate_.apply(clear)) emit musicUpdate(std::move(clear));
@@ -55,18 +57,19 @@ void LiveMusicBridge::run() {
   std::uint64_t active_session{}, last_revision{}; bool active=false;
   for (;;) {
     std::uint64_t session{}; bool requested{}; std::string endpoint;
+    std::shared_ptr<LoopbackStartAuthorization> authorization;
     try {
       {
         std::unique_lock lock(mutex_); wake_.wait_for(lock,std::chrono::milliseconds(25));
         if(quitting_) break;
         session=session_; requested=requested_;
-        if(requested && (!active || session!=active_session)) endpoint=endpoint_;
+        if(requested && (!active || session!=active_session)) { endpoint=endpoint_; authorization=authorization_; }
       }
       if(active && (!requested || session!=active_session)) { live->stop(); active=false; }
       if(requested && !active) {
         active_session=session; last_revision=0;
         if(!live) live=std::make_unique<LiveMusic>(epochs_);
-        active=start_hook_ ? start_hook_(*live,endpoint) : live->start(endpoint);
+        active=start_hook_ ? start_hook_(*live,endpoint,authorization) : live->start(endpoint,authorization);
         {
           std::lock_guard lock(mutex_);
           if(quitting_) break;
