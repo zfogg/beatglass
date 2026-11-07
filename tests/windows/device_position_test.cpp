@@ -46,3 +46,11 @@ TEST_CASE("Empty invalid or discontinuous buffers defer the gap to audio") {
   CHECK(position.observe(46, 8, true));
   CHECK_FALSE(position.observe(54, 8, true));
 }
+
+TEST_CASE("Empty device position jump defers the gap to audio") {
+  beatglass::windows::DevicePositionContinuity position;
+  CHECK_FALSE(position.observe(10, 10, true));
+  CHECK(position.observe(30, 0, true));
+  CHECK(position.observe(30, 8, true));
+  CHECK_FALSE(position.observe(38, 8, true));
+}

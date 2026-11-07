@@ -21,7 +21,7 @@ inline bool captureBufferArithmeticValid(std::uint64_t first_frame, std::uint32_
 /** Capture-thread-only continuity check for WASAPI device frame positions. The first valid packet establishes a baseline; a valid jump, invalid timestamp or arithmetic overflow requires reacquisition. After invalid data the next valid packet establishes a fresh baseline. This helper neither assigns epochs nor detects missing audio before its first packet. */
 class DevicePositionContinuity {
 public:
-  /** Observe one packet's first device frame and frame count. valid must be false when WASAPI reports a timestamp error. flagged records a native discontinuity. Returns true if this packet must be marked discontinuous; an empty invalid or flagged packet also marks the next nonempty packet. */
+  /** Observe one packet's first device frame and frame count. valid must be false when WASAPI reports a timestamp error. flagged records a native discontinuity. Returns true if this packet must be marked discontinuous; an empty discontinuous packet also marks the next nonempty packet. */
   bool observe(std::uint64_t first, std::uint64_t frames, bool valid, bool flagged = false) noexcept {
     if (!frames && (!valid || flagged)) pending_gap_ = true;
     if (!valid || first > std::numeric_limits<std::uint64_t>::max() - frames) {
@@ -30,6 +30,7 @@ public:
     }
     const bool discontinuity = flagged || pending_gap_ || (have_expected_ && first != expected_);
     if (frames) pending_gap_ = false;
+    else if (discontinuity) pending_gap_ = true;
     expected_ = first + frames;
     have_expected_ = true;
     return discontinuity;
