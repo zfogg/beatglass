@@ -40,9 +40,8 @@ The noninteractive Windows bridge regression also opens a real generated WAV
 with a coordinator-issued initial epoch, starts and restarts a failed live
 endpoint with that same allocator, and verifies the reader block retains its
 epoch while live attempts consume distinct values. This test deliberately does
-not use the legacy seek overload. PR #45 proposes an explicit new-epoch seek;
-that reader change and a combined library/live product integration are still
-required for coordinated seeks.
+not use the legacy seek overload. PR #45 added an explicit new-epoch seek;
+combined library/live product integration must use it for coordinated seeks.
 The collection integration in #51 independently introduces an application-level
 allocator. Before combining these branches, reconcile them into exactly one
 object outside platform and feature conditionals, inject it into both bridges,
@@ -51,19 +50,17 @@ separately owned allocators into the combined application.
 
 At the time of this review, #51's desktop entry point already constructs one
 allocator and passes it to `WindowsDj` and `CollectionView`, whereas #53 uses
-`DjBridge` and a different overlay integration. Reconciliation therefore needs
-an explicit choice of the surviving DJ adapter and overlay wiring, not a blind
-concatenation of both entry points. Whichever adapter survives must receive the
-same allocator as `CollectionView`; its worker and the collection worker must
-both stop and join before the owner is destroyed. The merged reader still has
-only local-increment seek; keep product paths requiring coordinated seeks gated
-until the explicit-epoch reader contract lands and is tested with this owner.
+`DjBridge` and a different overlay integration. The combined draft #71 retains
+`WindowsDj` as the sole active adapter and brings the overlay behavior around
+it. It passes the same allocator to `WindowsDj` and `CollectionView`; both
+workers must stop and join before the owner is destroyed. The merged reader
+provides an explicit-epoch seek; coordinated product seeks must use that
+overload and be tested with this owner.
 
-The file reader currently increments its own epoch on seek; merely injecting a
-shared initial value does not prevent it colliding with an epoch issued to
-another source. Its seek contract must be changed to receive a fresh allocated
-token, or otherwise use the same agreed allocator outside the callback, before
-it participates in this process-wide namespace. A restarted process also needs
+The legacy file-reader seek increments its own epoch; merely injecting a shared
+initial value does not prevent it colliding with an epoch issued to another
+source. Coordinated callers must use the new explicit-epoch overload with a
+fresh allocated token, never the legacy overload. A restarted process also needs
 a distinct session identity or a proven drain of all prior publications. A
 seeded allocator is safe only when the seed is a trustworthy high-water mark
 for the same namespace; resetting or persisting it alone is not such a proof.
