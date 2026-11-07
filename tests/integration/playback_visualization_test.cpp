@@ -67,9 +67,11 @@ TEST_CASE("older same-generation frames cannot replace a newer frame") {
   PlaybackVisualization tap(11);
   tap.output()->audioBufferReceived(tone(1024, 0));
   auto first = awaitFrame(tap); REQUIRE(first);
+  REQUIRE(tap.acceptFrame(first->value.epoch, first->revision));
   tap.output()->audioBufferReceived(tone(1024, 21333));
   auto second = awaitFrame(tap); REQUIRE(second);
   REQUIRE(second->revision > first->revision);
+  REQUIRE(tap.isCurrent(first->value.epoch, first->revision));
   std::optional<PlaybackVisualization::Frame> displayed;
   auto deliver = [&](const auto& candidate) {
     if (tap.acceptFrame(candidate.value.epoch, candidate.revision)) displayed = candidate;
