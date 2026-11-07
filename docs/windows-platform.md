@@ -118,6 +118,14 @@ with `NOMINMAX`, and the rebuilt target passed. These synthetic and endpoint tes
 do not establish music accuracy, real physical
 interruption recovery, or complete native DJ and overlay qualification.
 
+Hosted Windows CI later reported three device-dependent tests as failures even
+though Catch2 skipped them because the runner had no active render endpoint.
+The Windows Catch discovery properties accidentally split a semicolon-separated
+label into malformed property pairs, preventing CTest from recognizing the skip
+exit code. The registration now uses a single label. A dedicated skip-propagation
+regression was recognized as skipped locally; the targeted CTest selection passed
+11 cases with that one deliberate skip. Hosted rerun results are pending.
+
 After an explicit start, the private default follower polls active render endpoints
 approximately once per second on the worker thread. Stop disables future polling
 until a new start. A changed or missing default clears evidence
