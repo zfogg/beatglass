@@ -9,3 +9,5 @@ Remaining design work: validate real content density and long paths with users; 
 ## Technical audit and qualification
 
 `npm run check` verifies that all 60 theme/screen combinations render content without horizontal document overflow at 1440×960. `npm run render -- snapshots` produces tracked reference images; output directory argument is supported. Renderings were visually inspected for representative light, dark, contrast, purple, blue and yellow layouts, including the contextual overlay. This is not a complete accessibility, contrast, keyboard, interaction, responsiveness, localization or native UI audit. The CSS includes responsive rules and focus styling, but no claim of WCAG conformance is made. The high-contrast theme is a visual proposal, not an accessibility certification. No native app, audio, platform tray, capture, or overlay behavior was tested. Native Linux, macOS and Windows qualification remains required by issue #1.
+
+The Library and track-detail examples explicitly distinguish an unknown track-level key from a timestamped provisional rolling window. A completed job is not a validated track-key result.
