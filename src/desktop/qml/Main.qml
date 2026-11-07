@@ -13,11 +13,18 @@ ApplicationWindow {
     title: "Beatglass"
     property var metadataBridge: metadata
     property var liveBridge: livePresentation
+    property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    property string selectedTheme: "Light"
+    readonly property var themeNames: ["Light", "Dark", "High contrast", "Purple", "Blue", "Yellow"]
+    readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]
+    readonly property var themeForegrounds: ["#20242b", "#f4f6fb", "#ffffff", "#f4eaff", "#eaf4ff", "#fffbe6"]
+    readonly property var themeAccentColors: ["#3f51b5", "#90caf9", "#ffff00", "#c084fc", "#60a5fa", "#facc15"]
+    property int selectedThemeIndex: themePreferencesBridge ? themePreferencesBridge.themeIndex : 0
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
     }
@@ -98,8 +105,51 @@ ApplicationWindow {
                 TabButton { text: "Library"; objectName: "libraryTab" }
                 TabButton { text: "DJ"; objectName: "djTab" }
             }
+            ComboBox {
+                id: themeSelector
+                objectName: "themeSelector"
+                model: window.themeNames
+                currentIndex: window.selectedThemeIndex
+                Accessible.name: "Color theme"
+                Accessible.description: "Choose one of six color themes for the Beatglass desktop."
+                ToolTip.text: "Choose a color theme"
+                onActivated: {
+                    window.selectedThemeIndex = currentIndex
+                    window.selectedTheme = currentText
+                    if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = currentIndex
+                }
+            }
+            Row {
+                id: themePreviews
+                objectName: "themePreviews"
+                spacing: 3
+                Repeater {
+                    model: window.themeNames.length
+                    delegate: Button {
+                        required property int index
+                        objectName: "themePreview" + index
+                        width: 18; height: 18
+                        padding: 0
+                        Accessible.name: window.themeNames[index] + " theme preview"
+                        ToolTip.text: "Select " + window.themeNames[index] + " theme"
+                        background: Rectangle {
+                            radius: 3
+                            color: window.themeBackgrounds[index]
+                            border.width: window.selectedThemeIndex === index ? 2 : 1
+                            border.color: window.themeAccentColors[index]
+                        }
+                        onClicked: {
+                            window.selectedThemeIndex = index
+                            window.selectedTheme = window.themeNames[index]
+                            themeSelector.currentIndex = index
+                                if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = index
+                        }
+                    }
+                }
+            }
         }
     }
+    background: Rectangle { color: window.themeBackgrounds[window.selectedThemeIndex] }
     StackLayout {
         anchors.fill: parent
         currentIndex: navigation.currentIndex
@@ -107,7 +157,7 @@ ApplicationWindow {
             objectName: "libraryPage"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
-                Label { text: "Library"; font.pixelSize: 28; font.bold: true }
+                Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true }
                 Label {
                     text: "Browse local folders. Indexing, analysis, playback and saved results are not available yet."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
