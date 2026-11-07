@@ -14,6 +14,9 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
+    QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
+    QtObject { id: fakeOverlay; property bool clickThrough: false; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) {} }
+    Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay } }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
@@ -30,6 +33,19 @@ TestCase {
         tabs.currentIndex = 0
         tryCompare(library, "visible", true)
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
+        app.destroy()
+    }
+    function test_djControlsAndOverlayEscape() {
+        fakeDj.active = false; fakeOverlay.clickThrough = false
+        let app = djShell.createObject(null)
+        findChild(app, "navigation").currentIndex = 1
+        let start = findChild(app, "startMonitor")
+        verify(start.enabled); start.clicked(); verify(fakeDj.active); compare(fakeDj.status, "test-id")
+        let show = findChild(app, "showOverlay"); show.clicked()
+        let overlay = findChild(app, "djOverlay"); tryCompare(overlay, "visible", true)
+        let lock = findChild(app, "lockOverlay"); lock.clicked(); verify(fakeOverlay.clickThrough)
+        show.clicked(); verify(!fakeOverlay.clickThrough); tryCompare(overlay, "visible", false)
+        findChild(app, "stopMonitor").clicked(); verify(!fakeDj.active)
         app.destroy()
     }
     function test_realFolderNavigationAndSelection() {

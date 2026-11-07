@@ -14,6 +14,8 @@ ApplicationWindow {
     title: "Beatglass"
     property var metadataBridge: metadata
     property var liveBridge: livePresentation
+    property var djBridge: typeof windowsDj === "undefined" ? null : windowsDj
+    property var overlayBridge: null
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
@@ -179,14 +181,49 @@ ApplicationWindow {
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
-                Label { text: "Live output monitoring is not available yet."; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Capture, live estimates and the overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Status: " + window.liveBridge.status }
-                Label { text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
+                Label { text: window.djBridge ? "Monitor a selected Windows output. Other sounds on that output are included." : "Live output monitoring is not available on this platform yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                RowLayout {
+                    ComboBox { id: sourceBox; objectName: "sourceBox"; model: window.djBridge ? window.djBridge.sources : []; textRole: "name"; Layout.fillWidth: true; Accessible.name: "Output to monitor"; enabled: window.djBridge && !window.djBridge.active }
+                    Button { text: "Refresh outputs"; enabled: !!window.djBridge; onClicked: window.djBridge.refresh() }
+                }
+                RowLayout {
+                    Button { objectName: "startMonitor"; text: "Start monitoring"; enabled: !!window.djBridge && !window.djBridge.active && sourceBox.currentIndex >= 0; onClicked: window.djBridge.start(sourceBox.model[sourceBox.currentIndex].id) }
+                    Button { objectName: "stopMonitor"; text: "Stop monitoring"; enabled: !!window.djBridge && window.djBridge.active; onClicked: window.djBridge.stop() }
+                }
+                Label { objectName: "djStatus"; text: "Status: " + (window.djBridge ? window.djBridge.status : "Unavailable") }
+                Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
+                Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                RowLayout {
+                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge; onClicked: { if (djOverlay.visible) { window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { djOverlay.show(); window.overlayBridge.keepOnScreen() } } }
+                    Button { objectName: "lockOverlay"; text: window.overlayBridge && window.overlayBridge.clickThrough ? "Unlock overlay" : "Enable click-through"; enabled: !!window.overlayBridge && djOverlay.visible; onClicked: window.overlayBridge.setClickThrough(!window.overlayBridge.clickThrough) }
+                    Label { text: "Drag when unlocked. Unlock: Ctrl+Shift+U while Beatglass is active"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                }
+                RowLayout {
+                    Label { text: "Overlay opacity" }
+                    Slider { from: 0.25; to: 1.0; value: 0.85; enabled: !!window.overlayBridge; Accessible.name: "Overlay opacity"; onMoved: window.overlayBridge.setOpacity(value); Layout.fillWidth: true }
+                }
                 Item { Layout.fillHeight: true }
             }
         }
     }
+    Window {
+        id: djOverlay
+        objectName: "djOverlay"
+        visible: false
+        width: 240; height: 110
+        title: "Beatglass overlay"
+        color: "transparent"
+        Rectangle {
+            anchors.fill: parent; radius: 10; color: "#d9202530"; border.color: "#92a2b8"
+            MouseArea { anchors.fill: parent; onPressed: djOverlay.startSystemMove() }
+            Column {
+                anchors.centerIn: parent; spacing: 5
+                Label { text: window.djBridge ? window.djBridge.status : "Unavailable"; color: "white"; font.pixelSize: 16 }
+                Label { text: "BPM " + (window.djBridge ? window.djBridge.tempo : "—"); color: "white"; font.pixelSize: 30; font.bold: true }
+            }
+        }
+    }
+    Shortcut { sequence: "Ctrl+Shift+U"; context: Qt.ApplicationShortcut; enabled: !!window.overlayBridge; onActivated: window.overlayBridge.setClickThrough(false) }
     Connections {
         target: window.metadataBridge
         function onStatusChanged(text) { window.metadataStatus = text }

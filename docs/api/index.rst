@@ -52,7 +52,7 @@ decision; the interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
@@ -70,3 +70,11 @@ Desktop application internals
 
    Unlock the overlay and remove event filters. The caller retains ownership of
    both windows. Call on the GUI thread.
+
+.. cpp:function:: WindowsDj::~WindowsDj()
+
+   Stop and join the worker on the owning GUI thread before returning.
+
+.. cpp:function:: WindowsOverlay::~WindowsOverlay()
+
+   Destroy the platform controller on the GUI thread before either borrowed window.
