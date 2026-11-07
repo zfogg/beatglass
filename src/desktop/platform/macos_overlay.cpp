@@ -52,7 +52,7 @@ bool OverlayController::attach(QQuickWindow* overlay, QWindow* control) {
     const auto savedOpacity = settings_->value(QStringLiteral("overlay/opacity"), 0.9).toDouble(&validOpacity);
     if (validOpacity && std::isfinite(savedOpacity)) overlay_->setOpacity(std::clamp(savedOpacity, 0.2, 1.0));
   }
-  keepOnScreen(); restoring_ = false;
+  keepOnScreen(); restoring_ = false; scheduleSave();
   emit opacityChanged();
   return true;
 }
@@ -66,6 +66,7 @@ void OverlayController::detach() {
   }
   if (control_) { control_->removeEventFilter(this); disconnect(control_, nullptr, this, nullptr); }
   overlay_ = nullptr; control_ = nullptr;
+  have_snapshot_ = false;
   if (click_through_) { click_through_ = false; emit clickThroughChanged(); }
   setAvailable(false);
 }
@@ -88,12 +89,14 @@ void OverlayController::setOpacity(qreal value) {
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(0.9); }
 void OverlayController::scheduleSave() {
-  if (settings_ && available_ && !restoring_) save_timer_.start();
+  if (!settings_ || !available_ || !overlay_ || restoring_) return;
+  saved_geometry_ = overlay_->geometry(); saved_opacity_ = overlay_->opacity(); have_snapshot_ = true;
+  save_timer_.start();
 }
 void OverlayController::saveSettings() {
-  if (!settings_ || !overlay_ || !available_ || restoring_) return;
-  settings_->setValue(QStringLiteral("overlay/geometry"), overlay_->geometry());
-  settings_->setValue(QStringLiteral("overlay/opacity"), overlay_->opacity());
+  if (!settings_ || !have_snapshot_ || restoring_) return;
+  settings_->setValue(QStringLiteral("overlay/geometry"), saved_geometry_);
+  settings_->setValue(QStringLiteral("overlay/opacity"), saved_opacity_);
 }
 bool OverlayController::setClickThrough(bool enabled) {
   if (!overlay_ || !native_) return !enabled;

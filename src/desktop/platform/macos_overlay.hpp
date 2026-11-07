@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QPointer>
+#include <QRect>
 #include <QStringList>
 #include <QSettings>
 #include <QTimer>
@@ -79,6 +80,8 @@ private:
   QTimer save_timer_;
   QPointer<QQuickWindow> overlay_;
   QPointer<QWindow> control_;
-  bool available_{}, click_through_{}, restoring_{};
+  QRect saved_geometry_;
+  qreal saved_opacity_{0.9};
+  bool available_{}, click_through_{}, restoring_{}, have_snapshot_{};
 };
 }

@@ -149,6 +149,22 @@ private slots:
     QVERIFY(qAbs(controller.opacity() - 0.2) < 0.02);
     QVERIFY(!controller.clickThrough());
   }
+  void pendingSettingsSurviveOverlayDestruction() {
+    QTemporaryDir dir; QVERIFY(dir.isValid());
+    const auto path = dir.filePath(QStringLiteral("overlay.ini"));
+    {
+      auto overlay = std::make_unique<QQuickWindow>(); QWindow control;
+      OverlayController controller(std::make_unique<FakeNative>(), nullptr, std::make_unique<QSettings>(path, QSettings::IniFormat));
+      QVERIFY(controller.attach(overlay.get(), &control));
+      controller.setOpacity(0.65);
+      overlay.reset();
+      QVERIFY(!controller.available());
+    }
+    QQuickWindow overlay; QWindow control;
+    OverlayController controller(std::make_unique<FakeNative>(), nullptr, std::make_unique<QSettings>(path, QSettings::IniFormat));
+    QVERIFY(controller.attach(&overlay, &control));
+    QVERIFY(qAbs(controller.opacity() - 0.65) < 0.02);
+  }
 };
 QTEST_MAIN(OverlayControlTest)
 #include "overlay_controller_test.moc"
