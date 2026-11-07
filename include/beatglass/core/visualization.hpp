@@ -29,7 +29,9 @@ struct VisualizationFrame {
  * Reset, invalid input, or an epoch, rate, or frame discontinuity invokes the
  * invalidation hook synchronously and clears partial input. The owner must
  * gate every frame by the same shared generation and a monotonic revision;
- * epochs alone are insufficient, including for gaps within one epoch.
+ * epochs alone are insufficient, including for gaps within one epoch. On
+ * source stop or before destroying the processor, its owner must synchronously
+ * invalidate the shared publication state. Destruction does not revoke frames.
  */
 class VisualizationProcessor {
 public:
