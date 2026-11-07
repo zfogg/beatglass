@@ -76,7 +76,15 @@ events, and a new attempt started its event sequence at one. The test did not
 disconnect hardware or test an interruption following a running event. This
 private stream does not yet supply a shared `SourceAttempt`; the integration
 adapter must bind an attempt identity, order delivery relative to epoch setup,
-translate startup failures, and invalidate in-flight analysis. WASAPI's device
-position is currently not used to detect extra gaps: flagged discontinuities and
-timestamp errors are marked, but the epoch-relative frame count excludes unknown
-device gaps and must not be treated as an uninterrupted physical timeline.
+translate startup failures, and invalidate in-flight analysis. WASAPI device-frame
+position jumps and resets, timestamp errors, and flagged discontinuities mark a
+packet discontinuous. The epoch-relative frame count excludes unknown device gaps
+and must not be treated as an uninterrupted physical timeline.
+
+The device-position increment was built on Windows 11 Home 10.0.26300 x64
+with GCC 15.2.0 using `cmake --build "$env:TEMP/beatglass-windows-main" -j 4`;
+`ctest --test-dir "$env:TEMP/beatglass-windows-main" --output-on-failure`
+passed 29/29. Unit tests exercise jumps, backwards resets, invalid timestamps,
+and arithmetic overflow; the explicitly invoked `[native-audio]` test also
+passed with generated playback. This does not simulate a physical device switch
+or prove native device-position anomalies occur on this endpoint.

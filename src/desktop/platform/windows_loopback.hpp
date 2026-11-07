@@ -6,7 +6,7 @@
 #include <string>
 
 namespace beatglass::windows {
-/** One owned interleaved float packet copied from a selected render endpoint. Positions count delivered or dropped complete frames from the capture epoch's origin; WASAPI device-position jumps are not included in that count. A discontinuity or invalid timestamp requires the consumer to discard tracking evidence and reacquire. */
+/** One owned interleaved float packet copied from a selected render endpoint. Positions count delivered or dropped complete frames from the capture epoch's origin; WASAPI device-position jumps are marked discontinuous but are not included in that count. A discontinuity or invalid timestamp requires the consumer to discard tracking evidence and reacquire. */
 struct LoopbackPacket {
   /** Maximum interleaved sample values in one packet. */
   static constexpr unsigned max_samples = 8192;
@@ -19,7 +19,7 @@ struct LoopbackPacket {
   std::uint64_t first_frame{}; /**< Epoch-relative count of frames processed by the backend, including queue drops but excluding unknown device gaps. */
   std::uint64_t qpc_100ns{}; /**< Windows QPC timestamp for the first frame, in 100-nanosecond units, meaningful only when timestamp_valid is true. */
   bool timestamp_valid{}; /**< False when WASAPI flags a timestamp error; qpc_100ns must then be ignored. */
-  bool discontinuity{}; /**< True on a WASAPI discontinuity, timestamp error or preceding queue drop; downstream must reset and reacquire. */
+  bool discontinuity{}; /**< True on a WASAPI discontinuity, device-position jump, timestamp error, position overflow or preceding queue drop; downstream must reset and reacquire. */
 };
 
 /** Provisional selected-endpoint capture, independent of the shared source contract. */

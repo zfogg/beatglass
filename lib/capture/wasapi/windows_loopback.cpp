@@ -1,4 +1,5 @@
 #include "windows_loopback.hpp"
+#include "windows_device_position.hpp"
 #include <windows.h>
 #include <audioclient.h>
 #include <mmdeviceapi.h>
@@ -99,6 +100,7 @@ struct Loopback::Impl {
       else {
         publish(State::running, S_OK);
         std::uint64_t position = 0;
+        DevicePositionContinuity device_position;
         unsigned polls = 0;
         while (!cancel.load(std::memory_order_acquire)) {
           Sleep(10);
@@ -118,12 +120,13 @@ struct Loopback::Impl {
             const auto channels = format.p->nChannels;
             const unsigned chunk_limit = LoopbackPacket::max_samples / channels;
             const bool valid = !(flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR);
+            const bool position_discontinuity = device_position.observe(device_pos, frames, valid);
             for (unsigned offset = 0; offset < frames;) {
               const unsigned count = (std::min)(chunk_limit, frames - offset);
               const auto time_offset = static_cast<std::uint64_t>(offset) * 10000000 / format.p->nSamplesPerSec;
               const auto* samples = reinterpret_cast<const float*>(data);
               push(samples ? samples + static_cast<std::size_t>(offset) * channels : nullptr, count, channels, format.p->nSamplesPerSec, epoch,
-                   position + offset, qpc + time_offset, valid, offset == 0 && ((flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) || !valid), (flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0);
+                   position + offset, qpc + time_offset, valid, offset == 0 && ((flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) || position_discontinuity), (flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0);
               offset += count;
             }
             position += frames;

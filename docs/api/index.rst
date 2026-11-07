@@ -36,4 +36,4 @@ Library jobs
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_device_position.hpp
