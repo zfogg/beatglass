@@ -58,3 +58,9 @@ For Windows x64, Qt's official repository reported the following SHA-256 values 
 - `qttools`: `76ac7b8c86ca72b6608f1d41ee848aeab19663536990b4968ce52db8ec980bc3`
 
 They were read from the respective `.sha256` files in the [official Qt repository](https://download.qt.io/online/qtsdkrepository/windows_x86/desktop/qt6_683/qt6_683/qt.qt6.683.win64_msvc2022_64/). They are upstream-published checksums, not independently retained or rehashed original archives from the prior smoke run. Future automated acquisition must verify fixed hashes against downloaded archives and lock the acquisition tool's transitive dependencies; other platforms need their own artifact manifests.
+# Phase 1 snapshot boundary
+
+Snapshot publication uses exclusive `observed_through` frame boundaries and
+nonempty half-open chord intervals. A beat at the boundary and an empty chord
+are now rejected; existing producers must adjust. This does not qualify any
+native capture or presentation path.
