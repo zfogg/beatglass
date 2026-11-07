@@ -132,3 +132,12 @@ TEST_CASE("virtual decoder accepts coordinator epochs without wrapping") {
   const auto block = decoder.read(samples); REQUIRE(block.status == FileReadStatus::data);
   CHECK(block.block.epoch == std::numeric_limits<std::uint64_t>::max()); CHECK(block.block.first_frame == 10);
 }
+
+TEST_CASE("virtual seek consumes a coordinator epoch and fails before I/O on exhaustion") {
+  auto source = wav(); SourceEpochAllocator epochs; auto first = epochs.next(); REQUIRE(first);
+  VirtualFileReader decoder(source, *first); std::array<float, 2> samples{};
+  decoder.seek(10, epochs); auto read = decoder.read(samples); REQUIRE(read.status == FileReadStatus::data); REQUIRE(read.block.epoch == 2); REQUIRE(read.block.first_frame == 10);
+  SourceEpochAllocator exhausted(std::numeric_limits<std::uint64_t>::max());
+  REQUIRE_THROWS_AS(decoder.seek(100, exhausted), std::overflow_error);
+  auto next = decoder.read(samples); REQUIRE(next.status == FileReadStatus::data); REQUIRE(next.block.epoch == 2); REQUIRE(next.block.first_frame == 12);
+}

@@ -174,8 +174,14 @@ static StoredSnapshotJobResult analyze_store_impl(AnalysisStore& store, TempoAna
   const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop,
   const std::function<void(std::uint64_t)>& progress) {
   try {
-    if (engine.empty() || config.empty()) return {FileJobStatus::error, {}, "empty engine or configuration", {}};
-    auto opened = SnapshotOpen::create(path, stop);
+    if (!epoch || engine.empty() || config.empty()) return {FileJobStatus::error, {}, "invalid epoch, engine or configuration", {}};
+    if (index_path && std::filesystem::absolute(std::filesystem::u8path(*index_path)).lexically_normal() != std::filesystem::absolute(path).lexically_normal()) return {FileJobStatus::error, {}, "index path mismatch", {}};
+#ifdef _WIN32
+    const auto policy = indexed_store ? SnapshotSourcePolicy::deny_writes : SnapshotSourcePolicy::detect_changes;
+#else
+    const auto policy = SnapshotSourcePolicy::detect_changes;
+#endif
+    auto opened = SnapshotOpen::create(path, stop, {}, policy);
     if (opened.status == SnapshotStatus::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
     if (opened.status == SnapshotStatus::stale_input || opened.status == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, opened.diagnostic, {}};
     if (opened.status != SnapshotStatus::ok) return {FileJobStatus::error, {}, opened.diagnostic, {}};

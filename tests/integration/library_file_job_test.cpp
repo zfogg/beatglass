@@ -5,7 +5,10 @@
 #include "beatglass/library/detail/file_fingerprint.hpp"
 #include "beatglass/library/detail/snapshot_store_job.hpp"
 #include "beatglass/library/detail/tempo_analysis_store.hpp"
-#ifndef _WIN32
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#else
 #include <sndfile.h>
 #ifdef __linux__
 #include <fcntl.h>
@@ -296,4 +299,30 @@ TEST_CASE("shared replay version invalidates earlier snapshot cache") {
   INFO(newer.diagnostic); REQUIRE(newer.status == FileJobStatus::committed); REQUIRE(newer.value); REQUIRE(blocks > 0);
   REQUIRE(newer.value->identity.engine_version == "engine-old/causal-tempo-v1");
   REQUIRE(store.find(file, old.identity, {}).outcome == beatglass::FindOutcome::hit);
+}
+
+#ifdef _WIN32
+TEST_CASE("indexed Windows analysis retains a deny-write source handle through publication") {
+  TempDirectory temp; auto input=temp.path/"audio.aiff"; auto db=temp.path/"library.sqlite";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES)/"tone.aiff",input);
+  TempoAnalysisStore store(db.string()); CollectionEntry entry; entry.path=input.generic_string(); store.put_entry(entry);
+  HANDLE existing=CreateFileW(input.c_str(),GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);
+  REQUIRE(existing!=INVALID_HANDLE_VALUE);
+  auto blocked=analyze_indexed_snapshot_to_store(store,entry.path,input,"sharing-test","blocked",41);
+  REQUIRE(blocked.status==FileJobStatus::stale_input); REQUIRE(store.entry(entry.path)->content_hash.empty()); REQUIRE(CloseHandle(existing));
+  bool attempted=false; auto result=analyze_indexed_snapshot_to_store(store,entry.path,input,"sharing-test","default",42,{},[&](auto) {
+    HANDLE writer=CreateFileW(input.c_str(),GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,nullptr,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,nullptr);
+    REQUIRE(writer==INVALID_HANDLE_VALUE); REQUIRE(GetLastError()==ERROR_SHARING_VIOLATION); attempted=true;
+  });
+  INFO(result.diagnostic); REQUIRE(result.status==FileJobStatus::committed); REQUIRE(attempted);
+}
+#endif
+
+TEST_CASE("indexed snapshot job rejects zero epoch and mismatched index path") {
+  TempDirectory temp; auto input=temp.path/"audio.aiff"; auto db=temp.path/"library.sqlite";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES)/"tone.aiff",input);
+  TempoAnalysisStore store(db.string()); CollectionEntry entry; entry.path=input.generic_string(); store.put_entry(entry);
+  REQUIRE(analyze_indexed_snapshot_to_store(store,entry.path,input,"engine","config",0).status==FileJobStatus::error);
+  REQUIRE(analyze_indexed_snapshot_to_store(store,(temp.path/"other.aiff").generic_string(),input,"engine","config",8).status==FileJobStatus::error);
+  REQUIRE(store.entry(entry.path)->content_hash.empty());
 }

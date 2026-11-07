@@ -1,6 +1,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/capture/file_reader.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include "beatglass/core/stream_continuity.hpp"
 #include <array>
 #include <chrono>
@@ -75,4 +76,13 @@ TEST_CASE("reading and seeking leave the source file unchanged") {
  const auto before = bytes(); REQUIRE_FALSE(before.empty());
  { FileReader reader(fixture.path); std::array<float,4> samples{}; REQUIRE(reader.read(samples).status == FileReadStatus::data); reader.seek(0); REQUIRE(reader.read(samples).status == FileReadStatus::data); }
  CHECK(bytes() == before);
+}
+
+TEST_CASE("file reader seek uses coordinator-issued epochs and refuses exhaustion") {
+ WaveFixture fixture; SourceEpochAllocator epochs; auto first=epochs.next(); REQUIRE(first);
+ FileReader reader(fixture.path,*first); std::array<float,2> buffer{};
+ reader.seek(1,epochs); auto read=reader.read(buffer); REQUIRE(read.status==FileReadStatus::data); REQUIRE(read.block.epoch==2); REQUIRE(read.block.first_frame==1);
+ CHECK_THROWS_AS(reader.seek(0,2),std::invalid_argument);
+ SourceEpochAllocator exhausted(std::numeric_limits<std::uint64_t>::max()); CHECK_THROWS_AS(reader.seek(0,exhausted),std::overflow_error);
+ auto next=reader.read(buffer); REQUIRE(next.status==FileReadStatus::data); REQUIRE(next.block.epoch==2); REQUIRE(next.block.first_frame==2);
 }

@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <deque>
 #include <fstream>
+#include <limits>
 #include <sqlite3.h>
 #include <mutex>
 #include <thread>
@@ -162,8 +163,8 @@ TEST_CASE("composite bridge returns real unverified evidence without publishing 
   std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES)/"tone.aiff",audio);
   Dispatcher queue; std::optional<LibraryBridge::Result> result;
   {
-    LibraryBridge bridge(db.string(),[&](auto call){queue.post(std::move(call));});
-    bridge.analyze_composite(audio,81,[&](auto value){result=std::move(value);});
+    LibraryBridge bridge(db.string(),[&](auto call){queue.post(std::move(call));},std::make_shared<beatglass::SourceEpochAllocator>(80));
+    bridge.start_composite(audio,[&](auto value){result=std::move(value);});
     auto call=queue.take(); REQUIRE(call); call(); REQUIRE(result);
     auto composite=std::get<LibraryBridge::Composite>(result->value); INFO(composite.diagnostic);
     REQUIRE(composite.status==CompositeJobStatus::complete); REQUIRE(composite.value); REQUIRE_FALSE(composite.value->cache_reusable());
@@ -180,3 +181,29 @@ TEST_CASE("composite bridge returns real unverified evidence without publishing 
   std::error_code ignored; std::filesystem::remove_all(dir,ignored);
 }
 #endif
+
+TEST_CASE("library job issuance shares the coordinator allocator and fails on exhaustion") {
+  auto dir = std::filesystem::temp_directory_path() / ("beatglass-epoch-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+  std::filesystem::create_directory(dir); auto audio=dir/"tone.aiff";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES)/"tone.aiff",audio);
+  { TempoAnalysisStore seed((dir/"two.sqlite").string()); CollectionEntry entry; entry.path=audio.generic_string(); seed.put_entry(entry); }
+  auto epochs=std::make_shared<beatglass::SourceEpochAllocator>(); Dispatcher first_queue, second_queue; std::optional<LibraryBridge::Result> result;
+  {
+    LibraryBridge one((dir/"one.sqlite").string(),[&](auto call){first_queue.post(std::move(call));},epochs);
+    LibraryBridge two((dir/"two.sqlite").string(),[&](auto call){second_queue.post(std::move(call));},epochs);
+    REQUIRE(one.new_session_epoch() == 1);
+    auto ticket=two.start_analysis(audio,"epoch-test","default",[&](auto r){result=std::move(r);});
+    auto call=second_queue.take(); REQUIRE(call); call(); REQUIRE(ticket->result());
+    auto job=std::get<LibraryBridge::Analysis>(result->value); REQUIRE(job.status==FileJobStatus::committed); REQUIRE(job.value); REQUIRE(job.value->result.observed_through.epoch==2);
+    REQUIRE(one.new_session_epoch() == 3);
+    auto indexed=two.start_indexed_analysis(audio.generic_string(),audio,"epoch-test","default",[&](auto r){result=std::move(r);});
+    call=second_queue.take(); REQUIRE(call); call(); REQUIRE(indexed->result()); auto hit=std::get<LibraryBridge::Analysis>(result->value);
+    REQUIRE(hit.status==FileJobStatus::cache_hit); REQUIRE(hit.value); REQUIRE(hit.value->result.observed_through.epoch==4);
+  }
+  {
+    auto exhausted=std::make_shared<beatglass::SourceEpochAllocator>(std::numeric_limits<std::uint64_t>::max()); Dispatcher queue;
+    LibraryBridge bridge((dir/"exhausted.sqlite").string(),[&](auto call){queue.post(std::move(call));},exhausted);
+    auto ticket=bridge.start_analysis(dir/"nonexistent","engine","config",{}); auto call=queue.take(); REQUIRE(call); call(); REQUIRE(ticket->result()); REQUIRE(ticket->result()->error=="analysis epoch must be nonzero");
+  }
+  std::error_code ignored; std::filesystem::remove_all(dir,ignored);
+}

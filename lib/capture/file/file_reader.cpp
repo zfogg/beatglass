@@ -1,4 +1,5 @@
 #include "beatglass/capture/file_reader.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include <sndfile.h>
 #include <limits>
 #include <stdexcept>
@@ -42,11 +43,21 @@ FileReadResult FileReader::read(std::span<float> buffer, std::stop_token cancel)
   return {FileReadStatus::data, block};
 }
 void FileReader::seek(std::uint64_t frame) {
+  if (impl_->failed) throw std::runtime_error("File reader failed");
+  if (frame > impl_->metadata.frames) throw std::out_of_range("Seek outside file");
+  if (impl_->epoch == std::numeric_limits<std::uint64_t>::max()) throw std::overflow_error("Epoch exhausted");
+  seek(frame, impl_->epoch + 1);
+}
+void FileReader::seek(std::uint64_t frame, SourceEpochAllocator& epochs) {
+  auto epoch = epochs.next(); if (!epoch) throw std::overflow_error("Epoch exhausted");
+  seek(frame, *epoch);
+}
+void FileReader::seek(std::uint64_t frame, std::uint64_t epoch) {
   auto& f = *impl_; if (f.failed) throw std::runtime_error("File reader failed");
   if (frame > f.metadata.frames) throw std::out_of_range("Seek outside file");
-  if (f.epoch == std::numeric_limits<std::uint64_t>::max()) throw std::overflow_error("Epoch exhausted");
+  if (epoch <= f.epoch) throw std::invalid_argument("Epoch must increase");
   const auto actual = sf_seek(f.handle, static_cast<sf_count_t>(frame), SEEK_SET);
   if (actual < 0 || static_cast<std::uint64_t>(actual) != frame) { f.failed = true; throw std::runtime_error("Audio seek failed"); }
-  ++f.epoch; f.position = frame; f.ended = false;
+  f.epoch = epoch; f.position = frame; f.ended = false;
 }
 }

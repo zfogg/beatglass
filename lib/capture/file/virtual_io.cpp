@@ -101,4 +101,9 @@ void VirtualFileReader::seek(std::uint64_t frame, std::uint64_t new_epoch) {
   if (f.io.status() != VirtualIoStatus::ok || actual < 0 || static_cast<std::uint64_t>(actual) != frame) { f.failed = true; throw std::runtime_error("Virtual audio seek failed"); }
   f.epoch = new_epoch; f.position = frame; f.ended = false;
 }
+void VirtualFileReader::seek(std::uint64_t frame, SourceEpochAllocator& epochs) {
+  auto epoch = epochs.next(); if (!epoch) throw std::overflow_error("Source epochs exhausted");
+  seek(frame, *epoch);
+}
+
 }

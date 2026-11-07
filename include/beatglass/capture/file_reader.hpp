@@ -7,6 +7,7 @@
 #include <span>
 #include <stop_token>
 namespace beatglass {
+class SourceEpochAllocator;
 /** Result category for a pull-based file read. */
 enum class FileReadStatus {
   /** A nonempty block was decoded. */
@@ -58,13 +59,17 @@ public:
    *         decoder failure, after which this reader must be discarded.
    */
   FileReadResult read(std::span<float> buffer, std::stop_token cancel = {});
-  /** Seek to a frame and begin a fresh epoch, including when seeking to EOF.
+  /** Legacy local-epoch seek, suitable only where no other process-session sources can collide. Seek to a frame and begin a fresh epoch, including when seeking to EOF.
    * @param frame Position from zero through the reported frame count.
    * @throws std::out_of_range for an invalid position; std::overflow_error if
    *         the epoch cannot advance; std::runtime_error on decoder failure,
    *         after which this reader must be discarded.
    */
   void seek(std::uint64_t frame);
+  /** Seek with an explicit coordinator-issued epoch strictly greater than the current epoch. Rejects reused epochs before decoder I/O. */
+  void seek(std::uint64_t frame, std::uint64_t new_epoch);
+  /** Allocate a fresh epoch from the shared process coordinator and seek. Exhaustion fails before decoder I/O; call only off the audio callback. */
+  void seek(std::uint64_t frame, SourceEpochAllocator& epochs);
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;

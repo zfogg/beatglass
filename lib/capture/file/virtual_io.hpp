@@ -1,6 +1,7 @@
 #pragma once
 #include "beatglass/capture/byte_source.hpp"
 #include "beatglass/capture/file_reader.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include <cstdint>
 #include <memory>
 #include <span>
@@ -77,6 +78,8 @@ public:
    * process-wide uniqueness, including across recreated readers.
    */
   void seek(std::uint64_t frame, std::uint64_t new_epoch);
+  /** Allocate a process-coordinator epoch and seek; exhaustion throws before decoder I/O. The allocator must be the shared process instance and be called off the audio callback. */
+  void seek(std::uint64_t frame, SourceEpochAllocator& epochs);
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;

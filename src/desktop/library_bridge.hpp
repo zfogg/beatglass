@@ -1,5 +1,6 @@
 #pragma once
 #include "beatglass/library/detail/snapshot_store_job.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include "beatglass/library/detail/tempo_analysis_store.hpp"
 #include "beatglass/library/detail/offline_archive.hpp"
 #ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
@@ -69,9 +70,17 @@ public:
   using Completion = std::function<void(Result)>;
   /** Start the worker; it opens and closes the database on that worker. */
   LibraryBridge(std::string database, Dispatch dispatch);
+  /** Inject the same process-owned allocator used by live sources; it must outlive all work. The two-argument constructor is a legacy experimental path. */
+  LibraryBridge(std::string database, Dispatch dispatch, std::shared_ptr<beatglass::SourceEpochAllocator> epochs);
   ~LibraryBridge();
   LibraryBridge(const LibraryBridge&) = delete;
   LibraryBridge& operator=(const LibraryBridge&) = delete;
+  /** Issue a process-session epoch off the audio callback, or return empty if no allocator was injected or it is exhausted. Use the returned value for run-scoped page lookups. */
+  std::optional<std::uint64_t> new_session_epoch();
+  /** Allocate a fresh epoch from the injected allocator and start a tempo job. Exhaustion is reported as an error without opening the source. */
+  std::shared_ptr<Ticket> start_analysis(std::filesystem::path path, std::string engine, std::string configuration, Completion completion);
+  /** Allocate a fresh epoch and start indexed analysis. */
+  std::shared_ptr<Ticket> start_indexed_analysis(std::string key, std::filesystem::path path, std::string engine, std::string configuration, Completion completion);
   /** Replace pending browse work with a bounded collection query. */
   std::shared_ptr<Ticket> entries(beatglass::library_detail::CollectionQuery query, Completion completion);
   /** Replace pending browse work with exact-path detail lookup. */
@@ -87,6 +96,8 @@ public:
   /** Fetch an owned, bounded offline page from an indexed path after snapshot verification. Empty run selects the active run; subsequent pages should use the returned run ID. */
   std::shared_ptr<Ticket> offline_page(std::string key, std::filesystem::path path, beatglass::library_detail::OfflineKey identity, std::string run, std::size_t beat_offset, std::size_t beat_count, std::size_t window_offset, std::size_t window_count, std::uint64_t epoch, Completion completion);
 #ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  /** Allocate a fresh epoch and start the non-cacheable composite job. */
+  std::shared_ptr<Ticket> start_composite(std::filesystem::path path, Completion completion);
   /** Run real snapshot-backed composite analysis on the analysis lane. Results are owned and explicitly non-cacheable; this never calls the archive. The caller must serialize Essentia construction process-wide and supply a nonzero coordinator epoch. */
   std::shared_ptr<Ticket> analyze_composite(std::filesystem::path path, std::uint64_t epoch, Completion completion);
 #endif

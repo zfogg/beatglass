@@ -18,6 +18,7 @@ struct LibraryBridge::State {
   std::size_t next_lane{};
   bool stopping{};
   Dispatch dispatch;
+  std::shared_ptr<beatglass::SourceEpochAllocator> epochs;
   std::jthread worker;
   void cancel_lane(std::size_t lane) {
     ++generation[lane]; active[lane].request_stop();
@@ -34,7 +35,9 @@ struct LibraryBridge::State {
 };
 std::optional<LibraryBridge::Result> LibraryBridge::Ticket::result() const { std::lock_guard lock(mutex_); return result_; }
 void LibraryBridge::Ticket::finish(Result result) { std::lock_guard lock(mutex_); if (!result_) result_ = std::move(result); }
-LibraryBridge::LibraryBridge(std::string database, Dispatch dispatch) : state_(std::make_shared<State>()) {
+LibraryBridge::LibraryBridge(std::string database, Dispatch dispatch) : LibraryBridge(std::move(database), std::move(dispatch), {}) {}
+LibraryBridge::LibraryBridge(std::string database, Dispatch dispatch, std::shared_ptr<beatglass::SourceEpochAllocator> epochs) : state_(std::make_shared<State>()) {
+  state_->epochs = std::move(epochs);
   if (!dispatch) throw std::invalid_argument("dispatcher required");
   state_->dispatch = std::move(dispatch);
   auto state = state_;
@@ -76,6 +79,13 @@ LibraryBridge::~LibraryBridge() {
   { std::lock_guard lock(state_->mutex); state_->stopping = true; state_->cancel_lane(0); state_->cancel_lane(1); }
   state_->ready.notify_one();
   if (state_->worker.joinable()) state_->worker.join();
+}
+std::optional<std::uint64_t> LibraryBridge::new_session_epoch() { return state_->epochs ? state_->epochs->next() : std::nullopt; }
+std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::start_analysis(std::filesystem::path path, std::string engine, std::string configuration, Completion completion) {
+  auto epoch = new_session_epoch(); return analyze(std::move(path), std::move(engine), std::move(configuration), epoch.value_or(0), std::move(completion));
+}
+std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::start_indexed_analysis(std::string key, std::filesystem::path path, std::string engine, std::string configuration, Completion completion) {
+  auto epoch = new_session_epoch(); return analyze_indexed(std::move(key), std::move(path), std::move(engine), std::move(configuration), epoch.value_or(0), std::move(completion));
 }
 void LibraryBridge::cancel_browse() { std::lock_guard lock(state_->mutex); state_->cancel_lane(0); }
 void LibraryBridge::cancel_analysis() { std::lock_guard lock(state_->mutex); state_->cancel_lane(1); }
@@ -200,6 +210,9 @@ std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::offline_page(std::string k
   }, std::move(completion));
 }
 #ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::start_composite(std::filesystem::path path, Completion completion) {
+  auto epoch = new_session_epoch(); return analyze_composite(std::move(path), epoch.value_or(0), std::move(completion));
+}
 std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::analyze_composite(std::filesystem::path path, std::uint64_t epoch, Completion completion) {
   return state_->submit(1, [path = std::move(path), epoch](TempoAnalysisStore&, std::stop_token stop) {
     Result result;
