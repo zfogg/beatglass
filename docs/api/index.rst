@@ -79,6 +79,11 @@ Desktop application internals
    Unlock the overlay and remove event filters. The caller retains ownership of
    both windows. Call on the GUI thread.
 
+Experimental virtual file I/O
+-----------------------------
+
+.. cpp:autodoc:: lib/capture/file/virtual_io.hpp
+
 Experimental beat-event worker
 ------------------------------
 
