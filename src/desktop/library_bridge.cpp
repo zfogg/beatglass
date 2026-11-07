@@ -18,6 +18,7 @@ struct LibraryBridge::State {
   std::size_t next_lane{};
   bool stopping{};
   Dispatch dispatch;
+  std::function<void(std::stop_token)> test_browse_hook;
   std::shared_ptr<beatglass::SourceEpochAllocator> epochs;
   std::jthread worker;
   void cancel_lane(std::size_t lane) {
@@ -51,15 +52,18 @@ LibraryBridge::LibraryBridge(std::string database, Dispatch dispatch, std::share
     catch (...) { open_error = "database initialization failed"; }
     for (;;) {
       std::optional<State::Request> request;
+      std::function<void(std::stop_token)> test_hook;
       {
         std::unique_lock lock(state->mutex);
         state->ready.wait(lock, [&] { return state->stopping || state->pending[0].has_value() || state->pending[1].has_value(); });
         if (state->stopping) return;
         auto lane = state->pending[state->next_lane] ? state->next_lane : 1 - state->next_lane;
         request = std::move(state->pending[lane]); state->pending[lane].reset(); state->active[lane] = request->stop; state->next_lane = 1 - lane;
+        if (lane == 0) test_hook = state->test_browse_hook;
       }
       Result result;
       try {
+        if (test_hook) test_hook(request->stop.get_token());
         if (!store) result.error = open_error;
         else result = request->work(*store, request->stop.get_token());
       } catch (const CollectionCancelled&) { result.cancelled = true; }
@@ -89,6 +93,7 @@ std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::start_analysis(std::filesy
 std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::start_indexed_analysis(std::string key, std::filesystem::path path, std::string engine, std::string configuration, Completion completion) {
   auto epoch = new_session_epoch(); return analyze_indexed(std::move(key), std::move(path), std::move(engine), std::move(configuration), epoch.value_or(0), std::move(completion));
 }
+void LibraryBridge::set_test_browse_hook(std::function<void(std::stop_token)> hook) { std::lock_guard lock(state_->mutex); state_->test_browse_hook = std::move(hook); }
 void LibraryBridge::cancel_browse() { std::lock_guard lock(state_->mutex); state_->cancel_lane(0); }
 void LibraryBridge::cancel_analysis() { std::lock_guard lock(state_->mutex); state_->cancel_lane(1); }
 void LibraryBridge::cancel() { std::lock_guard lock(state_->mutex); state_->cancel_lane(0); state_->cancel_lane(1); }

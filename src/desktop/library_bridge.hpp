@@ -110,5 +110,8 @@ public:
   /** Cancel both lanes. Pending tickets retain cancellation; active tickets retain the actual eventual outcome, including a commit. */
   void cancel();
 private:
+  friend class CollectionViewTest;
+  /** Test-only worker hook, installed before requests, to exercise cooperative browse cancellation. */
+  void set_test_browse_hook(std::function<void(std::stop_token)> hook);
   std::shared_ptr<State> state_;
 };

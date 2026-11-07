@@ -45,6 +45,7 @@ signals:
   /** Page or query status changed on the GUI thread. */
   void changed();
 private:
+  friend class CollectionViewTest;
   using Requests = CollectionRequests<LibraryBridge::Page, LibraryBridge::Result>;
   Requests requests_;
   beatglass::SourceEpochAllocator& epochs_;
