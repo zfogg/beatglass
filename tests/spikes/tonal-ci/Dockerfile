@@ -8,14 +8,15 @@ RUN git clone https://github.com/MTG/essentia.git /opt/essentia && \
 WORKDIR /opt/essentia
 RUN python3 waf configure --lightweight= --fft=KISS --build-static --ignore-algos=Spline,CubicSpline && \
     python3 waf -j4
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cmake && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends cmake libaubio-dev libsndfile1-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /work
 COPY CMakeLists.txt ./
 COPY include ./include
 COPY lib ./lib
+COPY src ./src
 COPY tests ./tests
-RUN cmake -S . -B /tmp/build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_TONAL_SPIKE=ON \
+RUN cmake -S . -B /tmp/build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_TONAL_SPIKE=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_TEST_V1_CODECS=OFF -DBEATGLASS_BUILD_MUSIC_REPLAY=ON \
     -DESSENTIA_INCLUDE_DIR=/opt/essentia/src/essentia \
     -DESSENTIA_LIBRARY=/opt/essentia/build/src/libessentia.a \
     -DCMAKE_CXX_FLAGS=-I/opt/essentia/src && \
-    cmake --build /tmp/build -j4 && ctest --test-dir /tmp/build --output-on-failure
+    cmake --build /tmp/build -j2 && ctest --test-dir /tmp/build --output-on-failure

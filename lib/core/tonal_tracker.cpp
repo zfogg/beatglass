@@ -49,7 +49,7 @@ struct TonalTracker::Impl {
   void analyze(std::uint64_t boundary) {
     double power{};
     for (float sample : frame) power += static_cast<double>(sample) * sample;
-    result = {}; result.observed_through = boundary;
+    result = {}; result.observed_from = boundary - frame_size; result.observed_through = boundary;
     if (power / frame_size < 1e-8f) { history.clear(); return; }
     std::vector<Real> input(frame.begin(), frame.end()), windowed, spec, freq, mag, chroma;
     window->input("frame").set(input); window->output("frame").set(windowed);
@@ -63,6 +63,7 @@ struct TonalTracker::Impl {
         *std::max_element(chroma.begin(), chroma.end()) <= 0) { history.clear(); return; }
     if (history.size() == history_size) history.erase(history.begin());
     history.push_back(chroma);
+    result.key_from = result.observed_from - (history.size() - 1) * hop;
     std::vector<Real> average(chroma.size());
     for (const auto& h : history) for (std::size_t i = 0; i < h.size(); ++i) average[i] += h[i] / history.size();
     std::string key_name, chord_name; Real ks{}, cs{};

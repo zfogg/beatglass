@@ -2,6 +2,7 @@
 #include "beatglass/core/audio.hpp"
 #include "beatglass/core/results.hpp"
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -21,6 +22,17 @@ struct CausalTempoState {
   /** Current signal and acquisition state. */
   TrackingState state{TrackingState::stopped};
 };
+/** Borrowed mono hop, valid only during its synchronous worker callback. */
+struct CausalMonoHop {
+  /** Epoch and first frame of this hop. */
+  std::uint64_t epoch{}, first_frame{};
+  /** Sample rate in frames per second. */
+  std::uint32_t sample_rate{};
+  /** True when downstream evidence must be reset before consuming this hop. */
+  bool reset{};
+  /** Borrowed mono samples; never retain this view. */
+  std::span<const float> samples;
+};
 /** Provisional worker-owned incremental tempo engine shared by file and live callers.
  * The caller serializes access; this class allocates and runs DSP, so it must
  * never run on a capture callback or GUI thread. It consumes borrowed PCM
@@ -33,6 +45,11 @@ struct CausalTempoState {
  */
 class CausalTempoReplay {
 public:
+  /** Called synchronously after each complete mono hop. The block and samples
+   * are borrowed until return; reset marks a new acquisition or resume.
+   * The state is the tempo lifecycle after that hop. The observer is not retained.
+   */
+  using HopObserver = std::function<void(const CausalMonoHop&, TrackingState)>;
   /** Construct an inactive engine; the first valid block starts acquisition. */
   CausalTempoReplay();
   /** Release estimator state after worker calls have stopped. */
@@ -41,11 +58,12 @@ public:
   CausalTempoReplay& operator=(const CausalTempoReplay&) = delete;
   /** Consume one observed block; samples are borrowed for this call only.
    * @param block Nonempty, finite interleaved PCM with a valid epoch and format.
+   * @param observer Optional synchronous worker callback for complete mono hops.
    * @return An owned state; observed and analyzed positions are exclusive.
    * @throws std::exception for malformed PCM, continuity or estimator errors.
    * After any exception the engine is failed and must be discarded.
    */
-  CausalTempoState process(const AudioBlock& block);
+  CausalTempoState process(const AudioBlock& block, const HopObserver& observer = {});
   /** Return the most recent state by value, initially stopped. */
   CausalTempoState state() const noexcept;
 private:

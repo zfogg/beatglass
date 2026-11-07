@@ -8,6 +8,10 @@
 namespace beatglass::detail {
 /** Provisional worker-local tonal estimate; strengths are not probabilities. */
 struct TonalEstimate {
+  /** First frame contributing to the current key estimate. */
+  std::uint64_t key_from{};
+  /** First frame in the most recent chord analysis window. */
+  std::uint64_t observed_from{};
   /** End of observed PCM, exclusive; values use frames in the current epoch. */
   std::uint64_t observed_through{};
   /** Track key from recent HPCP evidence, or absent when unknown. */

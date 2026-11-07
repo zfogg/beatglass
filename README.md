@@ -66,3 +66,9 @@ File replay uses the proposed worker-owned `CausalTempoReplay` block interface. 
 The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
 
 The experimental worker-only aubio beat tracker is not connected to the CLI or snapshots; see [progress](docs/progress.md) for its timing and qualification limits.
+
+## Experimental combined file and block replay
+
+With `BEATGLASS_BUILD_SLICE=ON`, `BEATGLASS_BUILD_TONAL_SPIKE=ON`, and `BEATGLASS_BUILD_MUSIC_REPLAY=ON`, the optional `beatglass-music-cli <file>` emits JSON Lines from actual aubio and Essentia analysis. `beat` records carry a source epoch, event frame and exclusive observed boundary. `tonal` records carry a half-open chord-analysis window, an optional earlier `key_from` boundary for the rolling key evidence, and key/chord labels or null. These overlapping windows are not chord segments and strengths are uncalibrated. The final `result` records tempo, latest tonal labels and observed/analyzed boundaries; a failure can leave a partial stream and exits nonzero. The source file is not modified. This is a fast, causal replay without playback pacing, a calibrated model or release qualification.
+
+The same `CausalMusicReplay` consumes worker-delivered live `AudioBlock`s; its explicit interruption operation clears internal evidence and requires a fresh coordinator-issued epoch. The caller must also deliver revisioned clears to UI consumers. No capture backend, library snapshot, or desktop presentation is connected by this experiment. Generated synthetic tests do not establish real-music accuracy, latency, platform support, or legal clearance for distributing Essentia.
