@@ -1,5 +1,5 @@
 Beatglass API reference
-================
+=======================
 
 These interfaces describe the current foundation and are provisional. Headers
 under ``include/beatglass`` are library interfaces, not a promise of an
