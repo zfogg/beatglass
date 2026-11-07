@@ -13,6 +13,9 @@ ApplicationWindow {
     minimumWidth: 600; minimumHeight: 440
     title: "Beatglass"
     property var metadataBridge: metadata
+    property var playbackGuardBridge: playbackGuard
+    readonly property var playbackDevice: playbackOutputSelector.currentIndex >= 0 && playbackOutputSelector.currentIndex < playbackDevices.audioOutputs.length ? playbackDevices.audioOutputs[playbackOutputSelector.currentIndex] : playbackDevices.defaultAudioOutput
+    readonly property string playbackWarning: playbackGuardBridge.diagnostic(playbackDevice)
     property var liveBridge: livePresentation
     property url browseFolder: ""
     property bool sortDescending: false
@@ -48,10 +51,24 @@ ApplicationWindow {
         sortField: FolderListModel.Name
         sortReversed: window.sortDescending
     }
+    MediaDevices {
+        id: playbackDevices
+        onAudioOutputsChanged: {
+            player.stop()
+            window.selectDefaultPlaybackOutput()
+        }
+    }
+    function selectDefaultPlaybackOutput() {
+        playbackOutputSelector.currentIndex = -1
+        for (let i = 0; i < playbackDevices.audioOutputs.length; ++i) {
+            if (playbackDevices.audioOutputs[i].isDefault) { playbackOutputSelector.currentIndex = i; break }
+        }
+    }
+    Component.onCompleted: selectDefaultPlaybackOutput()
     MediaPlayer {
         id: player
         objectName: "player"
-        audioOutput: AudioOutput {}
+        audioOutput: AudioOutput { device: window.playbackDevice }
     }
     header: ToolBar {
         RowLayout {
@@ -146,9 +163,27 @@ ApplicationWindow {
                         Label { text: window.selectedName || "No file selected"; font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true }
                         Label { objectName: "metadataStatus"; text: window.metadataStatus; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         RowLayout {
+                            Label { text: "Playback output" }
+                            ComboBox {
+                                id: playbackOutputSelector
+                                objectName: "playbackOutputSelector"
+                                model: playbackDevices.audioOutputs
+                                textRole: "description"
+                                Layout.fillWidth: true
+                                Accessible.name: "Playback output"
+                                onActivated: player.stop()
+                            }
+                        }
+                        Label {
+                            objectName: "playbackDeviceWarning"
+                            text: window.playbackWarning
+                            visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        RowLayout {
                             Button {
+                                objectName: "playButton"
                                 text: player.playbackState === MediaPlayer.PlayingState ? "Pause" : "Play"
-                                enabled: player.source.toString() !== "" && player.error === MediaPlayer.NoError
+                                enabled: player.source.toString() !== "" && player.error === MediaPlayer.NoError && window.playbackWarning === ""
                                 onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play()
                             }
                             Button { text: "Stop"; enabled: player.playbackState !== MediaPlayer.StoppedState; onClicked: player.stop() }

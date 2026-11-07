@@ -14,7 +14,8 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
+    QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
+    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard } }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)
@@ -68,6 +69,10 @@ TestCase {
         compare(app.selectedName, "tone.flac")
         verify(fakeMetadata.lastFile.toString().endsWith("/tone.flac"))
         compare(app.formatTime(123400), "2:03.4")
+        fakeGuard.warning = "Unsupported output"
+        compare(findChild(app, "playbackDeviceWarning").text, "Unsupported output")
+        verify(!findChild(app, "playButton").enabled)
+        fakeGuard.warning = ""
         let player = findChild(app, "player")
         compare(player.playbackState, MediaPlayer.StoppedState)
         tryVerify(() => player.duration >= 200, 10000)
