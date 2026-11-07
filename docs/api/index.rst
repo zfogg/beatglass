@@ -4,7 +4,9 @@ Beatglass API reference
 These interfaces describe the current foundation and are provisional. Headers
 under ``include/beatglass`` are library interfaces, not a promise of an
 installed or stable public API. ``src/desktop/metadata.hpp`` is application
-private. Callers must respect each interface's ownership and threading rules.
+private. Production headers under ``lib/`` are likewise private and must be
+indexed here when introduced; documenting them does not install them or make
+them public. Callers must respect each interface's ownership and threading rules.
 The implementation and the issue's remaining product gates take precedence over
 aspirational behavior; see the repository README and progress notes.
 
@@ -26,6 +28,10 @@ AudioSource stop
 Analysis
 --------
 
+Snapshot timelines use an exclusive observed-frame boundary. Beats precede
+that boundary, and chord segments are nonempty half-open intervals whose end
+may equal it. Producers using the former inclusive boundary must adjust.
+
 .. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
 
 Library jobs
@@ -36,4 +42,4 @@ Library jobs
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp

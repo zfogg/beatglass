@@ -37,7 +37,7 @@ On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink disc
 
 ## API documentation
 
-The provisional library and application-private C++ interfaces are documented with Hawkmoth and Sphinx. Build the same Linux container used by CI from the repository root (Docker required):
+The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
 
 ```sh
 docker build -f docs/api/Dockerfile -t beatglass-docs .
@@ -49,7 +49,7 @@ Open `build/docs/html/index.html`. On Windows PowerShell, use `${PWD}` in the vo
 
 `vcpkg.json` pins the registry baseline and requests aubio without its tool dependencies and libsndfile with FLAC/Vorbis/Opus and MPEG features. Set `VCPKG_ROOT` to a vcpkg checkout containing the baseline, then run `cmake --preset vcpkg-core`, `cmake --build --preset vcpkg-core`, and `ctest --preset vcpkg-core`. The optional `vcpkg-desktop` preset enables the manifest's Qt feature. These presets are not yet verified across all platforms or configurations and do not establish a release distribution or codec coverage. Codec integration tests are enabled by default; set `-DBEATGLASS_TEST_V1_CODECS=OFF` only for a development system whose libsndfile lacks those codecs, and do not count that as format qualification. The CLI also accepts `--replay <file>` to print incremental estimates after observed blocks, without real-time pacing. See [contracts and handoff](docs/contracts.md).
 
-The [Phase 0 gate audit](docs/phase0-gate.md) lists remaining prerequisites and proposed module ownership. The gate is closed; the current experimental shell is not the full application.
+The [Phase 0 gate audit](docs/phase0-gate.md) records the coordinator's acceptance for starting Phase 1 and remaining gaps. The current experimental shell is not the full application.
 
 ## Qt 6.8.3 prebuilt desktop preset
 
