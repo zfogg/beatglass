@@ -293,3 +293,36 @@ Composite live analysis and its GUI bridge do not use this token yet and remain
 outside this change. Device-loss notification is invalidated before the native
 interruption event is published. Fake event and pending-delivery regressions do
 not establish physical device behavior or GUI scheduling.
+
+
+### Windows tray and hidden-window qualification plan
+
+The shared desktop owner is implementing tray and single-instance behavior;
+this plan does not claim that implementation or its native validation is
+complete. Record the build commit, Windows version, Qt version, display scaling,
+notification-area configuration, audio source, observed behavior and evidence
+for each native scenario. Do not run interactive scenarios while another user
+or task controls the desktop.
+
+- Start monitoring real output and play audio. Activate the overlay and verify
+  that the main window and its taskbar entry disappear, the overlay remains
+  visible over another application, and playback and monitoring continue.
+- Use the notification-area icon to show the existing controls, unlock or edit
+  the overlay, hide it, and quit. Verify that controls do not create another
+  monitoring session and that Quit shuts down the existing process.
+- While the main window is hidden, launch the application again. Verify that
+  the original window returns, the original process and playback continue, and
+  no competing instance or second capture session remains. Exercise near-
+  simultaneous launches and a relaunch during startup as well.
+- Test no notification-area service at startup and loss or restart of the
+  Windows shell while hidden. A missing or unusable recovery route must leave
+  or restore a discoverable main window and taskbar entry. Check that icon
+  overflow, shell restart, session lock/unlock and display changes do not strand
+  the application. Availability probes alone do not establish icon usability.
+- Verify overlay interaction and recovery across 100% and 150% scaling in both
+  directions, monitor removal and return, and exclusive fullscreen. Record
+  compositor or application limitations rather than assuming topmost display.
+
+Unit tests should inject tray availability and its loss, commands, and the
+single-instance transport so fallback and relaunch races can be checked without
+a desktop. Those tests and hosted CI do not replace the native scenarios above.
