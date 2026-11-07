@@ -146,6 +146,12 @@ The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
 
+# Cache contract integration
+
+Typed cache outcomes and a worker-local commit decision have regression
+coverage. SQLite, file-version revalidation, crash recovery and unchanged-file
+reuse acceptance tests remain backend work.
+
 # Shared timeline contract
 
 The snapshot publisher enforces exclusive observed-frame and nonempty

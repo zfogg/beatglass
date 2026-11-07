@@ -66,6 +66,14 @@ gaps and delivery loss fail closed. The process coordinator owns epoch
 allocation, while optional anchors expose clock domain and known uncertainty
 and latency. Existing adapters must migrate; no platform backend is provided.
 
+# Phase 1 cache contract proposal
+
+Lookup and publication report typed outcomes. The database worker decides
+cancellation before starting commit; after that point it resolves commit or
+error and must recover indeterminate outcomes by run ID. This is an interface
+proposal, not a claim that database transactions or filesystem identity races
+have been implemented or qualified.
+
 # Phase 1 snapshot boundary
 
 Snapshot publication uses exclusive `observed_through` frame boundaries and
