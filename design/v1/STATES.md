@@ -15,3 +15,9 @@
 
 Additional implementation states to exercise: empty search; no selected track; unsupported/corrupt/inaccessible/moved files; partial/cancelled/failed analysis; unavailable playback device; silence, ambiguous mixed tracks, capture permission revoked, default-device switch and discontinuity; overlay hidden, unlocked, off-screen, monitor removed and compositor refusal. These are specified here but are not all separately rendered. Remove entry must explicitly say the audio file is retained. No fabricated confidence percentages or deck separation.
 
+
+## Hidden-window and recovery transition
+
+1. Show overlay → monitoring continues and main window hides. Provide a Windows/Linux tray icon or macOS menu-bar icon; omit the main window from the taskbar while hidden where supported.
+2. Tray/menu-bar actions restore controls, unlock/edit or hide the overlay, and quit. A second launch restores the existing window. No restore control is required on the overlay itself.
+3. If the platform cannot expose the icon, retain a visible window or taskbar recovery route and explain why. Test icon disappearance, process relaunch, permission loss, display changes, shutdown and compositor refusal on actual platforms.
