@@ -3,25 +3,30 @@
 #include <QGuiApplication>
 #include <QQuickWindow>
 #include <QScreen>
+#include <QTimer>
 #include <algorithm>
 #include <cmath>
 
 namespace beatglass::windows {
 OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QObject* parent)
     : QObject(parent), overlay_(overlay), control_(control) {
-  if (overlay_) { overlay_->setColor(Qt::transparent); applyFlags(); }
+  if (overlay_) {
+    overlay_->setColor(Qt::transparent);
+    connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; click_through_ = false; });
+    applyFlags();
+  }
   if (control_) {
     control_->installEventFilter(this);
     connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; setClickThrough(false); });
   }
-  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { keepOnScreen(); });
+  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); }); });
 }
-OverlayController::~OverlayController() { if (control_) control_->removeEventFilter(this); }
+OverlayController::~OverlayController() { setClickThrough(false); if (control_) control_->removeEventFilter(this); }
 void OverlayController::setOpacity(qreal opacity) {
   if (overlay_ && std::isfinite(opacity)) overlay_->setOpacity(std::clamp(opacity, qreal(0), qreal(1)));
 }
 bool OverlayController::setClickThrough(bool enabled) {
-  if (enabled && (!overlay_ || !control_ || !control_->isVisible())) return false;
+  if (enabled && (!overlay_ || !control_ || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) return false;
   click_through_ = enabled;
   applyFlags();
   return true;
@@ -36,7 +41,8 @@ void OverlayController::applyFlags() {
   if (visible && !overlay_->isVisible()) overlay_->show();
 }
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
-  if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close)) setClickThrough(false);
+  if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
+      (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) setClickThrough(false);
   return QObject::eventFilter(watched, event);
 }
 void OverlayController::keepOnScreen() {

@@ -92,6 +92,11 @@ if(BUILD_TESTING)
       target_link_libraries(windows_overlay_tests PRIVATE beatglass_windows_overlay Qt6::Test)
       add_test(NAME windows_overlay COMMAND windows_overlay_tests)
       set_tests_properties(windows_overlay PROPERTIES LABELS "unit;platform" TIMEOUT 30)
+      if(TARGET Qt6::QWindowsIntegrationPlugin)
+        add_custom_command(TARGET windows_overlay_tests POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:windows_overlay_tests>/platforms
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt6::QWindowsIntegrationPlugin> $<TARGET_FILE_DIR:windows_overlay_tests>/platforms)
+      endif()
       add_custom_command(TARGET windows_overlay_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:windows_overlay_tests> $<TARGET_FILE_DIR:windows_overlay_tests> COMMAND_EXPAND_LISTS)
       add_custom_command(TARGET metadata_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:metadata_tests> $<TARGET_FILE_DIR:metadata_tests> COMMAND_EXPAND_LISTS)
     endif()
