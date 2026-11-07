@@ -7,6 +7,11 @@
 #include "beatglass/library/detail/tempo_analysis_store.hpp"
 #ifndef _WIN32
 #include <sndfile.h>
+#ifdef __linux__
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 #endif
 #include <future>
 #include <chrono>
@@ -258,4 +263,37 @@ TEST_CASE("shared store preserves cache when real snapshot verification is cance
   REQUIRE(cancelled.outcome == beatglass::PublishOutcome::cancelled);
   auto old = store.find(version, first.value->identity, {}); REQUIRE(old.outcome == beatglass::FindOutcome::hit); REQUIRE(old.result);
   REQUIRE(old.result->result.bpm == first.value->result.bpm);
+}
+
+#ifdef __linux__
+TEST_CASE("snapshot tampering before verification cannot replace the active result") {
+  TempDirectory temp; auto input = temp.path / "audio";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
+  auto snapshot = SnapshotOpen::create(input); INFO(snapshot.diagnostic); REQUIRE(snapshot.status == SnapshotStatus::ok);
+  SqliteCache cache((temp.path / "library.sqlite").string()); CacheKey key{snapshot.value->digest(), "engine", "config", "offline"};
+  cache.begin("old", key); REQUIRE(cache.publish("old", key, "old-result", {}, [] { return true; }) == Publish::committed);
+  const int fd = snapshot.value->borrowed_descriptor(); REQUIRE(::fchmod(fd, S_IRUSR | S_IWUSR) == 0);
+  const auto proc = std::string("/proc/self/fd/") + std::to_string(fd); const int writer = ::open(proc.c_str(), O_WRONLY | O_CLOEXEC); REQUIRE(writer >= 0);
+  REQUIRE(::pwrite(writer, "z", 1, 0) == 1); REQUIRE(::close(writer) == 0);
+  cache.begin("new", key);
+  REQUIRE(cache.publish("new", key, "bad", {}, [&] { return snapshot.value->verify() == SnapshotStatus::ok; }) == Publish::stale_input);
+  std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "old-result");
+}
+#endif
+
+TEST_CASE("shared replay version invalidates earlier snapshot cache") {
+  TempDirectory temp; auto input = temp.path / "audio";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
+  auto snapshot = SnapshotOpen::create(input); REQUIRE(snapshot.status == SnapshotStatus::ok);
+  auto modified = snapshot.value->modified_unix_ns(); REQUIRE(modified);
+  beatglass::FileVersion file{std::filesystem::absolute(input), snapshot.value->size(), *modified, snapshot.value->digest()};
+  TempoAnalysisStore store((temp.path / "library.sqlite").string());
+  beatglass::CachedAnalysis old; old.identity = {snapshot.value->digest(), "engine-old", "config", "offline"};
+  old.result.estimator_version = "engine-old"; old.result.configuration_id = "config";
+  class Match final : public beatglass::FileVersionVerifier { public: beatglass::FileVerificationResult verify(std::stop_token) override { return {beatglass::FileVerificationOutcome::match, {}}; } } match;
+  REQUIRE(store.publish(file, old, "legacy", match, {}).outcome == beatglass::PublishOutcome::committed);
+  int blocks = 0; auto newer = analyze_snapshot_to_store(store, input, "engine-old", "config", 220, {}, [&](auto) { ++blocks; });
+  INFO(newer.diagnostic); REQUIRE(newer.status == FileJobStatus::committed); REQUIRE(newer.value); REQUIRE(blocks > 0);
+  REQUIRE(newer.value->identity.engine_version == "engine-old/causal-tempo-v1");
+  REQUIRE(store.find(file, old.identity, {}).outcome == beatglass::FindOutcome::hit);
 }

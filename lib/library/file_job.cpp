@@ -3,13 +3,8 @@
 #include "beatglass/library/detail/file_snapshot.hpp"
 #include "beatglass/library/detail/snapshot_store_job.hpp"
 #include "beatglass/capture/byte_source.hpp"
-#include "beatglass/core/tempo_tracker.hpp"
-#include "beatglass/core/channel_reduction.hpp"
-#include "beatglass/core/stream_continuity.hpp"
-#include "beatglass/core/tracking_machine.hpp"
+#include "beatglass/core/causal_replay.hpp"
 #include "../capture/file/virtual_io.hpp"
-#include <algorithm>
-#include <cmath>
 #include <chrono>
 #include <vector>
 #include <atomic>
@@ -21,6 +16,8 @@
 namespace beatglass::library_detail {
 namespace {
 struct Cancelled {};
+// Changes to the shared replay's output semantics require a new suffix.
+std::string replay_version(const std::string& engine) { return engine + "/causal-tempo-v1"; }
 std::int64_t publication_time() { return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count(); }
 std::string run_id() {
   static std::atomic<unsigned long long> counter{0};
@@ -53,7 +50,7 @@ FileJobResult analyze_cached_tempo(SqliteCache& cache, const std::filesystem::pa
     if (before.status == FingerprintStatus::cancelled) return {FileJobStatus::cancelled, {}, {}};
     if (before.status == FingerprintStatus::changed) return {FileJobStatus::stale_input, {}, {}};
     if (before.status != FingerprintStatus::ok) return {FileJobStatus::error, {}, before.diagnostic};
-    CacheKey key{before.digest, engine, config, "offline"}; std::string blob;
+    CacheKey key{before.digest, replay_version(engine), config, "offline"}; std::string blob;
     if (stop.stop_requested()) return {FileJobStatus::cancelled, {}, {}};
     if (cache.find(key, blob)) return {FileJobStatus::cache_hit, decode(blob), {}};
     const auto id = run_id(); cache.begin(id, key);
@@ -98,37 +95,19 @@ public:
 private:
   FileSnapshot& snapshot_;
 };
-// Temporary integration adapter. DSP should own a shared replay pipeline once
-// its virtual reader interface is accepted; this mirrors the current tempo slice.
+// The decoder stays borrowed from the snapshot; DSP owns the shared replay policy.
 TempoResult replay_snapshot(ByteSource& source, std::uint64_t epoch, std::stop_token stop, const std::function<void(std::uint64_t)>& progress) {
   detail::VirtualFileReader file(source, epoch, stop); constexpr std::size_t hop = 512;
-  const auto metadata = file.metadata(); TempoTracker tracker(metadata.sample_rate);
-  std::uint64_t position = 0, silent_frames = 0; StreamContinuity continuity; TrackingMachine lifecycle;
-  if (!lifecycle.start(epoch)) throw std::runtime_error("Could not start tracking");
-  std::vector<float> pcm(hop * metadata.channels), mono(hop); TempoResult result{metadata, std::nullopt, 0};
+  const auto metadata = file.metadata(); CausalTempoReplay replay;
+  std::vector<float> pcm(hop * metadata.channels); TempoResult result{metadata, std::nullopt, 0};
   for (;;) {
     auto read = file.read(pcm, stop);
     if (read.status == FileReadStatus::cancelled) throw Cancelled{};
     if (read.status == FileReadStatus::end) break;
-    const auto& block = read.block; auto n = block.samples.size() / metadata.channels;
-    auto transition = continuity.observe(block);
-    if (transition == StreamTransition::invalid) throw std::runtime_error("Invalid decoded audio block");
-    mono.resize(n);
-    if (!reduce_loudest_channel(block.samples, metadata.channels, mono)) throw std::runtime_error("Audio contains invalid samples");
-    bool active = std::any_of(mono.begin(), mono.end(), [](float sample) { return std::abs(sample) >= 0.0001f; });
-    bool reset = transition == StreamTransition::reacquire;
-    if (reset) lifecycle.discontinuity(block.epoch);
-    if (active) { silent_frames = 0; lifecycle.signal(); }
-    else {
-      silent_frames = (std::min)(static_cast<std::uint64_t>(metadata.sample_rate), silent_frames + mono.size());
-      if (silent_frames >= metadata.sample_rate && lifecycle.state() != TrackingState::silent) { lifecycle.silence(); reset = true; }
-    }
-    tracker.process(mono, block.epoch, position, reset); position += mono.size();
-    auto current = tracker.estimate();
-    if (current.bpm && lifecycle.state() != TrackingState::silent) lifecycle.accept(lifecycle.token());
-    result.state = lifecycle.state(); result.beats = static_cast<unsigned>(current.beats);
-    result.bpm = result.state == TrackingState::tracking ? current.bpm : std::nullopt;
-    if (progress) progress(position);
+    auto state = replay.process(read.block);
+    if (state.beats > std::numeric_limits<unsigned>::max()) throw std::overflow_error("Beat count overflow");
+    result.state = state.state; result.beats = static_cast<unsigned>(state.beats); result.bpm = state.bpm;
+    if (progress) progress(state.observed_through);
     if (stop.stop_requested()) throw Cancelled{};
   }
   return result;
@@ -147,7 +126,7 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
     auto opened = SnapshotOpen::create(path, stop);
     if (opened.status == SnapshotStatus::error) return {FileJobStatus::error, {}, opened.diagnostic};
     if (opened.status != SnapshotStatus::ok) return verification_failure(opened.status);
-    CacheKey key{opened.value->digest(), engine, config, "offline"}; std::string blob;
+    CacheKey key{opened.value->digest(), replay_version(engine), config, "offline"}; std::string blob;
     if (stop.stop_requested()) return {FileJobStatus::cancelled, {}, {}};
     if (cache.find(key, blob)) {
       auto verified = opened.value->verify(stop);
@@ -181,7 +160,7 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
     auto modified = opened.value->modified_unix_ns();
     if (!modified) return {FileJobStatus::stale_input, {}, "original modification time cannot be represented", {}};
     FileVersion file{std::filesystem::absolute(path), opened.value->size(), *modified, opened.value->digest()};
-    AnalysisIdentity identity{opened.value->digest(), engine, config, "offline"};
+    AnalysisIdentity identity{opened.value->digest(), replay_version(engine), config, "offline"};
     auto found = store.find(file, identity, stop);
     if (found.outcome == FindOutcome::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
     if (found.outcome == FindOutcome::error) return {FileJobStatus::error, {}, found.diagnostic, {}};
@@ -201,7 +180,7 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
     SnapshotSource source(*opened.value); std::uint64_t observed = 0;
     auto tempo = replay_snapshot(source, epoch, stop, [&](auto frames) { observed = frames; if (progress) progress(frames); });
     CachedAnalysis value; value.identity = identity; value.result.state = tempo.state; value.result.bpm = tempo.bpm;
-    value.result.observed_through = {epoch, observed}; value.result.publication_monotonic_ns = publication_time(); value.result.estimator_version = engine; value.result.configuration_id = config;
+    value.result.observed_through = {epoch, observed}; value.result.publication_monotonic_ns = publication_time(); value.result.estimator_version = identity.engine_version; value.result.configuration_id = config;
     class Verifier final : public FileVersionVerifier {
     public:
       explicit Verifier(FileSnapshot& source) : source_(source) {}

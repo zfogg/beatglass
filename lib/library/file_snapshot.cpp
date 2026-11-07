@@ -88,6 +88,7 @@ const std::string& FileSnapshot::digest() const noexcept { return impl_->digest;
 SnapshotStatus FileSnapshot::verify(std::stop_token stop, const std::function<void(std::uintmax_t)>& progress) const {
   try {
     if (stop.stop_requested()) return SnapshotStatus::cancelled;
+    if (hash_fd(impl_->snapshot.value, stop) != impl_->digest) return SnapshotStatus::unverifiable;
     struct stat before{}, after{}, path_stat{};
     if (::fstat(impl_->original.value, &before) != 0) return SnapshotStatus::error;
     if (!same(before, impl_->evidence)) return SnapshotStatus::stale_input;
@@ -219,6 +220,7 @@ const std::string& FileSnapshot::digest() const noexcept { return impl_->digest;
 SnapshotStatus FileSnapshot::verify(std::stop_token stop, const std::function<void(std::uintmax_t)>& progress) const {
   try {
     if (stop.stop_requested()) return SnapshotStatus::cancelled;
+    if (hash_handle(impl_->snapshot.value, stop) != impl_->digest) return SnapshotStatus::unverifiable;
     auto before = evidence(impl_->original.value); if (!same(before, impl_->evidence)) return SnapshotStatus::stale_input;
     auto digest = hash_handle(impl_->original.value, stop, INVALID_HANDLE_VALUE, progress); auto after = evidence(impl_->original.value);
     WinHandle named; named.value = CreateFileW(impl_->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);

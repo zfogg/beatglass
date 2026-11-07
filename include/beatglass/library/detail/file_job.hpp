@@ -23,11 +23,11 @@ struct FileJobResult {
   /** Diagnostic for error outcomes. */ std::string diagnostic;
   /** Run ID and key for storage-error reconciliation, when publication was attempted. */ std::optional<std::pair<std::string, CacheKey>> recovery;
 };
-/** Analyze or reuse a file's provisional tempo result on the calling database worker. Hashes the whole file before lookup and after analysis; progress reports decoded frames synchronously. Cancellation is cooperative between decoded blocks and hash chunks, not during blocking I/O. The decoder separately opens the path, so replacement/ABA races remain; this is not yet suitable for product publication. The source file is never written. */
+/** Analyze or reuse a file's provisional tempo result on the calling database worker. Adds a causal-tempo algorithm version to the engine cache key and hashes the whole file before lookup and after analysis; progress reports decoded frames synchronously. Cancellation is cooperative between decoded blocks and hash chunks, not during blocking I/O. The decoder separately opens the path, so replacement/ABA races remain; this is not yet suitable for product publication. The source file is never written. */
 FileJobResult analyze_cached_tempo(SqliteCache& cache, const std::filesystem::path& path,
   const std::string& engine_version, const std::string& configuration_id,
   std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});
-/** Experimental snapshot-backed tempo job on the database worker. The same finalized snapshot supplies hash identity and virtual decoder bytes; original and path are revalidated before a hit or commit. The snapshot and decoder contracts are provisional; platform races remain and this path is not a product API. Cancellation is cooperative, and progress reports complete decoded frames. */
+/** Experimental snapshot-backed tempo job on the database worker. Adds a causal-tempo algorithm version to the engine cache key. The same finalized snapshot supplies hash identity and virtual decoder bytes; original and path are revalidated before a hit or commit. The snapshot and decoder contracts are provisional; platform races remain and this path is not a product API. Cancellation is cooperative, and progress reports complete decoded frames. */
 FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::path& path,
   const std::string& engine_version, const std::string& configuration_id,
   std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});

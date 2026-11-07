@@ -178,3 +178,16 @@ TEST_CASE("snapshot verification observes cancellation between hash chunks") {
   REQUIRE(callbacks == 1); REQUIRE(result == SnapshotStatus::cancelled);
   REQUIRE(opened.value->verify() == SnapshotStatus::ok);
 }
+
+#ifdef __linux__
+TEST_CASE("snapshot verification rejects altered snapshot bytes") {
+  TempDir temp; auto file = temp.path / "source"; write(file, "abc");
+  auto snapshot = SnapshotOpen::create(file); INFO(snapshot.diagnostic); REQUIRE(snapshot.status == SnapshotStatus::ok);
+  const int descriptor = snapshot.value->borrowed_descriptor();
+  REQUIRE(::fchmod(descriptor, S_IRUSR | S_IWUSR) == 0);
+  auto proc = std::string("/proc/self/fd/") + std::to_string(descriptor);
+  const int writer = ::open(proc.c_str(), O_WRONLY | O_CLOEXEC); REQUIRE(writer >= 0);
+  REQUIRE(::pwrite(writer, "z", 1, 0) == 1); REQUIRE(::close(writer) == 0);
+  REQUIRE(snapshot.value->verify() == SnapshotStatus::unverifiable);
+}
+#endif
