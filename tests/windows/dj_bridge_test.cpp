@@ -5,6 +5,7 @@
 #include <chrono>
 #include <utility>
 #include <stdexcept>
+#include <limits>
 #include <cmath>
 #include <vector>
 #ifndef NOMINMAX
@@ -17,7 +18,8 @@ class DjBridgeTest : public QObject {
   Q_OBJECT
 private slots:
   void stopStartCannotSkipClear() {
-    beatglass::windows::DjBridge bridge(nullptr, [] { return beatglass::windows::EndpointResult{}; });
+    beatglass::SourceEpochAllocator epochs;
+    beatglass::windows::DjBridge bridge(epochs, nullptr, [] { return beatglass::windows::EndpointResult{}; });
     QSignalSpy updates(&bridge, &beatglass::windows::DjBridge::presentationUpdate);
     beatglass::PresentationGate gate;
     bool deliveredOnOwner = true;
@@ -45,17 +47,19 @@ private slots:
     QVERIFY(!bridge.active());
   }
   void discoveryErrorIsDelivered() {
-    beatglass::windows::DjBridge bridge(nullptr, [] { return beatglass::windows::EndpointResult{{}, "enumeration failed"}; });
+    beatglass::SourceEpochAllocator epochs;
+    beatglass::windows::DjBridge bridge(epochs, nullptr, [] { return beatglass::windows::EndpointResult{{}, "enumeration failed"}; });
     bridge.start();
     QTRY_COMPARE(bridge.status(), QStringLiteral("enumeration failed"));
     bridge.stop();
   }
   void destructionJoinsBlockedDiscovery() {
+    beatglass::SourceEpochAllocator epochs;
     std::mutex mutex;
     std::condition_variable wake;
     bool release = false;
     std::atomic<bool> entered{false};
-    auto bridge = std::make_unique<beatglass::windows::DjBridge>(nullptr, [&] {
+    auto bridge = std::make_unique<beatglass::windows::DjBridge>(epochs, nullptr, [&] {
       std::unique_lock lock(mutex);
       entered.store(true);
       wake.wait(lock, [&] { return release; });
@@ -72,8 +76,62 @@ private slots:
     unblock.join();
     QVERIFY(entered.load());
   }
+  void concurrentOfflineIssuanceAndLiveShutdown() {
+    if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_DJ_TEST")) QSKIP("Set BEATGLASS_NATIVE_DJ_TEST to exercise a real default output");
+    const auto endpoints = beatglass::windows::enumerate_render_endpoints();
+    QVERIFY(endpoints.error.empty());
+    bool haveDefault = false;
+    for (const auto& endpoint : endpoints.endpoints) haveDefault = haveDefault || endpoint.is_default;
+    if (!haveDefault) QSKIP("No default render endpoint");
+    beatglass::SourceEpochAllocator epochs;
+    std::atomic<bool> issued{false};
+    std::vector<std::uint64_t> offline;
+    std::jthread offlineWorker([&](std::stop_token stop) {
+      while (!stop.stop_requested()) {
+        auto token = epochs.next();
+        if (!token) break;
+        offline.push_back(*token);
+        issued.store(true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      }
+    });
+    QTRY_VERIFY(issued.load());
+    {
+      beatglass::windows::DjBridge bridge(epochs);
+      bridge.start();
+      QTRY_COMPARE_WITH_TIMEOUT(bridge.status(), QStringLiteral("Monitoring default output"), 5000);
+    }
+    QTest::qWait(30);
+    offlineWorker.request_stop();
+    offlineWorker.join();
+    QVERIFY(offline.size() > 2);
+    bool gap = false;
+    for (std::size_t i = 1; i < offline.size(); ++i) {
+      QVERIFY(offline[i] > offline[i - 1]);
+      gap = gap || offline[i] > offline[i - 1] + 1;
+    }
+    QVERIFY2(gap, "Live startup must consume an epoch from the same allocator while the offline worker is issuing");
+    QVERIFY(epochs.next().value() > offline.back());
+  }
+  void exhaustedSharedAllocatorCannotStartCapture() {
+    if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_DJ_TEST")) QSKIP("Set BEATGLASS_NATIVE_DJ_TEST to exercise a real default output");
+    const auto endpoints = beatglass::windows::enumerate_render_endpoints();
+    QVERIFY(endpoints.error.empty());
+    bool haveDefault = false;
+    for (const auto& endpoint : endpoints.endpoints) haveDefault = haveDefault || endpoint.is_default;
+    if (!haveDefault) QSKIP("No default render endpoint");
+    beatglass::SourceEpochAllocator epochs(std::numeric_limits<std::uint64_t>::max());
+    beatglass::windows::DjBridge bridge(epochs);
+    QSignalSpy updates(&bridge, &beatglass::windows::DjBridge::presentationUpdate);
+    bridge.start();
+    QTRY_COMPARE_WITH_TIMEOUT(bridge.status(), QStringLiteral("Capture start failed"), 5000);
+    for (const auto& delivery : updates) QVERIFY(!qvariant_cast<beatglass::PresentationUpdate>(delivery.at(0)).snapshot);
+    QVERIFY(!epochs.next());
+    bridge.stop();
+  }
   void fatalFailureRemainsVisibleUntilStop() {
-    beatglass::windows::DjBridge bridge(nullptr, []() -> beatglass::windows::EndpointResult { throw std::runtime_error("failure"); });
+    beatglass::SourceEpochAllocator epochs;
+    beatglass::windows::DjBridge bridge(epochs, nullptr, []() -> beatglass::windows::EndpointResult { throw std::runtime_error("failure"); });
     bridge.start();
     QTRY_COMPARE(bridge.status(), QStringLiteral("Capture or presentation error"));
     QVERIFY(!bridge.active());
@@ -89,7 +147,8 @@ private slots:
     bool haveDefault = false;
     for (const auto& endpoint : endpoints.endpoints) haveDefault = haveDefault || endpoint.is_default;
     if (!haveDefault) QSKIP("No default render endpoint");
-    beatglass::windows::DjBridge bridge;
+    beatglass::SourceEpochAllocator epochs;
+    beatglass::windows::DjBridge bridge(epochs);
     beatglass::PresentationGate gate;
     connect(&bridge, &beatglass::windows::DjBridge::presentationUpdate, &bridge,
             [&](beatglass::PresentationUpdate update) { gate.apply(std::move(update)); });

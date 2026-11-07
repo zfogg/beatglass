@@ -27,6 +27,18 @@ uniqueness does not order independent publications or make an old result
 current: the existing generation, revision and invalidation gates remain
 necessary. Concurrent tests must cover uniqueness, exhaustion and teardown.
 
+The isolated Windows integration draft based on allocator PR #63 prepares the
+worker-side alternative: the GUI application constructs one allocator before
+the bridge, passes it by reference, and destroys the bridge and joins its worker
+before the allocator is destroyed. The worker's existing serialized follower
+uses that reference for every live restart; no capture callback issues tokens.
+An opt-in Windows test concurrently issues tokens from a simulated offline
+worker during real loopback startup and bridge destruction; another seeds the
+allocator at exhaustion and verifies no live snapshot is delivered. These do
+not establish that an actual offline product path has adopted the allocator.
+The implementation depends on review and integration of #63 and the offline
+seek contract; it must not be advertised as complete process-wide uniqueness yet.
+
 The file reader currently increments its own epoch on seek; merely injecting a
 shared initial value does not prevent it colliding with an epoch issued to
 another source. Its seek contract must be changed to receive a fresh allocated

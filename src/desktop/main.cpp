@@ -14,7 +14,8 @@
 int main(int argc, char** argv) {
   QGuiApplication app(argc, argv); Metadata metadata; LivePresentation livePresentation;
 #ifdef Q_OS_WIN
-  beatglass::windows::DjBridge djBridge;
+  beatglass::SourceEpochAllocator sourceEpochs;
+  beatglass::windows::DjBridge djBridge(sourceEpochs);
   QSettings overlaySettings(QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
   QObject::connect(&djBridge, &beatglass::windows::DjBridge::presentationUpdate, &livePresentation,
                    [&livePresentation](beatglass::PresentationUpdate update) { livePresentation.apply(std::move(update)); });
