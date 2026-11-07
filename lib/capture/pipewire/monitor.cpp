@@ -53,8 +53,7 @@ public:
     loop_ = pw_main_loop_new(nullptr);
     if (!loop_) { state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not create PipeWire loop"}; }
     auto* props = pw_properties_new(PW_KEY_MEDIA_TYPE, "Audio", PW_KEY_MEDIA_CATEGORY, "Capture",
-        PW_KEY_MEDIA_ROLE, "Music", PW_KEY_TARGET_OBJECT, serial.c_str(), "node.target", sink.name.c_str(),
-        PW_KEY_STREAM_CAPTURE_SINK, "true", PW_KEY_NODE_DONT_RECONNECT, "true", "node.dont-fallback", "true", nullptr);
+        PW_KEY_MEDIA_ROLE, "Music", PW_KEY_NODE_DONT_RECONNECT, "true", "node.dont-fallback", "true", nullptr);
     if (!props) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
     events_.version = PW_VERSION_STREAM_EVENTS;
     events_.state_changed = &state_changed;
@@ -73,7 +72,7 @@ public:
     info.position[0] = SPA_AUDIO_CHANNEL_FL;
     info.position[1] = SPA_AUDIO_CHANNEL_FR;
     const spa_pod* params[] = {spa_format_audio_raw_build(&builder, SPA_PARAM_EnumFormat, &info)};
-    const auto flags = static_cast<pw_stream_flags>(PW_STREAM_FLAG_AUTOCONNECT | PW_STREAM_FLAG_MAP_BUFFERS | PW_STREAM_FLAG_DONT_RECONNECT);
+    const auto flags = static_cast<pw_stream_flags>(PW_STREAM_FLAG_MAP_BUFFERS | PW_STREAM_FLAG_DONT_RECONNECT);
     if (pw_stream_connect(stream_, PW_DIRECTION_INPUT, PW_ID_ANY, flags, params, 1) < 0) {
       stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"};
     }
@@ -82,6 +81,7 @@ public:
     if (!core_) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
     core_events_.version = PW_VERSION_CORE_EVENTS;
     core_events_.done = &core_done;
+    core_events_.error = &core_error;
     pw_core_add_listener(core_, &core_hook_, &core_events_, this);
     core_listening_ = true;
     registry_ = pw_core_get_registry(core_, PW_VERSION_REGISTRY, 0);
@@ -90,10 +90,16 @@ public:
     registry_events_.global = &registry_global;
     registry_events_.global_remove = &registry_remove;
     pw_registry_add_listener(registry_, &registry_hook_, &registry_events_, this);
+    initial_sync_sequence_ = pw_core_sync(core_, PW_ID_CORE, 0);
+    if (initial_sync_sequence_ < 0) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not sync PipeWire registry"}; }
     try { thread_ = std::thread([this] {
       auto* loop = pw_main_loop_get_loop(loop_);
       pw_loop_enter(loop);
+      const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
       while (!stop_requested_.load(std::memory_order_acquire)) {
+        if (state() == MonitorState::starting && std::chrono::steady_clock::now() >= deadline) {
+          diagnostic_.store(12); transition(MonitorState::error); break;
+        }
         const int result = pw_loop_iterate(loop, 50);
         if (result < 0 && result != -EINTR) { transition(MonitorState::error); break; }
       }
@@ -111,6 +117,7 @@ public:
     state_.store(MonitorState::stopped, std::memory_order_release);
     stop_requested_.store(true, std::memory_order_release);
     if (thread_.joinable()) thread_.join();
+    for (auto*& link : owned_links_) if (link) { pw_proxy_destroy(link); link = nullptr; }
     if (registry_) { spa_hook_remove(&registry_hook_); pw_proxy_destroy(reinterpret_cast<pw_proxy*>(registry_)); registry_ = nullptr; }
     if (core_listening_) { spa_hook_remove(&core_hook_); core_listening_ = false; }
     if (stream_) { pw_stream_destroy(stream_); stream_ = nullptr; }
@@ -193,8 +200,31 @@ private:
     if (errno || *end || n >= SPA_ID_INVALID) return SPA_ID_INVALID;
     return static_cast<std::uint32_t>(n);
   }
-  void check_graph() {
+  void check_graph() noexcept {
+    try {
     if (!graph_ || !stream_ || state() == MonitorState::error || state() == MonitorState::interrupted || state() == MonitorState::stopped) return;
+    if (!registry_ready_) return;
+    if (!links_requested_) {
+      MonitorGraph::Endpoints endpoints{};
+      const auto resolution = graph_->endpoints(pw_stream_get_node_id(stream_), endpoints);
+      if (resolution == MonitorGraph::Result::waiting) return;
+      if (resolution == MonitorGraph::Result::invalid) { diagnostic_.store(6); transition(MonitorState::error); return; }
+      links_requested_ = true;
+      for (std::size_t i = 0; i < owned_links_.size(); ++i) {
+        const auto output_node = std::to_string(endpoints.target_node);
+        const auto input_node = std::to_string(endpoints.stream_node);
+        const auto output_port = std::to_string(endpoints.source_ports[i]);
+        const auto input_port = std::to_string(endpoints.input_ports[i]);
+        auto* properties = pw_properties_new(PW_KEY_LINK_OUTPUT_NODE, output_node.c_str(),
+            PW_KEY_LINK_OUTPUT_PORT, output_port.c_str(), PW_KEY_LINK_INPUT_NODE, input_node.c_str(),
+            PW_KEY_LINK_INPUT_PORT, input_port.c_str(), PW_KEY_OBJECT_LINGER, "false", nullptr);
+        if (!properties) { diagnostic_.store(10); transition(MonitorState::error); return; }
+        owned_links_[i] = static_cast<pw_proxy*>(pw_core_create_object(core_, "link-factory", PW_TYPE_INTERFACE_Link,
+            PW_VERSION_LINK, &properties->dict, 0));
+        pw_properties_free(properties);
+        if (!owned_links_[i]) { diagnostic_.store(10); transition(MonitorState::error); return; }
+      }
+    }
     const auto result = graph_->verify(pw_stream_get_node_id(stream_));
     if (result == MonitorGraph::Result::invalid) {
       diagnostic_.store(6); transition(MonitorState::error);
@@ -206,10 +236,23 @@ private:
     } else if (result == MonitorGraph::Result::verified && graph_verified_ && raw_streaming_ && format_valid_) {
       transition(MonitorState::streaming);
     }
+    } catch (...) { diagnostic_.store(9); transition(MonitorState::error); }
+  }
+  static void core_error(void* data, uint32_t, int, int, const char*) {
+    auto& self = *static_cast<Impl*>(data);
+    self.diagnostic_.store(11);
+    self.transition(MonitorState::error);
   }
   static void core_done(void* data, uint32_t id, int sequence) {
     auto& self = *static_cast<Impl*>(data);
-    if (id != PW_ID_CORE || sequence != self.sync_sequence_) return;
+    if (id != PW_ID_CORE) return;
+    if (sequence == self.initial_sync_sequence_) {
+      self.initial_sync_sequence_ = -1;
+      self.registry_ready_ = true;
+      self.check_graph();
+      return;
+    }
+    if (sequence != self.sync_sequence_) return;
     self.sync_sequence_ = -1;
     if (self.graph_->verify(pw_stream_get_node_id(self.stream_)) == MonitorGraph::Result::verified)
       self.graph_verified_ = true;
@@ -229,8 +272,9 @@ private:
       self.graph_->node(id, serial ? serial : "", name ? name : "", cls && !std::strcmp(cls, "Audio/Sink"));
     } else if (!std::strcmp(type, PW_TYPE_INTERFACE_Port)) {
       const auto node = number(get(PW_KEY_NODE_ID));
-      const auto channel = get("audio.channel"), monitor = get(PW_KEY_PORT_MONITOR);
-      if (node != SPA_ID_INVALID) self.graph_->port(id, {node, channel ? channel : "", monitor && !std::strcmp(monitor, "true")});
+      const auto channel = get("audio.channel"), monitor = get(PW_KEY_PORT_MONITOR), direction = get(PW_KEY_PORT_DIRECTION);
+      if (node != SPA_ID_INVALID && direction && (!std::strcmp(direction, "out") || !std::strcmp(direction, "in")))
+        self.graph_->port(id, {node, channel ? channel : "", monitor && !std::strcmp(monitor, "true"), !std::strcmp(direction, "out")});
     } else if (!std::strcmp(type, PW_TYPE_INTERFACE_Link)) {
       const auto out_node = number(get(PW_KEY_LINK_OUTPUT_NODE)), out_port = number(get(PW_KEY_LINK_OUTPUT_PORT));
       const auto in_node = number(get(PW_KEY_LINK_INPUT_NODE)), in_port = number(get(PW_KEY_LINK_INPUT_PORT));
@@ -324,7 +368,9 @@ private:
   spa_hook core_hook_{};
   pw_core_events core_events_{};
   bool core_listening_{};
-  int sync_sequence_{-1};
+  int sync_sequence_{-1}, initial_sync_sequence_{-1};
+  bool registry_ready_{}, links_requested_{};
+  std::array<pw_proxy*, 2> owned_links_{};
   pw_registry* registry_{};
   spa_hook registry_hook_{};
   pw_registry_events registry_events_{};

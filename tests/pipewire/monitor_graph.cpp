@@ -74,8 +74,17 @@ int main(int argc, char** argv) {
     }
     { std::ofstream ready(argv[1]); ready << "ready"; }
     const auto loss_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
-    while (std::chrono::steady_clock::now() < loss_deadline && monitor.state() == MonitorState::streaming)
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    while (std::chrono::steady_clock::now() < loss_deadline && monitor.state() == MonitorState::streaming) {
+      if (argc > 2 && std::string_view(argv[2]) == "inject") {
+        while (monitor.pop(*block)) {
+          for (std::size_t i = 0; i + 1 < block->sample_count; i += 2)
+            if (std::abs(block->samples[i] - block->samples[i + 1]) > 0.12f) {
+              std::cerr << "unexpected-source PCM escaped before invalidation\n"; return 16;
+            }
+        }
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
     if (!monitor.pop_event(event) || event.attempt.generation != attempt->generation || event.sequence != 2 || event.epoch ||
         (event.state != beatglass::SourceState::interrupted && event.state != beatglass::SourceState::error) || event.delivery_lost ||
         lifecycle.notify(event.attempt, event.sequence, event.state, event.epoch) != beatglass::SourceEventResult::accepted) {

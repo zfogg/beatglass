@@ -29,9 +29,9 @@ context.objects = [
   }
 ]
 CONF
-p=''; m=''; player=''; test_pid=''
+p=''; m=''; player=''; player2=''; test_pid=''
 cleanup() {
- for pid in "$test_pid" "$player" "$m" "$p"; do
+ for pid in "$test_pid" "$player2" "$player" "$m" "$p"; do
   if [ -n "$pid" ]; then kill "$pid" 2>/dev/null || true; fi
  done
  wait 2>/dev/null || true
@@ -51,17 +51,18 @@ for _ in $(seq 1 100); do
  sleep 0.05
 done
 if [ "$ready" != 1 ]; then cat "$XDG_RUNTIME_DIR/session.log"; exit 1; fi
-python3 - "$XDG_RUNTIME_DIR/tone.wav" <<'PY'
+python3 - "$XDG_RUNTIME_DIR/tone.wav" "$XDG_RUNTIME_DIR/tone2.wav" <<'PY'
 import math, struct, sys, wave
-with wave.open(sys.argv[1], 'wb') as out:
-    out.setparams((2, 2, 48000, 0, 'NONE', 'not compressed'))
-    out.writeframes(b''.join(struct.pack('<hh', int(18000*math.sin(2*math.pi*440*i/48000)), int(18000*math.sin(2*math.pi*440*i/48000))) for i in range(48000*8)))
+for path, hz in zip(sys.argv[1:], (440, 880)):
+    with wave.open(path, 'wb') as out:
+        out.setparams((2, 2, 48000, 0, 'NONE', 'not compressed'))
+        out.writeframes(b''.join(struct.pack('<hh', int(12000*math.sin(2*math.pi*hz*i/48000)), int(12000*math.sin(2*math.pi*hz*i/48000))) for i in range(48000*8)))
 PY
 other_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in json.load(sys.stdin) if x.get("info",{}).get("props",{}).get("node.name")=="beatglass_other_sink"))')
 wpctl set-default "$other_id"
 sink_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in json.load(sys.stdin) if x.get("info",{}).get("props",{}).get("node.name")=="beatglass_test_sink"))')
 pw-play --target "$sink_id" "$XDG_RUNTIME_DIR/tone.wav" >"$XDG_RUNTIME_DIR/play.log" 2>&1 & player=$!
-"$1" "$XDG_RUNTIME_DIR/capturing" & test_pid=$!
+"$1" "$XDG_RUNTIME_DIR/capturing" "${2:-remove}" & test_pid=$!
 ready=0
 for _ in $(seq 1 200); do
  if [ -f "$XDG_RUNTIME_DIR/capturing" ]; then ready=1; break; fi
@@ -69,7 +70,19 @@ for _ in $(seq 1 200); do
  sleep 0.05
 done
 if [ "$ready" != 1 ]; then wait "$test_pid" || true; cat "$XDG_RUNTIME_DIR/session.log"; exit 1; fi
-pw-cli destroy "$sink_id"
+if [ "${2:-remove}" = inject ]; then
+ pw-play --target "$other_id" "$XDG_RUNTIME_DIR/tone2.wav" >"$XDG_RUNTIME_DIR/injected-play.log" 2>&1 & player2=$!
+ ready=0
+ for _ in $(seq 1 100); do
+  if pw-dump | python3 -c 'import json,sys; n=int(sys.argv[1]); sys.exit(0 if any(x.get("type")=="PipeWire:Interface:Link" and x.get("info",{}).get("input-node-id")==n and x.get("info",{}).get("state")=="active" for x in json.load(sys.stdin)) else 1)' "$other_id"; then ready=1; break; fi
+  sleep 0.05
+ done
+ if [ "$ready" != 1 ]; then cat "$XDG_RUNTIME_DIR/injected-play.log"; exit 1; fi
+ read -r source_port input_port < <(pw-dump | python3 -c 'import json,sys; d=json.load(sys.stdin); other=int(sys.argv[1]); stream=next(x["id"] for x in d if x.get("type")=="PipeWire:Interface:Node" and x.get("info",{}).get("props",{}).get("media.name")=="Beatglass output monitor"); ports=[x for x in d if x.get("type")=="PipeWire:Interface:Port"]; find=lambda node,channel,monitor: next(x["id"] for x in ports if x.get("info",{}).get("props",{}).get("node.id")==node and x.get("info",{}).get("props",{}).get("audio.channel")==channel and bool(x.get("info",{}).get("props",{}).get("port.monitor",False))==monitor); print(find(other,"FL",True),find(stream,"FL",False))' "$other_id")
+ pw-link "$source_port" "$input_port"
+else
+ pw-cli destroy "$sink_id"
+fi
 if ! wait "$test_pid"; then
  cat "$XDG_RUNTIME_DIR/session.log"
  exit 1
