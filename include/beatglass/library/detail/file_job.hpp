@@ -27,7 +27,7 @@ struct FileJobResult {
 FileJobResult analyze_cached_tempo(SqliteCache& cache, const std::filesystem::path& path,
   const std::string& engine_version, const std::string& configuration_id,
   std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});
-/** Experimental snapshot-backed tempo job on the database worker. The same finalized snapshot supplies hash identity and virtual decoder bytes; original and path are revalidated before a hit or commit. The snapshot and decoder contracts are provisional; platform races remain and this path is not a product API. Cancellation is cooperative, and progress reports complete decoded frames. */
+/** Experimental snapshot-backed tempo job on the database worker. The same finalized snapshot supplies hash identity and virtual decoder bytes; original and path are revalidated before a hit or commit. The snapshot and decoder contracts are provisional; platform races remain and this path is not a product API. Its internal replay uses an uncoordinated zero epoch and must not be used as a process-wide session. Cancellation is cooperative, and progress reports complete decoded frames. */
 FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::path& path,
   const std::string& engine_version, const std::string& configuration_id,
   std::stop_token stop = {}, const std::function<void(std::uint64_t)>& progress = {});
