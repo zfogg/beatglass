@@ -147,6 +147,17 @@ On 2026-11-07, WSL Ubuntu 22.04 with GCC 11.4 and system SQLite 3.37.2, based on
 The documentation check `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html` passed using the existing docs image. No C++ headers were added or changed.
 
 Review update: the same WSL configure/build/CTest commands now pass 30/30 individually discovered tests linked to `beatglass_library_prototype`; tests cover SQLite binding length bounds and a second connection rejected while the first holds the exclusive lock. The CI proposal enables the target on Ubuntu. Windows and macOS remain untested for this increment.
+
+## Phase 1 shared UI navigation increment
+
+On Windows 10.0.26300 x64, MSVC 19.44 and Qt 6.8.3, the shared desktop shell gained Library and DJ navigation while retaining real asynchronous file metadata inspection. Library indexing, analysis, playback, capture and overlay remain unavailable. From this worktree at base 6f927cb with `VCPKG_ROOT=C:/Users/zachf/.codex/worktrees/beatglass-vcpkg-prebuilt` and `BEATGLASS_QT_ROOT=$env:TEMP/beatglass-qt/6.8.3/msvc2022_64`, `cmake --preset prebuilt-qt-desktop -G "Visual Studio 17 2022" -A x64 -B "$env:TEMP/beatglass-ui-build" -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=C:/Users/zachf/.codex/worktrees/beatglass-codecs/build-pinned-win/vcpkg_installed`, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4`, and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 35/35, including the offscreen Qt Quick navigation test. The existing installed vcpkg tree was reused; this is not a fresh dependency qualification. `docker build -f docs/api/Dockerfile -t beatglass-docs .` and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html` passed. No native interactive UI, audio, or overlay qualification was performed for this increment.
+
+# Source contract integration
+
+The proposed shared source types and ordered lifecycle helper have regression
+coverage. Native adapters, control queues and actual source clock measurements
+remain unimplemented and require integration and platform qualification.
+
 # Cache contract integration
 
 Typed cache outcomes and a worker-local commit decision have regression
@@ -166,3 +177,14 @@ commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
 
 After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea57372aaab89`, WSL Ubuntu 22.04 with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, slice disabled and pinned Catch2 source reused passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 32/32. Windows 10.0.26300 x64/MSVC 19.44 with the previously configured static CRT and static SQLite development tree passed `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` 34/34. These are development checks only; WSL is not native Linux qualification and no decoder slice was included.
+
+## Same-source integration proposal
+
+The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
+read-only byte boundary. The existing decoder does not consume it. Secure
+snapshot creation, native file identity and decoder integration remain open;
+see [same-source proposal](same-source-proposal.md).
+
+## Phase 1 tonal dependency experiment
+
+The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
