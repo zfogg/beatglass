@@ -2,7 +2,7 @@
 
 Issue #1 defines the foundation exit gate as **reproducible build commands, real shared contracts, a working CLI slice, a runnable UI shell, and a clear integration point for each team**. The integration owner decides when the merged evidence and contracts meet that gate. This audit does not require completed Phase 1 or v1 features before parallel feature work begins.
 
-Status: **under review; not yet declared passed**. The CLI and metadata shell exist and several boundaries have executable tests. The pinned desktop build, dependency/distribution choices, and shared interface review still need resolution. See [progress](progress.md), [decisions](decisions.md), and [the handoff](foundation-handoff.md) for exact evidence and open interface decisions.
+Status: **accepted for starting Phase 1** by the coordinator on merged commit `6f927cb`. This is a narrow handoff decision, not a finding that every item in the audit is complete. Shared contract changes, cross-platform dependency and SDK integrity verification, distribution licensing, and native v1 qualification remain open. See [progress](progress.md), [decisions](decisions.md), and [the handoff](foundation-handoff.md) for evidence and ownership.
 
 | Phase 0 exit requirement | Evidence on merged main | Concrete remaining foundation work |
 | --- | --- | --- |
@@ -20,8 +20,8 @@ Status: **under review; not yet declared passed**. The CLI and metadata shell ex
 
 Every workstream uses isolated branches/worktrees and explicit module ownership. The integration owner coordinates shared headers, schemas, CMake, dependencies and CI. Every implementing agent adds meaningful tests, runs relevant checks and records commands, evidence and limitations. Product paths must use actual capture and analysis; no handoff makes a stub a completed feature.
 
-## Recommendation to the integration owner
+## Handoff decision and remaining work
 
-After this Qt SDK proposal is reviewed, its CI passes, and the owner accepts the published contracts and assigns explicit worktree ownership, recommend declaring the Phase 0 exit gate passed for starting Phase 1 work. The working tempo CLI, deterministic replay, minimal interactive Windows and Mac shells, test infrastructure and named team integration points satisfy the narrow shape of the issue's gate; they do not establish a usable product. The owner should explicitly accept the exact-version SDK as a development baseline with the unresolved archive/installer hashes, Linux/macOS prebuilt builds, and release license/packaging review recorded as follow-up work, rather than silently treating those checks as passed.
+The coordinator accepted the handoff for starting Phase 1 on `6f927cb`. The working tempo CLI, deterministic replay, minimal interactive Windows and Mac shells, test infrastructure and named team integration points do not establish a usable product. The exact-version SDK remains a development baseline with unresolved archive/installer hashes, Linux/macOS prebuilt builds, and release license/packaging review.
 
 The source adapters, library backend, DSP and UI agents can propose the typed error/event and epoch rules, cache/commit outcomes, estimator semantics and UI delivery details identified in this handoff. The integration owner must approve shared header/schema changes before other work depends on them. Device implementations, SQLite behavior, cross-platform packaging and native v1 audio/overlay qualification remain later-phase requirements.
