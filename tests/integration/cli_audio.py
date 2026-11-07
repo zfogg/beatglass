@@ -31,5 +31,19 @@ with tempfile.TemporaryDirectory() as directory:
     assert any(abs(bpm - expected) < expected * .08 for expected in (60, 120, 240)), result
     anti = subprocess.run([exe, str(stereo)], capture_output=True, text=True, check=True).stdout
     assert "tempo: unknown" not in anti and "channels: 2" in anti, anti
+    replay = subprocess.run([exe, "--replay", str(clicks)], capture_output=True, text=True, check=True).stdout
+    lines = [line for line in replay.splitlines() if line.startswith("observed frame:")]
+    assert lines and "tempo: unknown" in lines[0], replay
+    assert [int(line.split()[2]) for line in lines] == sorted(int(line.split()[2]) for line in lines)
+    assert int(lines[-1].split()[2]) == 44100 * 20
+    prefix_frames = (44100 * 8 // 512) * 512
+    prefix = root / "prefix.wav"
+    with wave.open(str(clicks), "rb") as source, wave.open(str(prefix), "wb") as target:
+        target.setparams(source.getparams())
+        target.writeframes(source.readframes(prefix_frames))
+    prefix_output = subprocess.run([exe, "--replay", str(prefix)], capture_output=True, text=True, check=True).stdout
+    prefix_lines = [line for line in prefix_output.splitlines() if line.startswith("observed frame:")]
+    assert prefix_lines == lines[:len(prefix_lines)], "future samples changed an earlier estimate"
+    assert result.split("tempo: ")[-1] == replay.split("tempo: ")[-1], (result, replay[-500:])
     missing = subprocess.run([exe, str(root / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0

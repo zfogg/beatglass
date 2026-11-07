@@ -4,9 +4,11 @@
 
 namespace beatglass {
 // Position is measured in frames from the beginning of an epoch, not samples.
+enum class ChannelLayout { unknown, mono, stereo, multichannel };
 struct AudioFormat {
   std::uint32_t sample_rate{};
   std::uint16_t channels{};
+  ChannelLayout layout{ChannelLayout::unknown};
 };
 struct AudioBlock {
   AudioFormat format;

@@ -1,0 +1,34 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": { "major": 3, "minor": 24, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "vcpkg-core",
+      "displayName": "Pinned vcpkg core and CLI",
+      "binaryDir": "${sourceDir}/build/vcpkg-core",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BEATGLASS_BUILD_SLICE": "ON",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "vcpkg-desktop",
+      "inherits": "vcpkg-core",
+      "binaryDir": "${sourceDir}/build/vcpkg-desktop",
+      "cacheVariables": {
+        "VCPKG_MANIFEST_FEATURES": "desktop",
+        "BEATGLASS_BUILD_DESKTOP": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "vcpkg-core", "configurePreset": "vcpkg-core", "configuration": "Debug" },
+    { "name": "vcpkg-desktop", "configurePreset": "vcpkg-desktop", "configuration": "Debug" }
+  ],
+  "testPresets": [
+    { "name": "vcpkg-core", "configurePreset": "vcpkg-core", "configuration": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "vcpkg-desktop", "configurePreset": "vcpkg-desktop", "configuration": "Debug", "output": { "outputOnFailure": true } }
+  ]
+}
