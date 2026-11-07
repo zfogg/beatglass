@@ -35,25 +35,32 @@ bool OverlayController::attach(QQuickWindow* overlay, QWindow* control) {
   overlay_->installEventFilter(this); control_->installEventFilter(this);
   connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; detach(); });
   connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; detach(); });
-  connect(overlay_, &QWindow::xChanged, this, [this] { scheduleSave(); });
-  connect(overlay_, &QWindow::yChanged, this, [this] { scheduleSave(); });
-  connect(overlay_, &QWindow::widthChanged, this, [this] { scheduleSave(); });
-  connect(overlay_, &QWindow::heightChanged, this, [this] { scheduleSave(); });
+  connect(overlay_, &QWindow::xChanged, this, [this] { scheduleSave(); emit screensChanged(); });
+  connect(overlay_, &QWindow::yChanged, this, [this] { scheduleSave(); emit screensChanged(); });
+  connect(overlay_, &QWindow::widthChanged, this, [this] { scheduleSave(); emit screensChanged(); });
+  connect(overlay_, &QWindow::heightChanged, this, [this] { scheduleSave(); emit screensChanged(); });
   connect(overlay_, &QWindow::opacityChanged, this, [this] { emit opacityChanged(); scheduleSave(); });
   overlay_->create();
   if (!native_->apply(overlay_, false)) { detach(); return false; }
   setAvailable(true);
   restoring_ = true;
   overlay_->setOpacity(0.9);
+  bool restoredGeometry = false;
   if (settings_) {
     const QRect saved = settings_->value(QStringLiteral("overlay/geometry")).toRect();
-    if (saved.isValid() && saved.width() <= 10000 && saved.height() <= 10000) overlay_->setGeometry(saved);
+    if (saved.isValid() && saved.width() <= 10000 && saved.height() <= 10000) { overlay_->setGeometry(saved); restoredGeometry = true; }
     bool validOpacity = false;
     const auto savedOpacity = settings_->value(QStringLiteral("overlay/opacity"), 0.9).toDouble(&validOpacity);
     if (validOpacity && std::isfinite(savedOpacity)) overlay_->setOpacity(std::clamp(savedOpacity, 0.2, 1.0));
   }
+  if (!restoredGeometry) {
+    auto* screen = QGuiApplication::screenAt(control_->geometry().center());
+    if (!screen) screen = control_->screen();
+    const auto index = QGuiApplication::screens().indexOf(screen);
+    if (index >= 0) moveToScreen(index);
+  }
   keepOnScreen(); restoring_ = false; scheduleSave();
-  emit opacityChanged();
+  emit opacityChanged(); emit screensChanged();
   return true;
 }
 void OverlayController::detach() {
@@ -66,6 +73,7 @@ void OverlayController::detach() {
   }
   if (control_) { control_->removeEventFilter(this); disconnect(control_, nullptr, this, nullptr); }
   overlay_ = nullptr; control_ = nullptr;
+  emit screensChanged();
   have_snapshot_ = false;
   if (click_through_) { click_through_ = false; emit clickThroughChanged(); }
   setAvailable(false);
@@ -118,6 +126,10 @@ QStringList OverlayController::screenNames() const {
   for (const auto* screen : QGuiApplication::screens())
     names.append(screen->name().isEmpty() ? QStringLiteral("Display %1").arg(names.size() + 1) : screen->name());
   return names;
+}
+int OverlayController::screenIndex() const {
+  if (!overlay_) return -1;
+  return QGuiApplication::screens().indexOf(QGuiApplication::screenAt(overlay_->geometry().center()));
 }
 bool OverlayController::moveToScreen(int index) {
   const auto screens = QGuiApplication::screens();

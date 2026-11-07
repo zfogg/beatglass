@@ -29,6 +29,7 @@ class OverlayController final : public QObject {
   Q_PROPERTY(bool clickThrough READ clickThrough NOTIFY clickThroughChanged)
   Q_PROPERTY(bool available READ available NOTIFY availableChanged)
   Q_PROPERTY(QStringList screenNames READ screenNames NOTIFY screensChanged)
+  Q_PROPERTY(int screenIndex READ screenIndex NOTIFY screensChanged)
   Q_PROPERTY(qreal opacity READ opacity NOTIFY opacityChanged)
 public:
   /** Own the native adapter and optional settings store; the Qt parent, if any, owns this controller. All methods run on the GUI thread. */
@@ -55,6 +56,8 @@ public:
   Q_INVOKABLE void keepOnScreen();
   /** Return current display labels in Qt's screen order; names are presentation labels, not persistent identifiers. */
   QStringList screenNames() const;
+  /** Index of the overlay's current display in screenNames(), or -1 when unattached or no display contains its center. Indices are session-local. */
+  int screenIndex() const;
   /** Move the overlay to the selected current display and clamp it to its available geometry. Return false if the display or overlay is unavailable. */
   Q_INVOKABLE bool moveToScreen(int index);
   /** Request a positive logical-pixel size, then clamp to the current display. Qt minimum-size constraints still apply. */
