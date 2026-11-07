@@ -1,23 +1,66 @@
 #include "beatglass/core/file_analysis.hpp"
 #include <exception>
+#include <iomanip>
 #include <iostream>
+#include <locale>
+#include <string_view>
+
+namespace {
+const char* state_label(beatglass::TrackingState state) {
+  switch (state) {
+    case beatglass::TrackingState::stopped: return "stopped";
+    case beatglass::TrackingState::silent: return "silent";
+    case beatglass::TrackingState::tracking: return "tracking";
+    case beatglass::TrackingState::reacquiring: return "reacquiring";
+    default: return "acquiring";
+  }
+}
+void json_string(std::string_view s) {
+  constexpr char hex[] = "0123456789abcdef";
+  std::cout << '"';
+  for (unsigned char c : s) {
+    if (c == '"' || c == '\\') std::cout << '\\' << static_cast<char>(c);
+    else if (c < 0x20) std::cout << "\\u00" << hex[c >> 4] << hex[c & 15];
+    else std::cout << static_cast<char>(c);
+  }
+  std::cout << '"';
+}
+void json_result(const char* type, const beatglass::TempoResult& r, std::uint64_t frame = 0) {
+  std::cout << "{\"type\":\"" << type << "\",\"schema_version\":1";
+  if (std::string_view(type) == "replay") std::cout << ",\"observed_through\":" << frame;
+  std::cout << ",\"format\":"; json_string(r.metadata.format);
+  std::cout << ",\"sample_rate\":" << r.metadata.sample_rate << ",\"channels\":" << r.metadata.channels
+            << ",\"frames\":" << r.metadata.frames << ",\"beats\":" << r.beats << ",\"bpm\":";
+  if (r.bpm) std::cout << *r.bpm; else std::cout << "null";
+  std::cout << ",\"state\":\"" << state_label(r.state) << "\"}\n";
+}
+}
 #ifdef _WIN32
 int wmain(int argc, wchar_t** argv) {
 #else
 int main(int argc, char** argv) {
 #endif
-  const bool replay = argc == 3 && std::filesystem::path(argv[1]) == std::filesystem::path("--replay");
-  if (argc != 2 && !replay) { std::cerr << "Usage: beatglass-cli [--replay] <audio-file>\n"; return 2; }
+  std::cout.imbue(std::locale::classic());
+  std::cout << std::setprecision(9);
+  bool replay = false, json = false, positional_only = false;
+  std::filesystem::path path;
+  for (int i = 1; i < argc; ++i) {
+    const std::filesystem::path arg(argv[i]);
+    if (!positional_only && arg == std::filesystem::path("--")) positional_only = true;
+    else if (!positional_only && arg == std::filesystem::path("--replay") && !replay) replay = true;
+    else if (!positional_only && arg == std::filesystem::path("--json") && !json) json = true;
+    else if (path.empty() && arg.native().size() && (positional_only || arg.native()[0] != '-')) path = arg;
+    else { std::cerr << "Usage: beatglass-cli [--replay] [--json] [--] <audio-file>\n"; return 2; }
+  }
+  if (path.empty()) { std::cerr << "Usage: beatglass-cli [--replay] [--json] [--] <audio-file>\n"; return 2; }
   try {
-    const auto path = std::filesystem::path(argv[replay ? 2 : 1]);
-    const auto r = replay ? beatglass::replay_file(path, [](std::uint64_t frame, const beatglass::TempoResult& state) {
+    const auto r = replay ? beatglass::replay_file(path, [json](std::uint64_t frame, const beatglass::TempoResult& state) {
+      if (json) { json_result("replay", state, frame); return; }
       std::cout << "observed frame: " << frame << " tempo: ";
       if (state.bpm) std::cout << *state.bpm; else std::cout << "unknown";
-      const char* label = state.state == beatglass::TrackingState::silent ? "silent" :
-          state.state == beatglass::TrackingState::tracking ? "tracking" :
-          state.state == beatglass::TrackingState::reacquiring ? "reacquiring" : "acquiring";
-      std::cout << " state: " << label << "\n";
+      std::cout << " state: " << state_label(state.state) << "\n";
     }) : beatglass::analyze_file(path);
+    if (json) { json_result("result", r); return 0; }
     std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nbeats: " << r.beats << "\ntempo: ";
     if (r.bpm) std::cout << *r.bpm << " BPM\n"; else std::cout << "unknown\n";
   } catch (const std::exception& e) { std::cerr << e.what() << "\n"; return 1; }
