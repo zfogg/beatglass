@@ -83,9 +83,8 @@ must clear publication and reject in-flight work; the adapter does not revoke a
 packet already returned to an analysis worker. The control owner must poll and
 deliver invalidation promptly, install format before analysis, and ensure the
 callback and allocator outlive the session. The desktop does not yet use this
-adapter. WASAPI's device
-position is currently not used to detect extra gaps: flagged discontinuities and
-timestamp errors are marked, but the epoch-relative frame count excludes unknown
+adapter. WASAPI device-position jumps and resets are marked as discontinuities alongside
+flagged discontinuities and timestamp errors; the epoch-relative frame count excludes unknown
 device gaps and must not be treated as an uninterrupted physical timeline.
 
 Against reviewed source-contract PR #28 at `5b81fcc`, Windows 11 x64 GCC 15.2.0
@@ -232,3 +231,14 @@ settings and cover restoration and immediate persistence after recovery. Earlier
 native testing on Windows 11 Home 10.0.26300 with LG ULTRAGEAR at 100% and
 U2790B at 150% exercised one boundary-crossing direction; reverse crossing,
 physical display removal and exclusive-fullscreen product behavior remain open.
+
+Device-position continuity checks are deterministic unit coverage only. Physical
+endpoint switching, device removal and return, and integrated reacquisition over
+actual DJ output remain unqualified.
+
+Capture validates epoch-frame and valid QPC arithmetic for the complete WASAPI
+buffer before publishing a chunk. Arithmetic overflow releases that buffer and
+interrupts the attempt; invalid timestamps are not added. Empty invalid or
+flagged buffers retain a discontinuity for the next nonempty packet. Boundary
+checks are simulated; actual driver overflow and empty flagged buffers have not
+been observed or qualified.
