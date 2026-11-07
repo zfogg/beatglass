@@ -26,29 +26,45 @@ struct VisualizationFrame {
  * Own on one worker thread; never call from capture callback or GUI thread.
  * No PCM view is retained. Windows are non-overlapping; a call may return only
  * its latest completed window, so callers must not interpret it as full history.
- * Reset or an epoch, rate, or frame discontinuity clears partial input.
- * This does not revoke frames already delivered; publication must gate epochs.
+ * Reset, invalid input, or an epoch, rate, or frame discontinuity invokes the
+ * invalidation hook synchronously and clears partial input. The owner must
+ * gate every frame by the same shared generation and a monotonic revision;
+ * epochs alone are insufficient, including for gaps within one epoch.
  */
 class VisualizationProcessor {
 public:
   /** Maximum accepted frames per call; callers split larger blocks on the worker. */
   static constexpr unsigned max_input_frames = 4096;
-  /** Discard partial input and continuity state, without revoking delivered frames. */
+  /** Synchronous worker-thread invalidation hook. It must not throw or reenter.
+   * The owner synchronously advances the shared source invalidation generation and issues a
+   * monotonically increasing clear revision before returning. It must fail closed
+   * before either counter wraps and must synchronize cross-thread visibility. The GUI must reject
+   * old generations and older revisions, including already queued frames. */
+  using Invalidate = void (*)(void*) noexcept;
+  /** Construct with a required callback and borrowed context, valid for this object's lifetime.
+   * @throws std::invalid_argument if the callback is null. */
+  VisualizationProcessor(Invalidate invalidate, void* context);
+  /** Invalidate published data synchronously and discard partial input. */
   void reset() noexcept;
   /** Consume contiguous finite normalized mono PCM in [-1, 1]. Input must have nonzero epoch and rate and at most 4096 frames,
-   * and sample positions must not overflow. Invalid input throws before mutation.
+   * and sample positions must not overflow. Invalid input invalidates and clears the processor before throwing.
    * Gaps, overlaps, epoch changes and rate changes discard the previous partial
    * window and begin a new one. Out-of-range samples are rejected rather than clipped. Output owns its data.
    * @param epoch Coordinator-issued nonzero source epoch.
    * @param first_frame First source frame of the supplied span.
    * @param sample_rate Source sample rate in frames per second.
    * @param samples Borrowed mono PCM, valid only for this call.
+   * @param discontinuity Explicit break even if frame positions remain contiguous.
    * @return Latest complete window in this call, or empty until one completes.
-   * @throws std::invalid_argument for invalid metadata or nonfinite samples.
+   * @throws std::invalid_argument for invalid metadata, out-of-range or nonfinite samples.
    */
   std::optional<VisualizationFrame> process(std::uint64_t epoch, std::uint64_t first_frame,
-                                            std::uint32_t sample_rate, std::span<const float> samples);
+                                            std::uint32_t sample_rate, std::span<const float> samples,
+                                            bool discontinuity = false);
 private:
+  void clear_partial() noexcept;
+  Invalidate invalidate_;
+  void* context_;
   std::array<float, VisualizationFrame::window_size> samples_{};
   std::uint64_t epoch_{}, next_frame_{}, window_start_{};
   std::uint32_t sample_rate_{};

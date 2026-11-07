@@ -7,14 +7,18 @@
 #include <stdexcept>
 
 namespace beatglass {
-void VisualizationProcessor::reset() noexcept { epoch_ = next_frame_ = window_start_ = 0; sample_rate_ = count_ = 0; }
+VisualizationProcessor::VisualizationProcessor(Invalidate invalidate, void* context) : invalidate_(invalidate), context_(context) {
+  if (!invalidate_) throw std::invalid_argument("visualization invalidation hook required");
+}
+void VisualizationProcessor::clear_partial() noexcept { epoch_ = next_frame_ = window_start_ = 0; sample_rate_ = count_ = 0; }
+void VisualizationProcessor::reset() noexcept { invalidate_(context_); clear_partial(); }
 std::optional<VisualizationFrame> VisualizationProcessor::process(std::uint64_t epoch, std::uint64_t first,
-                                                                  std::uint32_t rate, std::span<const float> input) {
+                                                                  std::uint32_t rate, std::span<const float> input, bool discontinuity) {
   if (!epoch || !rate || input.size() > max_input_frames || input.size() > std::numeric_limits<std::uint64_t>::max() - first ||
       std::any_of(input.begin(), input.end(), [](float x){ return !std::isfinite(x) || x < -1.0f || x > 1.0f; }))
-    throw std::invalid_argument("invalid visualization PCM or timing");
-  if (epoch_ != epoch || sample_rate_ != rate || next_frame_ != first) {
-    reset(); epoch_ = epoch; sample_rate_ = rate; next_frame_ = first;
+    { reset(); throw std::invalid_argument("invalid visualization PCM or timing"); }
+  if (discontinuity || epoch_ != epoch || sample_rate_ != rate || next_frame_ != first) {
+    if (epoch_ || discontinuity) reset(); else clear_partial(); epoch_ = epoch; sample_rate_ = rate; next_frame_ = first;
   }
   std::optional<VisualizationFrame> result;
   constexpr unsigned n = VisualizationFrame::window_size;
