@@ -257,6 +257,7 @@ not yet shared by the live worker and offline sources; see
 `epoch-handoff-proposal.md`. Physical monitor removal, the reverse boundary
 direction, exclusive fullscreen product behavior and full native qualification
 remain open.
+
 Following merged allocator PR #63, the provisional `DjBridge` requires an
 injected process-session `SourceEpochAllocator`; its worker no longer creates a
 private allocator. The application owner must retain the same allocator across
@@ -265,8 +266,8 @@ desktop does not instantiate this bridge in this branch. Noninteractive tests
 cover a generated file reader's coordinator-issued initial epoch alongside
 failed live starts and restarts, and allocation across bridge recreation. The
 legacy file reader seek still increments locally and must not be used in a
-shared epoch namespace; coordinated seeks require the explicit-epoch reader
-contract proposed in PR #45. Full live/library integration remains open.
+shared epoch namespace. PR #45 added an explicit-epoch seek; coordinated
+product use of that overload and full live/library integration remain open.
 
 Queue-overflow review found that clearing tempo evidence alone allowed queued
 pre-gap PCM to be consumed after the clear. On observing dropped frames the

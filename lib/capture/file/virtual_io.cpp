@@ -63,11 +63,11 @@ SF_VIRTUAL_IO callbacks{filelen, seek_cb, read_cb, write_cb, tell_cb};
 struct VirtualFileReader::Impl {
   VirtualIo io; SNDFILE* handle{}; SF_INFO info{}; FileMetadata meta; std::uint64_t epoch{}, position{}; bool ended{}, failed{};
   Impl(ByteSource& source, std::uint64_t e, std::stop_token token) : io(source), epoch(e) {
-    if (token.stop_requested()) throw VirtualOpenCancelled();
+    if (token.stop_requested()) throw FileOpenCancelled();
     io.set_cancel(token); handle = sf_open_virtual(&callbacks, SFM_READ, &info, &io);
     if (!handle || io.status() != VirtualIoStatus::ok) {
       if (handle) sf_close(handle);
-      if (io.status() == VirtualIoStatus::cancelled) throw VirtualOpenCancelled();
+      if (io.status() == VirtualIoStatus::cancelled) throw FileOpenCancelled();
       throw std::runtime_error("Virtual audio open failed");
     }
     if (info.samplerate <= 0 || info.channels <= 0 || info.channels > std::numeric_limits<std::uint16_t>::max() || info.frames < 0) {

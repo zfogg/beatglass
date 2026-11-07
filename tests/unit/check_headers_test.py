@@ -21,6 +21,9 @@ class HeaderCoverageTest(unittest.TestCase):
             self.assertEqual(module.coverage(root), (["lib/library/private.hpp"], []))
             index.write_text(".. cpp:autodoc:: lib/library/private.hpp\n", encoding="utf-8")
             self.assertEqual(module.coverage(root), ([], []))
+            self.assertEqual(module.duplicates(root), [])
+            index.write_text(".. cpp:autodoc:: lib/library/private.hpp\n.. cpp:autodoc:: lib/library/private.hpp\n", encoding="utf-8")
+            self.assertEqual(module.duplicates(root), ["lib/library/private.hpp"])
 
 
 if __name__ == "__main__":

@@ -42,20 +42,18 @@ The noninteractive Windows bridge regression also opens a real generated WAV
 with a coordinator-issued initial epoch, starts and restarts a failed live
 endpoint with that same allocator, and verifies the reader block retains its
 epoch while live attempts consume distinct values. This test deliberately does
-not use the legacy seek overload. PR #45 proposes an explicit new-epoch seek;
-that reader change and a combined library/live product integration are still
-required for coordinated seeks.
+not use the legacy seek overload. PR #45 added an explicit new-epoch seek;
+combined library/live product integration must use it for coordinated seeks.
 The collection integration in #51 independently introduces an application-level
 allocator. Before combining these branches, reconcile them into exactly one
 object outside platform and feature conditionals, inject it into both bridges,
 and destroy and join both bridges before the allocator. Do not merge two
 separately owned allocators into the combined application.
 
-The file reader currently increments its own epoch on seek; merely injecting a
-shared initial value does not prevent it colliding with an epoch issued to
-another source. Its seek contract must be changed to receive a fresh allocated
-token, or otherwise use the same agreed allocator outside the callback, before
-it participates in this process-wide namespace. A restarted process also needs
+The legacy file-reader seek increments its own epoch; merely injecting a shared
+initial value does not prevent it colliding with an epoch issued to another
+source. Coordinated callers must use the new explicit-epoch overload with a
+fresh allocated token, never the legacy overload. A restarted process also needs
 a distinct session identity or a proven drain of all prior publications. A
 seeded allocator is safe only when the seed is a trustworthy high-water mark
 for the same namespace; resetting or persisting it alone is not such a proof.
