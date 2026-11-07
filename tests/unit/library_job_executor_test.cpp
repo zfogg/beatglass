@@ -2,6 +2,7 @@
 #include <chrono>
 #include <future>
 #include <mutex>
+#include <stdexcept>
 #include <vector>
 #include "beatglass/library/detail/job_executor.hpp"
 using namespace std::chrono_literals;
@@ -43,4 +44,58 @@ TEST_CASE("library executor cancels active work and discards waiting jobs") {
   executor.shutdown();
   REQUIRE(observed);
   REQUIRE_FALSE(queued_ran);
+}
+
+TEST_CASE("tracked jobs expose individual cancellation and monotonic progress") {
+  using beatglass::library_detail::TrackedState;
+  JobExecutor executor(2);
+  std::promise<void> started, resume; auto gate = resume.get_future().share();
+  auto active = executor.submit_tracked(0, [&](std::stop_token stop, const auto& progress) {
+    progress(12); progress(4); started.set_value(); gate.wait();
+    return stop.stop_requested() ? TrackedState::cancelled : TrackedState::completed;
+  });
+  REQUIRE(active); REQUIRE(started.get_future().wait_for(5s) == std::future_status::ready);
+  REQUIRE(active->state() == TrackedState::running); REQUIRE(active->frames() == 12);
+  bool ran = false;
+  auto queued = executor.submit_tracked(0, [&](std::stop_token, const auto&) { ran = true; return TrackedState::completed; });
+  REQUIRE(queued); queued->cancel(); REQUIRE(queued->state() == TrackedState::cancelled);
+  active->cancel(); resume.set_value(); executor.shutdown();
+  REQUIRE(active->state() == TrackedState::cancelled); REQUIRE_FALSE(ran);
+}
+TEST_CASE("tracked job completion wins over a late cancellation") {
+  using beatglass::library_detail::TrackedState;
+  JobExecutor executor(1);
+  std::promise<void> started, resume; auto gate = resume.get_future().share();
+  auto handle = executor.submit_tracked(0, [&](std::stop_token, const auto&) {
+    started.set_value(); gate.wait(); return TrackedState::completed;
+  });
+  REQUIRE(handle); REQUIRE(started.get_future().wait_for(5s) == std::future_status::ready);
+  handle->cancel(); resume.set_value(); executor.shutdown();
+  REQUIRE(handle->state() == TrackedState::completed);
+}
+
+TEST_CASE("tracked failures and discarded jobs remain observable after shutdown") {
+  using beatglass::library_detail::TrackedState;
+  std::shared_ptr<beatglass::library_detail::JobHandle> failed, discarded;
+  {
+    JobExecutor executor(1);
+    std::promise<void> started, release; auto gate = release.get_future().share();
+    failed = executor.submit_tracked(0, [&](std::stop_token, const auto& progress) -> TrackedState {
+      progress(7); started.set_value(); gate.wait(); throw std::runtime_error("failed");
+    });
+    REQUIRE(failed); REQUIRE(started.get_future().wait_for(5s) == std::future_status::ready);
+    discarded = executor.submit_tracked(0, [](std::stop_token, const auto&) { return TrackedState::completed; });
+    REQUIRE(discarded);
+    auto shutdown = std::async(std::launch::async, [&] { executor.shutdown(); });
+    const auto deadline = std::chrono::steady_clock::now() + 5s;
+    while (discarded->state() == TrackedState::queued && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
+    const auto queued_state = discarded->state();
+    release.set_value();
+    REQUIRE(queued_state == TrackedState::cancelled);
+    REQUIRE(shutdown.wait_for(5s) == std::future_status::ready);
+    shutdown.get();
+  }
+  REQUIRE(failed->state() == TrackedState::failed);
+  REQUIRE(failed->frames() == 7);
+  REQUIRE(discarded->state() == TrackedState::cancelled);
 }

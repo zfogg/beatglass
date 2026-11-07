@@ -245,3 +245,5 @@ After the concurrent allocator contract merged, the provisional borrowed `FileRe
 ## Bounded file fingerprint review
 
 A separately reviewable, opt-in fingerprint primitive hashes a file using a bounded buffer and supports cooperative cancellation and change detection. It does not connect to the cache or decoder. File replacement, mutation and ABA can evade attribute checks, so the result cannot prove decoder input identity. OpenSSL remains an unpinned development dependency; native product qualification remains open.
+
+The provisional library executor supports retained per-job state, monotonic frame progress and cooperative cancellation, including cancellation of queued work at shutdown. It is a bounded single-worker queue, not a cache or source-identity mechanism. Worker outcomes determine their terminal status so a late stop request does not relabel a successful operation; callers must define their own commit and identity rules.
