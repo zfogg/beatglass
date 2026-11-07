@@ -16,3 +16,8 @@ TEST_CASE("clock mapping refuses arithmetic overflow") {
  CHECK_FALSE(frame_to_monotonic_ns({1, 1, L::min()}, 1, 0, 48000));
  CHECK_FALSE(frame_to_monotonic_ns({1, 0, 0}, 1, std::numeric_limits<std::uint64_t>::max(), 1));
 }
+
+TEST_CASE("missing clock anchors do not map to zero") {
+ std::optional<AudioClockAnchor> absent;
+ CHECK_FALSE(frame_to_monotonic_ns(absent, 1, 0, 48000));
+}

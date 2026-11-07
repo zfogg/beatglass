@@ -3,6 +3,10 @@
 #include <windows.h>
 #include <set>
 
+TEST_CASE("CTest recognizes an unavailable native device as skipped") {
+  SKIP("Regression check for Catch2 skip propagation through CTest");
+}
+
 TEST_CASE("Render endpoint discovery returns owned unique identities") {
   const auto result = beatglass::windows::enumerate_render_endpoints();
   REQUIRE(result.error.empty());

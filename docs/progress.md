@@ -148,15 +148,33 @@ The documentation check `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx
 
 Review update: the same WSL configure/build/CTest commands now pass 30/30 individually discovered tests linked to `beatglass_library_prototype`; tests cover SQLite binding length bounds and a second connection rejected while the first holds the exclusive lock. The CI proposal enables the target on Ubuntu. Windows and macOS remain untested for this increment.
 
-## Provisional file-evidence and tempo-cache follow-up
+## Phase 1 shared UI navigation increment
 
-On WSL Ubuntu 22.04, GCC 11.4, SQLite 3.37.2, OpenSSL 3.0.2, and system aubio/libsndfile, `cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_TEST_V1_CODECS=OFF -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src -Wno-dev`, `cmake --build /tmp/beatglass-library-phase1 -j 3`, and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` passed 45/45. The real tempo acceptance exercises reopen reuse, configuration and content invalidation, cancellation, and changed-during-analysis rejection. The fixture decoder and DSP are real, but concurrent replacement/ABA remains unresolved, and the result is tempo-only. WSL is not native Linux qualification; codec qualification was disabled for this run.
+On Windows 10.0.26300 x64, MSVC 19.44 and Qt 6.8.3, the shared desktop shell gained Library and DJ navigation while retaining real asynchronous file metadata inspection. Library indexing, analysis, playback, capture and overlay remain unavailable. From this worktree at base 6f927cb with `VCPKG_ROOT=C:/Users/zachf/.codex/worktrees/beatglass-vcpkg-prebuilt` and `BEATGLASS_QT_ROOT=$env:TEMP/beatglass-qt/6.8.3/msvc2022_64`, `cmake --preset prebuilt-qt-desktop -G "Visual Studio 17 2022" -A x64 -B "$env:TEMP/beatglass-ui-build" -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=C:/Users/zachf/.codex/worktrees/beatglass-codecs/build-pinned-win/vcpkg_installed`, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4`, and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 35/35, including the offscreen Qt Quick navigation test. The existing installed vcpkg tree was reused; this is not a fresh dependency qualification. `docker build -f docs/api/Dockerfile -t beatglass-docs .` and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html` passed. No native interactive UI, audio, or overlay qualification was performed for this increment.
 
-For the parent review increment, Windows 10.0.26300 x64 and MSVC 19.44, using SQLite 3.51.1 from `C:/ac0146/vcpkg_installed/x64-windows-static`: `cmake -S . -B C:/Users/zachf/.codex/builds/beatglass-library-review -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DCMAKE_PREFIX_PATH=C:/ac0146/vcpkg_installed/x64-windows-static -DFETCHCONTENT_SOURCE_DIR_CATCH2=`, `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-review --config Release -j 4`, `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-review -C Release --output-on-failure` passed 30/30. Linker warning LNK4098 reported mixed static/dynamic CRT defaults; this is development evidence only and the dependency/runtime configuration must be reconciled before release. This Windows run predates the fingerprint/tempo follow-up.
+## Phase 1 filesystem browser and live presentation boundary
 
-The follow-up API header coverage check reported 25 headers and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html3` succeeded using the existing documentation image. No native macOS checks were run for this follow-up.
+On Windows 10.0.26300 x64 with MSVC 19.44 and Qt 6.8.3, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4` and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 36/36 using the existing vcpkg installation described above. After extending the QML test to activate a file with the keyboard, `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug -R desktop_navigation --output-on-failure` passed. The offscreen test browses checked-in audio fixtures; it does not qualify the native folder dialog or desktop accessibility. The current directory view is not an indexed or persistent collection, and cannot report a precise reason for an unreadable or empty folder. The GUI-thread presentation adapter rejects older revisions and clears estimates on invalidation/non-tracking states; no live producer is connected. Database integration, real capture, overlay and native platform qualification remain pending.
+The API index coverage check (`python docs/api/check_headers.py`) covered 22 headers; the warnings-as-errors Docker Sphinx build and `python docs/api/check_rendered.py "$env:TEMP/beatglass-docs-output/html/index.html"` passed. The new adapter is application-private and has no cross-thread delivery mechanism; integration must supply ordered GUI-thread delivery including clears and session/restart protection.
+
+# Source contract integration
+
+The proposed shared source types and ordered lifecycle helper have regression
+coverage. Native adapters, control queues and actual source clock measurements
+remain unimplemented and require integration and platform qualification.
+
+PR #63 merged concurrent process-epoch issuance with contention and exhaustion
+tests. The application must still share one allocator across live and offline
+paths and coordinate each source's lifecycle.
+
+# Cache contract integration
+
+Typed cache outcomes and a worker-local commit decision have regression
+coverage. SQLite, file-version revalidation, crash recovery and unchanged-file
+reuse acceptance tests remain backend work.
 
 For the fingerprint follow-up on Windows 10.0.26300 x64/MSVC 19.44 with SQLite 3.51.1 and OpenSSL 3.6.0 from `C:/ac0146/vcpkg_installed/x64-windows-static`, `cmake -S . -B C:/Users/zachf/.codex/builds/beatglass-library-review -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON -Wno-dev`, `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-review --config Release -j 4`, and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-review -C Release --output-on-failure` passed 32/32. This uses the same previously configured generator and prefix as the parent command above; the tempo slice was not enabled. The first link failed due to missing Windows OpenSSL system libraries; adding crypt32 and ws2_32 allowed it to link. LNK4098 remains and limits this development evidence.
+
 # Shared timeline contract
 
 The snapshot publisher enforces exclusive observed-frame and nonempty
@@ -174,3 +192,52 @@ platforms, licensing, and native v1 qualification remain open.
 Merged main at `9488384968ef0c59152b4ef50c18fcc408875a97` into the stacked library branch, retaining its exclusive timeline and Windows endpoint tests. On WSL Ubuntu 22.04/GCC 11.4 with the system dependencies and options in the file-evidence entry above, `cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_TEST_V1_CODECS=OFF -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src -Wno-dev`, `cmake --build /tmp/beatglass-library-phase1 -j 3`, and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` passed 50/50. The new cases test exact run/key recovery after reopening, a superseded completed run, per-job stop/progress and cancellation of real tempo replay through the tracked queue. No actual indeterminate SQLite commit was injected; the test verifies post-reopen state classification. WSL is not native Linux qualification.
 
 Windows 10.0.26300 x64/MSVC 19.44, system under test with static SQLite 3.51.1/OpenSSL 3.6.0 and consistent `-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded`: `cmake -S . -B C:/Users/zachf/.codex/builds/beatglass-library-static-crt -G "Visual Studio 17 2022" -A x64 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON -DCMAKE_PREFIX_PATH=C:/ac0146/vcpkg_installed/x64-windows-static -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DFETCHCONTENT_SOURCE_DIR_CATCH2=C:/Users/zachf/.codex/builds/beatglass-library-review/_deps/catch2-src -Wno-dev`, followed by `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure`, passed 38/38 after rebuilding following the main merge; the successful rebuild did not report LNK4098. An initial build overlapped the merge and its stale core/test combination failed the timeline test and omitted the newly introduced endpoint executable; it is superseded by the clean rebuild. This Windows run omitted the decoder slice. The merged documentation inventory and its unit test passed, and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html5` passed. macOS, a fault-injected commit, and safe shared-handle decoding remain untested/unimplemented.
+
+## Shared causal tempo replay proposal
+
+`CausalTempoReplay` consumes borrowed interleaved blocks on one worker, buffers at most one 512-frame hop, and runs the existing aubio tempo and signal lifecycle logic. File replay now uses this same engine; a future snapshot job can feed it without reopening the path. State reports both the exclusive accepted boundary and the last complete analyzed hop. At EOF an incomplete hop is not analyzed. Gaps and new epochs discard buffered evidence; old epochs, overlap, malformed PCM and same-epoch format changes fail closed. The caller must allocate epochs and deliver invalidation/clear notifications around source lifecycle events; the engine is not an audio callback, decoder, cache or GUI publisher. This is a proposed shared API pending integration-owner review. Tonal and timestamped beat trackers are separate unmerged increments and are not yet integrated into this engine.
+
+## Experimental beat events
+
+The worker-only aubio beat-event experiment reports epoch-local sample positions and the exclusive observed boundary for each detection. Its 1024-sample window/512-sample hop and aubio's estimated event time are not a measured latency guarantee. An event at the current exclusive boundary waits for a subsequent observed sample; it is not flushed at EOF. Partial hops are retained, and gaps, epoch changes and explicit discontinuities reset aubio state. The experiment is not connected to CLI replay or snapshots; silence invalidation, event strength, publication delay, longer-than-32-bit aubio counters, native capture and measured beat accuracy remain integration work. Generated click tests at 44.1/48 kHz check causal bounds, chunking and broad beat intervals, not full-mix accuracy.
+
+After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea57372aaab89`, WSL Ubuntu 22.04 with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, slice disabled and pinned Catch2 source reused passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 32/32. Windows 10.0.26300 x64/MSVC 19.44 with the previously configured static CRT and static SQLite development tree passed `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` 34/34. These are development checks only; WSL is not native Linux qualification and no decoder slice was included.
+
+## Same-source integration proposal
+
+The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
+read-only byte boundary. The existing CLI decoder does not consume it. Secure
+snapshot creation, native file identity and decoder integration remain open;
+see [same-source proposal](same-source-proposal.md).
+
+## Experimental virtual decoder
+
+A private libsndfile virtual-I/O adapter can synchronously decode a borrowed `ByteSource`; it is not connected to the CLI or cache. It keeps the source borrowed until decoder close, translates callback errors and cancellation to worker-visible outcomes, and is invalidated after mid-read cancellation or failure. Generated WAV, AIFF, FLAC and MP3 tests exercise the adapter on the codec-enabled Windows development build. The byte-source contract was merged in PR #41; snapshot creation, original-file revalidation, secure cleanup, and native platform race tests remain unimplemented. No file is made immutable by this adapter.
+
+Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built this adapter and passed 53/53 CTest cases with `BEATGLASS_TEST_V1_CODECS=OFF`; the virtual codec fixture check covered AIFF there. This is not native desktop qualification, and the older decoder does not qualify MP3 support.
+
+The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. The provisional public FileReader borrowed-source constructor and explicit-epoch seek expose this adapter for review; the legacy path-based seek retains local increment behavior. Snapshot creation and publication are still separate responsibilities.
+
+## Offline result contract
+
+PR #57 merged an owned offline result and bounded structural validator for
+composite evidence. Actual composite persistence, paged retrieval, native
+qualification and a validated track-level key remain open.
+
+## Phase 1 tonal dependency experiment
+
+The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
+
+After merging main `6aade6e`, the provisional library option was configured with `cmake -S . -B /tmp/beatglass-foundation-review -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, then `cmake --build /tmp/beatglass-foundation-review -j 1` and `ctest --test-dir /tmp/beatglass-foundation-review --output-on-failure` passed 38/38 on Ubuntu 22.04 WSL. This configuration does not enable desktop, native audio or macOS qualification. CMake emitted an author warning that `SQLite::SQLite3` is deprecated in favor of `SQLite3::SQLite3` in the installed CMake version; host SQLite remains unpinned.
+
+After the concurrent allocator contract merged, the provisional borrowed `FileReader` rejects epoch zero before source access, requires caller-issued increasing seek epochs and rejects its legacy one-argument seek. The caller must keep one process allocator, serialize reader operations, and discard stale publications. With `BEATGLASS_TEST_V1_CODECS=OFF`, WSL `cmake --build /tmp/beatglass-virtual-check -j1` and `ctest --test-dir /tmp/beatglass-virtual-check --output-on-failure` passed 59/59. Windows MSVC codec-enabled `cmake --build C:/Users/zachf/.codex/build/beatglass-phase1-verify --config Debug -- /m:1` and `ctest --test-dir C:/Users/zachf/.codex/build/beatglass-phase1-verify -C Debug --output-on-failure` passed 62/62. The desktop and library prototypes are not yet wired to one process-owned allocator; legacy path-based overloads remain isolated compatibility APIs.
+
+## Bounded file fingerprint review
+
+A separately reviewable, opt-in fingerprint primitive hashes a file using a bounded buffer and supports cooperative cancellation and change detection. It does not connect to the cache or decoder. File replacement, mutation and ABA can evade attribute checks, so the result cannot prove decoder input identity. OpenSSL remains an unpinned development dependency; native product qualification remains open.
+
+## Provisional path-based tempo job
+
+The private tempo job prototype reopens a path separately for fingerprinting and decoding. Replacement or ABA can evade its pre/post checks; it must not be used for product cache decisions until it is replaced by verified same-byte capture and publication. The reviewed fingerprint primitive and its hardening are now in main via #74. This branch remains a draft.
+
+Reconciliation at code commit `410c9df` with main `e6c207b`: WSL Ubuntu 22.04 serial configure with `-DBUILD_TESTING=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON -DBEATGLASS_TEST_V1_CODECS=OFF -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, followed by `cmake --build /tmp/beatglass-library-pr34 -j1` and `ctest --test-dir /tmp/beatglass-library-pr34 --output-on-failure`, passed 96/96. `python docs/api/check_headers.py` and the Docker Sphinx warnings-as-errors and rendered declaration checks passed (71 names). These checks do not resolve the path identity race or qualify native desktop/audio/overlay behavior.
