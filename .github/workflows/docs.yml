@@ -12,7 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Check header coverage
-        run: python3 docs/api/check_headers.py
+        run: |
+          python3 docs/api/check_headers.py
+          python3 tests/unit/check_headers_test.py
       - name: Build documentation image
         run: docker build -f docs/api/Dockerfile -t beatglass-docs .
       - name: Build with warnings as errors
