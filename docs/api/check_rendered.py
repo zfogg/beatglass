@@ -21,7 +21,7 @@ expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_l
             'id="beatglass::FileMetadata::channels__std::uint32_t"', 'id="beatglass::FileMetadata::frames__std::uint64_t"',
             'id="beatglass::FileMetadata::format__ss"', 'id="beatglass::TempoResult"',
             'id="beatglass::TempoResult::metadata__FileMetadata"', 'id="beatglass::TempoResult::bpm__std::optional:float:"',
-            'id="beatglass::TempoResult::beats__unsigned-i"', 'id="beatglass::TempoResult::state__TrackingState"', "TempoEstimator", "KeyEstimator", "ChordEstimator", "PresentationAdapter",
+            'id="beatglass::TempoResult::beats__unsigned-i"', 'id="beatglass::TempoResult::state__TrackingState"', "TempoEstimator", "KeyEstimator", "ChordEstimator", "PresentationAdapter", "PresentationGate", "PresentationUpdate",
             'id="_CPPv4N9beatglass14FileReadStatusE"', 'id="_CPPv4N9beatglass14FileReadStatus4dataE"',
             'id="_CPPv4N9beatglass14FileReadStatus3endE"', 'id="_CPPv4N9beatglass14FileReadStatus9cancelledE"',
             'id="beatglass::FileReadResult"', 'id="beatglass::FileReadResult::status__FileReadStatus"',
