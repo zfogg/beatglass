@@ -1,16 +1,29 @@
 #include "collection_view.hpp"
 #include <QMetaObject>
 #include <stdexcept>
+#include <filesystem>
+
+namespace {
+std::filesystem::path nativePath(const QString& path) {
+#ifdef _WIN32
+  return std::filesystem::path(path.toStdWString());
+#else
+  return std::filesystem::u8path(path.toUtf8().toStdString());
+#endif
+}
+}
 
 CollectionView::CollectionView(const QString& database, QObject* parent) : QObject(parent) {
   worker_ = std::make_unique<LibraryBridge>(database.toUtf8().toStdString(), [this](auto task) {
     if (!QMetaObject::invokeMethod(this, std::move(task), Qt::QueuedConnection))
       throw std::runtime_error("GUI dispatch failed");
   });
+  poll_.setInterval(50);
+  connect(&poll_, &QTimer::timeout, this, &CollectionView::pollAnalysis);
 }
 CollectionView::~CollectionView() { worker_.reset(); }
 void CollectionView::refresh(const QString& search) {
-  auto token = requests_.beginBrowse(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…"); emit changed();
+  auto token = requests_.beginBrowse(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
   beatglass::library_detail::CollectionQuery query; query.search = search.toUtf8().toStdString(); query.limit = 100;
   worker_->entries(std::move(query), [this, token](LibraryBridge::Result result) {
     if (!result.error.empty() || result.cancelled) {
@@ -30,4 +43,58 @@ void CollectionView::refresh(const QString& search) {
     }
     emit changed();
   });
+  emit changed();
+}
+bool CollectionView::analyzeIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch) {
+  if (path.isEmpty() || engine.isEmpty() || configuration.isEmpty() || !epoch || analysisTicket_) return false;
+  analysisToken_ = requests_.beginAnalysis();
+  if (!analysisToken_) return false;
+  analysisStatus_ = QStringLiteral("Analysis running.");
+  analysisTicket_ = worker_->analyze_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), epoch, {});
+  poll_.start(); emit changed(); return true;
+}
+void CollectionView::cancelAnalysis() {
+  if (!analysisTicket_) return;
+  worker_->cancel_analysis(); analysisStatus_ = QStringLiteral("Cancellation requested; awaiting terminal outcome."); emit changed();
+}
+void CollectionView::pollAnalysis() {
+  if (!analysisTicket_) return;
+  auto result = analysisTicket_->result(); if (!result) return;
+  poll_.stop(); analysisTicket_.reset();
+  if (!requests_.finishAnalysis(analysisToken_, std::move(*result))) return;
+  const auto& outcome = *requests_.terminal();
+  if (!outcome.error.empty()) analysisStatus_ = QStringLiteral("Analysis error: %1").arg(QString::fromStdString(outcome.error));
+  else if (outcome.cancelled) analysisStatus_ = QStringLiteral("Analysis cancelled.");
+  else if (const auto* analysis = std::get_if<LibraryBridge::Analysis>(&outcome.value)) {
+    using S = beatglass::library_detail::FileJobStatus;
+    switch (analysis->status) {
+      case S::committed: analysisStatus_ = QStringLiteral("Analysis committed; result remains gated."); break;
+      case S::cache_hit: analysisStatus_ = QStringLiteral("Existing analysis found; result remains gated."); break;
+      case S::cancelled: analysisStatus_ = QStringLiteral("Analysis cancelled."); break;
+      case S::stale_input: analysisStatus_ = QStringLiteral("Source changed during analysis."); break;
+      case S::error: analysisStatus_ = QStringLiteral("Analysis error: %1; recovery run: %2").arg(QString::fromStdString(analysis->diagnostic), QString::fromStdString(analysis->recovery_run_id)); break;
+    }
+    if (!outcome.association_error.empty()) analysisStatus_ += QStringLiteral(" Index association failed: %1").arg(QString::fromStdString(outcome.association_error));
+  } else analysisStatus_ = QStringLiteral("Unexpected analysis response.");
+  requests_.acknowledgeAnalysis(); analysisToken_.reset(); emit changed();
+}
+void CollectionView::lookupIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch) {
+  auto token = requests_.beginBrowse(); rows_.clear(); status_ = QStringLiteral("Checking indexed analysis…");
+  worker_->lookup_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), epoch, [this, token](LibraryBridge::Result result) {
+    if (!requests_.finishBrowse(token, {})) return;
+    if (!result.error.empty()) status_ = QStringLiteral("Lookup error: %1").arg(QString::fromStdString(result.error));
+    else if (result.cancelled) status_ = QStringLiteral("Lookup cancelled.");
+    else if (const auto* lookup = std::get_if<LibraryBridge::Lookup>(&result.value)) {
+      using S = LibraryBridge::LookupStatus;
+      switch (lookup->status) {
+        case S::hit: status_ = QStringLiteral("Provisional analysis found; result remains gated."); break;
+        case S::miss: status_ = QStringLiteral("No indexed analysis."); break;
+        case S::changed: status_ = QStringLiteral("Source changed or cannot be verified."); break;
+        case S::cancelled: status_ = QStringLiteral("Lookup cancelled."); break;
+        case S::error: status_ = QStringLiteral("Lookup error: %1").arg(QString::fromStdString(lookup->diagnostic)); break;
+      }
+    } else status_ = QStringLiteral("Unexpected lookup response.");
+    emit changed();
+  });
+  emit changed();
 }
