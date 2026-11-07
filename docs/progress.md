@@ -181,9 +181,9 @@ read-only byte boundary. The existing decoder does not consume it. Secure
 snapshot creation, native file identity and decoder integration remain open;
 see [same-source proposal](same-source-proposal.md).
 
-## Offline result contract proposal
+## Offline result contract
 
-An owned offline result and bounded structural validator are proposed for
+PR #57 merged an owned offline result and bounded structural validator for
 composite evidence. Actual composite persistence, paged retrieval, native
 qualification and a validated track-level key remain open.
 
