@@ -1,0 +1,74 @@
+#pragma once
+#include <cstddef>
+#include <cstdint>
+#include <span>
+#include <stop_token>
+
+namespace beatglass {
+/** Byte-read outcome for a worker-owned source. */
+enum class ByteReadStatus { data, end, cancelled, error };
+/** Read outcome and byte count; only data may have a nonzero count. */
+struct ByteReadResult {
+  ByteReadStatus status{ByteReadStatus::error}; ///< Result category.
+  std::size_t bytes{}; ///< Bytes written to the caller's buffer.
+};
+/** Provisional seekable read-only byte source, confined to one worker.
+ * A job may lend the same source to fingerprinting and a decoder sequentially.
+ * The owner keeps the source alive until all borrowers finish. Reads may block;
+ * no callback, GUI, or concurrent access is permitted. A source used for a
+ * cacheable analysis must denote the same immutable snapshot throughout both
+ * operations; this interface does not create or secure that snapshot. An opened
+ * mutable file and its path are not by themselves immutable evidence.
+ */
+class ByteSource {
+public:
+  virtual ~ByteSource() = default;
+  /** Size of the fixed byte sequence; no I/O is implied. */
+  virtual std::uint64_t size() const = 0;
+  /** Read from an absolute offset into caller-owned storage.
+   * At or after size, return end; a data result contains 1..buffer.size() bytes
+   * and cannot extend beyond size. Cancellation before I/O returns cancelled;
+   * interruption of a blocking operation is implementation-dependent. A
+   * cancelled/error read has zero bytes. No buffer is retained after return.
+   */
+  virtual ByteReadResult read_at(std::uint64_t offset, std::span<std::byte> buffer,
+                                 std::stop_token cancel) = 0;
+};
+/** Worker-local cursor borrowing a source; it does not extend source lifetime.
+ * It validates source responses and advances only after valid data. It is not
+ * thread-safe and cannot turn a mutable underlying source into a snapshot.
+ */
+class ByteCursor {
+public:
+  /** Borrow a source and begin at byte zero. */
+  explicit ByteCursor(ByteSource& source) noexcept : source_(source) {}
+  /** Current byte offset. */
+  std::uint64_t position() const noexcept { return position_; }
+  /** Seek to an absolute byte offset through EOF; reject offsets beyond EOF. */
+  bool seek(std::uint64_t offset) {
+    if (offset > source_.size()) return false;
+    position_ = offset; return true;
+  }
+  /** Read nonempty output, retaining position on cancellation or error.
+   * Reject malformed source responses; successful EOF does not advance.
+   * Exceptions from the source propagate and leave position unchanged.
+   */
+  ByteReadResult read(std::span<std::byte> buffer, std::stop_token cancel = {}) {
+    if (cancel.stop_requested()) return {ByteReadStatus::cancelled, 0};
+    if (buffer.empty()) return {ByteReadStatus::error, 0};
+    const auto size = source_.size();
+    if (position_ > size) return {ByteReadStatus::error, 0};
+    if (position_ == size) return {ByteReadStatus::end, 0};
+    auto result = source_.read_at(position_, buffer, cancel);
+    if (result.status == ByteReadStatus::data && result.bytes > 0 &&
+        result.bytes <= buffer.size() && result.bytes <= size - position_) {
+      position_ += result.bytes; return result;
+    }
+    if ((result.status == ByteReadStatus::cancelled || result.status == ByteReadStatus::error) && result.bytes == 0) return result;
+    return {ByteReadStatus::error, 0};
+  }
+private:
+  ByteSource& source_;
+  std::uint64_t position_{};
+};
+}
