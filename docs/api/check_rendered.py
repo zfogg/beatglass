@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 
 html = Path(sys.argv[1]).read_text(encoding="utf-8")
-expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_loudest_channel", "StreamContinuity", "AudioQueue", "AudioSource", 'id="beatglass::AudioSource::stop"', "SourceStatus", "ChannelLayout",
+expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_loudest_channel", "StreamContinuity", "AudioQueue", "AudioSource", 'id="beatglass::AudioSource::stop"', "SourceStatus", "ChannelLayout", "SourceAttempt", "SourceLifecycle",
             'id="beatglass::AcquisitionToken"', 'id="beatglass::AcquisitionToken::epoch__std::uint64_t"',
             'id="beatglass::AcquisitionToken::generation__std::uint64_t"',
             'id="beatglass::TrackingMachine"', 'id="beatglass::TrackingMachine::state__voidC"',
