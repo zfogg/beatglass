@@ -1,5 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/detail/file_job.hpp"
+#include "beatglass/library/detail/job_executor.hpp"
+#include <future>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -51,6 +53,25 @@ TEST_CASE("real tempo job rejects a file changed during analysis") {
     if (!modified) { modified = true; std::ofstream out(input, std::ios::binary | std::ios::app); out << 'x'; }
   });
   INFO(changed.diagnostic); REQUIRE(modified); REQUIRE(changed.status == FileJobStatus::stale_input);
+  auto retry = analyze_cached_tempo(cache, input, "aubio-test-v1", "config");
+  INFO(retry.diagnostic); REQUIRE(retry.status == FileJobStatus::committed);
+}
+
+TEST_CASE("tracked queue cancels a real tempo job without publishing") {
+  TempDirectory temp; auto input = temp.path / "audio";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.flac", input);
+  JobExecutor executor(1); std::promise<void> started, release; auto gate = release.get_future().share();
+  auto handle = executor.submit_tracked(0, [&](std::stop_token stop, const auto& progress) {
+    SqliteCache cache((temp.path / "library.sqlite").string()); bool signalled = false;
+    auto result = analyze_cached_tempo(cache, input, "aubio-test-v1", "config", stop, [&](auto frames) {
+      progress(frames); if (!signalled) { signalled = true; started.set_value(); gate.wait(); }
+    });
+    return result.status == FileJobStatus::cancelled ? TrackedState::cancelled : TrackedState::failed;
+  });
+  REQUIRE(handle); REQUIRE(started.get_future().wait_for(std::chrono::seconds(5)) == std::future_status::ready);
+  REQUIRE(handle->frames() > 0); handle->cancel(); release.set_value(); executor.shutdown();
+  REQUIRE(handle->state() == TrackedState::cancelled);
+  SqliteCache cache((temp.path / "library.sqlite").string());
   auto retry = analyze_cached_tempo(cache, input, "aubio-test-v1", "config");
   INFO(retry.diagnostic); REQUIRE(retry.status == FileJobStatus::committed);
 }

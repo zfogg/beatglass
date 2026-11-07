@@ -62,7 +62,7 @@ FileJobResult analyze_cached_tempo(SqliteCache& cache, const std::filesystem::pa
     if (cancelled || published == Publish::cancelled) return {FileJobStatus::cancelled, {}, {}};
     if (validation_error) return {FileJobStatus::error, {}, validation_diagnostic};
     if (published == Publish::stale_input) return {FileJobStatus::stale_input, {}, {}};
-    if (published == Publish::error) return {FileJobStatus::error, {}, "cache publication failed or commit outcome unknown"};
+    if (published == Publish::error) return {FileJobStatus::error, {}, "cache publication failed or commit outcome unknown", std::make_pair(id, key)};
     return {FileJobStatus::committed, result, {}};
   } catch (const Cancelled&) { return {FileJobStatus::cancelled, {}, {}}; }
     catch (const std::exception& e) { return {FileJobStatus::error, {}, e.what()}; }

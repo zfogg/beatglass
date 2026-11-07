@@ -6,6 +6,7 @@
 #include <optional>
 #include <stop_token>
 #include <string>
+#include <utility>
 namespace beatglass::library_detail {
 /** Terminal state of the provisional tempo cache job. */
 enum class FileJobStatus {
@@ -20,6 +21,7 @@ struct FileJobResult {
   /** Terminal state. */ FileJobStatus status{FileJobStatus::error};
   /** Tempo data for a cache hit or committed job. */ std::optional<TempoResult> result;
   /** Diagnostic for error outcomes. */ std::string diagnostic;
+  /** Run ID and key for storage-error reconciliation, when publication was attempted. */ std::optional<std::pair<std::string, CacheKey>> recovery;
 };
 /** Analyze or reuse a file's provisional tempo result on the calling database worker. Hashes the whole file before lookup and after analysis; progress reports decoded frames synchronously. Cancellation is cooperative between decoded blocks and hash chunks, not during blocking I/O. The decoder separately opens the path, so replacement/ABA races remain; this is not yet suitable for product publication. The source file is never written. */
 FileJobResult analyze_cached_tempo(SqliteCache& cache, const std::filesystem::path& path,

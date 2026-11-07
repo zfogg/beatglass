@@ -72,3 +72,28 @@ TEST_CASE("SQLite cache holds exclusive ownership during recovery and use") {
   { SqliteCache next(path.string()); std::string result; REQUIRE(next.find({"hash", "engine", "config", "offline"}, result)); }
   REQUIRE(std::filesystem::remove(path));
 }
+
+TEST_CASE("reopen resolves committed and interrupted runs by exact ID and key") {
+  auto path = std::filesystem::temp_directory_path() /
+    ("beatglass-recovery-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  CacheKey key{"hash", "engine", "config", "offline"};
+  {
+    SqliteCache cache(path.string());
+    cache.begin("committed", key);
+    REQUIRE(cache.publish("committed", key, "first", {}, [] { return true; }) == Publish::committed);
+    cache.begin("later", key);
+    REQUIRE(cache.publish("later", key, "second", {}, [] { return true; }) == Publish::committed);
+    cache.begin("interrupted", key);
+    REQUIRE_THROWS(cache.recover("interrupted", key));
+  }
+  {
+    SqliteCache cache(path.string());
+    REQUIRE(cache.recover("committed", key) == RunRecovery::committed);
+    REQUIRE(cache.recover("interrupted", key) == RunRecovery::retryable);
+    REQUIRE(cache.recover("missing", key) == RunRecovery::missing);
+    auto wrong = key; wrong.config = "other";
+    REQUIRE(cache.recover("committed", wrong) == RunRecovery::missing);
+    std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "second");
+  }
+  REQUIRE(std::filesystem::remove(path));
+}

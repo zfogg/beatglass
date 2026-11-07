@@ -51,6 +51,18 @@ public:
     auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 0));
     auto n = sqlite3_column_bytes(s.p, 0); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
   }
+  RunRecovery recover(const std::string& id, const CacheKey& key) {
+    Statement s(db_, "SELECT status FROM runs WHERE id=? AND content=? AND engine=? AND config=? AND mode=?");
+    bind(s.p, 1, id); bind_key(s.p, 2, key);
+    const int rc = sqlite3_step(s.p);
+    if (rc == SQLITE_DONE) return RunRecovery::missing;
+    if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_));
+    const auto status = reinterpret_cast<const char*>(sqlite3_column_text(s.p, 0));
+    if (!status) throw std::runtime_error("invalid run status");
+    if (std::string(status) == "complete") return RunRecovery::committed;
+    if (std::string(status) == "retryable") return RunRecovery::retryable;
+    throw std::runtime_error("cannot recover a currently running run; reopen first");
+  }
   // The worker rechecks evidence inside the transaction. The supplied callback
   // must compare the opened input's current version with its pre-analysis evidence.
   // A stat/hash check cannot rule out all concurrent filesystem mutations.
@@ -90,6 +102,7 @@ SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>
 SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
+RunRecovery SqliteCache::recover(const std::string& id, const CacheKey& key) { return impl_->recover(id, key); }
 Publish SqliteCache::publish(const std::string& id, const CacheKey& key, const std::string& result,
                              std::stop_token stop, const std::function<bool()>& revalidate) {
   return impl_->publish(id, key, result, stop, revalidate);

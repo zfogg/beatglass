@@ -44,3 +44,31 @@ TEST_CASE("library executor cancels active work and discards waiting jobs") {
   REQUIRE(observed);
   REQUIRE_FALSE(queued_ran);
 }
+
+TEST_CASE("tracked jobs expose individual cancellation and monotonic progress") {
+  using beatglass::library_detail::TrackedState;
+  JobExecutor executor(2);
+  std::promise<void> started, resume; auto gate = resume.get_future().share();
+  auto active = executor.submit_tracked(0, [&](std::stop_token stop, const auto& progress) {
+    progress(12); progress(4); started.set_value(); gate.wait();
+    return stop.stop_requested() ? TrackedState::cancelled : TrackedState::completed;
+  });
+  REQUIRE(active); REQUIRE(started.get_future().wait_for(5s) == std::future_status::ready);
+  REQUIRE(active->state() == TrackedState::running); REQUIRE(active->frames() == 12);
+  bool ran = false;
+  auto queued = executor.submit_tracked(0, [&](std::stop_token, const auto&) { ran = true; return TrackedState::completed; });
+  REQUIRE(queued); queued->cancel(); REQUIRE(queued->state() == TrackedState::cancelled);
+  active->cancel(); resume.set_value(); executor.shutdown();
+  REQUIRE(active->state() == TrackedState::cancelled); REQUIRE_FALSE(ran);
+}
+TEST_CASE("tracked job completion wins over a late cancellation") {
+  using beatglass::library_detail::TrackedState;
+  JobExecutor executor(1);
+  std::promise<void> started, resume; auto gate = resume.get_future().share();
+  auto handle = executor.submit_tracked(0, [&](std::stop_token, const auto&) {
+    started.set_value(); gate.wait(); return TrackedState::completed;
+  });
+  REQUIRE(handle); REQUIRE(started.get_future().wait_for(5s) == std::future_status::ready);
+  handle->cancel(); resume.set_value(); executor.shutdown();
+  REQUIRE(handle->state() == TrackedState::completed);
+}
