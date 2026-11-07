@@ -24,6 +24,8 @@ public:
   bool clickThrough() const;
   /** Move and resize an overlay into an available screen's logical-pixel geometry. No action occurs if no screen is available. */
   void keepOnScreen();
+  /** Emitted on the GUI thread when click-through changes, including automatic unlock. */
+  Q_SIGNAL void clickThroughChanged(bool enabled);
 protected:
   /** Unlock if the control window is hidden, minimized or closed. */
   bool eventFilter(QObject* watched, QEvent* event) override;

@@ -1,9 +1,18 @@
 #include "windows_overlay.hpp"
 #include <QGuiApplication>
+#include <QDebug>
 #include <QQuickWindow>
 #include <QScreen>
 #include <QtTest>
 #include <windows.h>
+#include <QMouseEvent>
+
+class ClickWindow : public QQuickWindow {
+public:
+  int presses{};
+protected:
+  void mousePressEvent(QMouseEvent* event) override { ++presses; event->accept(); }
+};
 
 class OverlayTest : public QObject {
   Q_OBJECT
@@ -12,6 +21,7 @@ private slots:
     QQuickWindow overlay;
     QWindow control;
     beatglass::windows::OverlayController adapter(&overlay, &control);
+    QSignalSpy changes(&adapter, &beatglass::windows::OverlayController::clickThroughChanged);
     QVERIFY(overlay.flags().testFlag(Qt::WindowStaysOnTopHint));
     QVERIFY(overlay.flags().testFlag(Qt::FramelessWindowHint));
     QCOMPARE(overlay.color(), QColor(Qt::transparent));
@@ -24,6 +34,8 @@ private slots:
     QVERIFY((GetWindowLongPtrW(reinterpret_cast<HWND>(overlay.winId()), GWL_EXSTYLE) & WS_EX_TOPMOST) != 0);
     control.hide();
     QVERIFY(!adapter.clickThrough());
+    QCOMPARE(changes.size(), 2);
+    QCOMPARE(changes.last().first().toBool(), false);
     QVERIFY(!overlay.flags().testFlag(Qt::WindowTransparentForInput));
     QTRY_VERIFY((GetWindowLongPtrW(reinterpret_cast<HWND>(overlay.winId()), GWL_EXSTYLE) & WS_EX_TRANSPARENT) == 0);
     control.show();
@@ -51,6 +63,98 @@ private slots:
       QVERIFY(adapter.setClickThrough(true));
     }
     QVERIFY(!overlay.flags().testFlag(Qt::WindowTransparentForInput));
+  }
+  void nativePointerPassThrough() {
+    if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_OVERLAY_TEST")) QSKIP("Set BEATGLASS_NATIVE_OVERLAY_TEST to run the interactive pointer test");
+    struct RestoreCursor { POINT position{}; RestoreCursor() { GetCursorPos(&position); } ~RestoreCursor() { SetCursorPos(position.x, position.y); } } restore;
+    ClickWindow background;
+    ClickWindow overlay;
+    QWindow control;
+    const auto bounds = QGuiApplication::primaryScreen()->availableGeometry();
+    const QRect area(bounds.left() + 120, bounds.top() + 120, 320, 220);
+    background.setGeometry(area);
+    background.setColor(Qt::darkBlue);
+    control.setGeometry(bounds.left() + 10, bounds.top() + 10, 80, 60);
+    overlay.setGeometry(area);
+    control.show();
+    background.show();
+    beatglass::windows::OverlayController adapter(&overlay, &control);
+    overlay.show();
+    const auto hwnd = reinterpret_cast<HWND>(overlay.winId());
+    QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE));
+    QTest::qWait(200);
+    auto click = [&] {
+      const auto point = overlay.mapToGlobal(QPoint(160, 110));
+      // SetCursorPos uses physical pixels; convert the Qt logical position for the target screen.
+      POINT native{point.x(), point.y()};
+      QVERIFY(LogicalToPhysicalPointForPerMonitorDPI(hwnd, &native));
+      QVERIFY(SetCursorPos(native.x, native.y));
+      INPUT input[2]{};
+      input[0].type = INPUT_MOUSE; input[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+      input[1].type = INPUT_MOUSE; input[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+      QCOMPARE(SendInput(2, input, sizeof(INPUT)), UINT(2));
+    };
+    click();
+    QTRY_COMPARE(overlay.presses, 1);
+    QCOMPARE(background.presses, 0);
+    QVERIFY(adapter.setClickThrough(true));
+    QTest::qWait(100);
+    click();
+    QTRY_COMPARE(background.presses, 1);
+    QCOMPARE(overlay.presses, 1);
+    control.hide();
+    QTRY_VERIFY(!adapter.clickThrough());
+    click();
+    QTRY_COMPARE(overlay.presses, 2);
+    control.show();
+    background.showFullScreen();
+    QTest::qWait(300);
+    QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE));
+    QVERIFY(adapter.setClickThrough(true));
+    QTest::qWait(100);
+    click();
+    QTRY_COMPARE(background.presses, 2);
+    QVERIFY(adapter.setClickThrough(false));
+    click();
+    QTRY_COMPARE(overlay.presses, 3);
+  }
+  void nativeMultiMonitorPassThrough() {
+    if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_OVERLAY_TEST")) QSKIP("Set BEATGLASS_NATIVE_OVERLAY_TEST to run the interactive pointer test");
+    const auto screens = QGuiApplication::screens();
+    if (screens.size() < 2) QSKIP("At least two active displays are required");
+    struct RestoreCursor { POINT position{}; RestoreCursor() { GetCursorPos(&position); } ~RestoreCursor() { SetCursorPos(position.x, position.y); } } restore;
+    ClickWindow background, overlay;
+    QWindow control;
+    control.setGeometry(QGuiApplication::primaryScreen()->availableGeometry().topLeft().x() + 10,
+                        QGuiApplication::primaryScreen()->availableGeometry().topLeft().y() + 10, 80, 60);
+    control.show();
+    beatglass::windows::OverlayController adapter(&overlay, &control);
+    background.show();
+    overlay.show();
+    QVERIFY(adapter.setClickThrough(true));
+    int expected = 0;
+    for (auto* screen : screens) {
+      qInfo() << "Display" << screen->name() << "logical geometry" << screen->geometry() << "scale" << screen->devicePixelRatio();
+      const auto origin = screen->availableGeometry().topLeft();
+      background.setScreen(screen);
+      overlay.setScreen(screen);
+      const QRect area(origin.x() + 120, origin.y() + 120, 320, 220);
+      background.setGeometry(area);
+      overlay.setGeometry(area);
+      const auto hwnd = reinterpret_cast<HWND>(overlay.winId());
+      QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE));
+      QTest::qWait(200);
+      const auto point = overlay.mapToGlobal(QPoint(160, 110));
+      POINT native{point.x(), point.y()};
+      QVERIFY(LogicalToPhysicalPointForPerMonitorDPI(hwnd, &native));
+      QVERIFY(SetCursorPos(native.x, native.y));
+      INPUT input[2]{};
+      input[0].type = INPUT_MOUSE; input[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+      input[1].type = INPUT_MOUSE; input[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+      QCOMPARE(SendInput(2, input, sizeof(INPUT)), UINT(2));
+      ++expected;
+      QTRY_COMPARE(background.presses, expected);
+    }
   }
 };
 QTEST_MAIN(OverlayTest)

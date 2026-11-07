@@ -12,7 +12,7 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     : QObject(parent), overlay_(overlay), control_(control) {
   if (overlay_) {
     overlay_->setColor(Qt::transparent);
-    connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; click_through_ = false; });
+    connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; setClickThrough(false); });
     applyFlags();
   }
   if (control_) {
@@ -27,8 +27,10 @@ void OverlayController::setOpacity(qreal opacity) {
 }
 bool OverlayController::setClickThrough(bool enabled) {
   if (enabled && (!overlay_ || !control_ || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) return false;
+  const bool changed = click_through_ != enabled;
   click_through_ = enabled;
   applyFlags();
+  if (changed) emit clickThroughChanged(enabled);
   return true;
 }
 bool OverlayController::clickThrough() const { return click_through_; }
