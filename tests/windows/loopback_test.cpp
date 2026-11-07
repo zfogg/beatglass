@@ -1,5 +1,6 @@
 #include "windows_endpoints.hpp"
 #include "windows_loopback.hpp"
+#include "windows_loopback_session.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <chrono>
 #include <thread>
@@ -10,6 +11,64 @@
 #include <mmsystem.h>
 
 using namespace std::chrono_literals;
+TEST_CASE("Session invalidates before shutdown and preserves process epochs") {
+  beatglass::SourceEpochAllocator epochs;
+  beatglass::windows::LoopbackSession no_invalidation(epochs, {});
+  REQUIRE_FALSE(no_invalidation.start("any endpoint"));
+  REQUIRE(no_invalidation.state() == beatglass::SourceState::stopped);
+  unsigned invalidations = 0;
+  {
+    beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+    REQUIRE_FALSE(session.start(""));
+    REQUIRE(session.state() == beatglass::SourceState::error);
+    REQUIRE(invalidations == 1);
+    session.stop();
+    REQUIRE(session.state() == beatglass::SourceState::stopped);
+  }
+  const auto next = epochs.next();
+  REQUIRE(next);
+  REQUIRE(*next == 2);
+}
+
+TEST_CASE("Session applies running before packets and invalidates on stop") {
+  const auto list = beatglass::windows::enumerate_render_endpoints();
+  REQUIRE(list.error.empty());
+  if (list.endpoints.empty()) SKIP("No active render endpoint on this machine");
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+  REQUIRE(session.start(list.endpoints.front().id));
+  beatglass::windows::LoopbackPacket packet;
+  for (int i = 0; i < 300 && session.state() == beatglass::SourceState::starting; ++i) {
+    session.poll();
+    std::this_thread::sleep_for(10ms);
+  }
+  REQUIRE(session.state() == beatglass::SourceState::running);
+  REQUIRE(invalidations == 0);
+  session.stop();
+  REQUIRE(invalidations == 1);
+  REQUIRE_FALSE(session.pop(packet));
+  REQUIRE(session.start(list.endpoints.front().id));
+  session.stop();
+  REQUIRE(invalidations == 2);
+}
+
+TEST_CASE("Asynchronous endpoint failure invalidates and needs stop before restart") {
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+  REQUIRE(session.start("not-a-real-endpoint"));
+  for (int i = 0; i < 200 && session.state() == beatglass::SourceState::starting; ++i) {
+    session.poll();
+    std::this_thread::sleep_for(10ms);
+  }
+  REQUIRE(session.state() == beatglass::SourceState::error);
+  REQUIRE(invalidations == 1);
+  REQUIRE_FALSE(session.start("not-a-real-endpoint"));
+  session.stop();
+  REQUIRE(session.start("not-a-real-endpoint"));
+  session.stop();
+}
 TEST_CASE("Invalid endpoint interrupts and can be stopped and retried") {
   beatglass::windows::Loopback capture;
   REQUIRE_FALSE(capture.start("", 1));

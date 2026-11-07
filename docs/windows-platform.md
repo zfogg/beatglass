@@ -75,8 +75,23 @@ stop with waiting for running; each stop joined the thread and discarded pending
 events, and a new attempt started its event sequence at one. The test did not
 disconnect hardware or test an interruption following a running event. This
 private stream does not yet supply a shared `SourceAttempt`; the integration
-adapter must bind an attempt identity, order delivery relative to epoch setup,
-translate startup failures, and invalidate in-flight analysis. WASAPI's device
+adapter binds a control-thread attempt and a process-owned epoch, applies ordered
+events before accepting PCM, translates startup interruption to an error, and
+invokes the owner's required invalidation callback on failure, interruption,
+newly observed queue loss, discontinuous or untimed PCM, and stop. The callback
+must clear publication and reject in-flight work; the adapter does not revoke a
+packet already returned to an analysis worker. The control owner must poll and
+deliver invalidation promptly, install format before analysis, and ensure the
+callback and allocator outlive the session. The desktop does not yet use this
+adapter. WASAPI's device
 position is currently not used to detect extra gaps: flagged discontinuities and
 timestamp errors are marked, but the epoch-relative frame count excludes unknown
 device gaps and must not be treated as an uninterrupted physical timeline.
+
+Against reviewed source-contract PR #28 at `5b81fcc`, Windows 11 x64 GCC 15.2.0
+`cmake --build "$env:TEMP/beatglass-windows-main" -j 4` and
+`ctest --test-dir "$env:TEMP/beatglass-windows-main" --output-on-failure`
+passed 34/34. Tests covered synchronous and asynchronous start failure, mandatory
+invalidation, process epoch retention, running transition and repeated stop/start.
+Physical device interruption, stale-result rejection by a real analysis worker,
+default-device following and the desktop integration remain untested or absent.

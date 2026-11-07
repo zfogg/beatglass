@@ -52,4 +52,9 @@ decision; the interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp
+
+.. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
+
+   Invalidate and stop the session on its control thread before destruction.
+   The retained invalidation callback must not throw.
