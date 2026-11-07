@@ -11,6 +11,7 @@
 #include <catch2/catch_session.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -96,6 +97,17 @@ TEST_CASE("playback tap clears prior evidence at end of stream") {
   tap.output()->audioBufferReceived(QAudioBuffer());
   REQUIRE(tap.status() == PlaybackVisualization::Status::end_of_stream);
   REQUIRE_FALSE(tap.isCurrent(6)); REQUIRE_FALSE(tap.takeLatest());
+}
+TEST_CASE("retirement suppresses frames while a producer is active") {
+  PlaybackVisualization tap(10); auto buffer = tone(1024);
+  std::atomic<bool> started{false}, finished{false};
+  std::thread producer([&] {
+    started.store(true, std::memory_order_release);
+    while (!finished.load(std::memory_order_acquire)) tap.output()->audioBufferReceived(buffer);
+  });
+  while (!started.load(std::memory_order_acquire)) std::this_thread::yield();
+  tap.retire(); finished.store(true, std::memory_order_release); producer.join();
+  REQUIRE_FALSE(tap.isCurrent(10)); REQUIRE_FALSE(tap.takeLatest());
 }
 TEST_CASE("Qt player delivers decoded PCM to playback tap", "[native-media]") {
   if (!qEnvironmentVariableIsSet("BEATGLASS_TEST_MEDIA_PCM")) SKIP("Set BEATGLASS_TEST_MEDIA_PCM for the opt-in Qt backend probe");
