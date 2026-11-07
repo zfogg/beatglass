@@ -48,7 +48,9 @@ public:
   /** Called synchronously after each complete mono hop. The block and samples
    * are borrowed until return; reset marks a new acquisition or resume.
    * The state is the tempo lifecycle after that hop. The observer is not retained
-   * and must not reenter or destroy the engine. No clock anchor is implied.
+   * and must not reenter or destroy the engine. A nested process call is rejected
+   * and fails the outer operation even if its exception is caught. Destroying the
+   * engine in a callback remains invalid. No clock anchor is implied.
    */
   using HopObserver = std::function<void(const CausalMonoHop&, TrackingState)>;
   /** Construct an inactive engine; the first valid block starts acquisition. */

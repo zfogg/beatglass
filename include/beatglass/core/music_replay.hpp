@@ -72,7 +72,7 @@ public:
   CausalMusicReplay(const CausalMusicReplay&) = delete;
   CausalMusicReplay& operator=(const CausalMusicReplay&) = delete;
   /** Consume borrowed PCM, emit eligible beats, and return an owned state.
-   * @param block Source PCM with coordinator-issued epoch and frame positions.
+   * @param block Source PCM with nonzero coordinator-issued epoch and frame positions.
    * @param observer Optional callback for beats; events are not retained.
    * @param tonal_observer Optional callback for tonal windows; not retained.
    * @throws std::exception on invalid input, callback or estimator failure;
@@ -101,13 +101,14 @@ public:
 /** Decode and replay a local file with the same causal block engine.
  * This is synchronous worker-thread work and does not modify the input file.
  * @param path Local audio file supported by the configured libsndfile build.
- * @param epoch Coordinator-allocated epoch for this opened source.
+ * @param epoch Nonzero coordinator-allocated epoch for this opened source.
  * @param observer Optional beat callback, invoked synchronously and not retained.
  * @param cancel Checked before decoder reads; it cannot interrupt blocking I/O.
  * @param tonal_observer Optional synchronous callback for tonal windows.
  * @param state_observer Optional synchronous callback after each decoded block.
  * @return The latest owned state; an incomplete final hop is not analyzed.
- * @throws MusicReplayCancelled for cancellation; std::exception for I/O,
+ * @throws std::invalid_argument for zero epoch before opening the file;
+ * MusicReplayCancelled for cancellation; std::exception for I/O,
  * estimator or callback failure. No cached or shared result is published.
  */
 CausalMusicState replay_music_file(const std::filesystem::path& path, std::uint64_t epoch,

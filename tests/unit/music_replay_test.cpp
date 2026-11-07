@@ -85,6 +85,10 @@ TEST_CASE("file replay and incremental blocks use the same real music engine") {
   } fixture(music(12));
   auto contents=[&]{std::ifstream in(fixture.path,std::ios::binary);return std::vector<char>(std::istreambuf_iterator<char>(in),{});};
   const auto before=contents(); REQUIRE_FALSE(before.empty());
+  bool called=false; TempWave empty(std::vector<float>{});
+  CHECK_THROWS_AS(replay_music_file(empty.path,0,[&](const CausalMusicBeat&){called=true;}),std::invalid_argument);
+  CHECK_THROWS_AS(replay_music_file(empty.path / "missing",0),std::invalid_argument);
+  CHECK_FALSE(called); CHECK(replay_music_file(empty.path,76).tempo.epoch==76);
   std::vector<CausalMusicBeat> file_beats, block_beats;
   const auto file=replay_music_file(fixture.path,72,[&](const CausalMusicBeat& e){file_beats.push_back(e);});
   FileReader reader(fixture.path,72); CausalMusicReplay replay; std::array<float,512> samples{}; CausalMusicState blocks;
@@ -104,4 +108,11 @@ TEST_CASE("combined callback failure clears state and fails closed") {
   CHECK_THROWS(replay.process(block(pcm,9,0),[](const CausalMusicBeat&){throw std::runtime_error("callback");}));
   CHECK(replay.state().tempo.state==TrackingState::error); CHECK_FALSE(replay.state().rolling_key); CHECK_FALSE(replay.state().local_chord);
   CHECK_THROWS(replay.process(block(std::span(pcm).first(512),10,0)));
+}
+
+TEST_CASE("combined replay rejects zero epoch before observers") {
+  auto pcm=music(1); CausalMusicReplay replay; bool called=false;
+  CHECK_THROWS_AS(replay.process(block(pcm,0,0),[&](const CausalMusicBeat&){called=true;},[&](const CausalTonalFrame&){called=true;}),std::invalid_argument);
+  CHECK_FALSE(called); CHECK(replay.state().tempo.state==TrackingState::error);
+  CHECK_THROWS(replay.process(block(pcm,1,0)));
 }
