@@ -20,9 +20,23 @@ enum class PublishOutcome { committed, cancelled, stale_input, error };
 /** Publication result; diagnostic describes errors including an indeterminate commit. */
 struct PublishResult { PublishOutcome outcome{PublishOutcome::error}; std::string diagnostic; };
 /** Result of checking the same opened input used by analysis against its original evidence. */
-enum class FileVerificationOutcome { match, changed, unverifiable, error };
+enum class FileVerificationOutcome { match, changed, unverifiable, cancelled, error };
 /** Verification result; diagnostic describes an error or inability to verify. */
 struct FileVerificationResult { FileVerificationOutcome outcome{FileVerificationOutcome::error}; std::string diagnostic; };
+/** Map verification to a terminal publication outcome; a match permits publication to continue.
+ * This does not start or commit a transaction; call on the database worker
+ * before the commit decision. Cancellation after commit starts is too late.
+ */
+inline std::optional<PublishOutcome> verification_failure(FileVerificationOutcome outcome) noexcept {
+  switch (outcome) {
+    case FileVerificationOutcome::match: return std::nullopt;
+    case FileVerificationOutcome::changed:
+    case FileVerificationOutcome::unverifiable: return PublishOutcome::stale_input;
+    case FileVerificationOutcome::cancelled: return PublishOutcome::cancelled;
+    case FileVerificationOutcome::error: return PublishOutcome::error;
+  }
+  return PublishOutcome::error;
+}
 /** Synchronous, worker-invoked revalidation of the opened analysis source.
  * The caller keeps this object and its source evidence alive until publish
  * returns. Its implementation must be safe on the database worker; no decoder
@@ -32,8 +46,11 @@ struct FileVerificationResult { FileVerificationOutcome outcome{FileVerification
 class FileVersionVerifier {
 public:
   virtual ~FileVersionVerifier() = default;
-  /** Recheck identity and version against the retained pre-analysis evidence. */
-  virtual FileVerificationResult verify() = 0;
+  /** Recheck retained pre-analysis evidence; observe cancellation cooperatively.
+   * A blocking filesystem call may not be interruptible. Return cancelled if
+   * cancellation is observed before verification completes, not stale_input.
+   */
+  virtual FileVerificationResult verify(std::stop_token cancel) = 0;
 };
 /** Recovery result after reopening storage: committed, absent, or still indeterminate due to error. */
 enum class RecoveryOutcome { committed, not_found, error };
@@ -59,7 +76,8 @@ public:
   /** Find a validated cached result, miss, cancellation or error. */
   virtual FindResult find(const FileVersion&, const AnalysisIdentity&, std::stop_token) = 0;
   /** Stage, invoke verifier on this worker, then publish at the serialized commit point.
-   * Changed or unverifiable evidence returns stale_input; verification errors
+   * Pass the token to verification. Changed or unverifiable evidence returns
+   * stale_input, observed cancellation returns cancelled, and verification errors
    * return error. run_id must be unique and durable across retries/reopening.
    * The caller retains verifier and source evidence until this call returns.
    */
