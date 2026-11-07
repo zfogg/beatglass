@@ -9,5 +9,6 @@ ApplicationWindow {
     Label { id: status; text: "Choose a file to inspect its metadata." }
     Label { text: "Analysis and DJ mode are not yet available in this shell." }
   }
-  FileDialog { id: picker; onAccepted: status.text = metadata.inspect(selectedFile) }
+  Connections { target: metadata; function onStatusChanged(text) { status.text = text } }
+  FileDialog { id: picker; onAccepted: metadata.inspect(selectedFile) }
 }
