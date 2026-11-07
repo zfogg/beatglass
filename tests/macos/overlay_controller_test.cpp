@@ -109,6 +109,21 @@ private slots:
     QVERIFY(controller.moveToScreen(controller.screenIndex()));
     QCOMPARE(controller.screenIndex(), QGuiApplication::screens().indexOf(screen));
   }
+  void screenGeometryNotificationsCoalesceAndRecoverOverlay() {
+    QQuickWindow overlay; QWindow control;
+    auto* screen = QGuiApplication::primaryScreen(); QVERIFY(screen);
+    OverlayController controller(std::make_unique<FakeNative>());
+    QVERIFY(controller.attach(&overlay, &control));
+    overlay.setGeometry(-30000, -30000, 250, 120);
+    QSignalSpy changes(&controller, &OverlayController::screensChanged);
+    const auto bounds = screen->availableGeometry();
+    QVERIFY(QMetaObject::invokeMethod(screen, "geometryChanged", Qt::DirectConnection, Q_ARG(QRect, screen->geometry())));
+    QVERIFY(QMetaObject::invokeMethod(screen, "availableGeometryChanged", Qt::DirectConnection, Q_ARG(QRect, bounds)));
+    QCOMPARE(changes.count(), 0);
+    QTRY_COMPARE(changes.count(), 1);
+    QVERIFY(bounds.contains(overlay.geometry()));
+    QCOMPARE(controller.screenIndex(), QGuiApplication::screens().indexOf(screen));
+  }
   void qmlAttachesTheRealController() {
     FakeMetadata metadata; FakeLive live;
     auto native = std::make_unique<FakeNative>(); auto* backend = native.get();

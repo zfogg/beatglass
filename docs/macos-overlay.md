@@ -6,7 +6,7 @@ The AppKit adapter requests a floating nonactivating window, `ignoresMouseEvents
 
 ## Portable development checks
 
-The controller exposes `screenIndex` for the shared display selector. Without a saved geometry it places the overlay on the control window's display; valid saved geometry takes precedence. The index follows the overlay's center and is -1 when no display contains it. The shared UI must bind its selection to this property and refresh it after display changes. Physical multi-display behavior remains unqualified.
+The controller exposes `screenIndex` for the shared display selector. Without a saved geometry it places the overlay on the control window's display; valid saved geometry takes precedence. The index follows the overlay's center and is -1 when no display contains it. Display addition, removal, geometry and available-area changes trigger a coalesced clamp and selector refresh. The shared UI must bind its selection to this property and refresh it after display changes. Physical multi-display behavior remains unqualified.
 
 On Windows 11 with MSVC 2022 and a Qt 6.8.3 SDK, with the pinned Catch2 source already downloaded:
 

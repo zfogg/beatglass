@@ -14,11 +14,23 @@ OverlayController::OverlayController(std::unique_ptr<OverlayNative> native, QObj
     : QObject(parent), native_(std::move(native)), settings_(std::move(settings)) {
   save_timer_.setSingleShot(true); save_timer_.setInterval(250);
   connect(&save_timer_, &QTimer::timeout, this, [this] { saveSettings(); });
-  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) {
-    QTimer::singleShot(0, this, [this] { keepOnScreen(); emit screensChanged(); });
+  screen_timer_.setSingleShot(true);
+  connect(&screen_timer_, &QTimer::timeout, this, [this] {
+    updating_screens_ = true; keepOnScreen(); updating_screens_ = false; emit screensChanged();
   });
-  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen*) { emit screensChanged(); });
+  for (auto* screen : QGuiApplication::screens()) observeScreen(screen);
+  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen* screen) {
+    disconnect(screen, nullptr, this, nullptr); scheduleScreenUpdate();
+  });
+  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen* screen) {
+    observeScreen(screen); scheduleScreenUpdate();
+  });
 }
+void OverlayController::observeScreen(QScreen* screen) {
+  connect(screen, &QScreen::geometryChanged, this, [this](const QRect&) { scheduleScreenUpdate(); });
+  connect(screen, &QScreen::availableGeometryChanged, this, [this](const QRect&) { scheduleScreenUpdate(); });
+}
+void OverlayController::scheduleScreenUpdate() { if (!screen_timer_.isActive()) screen_timer_.start(0); }
 OverlayController::~OverlayController() { detach(); }
 void OverlayController::setAvailable(bool value) {
   if (available_ == value) return;
@@ -35,10 +47,10 @@ bool OverlayController::attach(QQuickWindow* overlay, QWindow* control) {
   overlay_->installEventFilter(this); control_->installEventFilter(this);
   connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; detach(); });
   connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; detach(); });
-  connect(overlay_, &QWindow::xChanged, this, [this] { scheduleSave(); emit screensChanged(); });
-  connect(overlay_, &QWindow::yChanged, this, [this] { scheduleSave(); emit screensChanged(); });
-  connect(overlay_, &QWindow::widthChanged, this, [this] { scheduleSave(); emit screensChanged(); });
-  connect(overlay_, &QWindow::heightChanged, this, [this] { scheduleSave(); emit screensChanged(); });
+  connect(overlay_, &QWindow::xChanged, this, [this] { scheduleSave(); if (!updating_screens_) emit screensChanged(); });
+  connect(overlay_, &QWindow::yChanged, this, [this] { scheduleSave(); if (!updating_screens_) emit screensChanged(); });
+  connect(overlay_, &QWindow::widthChanged, this, [this] { scheduleSave(); if (!updating_screens_) emit screensChanged(); });
+  connect(overlay_, &QWindow::heightChanged, this, [this] { scheduleSave(); if (!updating_screens_) emit screensChanged(); });
   connect(overlay_, &QWindow::opacityChanged, this, [this] { emit opacityChanged(); scheduleSave(); });
   overlay_->create();
   if (!native_->apply(overlay_, false)) { detach(); return false; }

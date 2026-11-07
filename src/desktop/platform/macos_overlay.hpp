@@ -9,6 +9,7 @@
 
 class QEvent;
 class QQuickWindow;
+class QScreen;
 class QWindow;
 
 namespace beatglass::macos {
@@ -66,7 +67,7 @@ public:
   Q_SIGNAL void clickThroughChanged();
   /** Emitted when native availability changes. */
   Q_SIGNAL void availableChanged();
-  /** Emitted on display addition or removal; callers must refresh any selected index. */
+  /** Emitted when displays, their geometry, or overlay position change; callers must refresh any selected index. */
   Q_SIGNAL void screensChanged();
   /** Emitted when the overlay opacity changes. */
   Q_SIGNAL void opacityChanged();
@@ -78,13 +79,16 @@ private:
   void detach();
   void scheduleSave();
   void saveSettings();
+  void observeScreen(QScreen* screen);
+  void scheduleScreenUpdate();
   std::unique_ptr<OverlayNative> native_;
   std::unique_ptr<QSettings> settings_;
   QTimer save_timer_;
+  QTimer screen_timer_;
   QPointer<QQuickWindow> overlay_;
   QPointer<QWindow> control_;
   QRect saved_geometry_;
   qreal saved_opacity_{0.9};
-  bool available_{}, click_through_{}, restoring_{}, have_snapshot_{};
+  bool available_{}, click_through_{}, restoring_{}, have_snapshot_{}, updating_screens_{};
 };
 }
