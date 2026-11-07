@@ -1,6 +1,6 @@
 # Foundation handoff: ownership and integration points
 
-These are concrete starting points for integration-owner review, not a claim that all interfaces are stable or every feature is implemented. The owner should resolve the open choices below and name the checked-out base commit before assigning worktrees. See the [Phase 0 audit](phase0-gate.md) for the actual exit criteria.
+The coordinator accepted this handoff for starting Phase 1 on merged commit `6f927cb`. These ownership boundaries are starting points, not a claim that interfaces are stable or features implemented. Each workstream records its own base commit and coordinates shared changes with integration. See the [Phase 0 audit](phase0-gate.md) for remaining gaps.
 
 | Workstream | Owned implementation | Integration point and constraints |
 | --- | --- | --- |
