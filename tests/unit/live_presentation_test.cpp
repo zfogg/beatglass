@@ -12,7 +12,8 @@ private slots:
     snapshot->state = beatglass::TrackingState::tracking;
     snapshot->bpm = 123.4f;
     snapshot->key_candidates.push_back({"C major", 0.4f});
-    snapshot->chords.push_back({{}, {}, {"Am", 0.5f}});
+    snapshot->observed_through = {1, 2};
+    snapshot->chords.push_back({{1, 0}, {1, 1}, {"Am", 0.5f}});
     QVERIFY(model.apply({1, snapshot}));
     QCOMPARE(model.status(), QString("Tracking"));
     QCOMPARE(model.tempo(), QString("123.4"));
