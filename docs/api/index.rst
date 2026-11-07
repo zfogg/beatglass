@@ -67,7 +67,7 @@ stale input and storage error. Its worker owns the cancellation-versus-commit
 decision; file verification accepts cooperative cancellation before that
 decision. The interface and helper do not implement SQLite transactions.
 
-.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp include/beatglass/library/detail/job_executor.hpp include/beatglass/library/detail/sqlite_cache.hpp
+.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp include/beatglass/library/detail/file_fingerprint.hpp include/beatglass/library/detail/job_executor.hpp include/beatglass/library/detail/sqlite_cache.hpp
 
 Desktop application internals
 -----------------------------
@@ -87,6 +87,7 @@ Desktop application internals
 
    Stop and join the worker before destruction. Call on the GUI thread; an OS
    device operation that stalls can delay destruction.
+
 .. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
 
    Unlock the overlay and remove event filters. The caller retains ownership of
@@ -101,6 +102,11 @@ Desktop application internals
 
    Destroy the private native adapter on the GUI thread. It never owns the Qt
    window passed to its operations.
+
+Experimental tonal worker internals
+-----------------------------------
+
+.. cpp:autodoc:: lib/core/tonal_tracker.hpp
 
 Experimental virtual file I/O
 -----------------------------

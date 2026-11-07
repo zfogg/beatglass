@@ -185,6 +185,10 @@ The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
 
+## Phase 1 private tonal tracker
+
+The optional private Essentia tracker is a worker-only experiment tested on generated triads and discontinuities. It is disabled by default and not connected to file analysis or live capture. Release licensing, Windows MSVC dependency build, key/chord quality, timestamped segment policy and native qualification remain open; see [tonal experiment](tonal-experiment.md).
+
 ## Shared causal tempo replay proposal
 
 `CausalTempoReplay` consumes borrowed interleaved blocks on one worker, buffers at most one 512-frame hop, and runs the existing aubio tempo and signal lifecycle logic. File replay now uses this same engine; a future snapshot job can feed it without reopening the path. State reports both the exclusive accepted boundary and the last complete analyzed hop. At EOF an incomplete hop is not analyzed. Gaps and new epochs discard buffered evidence; old epochs, overlap, malformed PCM and same-epoch format changes fail closed. The caller must allocate epochs and deliver invalidation/clear notifications around source lifecycle events; the engine is not an audio callback, decoder, cache or GUI publisher. This is a proposed shared API pending integration-owner review. Tonal and timestamped beat trackers are separate unmerged increments and are not yet integrated into this engine.
@@ -220,6 +224,12 @@ qualification and a validated track-level key remain open.
 
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
 
+The Windows overlay controller now supports caller-owned persistence of position and opacity, on-screen recovery, and native cursor dragging across mixed-DPI screens. It does not instantiate a DJ UI; the selected/default integration is separate. Windows unit tests cover restoration and immediate persistence after recovery; see [Windows platform status](windows-platform.md) for the prior native evidence and remaining qualification gaps.
+
 After merging main `6aade6e`, the provisional library option was configured with `cmake -S . -B /tmp/beatglass-foundation-review -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, then `cmake --build /tmp/beatglass-foundation-review -j 1` and `ctest --test-dir /tmp/beatglass-foundation-review --output-on-failure` passed 38/38 on Ubuntu 22.04 WSL. This configuration does not enable desktop, native audio or macOS qualification. CMake emitted an author warning that `SQLite::SQLite3` is deprecated in favor of `SQLite3::SQLite3` in the installed CMake version; host SQLite remains unpinned.
 
 After the concurrent allocator contract merged, the provisional borrowed `FileReader` rejects epoch zero before source access, requires caller-issued increasing seek epochs and rejects its legacy one-argument seek. The caller must keep one process allocator, serialize reader operations, and discard stale publications. With `BEATGLASS_TEST_V1_CODECS=OFF`, WSL `cmake --build /tmp/beatglass-virtual-check -j1` and `ctest --test-dir /tmp/beatglass-virtual-check --output-on-failure` passed 59/59. Windows MSVC codec-enabled `cmake --build C:/Users/zachf/.codex/build/beatglass-phase1-verify --config Debug -- /m:1` and `ctest --test-dir C:/Users/zachf/.codex/build/beatglass-phase1-verify -C Debug --output-on-failure` passed 62/62. The desktop and library prototypes are not yet wired to one process-owned allocator; legacy path-based overloads remain isolated compatibility APIs.
+
+## Bounded file fingerprint review
+
+A separately reviewable, opt-in fingerprint primitive hashes a file using a bounded buffer and supports cooperative cancellation and change detection. It does not connect to the cache or decoder. File replacement, mutation and ABA can evade attribute checks, so the result cannot prove decoder input identity. OpenSSL remains an unpinned development dependency; native product qualification remains open.

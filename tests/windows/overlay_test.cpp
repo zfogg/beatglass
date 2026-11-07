@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QQuickWindow>
 #include <QScreen>
+#include <QSettings>
+#include <QTemporaryDir>
 #include <QtTest>
 #include <windows.h>
 #include <QMouseEvent>
@@ -17,6 +19,63 @@ protected:
 class OverlayTest : public QObject {
   Q_OBJECT
 private slots:
+  void recoveredPositionIsPersistedImmediately() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto path = directory.filePath("overlay.ini");
+    QPoint recovered;
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      QQuickWindow overlay;
+      overlay.resize(320, 110);
+      QWindow control;
+      beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
+      overlay.setPosition(-30000, -30000);
+      controller.keepOnScreen();
+      recovered = overlay.position();
+      QVERIFY(QGuiApplication::primaryScreen()->availableGeometry().contains(overlay.geometry()));
+      settings.sync();
+      QCOMPARE(settings.value(QStringLiteral("overlay/position")).toPoint(), recovered);
+      QCOMPARE(settings.status(), QSettings::NoError);
+    }
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      QQuickWindow overlay;
+      overlay.resize(320, 110);
+      QWindow control;
+      beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
+      QCOMPARE(overlay.position(), recovered);
+    }
+  }
+  void restoresSavedPositionAndOpacity() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto path = directory.filePath("overlay.ini");
+    const auto position = QGuiApplication::primaryScreen()->availableGeometry().topLeft() + QPoint(120, 140);
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      QQuickWindow overlay;
+      QWindow control;
+      control.show();
+      beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
+      overlay.setPosition(position);
+      controller.setOpacity(0.4);
+      QVERIFY(controller.setClickThrough(true));
+      settings.sync();
+      QCOMPARE(settings.status(), QSettings::NoError);
+    }
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      QQuickWindow overlay;
+      overlay.resize(320, 110);
+      QWindow control;
+      beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
+      QCOMPARE(overlay.position(), position);
+      QVERIFY(qAbs(overlay.opacity() - 0.4) < 0.02);
+      QVERIFY(!controller.clickThrough());
+      QVERIFY(!overlay.isVisible());
+    }
+  }
   void flagsAndEscape() {
     QQuickWindow overlay;
     QWindow control;
