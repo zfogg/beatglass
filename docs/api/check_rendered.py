@@ -12,7 +12,11 @@ expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_l
             'id="beatglass::TrackingMachine::discontinuity__std::uint64_t"',
             'id="beatglass::TrackingMachine::silence__void"', 'id="beatglass::TrackingMachine::signal__void"',
             'id="beatglass::TrackingMachine::expire__void"', 'id="beatglass::TrackingMachine::accept__AcquisitionToken"',
-            'id="beatglass::TempoResult::state__TrackingState"', "TempoEstimator", "KeyEstimator", "ChordEstimator", "PresentationAdapter",
+            'id="beatglass::FileMetadata"', 'id="beatglass::FileMetadata::sample_rate__std::uint32_t"',
+            'id="beatglass::FileMetadata::channels__std::uint32_t"', 'id="beatglass::FileMetadata::frames__std::uint64_t"',
+            'id="beatglass::FileMetadata::format__ss"', 'id="beatglass::TempoResult"',
+            'id="beatglass::TempoResult::metadata__FileMetadata"', 'id="beatglass::TempoResult::bpm__std::optional:float:"',
+            'id="beatglass::TempoResult::beats__unsigned-i"', 'id="beatglass::TempoResult::state__TrackingState"', "TempoEstimator", "KeyEstimator", "ChordEstimator", "PresentationAdapter",
             "AnalysisStore", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
             'id="beatglass::ChordEstimator::take_segments__void"',
             'id="beatglass::PresentationAdapter::present__SnapshotCRC"')
