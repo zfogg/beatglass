@@ -163,7 +163,7 @@ The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
 
-Concurrent process-epoch issuance is proposed with contention and exhaustion
+PR #63 merged concurrent process-epoch issuance with contention and exhaustion
 tests. The application must still share one allocator across live and offline
 paths and coordinate each source's lifecycle.
 
@@ -194,7 +194,7 @@ After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea5737
 ## Same-source integration proposal
 
 The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
-read-only byte boundary. The existing decoder does not consume it. Secure
+read-only byte boundary. The existing CLI decoder does not consume it. Secure
 snapshot creation, native file identity and decoder integration remain open;
 see [same-source proposal](same-source-proposal.md).
 
@@ -206,9 +206,9 @@ Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built thi
 
 The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. The provisional public FileReader borrowed-source constructor and explicit-epoch seek expose this adapter for review; the legacy path-based seek retains local increment behavior. Snapshot creation and publication are still separate responsibilities.
 
-## Offline result contract proposal
+## Offline result contract
 
-An owned offline result and bounded structural validator are proposed for
+PR #57 merged an owned offline result and bounded structural validator for
 composite evidence. Actual composite persistence, paged retrieval, native
 qualification and a validated track-level key remain open.
 
