@@ -3,6 +3,7 @@
 #include "windows_dj_bridge.hpp"
 #include "windows_overlay.hpp"
 #include <QQuickWindow>
+#include <QScreen>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QtTest>
@@ -39,14 +40,18 @@ private slots:
     QVERIFY(QMetaObject::invokeMethod(toggle, "clicked"));
     QTRY_VERIFY(overlay->isVisible());
     QTest::qWait(200);
-    {
+    for (auto* screen : QGuiApplication::screens()) {
+      const auto available = screen->availableGeometry();
+      overlay->setPosition(available.topLeft() + QPoint(100, 100));
+      QTest::qWait(300);
       const auto before = overlay->position();
       const auto hwnd = reinterpret_cast<HWND>(overlay->winId());
+      qInfo() << "Testing native overlay drag on" << screen->name() << "scale" << screen->devicePixelRatio();
       QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE));
       SetForegroundWindow(hwnd);
-      auto point = overlay->mapToGlobal(QPoint(30, 30));
-      POINT native{point.x(), point.y()};
-      QVERIFY(LogicalToPhysicalPointForPerMonitorDPI(hwnd, &native));
+      RECT rect{};
+      QVERIFY(GetWindowRect(hwnd, &rect));
+      POINT native{rect.left + 30, rect.top + 30};
       std::jthread pointer([native] {
         SetCursorPos(native.x, native.y);
         INPUT input{}; input.type = INPUT_MOUSE; input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
@@ -60,7 +65,8 @@ private slots:
         input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
         SendInput(1, &input, sizeof(INPUT));
       });
-      QTRY_VERIFY_WITH_TIMEOUT(overlay->position() != before, 2000);
+      QTRY_VERIFY_WITH_TIMEOUT(overlay->position().x() > before.x() + 20 && overlay->position().y() > before.y() + 10, 2000);
+      pointer.join();
     }
   }
   void overlayControlsUseRealController() {

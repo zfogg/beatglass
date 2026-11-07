@@ -223,10 +223,14 @@ control-window labels tracked the state. The application was closed after the
 test. The unlocked overlay now has a drag surface and starts near the control
 window. The opt-in `BEATGLASS_NATIVE_OVERLAY_TEST=1` invocation
 `windows_dj_ui_tests.exe nativeOverlayDrag` passed with native pointer input and
-observed a position change on one display. An earlier run of this test did not
-move the window; the revised test raises the window and sends incremental
-pointer movement. A proposed second-display version failed converting a point
-after changing screens and was not counted as a pass. Two-display pointer
-delivery for the standalone controller is recorded in `windows-overlay.md`,
-but cross-display movement of the complete DJ overlay is unqualified. Physical
+observed a position change on one display. An earlier run did not move the
+window, and a second-display version failed converting a point after changing
+screens. The drag surface now tracks pointer movement in Qt global coordinates;
+the native test reads the Windows window rectangle for pointer input. On build
+`38aad62` with these changes, an interactive desktop drag moved the overlay 240
+by 100 logical pixels. Three consecutive native `windows_dj_ui_tests.exe
+nativeOverlayDrag` runs passed on both LG ULTRAGEAR (100% scaling) and U2790B
+(150% scaling), checking a substantial position change on each screen. The five
+targeted CTest cases passed again. This covers drags started and completed
+within each display; a single drag crossing the monitor boundary, physical
 display removal and exclusive fullscreen product scenarios remain untested.

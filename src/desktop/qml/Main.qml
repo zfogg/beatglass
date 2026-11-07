@@ -32,7 +32,15 @@ ApplicationWindow {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.SizeAllCursor
-                onPressed: overlay.startSystemMove()
+                property point lastGlobal
+                onPressed: function(mouse) { lastGlobal = mapToGlobal(mouse.x, mouse.y) }
+                onPositionChanged: function(mouse) {
+                    if (!pressed) return
+                    const current = mapToGlobal(mouse.x, mouse.y)
+                    overlay.x += current.x - lastGlobal.x
+                    overlay.y += current.y - lastGlobal.y
+                    lastGlobal = current
+                }
             }
             Column {
                 anchors.centerIn: parent; spacing: 6
