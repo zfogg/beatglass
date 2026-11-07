@@ -1,0 +1,21 @@
+name: Experimental Windows dependency recipe
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  cross-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build recipe without cached layers
+        run: docker build --no-cache -f tests/spikes/windows-mingw/Dockerfile -t beatglass-windows-deps-experiment .
+      - name: Check emitted candidate hashes and target format
+        run: |
+          docker run --rm beatglass-windows-deps-experiment sh -c '
+            cd /out
+            sha256sum -c CANDIDATE-SHA256.txt
+            x86_64-w64-mingw32-objdump -f libaubio-5.dll | grep -q pei-x86-64
+            x86_64-w64-mingw32-objdump -f libessentia.a > /tmp/essentia-objects.txt
+            grep -q pe-x86-64 /tmp/essentia-objects.txt
+          '
