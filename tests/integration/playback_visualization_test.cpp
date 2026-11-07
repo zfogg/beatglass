@@ -1,3 +1,6 @@
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include "playback_visualization.hpp"
 #include <QAudioBuffer>
 #include <QAudioBufferOutput>
