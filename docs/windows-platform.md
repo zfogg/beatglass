@@ -224,7 +224,8 @@ and return were not part of this deterministic check.
 
 The provisional overlay controller can persist position and opacity through a
 caller-owned `QSettings`, recover off-screen geometry and follow native cursor
-movement across mixed-DPI displays. Visibility and click-through start disabled.
+movement across mixed-DPI displays. Visibility remains caller-controlled and
+click-through starts disabled.
 The controller does not create content or instantiate a desktop DJ path; the
 selected/default integration is reviewed separately in #71. Tests use temporary
 settings and cover restoration and immediate persistence after recovery. Earlier

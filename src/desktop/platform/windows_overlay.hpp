@@ -16,7 +16,7 @@ class OverlayController final : public QObject {
   Q_PROPERTY(bool clickThrough READ clickThrough NOTIFY clickThroughChanged)
   Q_PROPERTY(qreal opacity READ opacity NOTIFY opacityChanged)
 public:
-  /** Configure the overlay as transparent, frameless and always on top. The control window is the escape path and must outlive this controller or trigger automatic unlock. Optional settings are caller-owned, must outlive the controller and are read and written only on the GUI thread. Saved position and opacity are restored; visibility and click-through start disabled. */
+  /** Configure the overlay as transparent, frameless and always on top. The control window is the escape path and must outlive this controller or trigger automatic unlock. Optional settings are caller-owned, must outlive the controller and are read and written only on the GUI thread. Saved position and opacity are restored; visibility remains caller-controlled and click-through starts disabled. */
   OverlayController(QQuickWindow* overlay, QWindow* control, QObject* parent = nullptr, QSettings* settings = nullptr);
   // Documented manually in the API reference due to Hawkmoth destructor parsing.
   ~OverlayController() override;
