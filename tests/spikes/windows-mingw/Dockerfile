@@ -24,4 +24,11 @@ RUN mkdir -p /out && cp /src/essentia/build/src/libessentia.a /src/essentia/src/
     /src/aubio/build/src/libaubio-5.dll /src/aubio/build/src/aubio.dll.a /out/ && \
     cp -a /src/essentia/src /out/essentia-src && cp -a /src/aubio/src /out/aubio-src && \
     cp -a /usr/include/eigen3 /out/eigen3 && \
-    cd /out && sha256sum libessentia.a version.h libaubio-5.dll aubio.dll.a > CANDIDATE-SHA256.txt
+    { printf '%s\n' 'essentia=23ae7baddecfc3227ba23ad69fa11f73ac5293a4' \
+        'aubio=90bd27a23123fcc524c31787c9c8fc0ae4c79378' \
+        'essentia-options=cross-compile-mingw32,lightweight,KISS,static,Windowing,Spectrum,SpectralPeaks,HPCP,Key,FFT,Magnitude,PeakDetection' \
+        'essentia-patch=i686-prefix-to-x86_64' \
+        'aubio-options=win64,no-tests,no-examples,no-fftw3,no-sndfile,no-avcodec,no-samplerate,no-wavread,no-wavwrite'; \
+      x86_64-w64-mingw32-g++ --version | head -1; \
+      dpkg-query -W gcc-mingw-w64-x86-64-posix g++-mingw-w64-x86-64-posix libeigen3-dev; } > /out/BUILD-CONFIG.txt && \
+    cd /out && sha256sum libessentia.a version.h libaubio-5.dll aubio.dll.a BUILD-CONFIG.txt > CANDIDATE-SHA256.txt
