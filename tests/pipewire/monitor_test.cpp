@@ -6,7 +6,7 @@
 using namespace beatglass::pipewire;
 TEST_CASE("monitor rejects missing selection and zero epoch") {
   Monitor invalid(0, {1}); CHECK_FALSE(invalid.start({"123", "sink", ""}).attempt);
-  Monitor monitor(1, {1}); CHECK_FALSE(monitor.start({"", "sink", ""}).attempt); CHECK_FALSE(monitor.start({"default", "sink", ""}).attempt); CHECK(monitor.state() == MonitorState::stopped);
+  Monitor monitor(1, {1}); CHECK_FALSE(monitor.graph_clock()); CHECK_FALSE(monitor.start({"", "sink", ""}).attempt); CHECK_FALSE(monitor.start({"default", "sink", ""}).attempt); CHECK(monitor.state() == MonitorState::stopped);
 }
 TEST_CASE("unavailable PipeWire server never starts and stop quiesces") {
   REQUIRE(setenv("PIPEWIRE_REMOTE", "beatglass-test-nonexistent-server", 1) == 0);

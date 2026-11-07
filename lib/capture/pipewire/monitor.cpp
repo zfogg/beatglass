@@ -22,6 +22,8 @@ namespace beatglass::pipewire {
 static_assert(std::atomic<MonitorState>::is_always_lock_free);
 static_assert(std::atomic<int>::is_always_lock_free);
 static_assert(std::atomic<bool>::is_always_lock_free);
+static_assert(std::atomic<std::int64_t>::is_always_lock_free);
+static_assert(std::atomic<std::uint32_t>::is_always_lock_free);
 struct Monitor::Impl {
 public:
   explicit Impl(std::uint64_t epoch, SourceAttempt attempt) : ingress_(epoch), epoch_(epoch), attempt_(attempt) {}
@@ -104,6 +106,7 @@ public:
   // Stop is control-thread-only. The process callback runs on this main loop,
   // never on PipeWire's RT thread; joining the loop quiesces our callbacks.
   void stop() noexcept {
+    worker_epoch_.store(0, std::memory_order_release);
     state_.store(MonitorState::stopped, std::memory_order_release);
     stop_requested_.store(true, std::memory_order_release);
     if (thread_.joinable()) thread_.join();
@@ -116,9 +119,17 @@ public:
   MonitorState state() const noexcept { return state_.load(std::memory_order_acquire); }
   // Consumer must invalidate all retained results on any non-streaming state,
   // drain old blocks at stop, and install an epoch before accepting new ones.
+  bool install_worker_epoch(std::uint64_t epoch, AudioFormat format) noexcept {
+    if (epoch != epoch_ || format.sample_rate != 48000 || format.channels != 2 ||
+        format.layout != ChannelLayout::stereo || state() != MonitorState::streaming) return false;
+    worker_epoch_.store(epoch, std::memory_order_release);
+    if (state() == MonitorState::streaming) return true;
+    worker_epoch_.store(0, std::memory_order_release);
+    return false;
+  }
   bool pop(MonitorIngress::Block& block) noexcept {
-    if (state() != MonitorState::streaming || !ingress_.pop(block)) return false;
-    return state() == MonitorState::streaming;
+    if (worker_epoch_.load(std::memory_order_acquire) != epoch_ || state() != MonitorState::streaming || !ingress_.pop(block)) return false;
+    return state() == MonitorState::streaming && worker_epoch_.load(std::memory_order_acquire) == epoch_ && block.epoch == epoch_;
   }
   std::uint64_t dropped_frames() const noexcept { return ingress_.dropped_frames(); }
   bool pop_event(MonitorEvent& event) noexcept {
@@ -137,6 +148,16 @@ public:
     return true;
   }
   int diagnostic_code() const noexcept { return diagnostic_.load(); }
+  std::optional<MonitorGraphClock> graph_clock() const noexcept {
+    for (int i = 0; i < 3; ++i) {
+      const auto before = clock_seq_.load();
+      if (!before || (before & 1) || state() != MonitorState::streaming) continue;
+      MonitorGraphClock value{clock_now_.load(), clock_ticks_.load(), clock_rate_num_.load(),
+                              clock_rate_denom_.load(), clock_delay_.load(), clock_queued_.load()};
+      if (clock_seq_.load() == before && state() == MonitorState::streaming) return value;
+    }
+    return std::nullopt;
+  }
 
 private:
   // Single loop-thread producer, single control-thread consumer. Full delivery
@@ -144,6 +165,7 @@ private:
   void transition(MonitorState next) noexcept {
     const auto current = state();
     if (current == MonitorState::stopped || current == MonitorState::error || current == MonitorState::interrupted || current == next) return;
+    if (next != MonitorState::streaming) worker_epoch_.store(0, std::memory_order_release);
     const auto write = event_write_.load(std::memory_order_relaxed);
     const auto after = (write + 1) % events_queue_.size();
     if (after == event_read_.load(std::memory_order_acquire) || event_sequence_ == UINT64_MAX) {
@@ -251,6 +273,19 @@ private:
     auto* buffer = pw_stream_dequeue_buffer(self.stream_);
     if (!buffer) return;
     auto* spa = buffer->buffer;
+    if (self.state() == MonitorState::streaming) {
+      pw_time observation{};
+      if (pw_stream_get_time(self.stream_, &observation) >= 0 && observation.now > 0 && observation.rate.num && observation.rate.denom) {
+        const auto sequence = self.clock_seq_.load();
+        if (sequence <= UINT64_MAX - 2) {
+          self.clock_seq_.store(sequence + 1);
+          self.clock_now_.store(observation.now); self.clock_ticks_.store(observation.ticks);
+          self.clock_rate_num_.store(observation.rate.num); self.clock_rate_denom_.store(observation.rate.denom);
+          self.clock_delay_.store(observation.delay); self.clock_queued_.store(observation.queued);
+          self.clock_seq_.store(sequence + 2);
+        } else self.transition(MonitorState::error);
+      }
+    }
     if (self.state() == MonitorState::streaming && spa && spa->n_datas == 1 && spa->datas &&
         spa->datas[0].data && spa->datas[0].chunk && self.format_valid_) {
       auto& d = spa->datas[0];
@@ -294,6 +329,10 @@ private:
   std::array<MonitorEvent, 16> events_queue_{};
   std::atomic<std::size_t> event_read_{0}, event_write_{0};
   std::atomic<bool> event_loss_{false};
+  std::atomic<std::uint64_t> worker_epoch_{0};
+  std::atomic<std::uint64_t> clock_seq_{0}, clock_ticks_{0}, clock_queued_{0};
+  std::atomic<std::int64_t> clock_now_{0}, clock_delay_{0};
+  std::atomic<std::uint32_t> clock_rate_num_{0}, clock_rate_denom_{0};
   bool started_{};
   bool format_valid_{}; // control loop thread, after start before thread creation
 };
@@ -310,7 +349,9 @@ SourceStartResult Monitor::start(const Sink& sink) { return impl_->start(sink); 
 void Monitor::stop() noexcept { impl_->stop(); }
 MonitorState Monitor::state() const noexcept { return impl_->state(); }
 bool Monitor::pop_event(MonitorEvent& event) noexcept { return impl_->pop_event(event); }
+bool Monitor::install_worker_epoch(std::uint64_t epoch, AudioFormat format) noexcept { return impl_->install_worker_epoch(epoch, format); }
 bool Monitor::pop(MonitorIngress::Block& block) noexcept { return impl_->pop(block); }
+std::optional<MonitorGraphClock> Monitor::graph_clock() const noexcept { return impl_->graph_clock(); }
 int Monitor::diagnostic_code() const noexcept { return impl_->diagnostic_code(); }
 std::uint64_t Monitor::dropped_frames() const noexcept { return impl_->dropped_frames(); }
 } // namespace beatglass::pipewire
