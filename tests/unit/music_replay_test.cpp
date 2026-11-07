@@ -38,14 +38,14 @@ TEST_CASE("combined real estimators consume causal blocks independent of chunkin
     const auto n=std::min<std::size_t>(137,pcm.size()-i);
     many=chunks.process(block(std::span(pcm).subspan(i,n),5,100+i), [&](const CausalMusicBeat& e) { b.push_back(e); }, [&](const CausalTonalFrame& t) { tb.push_back(t); });
   }
-  REQUIRE(one.tempo.bpm); REQUIRE(one.key); REQUIRE(one.chord); CHECK(*one.chord == "C major");
+  CHECK(one.sample_rate==44100); REQUIRE(one.tempo.bpm); REQUIRE(one.key); REQUIRE(one.chord); CHECK(*one.chord == "C major");
   CHECK(many.tempo.bpm == one.tempo.bpm); CHECK(many.key == one.key); CHECK(many.chord == one.chord);
   CHECK(many.tonal_through == one.tonal_through); REQUIRE(one.tonal_through); CHECK(*one.tonal_through <= one.tempo.analyzed_through);
   REQUIRE_FALSE(ta.empty()); REQUIRE(ta.size()==tb.size());
-  for (std::size_t i=0; i<ta.size(); ++i) { CHECK(ta[i].epoch==5); CHECK(ta[i].first_frame<ta[i].observed_through); REQUIRE(ta[i].key_from); CHECK(*ta[i].key_from>=100); CHECK(*ta[i].key_from<=ta[i].first_frame); CHECK(ta[i].first_frame==tb[i].first_frame); CHECK(ta[i].observed_through==tb[i].observed_through); CHECK(ta[i].chord==tb[i].chord); }
+  for (std::size_t i=0; i<ta.size(); ++i) { CHECK(ta[i].epoch==5); CHECK(ta[i].sample_rate==44100); CHECK(ta[i].first_frame<ta[i].observed_through); REQUIRE(ta[i].key_from); CHECK(*ta[i].key_from>=100); CHECK(*ta[i].key_from<=ta[i].first_frame); CHECK(ta[i].first_frame==tb[i].first_frame); CHECK(ta[i].observed_through==tb[i].observed_through); CHECK(ta[i].chord==tb[i].chord); }
   REQUIRE(one.tonal_from); REQUIRE(one.key_from); CHECK(*one.key_from <= *one.tonal_from); CHECK(*one.tonal_from < *one.tonal_through);
   REQUIRE_FALSE(a.empty()); REQUIRE(a.size()==b.size());
-  for (std::size_t i=0; i<a.size(); ++i) { CHECK(a[i].epoch==5); CHECK(a[i].frame<a[i].observed_through); CHECK(a[i].frame==b[i].frame); CHECK(a[i].observed_through==b[i].observed_through); }
+  for (std::size_t i=0; i<a.size(); ++i) { CHECK(a[i].epoch==5); CHECK(a[i].sample_rate==44100); CHECK(a[i].frame<a[i].observed_through); CHECK(a[i].frame==b[i].frame); CHECK(a[i].observed_through==b[i].observed_through); }
 }
 TEST_CASE("combined replay invalidates old evidence on gap silence and resume") {
   auto pcm=music(20); CausalMusicReplay replay;

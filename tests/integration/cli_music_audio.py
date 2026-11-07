@@ -28,13 +28,13 @@ with tempfile.TemporaryDirectory() as directory:
     rows = [json.loads(line) for line in run.stdout.splitlines()]
     assert rows and rows[-1]["type"] == "result", run.stdout
     result = rows[-1]
-    assert result["schema_version"] == 1 and result["bpm"] is not None, result
+    assert result["schema_version"] == 1 and result["sample_rate"] == rate and result["bpm"] is not None and result["state"] == "tracking", result
     assert result["key"] is not None and result["chord"] == "A minor", result
     assert result["tonal_through"] <= result["analyzed_through"] <= result["observed_through"] == rate * 12
     beats = [row for row in rows[:-1] if row["type"] == "beat"]
     tonal = [row for row in rows[:-1] if row["type"] == "tonal"]
-    assert beats and all(b["frame"] < b["observed_through"] <= rate * 12 for b in beats), rows
-    assert tonal and all(t["first_frame"] < t["observed_through"] <= rate * 12 for t in tonal), rows
+    assert beats and all(b["sample_rate"] == rate and b["frame"] < b["observed_through"] <= rate * 12 for b in beats), rows
+    assert tonal and all(t["sample_rate"] == rate and t["first_frame"] < t["observed_through"] <= rate * 12 for t in tonal), rows
     assert all(t["key_from"] is None or t["key_from"] <= t["first_frame"] for t in tonal), rows
     assert any(t["chord"] == "C major" and t["observed_through"] < rate * 5 for t in tonal), rows
     assert any(t["chord"] == "A minor" and t["first_frame"] > rate * 8 for t in tonal), rows

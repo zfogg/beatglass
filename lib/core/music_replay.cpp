@@ -30,18 +30,18 @@ CausalMusicState CausalMusicReplay::process(const AudioBlock& block, const BeatO
         s.rate = hop.sample_rate; s.clear_tonal();
       } else if (hop.reset) s.clear_tonal();
       s.beat->process(hop.samples, hop.epoch, hop.first_frame, [&](const detail::BeatEvent& event) {
-        if (observer) observer({event.epoch, event.frame, event.observed_through});
+        if (observer) observer({event.epoch, event.frame, event.observed_through, hop.sample_rate});
       }, hop.reset);
       s.tonal->process(hop.samples, hop.epoch, hop.first_frame, hop.reset);
       const auto tonal = s.tonal->estimate();
       const bool fresh = tonal.observed_through && (!s.result.tonal_through || tonal.observed_through > *s.result.tonal_through);
       s.result.tonal_from = tonal.observed_through ? std::optional<std::uint64_t>(tonal.observed_from) : std::nullopt;
-      if (fresh && tonal_observer) tonal_observer({hop.epoch, tonal.observed_from, tonal.observed_through, tonal.key ? std::optional<std::uint64_t>(tonal.key_from) : std::nullopt, tonal.key, tonal.chord, tonal.key_strength, tonal.chord_strength});
+      if (fresh && tonal_observer) tonal_observer({hop.epoch, tonal.observed_from, tonal.observed_through, tonal.key ? std::optional<std::uint64_t>(tonal.key_from) : std::nullopt, tonal.key, tonal.chord, tonal.key_strength, tonal.chord_strength, hop.sample_rate});
       s.result.key_from = tonal.key ? std::optional<std::uint64_t>(tonal.key_from) : std::nullopt;
       s.result.key = tonal.key; s.result.chord = tonal.chord; s.result.tonal_through = tonal.observed_through ? std::optional<std::uint64_t>(tonal.observed_through) : std::nullopt;
       s.result.key_strength = tonal.key_strength; s.result.chord_strength = tonal.chord_strength;
     });
-    s.result.tempo = tempo; s.has_source = true; s.require_new_epoch = false; return s.result;
+    s.result.tempo = tempo; s.result.sample_rate = block.format.sample_rate; s.has_source = true; s.require_new_epoch = false; return s.result;
   } catch (...) { s.failed = true; s.result = {}; s.result.tempo.state = TrackingState::error; throw; }
 }
 void CausalMusicReplay::interrupt() noexcept {

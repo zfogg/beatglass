@@ -9,7 +9,7 @@ CausalMusicState replay_music_file(const std::filesystem::path& path, std::uint6
   FileReader file(path, epoch);
   CausalMusicReplay replay;
   std::vector<float> samples(512 * static_cast<std::size_t>(file.metadata().channels));
-  CausalMusicState state;
+  CausalMusicState state; state.sample_rate = file.metadata().sample_rate; state.tempo.epoch = epoch;
   while (true) {
     const auto read = file.read(samples, cancel);
     if (read.status == FileReadStatus::cancelled) throw MusicReplayCancelled();

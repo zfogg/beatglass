@@ -14,6 +14,8 @@ struct CausalMusicBeat {
   std::uint64_t epoch{}, frame{};
   /** Exclusive input frame observed when the beat was emitted. */
   std::uint64_t observed_through{};
+  /** Sample rate of this epoch, for converting frame positions to time. */
+  std::uint32_t sample_rate{};
 };
 /** One analysis window, not a chord segment; its interval is half-open. */
 struct CausalTonalFrame {
@@ -25,11 +27,15 @@ struct CausalTonalFrame {
   std::optional<std::string> key, chord;
   /** Uncalibrated strengths, not probabilities. */
   float key_strength{}, chord_strength{};
+  /** Sample rate of this epoch, for converting frame positions to time. */
+  std::uint32_t sample_rate{};
 };
 /** Owned experimental tempo and tonal state; strengths are not probabilities. */
 struct CausalMusicState {
   /** Causal tempo and source boundaries. */
   CausalTempoState tempo;
+  /** Source sample rate, or zero before a source has been opened. */
+  std::uint32_t sample_rate{};
   /** Key and local major/minor triad, absent when no evidence is available. */
   std::optional<std::string> key, chord;
   /** First frame contributing to the current key estimate, if any. */
