@@ -51,7 +51,9 @@ public:
   std::optional<Frame> takeLatest();
   /** Copy the latest publication revision, or the reserved maximum once terminal. */
   unsigned revision() const noexcept;
-  /** Momentary frame epoch/revision check; the caller must serialize presentation and arrange a later clear after invalidation. */
+  /** Accept a newer delivered frame on the control thread; rejects old or invalid generations. */
+  bool acceptFrame(std::uint64_t epoch, unsigned revision) noexcept;
+  /** Momentary check of the last accepted frame; serialize presentation and arrange a later clear after invalidation. */
   bool isCurrent(std::uint64_t epoch, unsigned revision) const noexcept;
 private:
   struct Impl;

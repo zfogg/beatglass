@@ -34,6 +34,7 @@ struct Shared {
   std::mutex latestMutex;
   std::optional<PlaybackVisualization::Frame> latest;
   std::atomic<unsigned> publishedRevision{0};
+  std::atomic<unsigned> acceptedRevision{0};
   std::uint64_t epoch{};
   void stop(Status reason) noexcept {
     unsigned expected = static_cast<unsigned>(Status::active);
@@ -141,8 +142,15 @@ PlaybackVisualization::Status PlaybackVisualization::status() const noexcept { r
 unsigned PlaybackVisualization::revision() const noexcept {
   return impl_->state->active() ? impl_->state->publishedRevision.load(std::memory_order_acquire) : std::numeric_limits<unsigned>::max();
 }
+bool PlaybackVisualization::acceptFrame(std::uint64_t epoch, unsigned revision) noexcept {
+  auto& state = *impl_->state;
+  if (!revision || revision == std::numeric_limits<unsigned>::max() || epoch != state.epoch || !state.active() ||
+      revision > state.publishedRevision.load(std::memory_order_acquire) || revision <= state.acceptedRevision.load(std::memory_order_relaxed)) return false;
+  state.acceptedRevision.store(revision, std::memory_order_release);
+  return state.active();
+}
 bool PlaybackVisualization::isCurrent(std::uint64_t epoch, unsigned revision) const noexcept {
-  return revision != 0 && revision != std::numeric_limits<unsigned>::max() && impl_->state->epoch == epoch && impl_->state->active() && impl_->state->publishedRevision.load(std::memory_order_acquire) == revision && impl_->state->active();
+  return revision != 0 && revision != std::numeric_limits<unsigned>::max() && impl_->state->epoch == epoch && impl_->state->active() && impl_->state->acceptedRevision.load(std::memory_order_acquire) == revision && impl_->state->active();
 }
 std::optional<PlaybackVisualization::Frame> PlaybackVisualization::takeLatest() {
   if (!impl_->state->active()) return {};

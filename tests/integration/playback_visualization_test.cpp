@@ -57,7 +57,7 @@ TEST_CASE("playback tap processes bounded real PCM and gates retired generations
   const auto peak = std::max_element(frame->value.magnitude.begin() + 1, frame->value.magnitude.end());
   REQUIRE(std::distance(frame->value.magnitude.begin(), peak) == 21);
   REQUIRE(*peak > 0.35f);
-  REQUIRE(tap.revision() == frame->revision); REQUIRE(tap.isCurrent(7, frame->revision)); REQUIRE_FALSE(tap.isCurrent(8, frame->revision));
+  REQUIRE(tap.revision() == frame->revision); REQUIRE(tap.acceptFrame(7, frame->revision)); REQUIRE(tap.isCurrent(7, frame->revision)); REQUIRE_FALSE(tap.isCurrent(8, frame->revision));
   tap.retire(); REQUIRE(tap.revision() == std::numeric_limits<unsigned>::max()); REQUIRE_FALSE(tap.isCurrent(7, frame->revision)); REQUIRE_FALSE(tap.takeLatest());
   tap.output()->audioBufferReceived(buffer); REQUIRE_FALSE(tap.takeLatest());
   PlaybackVisualization replacement(8); replacement.output()->audioBufferReceived(buffer);
@@ -72,8 +72,7 @@ TEST_CASE("older same-generation frames cannot replace a newer frame") {
   REQUIRE(second->revision > first->revision);
   std::optional<PlaybackVisualization::Frame> displayed;
   auto deliver = [&](const auto& candidate) {
-    if (tap.isCurrent(candidate.value.epoch, candidate.revision) &&
-        (!displayed || candidate.revision > displayed->revision)) displayed = candidate;
+    if (tap.acceptFrame(candidate.value.epoch, candidate.revision)) displayed = candidate;
   };
   deliver(*second); deliver(*first); REQUIRE(displayed); REQUIRE(displayed->revision == second->revision);
   REQUIRE(tap.isCurrent(second->value.epoch, second->revision));
