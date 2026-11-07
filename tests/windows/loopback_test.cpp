@@ -377,3 +377,18 @@ TEST_CASE("Claim and cancellation have ordered concurrent outcomes") {
     CHECK(worker.get()); CHECK_FALSE(authorization.claim());
   }
 }
+
+TEST_CASE("Loss token rejects queued evidence and recovers with a new packet stamp") {
+  beatglass::windows::LoopbackLossToken token;
+  const auto queued=token.stamp(); REQUIRE(token.matches(queued));
+  token.invalidate(); CHECK_FALSE(token.matches(queued));
+  const auto fresh=token.stamp(); CHECK(token.matches(fresh));
+  // Delayed queued work cannot be relabeled with a later token.
+  token.invalidate(); CHECK_FALSE(token.matches(fresh)); CHECK_FALSE(token.matches(queued));
+}
+TEST_CASE("Loss token is visible across capture and GUI threads") {
+  beatglass::windows::LoopbackLossToken token; const auto pending=token.stamp();
+  std::latch begin{1}, invalidated{1};
+  auto worker=std::async(std::launch::async,[&] { begin.wait(); token.invalidate(); invalidated.count_down(); });
+  begin.count_down(); invalidated.wait(); CHECK_FALSE(token.matches(pending)); worker.get();
+}

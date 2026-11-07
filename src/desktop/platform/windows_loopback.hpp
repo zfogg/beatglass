@@ -3,9 +3,24 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <limits>
 #include <string>
 
 namespace beatglass::windows {
+/** Shared capture-loss token. The capture worker is the sole writer; GUI and analysis threads may read concurrently. Invalidation is bounded, allocation-free and lock-free. Exhaustion permanently rejects all stamps rather than wrapping. A token is not an epoch or an ordered publication revision. */
+class LoopbackLossToken {
+public:
+  /** Snapshot on any thread. A value at exhaustion is never valid. */
+  std::uint64_t stamp() const noexcept { return value_.load(std::memory_order_acquire); }
+  /** True if this stamp still identifies the current, non-exhausted capture interval. */
+  bool matches(std::uint64_t stamp) const noexcept { return stamp != std::numeric_limits<std::uint64_t>::max() && value_.load(std::memory_order_acquire) == stamp; }
+  /** Invalidate earlier stamps on the sole capture worker; no allocation or blocking. */
+  void invalidate() noexcept { const auto old=value_.load(std::memory_order_relaxed); if (old != std::numeric_limits<std::uint64_t>::max()) value_.store(old+1, std::memory_order_release); }
+private:
+  static_assert(std::atomic<std::uint64_t>::is_always_lock_free);
+  std::atomic<std::uint64_t> value_{0};
+};
+
 /** One owned interleaved float packet copied from a selected render endpoint. Positions count delivered or dropped complete frames from the capture epoch's origin; WASAPI device-position jumps are marked discontinuous but are not included in that count. A discontinuity or invalid timestamp requires the consumer to discard tracking evidence and reacquire. */
 struct LoopbackPacket {
   /** Maximum interleaved sample values in one packet. */
@@ -16,6 +31,7 @@ struct LoopbackPacket {
   std::uint32_t sample_rate{}; /**< Frames per second. */
   std::uint32_t channels{}; /**< Interleaved values per frame. */
   std::uint64_t epoch{}; /**< Caller-allocated stream epoch, never reused while evidence can remain in flight. */
+  std::uint64_t loss_stamp{}; /**< Capture-loss token sampled for this packet; retain this stamp with derived evidence, never substitute a later snapshot. */
   std::uint64_t first_frame{}; /**< Epoch-relative count of frames processed by the backend, including queue drops but excluding unknown device gaps. */
   std::uint64_t qpc_100ns{}; /**< Windows QPC timestamp for the first frame, in 100-nanosecond units, meaningful only when timestamp_valid is true. */
   bool timestamp_valid{}; /**< False when WASAPI flags a timestamp error; qpc_100ns must then be ignored. */
@@ -59,6 +75,8 @@ public:
   virtual bool start(const std::string& endpoint_id, std::uint64_t epoch, std::shared_ptr<LoopbackStartAuthorization> authorization);
   /** Stop and join the capture thread. Call on the control thread; queued packets are discarded. */
   virtual void stop();
+  /** Share the loss token with consumers; retained references outlive the source. Source/session generation and revision gates are still required. GUI updates can only clear when the GUI thread runs. */
+  std::shared_ptr<const LoopbackLossToken> lossToken() const noexcept;
   /** Read current state from any non-capture thread. */
   virtual State state() const;
   /** Native HRESULT from a failed stream; meaningful only after interruption. */

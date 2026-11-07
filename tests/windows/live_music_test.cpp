@@ -8,6 +8,7 @@ namespace beatglass::windows {
 struct Loopback::Impl {};
 Loopback::Loopback() = default;
 Loopback::~Loopback() = default;
+std::shared_ptr<const LoopbackLossToken> Loopback::lossToken() const noexcept { return {}; }
 bool Loopback::start(const std::string&,std::uint64_t) { return false; }
 bool Loopback::start(const std::string&,std::uint64_t,std::shared_ptr<LoopbackStartAuthorization>) { return false; }
 void Loopback::stop() {}
