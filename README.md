@@ -65,6 +65,8 @@ On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the co
 
 The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
 
+File replay uses the proposed worker-owned `CausalTempoReplay` block interface. It accepts arbitrary interleaved chunk sizes, buffers partial 512-frame hops, and reports accepted and analyzed exclusive boundaries separately. An incomplete final hop is not analyzed. Live capture and the library snapshot job are not connected yet.
+
 The experimental worker-only aubio beat tracker is not connected to the CLI or snapshots; see [progress](docs/progress.md) for its timing and qualification limits.
 
 ## Provisional library storage increment
