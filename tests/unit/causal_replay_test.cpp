@@ -81,3 +81,39 @@ TEST_CASE("causal tempo replay permits a new format only in a new epoch") {
   CHECK(changed.epoch == 4); CHECK(changed.observed_through == b.size());
   CHECK(changed.analyzed_through <= changed.observed_through);
 }
+TEST_CASE("hop observers are synchronous borrowed and independent of source chunking") {
+  auto pcm=click_pcm(44100,1,2); const auto frames=pcm.size()/2;
+  struct Copy { std::uint64_t epoch,first; std::uint32_t rate; bool reset; std::vector<float> samples; };
+  std::vector<Copy> single,split; CausalTempoReplay one,many;
+  auto copy=[](std::vector<Copy>& out,const CausalMonoHop& h) { out.push_back({h.epoch,h.first_frame,h.sample_rate,h.reset,{h.samples.begin(),h.samples.end()}}); };
+  bool inside=false; auto token=std::make_shared<int>(1); std::weak_ptr<int> weak=token;
+  {
+    CausalTempoReplay::HopObserver observer=[&,owned=token](const CausalMonoHop& h,TrackingState) { CHECK(inside); CHECK(h.samples.size()==512); copy(single,h); };
+    token.reset(); inside=true; one.process(block(pcm,9,37,44100,2),observer); inside=false;
+    CHECK_FALSE(weak.expired());
+  }
+  CHECK(weak.expired());
+  for (std::size_t i=0;i<frames;i+=137) {
+    auto n=std::min<std::size_t>(137,frames-i);
+    auto temporary=std::vector<float>(pcm.begin()+i*2,pcm.begin()+(i+n)*2);
+    many.process(block(temporary,9,37+i,44100,2),[&](const CausalMonoHop& h,TrackingState){copy(split,h);});
+    std::fill(temporary.begin(),temporary.end(),0.f);
+  }
+  REQUIRE_FALSE(single.empty()); REQUIRE(single.size()==split.size());
+  for (std::size_t i=0;i<single.size();++i) {
+    CHECK(single[i].epoch==9); CHECK(single[i].first==37+i*512); CHECK(single[i].rate==44100);
+    CHECK(single[i].reset==(i==0)); CHECK(split[i].first==single[i].first);
+    CHECK(split[i].reset==single[i].reset); CHECK(split[i].samples==single[i].samples);
+  }
+}
+TEST_CASE("hop observer exceptions and reentrant process fail closed") {
+  auto pcm=click_pcm(44100,1); auto input=block(std::span(pcm).first(512),12,0);
+  CausalTempoReplay throwing;
+  CHECK_THROWS_AS(throwing.process(input,[](const CausalMonoHop&,TrackingState){throw std::logic_error("observer");}),std::logic_error);
+  CHECK(throwing.state().state==TrackingState::error); CHECK_FALSE(throwing.state().bpm); CHECK_THROWS(throwing.process(input));
+  CausalTempoReplay nested; bool rejected=false;
+  CHECK_THROWS_AS(nested.process(input,[&](const CausalMonoHop&,TrackingState){
+    try { nested.process(input); } catch (const std::logic_error&) { rejected=true; }
+  }),std::logic_error);
+  CHECK(rejected); CHECK(nested.state().state==TrackingState::error); CHECK_THROWS(nested.process(input));
+}
