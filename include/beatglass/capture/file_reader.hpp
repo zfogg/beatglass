@@ -6,14 +6,22 @@
 #include <memory>
 #include <span>
 #include <stop_token>
+#include <stdexcept>
 namespace beatglass {
+class ByteSource;
+/** Opening a borrowed source was cancelled. */
+class FileOpenCancelled : public std::runtime_error {
+public:
+  /** Construct a typed cancellation exception. */
+  FileOpenCancelled() : std::runtime_error("File open cancelled") {}
+};
 /** Result category for a pull-based file read. */
 enum class FileReadStatus {
   /** A nonempty block was decoded. */
   data,
   /** The decoder reached end of file. */
   end,
-  /** Cancellation was already requested before the read. */
+  /** Cancellation was observed before or during a borrowed-source read. */
   cancelled
 };
 /** One read result. The block view borrows the caller's output buffer. */
@@ -31,6 +39,8 @@ struct FileReadResult {
  * decoder/filesystem I/O and must stay off GUI and capture threads. The caller
  * provides an initial epoch unique within its session. A successful seek starts
  * a new epoch; existing borrowed blocks must be discarded by the caller.
+ * Borrowed byte sources must remain alive through reader destruction and be
+ * confined to the same worker. Snapshot immutability is the caller's duty.
  */
 class FileReader {
 public:
@@ -40,6 +50,16 @@ public:
    * @throws std::runtime_error for an unreadable file or invalid format.
    */
   explicit FileReader(const std::filesystem::path& path, std::uint64_t initial_epoch = 0);
+  /** Open a borrowed, seekable byte source synchronously on the worker.
+   * @param source Source that outlives this reader, including its destructor.
+   * @param initial_epoch Process-coordinator-issued epoch for this source.
+   * @param cancel Checked before and during reads; blocking I/O may not stop promptly.
+   * @throws FileOpenCancelled if cancellation is observed while opening;
+   * std::runtime_error on source or decoder errors.
+   * The source must be an immutable snapshot for cacheable analysis. No source
+   * is created, copied, verified or retained beyond the borrow by this class.
+   */
+  explicit FileReader(ByteSource& source, std::uint64_t initial_epoch, std::stop_token cancel = {});
   /** Close the decoder. The destructor may block on filesystem work. */
   ~FileReader();
   /** File readers cannot be copied. */
@@ -50,21 +70,35 @@ public:
   const FileMetadata& metadata() const noexcept;
   /** Pull normalized float frames into caller-owned interleaved storage.
    * @param buffer Nonempty storage sized to a whole number of source frames.
-   * @param cancel Checked before I/O; cancellation cannot interrupt an ongoing
-   *               decoder read and does not change position when already set.
+   * @param cancel Checked before I/O and during borrowed-source reads; blocking
+   *               I/O may not be interruptible. An already-requested token
+   *               leaves position unchanged. Mid-I/O cancellation invalidates
+   *               the borrowed-source reader and may modify the output buffer.
    * @return Data, end, or cancelled. File replay has no live monotonic anchor;
    *         its block's monotonic_ns is zero and must not be used as one.
    * @throws std::invalid_argument on malformed buffer; std::runtime_error on
    *         decoder failure, after which this reader must be discarded.
    */
   FileReadResult read(std::span<float> buffer, std::stop_token cancel = {});
-  /** Seek to a frame and begin a fresh epoch, including when seeking to EOF.
+  /** Legacy path-only seek increments a local epoch; not process-unique.
+   * Coordinated callers must use the explicit-epoch overload instead.
+   * Seek to a frame and begin a fresh epoch, including when seeking to EOF.
    * @param frame Position from zero through the reported frame count.
    * @throws std::out_of_range for an invalid position; std::overflow_error if
-   *         the epoch cannot advance; std::runtime_error on decoder failure,
+   *         the epoch cannot advance; std::logic_error for borrowed sources;
+   *         std::runtime_error on decoder failure,
    *         after which this reader must be discarded.
    */
   void seek(std::uint64_t frame);
+  /** Seek with an externally allocated, strictly newer epoch.
+   * @param frame Position from zero through the reported frame count.
+   * @param new_epoch Coordinator-issued epoch greater than the current epoch.
+   * @throws std::out_of_range for an invalid frame; std::invalid_argument for a
+   * reused or decreasing epoch, both before decoder I/O; std::runtime_error
+   * on decoder failure, after which this reader must be discarded. Epoch
+   * allocation and process-wide uniqueness remain the caller's responsibility.
+   */
+  void seek(std::uint64_t frame, std::uint64_t new_epoch);
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
