@@ -68,6 +68,7 @@ Desktop application internals
 
    Stop and join the worker before destruction. Call on the GUI thread; an OS
    device operation that stalls can delay destruction.
+
 CLI application internals
 -------------------------
 
