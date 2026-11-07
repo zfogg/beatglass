@@ -23,7 +23,7 @@ CollectionView::CollectionView(const QString& database, beatglass::SourceEpochAl
 }
 CollectionView::~CollectionView() { worker_.reset(); }
 void CollectionView::refresh(const QString& search) {
-  auto token = requests_.beginBrowse(); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
+  auto token = requests_.beginBrowse([this] { worker_->cancel_browse(); }); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
   beatglass::library_detail::CollectionQuery query; query.search = search.toUtf8().toStdString(); query.limit = 100;
   worker_->entries(std::move(query), [this, token](LibraryBridge::Result result) {
     if (!result.error.empty() || result.cancelled) {
@@ -110,7 +110,7 @@ bool CollectionView::analyzeComposite(const QString& path) {
 }
 #endif
 void CollectionView::lookupIndexed(const QString& path, const QString& engine, const QString& configuration) {
-  auto token = requests_.beginBrowse(); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear();
+  auto token = requests_.beginBrowse([this] { worker_->cancel_browse(); }); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear();
   if (path.isEmpty() || engine.isEmpty() || configuration.isEmpty()) { status_ = QStringLiteral("Lookup unavailable: identity or epoch missing."); emit changed(); return; }
   auto epoch = worker_->new_session_epoch();
   if (!epoch) { status_ = QStringLiteral("Lookup unavailable: identity or epoch missing."); emit changed(); return; }
@@ -137,7 +137,7 @@ void CollectionView::requestOfflinePage(const QString& path, beatglass::library_
   const bool continuation = !run.empty() && offlinePage_ && offlinePage_->run_id == run && pagePath_ == path && pageEpoch_;
   const bool identityPresent = !path.isEmpty() && !identity.content_hash.empty() && !identity.engine_version.empty() && !identity.configuration_id.empty();
   auto epoch = identityPresent ? (run.empty() ? worker_->new_session_epoch() : (continuation ? pageEpoch_ : std::nullopt)) : std::nullopt;
-  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear();
+  auto token = requests_.beginBrowse([this] { worker_->cancel_browse(); }); offlinePage_.reset(); rows_.clear();
   if (!epoch) { pageEpoch_.reset(); pagePath_.clear(); status_ = QStringLiteral("Offline page unavailable: identity, run, or epoch missing."); emit changed(); return; }
   pageEpoch_ = *epoch; pagePath_ = path; status_ = QStringLiteral("Checking offline page…");
   worker_->offline_page(path.toUtf8().toStdString(), nativePath(path), std::move(identity), run, beatOffset, beatCount, windowOffset, windowCount, *epoch, [this, token](LibraryBridge::Result result) {

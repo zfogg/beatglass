@@ -16,6 +16,10 @@ public:
   using Token = std::shared_ptr<const char>;
   /** Replace the current browse request and clear its displayed page. */
   Token beginBrowse() { page_.reset(); return browse_ = std::make_shared<const char>(); }
+  /** Request backend cancellation before replacing browse state, including when the caller will reject the new request. The callback runs synchronously on the GUI thread. */
+  template <class Cancel> Token beginBrowse(Cancel&& cancel) {
+    std::forward<Cancel>(cancel)(); return beginBrowse();
+  }
   /** Invalidate browse delivery and clear its page; does not cancel backend work. */
   void clearBrowse() { browse_.reset(); page_.reset(); }
   /** Accept an owned page only for the current request. */
