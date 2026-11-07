@@ -26,7 +26,7 @@ struct OfflineReadResult {
   std::optional<OfflinePage> page; ///< Page only on hit.
   std::string diagnostic; ///< Optional error explanation.
 };
-/** Worker-confined private offline storage experiment using the same SqliteCache connection. Not a product API; source verification remains subject to platform races. */
+/** Worker-confined private offline storage experiment using the same SqliteCache connection. Not a product API; source verification remains subject to platform races. Callers must bind source identity and verifier to the same opened snapshot and independently establish actual loaded runtime and configuration identity. Non-cacheable producer results must not be published. */
 class OfflineArchive {
 public:
   /** Borrow a cache on its owning worker; it must outlive this archive. */
