@@ -163,3 +163,7 @@ qualification are still in progress.
 The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
+
+## Shared causal tempo replay proposal
+
+`CausalTempoReplay` consumes borrowed interleaved blocks on one worker, buffers at most one 512-frame hop, and runs the existing aubio tempo and signal lifecycle logic. File replay now uses this same engine; a future snapshot job can feed it without reopening the path. State reports both the exclusive accepted boundary and the last complete analyzed hop. At EOF an incomplete hop is not analyzed. Gaps and new epochs discard buffered evidence; old epochs, overlap, malformed PCM and same-epoch format changes fail closed. The caller must allocate epochs and deliver invalidation/clear notifications around source lifecycle events; the engine is not an audio callback, decoder, cache or GUI publisher. This is a proposed shared API pending integration-owner review. Tonal and timestamped beat trackers are separate unmerged increments and are not yet integrated into this engine.
