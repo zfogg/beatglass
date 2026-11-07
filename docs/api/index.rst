@@ -4,7 +4,9 @@ Beatglass API reference
 These interfaces describe the current foundation and are provisional. Headers
 under ``include/beatglass`` are library interfaces, not a promise of an
 installed or stable public API. ``src/desktop/metadata.hpp`` is application
-private. Callers must respect each interface's ownership and threading rules.
+private. Production headers under ``lib/`` are likewise private and must be
+indexed here when introduced; documenting them does not install them or make
+them public. Callers must respect each interface's ownership and threading rules.
 The implementation and the issue's remaining product gates take precedence over
 aspirational behavior; see the repository README and progress notes.
 
