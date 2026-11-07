@@ -8,6 +8,7 @@
 #include <memory>
 
 class QMenu;
+class QMessageBox;
 class QLocalSocket;
 class QQuickWindow;
 class QSystemTrayIcon;
@@ -29,6 +30,8 @@ public:
   ~AppLifecycle() override;
   /** Become primary or ask the existing primary to restore its controls. A failed handoff never starts a competing instance. */
   Startup start();
+  /** Create a GUI-thread warning explaining how to recover when relaunch cannot restore the existing instance. The caller owns and presents the dialog. */
+  static std::unique_ptr<QMessageBox> handoffFailureDialog();
   /** Borrow the main QML window until its destruction; create a tray only when a recovery route is available. */
   void attach(QQuickWindow* controls);
   /** True only while the tray is present and the platform supports the guarded recovery path. */

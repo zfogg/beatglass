@@ -5,6 +5,7 @@
 #include "beatglass/capture/source_lifecycle.hpp"
 #include <QApplication>
 #include <QDir>
+#include <QMessageBox>
 #include <QStandardPaths>
 #include <QQuickWindow>
 #include <QQmlApplicationEngine>
@@ -29,10 +30,16 @@ int main(int argc, char** argv) {
   app.setOrganizationName(QStringLiteral("Beatglass")); app.setApplicationName(QStringLiteral("Beatglass"));
   app.setQuitOnLastWindowClosed(false);
   const auto dataDirectory = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-  if (dataDirectory.isEmpty() || !QDir().mkpath(dataDirectory)) return 1;
+  if (dataDirectory.isEmpty() || !QDir().mkpath(dataDirectory)) {
+    auto dialog = AppLifecycle::handoffFailureDialog();
+    dialog->setText(QObject::tr("Beatglass could not access its application data folder."));
+    dialog->setInformativeText(QObject::tr("Check that your user account can write to its application data folder, then try again."));
+    dialog->exec(); return 1;
+  }
   AppLifecycle lifecycle(QStringLiteral("desktop"), dataDirectory);
   const auto startup = lifecycle.start();
-  if (startup != AppLifecycle::Startup::primary) return startup == AppLifecycle::Startup::restored ? 0 : 1;
+  if (startup == AppLifecycle::Startup::restored) return 0;
+  if (startup == AppLifecycle::Startup::unavailable) { auto dialog = AppLifecycle::handoffFailureDialog(); dialog->exec(); return 1; }
   beatglass::SourceEpochAllocator epochs;
   Metadata metadata;
   LivePresentation livePresentation;

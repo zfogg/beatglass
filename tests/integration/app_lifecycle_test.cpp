@@ -1,6 +1,7 @@
 #include "app_lifecycle.hpp"
 #include <QApplication>
 #include <QProcess>
+#include <QMessageBox>
 #include <QQuickWindow>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -121,6 +122,15 @@ private slots:
     QEvent activation(QEvent::ApplicationActivate); QCoreApplication::sendEvent(qApp, &activation);
     QVERIFY(controls.isVisible());
   }
+  void failedHandoffShowsRecoveryWithoutAnotherInstance() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    AppLifecycle primary(QStringLiteral("relaunch"), directory.path());
+    QVERIFY(primary.lock_.tryLock(0));
+    QProcess child; child.start(QCoreApplication::applicationFilePath(), {QStringLiteral("--failure-dialog"), directory.path()});
+    QVERIFY(child.waitForStarted(5000)); QTRY_COMPARE_WITH_TIMEOUT(child.state(), QProcess::NotRunning, 12000);
+    QCOMPARE(child.exitStatus(), QProcess::NormalExit); QCOMPARE(child.exitCode(), 0);
+    QVERIFY(!primary.server_.isListening());
+  }
 };
 int main(int argc, char** argv) {
 #ifdef _WIN32
@@ -138,6 +148,14 @@ int main(int argc, char** argv) {
   if (app.arguments().size() == 3 && app.arguments().at(1) == QStringLiteral("--promote")) {
     AppLifecycle secondary(QStringLiteral("relaunch"), app.arguments().at(2));
     return secondary.start() == AppLifecycle::Startup::primary ? 0 : 1;
+  }
+  if (app.arguments().size() == 3 && app.arguments().at(1) == QStringLiteral("--failure-dialog")) {
+    AppLifecycle secondary(QStringLiteral("relaunch"), app.arguments().at(2));
+    if (secondary.start() != AppLifecycle::Startup::unavailable) return 1;
+    auto dialog = AppLifecycle::handoffFailureDialog();
+    if (dialog->text().isEmpty() || !dialog->informativeText().contains(QStringLiteral("try again")) || dialog->icon() != QMessageBox::Warning) return 2;
+    QTimer::singleShot(0, dialog.get(), &QDialog::accept);
+    dialog->exec(); return 0;
   }
   if (app.arguments().size() == 3 && app.arguments().at(1) == QStringLiteral("--fragment")) {
     QLocalSocket peer; peer.connectToServer(app.arguments().at(2));

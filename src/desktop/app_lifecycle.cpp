@@ -8,6 +8,7 @@
 #include <QIcon>
 #include <QLocalSocket>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPixmap>
 #include <QQuickWindow>
@@ -60,6 +61,12 @@ AppLifecycle::Startup AppLifecycle::start() {
     QThread::msleep(50);
   }
   return Startup::unavailable;
+}
+std::unique_ptr<QMessageBox> AppLifecycle::handoffFailureDialog() {
+  auto dialog = std::make_unique<QMessageBox>(QMessageBox::Warning, tr("Beatglass could not open"),
+      tr("Beatglass could not start or restore its window."), QMessageBox::Ok);
+  dialog->setInformativeText(tr("Wait a moment and try again. If another Beatglass instance is not responding, close it using your system's process manager, then reopen it."));
+  return dialog;
 }
 void AppLifecycle::acceptConnections() {
   while (auto* socket = server_.nextPendingConnection()) {
