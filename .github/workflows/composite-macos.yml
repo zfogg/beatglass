@@ -1,0 +1,32 @@
+name: Experimental macOS composite
+on: [push, pull_request]
+jobs:
+  composite-macos:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install development dependencies
+        run: brew install aubio libsndfile eigen@3 pkgconf
+      - name: Build pinned Essentia
+        shell: bash
+        run: |
+          git clone https://github.com/MTG/essentia.git "$RUNNER_TEMP/essentia"
+          git -C "$RUNNER_TEMP/essentia" checkout 23ae7baddecfc3227ba23ad69fa11f73ac5293a4
+          cd "$RUNNER_TEMP/essentia"
+          export PKG_CONFIG_PATH="$(brew --prefix eigen@3)/share/pkgconfig:${PKG_CONFIG_PATH:-}"
+          python3 waf configure --lightweight= --fft=KISS --build-static --ignore-algos=Spline,CubicSpline
+          python3 waf -j2
+      - name: Build and test composite analysis
+        shell: bash
+        run: |
+          prefix="$(brew --prefix)"
+          cmake -S . -B "$RUNNER_TEMP/beatglass" -DBUILD_TESTING=ON \
+            -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TONAL_SPIKE=ON \
+            -DBEATGLASS_BUILD_MUSIC_REPLAY=ON -DBEATGLASS_TEST_V1_CODECS=OFF \
+            -DCMAKE_PREFIX_PATH="$prefix;$(brew --prefix eigen@3)" \
+            -DESSENTIA_INCLUDE_DIR="$RUNNER_TEMP/essentia/src/essentia" \
+            -DESSENTIA_LIBRARY="$RUNNER_TEMP/essentia/build/src/libessentia.a" \
+            -DCMAKE_CXX_FLAGS="-I$RUNNER_TEMP/essentia/src"
+          cmake --build "$RUNNER_TEMP/beatglass" -j2
+          ctest --test-dir "$RUNNER_TEMP/beatglass" --output-on-failure
