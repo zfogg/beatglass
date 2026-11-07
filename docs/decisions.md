@@ -65,3 +65,10 @@ cancellation before starting commit; after that point it resolves commit or
 error and must recover indeterminate outcomes by run ID. This is an interface
 proposal, not a claim that database transactions or filesystem identity races
 have been implemented or qualified.
+
+# Phase 1 snapshot boundary
+
+Snapshot publication uses exclusive `observed_through` frame boundaries and
+nonempty half-open chord intervals. A beat at the boundary and an empty chord
+are now rejected; existing producers must adjust. This does not qualify any
+native capture or presentation path.
