@@ -85,12 +85,14 @@ public:
     bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p);
   }
   bool find(const CacheKey& key, std::string& result) {
-    Statement s(db_, "SELECT r.result FROM active a JOIN runs r ON r.id=a.run_id WHERE a.content=? AND a.engine=? AND a.config=? AND a.mode=?");
+    Statement s(db_, "SELECT length(r.result), CASE WHEN length(r.result)<=8388608 THEN r.result ELSE NULL END FROM active a JOIN runs r ON r.id=a.run_id WHERE a.content=? AND a.engine=? AND a.config=? AND a.mode=?");
     bind_key(s.p, 1, key); int rc = sqlite3_step(s.p);
     if (rc == SQLITE_DONE) return false;
     if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_));
-    auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 0));
-    auto n = sqlite3_column_bytes(s.p, 0); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
+    const auto length = sqlite3_column_int64(s.p, 0);
+    if (length < 0 || length > 8 * 1024 * 1024) throw std::runtime_error("offline result too large");
+    auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 1));
+    auto n = sqlite3_column_bytes(s.p, 1); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
   }
   std::optional<std::string> active_run(const CacheKey& key) {
     Statement s(db_, "SELECT run_id FROM active WHERE content=? AND engine=? AND config=? AND mode=?"); bind_key(s.p, 1, key);
@@ -132,7 +134,7 @@ public:
                   std::stop_token stop, const std::function<bool()>& revalidate,
                   const std::function<void()>& after_commit_probe, const std::string* indexed_path = nullptr) {
     try {
-      if (!sqlite_length_representable(result.size())) return Publish::error;
+      if (!sqlite_length_representable(result.size()) || result.size() > 8 * 1024 * 1024) return Publish::error;
       exec("BEGIN IMMEDIATE");
       if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
       if (!revalidate()) { rollback(); return Publish::stale_input; }
