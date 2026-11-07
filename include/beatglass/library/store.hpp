@@ -19,6 +19,26 @@ struct FindResult { FindOutcome outcome{FindOutcome::error}; std::optional<Cache
 enum class PublishOutcome { committed, cancelled, stale_input, error };
 /** Publication result; diagnostic describes errors including an indeterminate commit. */
 struct PublishResult { PublishOutcome outcome{PublishOutcome::error}; std::string diagnostic; };
+/** Result of checking the same opened input used by analysis against its original evidence. */
+enum class FileVerificationOutcome { match, changed, unverifiable, error };
+/** Verification result; diagnostic describes an error or inability to verify. */
+struct FileVerificationResult { FileVerificationOutcome outcome{FileVerificationOutcome::error}; std::string diagnostic; };
+/** Synchronous, worker-invoked revalidation of the opened analysis source.
+ * The caller keeps this object and its source evidence alive until publish
+ * returns. Its implementation must be safe on the database worker; no decoder
+ * or file handle may be accessed concurrently unless its owner permits it.
+ * A successful match is limited by the platform's documented filesystem races.
+ */
+class FileVersionVerifier {
+public:
+  virtual ~FileVersionVerifier() = default;
+  /** Recheck identity and version against the retained pre-analysis evidence. */
+  virtual FileVerificationResult verify() = 0;
+};
+/** Recovery result after reopening storage: committed, absent, or still indeterminate due to error. */
+enum class RecoveryOutcome { committed, not_found, error };
+/** Recovery status and optional diagnostic for errors. */
+struct RecoveryResult { RecoveryOutcome outcome{RecoveryOutcome::error}; std::string diagnostic; };
 /** Worker-owned storage boundary, not a database implementation.
  * Connections and writes belong to a database worker, never the GUI or audio
  * callback. Keys include validated content identity, engine and algorithm
@@ -38,9 +58,16 @@ public:
   virtual ~AnalysisStore() = default;
   /** Find a validated cached result, miss, cancellation or error. */
   virtual FindResult find(const FileVersion&, const AnalysisIdentity&, std::stop_token) = 0;
-  /** Revalidate and publish, applying the worker-serialized commit decision above. */
-  virtual PublishResult publish(const FileVersion& before, const FileVersion& after,
-                                const CachedAnalysis&, std::stop_token) = 0;
+  /** Stage, invoke verifier on this worker, then publish at the serialized commit point.
+   * Changed or unverifiable evidence returns stale_input; verification errors
+   * return error. run_id must be unique and durable across retries/reopening.
+   * The caller retains verifier and source evidence until this call returns.
+   */
+  virtual PublishResult publish(const FileVersion& before, const CachedAnalysis&,
+                                const std::string& run_id, FileVersionVerifier& verifier,
+                                std::stop_token) = 0;
+  /** Query a unique run ID after reopening; not_found means no committed run with that ID. */
+  virtual RecoveryResult recover(const std::string& run_id) = 0;
 };
 /** Worker-local commit decision; neither a transaction nor a cross-thread arbiter.
  * Deliver cancellation to the worker and call begin_commit at its commit point.
