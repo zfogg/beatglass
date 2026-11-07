@@ -57,7 +57,7 @@ Offline results preserve overlapping local tonal evidence separately from an
 optional validated track-level key. Missing windows and scores remain unknown;
 the value type does not itself provide database paging or persistence.
 
-.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp
+.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp include/beatglass/core/visualization.hpp
 
 Library jobs
 ------------
@@ -92,7 +92,7 @@ Desktop application internals
 
    Return the last owned, non-cacheable composite evidence on the GUI thread. A new analysis or destruction invalidates the reference.
 
-.. cpp:autodoc:: src/desktop/library_bridge.hpp src/desktop/collection_requests.hpp src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/playback_guard.hpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp
+.. cpp:autodoc:: src/desktop/library_bridge.hpp src/desktop/collection_requests.hpp src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/playback_guard.hpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_device_position.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_live_music.hpp src/desktop/platform/windows_default_tempo.hpp
 
 .. cpp:autodoc:: src/desktop/platform/windows_dj_bridge.hpp
 

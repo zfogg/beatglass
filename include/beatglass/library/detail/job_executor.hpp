@@ -16,7 +16,7 @@ enum class TrackedState {
 /** Thread-safe retained view of one tracked job; may outlive the executor. */
 class JobHandle {
 public:
-  /** Request cooperative cancellation; a queued job is marked cancelled immediately. */
+  /** Request cooperative cancellation; a queued job is marked cancelled immediately. A call observing a terminal state does nothing. A request begun while work is running can race terminal publication; stop callbacks run without the handle mutex and may finish after terminal state becomes observable. */
   void cancel();
   /** Copy current state. */ TrackedState state() const;
   /** Copy the latest monotonic frame count. */ std::uint64_t frames() const;
@@ -31,7 +31,7 @@ class JobExecutor {
 public:
   /** A job invoked on the worker with a cooperative shutdown token. */
   using Work = std::function<void(std::stop_token)>;
-  /** Tracked work reports its terminal outcome itself, so late cancellation cannot relabel a successful commit. Progress calls are synchronous and monotonic. */
+  /** Tracked work reports its terminal outcome itself, so late cancellation cannot relabel a successful commit. The progress callback must not be retained after work returns; calls are synchronous and monotonic, and late calls cannot update terminal state. */
   using TrackedWork = std::function<TrackedState(std::stop_token, const std::function<void(std::uint64_t)>&)>;
   /** Start one worker; capacity bounds queued jobs, excluding the running job. */
   explicit JobExecutor(std::size_t capacity);
@@ -43,7 +43,7 @@ public:
   bool submit(int priority, Work work);
   /** Queue tracked work or return empty if full, stopping, or empty. A cancelled queued job occupies capacity until removed by the worker or shutdown. */
   std::shared_ptr<JobHandle> submit_tracked(int priority, TrackedWork work);
-  /** Reject and discard queued jobs, request active cancellation, and join. May block until active work returns. */
+  /** Reject new jobs, request active cancellation, then cancel and destroy queued jobs outside the queue lock and join. May block until active work or queued closure destruction returns. Stop callbacks execute without the queue lock. */
   void shutdown();
 private:
   struct Impl;

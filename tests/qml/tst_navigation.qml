@@ -13,7 +13,7 @@ TestCase {
         signal statusChanged(string status)
         function inspect(url) { lastFile = url; statusChanged(url.toString() === "" ? "Select a local file." : "Metadata for " + url) }
     }
-    QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
+    QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "â€”"; property string key: "â€”"; property string chord: "â€”" }
     QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
     QtObject {
         id: fakeCollection
@@ -26,7 +26,7 @@ TestCase {
         function analyzeSelected() { analysisStatus = "Provisional analysis complete"; provisionalWindows = [{range:"Frames [0, 100)", key:"C", keyFrom:"0", keyStrength:"Unknown", chord:"Unknown", chordStrength:"Unknown"}]; return true }
         function cancelSelected() { analysisActive = false; provisionalWindows = [] }
     }
-    QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
+    QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "â€”"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "â€”" } }
     QtObject {
         id: fakeLifecycle
         property bool recoveryAvailable: false; property int hideRequests: 0
@@ -38,13 +38,13 @@ TestCase {
         id: fakeMacOverlay
         property bool available: true; property bool clickThrough: false; property real opacity: 0.9
         property int attaches: 0; property int shows: 0; property int hides: 0
-        property var screenNames: ["Display"]; property int selectedScreen: -1; property int requestedWidth: 0
+        property var screenNames: ["Display"]; property int screenIndex: 0; property int selectedScreen: -1; property int requestedWidth: 0
         function attach(overlay, control) { attaches++; return true }
         function showOverlay() { shows++; return true }
         function hideOverlay() { hides++; clickThrough = false }
         function setClickThrough(value) { clickThrough = value; return true }
         function keepOnScreen() {} function setOpacity(value) { opacity = value }
-        function moveToScreen(index) { selectedScreen = index; return true }
+        function moveToScreen(index) { selectedScreen = index; screenIndex = index; return true }
         function resizeOverlay(width, height) { requestedWidth = width; return true }
     }
     Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay; playbackGuardBridge: fakeGuard } }
@@ -73,7 +73,14 @@ TestCase {
         compare(fakeMacOverlay.attaches, 1)
         findChild(app, "navigation").currentIndex = 1
         findChild(app, "showOverlay").clicked(); compare(fakeMacOverlay.shows, 1)
-        let display = findChild(app, "overlayDisplay"); display.activated(0); compare(fakeMacOverlay.selectedScreen, 0)
+        let display = findChild(app, "overlayDisplay"); compare(display.currentIndex, 0)
+        fakeMacOverlay.screenNames = ["A", "B"]; fakeMacOverlay.screenIndex = 1; compare(display.currentIndex, 1)
+        display.popup.open(); fakeMacOverlay.screenNames = ["B", "A"]; fakeMacOverlay.screenIndex = 0
+        compare(display.currentIndex, 0); compare(fakeMacOverlay.selectedScreen, -1)
+        display.activated(1); compare(fakeMacOverlay.selectedScreen, -1)
+        display.popup.close(); fakeMacOverlay.screenNames = ["Same", "Same"]; fakeMacOverlay.screenIndex = 0
+        display.openedScreens = ["Same", "Same"]; display.activated(1); compare(fakeMacOverlay.selectedScreen, -1)
+        fakeMacOverlay.screenNames = ["Display"]; display.openedScreens = []; display.activated(0); compare(fakeMacOverlay.selectedScreen, 0)
         let size = findChild(app, "overlaySize"); size.currentIndex = 2; size.activated(2); compare(fakeMacOverlay.requestedWidth, 430)
         app.destroy()
     }
@@ -183,12 +190,12 @@ TestCase {
             if (model.get(i, "fileName") === "tone.flac") audio = i
         verify(audio >= 0)
         let sort = findChild(app, "sortOrder")
-        compare(sort.text, "Name ↑")
+        compare(sort.text, "Name â†‘")
         sort.clicked()
-        compare(sort.text, "Name ↓")
+        compare(sort.text, "Name â†“")
         tryVerify(() => model.get(0, "fileName") === "tone.mp3")
         sort.clicked()
-        compare(sort.text, "Name ↑")
+        compare(sort.text, "Name â†‘")
         tryVerify(() => model.get(0, "fileName") === "tone.aiff")
         findChild(app, "search").text = "no-such-file"
         tryCompare(model, "count", 0)

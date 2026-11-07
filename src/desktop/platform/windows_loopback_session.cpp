@@ -8,7 +8,9 @@ LoopbackSession::LoopbackSession(SourceEpochAllocator& epochs, std::function<voi
     : epochs_(epochs), invalidate_(std::move(invalidate)), backend_(std::move(backend)) {}
 LoopbackSession::~LoopbackSession() { stop(); }
 void LoopbackSession::invalidate() { if (invalidate_) invalidate_(); }
-bool LoopbackSession::start(const std::string& endpoint) {
+bool LoopbackSession::start(const std::string& endpoint) { return start(endpoint, {}); }
+bool LoopbackSession::start(const std::string& endpoint, std::shared_ptr<LoopbackStartAuthorization> authorization) {
+  if (authorization && !authorization->claim()) return false;
   if (!backend_ || !invalidate_ || lifecycle_.state() != SourceState::stopped) return false;
   auto attempt = lifecycle_.start();
   if (!attempt) return false;
@@ -21,7 +23,11 @@ bool LoopbackSession::start(const std::string& endpoint) {
   }
   epoch_ = *epoch;
   dropped_ = 0;
-  if (!backend_->start(endpoint, epoch_)) {
+  authorization_ = authorization;
+  if (authorization && authorization->cancelled()) { lifecycle_.stop(); invalidate(); return false; }
+  const bool accepted = authorization ? backend_->start(endpoint, epoch_, authorization) : backend_->start(endpoint, epoch_);
+  if (authorization && authorization->cancelled()) { backend_->stop(); lifecycle_.stop(); invalidate(); return false; }
+  if (!accepted) {
     lifecycle_.notify(attempt_, 1, SourceState::error);
     invalidate();
     return false;
@@ -31,6 +37,9 @@ bool LoopbackSession::start(const std::string& endpoint) {
 void LoopbackSession::poll() {
   Loopback::Event event;
   if (!backend_) return;
+  if (authorization_ && authorization_->cancelled()) {
+    lifecycle_.delivery_lost(); invalidate(); backend_->stop(); authorization_.reset(); return;
+  }
   while (backend_->pop_event(event)) {
     if (event.epoch != epoch_) { lifecycle_.delivery_lost(); invalidate(); backend_->stop(); return; }
     const auto next = event.state == Loopback::State::running ? SourceState::running :
@@ -61,6 +70,7 @@ void LoopbackSession::stop() {
   if (lifecycle_.state() != SourceState::stopped) invalidate();
   lifecycle_.stop();
   if (backend_) backend_->stop();
+  authorization_.reset();
 }
 SourceState LoopbackSession::state() const { return lifecycle_.state(); }
 }

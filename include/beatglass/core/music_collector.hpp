@@ -5,18 +5,20 @@
 #include <cstdint>
 #include <memory>
 namespace beatglass {
-/** Limits for one materialized file result. Zero permits no entries or text. */
+/** Result event count limits and a byte limit per individual label. Zero permits no entries or label bytes. */
 struct MusicCollectorLimits {
-  std::size_t max_beats{}, max_tonal_windows{}, max_label_bytes{}; ///< Per-result ceilings.
+  std::size_t max_beats{}, max_tonal_windows{}, max_label_bytes{}; ///< Counts per result; bytes per label.
 };
 /** A complete owned causal result whose dependency identity is not verified.
- * Its identity fields are deliberately empty, so it cannot pass offline structural
- * validation or be used as a persistent cache entry. It may be displayed only
- * after the caller separately verifies the source and commits the job.
+ * Initial identity fields are empty. This is an advisory provenance marker: value
+ * is public and mutable, and filling its fields can satisfy structural validation
+ * without verifying provenance. Storage must reject unverified producer results
+ * or require a separately validated capability before cache publication. Display
+ * requires the caller to verify the source and commit the job separately.
  */
 struct UnverifiedMusicAnalysis {
   OfflineAnalysis value; ///< Owned events and windows; no borrowed PCM remains.
-  /** Always false: this build does not verify loaded dependency artifacts. */
+  /** Always false; callers must enforce this result at the storage boundary. */
   bool cache_reusable() const noexcept { return false; }
 };
 /** Bounded worker-only collector for one contiguous source starting at frame zero.

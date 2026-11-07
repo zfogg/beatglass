@@ -157,7 +157,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { text: "Choose folder…"; objectName: "chooseFolder"; onClicked: folderPicker.open() }
+                    Button { text: "Choose folderâ€¦"; objectName: "chooseFolder"; onClicked: folderPicker.open() }
                     Button {
                         text: "Up"; objectName: "parentFolder"
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
@@ -174,7 +174,7 @@ ApplicationWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true; onTextChanged: window.invalidateSelection() }
-                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name â†“" : "Name â†‘"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -308,7 +308,7 @@ ApplicationWindow {
                     Button { objectName: "stopMonitor"; text: "Stop monitoring"; enabled: !!window.djBridge && window.djBridge.active; onClicked: window.djBridge.stop() }
                 }
                 Label { objectName: "djStatus"; text: "Status: " + (window.djBridge ? window.djBridge.status : "Unavailable") }
-                Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
+                Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "â€”"); font.pixelSize: 22 }
                 Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
                     Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge && (!window.macOverlay || window.overlayBridge.available); onClicked: { if (djOverlay.visible) window.hideOverlay(); else window.showOverlay() } }
@@ -324,11 +324,24 @@ ApplicationWindow {
                 RowLayout {
                     visible: window.macOverlay
                     Label { text: "Display" }
-                    ComboBox { objectName: "overlayDisplay"; model: window.macOverlay ? window.overlayBridge.screenNames : []; enabled: window.macOverlay && window.overlayBridge.available && count > 0; Layout.fillWidth: true; onActivated: window.overlayBridge.moveToScreen(currentIndex) }
+                    ComboBox {
+                        id: overlayDisplay; objectName: "overlayDisplay"
+                        property var openedScreens: []
+                        model: window.macOverlay ? window.overlayBridge.screenNames : []
+                        currentIndex: window.macOverlay ? window.overlayBridge.screenIndex : -1
+                        enabled: window.macOverlay && window.overlayBridge.available && count > 0; Layout.fillWidth: true
+                        onActivated: function(index) {
+                            const current = window.overlayBridge.screenNames
+                            if (openedScreens.length && (openedScreens.length !== current.length || openedScreens.some((name, i) => name !== current[i]) || openedScreens.some((name, i) => openedScreens.indexOf(name) !== i))) return
+                            if (index >= 0 && index < current.length) window.overlayBridge.moveToScreen(index)
+                        }
+                        Connections { target: overlayDisplay.popup; function onAboutToShow() { overlayDisplay.openedScreens = Array.from(window.overlayBridge.screenNames) } }
+                    }
                     Label { text: "Size" }
                     ComboBox { objectName: "overlaySize"; model: ["Compact", "Medium", "Large"]; currentIndex: 1; enabled: window.macOverlay && window.overlayBridge.available; onActivated: { const sizes = [[250, 110], [310, 130], [430, 180]]; window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1]) } }
                 }
                 Label { visible: window.macOverlay && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
+                Label { visible: window.macOverlay && Array.from(window.overlayBridge.screenNames).some((name, i, names) => names.indexOf(name) !== i); text: "Display names are indistinguishable; keep the overlay on its current display."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Item { Layout.fillHeight: true }
             }
         }
@@ -363,7 +376,7 @@ ApplicationWindow {
             Column {
                 anchors.centerIn: parent; spacing: 5
                 Label { text: window.djBridge ? window.djBridge.status : "Unavailable"; color: "white"; font.pixelSize: 16 }
-                Label { text: "BPM " + (window.djBridge ? window.djBridge.tempo : "—"); color: "white"; font.pixelSize: 30; font.bold: true }
+                Label { text: "BPM " + (window.djBridge ? window.djBridge.tempo : "â€”"); color: "white"; font.pixelSize: 30; font.bold: true }
             }
         }
     }
