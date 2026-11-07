@@ -13,7 +13,24 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
+    QtObject { id: fakeDj; property bool active: false; property string status: "Stopped"; function start() { active = true } function stop() { active = false } }
+    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djControl: fakeDj } }
+    function test_djStartStop() {
+        fakeDj.active = false
+        let app = shell.createObject(null)
+        findChild(app, "navigation").currentIndex = 1
+        let start = findChild(app, "startMonitoring")
+        let stop = findChild(app, "stopMonitoring")
+        verify(start.enabled)
+        verify(!stop.enabled)
+        start.clicked()
+        verify(fakeDj.active)
+        verify(!start.enabled)
+        verify(stop.enabled)
+        stop.clicked()
+        verify(!fakeDj.active)
+        app.destroy()
+    }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)

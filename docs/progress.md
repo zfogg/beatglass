@@ -1,5 +1,12 @@
 # Progress and handoff
 
+Windows DJ integration branch: the shared DJ page can start and stop
+experimental default-output WASAPI tempo monitoring, with revisioned updates
+delivered to the GUI model. This is tempo only and does not qualify the product.
+See [Windows platform evidence](windows-platform.md) for serial build commands,
+generated-output/QML test results and the remaining physical-device, overlay,
+accuracy and cross-platform gaps. The shared UI and capture PRs are prerequisites.
+
 Phase 0 is **not complete**. No feature work should start until its exit gate is met.
 
 - [x] Initial repository guidance and README.

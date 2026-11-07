@@ -13,6 +13,7 @@ ApplicationWindow {
     title: "Beatglass"
     property var metadataBridge: metadata
     property var liveBridge: livePresentation
+    property var djControl: null
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
@@ -141,10 +142,15 @@ ApplicationWindow {
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
-                Label { text: "Live output monitoring is not available yet."; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Capture, live estimates and the overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Status: " + window.liveBridge.status }
-                Label { text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
+                Label { text: window.djControl ? "Monitor the Windows default output" : "Live output monitoring is not available yet."; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                Label { text: "Tempo is experimental. Key, chords and overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                RowLayout {
+                    visible: window.djControl !== null
+                    Button { objectName: "startMonitoring"; text: "Start monitoring"; enabled: window.djControl !== null && !window.djControl.active; onClicked: window.djControl.start() }
+                    Button { objectName: "stopMonitoring"; text: "Stop monitoring"; enabled: window.djControl !== null && window.djControl.active; onClicked: window.djControl.stop() }
+                }
+                Label { text: "Status: " + (window.djControl ? window.djControl.status : window.liveBridge.status) }
+                Label { objectName: "liveEstimates"; text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
                 Item { Layout.fillHeight: true }
             }
         }

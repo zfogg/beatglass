@@ -1,7 +1,8 @@
 # Windows platform work
 
 The provisional backend enumerates active render endpoints and opens a selected
-endpoint with WASAPI shared-mode loopback. It is not connected to the desktop.
+endpoint with WASAPI shared-mode loopback. This integration branch connects it
+to the Windows desktop DJ page for experimental default-output tempo only.
 Discovery is a snapshot: a device can change while the list is being read. A
 dedicated thread owns COM and WASAPI objects and copies float packets into a
 preallocated SPSC queue. Overflow drops complete chunks and marks the next
@@ -82,8 +83,7 @@ newly observed queue loss, discontinuous or untimed PCM, and stop. The callback
 must clear publication and reject in-flight work; the adapter does not revoke a
 packet already returned to an analysis worker. The control owner must poll and
 deliver invalidation promptly, install format before analysis, and ensure the
-callback and allocator outlive the session. The desktop does not yet use this
-adapter. WASAPI's device
+callback and allocator outlive the session. WASAPI's device
 position is currently not used to detect extra gaps: flagged discontinuities and
 timestamp errors are marked, but the epoch-relative frame count excludes unknown
 device gaps and must not be treated as an uninterrupted physical timeline.
@@ -100,8 +100,8 @@ An experimental worker-only path now feeds selected-endpoint packets through
 `reduce_loudest_channel` and the existing aubio `TempoTracker`. It publishes only
 an optional BPM to its caller and clears it on stop, source errors, queue loss,
 discontinuity, malformed PCM, one second of silence or a one-second packet stall.
-It must be pumped regularly by its owning worker; it is not connected to the UI,
-and it does not provide beat phase, key or chords. The one-second silence
+It must be pumped regularly by its owning worker and does not provide beat phase,
+key or chords. The one-second silence
 threshold is provisional.
 
 On Windows 11 Home 10.0.26300 x64, MSVC 19.44 and the existing pinned codec tree,
@@ -126,8 +126,9 @@ epochs. It exposes waiting/starting/running/error status and coalesces
 strictly-revisioned `PresentationUpdate` snapshots and clears. The UI owner must
 transfer updates to the GUI thread, preserve clears and ordering, consume status,
 and call stop and deliver its clear before destruction. Revision exhaustion or a
-fatal error requires a separate session boundary to clear the display. No GUI
-bridge or DJ controls are connected by this work.
+fatal error requires a separate session boundary to clear the display. On this
+integration branch, the Windows DJ page connects the bridge to the shared
+presentation model and exposes default-output start/stop controls.
 
 The provisional Windows `DjBridge` exposes GUI-thread `start`/`stop`, an active
 flag and status, and emits revisioned presentation updates on the GUI thread.
@@ -138,7 +139,7 @@ bind start/stop controls and display status. It must stop, deliver the clear,
 and drain or otherwise guard old updates before recreating the bridge or
 presentation gate. A source revision is not a cross-process/session identity.
 Stop is asynchronous; destruction joins the worker and can wait for a stalled
-OS discovery call. The bridge is not yet instantiated by the shared desktop.
+OS discovery call.
 
 Windows 11 x64, MSVC 19.44, Qt 6.8.3: serial
 `cmake --build "$env:TEMP/beatglass-overlay-build" --config Debug --target windows_dj_bridge_tests -j 1`
@@ -155,6 +156,16 @@ observed a tempo snapshot reach a GUI-thread `PresentationGate`; stopping the
 bridge cleared the gate, and it remained clear after a short wait. This is a
 native test of the private bridge and real capture/tempo path, not the actual
 QML control or overlay. The normal and opt-in test invocations both passed.
+
+The Windows QML integration branch connects the bridge's GUI-thread updates to
+`LivePresentation` and exposes default-output start/stop controls. Windows 11
+x64, MSVC 19.44 and Qt 6.8.3: serial desktop and test builds succeeded; CTest
+passed `desktop_navigation`, `live_presentation`, `windows_dj_bridge` and
+`windows_dj_ui` (4/4). With `BEATGLASS_NATIVE_DJ_TEST=1`, `windows_dj_ui` played
+a generated click track through the default endpoint, verified that the actual
+QML BPM label updated, and verified that stop cleared it. This is not an overlay
+test, physical disconnect/default-switch test, real-music evaluation, or v1
+qualification. The shared UI and Windows bridge PRs remain prerequisites.
 
 Windows 11 x64, MSVC 19.44: `cmake --build "$env:TEMP/beatglass-wasapi-slice" --config Debug --target windows_endpoint_tests -j 4`
 and `ctest --test-dir "$env:TEMP/beatglass-wasapi-slice" -C Debug -R 'Default follower|Discovery exceptions|Live tempo|Session|endpoint|capture startup' --output-on-failure`
