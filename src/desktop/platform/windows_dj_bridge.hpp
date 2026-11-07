@@ -22,7 +22,7 @@ public:
   ~DjBridge() override;
   /** Request default-output capture; it starts asynchronously on the owned worker. */
   Q_INVOKABLE void start();
-  /** Request stop and a revisioned clear; delivery is asynchronous. A later start cannot bypass that stop even when both are requested before the worker wakes. */
+  /** Request stop and a revisioned clear; delivery is asynchronous. A later start cannot bypass that stop even when both are requested before the worker wakes. Capture start is serialized with this request; stop may wait for the short start request, which does not wait for WASAPI startup. */
   Q_INVOKABLE void stop();
   /** Whether capture is requested. Read on the GUI thread. */
   bool active() const;

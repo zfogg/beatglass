@@ -22,6 +22,32 @@
 class DjBridgeTest : public QObject {
   Q_OBJECT
 private slots:
+  void blockedDiscoveryCannotStartAfterStop() {
+    beatglass::SourceEpochAllocator epochs;
+    std::mutex mutex;
+    std::condition_variable wake;
+    bool release = false;
+    std::atomic<bool> entered{false};
+    beatglass::windows::DjBridge bridge(epochs, nullptr, [&] {
+      std::unique_lock lock(mutex);
+      entered.store(true);
+      wake.wait(lock, [&] { return release; });
+      return beatglass::windows::EndpointResult{{{"not-a-real-endpoint", "default", true}}, {}};
+    });
+    struct Release {
+      std::mutex& mutex; std::condition_variable& wake; bool& release;
+      ~Release() { { std::lock_guard lock(mutex); release = true; } wake.notify_all(); }
+    } releaseOnExit{mutex, wake, release};
+    bridge.start();
+    QTRY_VERIFY_WITH_TIMEOUT(entered.load(), 5000);
+    bridge.stop();
+    { std::lock_guard lock(mutex); release = true; }
+    wake.notify_all();
+    QTRY_COMPARE_WITH_TIMEOUT(bridge.status(), QStringLiteral("Stopped"), 5000);
+    QTest::qWait(200);
+    QCOMPARE(bridge.status(), QStringLiteral("Stopped"));
+    QCOMPARE(epochs.next().value(), std::uint64_t(1));
+  }
   void fileReaderAndLiveRestartShareEpochs() {
     QTemporaryDir directory;
     QVERIFY(directory.isValid());
@@ -132,7 +158,7 @@ private slots:
       std::unique_lock lock(mutex);
       entered.store(true);
       wake.wait(lock, [&] { return release; });
-      return beatglass::windows::EndpointResult{};
+      return beatglass::windows::EndpointResult{{{"not-a-real-endpoint", "default", true}}, {}};
     });
     bridge->start();
     QTRY_VERIFY(entered.load());
@@ -144,6 +170,7 @@ private slots:
     bridge.reset();
     unblock.join();
     QVERIFY(entered.load());
+    QCOMPARE(epochs.next().value(), std::uint64_t(1));
   }
   void concurrentOfflineIssuanceAndLiveShutdown() {
     if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_DJ_TEST")) QSKIP("Set BEATGLASS_NATIVE_DJ_TEST to exercise a real default output");
