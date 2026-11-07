@@ -71,6 +71,11 @@ Desktop application internals
    Unlock and hide the overlay and release the native adapter. The caller owns
    both windows. Call on the GUI thread.
 
+.. cpp:function:: beatglass::macos::OverlayNative::~OverlayNative()
+
+   Destroy the private native adapter on the GUI thread. It never owns the Qt
+   window passed to its operations.
+
 CLI application internals
 -------------------------
 

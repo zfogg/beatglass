@@ -11,6 +11,7 @@ namespace beatglass::macos {
 /** Private GUI-thread native-window operations. The implementation never owns the Qt window. A false result means native behavior was not applied. */
 class OverlayNative {
 public:
+  // Destructor documented manually in the API reference due to Hawkmoth parsing.
   virtual ~OverlayNative() = default;
   /** Configure the native window, including its requested input mode. */
   virtual bool apply(QQuickWindow* window, bool clickThrough) = 0;
