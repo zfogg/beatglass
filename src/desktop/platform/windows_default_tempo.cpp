@@ -4,8 +4,8 @@
 #include <utility>
 
 namespace beatglass::windows {
-DefaultTempoFollower::DefaultTempoFollower(SourceEpochAllocator& epochs, std::function<EndpointResult()> discovery)
-    : tempo_(epochs), discovery_(std::move(discovery)) {
+DefaultTempoFollower::DefaultTempoFollower(SourceEpochAllocator& epochs, std::function<EndpointResult()> discovery, std::function<bool(const std::function<bool()>&)> startGuard)
+    : tempo_(epochs), discovery_(std::move(discovery)), start_guard_(std::move(startGuard)) {
   if (!discovery_) discovery_ = enumerate_render_endpoints;
 }
 bool DefaultTempoFollower::start() {
@@ -65,7 +65,8 @@ bool DefaultTempoFollower::tick(std::chrono::steady_clock::time_point now) {
       if (!publishClear()) return false;
       tempo_.stop(); endpoint_.clear();
       if (!selected.empty()) {
-        if (tempo_.start(selected)) { endpoint_ = std::move(selected); status_ = Status::starting; diagnostic_.clear(); }
+        const auto start = [&] { return tempo_.start(selected); };
+        if (start_guard_ ? start_guard_(start) : start()) { endpoint_ = std::move(selected); status_ = Status::starting; diagnostic_.clear(); }
         else { status_ = Status::error; diagnostic_ = "Capture start failed"; }
       }
     }
