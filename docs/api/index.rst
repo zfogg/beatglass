@@ -38,13 +38,13 @@ Snapshot timelines use an exclusive observed-frame boundary. Beats precede
 that boundary, and chord segments are nonempty half-open intervals whose end
 may equal it. Producers using the former inclusive boundary must adjust.
 
-.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
+.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/music_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
 
 Offline results preserve overlapping local tonal evidence separately from an
 optional validated track-level key. Missing windows and scores remain unknown;
 the value type does not itself provide database paging or persistence.
 
-.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp
+.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp
 
 Library jobs
 ------------
@@ -66,6 +66,16 @@ Desktop application internals
    Unlock the overlay and remove event filters. The caller retains ownership of
    both windows. Call on the GUI thread.
 
+Experimental tonal worker internals
+-----------------------------------
+
+.. cpp:autodoc:: lib/core/tonal_tracker.hpp
+
+Experimental beat-event worker
+------------------------------
+
+.. cpp:autodoc:: lib/core/beat_tracker.hpp
+
 Experimental virtual file I/O
 -----------------------------
 
@@ -75,3 +85,8 @@ CLI application internals
 -------------------------
 
 .. cpp:autodoc:: src/cli/state_label.hpp
+
+Experimental composite snapshot worker
+--------------------------------------
+
+.. cpp:autodoc:: include/beatglass/library/detail/composite_snapshot_job.hpp

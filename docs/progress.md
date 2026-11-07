@@ -190,6 +190,25 @@ The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
 
+## Shared causal tempo replay proposal
+
+`CausalTempoReplay` consumes borrowed interleaved blocks on one worker, buffers at most one 512-frame hop, and runs the existing aubio tempo and signal lifecycle logic. File replay now uses this same engine; a future snapshot job can feed it without reopening the path. State reports both the exclusive accepted boundary and the last complete analyzed hop. At EOF an incomplete hop is not analyzed. Gaps and new epochs discard buffered evidence; old epochs, overlap, malformed PCM and same-epoch format changes fail closed. The caller must allocate epochs and deliver invalidation/clear notifications around source lifecycle events; the engine is not an audio callback, decoder, cache or GUI publisher. This is a proposed shared API pending integration-owner review. Tonal and timestamped beat trackers are separate unmerged increments and are not yet integrated into this engine.
+
+## Phase 1 private tonal tracker
+
+The optional private Essentia tracker is a worker-only experiment tested on generated triads and discontinuities. It is disabled by default and not connected to file analysis or live capture. Release licensing, Windows MSVC dependency build, key/chord quality, timestamped segment policy and native qualification remain open; see [tonal experiment](tonal-experiment.md).
+
+## Experimental beat events
+
+The worker-only aubio beat-event experiment reports epoch-local sample positions and the exclusive observed boundary for each detection. Its 1024-sample window/512-sample hop and aubio's estimated event time are not a measured latency guarantee. An event at the current exclusive boundary waits for a subsequent observed sample; it is not flushed at EOF. Partial hops are retained, and gaps, epoch changes and explicit discontinuities reset aubio state. The experiment is not connected to CLI replay or snapshots; silence invalidation, event strength, publication delay, longer-than-32-bit aubio counters, native capture and measured beat accuracy remain integration work. Generated click tests at 44.1/48 kHz check causal bounds, chunking and broad beat intervals, not full-mix accuracy.
+
+## Combined causal music replay prototype
+
+The optional composition feeds the shared mono hops to real aubio tempo and beat trackers and the Essentia tonal tracker. It can replay a path through `FileReader` and emits synchronous beat and overlapping tonal-window callbacks; a live worker can call the same block interface after leaving the audio callback. An explicit interrupt clears internal evidence and requires a new coordinator-issued epoch, but cannot revoke already published UI copies. The snapshot library and actual platform capture backends remain unconnected. Time-aligned windows are not merged chord segments; rolling key is not a validated track-level key; unavailable strengths remain explicitly absent; estimates and strengths remain uncalibrated, and distribution licensing plus real-mix and native qualification are open.
+
+Combined prototype verification on 2026-11-07: `docker build -f tests/spikes/tonal-ci/Dockerfile -t beatglass-music-ci .` and `docker run --rm beatglass-music-ci ctest --test-dir /tmp/build --output-on-failure` passed 57/57 in Ubuntu 24.04 x86-64 with pinned Essentia source and system aubio/libsndfile; the v1 codec option was off. The generated C-major-to-A-minor file test exercises time-aligned windows, causal prefix equivalence, real beat events, sample-rate metadata and source-byte preservation. The default Windows x64 MSVC build with the combined option off passed 52/52 with the codec-enabled development tree. These runs do not qualify the optional Essentia path on Windows, real music, live capture or native GUI behavior.
+
+
 ## Run recovery and tracked queue increment
 
 Merged main at `9488384968ef0c59152b4ef50c18fcc408875a97` into the stacked library branch, retaining its exclusive timeline and Windows endpoint tests. On WSL Ubuntu 22.04/GCC 11.4 with the system dependencies and options in the file-evidence entry above, `cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_TEST_V1_CODECS=OFF -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src -Wno-dev`, `cmake --build /tmp/beatglass-library-phase1 -j 3`, and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` passed 50/50. The new cases test exact run/key recovery after reopening, a superseded completed run, per-job stop/progress and cancellation of real tempo replay through the tracked queue. No actual indeterminate SQLite commit was injected; the test verifies post-reopen state classification. WSL is not native Linux qualification.
@@ -216,6 +235,13 @@ The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
 read-only byte boundary. The existing decoder does not consume it. Secure
 snapshot creation, native file identity and decoder integration remain open;
 see [same-source proposal](same-source-proposal.md).
+
+
+## Offline result contract proposal
+
+An owned offline result and bounded structural validator are proposed for
+composite evidence. Actual composite persistence, paged retrieval, native
+qualification and a validated track-level key remain open.
 
 ## Experimental virtual decoder
 
@@ -272,9 +298,16 @@ An owned offline result and bounded structural validator are proposed for
 composite evidence. Actual composite persistence, paged retrieval, native
 qualification and a validated track-level key remain open.
 
+
 ## Phase 1 tonal dependency experiment
 
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
+
+## Composite collector and dependency provenance
+
+The experimental music collector stages owned beats and overlapping tonal windows under caller-selected event and label limits. It rejects discontinuities and failures without exposing partial output, and requires caller-observed EOF and source revalidation before publication. Its result has deliberately empty engine, algorithm and configuration identity; cache reuse and composite store publication are disabled. A provisional snapshot worker now feeds the collector from the private snapshot and revalidates before returning; it does not use a composite store.
+
+An embedded build manifest is a useful starting point only when the build is reproducible and the manifest covers the actual engine, aubio, Essentia, FFT/downmix configuration and relevant transitive artifacts. An embedded digest of the libraries selected at link time does not verify the libraries loaded at runtime: shared libraries can be replaced or resolved differently, and a file hash obtained after loading can race replacement. Static dependencies embedded in a measured immutable executable can avoid this mismatch only if the deployment verifies that exact artifact and its remaining dynamically loaded dependencies. A reviewed platform-specific measurement and deployment policy is required before these identifiers can authorize reuse; version strings or caller-supplied labels alone are insufficient. Until then the collector returns unverified results and must not read or write composite cache entries.
 
 After merging main `e91c71e` (merged ByteSource #41), the bridge and snapshot integration retain the merged direct-read cancellation/EOF/buffer semantics and real decoder and mutation tests. Serial WSL build and CTest passed 98/98; serial Windows codec-enabled build and CTest passed 101/101 using the same commands and environments above. These do not enable desktop, PipeWire, composite tonal replay, or qualify native desktop/audio/overlay scenarios.
 
@@ -309,3 +342,5 @@ After reconciling main `a9beb46` (#26 and #57), the integration build and full C
 Windows 10.0.26300 x64/MSVC 19.44, dynamic CRT and the previously recorded codec-enabled PATH: `cmake --build C:/Users/zachf/.codex/builds/beatglass-snapshot-pinned-codecs --config Release -j 1` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-snapshot-pinned-codecs -C Release --output-on-failure` passed 113/113, including existing-writer rejection, blocked later write/delete opens and release after snapshot destruction. WSL Ubuntu 22.04 with the prior configuration: `cmake --build /tmp/beatglass-library-phase1 -j 1` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` passed 111/111, including unsupported-policy fail-closed behavior. The Mac remains in an active Homebrew upgrade; no native Mac build was attempted.
 
 `python docs/api/check_headers.py` and `docker run --rm -v "${PWD}:/work" beatglass-docs sh -c 'sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html27 && python3 docs/api/check_rendered.py /tmp/beatglass-docs-html27/index.html'` passed (71 names).
+
+The provisional composite snapshot worker decodes borrowed snapshot bytes, destroys the decoder, and verifies both snapshot and original before returning unverified in-memory evidence. Cancellation, limits, and stale input discard the staged result; every run analyzes afresh. Ubuntu 24.04 Docker with a tmpfs temporary directory, pinned Essentia, system aubio/libsndfile, SQLite and OpenSSL passed 119/119 CTest cases. The default container overlay temporary filesystem did not support the required snapshot behavior and failed 21 cases; tmpfs was required. This does not qualify native desktop or audio. Composite storage, paging, UI, and verified artifact identity remain open.
