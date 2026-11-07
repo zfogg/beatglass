@@ -64,4 +64,5 @@ int main(int argc, char** argv) {
     std::cout << ",\"tonal_through\":"; if(result.tonal_through) std::cout << *result.tonal_through; else std::cout << "null";
     std::cout << "}\n";
   } catch(const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
+  return 0;
 }
