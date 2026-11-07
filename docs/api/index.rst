@@ -57,7 +57,7 @@ Offline results preserve overlapping local tonal evidence separately from an
 optional validated track-level key. Missing windows and scores remain unknown;
 the value type does not itself provide database paging or persistence.
 
-.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp
+.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp include/beatglass/core/visualization.hpp
 
 Library jobs
 ------------
@@ -123,3 +123,4 @@ CLI application internals
 -------------------------
 
 .. cpp:autodoc:: src/cli/state_label.hpp
+
