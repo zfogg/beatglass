@@ -117,3 +117,13 @@ TEST_CASE("hop observer exceptions and reentrant process fail closed") {
   }),std::logic_error);
   CHECK(rejected); CHECK(nested.state().state==TrackingState::error); CHECK_THROWS(nested.process(input));
 }
+TEST_CASE("hop reset signals reacquisition silence and resume") {
+  CausalTempoReplay replay; std::vector<float> active(512,0.1f), quiet(512*90,0.f);
+  std::vector<bool> resets; auto observe=[&](const CausalMonoHop& hop,TrackingState){resets.push_back(hop.reset);};
+  replay.process(block(active,4,0),observe);
+  replay.process(block(active,4,600),observe);
+  replay.process(block(quiet,4,1112),observe);
+  replay.process(block(active,4,1112+quiet.size()),observe);
+  REQUIRE(resets.size()==93); CHECK(resets[0]); CHECK(resets[1]); CHECK(resets.back());
+  CHECK(std::count(resets.begin()+2,resets.end()-1,true)==1);
+}
