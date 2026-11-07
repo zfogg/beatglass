@@ -25,6 +25,12 @@ public:
   void port(std::uint32_t id, Port value);
   /** Record a link. */
   void link(std::uint32_t id, Link value);
+  /** Compare watched sink properties with the currently recorded registry evidence. */
+  bool matches_node(std::uint32_t id, const char* serial, const char* name, bool sink) const noexcept;
+  /** Compare watched port properties with the currently recorded registry evidence. */
+  bool matches_port(std::uint32_t id, std::uint32_t node, const char* channel, bool monitor, bool output) const noexcept;
+  /** Compare all immutable endpoint IDs from a watched link. */
+  static bool matches_link(Link expected, Link observed) noexcept;
   /** Remove a registry global. */
   void remove(std::uint32_t id);
   /** Find unique matching monitor outputs and capture inputs. Incomplete is waiting; ambiguous evidence is invalid. */

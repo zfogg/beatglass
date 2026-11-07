@@ -5,6 +5,19 @@ namespace beatglass::pipewire {
 void MonitorGraph::node(std::uint32_t id, std::string serial, std::string name, bool sink) { if (serial.size() > 1024 || name.size() > 1024 || (!nodes_.contains(id) && nodes_.size() >= 4096)) { overflow_ = true; return; } nodes_.insert_or_assign(id, Node{std::move(serial), std::move(name), sink}); }
 void MonitorGraph::port(std::uint32_t id, Port value) { if (value.channel.size() > 64 || (!ports_.contains(id) && ports_.size() >= 4096)) { overflow_ = true; return; } ports_.insert_or_assign(id, std::move(value)); }
 void MonitorGraph::link(std::uint32_t id, Link value) { if (!links_.contains(id) && links_.size() >= 4096) { overflow_ = true; return; } links_.insert_or_assign(id, value); }
+bool MonitorGraph::matches_node(std::uint32_t id, const char* serial, const char* name, bool sink) const noexcept {
+  const auto found = nodes_.find(id);
+  return found != nodes_.end() && serial && name && found->second.serial == serial && found->second.name == name && found->second.sink == sink;
+}
+bool MonitorGraph::matches_port(std::uint32_t id, std::uint32_t node, const char* channel, bool monitor, bool output) const noexcept {
+  const auto found = ports_.find(id);
+  return found != ports_.end() && channel && found->second.node == node && found->second.channel == channel &&
+         found->second.monitor == monitor && found->second.output == output;
+}
+bool MonitorGraph::matches_link(Link expected, Link observed) noexcept {
+  return expected.out_node == observed.out_node && expected.out_port == observed.out_port &&
+         expected.in_node == observed.in_node && expected.in_port == observed.in_port;
+}
 void MonitorGraph::remove(std::uint32_t id) { nodes_.erase(id); ports_.erase(id); links_.erase(id); }
 MonitorGraph::Result MonitorGraph::endpoints(std::uint32_t stream, Endpoints& result) const {
   constexpr auto invalid = std::numeric_limits<std::uint32_t>::max();

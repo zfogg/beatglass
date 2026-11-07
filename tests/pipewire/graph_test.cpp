@@ -81,3 +81,22 @@ TEST_CASE("graph model rejects changed endpoint properties") {
    CHECK(graph.verify(5) == MonitorGraph::Result::invalid);
  }
 }
+
+TEST_CASE("watched object properties must match registry evidence") {
+  MonitorGraph graph("serial", "sink");
+  graph.node(3, "serial", "sink", true);
+  graph.port(10, {3, "FL", true, true});
+  CHECK(graph.matches_node(3, "serial", "sink", true));
+  CHECK_FALSE(graph.matches_node(3, "other", "sink", true));
+  CHECK_FALSE(graph.matches_node(3, "serial", "renamed", true));
+  CHECK_FALSE(graph.matches_node(3, nullptr, "sink", true));
+  CHECK(graph.matches_port(10, 3, "FL", true, true));
+  CHECK_FALSE(graph.matches_port(10, 3, "FR", true, true));
+  CHECK_FALSE(graph.matches_port(10, 3, "FL", false, true));
+  CHECK_FALSE(graph.matches_port(10, 4, "FL", true, true));
+  CHECK_FALSE(graph.matches_port(10, 3, nullptr, true, true));
+  const MonitorGraph::Link expected{3,10,5,20};
+  CHECK(MonitorGraph::matches_link(expected, {3,10,5,20}));
+  CHECK_FALSE(MonitorGraph::matches_link(expected, {4,10,5,20}));
+  CHECK_FALSE(MonitorGraph::matches_link(expected, {3,10,5,21}));
+}

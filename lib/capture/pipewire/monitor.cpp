@@ -25,6 +25,14 @@ static_assert(std::atomic<bool>::is_always_lock_free);
 static_assert(std::atomic<std::int64_t>::is_always_lock_free);
 static_assert(std::atomic<std::uint32_t>::is_always_lock_free);
 struct Monitor::Impl {
+  struct Watch {
+    Impl* owner{};
+    pw_proxy* proxy{};
+    spa_hook hook{};
+    std::uint32_t id{}, node{}, out_node{}, out_port{}, in_node{}, in_port{};
+    const char* channel{};
+    bool input{}, monitor{}, initialized{}, owned{};
+  };
 public:
   explicit Impl(std::uint64_t epoch, SourceAttempt attempt) : ingress_(epoch), epoch_(epoch), attempt_(attempt) {}
   ~Impl() { stop(); }
@@ -76,6 +84,7 @@ public:
     if (pw_stream_connect(stream_, PW_DIRECTION_INPUT, PW_ID_ANY, flags, params, 1) < 0) {
       stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"};
     }
+    selected_sink_ = sink;
     graph_ = std::make_unique<MonitorGraph>(sink.serial, sink.name);
     core_ = pw_stream_get_core(stream_);
     if (!core_) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
@@ -117,6 +126,12 @@ public:
     state_.store(MonitorState::stopped, std::memory_order_release);
     stop_requested_.store(true, std::memory_order_release);
     if (thread_.joinable()) thread_.join();
+    for (auto& watch : watches_) {
+      if (!watch.proxy) continue;
+      spa_hook_remove(&watch.hook);
+      if (!watch.owned) pw_proxy_destroy(watch.proxy);
+      watch.proxy = nullptr;
+    }
     for (auto*& link : owned_links_) if (link) { pw_proxy_destroy(link); link = nullptr; }
     if (registry_) { spa_hook_remove(&registry_hook_); pw_proxy_destroy(reinterpret_cast<pw_proxy*>(registry_)); registry_ = nullptr; }
     if (core_listening_) { spa_hook_remove(&core_hook_); core_listening_ = false; }
@@ -193,6 +208,91 @@ private:
     event_write_.store(after, std::memory_order_release);
     state_.store(next, std::memory_order_release);
   }
+  static bool equals(const char* a, const char* b) noexcept { return a && b && !std::strcmp(a, b); }
+  void watch_failure() noexcept {
+    diagnostic_.store(13);
+    transition(state() == MonitorState::streaming ? MonitorState::interrupted : MonitorState::error);
+  }
+  static void node_info(void* data, const pw_node_info* info) {
+    auto& watch = *static_cast<Watch*>(data);
+    auto& self = *watch.owner;
+    if (!info || info->id != watch.id || info->state == PW_NODE_STATE_ERROR) { self.watch_failure(); return; }
+    if (watch.initialized && self.state() == MonitorState::streaming && (info->change_mask & PW_NODE_CHANGE_MASK_PROPS)) {
+      self.watch_failure(); return;
+    }
+    if (!watch.initialized || (info->change_mask & PW_NODE_CHANGE_MASK_PROPS)) {
+      if (!info->props) { self.watch_failure(); return; }
+      const auto* cls = spa_dict_lookup(info->props, PW_KEY_MEDIA_CLASS);
+      if (watch.input) {
+        if (!equals(cls, "Stream/Input/Audio")) { self.watch_failure(); return; }
+      } else {
+        if (!self.graph_->matches_node(watch.id, spa_dict_lookup(info->props, PW_KEY_OBJECT_SERIAL),
+                                       spa_dict_lookup(info->props, PW_KEY_NODE_NAME), equals(cls, "Audio/Sink"))) {
+          self.watch_failure(); return;
+        }
+      }
+    }
+    if (!watch.initialized) { watch.initialized = true; ++self.watch_ready_; self.check_graph(); }
+  }
+  static void port_info(void* data, const pw_port_info* info) {
+    auto& watch = *static_cast<Watch*>(data);
+    auto& self = *watch.owner;
+    if (!info || info->id != watch.id || info->direction != (watch.input ? PW_DIRECTION_INPUT : PW_DIRECTION_OUTPUT)) { self.watch_failure(); return; }
+    if (watch.initialized && self.state() == MonitorState::streaming && (info->change_mask & PW_PORT_CHANGE_MASK_PROPS)) {
+      self.watch_failure(); return;
+    }
+    if (!watch.initialized || (info->change_mask & PW_PORT_CHANGE_MASK_PROPS)) {
+      if (!info->props) { self.watch_failure(); return; }
+      const auto* mon = spa_dict_lookup(info->props, PW_KEY_PORT_MONITOR);
+      if (!self.graph_->matches_port(watch.id, number(spa_dict_lookup(info->props, PW_KEY_NODE_ID)),
+                                    spa_dict_lookup(info->props, "audio.channel"), equals(mon, "true"), !watch.input)) {
+        self.watch_failure(); return;
+      }
+    }
+    if (!watch.initialized) { watch.initialized = true; ++self.watch_ready_; self.check_graph(); }
+  }
+  static void link_info(void* data, const pw_link_info* info) {
+    auto& watch = *static_cast<Watch*>(data);
+    auto& self = *watch.owner;
+    if (!info || !MonitorGraph::matches_link({watch.out_node, watch.out_port, watch.in_node, watch.in_port},
+                                             {info->output_node_id, info->output_port_id, info->input_node_id, info->input_port_id}) ||
+        info->state == PW_LINK_STATE_ERROR) {
+      self.watch_failure(); return;
+    }
+    if (watch.initialized && self.state() == MonitorState::streaming && (info->change_mask & PW_LINK_CHANGE_MASK_PROPS)) {
+      self.watch_failure(); return;
+    }
+    if (!watch.initialized) { watch.initialized = true; ++self.watch_ready_; self.check_graph(); }
+  }
+  static const pw_node_events& node_events() {
+    static const auto events = [] { pw_node_events e{}; e.version = PW_VERSION_NODE_EVENTS; e.info = &node_info; return e; }(); return events;
+  }
+  static const pw_port_events& port_events() {
+    static const auto events = [] { pw_port_events e{}; e.version = PW_VERSION_PORT_EVENTS; e.info = &port_info; return e; }(); return events;
+  }
+  static const pw_link_events& link_events() {
+    static const auto events = [] { pw_link_events e{}; e.version = PW_VERSION_LINK_EVENTS; e.info = &link_info; return e; }(); return events;
+  }
+  bool watch_endpoints(const MonitorGraph::Endpoints& endpoints) {
+    for (std::size_t i = 0; i < 6; ++i) {
+      auto& watch = watches_[i];
+      watch.owner = this;
+      if (i < 2) {
+        watch.id = i ? endpoints.stream_node : endpoints.target_node; watch.input = i != 0;
+        watch.proxy = static_cast<pw_proxy*>(pw_registry_bind(registry_, watch.id, PW_TYPE_INTERFACE_Node, PW_VERSION_NODE, 0));
+        if (!watch.proxy) return false;
+        pw_node_add_listener(reinterpret_cast<pw_node*>(watch.proxy), &watch.hook, &node_events(), &watch);
+      } else {
+        const auto channel = (i - 2) % 2; watch.input = i >= 4; watch.monitor = !watch.input;
+        watch.channel = channel ? "FR" : "FL"; watch.node = watch.input ? endpoints.stream_node : endpoints.target_node;
+        watch.id = watch.input ? endpoints.input_ports[channel] : endpoints.source_ports[channel];
+        watch.proxy = static_cast<pw_proxy*>(pw_registry_bind(registry_, watch.id, PW_TYPE_INTERFACE_Port, PW_VERSION_PORT, 0));
+        if (!watch.proxy) return false;
+        pw_port_add_listener(reinterpret_cast<pw_port*>(watch.proxy), &watch.hook, &port_events(), &watch);
+      }
+    }
+    return true;
+  }
   static std::uint32_t number(const char* value) {
     if (!value || !*value || *value == '-') return SPA_ID_INVALID;
     char* end{}; errno = 0;
@@ -210,6 +310,7 @@ private:
       if (resolution == MonitorGraph::Result::waiting) return;
       if (resolution == MonitorGraph::Result::invalid) { diagnostic_.store(6); transition(MonitorState::error); return; }
       links_requested_ = true;
+      if (!watch_endpoints(endpoints)) { diagnostic_.store(13); transition(MonitorState::error); return; }
       for (std::size_t i = 0; i < owned_links_.size(); ++i) {
         const auto output_node = std::to_string(endpoints.target_node);
         const auto input_node = std::to_string(endpoints.stream_node);
@@ -223,8 +324,15 @@ private:
             PW_VERSION_LINK, &properties->dict, 0));
         pw_properties_free(properties);
         if (!owned_links_[i]) { diagnostic_.store(10); transition(MonitorState::error); return; }
+        auto& watch = watches_[6 + i];
+        watch = {};
+        watch.owner = this; watch.proxy = owned_links_[i]; watch.owned = true;
+        watch.out_node = endpoints.target_node; watch.out_port = endpoints.source_ports[i];
+        watch.in_node = endpoints.stream_node; watch.in_port = endpoints.input_ports[i];
+        pw_link_add_listener(reinterpret_cast<pw_link*>(watch.proxy), &watch.hook, &link_events(), &watch);
       }
     }
+    if (watch_ready_ != watches_.size()) return;
     const auto result = graph_->verify(pw_stream_get_node_id(stream_));
     if (result == MonitorGraph::Result::invalid) {
       diagnostic_.store(6); transition(MonitorState::error);
@@ -371,6 +479,9 @@ private:
   int sync_sequence_{-1}, initial_sync_sequence_{-1};
   bool registry_ready_{}, links_requested_{};
   std::array<pw_proxy*, 2> owned_links_{};
+  std::array<Watch, 8> watches_{};
+  std::size_t watch_ready_{};
+  Sink selected_sink_{};
   pw_registry* registry_{};
   spa_hook registry_hook_{};
   pw_registry_events registry_events_{};
