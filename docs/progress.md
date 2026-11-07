@@ -487,7 +487,9 @@ After the concurrent allocator contract merged, the provisional borrowed `FileRe
 
 ## Playback branch reconciliation with main
 
-This review incorporates main through `4a65276`, including the tracked executor (#78), live composite worker (#79), bounded visualization processor (#80), macOS display tracking (#81) and WASAPI position discontinuity checks (#35). The UI retains its separate selected/default bridge and guarded tray recovery. The new live worker and visualization processor remain unconnected to the product. Cache reuse and native qualification remain gated; hosted CI and Pages deployment are paused by request. This reconciliation requires fresh tests and independent review before merge.
+This review incorporates main through `4a65276`, including the tracked executor (#78), live composite worker (#79), bounded visualization processor (#80), macOS display tracking (#81) and WASAPI position discontinuity checks (#35). The selected/default Windows tempo bridge remains experimental and is disconnected from the UI; guarded tray recovery remains integrated. The new live worker and visualization processor remain unconnected to the product. Cache reuse and native qualification remain gated; hosted CI and Pages deployment are paused by request. This reconciliation requires fresh tests and independent review before merge.
 
 
 The #42 integration review gated Windows live monitoring from the desktop UI: the experimental tempo path still needs capture-age and post-analysis loss invalidation before it can safely publish BPM. The existing worker and tests remain experimental. This gate does not qualify native capture or overlay behavior.
+
+The reconciled Linux composite build at `36211e8` used the `beatglass-composite-qt-gst-test` container with desktop, replay, tonal, collection and macOS-controller test options enabled; serial `cmake --build /tmp/build -j1` and `ctest --test-dir /tmp/build --output-on-failure` passed 185/185. Subsequent cancellation, UI gating and Unicode changes require a new C++ test run. Windows Qt 6.8.3 offscreen QML passed 11/11 after those UI changes; this does not qualify a native desktop.
