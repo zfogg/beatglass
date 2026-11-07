@@ -4,7 +4,18 @@
 #include <limits>
 
 namespace beatglass::coreaudio {
-static_assert(std::atomic<std::size_t>::is_always_lock_free && std::atomic<std::uint64_t>::is_always_lock_free && std::atomic<bool>::is_always_lock_free);
+static_assert(std::atomic<std::size_t>::is_always_lock_free && std::atomic<std::uint64_t>::is_always_lock_free && std::atomic<std::uint32_t>::is_always_lock_free && std::atomic<bool>::is_always_lock_free);
+namespace { constexpr std::uint32_t closed_bit = std::uint32_t{1} << 31; }
+CallbackEntry CallbackGate::try_enter() noexcept {
+  std::uint32_t expected = 0;
+  if (state_.compare_exchange_strong(expected, 1, std::memory_order_acquire, std::memory_order_acquire)) return CallbackEntry::entered;
+  return (expected & closed_bit) ? CallbackEntry::closed : CallbackEntry::busy;
+}
+void CallbackGate::leave() noexcept { state_.fetch_sub(1, std::memory_order_release); }
+void CallbackGate::close() noexcept { state_.fetch_or(closed_bit, std::memory_order_acq_rel); }
+bool CallbackGate::drained() const noexcept { return state_.load(std::memory_order_acquire) == closed_bit; }
+void CallbackGate::reopen() noexcept { state_.store(0, std::memory_order_relaxed); }
+
 bool NativeTimeline::observe(double sample_time, bool valid, std::uint32_t frames) noexcept {
   valid = valid && std::isfinite(sample_time);
   const bool discontinuity = seen_ && (valid != last_valid_ || (valid && last_valid_ && sample_time != expected_));

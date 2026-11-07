@@ -2,8 +2,35 @@
 #include <catch2/catch_test_macros.hpp>
 #include <array>
 #include <limits>
+#include <atomic>
+#include <thread>
 #include <vector>
 using namespace beatglass::coreaudio;
+
+TEST_CASE("callback gate closes before draining an in-flight callback", "[coreaudio]") {
+  CallbackGate gate;
+  std::atomic<bool> entered{false}, release{false};
+  std::thread callback([&] {
+    if (gate.try_enter() != CallbackEntry::entered) return;
+    entered.store(true, std::memory_order_release);
+    while (!release.load(std::memory_order_acquire)) std::this_thread::yield();
+    gate.leave();
+  });
+  while (!entered.load(std::memory_order_acquire)) std::this_thread::yield();
+  CHECK(gate.try_enter() == CallbackEntry::busy);
+  gate.close();
+  CHECK_FALSE(gate.drained());
+  CHECK(gate.try_enter() == CallbackEntry::closed);
+  release.store(true, std::memory_order_release);
+  callback.join();
+  REQUIRE(gate.drained());
+  CHECK(gate.try_enter() == CallbackEntry::closed);
+  gate.reopen();
+  CHECK(gate.try_enter() == CallbackEntry::entered);
+  gate.leave();
+  gate.close();
+  CHECK(gate.drained());
+}
 
 TEST_CASE("Core Audio FIFO retains owned samples and host clock validity", "[coreaudio]") {
   CaptureFifo fifo(17, 48000, 2);

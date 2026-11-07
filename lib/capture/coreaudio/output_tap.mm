@@ -8,6 +8,7 @@
 #include <limits>
 #include <memory>
 #include <span>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -55,6 +56,7 @@ public:
   AudioDeviceIOProcID io{};
   AudioStreamBasicDescription format{};
   std::unique_ptr<CaptureFifo> fifo;
+  CallbackGate callback_gate;
   TapStatus current{};
   std::atomic<bool> callback_fault{false};
   bool started{};
@@ -63,6 +65,12 @@ public:
   static OSStatus callback(AudioObjectID, const AudioTimeStamp*, const AudioBufferList* input,
                            const AudioTimeStamp* time, AudioBufferList*, const AudioTimeStamp*, void* context) noexcept {
     auto& self = *static_cast<Impl*>(context);
+    const auto entry = self.callback_gate.try_enter();
+    if (entry != CallbackEntry::entered) {
+      if (entry == CallbackEntry::busy) self.callback_fault.store(true, std::memory_order_release);
+      return noErr;
+    }
+    struct Leave { CallbackGate& gate; ~Leave() { gate.leave(); } } leave{self.callback_gate};
     if (!input || input->mNumberBuffers != 1) { self.callback_fault.store(true, std::memory_order_release); return noErr; }
     const auto& buffer = input->mBuffers[0];
     if (!buffer.mData || buffer.mNumberChannels != self.format.mChannelsPerFrame ||
@@ -80,6 +88,8 @@ public:
     return noErr;
   }
   bool cleanup() noexcept {
+    callback_gate.close();
+    while (!callback_gate.drained()) std::this_thread::yield();
     if (started) {
       if (AudioDeviceStop(aggregate, io) != noErr) return false;
       started = false;
@@ -155,6 +165,7 @@ bool OutputTap::start(const std::string& uid, std::uint64_t epoch) {
       }
       impl_->fifo = std::make_unique<CaptureFifo>(epoch, static_cast<std::uint32_t>(impl_->format.mSampleRate), impl_->format.mChannelsPerFrame);
       impl_->callback_fault.store(false, std::memory_order_relaxed); impl_->timeline = NativeTimeline{};
+      impl_->callback_gate.reopen();
       s = AudioDeviceCreateIOProcID(impl_->aggregate, &Impl::callback, impl_.get(), &impl_->io);
       if (s != noErr) return impl_->fail("Create tap IOProc", s);
       s = AudioDeviceStart(impl_->aggregate, impl_->io);

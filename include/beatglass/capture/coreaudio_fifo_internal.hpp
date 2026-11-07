@@ -6,6 +6,25 @@
 #include <span>
 
 namespace beatglass::coreaudio {
+/** Result of one nonblocking callback gate entry attempt. */
+enum class CallbackEntry { entered, closed, busy };
+/** Lock-free gate between the single native callback and its control owner. The callback attempts entry once and never waits; the owner closes the gate, then waits off the audio thread until drained before releasing callback-owned buffers. Closing does not unregister the native callback or guarantee that the operating system stopped invoking it. The gate itself must remain alive until the native callback is destroyed. */
+class CallbackGate {
+public:
+  /** Attempt entry once. Busy means concurrent entry or a race with closure; the caller must report a fault if still active. */
+  CallbackEntry try_enter() noexcept;
+  /** Leave exactly once after a successful entry. */
+  void leave() noexcept;
+  /** Prevent future entries; safe to call repeatedly on the control owner. */
+  void close() noexcept;
+  /** True once closed and all successful entries have left. */
+  bool drained() const noexcept;
+  /** Reopen only after the old native callback has been destroyed and no callback can reference the gate. */
+  void reopen() noexcept;
+private:
+  std::atomic<std::uint32_t> state_{0};
+};
+
 /** Provisional, non-installed Core Audio transfer format. One block owns its PCM. Host ticks are in the macOS host clock domain and are valid only when host_time_valid is true; they are not nanoseconds. source_sample_time is the native input timestamp and is meaningful only when source_sample_time_valid is true. first_frame counts frames since this capture epoch began, including whole frames rejected by the FIFO. */
 struct CaptureBlock {
   static constexpr std::size_t max_samples = 8192;
