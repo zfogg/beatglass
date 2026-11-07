@@ -54,12 +54,12 @@ stale input and storage error. Its worker owns the cancellation-versus-commit
 decision; file verification accepts cooperative cancellation before that
 decision. The interface and helper do not implement SQLite transactions.
 
-.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp
+.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp include/beatglass/library/detail/file_fingerprint.hpp include/beatglass/library/detail/file_snapshot.hpp include/beatglass/library/detail/file_job.hpp include/beatglass/library/detail/job_executor.hpp include/beatglass/library/detail/sqlite_cache.hpp include/beatglass/library/detail/tempo_analysis_store.hpp include/beatglass/library/detail/snapshot_store_job.hpp
 
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_overlay.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/library_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_overlay.hpp
 
 .. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
 
@@ -75,6 +75,11 @@ Experimental beat-event worker
 ------------------------------
 
 .. cpp:autodoc:: lib/core/beat_tracker.hpp
+
+Experimental virtual file I/O
+-----------------------------
+
+.. cpp:autodoc:: lib/capture/file/virtual_io.hpp
 
 CLI application internals
 -------------------------
