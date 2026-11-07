@@ -13,10 +13,58 @@ ApplicationWindow {
     title: "Beatglass"
     property var metadataBridge: metadata
     property var liveBridge: livePresentation
+    property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    Component.onCompleted: {
+        if (overlayBridge) overlayBridge.attach(djOverlay, window)
+    }
+
+    Window {
+        id: djOverlay
+        objectName: "djOverlay"
+        title: "Beatglass overlay"
+        visible: false
+        width: 310; height: 130
+        minimumWidth: 230; minimumHeight: 100
+        color: "transparent"
+        Rectangle {
+            anchors.fill: parent; radius: 12; color: "#e51b2028"; border.color: "#667788"
+            MouseArea {
+                anchors.fill: parent
+                property bool fallbackMove: false
+                property point lastGlobal: Qt.point(0, 0)
+                onPressed: function(mouse) {
+                    fallbackMove = typeof djOverlay.startSystemMove !== "function"
+                    if (fallbackMove) lastGlobal = mapToGlobal(mouse.x, mouse.y)
+                    else djOverlay.startSystemMove()
+                }
+                onPositionChanged: function(mouse) {
+                    if (!pressed || !fallbackMove) return
+                    const current = mapToGlobal(mouse.x, mouse.y)
+                    djOverlay.x += current.x - lastGlobal.x
+                    djOverlay.y += current.y - lastGlobal.y
+                    lastGlobal = current
+                }
+            }
+            ColumnLayout {
+                anchors.fill: parent; anchors.margins: 14; spacing: 4
+                RowLayout {
+                    Layout.fillWidth: true
+                    Label { text: "Beatglass · " + window.liveBridge.status; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight }
+                    Button {
+                        text: "×"; Accessible.name: "Hide overlay"
+                        visible: window.overlayBridge && !window.overlayBridge.clickThrough
+                        onClicked: window.overlayBridge.hideOverlay()
+                    }
+                }
+                Label { text: "BPM " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24; font.bold: true }
+                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; color: "white" }
+            }
+        }
+    }
 
     function activateEntry(index) {
         if (index < 0 || index >= files.count) return
@@ -145,6 +193,52 @@ ApplicationWindow {
                 Label { text: "Capture, live estimates and the overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Label { text: "Status: " + window.liveBridge.status }
                 Label { text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
+                RowLayout {
+                    visible: window.overlayBridge !== null
+                    Button { text: "Show overlay"; objectName: "showOverlay"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.showOverlay() }
+                    Button { text: "Unlock overlay"; objectName: "unlockOverlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
+                    Button { text: "Hide overlay"; objectName: "hideOverlay"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.hideOverlay() }
+                }
+                RowLayout {
+                    visible: window.overlayBridge !== null
+                    CheckBox {
+                        id: clickThroughToggle
+                        text: "Click through"; objectName: "clickThrough"
+                        enabled: window.overlayBridge && window.overlayBridge.available
+                        onClicked: if (window.overlayBridge) {
+                            window.overlayBridge.setClickThrough(checked)
+                            checked = window.overlayBridge.clickThrough
+                        }
+                        Connections {
+                            target: window.overlayBridge
+                            function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
+                        }
+                    }
+                    Label { text: "Opacity" }
+                    Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
+                }
+                RowLayout {
+                    visible: window.overlayBridge !== null
+                    Label { text: "Display" }
+                    ComboBox {
+                        objectName: "overlayDisplay"
+                        enabled: window.overlayBridge && window.overlayBridge.available && count > 0
+                        model: window.overlayBridge ? window.overlayBridge.screenNames : []
+                        onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
+                        Layout.fillWidth: true
+                    }
+                    Label { text: "Size" }
+                    ComboBox {
+                        objectName: "overlaySize"
+                        model: ["Compact", "Medium", "Large"]; currentIndex: 1
+                        enabled: window.overlayBridge && window.overlayBridge.available
+                        onActivated: if (window.overlayBridge) {
+                            const sizes = [[250, 110], [310, 130], [430, 180]]
+                            window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
+                        }
+                    }
+                }
+                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
                 Item { Layout.fillHeight: true }
             }
         }

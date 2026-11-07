@@ -51,13 +51,13 @@ Snapshot timelines use an exclusive observed-frame boundary. Beats precede
 that boundary, and chord segments are nonempty half-open intervals whose end
 may equal it. Producers using the former inclusive boundary must adjust.
 
-.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
+.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/music_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
 
 Offline results preserve overlapping local tonal evidence separately from an
 optional validated track-level key. Missing windows and scores remain unknown;
 the value type does not itself provide database paging or persistence.
 
-.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp
+.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp
 
 Library jobs
 ------------
@@ -72,7 +72,7 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/macos_overlay.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
@@ -87,10 +87,27 @@ Desktop application internals
 
    Stop and join the worker before destruction. Call on the GUI thread; an OS
    device operation that stalls can delay destruction.
+
 .. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
 
    Unlock the overlay and remove event filters. The caller retains ownership of
    both windows. Call on the GUI thread.
+
+.. cpp:function:: beatglass::macos::OverlayController::~OverlayController()
+
+   Unlock and hide the overlay and release the native adapter. The caller owns
+   both windows. Call on the GUI thread.
+
+.. cpp:function:: beatglass::macos::OverlayNative::~OverlayNative()
+
+   Destroy the private native adapter on the GUI thread. It never owns the Qt
+   window passed to its operations.
+
+Experimental tonal worker internals
+-----------------------------------
+
+.. cpp:autodoc:: lib/core/tonal_tracker.hpp
+
 
 Experimental virtual file I/O
 -----------------------------
