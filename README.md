@@ -41,6 +41,8 @@ On macOS the DJ page also offers an experimental overlay; live output monitoring
 
 The desktop has a provisional per-user relaunch handoff and tray/menu actions for restoring controls, unlocking or hiding the overlay, and quitting. The controls remain visible when the overlay opens until a reachable recovery route has been verified on the active platform; tray visibility alone is not sufficient evidence. Native tray, Dock/menu-bar, compositor and relaunch behavior remain unqualified.
 
+For automated launches, `BEATGLASS_NONINTERACTIVE=1` reports startup failures to stderr instead of opening a dialog. Qt's offscreen and minimal platforms also use stderr automatically. The production instance-lock directory remains per-user and cannot be redirected by this setting.
+
 ## API documentation
 
 The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):

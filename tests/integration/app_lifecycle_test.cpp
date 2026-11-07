@@ -1,6 +1,8 @@
 #include "app_lifecycle.hpp"
 #include <QApplication>
 #include <QProcess>
+#include <QProcessEnvironment>
+#include <QFile>
 #include <QMessageBox>
 #include <QQuickWindow>
 #include <QSignalSpy>
@@ -130,6 +132,31 @@ private slots:
     QVERIFY(child.waitForStarted(5000)); QTRY_COMPARE_WITH_TIMEOUT(child.state(), QProcess::NotRunning, 12000);
     QCOMPARE(child.exitStatus(), QProcess::NormalExit); QCOMPARE(child.exitCode(), 0);
     QVERIFY(!primary.server_.isListening());
+  }
+  void noninteractivePolicy() {
+    QVERIFY(!AppLifecycle::useNoninteractiveErrors(QStringLiteral("windows"), false));
+    QVERIFY(AppLifecycle::useNoninteractiveErrors(QStringLiteral("windows"), true));
+    QVERIFY(AppLifecycle::useNoninteractiveErrors(QStringLiteral("offscreen"), false));
+    QVERIFY(AppLifecycle::useNoninteractiveErrors(QStringLiteral("minimal"), false));
+  }
+  void headlessStartupReportsBothFailures() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    const auto blockedPath = directory.filePath(QStringLiteral("not-a-directory"));
+    QFile file(blockedPath); QVERIFY(file.open(QIODevice::WriteOnly)); file.close();
+    auto run = [](const QString& dataPath, const QByteArray& expected, bool explicitMode) {
+      QProcess child; auto env = QProcessEnvironment::systemEnvironment();
+      env.insert(QStringLiteral("BEATGLASS_TEST_DATA_DIR"), dataPath);
+      if (explicitMode) env.insert(QStringLiteral("BEATGLASS_NONINTERACTIVE"), QStringLiteral("1"));
+      else env.remove(QStringLiteral("BEATGLASS_NONINTERACTIVE"));
+      env.insert(QStringLiteral("QT_QPA_PLATFORM"), QStringLiteral("offscreen"));
+      child.setProcessEnvironment(env); child.start(QStringLiteral(BEATGLASS_STARTUP_PROBE_EXE), QStringList{});
+      if (!child.waitForStarted(5000)) return false;
+      if (!child.waitForFinished(12000)) { child.kill(); child.waitForFinished(); return false; }
+      return child.exitStatus() == QProcess::NormalExit && child.exitCode() == 1 && child.readAllStandardError().contains(expected);
+    };
+    QVERIFY(run(blockedPath, QByteArrayLiteral("application data folder"), false));
+    AppLifecycle primary(QStringLiteral("desktop"), directory.path()); QVERIFY(primary.lock_.tryLock(0));
+    QVERIFY(run(directory.path(), QByteArrayLiteral("could not start or restore"), true));
   }
 };
 int main(int argc, char** argv) {

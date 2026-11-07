@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 #include <QQuickWindow>
+#include <QTextStream>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #ifdef Q_OS_MACOS
@@ -25,21 +26,39 @@
 #include <QQuickWindow>
 #include <QSettings>
 #endif
+namespace {
+int reportStartupFailure(QMessageBox& dialog) {
+  const auto platform = QGuiApplication::platformName();
+  if (AppLifecycle::useNoninteractiveErrors(platform, qEnvironmentVariableIntValue("BEATGLASS_NONINTERACTIVE") != 0)) {
+    QTextStream error(stderr); error << dialog.text() << '\n' << dialog.informativeText() << '\n'; error.flush();
+  } else {
+    dialog.exec();
+  }
+  return 1;
+}
+}
 int main(int argc, char** argv) {
   QApplication app(argc, argv);
   app.setOrganizationName(QStringLiteral("Beatglass")); app.setApplicationName(QStringLiteral("Beatglass"));
   app.setQuitOnLastWindowClosed(false);
-  const auto dataDirectory = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+  auto dataDirectory = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+#ifdef BEATGLASS_TEST_STARTUP_PROBE
+  const auto testDirectory = qEnvironmentVariable("BEATGLASS_TEST_DATA_DIR");
+  if (!testDirectory.isEmpty()) dataDirectory = testDirectory;
+#endif
   if (dataDirectory.isEmpty() || !QDir().mkpath(dataDirectory)) {
     auto dialog = AppLifecycle::handoffFailureDialog();
     dialog->setText(QObject::tr("Beatglass could not access its application data folder."));
     dialog->setInformativeText(QObject::tr("Check that your user account can write to its application data folder, then try again."));
-    dialog->exec(); return 1;
+    return reportStartupFailure(*dialog);
   }
   AppLifecycle lifecycle(QStringLiteral("desktop"), dataDirectory);
   const auto startup = lifecycle.start();
   if (startup == AppLifecycle::Startup::restored) return 0;
-  if (startup == AppLifecycle::Startup::unavailable) { auto dialog = AppLifecycle::handoffFailureDialog(); dialog->exec(); return 1; }
+  if (startup == AppLifecycle::Startup::unavailable) { auto dialog = AppLifecycle::handoffFailureDialog(); return reportStartupFailure(*dialog); }
+#ifdef BEATGLASS_TEST_STARTUP_PROBE
+  return 0;
+#else
   beatglass::SourceEpochAllocator epochs;
   Metadata metadata;
   LivePresentation livePresentation;
@@ -91,4 +110,5 @@ int main(int argc, char** argv) {
 #endif
   lifecycle.attach(control);
   return app.exec();
+#endif
 }

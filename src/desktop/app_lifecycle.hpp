@@ -32,6 +32,8 @@ public:
   Startup start();
   /** Create a GUI-thread warning explaining how to recover when relaunch cannot restore the existing instance. The caller owns and presents the dialog. */
   static std::unique_ptr<QMessageBox> handoffFailureDialog();
+  /** Select stderr for explicit noninteractive mode or Qt's offscreen/minimal platforms; other headless plugins require explicit mode. */
+  static bool useNoninteractiveErrors(const QString& platform, bool requested);
   /** Borrow the main QML window until its destruction; create a tray only when a recovery route is available. */
   void attach(QQuickWindow* controls);
   /** True only while the tray is present and the platform supports the guarded recovery path. */

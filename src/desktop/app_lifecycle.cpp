@@ -68,6 +68,9 @@ std::unique_ptr<QMessageBox> AppLifecycle::handoffFailureDialog() {
   dialog->setInformativeText(tr("Wait a moment and try again. If another Beatglass instance is not responding, close it using your system's process manager, then reopen it."));
   return dialog;
 }
+bool AppLifecycle::useNoninteractiveErrors(const QString& platform, bool requested) {
+  return requested || platform == QStringLiteral("offscreen") || platform.startsWith(QStringLiteral("minimal"));
+}
 void AppLifecycle::acceptConnections() {
   while (auto* socket = server_.nextPendingConnection()) {
     if (clients_.size() >= 8) { socket->abort(); socket->deleteLater(); continue; }
