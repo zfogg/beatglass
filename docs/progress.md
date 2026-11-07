@@ -183,3 +183,7 @@ A private libsndfile virtual-I/O adapter can synchronously decode a borrowed `By
 Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built this adapter and passed 47/47 CTest cases with `BEATGLASS_TEST_V1_CODECS=OFF`; the virtual codec fixture check covered AIFF there. This is not native desktop qualification, and the older decoder does not qualify MP3 support.
 
 The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. Existing shared FileReader still increments locally; a shared API change is proposed and not implemented.
+
+## Phase 1 tonal dependency experiment
+
+The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
