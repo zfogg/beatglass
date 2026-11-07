@@ -140,3 +140,8 @@ On Windows 10.0.26300 x64, the deployed Qt 6.8.3/MSVC Debug desktop build from c
 After merging the codec manifest in PR #13 at 2b74e90, a lock-free combined Windows test used the previously installed codec-enabled pinned vcpkg tree: with `VCPKG_ROOT=C:/Users/zachf/.codex/worktrees/beatglass-vcpkg-prebuilt` and `BEATGLASS_QT_ROOT=<temp>/beatglass-qt/6.8.3/msvc2022_64`, `cmake --preset prebuilt-qt-desktop -G "Visual Studio 17 2022" -A x64 -B build/prebuilt-qt-codecs -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=C:/Users/zachf/.codex/worktrees/beatglass-codecs/build-pinned-win/vcpkg_installed -DFETCHCONTENT_SOURCE_DIR_CATCH2=C:/Users/zachf/.codex/worktrees/c429/beatglass/build-slice/_deps/catch2-src`, `cmake --build build/prebuilt-qt-codecs --config Debug -j 4`, and `ctest --test-dir build/prebuilt-qt-codecs -C Debug --output-on-failure` passed 34/34, including the desktop metadata worker and AIFF/FLAC/MP3 replay fixtures. Manifest installation was disabled only for this rerun to avoid a vcpkg lock; the codec tree had been installed from the pinned manifest as documented above.
 
 After merging PR #18 at 2f66515 (documentation changes), the existing prebuilt Qt and codec-enabled Windows executable passed `ctest --test-dir build/prebuilt-qt-codecs -C Debug --output-on-failure` 34/34 without acquiring a vcpkg lock. The strict Docker Sphinx build passed with 21 indexed headers and 71 rendered declarations. The Mac smoke and current codec/Qt gate evidence are retained.
+# Cache contract integration
+
+Typed cache outcomes and a worker-local commit decision have regression
+coverage. SQLite, file-version revalidation, crash recovery and unchanged-file
+reuse acceptance tests remain backend work.
