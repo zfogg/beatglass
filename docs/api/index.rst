@@ -1,5 +1,6 @@
 Beatglass API reference
-================
+=======================
+
 These interfaces describe the current foundation and are provisional. Headers
 under ``include/beatglass`` are library interfaces, not a promise of an
 installed or stable public API. ``src/desktop/metadata.hpp`` is application
@@ -58,6 +59,7 @@ Experimental virtual file I/O
 -----------------------------
 
 .. cpp:autodoc:: lib/capture/file/virtual_io.hpp
+
 CLI application internals
 -------------------------
 

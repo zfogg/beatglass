@@ -130,3 +130,11 @@ TEST_CASE("failure before commit preserves old result and interrupted run is ret
   }
   REQUIRE(std::filesystem::remove(path));
 }
+
+TEST_CASE("cancellation after commit starts cannot relabel a committed run") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"}; std::stop_source stop;
+  cache.begin("run", key);
+  auto result = cache.publish("run", key, "completed", stop.get_token(), [] { return true; }, [&] { stop.request_stop(); });
+  REQUIRE(stop.stop_requested()); REQUIRE(result == Publish::committed);
+  std::string value; REQUIRE(cache.find(key, value)); REQUIRE(value == "completed");
+}
