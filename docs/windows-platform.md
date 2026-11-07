@@ -1,8 +1,9 @@
 # Windows platform work
 
 The provisional backend enumerates active render endpoints and opens a selected
-endpoint with WASAPI shared-mode loopback. This integration branch connects it
-to the Windows desktop DJ page for experimental default-output tempo only.
+endpoint with WASAPI shared-mode loopback. The experimental live tempo bridge is
+currently disconnected from the desktop DJ page pending capture-age and
+post-analysis loss checks. Earlier integration observations below are historical.
 Discovery is a snapshot: a device can change while the list is being read. A
 dedicated thread owns COM and WASAPI objects and copies float packets into a
 preallocated SPSC queue. Overflow drops complete chunks and marks the next
