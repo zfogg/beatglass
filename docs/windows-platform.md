@@ -254,3 +254,11 @@ is required before publishing. The desktop bridge must retain and cancel its own
 Stop, switch and destruction, gate stale deliveries, and join the worker. This
 contract has deterministic fake-backend coverage; the bridge integration and
 physical device timing remain unqualified.
+
+Selected and default Windows tempo paths now reject untimed, future, and
+over-one-second-old QPC packets, and check session loss and packet age after
+DSP before publishing an observed boundary or BPM. A capture-clock failure
+clears evidence and fails the attempt. Windows 11 10.0.26300 x64/MSVC 19.44
+fake-backend tests cover age boundaries, post-DSP interruption, aging and clock
+failure; native WASAPI timestamp compatibility and actual DJ output remain
+unqualified. Consumers still need synchronized delivery gates.

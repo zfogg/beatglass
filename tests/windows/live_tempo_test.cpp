@@ -8,7 +8,58 @@
 #include <chrono>
 #include <cmath>
 #include <thread>
+#include <deque>
 #include <vector>
+
+namespace {
+class TempoFakeLoopback final : public beatglass::windows::Loopback {
+public:
+  State current{State::stopped}; std::uint64_t epoch{}, dropped{};
+  std::deque<Event> events; std::deque<beatglass::windows::LoopbackPacket> packets;
+  bool start(const std::string&, std::uint64_t e) override { epoch=e; current=State::running; events.push_back({State::running,1,e,0}); return true; }
+  void stop() override { current=State::stopped; packets.clear(); events.clear(); }
+  State state() const override { return current; }
+  bool pop_event(Event& event) override { if(events.empty()) return false; event=events.front(); events.pop_front(); return true; }
+  bool pop(beatglass::windows::LoopbackPacket& packet) override { if(packets.empty()) return false; packet=packets.front(); packets.pop_front(); return true; }
+  std::uint64_t dropped_frames() const override { return dropped; }
+  void add(std::uint64_t frame, std::uint64_t qpc=100000000) {
+    beatglass::windows::LoopbackPacket packet; packet.epoch=epoch; packet.first_frame=frame;
+    packet.sample_rate=44100; packet.channels=1; packet.sample_count=512; packet.timestamp_valid=true; packet.qpc_100ns=qpc;
+    for(unsigned i=0;i<packet.sample_count;++i) packet.samples[i]=0.2f*std::sin(float(frame+i)*0.037f);
+    packets.push_back(packet);
+  }
+};
+}
+TEST_CASE("Live tempo rejects stale future and untimed capture") {
+  beatglass::SourceEpochAllocator epochs; auto backend=std::make_unique<TempoFakeLoopback>(); auto* fake=backend.get();
+  std::uint64_t now=110000000;
+  beatglass::windows::LiveTempo tempo(epochs,std::move(backend),[&] { return std::optional<std::uint64_t>{now}; });
+  REQUIRE(tempo.start("fake")); fake->add(0); REQUIRE(tempo.pump()); REQUIRE(tempo.observedThrough());
+  const auto generation=tempo.invalidationGeneration(); fake->add(512,now+1);
+  REQUIRE(tempo.pump()); CHECK_FALSE(tempo.observedThrough()); CHECK(tempo.invalidationGeneration()>generation);
+  fake->add(1024,now-10000000); REQUIRE(tempo.pump()); REQUIRE(tempo.observedThrough());
+  fake->add(1536,now-10000001); REQUIRE(tempo.pump()); CHECK_FALSE(tempo.observedThrough());
+  fake->add(2048,now); fake->packets.back().timestamp_valid=false;
+  REQUIRE(tempo.pump()); CHECK_FALSE(tempo.observedThrough());
+}
+TEST_CASE("Live tempo invalidates loss or expired capture after DSP") {
+  beatglass::SourceEpochAllocator epochs; auto backend=std::make_unique<TempoFakeLoopback>(); auto* fake=backend.get();
+  std::uint64_t now=100000000; bool interrupt=false, age=false;
+  beatglass::windows::LiveTempo tempo(epochs,std::move(backend),[&] { return std::optional<std::uint64_t>{now}; },[&] {
+    if (interrupt) { fake->current=beatglass::windows::Loopback::State::interrupted; fake->events.push_back({fake->current,2,fake->epoch,0}); }
+    if (age) now+=10000001;
+  });
+  REQUIRE(tempo.start("fake")); fake->add(0); REQUIRE(tempo.pump()); REQUIRE(tempo.observedThrough());
+  const auto generation=tempo.invalidationGeneration(); fake->add(512);
+  SECTION("interruption") { interrupt=true; CHECK_FALSE(tempo.pump()); }
+  SECTION("age") { age=true; CHECK(tempo.pump()); }
+  CHECK_FALSE(tempo.observedThrough()); CHECK_FALSE(tempo.bpm()); CHECK(tempo.invalidationGeneration()>generation);
+}
+TEST_CASE("Live tempo fails closed on capture clock error") {
+  beatglass::SourceEpochAllocator epochs; auto backend=std::make_unique<TempoFakeLoopback>(); auto* fake=backend.get();
+  beatglass::windows::LiveTempo tempo(epochs,std::move(backend),[] { return std::optional<std::uint64_t>{}; });
+  REQUIRE(tempo.start("fake")); fake->add(0); CHECK_FALSE(tempo.pump()); CHECK_FALSE(tempo.observedThrough());
+}
 
 TEST_CASE("Live tempo starts unknown and invalidates on failure and stop") {
   beatglass::SourceEpochAllocator epochs;
