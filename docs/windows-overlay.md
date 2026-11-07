@@ -57,5 +57,7 @@ Qt 6.8.3 with `aqtinstall==3.3.0`, configures
 `-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON -DBUILD_TESTING=ON`, builds
 `windows_overlay_tests` and runs `ctest -R '^windows_overlay$'`. This path was
 also configured, built and passed locally on Windows with MSVC 19.44 and the
-same Qt SDK. Hosted results remain pending. The gate does not enable the opt-in
+same Qt SDK. The hosted `windows-overlay` job passed in GitHub Actions run
+`42372333794` for commit `89010db`; checks for subsequent merge commits must run
+again. The gate does not enable the opt-in
 pointer-injection scenarios and is not native product qualification.
