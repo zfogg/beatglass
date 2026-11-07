@@ -21,7 +21,7 @@ struct TempDirectory {
 TEST_CASE("real tempo analysis is reused after reopen and invalidated by content or configuration") {
   TempDirectory temp; auto input = temp.path / "audio"; auto db = temp.path / "library.sqlite";
   auto fixtures = std::filesystem::path(BEATGLASS_FIXTURES);
-  std::filesystem::copy_file(fixtures / "tone.flac", input);
+  std::filesystem::copy_file(fixtures / "tone.aiff", input);
   int progress = 0;
   {
     SqliteCache cache(db.string());
@@ -34,7 +34,7 @@ TEST_CASE("real tempo analysis is reused after reopen and invalidated by content
     INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit); REQUIRE(hit.result); REQUIRE(progress == 0);
     auto changed_config = analyze_cached_tempo(cache, input, "aubio-test-v1", "config2", {}, [&](auto) { ++progress; });
     INFO(changed_config.diagnostic); REQUIRE(changed_config.status == FileJobStatus::committed); REQUIRE(progress > 0);
-    std::filesystem::copy_file(fixtures / "tone.aiff", input, std::filesystem::copy_options::overwrite_existing);
+    { std::ofstream out(input, std::ios::binary | std::ios::app); out << 'z'; }
     progress = 0;
     auto changed_file = analyze_cached_tempo(cache, input, "aubio-test-v1", "config1", {}, [&](auto) { ++progress; });
     INFO(changed_file.diagnostic); REQUIRE(changed_file.status == FileJobStatus::committed); REQUIRE(progress > 0);
@@ -42,7 +42,7 @@ TEST_CASE("real tempo analysis is reused after reopen and invalidated by content
 }
 TEST_CASE("real tempo job cooperatively cancels and does not publish") {
   TempDirectory temp; auto input = temp.path / "audio";
-  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.flac", input);
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
   SqliteCache cache((temp.path / "library.sqlite").string()); std::stop_source stop;
   auto cancelled = analyze_cached_tempo(cache, input, "aubio-test-v1", "config", stop.get_token(), [&](auto) { stop.request_stop(); });
   REQUIRE(cancelled.status == FileJobStatus::cancelled);
@@ -52,7 +52,7 @@ TEST_CASE("real tempo job cooperatively cancels and does not publish") {
 
 TEST_CASE("real tempo job rejects a file changed during analysis") {
   TempDirectory temp; auto input = temp.path / "audio";
-  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.flac", input);
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
   SqliteCache cache((temp.path / "library.sqlite").string()); bool modified = false;
   auto changed = analyze_cached_tempo(cache, input, "aubio-test-v1", "config", {}, [&](auto) {
     if (!modified) { modified = true; std::ofstream out(input, std::ios::binary | std::ios::app); out << 'x'; }
@@ -64,7 +64,7 @@ TEST_CASE("real tempo job rejects a file changed during analysis") {
 
 TEST_CASE("tracked queue cancels a real tempo job without publishing") {
   TempDirectory temp; auto input = temp.path / "audio";
-  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.flac", input);
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
   JobExecutor executor(1); std::promise<void> started, release; auto gate = release.get_future().share();
   auto handle = executor.submit_tracked(0, [&](std::stop_token stop, const auto& progress) {
     SqliteCache cache((temp.path / "library.sqlite").string()); bool signalled = false;
@@ -84,7 +84,7 @@ TEST_CASE("tracked queue cancels a real tempo job without publishing") {
 TEST_CASE("decoder reads snapshot while source replacement blocks publication") {
 #ifndef _WIN32
   TempDirectory temp; auto input = temp.path / "audio";
-  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.flac", input);
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
   auto opened = SnapshotOpen::create(input); INFO(opened.diagnostic); REQUIRE(opened.status == SnapshotStatus::ok);
   SF_INFO info{}; auto decoder = sf_open_fd(opened.value->borrowed_descriptor(), SFM_READ, &info, 0);
   REQUIRE(decoder != nullptr); REQUIRE(info.channels > 0);
@@ -101,4 +101,61 @@ TEST_CASE("decoder reads snapshot while source replacement blocks publication") 
   REQUIRE(cache.publish("run", key, "result", {}, [&] { return opened.value->verify() == SnapshotStatus::ok; }) == Publish::stale_input);
   std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "old-result");
 #endif
+}
+
+TEST_CASE("snapshot virtual job reuses decoded bytes and rejects source mutation") {
+  TempDirectory temp; auto input = temp.path / "audio"; auto database = temp.path / "library.sqlite";
+  auto fixtures = std::filesystem::path(BEATGLASS_FIXTURES);
+  std::filesystem::copy_file(fixtures / "tone.aiff", input); int progress = 0;
+  {
+    SqliteCache cache(database.string());
+    auto first = analyze_snapshot_tempo(cache, input, "aubio-snapshot-v1", "config1", {}, [&](auto) { ++progress; });
+    INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed); REQUIRE(first.result); REQUIRE(progress > 0);
+    auto direct = beatglass::analyze_file(input);
+    REQUIRE(first.result->metadata.sample_rate == direct.metadata.sample_rate);
+    REQUIRE(first.result->metadata.channels == direct.metadata.channels);
+    REQUIRE(first.result->metadata.frames == direct.metadata.frames);
+    REQUIRE(first.result->bpm == direct.bpm); REQUIRE(first.result->beats == direct.beats); REQUIRE(first.result->state == direct.state);
+  }
+  {
+    SqliteCache cache(database.string()); progress = 0;
+    auto reused = analyze_snapshot_tempo(cache, input, "aubio-snapshot-v1", "config1", {}, [&](auto) { ++progress; });
+    INFO(reused.diagnostic); REQUIRE(reused.status == FileJobStatus::cache_hit); REQUIRE(progress == 0);
+    auto changed = analyze_snapshot_tempo(cache, input, "aubio-snapshot-v1", "config2", {}, [&](auto) {
+      if (progress++ == 0) { std::ofstream out(input, std::ios::binary | std::ios::app); out << 'x'; }
+    });
+    INFO(changed.diagnostic); REQUIRE(changed.status == FileJobStatus::stale_input); REQUIRE(progress > 0);
+    std::filesystem::copy_file(fixtures / "tone.aiff", input, std::filesystem::copy_options::overwrite_existing);
+    auto old = analyze_snapshot_tempo(cache, input, "aubio-snapshot-v1", "config1");
+    INFO(old.diagnostic); REQUIRE(old.status == FileJobStatus::cache_hit);
+    auto config = analyze_snapshot_tempo(cache, input, "aubio-snapshot-v1", "config2");
+    INFO(config.diagnostic); REQUIRE(config.status == FileJobStatus::committed);
+    { std::ofstream out(input, std::ios::binary | std::ios::app); out << 'z'; }
+    auto content = analyze_snapshot_tempo(cache, input, "aubio-snapshot-v1", "config1");
+    INFO(content.diagnostic); REQUIRE(content.status == FileJobStatus::committed);
+  }
+}
+TEST_CASE("snapshot virtual job preserves old result when path is replaced") {
+  TempDirectory temp; auto input = temp.path / "audio"; auto fixtures = std::filesystem::path(BEATGLASS_FIXTURES);
+  std::filesystem::copy_file(fixtures / "tone.aiff", input);
+  SqliteCache cache((temp.path / "library.sqlite").string());
+  auto first = analyze_snapshot_tempo(cache, input, "snapshot-v1", "old");
+  INFO(first.diagnostic); REQUIRE(first.status == FileJobStatus::committed);
+  bool replaced = false;
+  auto replacement = analyze_snapshot_tempo(cache, input, "snapshot-v1", "new", {}, [&](auto) {
+    if (!replaced) { replaced = true; std::filesystem::rename(input, temp.path / "old-file"); std::filesystem::copy_file(fixtures / "tone.aiff", input); }
+  });
+  INFO(replacement.diagnostic); REQUIRE(replaced); REQUIRE(replacement.status == FileJobStatus::stale_input);
+  std::filesystem::remove(input); std::filesystem::rename(temp.path / "old-file", input);
+  auto hit = analyze_snapshot_tempo(cache, input, "snapshot-v1", "old");
+  INFO(hit.diagnostic); REQUIRE(hit.status == FileJobStatus::cache_hit);
+}
+TEST_CASE("snapshot virtual job cancels during decoding and retries") {
+  TempDirectory temp; auto input = temp.path / "audio";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
+  SqliteCache cache((temp.path / "library.sqlite").string()); std::stop_source stop;
+  auto cancelled = analyze_snapshot_tempo(cache, input, "snapshot-v1", "config", stop.get_token(), [&](auto) { stop.request_stop(); });
+  INFO(cancelled.diagnostic); REQUIRE(cancelled.status == FileJobStatus::cancelled);
+  auto retry = analyze_snapshot_tempo(cache, input, "snapshot-v1", "config");
+  INFO(retry.diagnostic); REQUIRE(retry.status == FileJobStatus::committed);
 }
