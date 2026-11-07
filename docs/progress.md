@@ -163,7 +163,7 @@ The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
 
-Concurrent process-epoch issuance is proposed with contention and exhaustion
+PR #63 merged concurrent process-epoch issuance with contention and exhaustion
 tests. The application must still share one allocator across live and offline
 paths and coordinate each source's lifecycle.
 
@@ -185,6 +185,10 @@ The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
 
+## Shared causal tempo replay proposal
+
+`CausalTempoReplay` consumes borrowed interleaved blocks on one worker, buffers at most one 512-frame hop, and runs the existing aubio tempo and signal lifecycle logic. File replay now uses this same engine; a future snapshot job can feed it without reopening the path. State reports both the exclusive accepted boundary and the last complete analyzed hop. At EOF an incomplete hop is not analyzed. Gaps and new epochs discard buffered evidence; old epochs, overlap, malformed PCM and same-epoch format changes fail closed. The caller must allocate epochs and deliver invalidation/clear notifications around source lifecycle events; the engine is not an audio callback, decoder, cache or GUI publisher. This is a proposed shared API pending integration-owner review. Tonal and timestamped beat trackers are separate unmerged increments and are not yet integrated into this engine.
+
 ## Experimental beat events
 
 The worker-only aubio beat-event experiment reports epoch-local sample positions and the exclusive observed boundary for each detection. Its 1024-sample window/512-sample hop and aubio's estimated event time are not a measured latency guarantee. An event at the current exclusive boundary waits for a subsequent observed sample; it is not flushed at EOF. Partial hops are retained, and gaps, epoch changes and explicit discontinuities reset aubio state. The experiment is not connected to CLI replay or snapshots; silence invalidation, event strength, publication delay, longer-than-32-bit aubio counters, native capture and measured beat accuracy remain integration work. Generated click tests at 44.1/48 kHz check causal bounds, chunking and broad beat intervals, not full-mix accuracy.
@@ -194,7 +198,7 @@ After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea5737
 ## Same-source integration proposal
 
 The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
-read-only byte boundary. The existing decoder does not consume it. Secure
+read-only byte boundary. The existing CLI decoder does not consume it. Secure
 snapshot creation, native file identity and decoder integration remain open;
 see [same-source proposal](same-source-proposal.md).
 
@@ -206,9 +210,9 @@ Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built thi
 
 The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. The provisional public FileReader borrowed-source constructor and explicit-epoch seek expose this adapter for review; the legacy path-based seek retains local increment behavior. Snapshot creation and publication are still separate responsibilities.
 
-## Offline result contract proposal
+## Offline result contract
 
-An owned offline result and bounded structural validator are proposed for
+PR #57 merged an owned offline result and bounded structural validator for
 composite evidence. Actual composite persistence, paged retrieval, native
 qualification and a validated track-level key remain open.
 
