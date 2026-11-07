@@ -266,6 +266,12 @@ API documentation validation for this review: `python docs/api/check_headers.py`
 
 With the same WSL and Windows build configurations and commands in the preceding section, `cmake --build /tmp/beatglass-library-phase1 -j 1` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` passed 98/98; Windows `cmake --build C:/Users/zachf/.codex/builds/beatglass-snapshot-pinned-codecs --config Release -j 1` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-snapshot-pinned-codecs -C Release --output-on-failure` passed 101/101. The integration test uses a real AIFF snapshot job and checks its caller-issued epoch, owned detail, stale-delivery suppression, cancellation and destruction. WSL is not native Linux qualification; macOS remained deferred during its upgrade.
 
+## Offline result contract proposal
+
+An owned offline result and bounded structural validator are proposed for
+composite evidence. Actual composite persistence, paged retrieval, native
+qualification and a validated track-level key remain open.
+
 ## Phase 1 tonal dependency experiment
 
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
