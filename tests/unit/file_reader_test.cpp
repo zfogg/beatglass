@@ -7,6 +7,8 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <iterator>
+#include <vector>
 #include <random>
 #include <stop_token>
 using namespace beatglass;
@@ -65,4 +67,12 @@ TEST_CASE("file source changes sample rate only across distinct epochs") {
  CHECK(a.block.format.sample_rate == 44100); CHECK(b.block.format.sample_rate == 48000);
  CHECK(continuity.observe(a.block) == StreamTransition::acquire);
  CHECK(continuity.observe(b.block) == StreamTransition::reacquire);
+}
+
+TEST_CASE("reading and seeking leave the source file unchanged") {
+ WaveFixture fixture;
+ auto bytes = [&] { std::ifstream in(fixture.path, std::ios::binary); return std::vector<char>(std::istreambuf_iterator<char>(in), {}); };
+ const auto before = bytes(); REQUIRE_FALSE(before.empty());
+ { FileReader reader(fixture.path); std::array<float,4> samples{}; REQUIRE(reader.read(samples).status == FileReadStatus::data); reader.seek(0); REQUIRE(reader.read(samples).status == FileReadStatus::data); }
+ CHECK(bytes() == before);
 }
