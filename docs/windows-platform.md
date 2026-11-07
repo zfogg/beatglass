@@ -279,11 +279,17 @@ evidence can incorrectly validate it. The capture worker is the token's sole
 writer and never allocates or blocks to invalidate it; exhaustion permanently
 rejects stamps. Session generation and publication revision remain necessary.
 
-The selected tempo consumer retains the packet stamp with its observed result
-and exposes the token and stamp to the worker; the default follower exposes
-the same contract. This is a capture-side contract only. The desktop does not
+The selected tempo consumer returns its result and originating stamp together.
+The default follower bundles the token and stamp with each pending update at
+publication; clears carry no stamp. A later result cannot retag an older
+pending update. This is a capture-side contract only. The desktop does not
 yet transfer the token to the GUI or clear already displayed results when it changes. A GUI
 owner must reject queued stale stamps and check displayed stamps on its own
 thread; a physical loss cannot be reflected until that thread is scheduled.
 The actual loss-to-display delay, physical device behavior and token-integrated
 GUI tests remain unqualified.
+
+Composite live analysis and its GUI bridge do not use this token yet and remain
+outside this change. Device-loss notification is invalidated before the native
+interruption event is published. Fake event and pending-delivery regressions do
+not establish physical device behavior or GUI scheduling.

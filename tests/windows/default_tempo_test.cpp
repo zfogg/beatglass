@@ -5,6 +5,12 @@
 #include <stdexcept>
 #include <iostream>
 
+namespace beatglass::windows {
+struct DefaultTempoFollowerTestAccess {
+  static void enqueue(DefaultTempoFollower& follower, StampedTempoUpdate update) { follower.pending_=std::move(update); }
+};
+}
+
 using namespace std::chrono_literals;
 TEST_CASE("Default follower clears on selection loss and failed startup") {
   beatglass::SourceEpochAllocator epochs;
@@ -145,4 +151,23 @@ TEST_CASE("Actual Windows default-output changes clear and reacquire", "[.][nati
   const auto next = epochs.next();
   REQUIRE(next);
   REQUIRE(*next >= 4);
+}
+
+TEST_CASE("Default follower pending update retains original loss stamp") {
+  using namespace beatglass::windows;
+  auto token=std::make_shared<LoopbackLossToken>();
+  auto snapshot=std::make_shared<const beatglass::Snapshot>();
+  const auto a=token->stamp();
+  beatglass::SourceEpochAllocator epochs; DefaultTempoFollower follower(epochs);
+  DefaultTempoFollowerTestAccess::enqueue(follower, StampedTempoUpdate{beatglass::PresentationUpdate{1,snapshot},token,a});
+  token->invalidate(); const auto b=token->stamp();
+  // Updating the producer to B cannot retag pending A.
+  auto pendingResult=follower.takeUpdate(); REQUIRE(pendingResult); auto pending=std::move(*pendingResult);
+  REQUIRE(pending.loss_stamp); CHECK(*pending.loss_stamp==a);
+  CHECK_FALSE(pending.loss_token->matches(*pending.loss_stamp));
+  StampedTempoUpdate replacement{beatglass::PresentationUpdate{2,snapshot},token,b};
+  pending=std::move(replacement);
+  REQUIRE(pending.loss_stamp); CHECK(*pending.loss_stamp==b); CHECK(pending.loss_token->matches(*pending.loss_stamp));
+  StampedTempoUpdate clear{beatglass::PresentationUpdate{3,{}},{},{}};
+  CHECK_FALSE(clear.snapshot); CHECK_FALSE(clear.loss_stamp);
 }

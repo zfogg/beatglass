@@ -87,6 +87,10 @@ bool LiveTempo::pump() {
 }
 std::optional<float> LiveTempo::bpm() const { return bpm_; }
 std::optional<EventTime> LiveTempo::observedThrough() const { return observed_; }
+StampedLiveTempo LiveTempo::stampedTempo() const noexcept {
+  if (!bpm_ || !observed_ || !loss_stamp_) return {{}, {}, session_.lossToken(), {}};
+  return {bpm_, observed_, session_.lossToken(), loss_stamp_};
+}
 std::shared_ptr<const LoopbackLossToken> LiveTempo::lossToken() const noexcept { return session_.lossToken(); }
 std::optional<std::uint64_t> LiveTempo::lossStamp() const noexcept { return loss_stamp_; }
 std::uint64_t LiveTempo::invalidationGeneration() const { return invalidation_generation_; }

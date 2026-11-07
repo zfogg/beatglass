@@ -45,6 +45,7 @@ struct Loopback::Impl {
   std::atomic<unsigned> read{0}, write{0};
   std::atomic<std::uint64_t> dropped{0};
   std::shared_ptr<LoopbackLossToken> loss = std::make_shared<LoopbackLossToken>();
+  LoopbackLossEvents loss_events{*loss};
   std::atomic<State> current{State::stopped};
   std::atomic<std::int32_t> error{0};
   std::atomic<bool> cancel{false};
@@ -64,15 +65,14 @@ struct Loopback::Impl {
     error.store(static_cast<std::int32_t>(hr), std::memory_order_relaxed);
     current.store(state, std::memory_order_release);
   }
-  void fail(HRESULT hr) { publish(State::interrupted, hr); loss->invalidate(); }
+  void fail(HRESULT hr) { loss_events.failure(); publish(State::interrupted, hr); }
   void push(const float* data, unsigned frames, unsigned channels, unsigned rate, std::uint64_t epoch,
             std::uint64_t position, std::uint64_t qpc, bool valid, bool discontinuity, bool silent) noexcept {
     const unsigned next = (write.load(std::memory_order_relaxed) + 1) % slots;
-    if (next == read.load(std::memory_order_acquire)) { dropped.fetch_add(frames, std::memory_order_relaxed); loss->invalidate(); gap = true; return; }
-    if (discontinuity) loss->invalidate();
+    if (next == read.load(std::memory_order_acquire)) { dropped.fetch_add(frames, std::memory_order_relaxed); loss_events.queueFull(); gap = true; return; }
     auto& out = queue[write.load(std::memory_order_relaxed)];
     out.sample_count = frames * channels; out.channels = channels; out.sample_rate = rate;
-    out.epoch = epoch; out.loss_stamp = loss->stamp(); out.first_frame = position; out.qpc_100ns = qpc;
+    out.epoch = epoch; out.loss_stamp = loss_events.packetStamp(discontinuity); out.first_frame = position; out.qpc_100ns = qpc;
     out.timestamp_valid = valid; out.discontinuity = gap || discontinuity;
     if (silent) std::fill_n(out.samples.data(), out.sample_count, 0.0f);
     else std::memcpy(out.samples.data(), data, out.sample_count * sizeof(float));
@@ -133,7 +133,7 @@ struct Loopback::Impl {
               break;
             }
             const bool position_discontinuity = device_position.observe(device_pos, frames, valid, (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) != 0);
-            if (!frames && position_discontinuity) loss->invalidate();
+            if (!frames && position_discontinuity) loss_events.emptyDiscontinuity();
             for (unsigned offset = 0; offset < frames;) {
               const unsigned count = (std::min)(chunk_limit, frames - offset);
               const auto time_offset = static_cast<std::uint64_t>(offset) * 10000000 / format.p->nSamplesPerSec;
