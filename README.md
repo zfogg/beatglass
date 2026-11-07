@@ -32,3 +32,14 @@ ctest --test-dir build --output-on-failure
 ```
 
 For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. These dependencies are not yet pinned and these are development instructions, not a release recipe. The CLI accepts one file, prints an aubio estimate or unknown, and never modifies the input. The shell only displays basic decoded metadata; it does not launch analysis. Actual support depends on decoder build options. No GUI, capture or overlay has been qualified on any platform.
+
+## API documentation
+
+The provisional library and application-private C++ interfaces are documented with Hawkmoth and Sphinx. Build the same Linux container used by CI from the repository root (Docker required):
+
+```sh
+docker build -f docs/api/Dockerfile -t beatglass-docs .
+docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /work/build/docs/html
+```
+
+Open `build/docs/html/index.html`. On Windows PowerShell, use `${PWD}` in the volume argument. Python dependencies are version-pinned; the Ubuntu 24.04 package repositories supply Clang 18 and Qt 6, so their patch versions may change. Pull requests validate the build; pushes to main deploy it through GitHub Pages when Pages is configured for GitHub Actions. The documentation does not establish native platform qualification or API stability.

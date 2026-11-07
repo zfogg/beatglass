@@ -4,10 +4,12 @@
 
 namespace beatglass {
 // Position is measured in frames from the beginning of an epoch, not samples.
+/// Audio format: frames per second and interleaved channel count.
 struct AudioFormat {
   std::uint32_t sample_rate{};
   std::uint16_t channels{};
 };
+/// Borrowed interleaved normalized float PCM; the sample view is valid only during the call. first_frame counts frames from the epoch start. monotonic_ns records monotonic timing; its exact mapping is source-specific. A discontinuity marks a break in continuity.
 struct AudioBlock {
   AudioFormat format;
   std::uint64_t epoch{};
