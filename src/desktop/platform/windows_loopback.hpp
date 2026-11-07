@@ -22,7 +22,7 @@ struct LoopbackPacket {
   bool discontinuity{}; /**< True on a WASAPI discontinuity, timestamp error or preceding queue drop; downstream must reset and reacquire. */
 };
 
-/** Provisional selected-endpoint capture, independent of the shared source contract. */
+/** Provisional selected-endpoint capture, independent of the shared source contract. Virtual control methods allow deterministic adapter tests; production capture callbacks do not dispatch through this interface. */
 class Loopback {
 public:
   /** State is published atomically by the capture thread. Interrupted means the stream has stopped and buffered packets must be discarded. */
@@ -37,23 +37,23 @@ public:
   /** Construct a stopped source; the caller owns it. */
   Loopback();
   /** Stop and join before releasing buffers. Never destroy on the capture thread. */
-  ~Loopback();
+  virtual ~Loopback();
   Loopback(const Loopback&) = delete;
   Loopback& operator=(const Loopback&) = delete;
   /** Start the opaque UTF-8 render endpoint ID using a caller-allocated, never-reused epoch. Call on the control thread while stopped; errors are observable through state and error_code. */
-  bool start(const std::string& endpoint_id, std::uint64_t epoch);
+  virtual bool start(const std::string& endpoint_id, std::uint64_t epoch);
   /** Stop and join the capture thread. Call on the control thread; queued packets are discarded. */
-  void stop();
+  virtual void stop();
   /** Read current state from any non-capture thread. */
-  State state() const;
+  virtual State state() const;
   /** Native HRESULT from a failed stream; meaningful only after interruption. */
   std::int32_t error_code() const;
   /** Read the next ordered running or interrupted transition on the sole control consumer. Start and stop must not run concurrently with this call. The owner must apply running before consuming PCM and clear evidence on interruption. PCM and event queues have no shared ordering; retained or in-flight packets require external invalidation. Startup failure produces interrupted as the first event and maps to an error in the proposed shared lifecycle. Stop discards pending events. */
-  bool pop_event(Event& event);
+  virtual bool pop_event(Event& event);
   /** Copy the next packet on one consumer thread. Do not call concurrently with start or stop. */
-  bool pop(LoopbackPacket& packet);
+  virtual bool pop(LoopbackPacket& packet);
   /** Count frames rejected because the queue was full. */
-  std::uint64_t dropped_frames() const;
+  virtual std::uint64_t dropped_frames() const;
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
