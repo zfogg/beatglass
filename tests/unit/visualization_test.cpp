@@ -8,8 +8,9 @@
 using namespace beatglass;
 struct Gate {
   std::uint64_t generation = 1, revision = 0, seen = 0;
+  unsigned clears = 0;
   bool visible = false;
-  static void clear(void* ptr) noexcept { auto& g=*static_cast<Gate*>(ptr); ++g.generation; ++g.revision; g.seen=g.revision; g.visible=false; }
+  static void clear(void* ptr) noexcept { auto& g=*static_cast<Gate*>(ptr); ++g.generation; ++g.revision; ++g.clears; g.seen=g.revision; g.visible=false; }
   bool apply(std::uint64_t gen, std::uint64_t rev) { if (gen != generation || rev <= seen) return false; seen=rev; visible=true; return true; }
 };
 TEST_CASE("visualization reports silence and sample boundaries") {
@@ -58,6 +59,20 @@ TEST_CASE("contiguous explicit discontinuity invalidates old window") {
   REQUIRE(p.process(1,0,48000,x)); auto gen=gate.generation; auto rev=++gate.revision;
   REQUIRE_FALSE(p.process(1,1024,48000,std::span(x).first(512),true)); CHECK_FALSE(gate.apply(gen,rev));
   auto f=p.process(1,1536,48000,std::span(x).first(512)); REQUIRE(f); CHECK(f->first_frame==1024);
+}
+TEST_CASE("visualization high-water clear contract is synchronous") {
+  Gate gate; VisualizationProcessor p(Gate::clear, &gate); std::array<float,512> x{};
+  REQUIRE_FALSE(p.process(1, 0, 48000, x));
+  CHECK(gate.clears == 0);
+  REQUIRE_FALSE(p.process(1, 512, 48000, x, true));
+  CHECK(gate.clears == 1);
+  const auto generation = gate.generation;
+  CHECK_THROWS(p.process(1, 900, 48000, x));
+  CHECK(gate.clears == 2);
+  CHECK(gate.generation > generation);
+  const auto before_reset = gate.clears;
+  p.reset();
+  CHECK(gate.clears == before_reset + 1);
 }
 TEST_CASE("chunking and latest-only windows preserve timing and magnitudes") {
   Gate a,b; VisualizationProcessor full(Gate::clear,&a), chunked(Gate::clear,&b); std::array<float,4096> x{};
