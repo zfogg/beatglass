@@ -137,6 +137,9 @@ if(BUILD_TESTING)
       add_test(NAME windows_dj_ui COMMAND windows_dj_ui_tests)
       set_tests_properties(windows_dj_ui PROPERTIES LABELS "unit;platform" TIMEOUT 45)
       add_custom_command(TARGET windows_dj_ui_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:windows_dj_ui_tests> $<TARGET_FILE_DIR:windows_dj_ui_tests> COMMAND_EXPAND_LISTS)
+      add_custom_command(TARGET windows_dj_ui_tests POST_BUILD
+        COMMAND $<TARGET_FILE:Qt6::windeployqt> --no-translations --qmldir ${CMAKE_CURRENT_SOURCE_DIR}/src/desktop/qml $<TARGET_FILE:windows_dj_ui_tests>
+        VERBATIM)
       add_custom_command(TARGET live_presentation_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:live_presentation_tests> $<TARGET_FILE_DIR:live_presentation_tests> COMMAND_EXPAND_LISTS)
       add_custom_command(TARGET metadata_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:metadata_tests> $<TARGET_FILE_DIR:metadata_tests> COMMAND_EXPAND_LISTS)
     endif()
