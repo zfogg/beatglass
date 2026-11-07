@@ -1,0 +1,21 @@
+# macOS overlay development increment
+
+The DJ shell can attach a separate overlay window on macOS. It displays the existing revision-gated live presentation fields; capture and live analysis are not yet connected, so the shell continues to report that monitoring is unavailable. The normal control window offers show, hide, opacity, click-through and unlock controls. The overlay can be moved while unlocked and has its own hide button. Closing, hiding, minimizing or destroying the control window unlocks or hides the overlay. An unsuccessful native mode change hides the overlay rather than claiming click-through is off.
+
+The AppKit adapter requests a floating nonactivating window, `ignoresMouseEvents` for click-through, and all-Spaces/fullscreen-auxiliary hints. These are requests, not a guarantee above other applications, fullscreen apps, Stage Manager or all displays. Qt provides opacity and geometry; the controller clamps an off-screen window to an available display when a screen is removed. Dedicated monitor selection, resizing controls, persisted placement/settings, shortcuts/tray recovery, beat pulse and history are not implemented. No native Mac UI, click-through, focus, fullscreen, Spaces, multi-monitor, or permission test has been run for this increment; none of those behaviors is qualified yet. The controller and its interface are provisional application-private APIs.
+
+## Portable development checks
+
+On Windows 11 with MSVC 2022 and a Qt 6.8.3 SDK, with the pinned Catch2 source already downloaded:
+
+```powershell
+cmake -S . -B C:/Users/zachf/.codex/builds/beatglass-macos-overlay -G 'Visual Studio 17 2022' -A x64 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DCMAKE_PREFIX_PATH=C:/Users/zachf/AppData/Local/Temp/beatglass-qt/6.8.3/msvc2022_64 -DFETCHCONTENT_SOURCE_DIR_CATCH2=C:/Users/zachf/.codex/builds/beatglass-macos-fifo/_deps/catch2-src
+cmake --build C:/Users/zachf/.codex/builds/beatglass-macos-overlay --config Debug --target macos_overlay_tests --parallel 1
+ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-macos-overlay -C Debug -R '^macos_overlay_' --output-on-failure
+```
+
+The controller test uses fake native operations and Qt's offscreen platform, and also loads the QML shell with the real controller to verify window attachment and control-to-controller calls. The separate QML test exercises the controls through a fake bridge. These checks cannot establish AppKit behavior. A first QML attempt using synthetic mouse clicks failed under the offscreen Basic style; the test now exercises the controls' clicked signals and the failed click-through path. The final two CTest cases passed. The GitHub macOS overlay job compiles the AppKit source but likewise uses fake-native/offscreen tests; native desktop qualification remains separate.
+
+When the Mac is available, configure with `-DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DBEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON`, build `macos_native_overlay_tests`, and run `ctest --test-dir <build-dir> -C Debug -R '^macos_native_overlay$' --output-on-failure` in the logged-in Cocoa session. That opt-in check inspects the AppKit window level, Spaces hints, input flag and unlock on control-window hide. It does not inject pointer events or establish visibility over fullscreen applications; those interactive scenarios remain separately required. The native test has not yet been compiled or run.
+
+A combined serial Windows build with `-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON`, `cmake --build C:/Users/zachf/.codex/builds/beatglass-macos-overlay --config Debug --target windows_overlay_tests macos_overlay_tests --parallel 1`, and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-macos-overlay -C Debug -R '^(windows_overlay|macos_overlay_)' --output-on-failure` passed 3/3. This includes the existing Windows overlay test, the fake-native Qt controller test with real QML attachment, and the offscreen QML navigation test. Native pointer-injection cases in the Windows test were not enabled.

@@ -59,11 +59,16 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_overlay.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/macos_overlay.hpp
 
 .. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
 
    Unlock the overlay and remove event filters. The caller retains ownership of
+   both windows. Call on the GUI thread.
+
+.. cpp:function:: beatglass::macos::OverlayController::~OverlayController()
+
+   Unlock and hide the overlay and release the native adapter. The caller owns
    both windows. Call on the GUI thread.
 
 CLI application internals
