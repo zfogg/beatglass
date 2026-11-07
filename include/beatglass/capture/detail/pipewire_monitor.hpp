@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include "beatglass/capture/detail/pipewire_ingress.hpp"
+#include "beatglass/capture/detail/pipewire_discovery.hpp"
 namespace beatglass::pipewire {
 /** Provisional monitor state; interruption and error require a new instance. */
 enum class MonitorState : unsigned { stopped, starting, streaming, interrupted, error };
@@ -22,8 +23,8 @@ public:
   ~Monitor();
   Monitor(const Monitor&) = delete;
   Monitor& operator=(const Monitor&) = delete;
-  /** Request capture of the selected server-session sink serial; true is not running. */
-  bool start(const std::string& serial);
+  /** Validate the selected serial/name against discovery, then request capture; true is not running. Removal after validation remains a race. */
+  bool start(const Sink& sink);
   /** Stop on control thread and join the callback loop; no restart is supported. */
   void stop() noexcept;
   /** Read an atomic status; any non-streaming state invalidates retained analysis. */

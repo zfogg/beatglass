@@ -24,15 +24,27 @@ public:
 
   // The serial must have come from an explicit sink selection. Epochs are
   // assigned externally and must never be reused while old data is in flight.
-  bool start(const std::string& serial) {
-    if (started_ || state_.load() != MonitorState::stopped || serial.empty() || !epoch_ ||
+  bool start(const Sink& sink) {
+    const auto& serial = sink.serial;
+    if (started_ || state_.load() != MonitorState::stopped || serial.empty() || sink.name.empty() || !epoch_ ||
         !std::all_of(serial.begin(), serial.end(), [](unsigned char c) { return c >= '0' && c <= '9'; })) return false;
     started_ = true;
+    const auto discovered = discover_sinks(std::chrono::seconds(2));
+    const auto match = std::count_if(discovered.sinks.begin(), discovered.sinks.end(), [&](const Sink& item) {
+      return item.serial == sink.serial && item.name == sink.name;
+    });
+    const auto same_name = std::count_if(discovered.sinks.begin(), discovered.sinks.end(), [&](const Sink& item) {
+      return item.name == sink.name;
+    });
+    if (!discovered.error.empty() || match != 1 || same_name != 1) {
+      state_.store(MonitorState::error, std::memory_order_release);
+      return false;
+    }
     pw_init(nullptr, nullptr);
     loop_ = pw_main_loop_new(nullptr);
     if (!loop_) { state_.store(MonitorState::error); return false; }
     auto* props = pw_properties_new(PW_KEY_MEDIA_TYPE, "Audio", PW_KEY_MEDIA_CATEGORY, "Capture",
-        PW_KEY_MEDIA_ROLE, "Music", PW_KEY_TARGET_OBJECT, serial.c_str(),
+        PW_KEY_MEDIA_ROLE, "Music", PW_KEY_TARGET_OBJECT, serial.c_str(), "node.target", sink.name.c_str(),
         PW_KEY_STREAM_CAPTURE_SINK, "true", PW_KEY_NODE_DONT_RECONNECT, "true", "node.dont-fallback", "true", nullptr);
     if (!props) { stop(); state_.store(MonitorState::error); return false; }
     events_.version = PW_VERSION_STREAM_EVENTS;
@@ -156,7 +168,7 @@ private:
 };
 Monitor::Monitor(std::uint64_t epoch) : impl_(std::make_unique<Impl>(epoch)) {}
 Monitor::~Monitor() = default;
-bool Monitor::start(const std::string& serial) { return impl_->start(serial); }
+bool Monitor::start(const Sink& sink) { return impl_->start(sink); }
 void Monitor::stop() noexcept { impl_->stop(); }
 MonitorState Monitor::state() const noexcept { return impl_->state(); }
 bool Monitor::pop(MonitorIngress::Block& block) noexcept { return impl_->pop(block); }
