@@ -11,7 +11,7 @@ struct CausalMusicReplay::Impl {
   bool failed{}, has_source{}, require_new_epoch{};
   std::uint64_t interrupted_epoch{};
   CausalMusicState result;
-  void clear_tonal() { result.key.reset(); result.chord.reset(); result.key_from.reset(); result.tonal_from.reset(); result.tonal_through.reset(); result.key_strength = result.chord_strength = 0; }
+  void clear_tonal() { result.rolling_key.reset(); result.local_chord.reset(); result.rolling_key_from.reset(); result.tonal_from.reset(); result.tonal_through.reset(); result.rolling_key_strength.reset(); result.local_chord_strength.reset(); }
 };
 CausalMusicReplay::CausalMusicReplay() : impl_(std::make_unique<Impl>()) {}
 CausalMusicReplay::~CausalMusicReplay() = default;
@@ -30,16 +30,16 @@ CausalMusicState CausalMusicReplay::process(const AudioBlock& block, const BeatO
         s.rate = hop.sample_rate; s.clear_tonal();
       } else if (hop.reset) s.clear_tonal();
       s.beat->process(hop.samples, hop.epoch, hop.first_frame, [&](const detail::BeatEvent& event) {
-        if (observer) observer({event.epoch, event.frame, event.observed_through, hop.sample_rate});
+        if (observer) observer({event.epoch, event.frame, event.observed_through, hop.sample_rate, std::nullopt});
       }, hop.reset);
       s.tonal->process(hop.samples, hop.epoch, hop.first_frame, hop.reset);
       const auto tonal = s.tonal->estimate();
       const bool fresh = tonal.observed_through && (!s.result.tonal_through || tonal.observed_through > *s.result.tonal_through);
       s.result.tonal_from = tonal.observed_through ? std::optional<std::uint64_t>(tonal.observed_from) : std::nullopt;
-      if (fresh && tonal_observer) tonal_observer({hop.epoch, tonal.observed_from, tonal.observed_through, tonal.key ? std::optional<std::uint64_t>(tonal.key_from) : std::nullopt, tonal.key, tonal.chord, tonal.key_strength, tonal.chord_strength, hop.sample_rate});
-      s.result.key_from = tonal.key ? std::optional<std::uint64_t>(tonal.key_from) : std::nullopt;
-      s.result.key = tonal.key; s.result.chord = tonal.chord; s.result.tonal_through = tonal.observed_through ? std::optional<std::uint64_t>(tonal.observed_through) : std::nullopt;
-      s.result.key_strength = tonal.key_strength; s.result.chord_strength = tonal.chord_strength;
+      if (fresh && tonal_observer) tonal_observer({hop.epoch, tonal.observed_from, tonal.observed_through, tonal.key ? std::optional<std::uint64_t>(tonal.key_from) : std::nullopt, tonal.key, tonal.chord, tonal.key ? std::optional<float>(tonal.key_strength) : std::nullopt, tonal.chord ? std::optional<float>(tonal.chord_strength) : std::nullopt, hop.sample_rate});
+      s.result.rolling_key_from = tonal.key ? std::optional<std::uint64_t>(tonal.key_from) : std::nullopt;
+      s.result.rolling_key = tonal.key; s.result.local_chord = tonal.chord; s.result.tonal_through = tonal.observed_through ? std::optional<std::uint64_t>(tonal.observed_through) : std::nullopt;
+      s.result.rolling_key_strength = tonal.key ? std::optional<float>(tonal.key_strength) : std::nullopt; s.result.local_chord_strength = tonal.chord ? std::optional<float>(tonal.chord_strength) : std::nullopt;
     });
     s.result.tempo = tempo; s.result.sample_rate = block.format.sample_rate; s.has_source = true; s.require_new_epoch = false; return s.result;
   } catch (...) { s.failed = true; s.result = {}; s.result.tempo.state = TrackingState::error; throw; }

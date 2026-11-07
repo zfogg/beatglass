@@ -16,17 +16,19 @@ struct CausalMusicBeat {
   std::uint64_t observed_through{};
   /** Sample rate of this epoch, for converting frame positions to time. */
   std::uint32_t sample_rate{};
+  /** Beat strength, absent when the estimator does not provide one. */
+  std::optional<float> strength;
 };
 /** One analysis window, not a chord segment; its interval is half-open. */
 struct CausalTonalFrame {
   /** Epoch and half-open chord-analysis window. */
   std::uint64_t epoch{}, first_frame{}, observed_through{};
   /** First frame contributing to the key estimate, when a key is available. */
-  std::optional<std::uint64_t> key_from;
-  /** Estimated track key and local major/minor chord, if available. */
-  std::optional<std::string> key, chord;
-  /** Uncalibrated strengths, not probabilities. */
-  float key_strength{}, chord_strength{};
+  std::optional<std::uint64_t> rolling_key_from;
+  /** Rolling key and local major/minor chord, if available. */
+  std::optional<std::string> rolling_key, local_chord;
+  /** Uncalibrated strengths, absent when unavailable; not probabilities. */
+  std::optional<float> rolling_key_strength, local_chord_strength;
   /** Sample rate of this epoch, for converting frame positions to time. */
   std::uint32_t sample_rate{};
 };
@@ -36,16 +38,16 @@ struct CausalMusicState {
   CausalTempoState tempo;
   /** Source sample rate, or zero before a source has been opened. */
   std::uint32_t sample_rate{};
-  /** Key and local major/minor triad, absent when no evidence is available. */
-  std::optional<std::string> key, chord;
+  /** Rolling key and local major/minor triad, absent when unavailable. */
+  std::optional<std::string> rolling_key, local_chord;
   /** First frame contributing to the current key estimate, if any. */
-  std::optional<std::uint64_t> key_from;
+  std::optional<std::uint64_t> rolling_key_from;
   /** First frame of the most recent chord window, if any. */
   std::optional<std::uint64_t> tonal_from;
   /** Exclusive end of the most recent tonal window, if any. */
   std::optional<std::uint64_t> tonal_through;
-  /** Raw, uncalibrated algorithm strengths. */
-  float key_strength{}, chord_strength{};
+  /** Raw strengths, absent when unavailable; not probabilities. */
+  std::optional<float> rolling_key_strength, local_chord_strength;
 };
 /** Experimental worker-owned composition of real aubio and Essentia trackers.
  * This allocates and runs DSP synchronously and is not thread-safe. Never call

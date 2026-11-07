@@ -29,15 +29,16 @@ with tempfile.TemporaryDirectory() as directory:
     assert rows and rows[-1]["type"] == "result", run.stdout
     result = rows[-1]
     assert result["schema_version"] == 1 and result["sample_rate"] == rate and result["bpm"] is not None and result["state"] == "tracking", result
-    assert result["key"] is not None and result["chord"] == "A minor", result
+    assert result["rolling_key"] is not None and result["local_chord"] == "A minor", result
     assert result["tonal_through"] <= result["analyzed_through"] <= result["observed_through"] == rate * 12
     beats = [row for row in rows[:-1] if row["type"] == "beat"]
     tonal = [row for row in rows[:-1] if row["type"] == "tonal"]
-    assert beats and all(b["sample_rate"] == rate and b["frame"] < b["observed_through"] <= rate * 12 for b in beats), rows
+    assert beats and all(b["strength"] is None and b["sample_rate"] == rate and b["frame"] < b["observed_through"] <= rate * 12 for b in beats), rows
     assert tonal and all(t["sample_rate"] == rate and t["first_frame"] < t["observed_through"] <= rate * 12 for t in tonal), rows
-    assert all(t["key_from"] is None or t["key_from"] <= t["first_frame"] for t in tonal), rows
-    assert any(t["chord"] == "C major" and t["observed_through"] < rate * 5 for t in tonal), rows
-    assert any(t["chord"] == "A minor" and t["first_frame"] > rate * 8 for t in tonal), rows
+    assert all(t["rolling_key_from"] is None or t["rolling_key_from"] <= t["first_frame"] for t in tonal), rows
+    assert all((t["rolling_key"] is None) == (t["rolling_key_strength"] is None) and (t["local_chord"] is None) == (t["local_chord_strength"] is None) for t in tonal), rows
+    assert any(t["local_chord"] == "C major" and t["observed_through"] < rate * 5 for t in tonal), rows
+    assert any(t["local_chord"] == "A minor" and t["first_frame"] > rate * 8 for t in tonal), rows
     prefix = pathlib.Path(directory) / "prefix.wav"
     with wave.open(str(path), "rb") as source, wave.open(str(prefix), "wb") as target:
         target.setparams(source.getparams())
@@ -51,7 +52,7 @@ with tempfile.TemporaryDirectory() as directory:
         target.writeframes(source.readframes(rate * 12) + bytes(rate * 2 * 2))
     quiet_rows = [json.loads(line) for line in subprocess.run([exe, str(quiet_path)], capture_output=True, text=True, check=True).stdout.splitlines()]
     assert any(row["type"] == "state" and row["state"] == "silent" and row["observed_through"] < rate * 14 for row in quiet_rows), quiet_rows[-10:]
-    assert quiet_rows[-1]["state"] == "silent" and quiet_rows[-1]["bpm"] is None and quiet_rows[-1]["key"] is None and quiet_rows[-1]["chord"] is None
+    assert quiet_rows[-1]["state"] == "silent" and quiet_rows[-1]["bpm"] is None and quiet_rows[-1]["rolling_key"] is None and quiet_rows[-1]["local_chord"] is None and quiet_rows[-1]["rolling_key_strength"] is None and quiet_rows[-1]["local_chord_strength"] is None
     assert path.read_bytes() == before
     missing = subprocess.run([exe, str(path.parent / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0
