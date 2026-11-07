@@ -24,3 +24,11 @@ TEST_CASE("commit decision serializes cancellation at the commit boundary") {
  REQUIRE(late.finish(true) == PublishOutcome::committed); CHECK_FALSE(late.finish(false));
  CommitDecision failed; REQUIRE(failed.begin_commit(false)); REQUIRE(failed.finish(false) == PublishOutcome::error);
 }
+TEST_CASE("verification distinguishes stale input, cancellation and storage errors") {
+ CHECK_FALSE(verification_failure(FileVerificationOutcome::match));
+ CHECK(verification_failure(FileVerificationOutcome::changed) == PublishOutcome::stale_input);
+ CHECK(verification_failure(FileVerificationOutcome::unverifiable) == PublishOutcome::stale_input);
+ CHECK(verification_failure(FileVerificationOutcome::cancelled) == PublishOutcome::cancelled);
+ CHECK(verification_failure(FileVerificationOutcome::error) == PublishOutcome::error);
+ CHECK(verification_failure(static_cast<FileVerificationOutcome>(-1)) == PublishOutcome::error);
+}
