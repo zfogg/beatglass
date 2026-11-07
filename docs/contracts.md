@@ -1,6 +1,6 @@
 # Preliminary foundation contracts and handoff
 
-These interfaces are a review proposal, not a completed Phase 0 handoff; see [the gate audit](phase0-gate.md). No feature delegation is authorized by this document; the issue's exit gate remains open. The integration owner owns all headers, schema, CMake, dependency selection and CI. Future workstreams own their code under `lib/core` and `src/cli` (DSP); `lib/library` (storage/jobs); `src/desktop` (shared presentation); and `lib/capture/{pipewire,coreaudio,wasapi}` plus corresponding `src/desktop/platform` adapters. Propose shared changes before depending on them.
+These interfaces are a review proposal, not a completed Phase 0 handoff; see [the gate audit](phase0-gate.md) and [handoff proposals](handoff-proposals.md). No feature delegation is authorized by this document; the issue's exit gate remains open. The integration owner owns all headers, schema, CMake, dependency selection and CI. Future workstreams own their code under `lib/core` and `src/cli` (DSP); `lib/library` (storage/jobs); `src/desktop` (shared presentation); and `lib/capture/{pipewire,coreaudio,wasapi}` plus corresponding `src/desktop/platform` adapters. Propose shared changes before depending on them.
 
 ## Audio and timing
 
