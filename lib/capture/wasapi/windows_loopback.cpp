@@ -123,13 +123,18 @@ struct Loopback::Impl {
             const auto channels = format.p->nChannels;
             const unsigned chunk_limit = LoopbackPacket::max_samples / channels;
             const bool valid = !(flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR);
-            const bool position_discontinuity = device_position.observe(device_pos, frames, valid);
+            if (!captureBufferArithmeticValid(position, frames, qpc, valid, format.p->nSamplesPerSec, chunk_limit)) {
+              const auto release_result = capture->ReleaseBuffer(frames);
+              hr = FAILED(release_result) ? release_result : HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
+              break;
+            }
+            const bool position_discontinuity = device_position.observe(device_pos, frames, valid, (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) != 0);
             for (unsigned offset = 0; offset < frames;) {
               const unsigned count = (std::min)(chunk_limit, frames - offset);
               const auto time_offset = static_cast<std::uint64_t>(offset) * 10000000 / format.p->nSamplesPerSec;
               const auto* samples = reinterpret_cast<const float*>(data);
               push(samples ? samples + static_cast<std::size_t>(offset) * channels : nullptr, count, channels, format.p->nSamplesPerSec, epoch,
-                   position + offset, qpc + time_offset, valid, offset == 0 && ((flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) || position_discontinuity), (flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0);
+                   position + offset, valid ? qpc + time_offset : 0, valid, offset == 0 && position_discontinuity, (flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0);
               offset += count;
             }
             position += frames;

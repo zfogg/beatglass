@@ -235,3 +235,10 @@ physical display removal and exclusive-fullscreen product behavior remain open.
 Device-position continuity checks are deterministic unit coverage only. Physical
 endpoint switching, device removal and return, and integrated reacquisition over
 actual DJ output remain unqualified.
+
+Capture validates epoch-frame and valid QPC arithmetic for the complete WASAPI
+buffer before publishing a chunk. Arithmetic overflow releases that buffer and
+interrupts the attempt; invalid timestamps are not added. Empty invalid or
+flagged buffers retain a discontinuity for the next nonempty packet. Boundary
+checks are simulated; actual driver overflow and empty flagged buffers have not
+been observed or qualified.
