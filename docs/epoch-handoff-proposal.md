@@ -49,6 +49,16 @@ object outside platform and feature conditionals, inject it into both bridges,
 and destroy and join both bridges before the allocator. Do not merge two
 separately owned allocators into the combined application.
 
+At the time of this review, #51's desktop entry point already constructs one
+allocator and passes it to `WindowsDj` and `CollectionView`, whereas #53 uses
+`DjBridge` and a different overlay integration. Reconciliation therefore needs
+an explicit choice of the surviving DJ adapter and overlay wiring, not a blind
+concatenation of both entry points. Whichever adapter survives must receive the
+same allocator as `CollectionView`; its worker and the collection worker must
+both stop and join before the owner is destroyed. The merged reader still has
+only local-increment seek; keep product paths requiring coordinated seeks gated
+until the explicit-epoch reader contract lands and is tested with this owner.
+
 The file reader currently increments its own epoch on seek; merely injecting a
 shared initial value does not prevent it colliding with an epoch issued to
 another source. Its seek contract must be changed to receive a fresh allocated
