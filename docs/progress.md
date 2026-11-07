@@ -157,6 +157,12 @@ For the parent review increment, Windows 10.0.26300 x64 and MSVC 19.44, using SQ
 The follow-up API header coverage check reported 25 headers and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html3` succeeded using the existing documentation image. No native macOS checks were run for this follow-up.
 
 For the fingerprint follow-up on Windows 10.0.26300 x64/MSVC 19.44 with SQLite 3.51.1 and OpenSSL 3.6.0 from `C:/ac0146/vcpkg_installed/x64-windows-static`, `cmake -S . -B C:/Users/zachf/.codex/builds/beatglass-library-review -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON -Wno-dev`, `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-review --config Release -j 4`, and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-review -C Release --output-on-failure` passed 32/32. This uses the same previously configured generator and prefix as the parent command above; the tempo slice was not enabled. The first link failed due to missing Windows OpenSSL system libraries; adding crypt32 and ws2_32 allowed it to link. LNK4098 remains and limits this development evidence.
+# Cache contract integration
+
+Typed cache outcomes and a worker-local commit decision have regression
+coverage. SQLite, file-version revalidation, crash recovery and unchanged-file
+reuse acceptance tests remain backend work.
+
 # Shared timeline contract
 
 The snapshot publisher enforces exclusive observed-frame and nonempty
