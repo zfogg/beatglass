@@ -79,6 +79,11 @@ Desktop application internals
    Unlock the overlay and remove event filters. The caller retains ownership of
    both windows. Call on the GUI thread.
 
+Experimental beat-event worker
+------------------------------
+
+.. cpp:autodoc:: lib/core/beat_tracker.hpp
+
 CLI application internals
 -------------------------
 

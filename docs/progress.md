@@ -185,6 +185,10 @@ The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
 
+## Experimental beat events
+
+The worker-only aubio beat-event experiment reports epoch-local sample positions and the exclusive observed boundary for each detection. Its 1024-sample window/512-sample hop and aubio's estimated event time are not a measured latency guarantee. An event at the current exclusive boundary waits for a subsequent observed sample; it is not flushed at EOF. Partial hops are retained, and gaps, epoch changes and explicit discontinuities reset aubio state. The experiment is not connected to CLI replay or snapshots; silence invalidation, event strength, publication delay, longer-than-32-bit aubio counters, native capture and measured beat accuracy remain integration work. Generated click tests at 44.1/48 kHz check causal bounds, chunking and broad beat intervals, not full-mix accuracy.
+
 After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea57372aaab89`, WSL Ubuntu 22.04 with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, slice disabled and pinned Catch2 source reused passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 32/32. Windows 10.0.26300 x64/MSVC 19.44 with the previously configured static CRT and static SQLite development tree passed `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` 34/34. These are development checks only; WSL is not native Linux qualification and no decoder slice was included.
 
 ## Same-source integration proposal
