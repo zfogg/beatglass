@@ -19,7 +19,7 @@ delivery loss invalidates the active epoch. Clock anchors are optional and
 carry a clock domain and optional uncertainty and latency; absence is not zero.
 These interfaces require adapter integration and do not implement capture.
 
-.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
+.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/byte_source.hpp include/beatglass/capture/file_reader.hpp
 
 AudioSource stop
 ~~~~~~~~~~~~~~~~
@@ -53,7 +53,7 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
@@ -68,6 +68,10 @@ Desktop application internals
 
    Stop and join the worker before destruction. Call on the GUI thread; an OS
    device operation that stalls can delay destruction.
+.. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
+
+   Unlock the overlay and remove event filters. The caller retains ownership of
+   both windows. Call on the GUI thread.
 
 CLI application internals
 -------------------------
