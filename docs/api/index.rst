@@ -102,6 +102,16 @@ Desktop application internals
 
 .. cpp:autodoc:: src/desktop/platform/windows_overlay.hpp
 
+.. cpp:autodoc:: src/desktop/platform/macos_overlay.hpp
+
+.. cpp:function:: beatglass::macos::OverlayController::~OverlayController()
+
+   Unlock and hide the overlay and release the native adapter. The caller owns both windows. Call on the GUI thread.
+
+.. cpp:function:: beatglass::macos::OverlayNative::~OverlayNative()
+
+   Destroy the private native adapter on the GUI thread. It never owns the Qt window passed to its operations.
+
 .. cpp:function:: beatglass::windows::DjBridge::~DjBridge()
 
    Stop and join the worker before destruction. Call on the GUI thread; an OS

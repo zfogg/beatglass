@@ -19,7 +19,8 @@ ApplicationWindow {
     property var liveBridge: livePresentation
     property var collectionBridge: typeof experimentalCollection === "undefined" ? null : experimentalCollection
     property var djBridge: typeof windowsDj === "undefined" ? null : windowsDj
-    property var overlayBridge: null
+    property var overlayBridge: typeof macOverlayController === "undefined" ? null : macOverlayController
+    readonly property bool macOverlay: !!overlayBridge && typeof overlayBridge.showOverlay === "function"
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
@@ -95,7 +96,10 @@ ApplicationWindow {
             if (playbackDevices.audioOutputs[i].isDefault) { playbackOutputSelector.currentIndex = i; break }
         }
     }
-    Component.onCompleted: selectDefaultPlaybackOutput()
+    Component.onCompleted: {
+        selectDefaultPlaybackOutput()
+        if (overlayBridge && typeof overlayBridge.attach === "function") overlayBridge.attach(djOverlay, window)
+    }
     MediaPlayer {
         id: player
         objectName: "player"
@@ -294,7 +298,7 @@ ApplicationWindow {
                 Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
                 Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
-                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge; onClicked: { if (djOverlay.visible) { window.overlayBridge.endDrag(); window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { window.overlayBridge.keepOnScreen(); djOverlay.show() } } }
+                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge && (!window.macOverlay || window.overlayBridge.available); onClicked: { if (window.macOverlay) { if (djOverlay.visible) window.overlayBridge.hideOverlay(); else window.overlayBridge.showOverlay() } else if (djOverlay.visible) { window.overlayBridge.endDrag(); window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { window.overlayBridge.keepOnScreen(); djOverlay.show() } } }
                     Button { objectName: "lockOverlay"; text: window.overlayBridge && window.overlayBridge.clickThrough ? "Unlock overlay" : "Enable click-through"; enabled: !!window.overlayBridge && djOverlay.visible; onClicked: window.overlayBridge.setClickThrough(!window.overlayBridge.clickThrough) }
                     Button { objectName: "recoverOverlay"; text: "Move on screen"; enabled: !!window.overlayBridge; onClicked: window.overlayBridge.keepOnScreen() }
                     Label { text: "Drag when unlocked. Unlock: Ctrl+Shift+U while Beatglass is active"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
@@ -303,6 +307,14 @@ ApplicationWindow {
                     Label { text: "Overlay opacity" }
                     Slider { objectName: "overlayOpacity"; from: 0.25; to: 1.0; value: window.overlayBridge ? window.overlayBridge.opacity : 1; enabled: !!window.overlayBridge; Accessible.name: "Overlay opacity"; onMoved: window.overlayBridge.setOpacity(value); Layout.fillWidth: true }
                 }
+                RowLayout {
+                    visible: window.macOverlay
+                    Label { text: "Display" }
+                    ComboBox { objectName: "overlayDisplay"; model: window.macOverlay ? window.overlayBridge.screenNames : []; enabled: window.macOverlay && window.overlayBridge.available && count > 0; Layout.fillWidth: true; onActivated: window.overlayBridge.moveToScreen(currentIndex) }
+                    Label { text: "Size" }
+                    ComboBox { objectName: "overlaySize"; model: ["Compact", "Medium", "Large"]; currentIndex: 1; enabled: window.macOverlay && window.overlayBridge.available; onActivated: { const sizes = [[250, 110], [310, 130], [430, 180]]; window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1]) } }
+                }
+                Label { visible: window.macOverlay && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
                 Item { Layout.fillHeight: true }
             }
         }
@@ -317,7 +329,23 @@ ApplicationWindow {
         color: "transparent"
         Rectangle {
             anchors.fill: parent; radius: 10; color: "#d9202530"; border.color: "#92a2b8"
-            MouseArea { anchors.fill: parent; cursorShape: Qt.SizeAllCursor; onPressed: if (window.overlayBridge) window.overlayBridge.beginDrag(); onPositionChanged: if (pressed && window.overlayBridge) window.overlayBridge.dragToCursor() }
+            MouseArea {
+                anchors.fill: parent; cursorShape: Qt.SizeAllCursor
+                property bool fallbackMove: false
+                property point lastGlobal: Qt.point(0, 0)
+                onPressed: function(mouse) {
+                    if (window.macOverlay) {
+                        fallbackMove = typeof djOverlay.startSystemMove !== "function"
+                        if (fallbackMove) lastGlobal = mapToGlobal(mouse.x, mouse.y)
+                        else djOverlay.startSystemMove()
+                    } else if (window.overlayBridge) window.overlayBridge.beginDrag()
+                }
+                onPositionChanged: function(mouse) {
+                    if (!pressed || !window.overlayBridge) return
+                    if (!window.macOverlay) window.overlayBridge.dragToCursor()
+                    else if (fallbackMove) { const p = mapToGlobal(mouse.x, mouse.y); djOverlay.x += p.x - lastGlobal.x; djOverlay.y += p.y - lastGlobal.y; lastGlobal = p }
+                }
+            }
             Column {
                 anchors.centerIn: parent; spacing: 5
                 Label { text: window.djBridge ? window.djBridge.status : "Unavailable"; color: "white"; font.pixelSize: 16 }

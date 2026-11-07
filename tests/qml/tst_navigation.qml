@@ -28,9 +28,33 @@ TestCase {
     }
     QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
     QtObject { id: fakeOverlay; property bool clickThrough: false; property real opacity: 1; property int endCount: 0; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) { opacity = value } function beginDrag() { return true } function dragToCursor() {} function endDrag() { endCount++ } }
+    QtObject {
+        id: fakeMacOverlay
+        property bool available: true; property bool clickThrough: false; property real opacity: 0.9
+        property int attaches: 0; property int shows: 0; property int hides: 0
+        property var screenNames: ["Display"]; property int selectedScreen: -1; property int requestedWidth: 0
+        function attach(overlay, control) { attaches++; return true }
+        function showOverlay() { shows++; return true }
+        function hideOverlay() { hides++; clickThrough = false }
+        function setClickThrough(value) { clickThrough = value; return true }
+        function keepOnScreen() {} function setOpacity(value) { opacity = value }
+        function moveToScreen(index) { selectedScreen = index; return true }
+        function resizeOverlay(width, height) { requestedWidth = width; return true }
+    }
     Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay; playbackGuardBridge: fakeGuard } }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard } }
     Component { id: collectionShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; collectionBridge: fakeCollection } }
+    Component { id: macShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; overlayBridge: fakeMacOverlay } }
+    function test_macOverlayControls() {
+        fakeMacOverlay.attaches = 0; fakeMacOverlay.shows = 0; fakeMacOverlay.selectedScreen = -1; fakeMacOverlay.requestedWidth = 0
+        let app = macShell.createObject(null)
+        compare(fakeMacOverlay.attaches, 1)
+        findChild(app, "navigation").currentIndex = 1
+        findChild(app, "showOverlay").clicked(); compare(fakeMacOverlay.shows, 1)
+        let display = findChild(app, "overlayDisplay"); display.activated(0); compare(fakeMacOverlay.selectedScreen, 0)
+        let size = findChild(app, "overlaySize"); size.currentIndex = 2; size.activated(2); compare(fakeMacOverlay.requestedWidth, 430)
+        app.destroy()
+    }
     function test_experimentalCollection() {
         fakeCollection.rows = []; fakeCollection.status = "Ready"
         let app = collectionShell.createObject(null)
