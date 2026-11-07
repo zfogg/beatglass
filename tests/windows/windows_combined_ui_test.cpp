@@ -10,6 +10,11 @@
 #include <QScreen>
 #include <QTemporaryDir>
 #include <QtTest>
+#include <QGuiApplication>
+#include <windows.h>
+#ifdef _MSC_VER
+#include <crtdbg.h>
+#endif
 
 class CombinedUiTest : public QObject {
   Q_OBJECT
@@ -104,5 +109,19 @@ private slots:
     }
   }
 };
-QTEST_MAIN(CombinedUiTest)
+int main(int argc, char** argv) {
+  // A failed Qt platform-plugin load must not leave a blocking Windows dialog.
+  SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
+#ifdef _MSC_VER
+  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+  _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+  _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+  _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+  _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+  _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+#endif
+  QGuiApplication app(argc, argv);
+  CombinedUiTest test;
+  return QTest::qExec(&test, argc, argv);
+}
 #include "windows_combined_ui_test.moc"
