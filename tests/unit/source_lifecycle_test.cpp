@@ -1,6 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/capture/source_lifecycle.hpp"
 #include "beatglass/core/snapshot_publisher.hpp"
+#include <algorithm>
+#include <array>
+#include <limits>
+#include <thread>
+#include <vector>
 using namespace beatglass;
 TEST_CASE("ordered source events reject duplicates and fail closed on gaps") {
  SourceLifecycle s; auto a = s.start(); REQUIRE(a);
@@ -32,6 +37,30 @@ TEST_CASE("epoch allocator persists across source instances") {
  REQUIRE(a.notify(*attempt, 1, SourceState::running, *first) == SourceEventResult::accepted);
  a.stop(); SourceLifecycle b; auto next = b.start(); REQUIRE(next);
  REQUIRE(b.notify(*next, 1, SourceState::running, *second) == SourceEventResult::accepted);
+}
+
+TEST_CASE("shared epoch allocator issues unique values to concurrent workers") {
+ SourceEpochAllocator epochs; constexpr std::size_t workers = 8, count = 2000;
+ std::array<std::vector<std::uint64_t>, workers> issued; std::array<std::thread, workers> threads;
+ for (std::size_t i = 0; i < workers; ++i) threads[i] = std::thread([&, i] {
+   issued[i].reserve(count);
+   for (std::size_t j = 0; j < count; ++j) { auto epoch = epochs.next(); if (epoch) issued[i].push_back(*epoch); }
+ });
+ for (auto& t : threads) t.join();
+ std::vector<std::uint64_t> all;
+ for (const auto& batch : issued) { REQUIRE(batch.size() == count); all.insert(all.end(), batch.begin(), batch.end()); }
+ std::sort(all.begin(), all.end()); REQUIRE(all.size() == workers * count);
+ for (std::size_t i = 0; i < all.size(); ++i) CHECK(all[i] == i + 1);
+}
+TEST_CASE("shared epoch exhaustion never wraps under contention") {
+ constexpr auto maximum = std::numeric_limits<std::uint64_t>::max();
+ SourceEpochAllocator epochs(maximum - 2); std::array<std::optional<std::uint64_t>, 8> results;
+ std::array<std::thread, 8> threads;
+ for (std::size_t i = 0; i < threads.size(); ++i) threads[i] = std::thread([&, i] { results[i] = epochs.next(); });
+ for (auto& t : threads) t.join();
+ std::vector<std::uint64_t> issued; for (auto value : results) if (value) issued.push_back(*value);
+ std::sort(issued.begin(), issued.end()); REQUIRE(issued.size() == 2);
+ CHECK(issued[0] == maximum - 1); CHECK(issued[1] == maximum); CHECK_FALSE(epochs.next());
 }
 
 TEST_CASE("source interruption invalidates in-flight publication") {
