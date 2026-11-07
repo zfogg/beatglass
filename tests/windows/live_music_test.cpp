@@ -126,3 +126,34 @@ TEST_CASE("live composite fails closed when capture clock fails") {
   LiveMusic live(epochs,std::move(fake),[] { return std::optional<std::uint64_t>{}; });
   REQUIRE(live.start("endpoint")); source->add(0); CHECK_FALSE(live.pump()); CHECK_FALSE(live.latest());
 }
+
+TEST_CASE("live composite capture age accepts exactly one second and rejects future time") {
+  SourceEpochAllocator epochs; auto fake=std::make_unique<FakeLoopback>(); auto* source=fake.get();
+  std::uint64_t now=110000000;
+  LiveMusic live(epochs,std::move(fake),[&] { return std::optional<std::uint64_t>{now}; });
+  REQUIRE(live.start("endpoint")); source->add(0);
+  REQUIRE(live.pump()); REQUIRE(live.latest());
+  const auto generation=live.generation();
+  source->add(512); source->packets.back().qpc_100ns=now+1;
+  REQUIRE(live.pump()); CHECK_FALSE(live.latest()); CHECK(live.generation()>generation);
+  source->add(1024); source->packets.back().qpc_100ns=now-10000000;
+  REQUIRE(live.pump()); REQUIRE(live.latest());
+  source->add(1536); source->packets.back().qpc_100ns=now-10000001;
+  REQUIRE(live.pump()); CHECK_FALSE(live.latest());
+}
+TEST_CASE("live composite clears interruption or cancellation during DSP") {
+  SourceEpochAllocator epochs; auto fake=std::make_unique<FakeLoopback>(); auto* source=fake.get();
+  auto authorization=std::make_shared<LoopbackStartAuthorization>(); bool interrupt=false;
+  LiveMusic live(epochs,std::move(fake),[] { return std::optional<std::uint64_t>{100000000}; },[&] {
+    if (!interrupt) return;
+    SECTION("device interruption") {
+      source->current=Loopback::State::interrupted;
+      source->events.push_back({Loopback::State::interrupted,2,source->epoch,0});
+    }
+    SECTION("authorization cancellation") { authorization->cancel(); }
+  });
+  REQUIRE(live.start("endpoint",authorization)); source->add(0);
+  REQUIRE(live.pump()); REQUIRE(live.latest()); const auto generation=live.generation();
+  source->add(512); interrupt=true;
+  CHECK_FALSE(live.pump()); CHECK_FALSE(live.latest()); CHECK(live.generation()>generation);
+}
