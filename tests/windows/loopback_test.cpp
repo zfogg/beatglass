@@ -134,6 +134,27 @@ TEST_CASE("Repeated capture startup and shutdown discard prior attempt events") 
   }
 }
 
+TEST_CASE("Switch between two active render endpoints with fresh lifecycle attempts", "[.][native-switch]") {
+  const auto list = beatglass::windows::enumerate_render_endpoints();
+  REQUIRE(list.error.empty());
+  if (list.endpoints.size() < 2) SKIP("At least two active render endpoints are required");
+  beatglass::SourceEpochAllocator epochs;
+  unsigned invalidations = 0;
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++invalidations; });
+  for (unsigned index = 0; index < 2; ++index) {
+    INFO("Endpoint: " << list.endpoints[index].name);
+    REQUIRE(session.start(list.endpoints[index].id));
+    for (int i = 0; i < 300 && session.state() == beatglass::SourceState::starting; ++i) {
+      session.poll();
+      std::this_thread::sleep_for(10ms);
+    }
+    REQUIRE(session.state() == beatglass::SourceState::running);
+    session.stop();
+    REQUIRE(invalidations == index + 1);
+  }
+  REQUIRE(epochs.next() == 3);
+}
+
 TEST_CASE("Generated default endpoint playback is captured and overflow marks a gap", "[.][native-audio]") {
   const auto list = beatglass::windows::enumerate_render_endpoints();
   REQUIRE(list.error.empty());

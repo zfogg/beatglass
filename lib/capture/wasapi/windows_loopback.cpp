@@ -1,4 +1,7 @@
 #include "windows_loopback.hpp"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #include <audioclient.h>
 #include <mmdeviceapi.h>
