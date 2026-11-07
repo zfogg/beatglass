@@ -84,7 +84,7 @@ public:
   std::shared_ptr<Ticket> analyze_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
   /** Indexed cache lookup is disabled until source exclusion is established; completes with an error without reading cached data. */
   std::shared_ptr<Ticket> lookup_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
-  /** Fetch an owned, bounded offline page from an indexed path after snapshot verification. Empty run selects the active run; subsequent pages should use the returned run ID. */
+  /** Experimental indexed offline page read; unsafe for product use until source exclusion is established, and not wired to product UI. */
   std::shared_ptr<Ticket> offline_page(std::string key, std::filesystem::path path, beatglass::library_detail::OfflineKey identity, std::string run, std::size_t beat_offset, std::size_t beat_count, std::size_t window_offset, std::size_t window_count, std::uint64_t epoch, Completion completion);
 #ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
   /** Run real snapshot-backed composite analysis on the analysis lane. Results are owned and explicitly non-cacheable; this never calls the archive. The caller must serialize Essentia construction process-wide and supply a nonzero coordinator epoch. */
