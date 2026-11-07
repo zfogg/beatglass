@@ -29,10 +29,11 @@ public:
 
   // The serial must have come from an explicit sink selection. Epochs are
   // assigned externally and must never be reused while old data is in flight.
-  bool start(const Sink& sink) {
+  SourceStartResult start(const Sink& sink) {
     const auto& serial = sink.serial;
-    if (started_ || state_.load() != MonitorState::stopped || serial.empty() || sink.name.empty() || !epoch_ || !attempt_.generation ||
-        !std::all_of(serial.begin(), serial.end(), [](unsigned char c) { return c >= '0' && c <= '9'; })) return false;
+    if (started_ || state_.load() != MonitorState::stopped) return {{}, SourceError::busy, "Monitor instance already used"};
+    if (serial.empty() || sink.name.empty() || !epoch_ || !attempt_.generation ||
+        !std::all_of(serial.begin(), serial.end(), [](unsigned char c) { return c >= '0' && c <= '9'; })) return {{}, SourceError::unsupported, "Invalid monitor request"};
     started_ = true;
     const auto discovered = discover_sinks(std::chrono::seconds(2));
     const auto match = std::count_if(discovered.sinks.begin(), discovered.sinks.end(), [&](const Sink& item) {
@@ -43,21 +44,22 @@ public:
     });
     if (!discovered.error.empty() || match != 1 || same_name != 1) {
       state_.store(MonitorState::error, std::memory_order_release);
-      return false;
+      return {{}, discovered.error.empty() ? SourceError::not_found : SourceError::backend_error,
+              discovered.error.empty() ? "Selected sink is unavailable or ambiguous" : discovered.error};
     }
     pw_init(nullptr, nullptr);
     loop_ = pw_main_loop_new(nullptr);
-    if (!loop_) { state_.store(MonitorState::error); return false; }
+    if (!loop_) { state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not create PipeWire loop"}; }
     auto* props = pw_properties_new(PW_KEY_MEDIA_TYPE, "Audio", PW_KEY_MEDIA_CATEGORY, "Capture",
         PW_KEY_MEDIA_ROLE, "Music", PW_KEY_TARGET_OBJECT, serial.c_str(), "node.target", sink.name.c_str(),
         PW_KEY_STREAM_CAPTURE_SINK, "true", PW_KEY_NODE_DONT_RECONNECT, "true", "node.dont-fallback", "true", nullptr);
-    if (!props) { stop(); state_.store(MonitorState::error); return false; }
+    if (!props) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
     events_.version = PW_VERSION_STREAM_EVENTS;
     events_.state_changed = &state_changed;
     events_.param_changed = &param_changed;
     events_.process = &process;
     stream_ = pw_stream_new_simple(pw_main_loop_get_loop(loop_), "Beatglass output monitor", props, &events_, this);
-    if (!stream_) { stop(); state_.store(MonitorState::error); return false; }
+    if (!stream_) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
     format_valid_ = false;
     state_.store(MonitorState::starting, std::memory_order_release);
     uint8_t storage[1024];
@@ -71,17 +73,17 @@ public:
     const spa_pod* params[] = {spa_format_audio_raw_build(&builder, SPA_PARAM_EnumFormat, &info)};
     const auto flags = static_cast<pw_stream_flags>(PW_STREAM_FLAG_AUTOCONNECT | PW_STREAM_FLAG_MAP_BUFFERS | PW_STREAM_FLAG_DONT_RECONNECT);
     if (pw_stream_connect(stream_, PW_DIRECTION_INPUT, PW_ID_ANY, flags, params, 1) < 0) {
-      stop(); state_.store(MonitorState::error); return false;
+      stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"};
     }
     graph_ = std::make_unique<MonitorGraph>(sink.serial, sink.name);
     core_ = pw_stream_get_core(stream_);
-    if (!core_) { stop(); state_.store(MonitorState::error); return false; }
+    if (!core_) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
     core_events_.version = PW_VERSION_CORE_EVENTS;
     core_events_.done = &core_done;
     pw_core_add_listener(core_, &core_hook_, &core_events_, this);
     core_listening_ = true;
     registry_ = pw_core_get_registry(core_, PW_VERSION_REGISTRY, 0);
-    if (!registry_) { stop(); state_.store(MonitorState::error); return false; }
+    if (!registry_) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
     registry_events_.version = PW_VERSION_REGISTRY_EVENTS;
     registry_events_.global = &registry_global;
     registry_events_.global_remove = &registry_remove;
@@ -95,8 +97,8 @@ public:
       }
       pw_loop_leave(loop);
     }); }
-    catch (...) { stop(); state_.store(MonitorState::error); return false; }
-    return true;
+    catch (...) { stop(); state_.store(MonitorState::error); return {{}, SourceError::backend_error, "Could not start PipeWire stream"}; }
+    return {attempt_, {}, {}};
   }
 
   // Stop is control-thread-only. The process callback runs on this main loop,
@@ -122,7 +124,7 @@ public:
   bool pop_event(MonitorEvent& event) noexcept {
     if (event_loss_.exchange(false, std::memory_order_acq_rel)) {
       event_read_.store(event_write_.load(std::memory_order_acquire), std::memory_order_release);
-      event = {attempt_, 0, std::nullopt, SourceState::error, std::nullopt, true}; return true;
+      event = {attempt_, 0, std::nullopt, SourceState::error, std::nullopt, SourceError::backend_error, true}; return true;
     }
     const auto read = event_read_.load(std::memory_order_relaxed);
     if (read == event_write_.load(std::memory_order_acquire)) return false;
@@ -130,7 +132,7 @@ public:
     event_read_.store((read + 1) % events_queue_.size(), std::memory_order_release);
     if (event_loss_.exchange(false, std::memory_order_acq_rel)) {
       event_read_.store(event_write_.load(std::memory_order_acquire), std::memory_order_release);
-      event = {attempt_, 0, std::nullopt, SourceState::error, std::nullopt, true};
+      event = {attempt_, 0, std::nullopt, SourceState::error, std::nullopt, SourceError::backend_error, true};
     }
     return true;
   }
@@ -151,7 +153,7 @@ private:
     const auto source_state = next == MonitorState::streaming ? SourceState::running :
                               next == MonitorState::interrupted ? SourceState::interrupted : SourceState::error;
     events_queue_[write] = {attempt_, ++event_sequence_, next == MonitorState::streaming ? std::optional{epoch_} : std::nullopt,
-                            source_state, std::nullopt, false};
+                            source_state, std::nullopt, source_state == SourceState::error ? std::optional{SourceError::backend_error} : std::nullopt, false};
     event_write_.store(after, std::memory_order_release);
     state_.store(next, std::memory_order_release);
   }
@@ -295,9 +297,16 @@ private:
   bool started_{};
   bool format_valid_{}; // control loop thread, after start before thread creation
 };
+EnumerationResult enumerate_monitor_sources(std::chrono::milliseconds timeout) {
+  const auto result = discover_sinks(timeout);
+  if (!result.error.empty()) return {EnumerationOutcome::error, {}, SourceError::backend_error, result.error};
+  EnumerationResult value{EnumerationOutcome::ok, {}, std::nullopt, {}};
+  for (const auto& sink : result.sinks) value.sources.push_back({sink.serial, sink.description, true, false});
+  return value;
+}
 Monitor::Monitor(std::uint64_t epoch, SourceAttempt attempt) : impl_(std::make_unique<Impl>(epoch, attempt)) {}
 Monitor::~Monitor() = default;
-bool Monitor::start(const Sink& sink) { return impl_->start(sink); }
+SourceStartResult Monitor::start(const Sink& sink) { return impl_->start(sink); }
 void Monitor::stop() noexcept { impl_->stop(); }
 MonitorState Monitor::state() const noexcept { return impl_->state(); }
 bool Monitor::pop_event(MonitorEvent& event) noexcept { return impl_->pop_event(event); }

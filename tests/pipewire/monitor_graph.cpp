@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   const auto attempt = lifecycle.start();
   if (!epoch || !attempt) return 10;
   Monitor monitor(*epoch, *attempt);
-  if (!monitor.start(selected)) { if (missing) { std::cout << "missing target rejected\n"; return 0; } std::cerr << "start rejected\n"; return 3; }
+  if (!monitor.start(selected).attempt) { if (missing) { std::cout << "missing target rejected\n"; return 0; } std::cerr << "start rejected\n"; return 3; }
   const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(missing ? 5 : 12);
   auto block = std::make_unique<MonitorIngress::Block>();
   bool nonzero = false;

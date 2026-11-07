@@ -11,13 +11,16 @@ namespace beatglass::pipewire {
 enum class MonitorState : unsigned { stopped, starting, streaming, interrupted, error };
 /** Ordered event for one start attempt; a loss indication invalidates all evidence. */
 struct MonitorEvent {
-  SourceAttempt attempt{};
-  std::uint64_t sequence{};
-  std::optional<std::uint64_t> epoch;
-  SourceState state{SourceState::stopped};
-  std::optional<AudioClockAnchor> anchor;
-  bool delivery_lost{};
+  SourceAttempt attempt{}; ///< Attempt allocated by the control owner.
+  std::uint64_t sequence{}; ///< Consecutive event number, or zero for delivery loss.
+  std::optional<std::uint64_t> epoch; ///< Present only for a running event.
+  SourceState state{SourceState::stopped}; ///< Source state after the event.
+  std::optional<AudioClockAnchor> anchor; ///< Absent until an anchor is measured.
+  std::optional<SourceError> error; ///< Typed diagnostic for an error, when known.
+  bool delivery_lost{}; ///< True invalidates the attempt and discards queued events.
 };
+/** Enumerate sink identities using the shared typed result; no cancellation is supported yet. */
+EnumerationResult enumerate_monitor_sources(std::chrono::milliseconds timeout);
 /**
  * Private PipeWire sink-monitor prototype. The control thread owns start, stop,
  * state and lifetime; one worker may pop. The worker must be stopped before
@@ -35,8 +38,8 @@ public:
   ~Monitor();
   Monitor(const Monitor&) = delete;
   Monitor& operator=(const Monitor&) = delete;
-  /** Validate the selected serial/name against discovery, then request capture; true is not running. Removal after validation remains a race. */
-  bool start(const Sink& sink);
+  /** Validate the selected serial/name against discovery, then request capture; acceptance is not running. Removal after validation remains a race. */
+  SourceStartResult start(const Sink& sink);
   /** Stop on control thread and join the callback loop; no restart is supported. */
   void stop() noexcept;
   /** Read an atomic status; any non-streaming state invalidates retained analysis. */
