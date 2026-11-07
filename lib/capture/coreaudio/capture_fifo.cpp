@@ -1,9 +1,18 @@
 #include "beatglass/capture/coreaudio_fifo_internal.hpp"
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 namespace beatglass::coreaudio {
 static_assert(std::atomic<std::size_t>::is_always_lock_free && std::atomic<std::uint64_t>::is_always_lock_free && std::atomic<bool>::is_always_lock_free);
+bool NativeTimeline::observe(double sample_time, bool valid, std::uint32_t frames) noexcept {
+  valid = valid && std::isfinite(sample_time);
+  const bool discontinuity = seen_ && (valid != last_valid_ || (valid && last_valid_ && sample_time != expected_));
+  if (valid) expected_ = sample_time + frames;
+  seen_ = true;
+  last_valid_ = valid;
+  return discontinuity;
+}
 CaptureFifo::CaptureFifo(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) noexcept
     : epoch_(epoch), sample_rate_(sample_rate), channels_(channels) {}
 

@@ -1,6 +1,7 @@
 #include "beatglass/capture/coreaudio_fifo_internal.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <array>
+#include <limits>
 #include <vector>
 using namespace beatglass::coreaudio;
 
@@ -54,4 +55,18 @@ TEST_CASE("Core Audio FIFO rejects malformed or oversized blocks", "[coreaudio]"
   REQUIRE(fifo.pop(block));
   CHECK(block.discontinuity);
   CHECK(block.first_frame == 1 + oversized.size() / 2);
+}
+
+TEST_CASE("Core Audio sample-time gaps and missing timestamps force reacquisition", "[coreaudio]") {
+  NativeTimeline timeline;
+  CHECK_FALSE(timeline.observe(100, true, 128));
+  CHECK_FALSE(timeline.observe(228, true, 128));
+  CHECK(timeline.observe(400, true, 128));
+  CHECK_FALSE(timeline.observe(528, true, 128));
+  CHECK(timeline.observe(0, false, 128));
+  CHECK_FALSE(timeline.observe(0, false, 128));
+  CHECK(timeline.observe(1000, true, 128));
+  CHECK_FALSE(timeline.observe(1128, true, 128));
+  CHECK(timeline.observe(std::numeric_limits<double>::quiet_NaN(), true, 128));
+  CHECK(timeline.observe(2000, true, 128));
 }

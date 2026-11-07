@@ -16,6 +16,16 @@ struct CaptureBlock {
   std::array<float, max_samples> samples{};
 };
 
+/** Producer-owned native sample-time continuity detector. It tracks only the input time supplied by Core Audio, not wall-clock time; no allocation or locking occurs. A timestamp jump, loss of previously valid time, or its return after missing time marks a discontinuity. */
+class NativeTimeline {
+public:
+  /** Observe one callback's first-frame timestamp and complete-frame count. Non-finite timestamps are treated as invalid. Returns whether this callback begins a discontinuity. */
+  bool observe(double sample_time, bool valid, std::uint32_t frames) noexcept;
+private:
+  double expected_{};
+  bool seen_{}, last_valid_{};
+};
+
 /** Private bounded single-producer/single-consumer PCM handoff. The callback is the only producer, the analysis worker is the only consumer, and neither may overlap reset/destruction. The producer copies only and performs no allocation or locks. Rejected whole blocks advance the frame timeline and cause the next accepted block to report discontinuity. */
 class CaptureFifo {
 public:
