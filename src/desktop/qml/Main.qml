@@ -14,7 +14,7 @@ ApplicationWindow {
     title: "Beatglass"
     property var metadataBridge: metadata
     property var playbackGuardBridge: playbackGuard
-    readonly property var playbackDevice: playbackOutputSelector.currentIndex >= 0 && playbackOutputSelector.currentIndex < playbackDevices.audioOutputs.length ? playbackDevices.audioOutputs[playbackOutputSelector.currentIndex] : playbackDevices.defaultAudioOutput
+    property var playbackDevice: playbackDevices.defaultAudioOutput
     readonly property string playbackWarning: playbackGuardBridge.diagnostic(playbackDevice)
     property var liveBridge: livePresentation
     property url browseFolder: ""
@@ -60,6 +60,7 @@ ApplicationWindow {
     }
     function selectDefaultPlaybackOutput() {
         playbackOutputSelector.currentIndex = -1
+        window.playbackDevice = playbackDevices.defaultAudioOutput
         for (let i = 0; i < playbackDevices.audioOutputs.length; ++i) {
             if (playbackDevices.audioOutputs[i].isDefault) { playbackOutputSelector.currentIndex = i; break }
         }
@@ -171,7 +172,11 @@ ApplicationWindow {
                                 textRole: "description"
                                 Layout.fillWidth: true
                                 Accessible.name: "Playback output"
-                                onActivated: player.stop()
+                                onActivated: function(index) {
+                                    player.stop()
+                                    if (index >= 0 && index < playbackDevices.audioOutputs.length)
+                                        window.playbackDevice = playbackDevices.audioOutputs[index]
+                                }
                             }
                         }
                         Label {

@@ -33,6 +33,18 @@ TestCase {
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
         app.destroy()
     }
+    function test_playbackSelectionRequiresActivation() {
+        let app = shell.createObject(null)
+        let selector = findChild(app, "playbackOutputSelector")
+        if (selector.count < 2 || selector.currentIndex < 0) { app.destroy(); skip("Two playback outputs are unavailable") }
+        let original = String(app.playbackDevice.id)
+        let next = (selector.currentIndex + 1) % selector.count
+        selector.currentIndex = next
+        compare(String(app.playbackDevice.id), original)
+        selector.activated(next)
+        compare(String(app.playbackDevice.id), String(selector.model[next].id))
+        app.destroy()
+    }
     function test_realFolderNavigationAndSelection() {
         let app = shell.createObject(null)
         let model = findChild(app, "fileModel")
