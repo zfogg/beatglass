@@ -1,6 +1,7 @@
-"""Fail when a production C++ header is absent from the API index."""
+"""Fail when API header entries are missing, stale, or duplicated."""
 from pathlib import Path
 import sys
+from collections import Counter
 
 
 def coverage(root: Path) -> tuple[list[str], list[str]]:
@@ -16,11 +17,20 @@ def coverage(root: Path) -> tuple[list[str], list[str]]:
     return sorted(headers - listed), sorted(listed - headers)
 
 
+def duplicates(root: Path) -> list[str]:
+    """Return headers included more than once by autodoc directives."""
+    index = (root / "docs/api/index.rst").read_text(encoding="utf-8")
+    entries = (entry for line in index.splitlines() if line.startswith(".. cpp:autodoc:: ")
+               for entry in line.split("::", 1)[1].split())
+    return sorted(path for path, count in Counter(entries).items() if count > 1)
+
+
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
     missing, extra = coverage(root)
-    if missing or extra:
-        print(f"Missing headers: {missing}; stale entries: {extra}", file=sys.stderr)
+    repeated = duplicates(root)
+    if missing or extra or repeated:
+        print(f"Missing headers: {missing}; stale entries: {extra}; duplicates: {repeated}", file=sys.stderr)
         return 1
     print("API index covers all production headers")
     return 0

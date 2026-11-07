@@ -17,7 +17,7 @@ TestCase {
     QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
     QtObject { id: fakeCollection; property var rows: []; property string status: "Ready"; function refresh(search) { rows = [{path: "indexed.wav"}]; status = "Loaded" } }
     QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
-    QtObject { id: fakeOverlay; property bool clickThrough: false; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) {} }
+    QtObject { id: fakeOverlay; property bool clickThrough: false; property real opacity: 1; property int endCount: 0; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) { opacity = value } function beginDrag() { return true } function dragToCursor() {} function endDrag() { endCount++ } }
     Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay; playbackGuardBridge: fakeGuard } }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard } }
     Component { id: collectionShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; collectionBridge: fakeCollection } }
@@ -47,15 +47,16 @@ TestCase {
         app.destroy()
     }
     function test_djControlsAndOverlayEscape() {
-        fakeDj.active = false; fakeOverlay.clickThrough = false
+        fakeDj.active = false; fakeOverlay.clickThrough = false; fakeOverlay.opacity = 0.4; fakeOverlay.endCount = 0
         let app = djShell.createObject(null)
         findChild(app, "navigation").currentIndex = 1
         let start = findChild(app, "startMonitor")
         verify(start.enabled); start.clicked(); verify(fakeDj.active); compare(fakeDj.status, "test-id")
         let show = findChild(app, "showOverlay"); show.clicked()
+        compare(findChild(app, "overlayOpacity").value, 0.4)
         let overlay = findChild(app, "djOverlay"); tryCompare(overlay, "visible", true)
         let lock = findChild(app, "lockOverlay"); lock.clicked(); verify(fakeOverlay.clickThrough)
-        show.clicked(); verify(!fakeOverlay.clickThrough); tryCompare(overlay, "visible", false)
+        show.clicked(); verify(!fakeOverlay.clickThrough); compare(fakeOverlay.endCount, 1); tryCompare(overlay, "visible", false)
         findChild(app, "stopMonitor").clicked(); verify(!fakeDj.active)
         app.destroy()
     }

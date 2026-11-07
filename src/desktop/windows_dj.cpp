@@ -7,10 +7,11 @@
 #include <chrono>
 #include <limits>
 
-WindowsDj::WindowsDj(beatglass::SourceEpochAllocator& epochs, QObject* parent) : QObject(parent), epochs_(epochs), timer_(new QTimer(this)) {
+WindowsDj::WindowsDj(beatglass::SourceEpochAllocator& epochs, QObject* parent) : WindowsDj(epochs, nullptr, {}, parent) {}
+WindowsDj::WindowsDj(beatglass::SourceEpochAllocator& epochs, std::unique_ptr<beatglass::windows::LiveTempo> selectedCapture, std::function<beatglass::windows::EndpointResult()> discovery, QObject* parent) : QObject(parent), epochs_(epochs), timer_(new QTimer(this)) {
   connect(timer_, &QTimer::timeout, this, &WindowsDj::drain);
   timer_->start(50);
-  worker_ = std::thread([this] { run(); });
+  worker_ = std::thread([this, capture = std::move(selectedCapture), discovery = std::move(discovery)]() mutable { run(std::move(capture), std::move(discovery)); });
 }
 WindowsDj::~WindowsDj() {
   { std::lock_guard lock(mutex_); quitting_ = true; }
@@ -41,15 +42,26 @@ void WindowsDj::drain() {
     status_ = value.status; active_ = value.active; tempo_ = tempo; emit changed();
   }
 }
-void WindowsDj::run() {
-  beatglass::windows::LiveTempo capture(epochs_);
-  beatglass::windows::DefaultTempoFollower follower(epochs_);
+void WindowsDj::run(std::unique_ptr<beatglass::windows::LiveTempo> capture, std::function<beatglass::windows::EndpointResult()> discovery) {
+  if (!capture) capture = std::make_unique<beatglass::windows::LiveTempo>(epochs_);
+  std::uint64_t applied = 0;
+  beatglass::windows::DefaultTempoFollower follower(epochs_, std::move(discovery), [this, &applied](const std::function<bool()>& start) {
+    std::lock_guard lock(mutex_);
+    if (quitting_ || !requested_ || generation_ != applied || endpoint_ != "__beatglass_default__") return false;
+    return start();
+  });
   std::optional<float> followedBpm;
   bool following = false;
-  std::uint64_t applied = 0;
   QVariantList sources;
   QString enumerationError;
   bool running = false, appliedRequested = false;
+  bool everRunning = false, recovering = false;
+  std::chrono::steady_clock::time_point retryAt{};
+  auto startSelectedIfCurrent = [&](std::uint64_t generation, const std::string& endpoint) {
+    std::lock_guard lock(mutex_);
+    if (quitting_ || !requested_ || generation != generation_ || endpoint != endpoint_) return false;
+    return capture->start(endpoint);
+  };
   for (;;) {
     bool requested, enumerate; std::uint64_t generation; std::string endpoint;
     { std::unique_lock lock(mutex_); wake_.wait_for(lock, std::chrono::milliseconds(50));
@@ -64,13 +76,17 @@ void WindowsDj::run() {
         sources.push_back(QVariantMap{{QStringLiteral("name"), QString::fromStdString(item.name)}, {QStringLiteral("id"), QString::fromStdString(item.id)}});
     }
     if (generation != applied || requested != appliedRequested) {
-      capture.stop(); follower.stop(); followedBpm.reset(); running = false;
+      capture->stop(); follower.stop(); followedBpm.reset(); running = false; everRunning = false; recovering = false;
       applied = generation; appliedRequested = requested;
       following = endpoint == "__beatglass_default__";
-      if (requested) running = following ? follower.start() : capture.start(endpoint);
+      if (requested) running = following ? follower.start() : startSelectedIfCurrent(generation, endpoint);
     }
-    Value value; value.generation = generation; value.sources = sources; value.active = requested && running;
-    if (requested && !running) value.status = QStringLiteral("Capture could not start");
+    if (requested && !following && recovering && !running && std::chrono::steady_clock::now() >= retryAt) {
+      capture->stop(); running = startSelectedIfCurrent(generation, endpoint);
+      if (!running) retryAt = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+    }
+    Value value; value.generation = generation; value.sources = sources; value.active = requested && (running || recovering);
+    if (requested && !running) value.status = recovering ? QStringLiteral("Output interrupted; retrying") : QStringLiteral("Capture could not start");
     else if (running && following) {
       if (!follower.tick(std::chrono::steady_clock::now())) {
         followedBpm.reset(); running = false; value.active = false; value.status = QStringLiteral("Capture interrupted or failed");
@@ -85,12 +101,18 @@ void WindowsDj::run() {
           case Status::error: value.status = QStringLiteral("Capture error: ") + QString::fromStdString(follower.diagnostic()); break;
         }
       }
-    } else if (running && !capture.pump()) { capture.stop(); running = false; value.active = false; value.status = QStringLiteral("Capture interrupted or failed"); }
+    } else if (running && !capture->pump()) {
+      capture->stop(); running = false; recovering = everRunning;
+      if (recovering) retryAt = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+      value.active = requested && recovering;
+      value.status = recovering ? QStringLiteral("Output interrupted; retrying") : QStringLiteral("Capture interrupted or failed");
+    }
     else if (running) {
-      value.bpm = capture.bpm();
-      value.status = capture.state() == beatglass::SourceState::starting ? QStringLiteral("Starting") : (value.bpm ? QStringLiteral("Tracking") : QStringLiteral("Acquiring"));
+      if (capture->state() == beatglass::SourceState::running) { everRunning = true; recovering = false; }
+      value.bpm = capture->bpm();
+      value.status = capture->state() == beatglass::SourceState::starting ? QStringLiteral("Starting") : (value.bpm ? QStringLiteral("Tracking") : QStringLiteral("Acquiring"));
     } else value.status = enumerationError.isEmpty() ? QStringLiteral("Stopped") : QStringLiteral("Output discovery failed: ") + enumerationError;
     { std::lock_guard lock(mutex_); if (generation == generation_ && requested == requested_) { latest_ = std::move(value); pending_ = true; } }
   }
-  capture.stop(); follower.stop();
+  capture->stop(); follower.stop();
 }

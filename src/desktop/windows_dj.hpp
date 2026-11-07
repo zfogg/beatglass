@@ -3,16 +3,20 @@
 #include <QString>
 #include <QVariantList>
 #include <condition_variable>
+#include <functional>
 #include <cstdint>
 #include <mutex>
+#include <memory>
 #include <optional>
 #include <string>
 #include <thread>
 #include <vector>
 #include "beatglass/capture/source_lifecycle.hpp"
+#include "platform/windows_endpoints.hpp"
 class QTimer;
+namespace beatglass::windows { class LiveTempo; }
 
-/** Windows-only GUI-thread bridge to a worker-owned experimental tempo source. The worker coalesces updates for nominal 50 ms GUI polling; invalidation is visible after polling, while stop clears immediately and rejects older generations. Destruction joins the worker. It supports the Windows default follower but does not provide key, chords or beat phase. */
+/** Windows-only GUI-thread bridge to a worker-owned experimental tempo source. The worker coalesces updates for nominal 50 ms GUI polling; invalidation is visible after polling, while stop clears immediately and rejects older generations. A selected source that was running is retried with fresh epochs after interruption; an initial failure is reported without retry. Selected and default capture starts are serialized with stop and replacement; the GUI caller may wait for an in-progress start request to return. Start requests do not wait for WASAPI startup. Stop does not synchronously join an already started capture; destruction joins the worker. It does not provide key, chords or beat phase. */
 class WindowsDj : public QObject {
   Q_OBJECT
   Q_PROPERTY(QVariantList sources READ sources NOTIFY sourcesChanged)
@@ -22,6 +26,8 @@ class WindowsDj : public QObject {
 public:
   /** Construct on the GUI thread with the process-owned epoch allocator, which must outlive this object and its joined worker. Allocation never occurs on the capture callback. */
   explicit WindowsDj(beatglass::SourceEpochAllocator& epochs, QObject* parent = nullptr);
+  /** Test seam: transfer selected capture and optional discovery to the worker. Capture is used and destroyed only on that worker; the allocator must outlive this bridge. */
+  WindowsDj(beatglass::SourceEpochAllocator& epochs, std::unique_ptr<beatglass::windows::LiveTempo> selectedCapture, std::function<beatglass::windows::EndpointResult()> discovery = {}, QObject* parent = nullptr);
   // Documented manually in the API index for Hawkmoth destructor parsing.
   ~WindowsDj() override;
   /** Snapshot of discovered endpoint names and opaque IDs. */
@@ -45,7 +51,7 @@ signals:
   void changed();
 private:
   struct Value { std::uint64_t generation{}; QString status; std::optional<float> bpm; bool active{}; QVariantList sources; };
-  void run();
+  void run(std::unique_ptr<beatglass::windows::LiveTempo> selectedCapture, std::function<beatglass::windows::EndpointResult()> discovery);
   void drain();
   beatglass::SourceEpochAllocator& epochs_;
   std::mutex mutex_;

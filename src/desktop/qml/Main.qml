@@ -247,13 +247,14 @@ ApplicationWindow {
                 Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
                 Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
-                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge; onClicked: { if (djOverlay.visible) { window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { djOverlay.show(); window.overlayBridge.keepOnScreen() } } }
+                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge; onClicked: { if (djOverlay.visible) { window.overlayBridge.endDrag(); window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { window.overlayBridge.keepOnScreen(); djOverlay.show() } } }
                     Button { objectName: "lockOverlay"; text: window.overlayBridge && window.overlayBridge.clickThrough ? "Unlock overlay" : "Enable click-through"; enabled: !!window.overlayBridge && djOverlay.visible; onClicked: window.overlayBridge.setClickThrough(!window.overlayBridge.clickThrough) }
+                    Button { objectName: "recoverOverlay"; text: "Move on screen"; enabled: !!window.overlayBridge; onClicked: window.overlayBridge.keepOnScreen() }
                     Label { text: "Drag when unlocked. Unlock: Ctrl+Shift+U while Beatglass is active"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 }
                 RowLayout {
                     Label { text: "Overlay opacity" }
-                    Slider { from: 0.25; to: 1.0; value: 0.85; enabled: !!window.overlayBridge; Accessible.name: "Overlay opacity"; onMoved: window.overlayBridge.setOpacity(value); Layout.fillWidth: true }
+                    Slider { objectName: "overlayOpacity"; from: 0.25; to: 1.0; value: window.overlayBridge ? window.overlayBridge.opacity : 1; enabled: !!window.overlayBridge; Accessible.name: "Overlay opacity"; onMoved: window.overlayBridge.setOpacity(value); Layout.fillWidth: true }
                 }
                 Item { Layout.fillHeight: true }
             }
@@ -264,11 +265,12 @@ ApplicationWindow {
         objectName: "djOverlay"
         visible: false
         width: 240; height: 110
+        Component.onCompleted: { x = window.x + 100; y = window.y + 100 }
         title: "Beatglass overlay"
         color: "transparent"
         Rectangle {
             anchors.fill: parent; radius: 10; color: "#d9202530"; border.color: "#92a2b8"
-            MouseArea { anchors.fill: parent; onPressed: djOverlay.startSystemMove() }
+            MouseArea { anchors.fill: parent; cursorShape: Qt.SizeAllCursor; onPressed: if (window.overlayBridge) window.overlayBridge.beginDrag(); onPositionChanged: if (pressed && window.overlayBridge) window.overlayBridge.dragToCursor() }
             Column {
                 anchors.centerIn: parent; spacing: 5
                 Label { text: window.djBridge ? window.djBridge.status : "Unavailable"; color: "white"; font.pixelSize: 16 }
