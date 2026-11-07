@@ -187,6 +187,13 @@ The optional composition feeds the shared mono hops to real aubio tempo and beat
 
 Combined prototype verification on 2026-11-07: `docker build -f tests/spikes/tonal-ci/Dockerfile -t beatglass-music-ci .` and `docker run --rm beatglass-music-ci ctest --test-dir /tmp/build --output-on-failure` passed 54/54 in Ubuntu 24.04 x86-64 with pinned Essentia source and system aubio/libsndfile; the v1 codec option was off. The generated C-major-to-A-minor file test exercises time-aligned windows, causal prefix equivalence, real beat events, sample-rate metadata and source-byte preservation. The default Windows x64 MSVC build with the combined option off passed 49/49 with the codec-enabled development tree. These runs do not qualify the optional Essentia path on Windows, real music, live capture or native GUI behavior.
 
+## Same-source integration proposal
+
+The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
+read-only byte boundary. The existing decoder does not consume it. Secure
+snapshot creation, native file identity and decoder integration remain open;
+see [same-source proposal](same-source-proposal.md).
+
 ## Phase 1 tonal dependency experiment
 
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
