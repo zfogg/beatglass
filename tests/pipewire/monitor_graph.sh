@@ -60,7 +60,7 @@ for path, hz in zip(sys.argv[1:], (440, 880)):
 PY
 other_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in json.load(sys.stdin) if x.get("info",{}).get("props",{}).get("node.name")=="beatglass_other_sink"))')
 wpctl set-default "$other_id"
-sink_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in json.load(sys.stdin) if x.get("info",{}).get("props",{}).get("node.name")=="beatglass_test_sink"))')
+read -r sink_id sink_serial < <(pw-dump | python3 -c 'import sys,json; x=next(x for x in json.load(sys.stdin) if x.get("type")=="PipeWire:Interface:Node" and x.get("info",{}).get("props",{}).get("node.name")=="beatglass_test_sink"); print(x["id"], x["info"]["props"]["object.serial"])')
 pw-play --target "$sink_id" "$XDG_RUNTIME_DIR/tone.wav" >"$XDG_RUNTIME_DIR/play.log" 2>&1 & player=$!
 "$1" "$XDG_RUNTIME_DIR/capturing" "${2:-remove}" & test_pid=$!
 ready=0
@@ -82,6 +82,21 @@ if [ "${2:-remove}" = inject ]; then
  pw-link "$source_port" "$input_port"
 else
  pw-cli destroy "$sink_id"
+ ready=0
+ for _ in $(seq 1 100); do
+  if [ -f "$XDG_RUNTIME_DIR/capturing.lost" ]; then ready=1; break; fi
+  if ! kill -0 "$test_pid" 2>/dev/null; then break; fi
+  sleep 0.05
+ done
+ if [ "$ready" != 1 ]; then wait "$test_pid" || true; echo "loss event not observed"; exit 1; fi
+ pw-cli create-node adapter '{ factory.name = support.null-audio-sink node.name = beatglass_test_sink media.class = Audio/Sink audio.position = [ FL FR ] node.driver = true object.linger = true }'
+ ready=0
+ for _ in $(seq 1 100); do
+  if pw-dump | python3 -c 'import json,sys; old=str(sys.argv[1]); sys.exit(0 if any(x.get("type")=="PipeWire:Interface:Node" and x.get("info",{}).get("props",{}).get("node.name")=="beatglass_test_sink" and str(x.get("info",{}).get("props",{}).get("object.serial"))!=old for x in json.load(sys.stdin)) else 1)' "$sink_serial"; then ready=1; break; fi
+  sleep 0.05
+ done
+ if [ "$ready" != 1 ]; then echo "replacement sink unavailable"; exit 1; fi
+ touch "$XDG_RUNTIME_DIR/capturing.replaced"
 fi
 if ! wait "$test_pid"; then
  cat "$XDG_RUNTIME_DIR/session.log"

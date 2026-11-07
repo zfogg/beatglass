@@ -1,10 +1,14 @@
 #include "beatglass/capture/detail/pipewire_discovery.hpp"
 #include "beatglass/capture/source_lifecycle.hpp"
+#include "beatglass/core/stream_continuity.hpp"
+#include "beatglass/core/tracking_machine.hpp"
+#include "beatglass/core/snapshot_publisher.hpp"
 #include "beatglass/capture/detail/pipewire_monitor.hpp"
 #include <chrono>
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <string_view>
 #include <thread>
 int main(int argc, char** argv) {
@@ -46,6 +50,14 @@ int main(int argc, char** argv) {
       !monitor.install_worker_epoch(*epoch, {48000, 2, beatglass::ChannelLayout::stereo})) {
     std::cerr << "worker barrier rejected running event or accepted stale format\n"; return 12;
   }
+  beatglass::StreamContinuity continuity;
+  beatglass::TrackingMachine tracking;
+  beatglass::SnapshotPublisher publisher(2, 2);
+  if (!tracking.start(*epoch)) return 19;
+  const auto token = tracking.token();
+  publisher.begin_acquisition(token);
+  beatglass::Snapshot snapshot;
+  bool published = false;
   bool nonzero = false;
   unsigned positive_crossings = 0;
   float previous = 0.0f;
@@ -55,6 +67,15 @@ int main(int argc, char** argv) {
       if (block->epoch != 1 || block->format.sample_rate != 48000 || block->format.channels != 2 ||
           block->first_frame < last_end || block->sample_count % 2) return 6;
       last_end = block->first_frame + block->sample_count / 2;
+      const beatglass::AudioBlock view{block->format, block->epoch, block->first_frame, block->monotonic_ns,
+                                      block->discontinuity, {block->samples.data(), block->sample_count}};
+      const auto transition = continuity.observe(view);
+      if (transition != beatglass::StreamTransition::acquire && transition != beatglass::StreamTransition::contiguous) return 20;
+      if (!published) {
+        snapshot.observed_through = {*epoch, last_end};
+        if (!tracking.accept(token) || !publisher.publish(token, snapshot) || !publisher.latest()) return 21;
+        published = true;
+      }
       for (std::size_t i = 0; i < block->sample_count; i += 2) {
         const float sample = block->samples[i];
         if (std::abs(sample) > 0.1f) nonzero = true;
@@ -90,8 +111,26 @@ int main(int argc, char** argv) {
         lifecycle.notify(event.attempt, event.sequence, event.state, event.epoch) != beatglass::SourceEventResult::accepted) {
       std::cerr << "missing ordered target-loss event state=" << static_cast<unsigned>(monitor.state()) << "\n"; return 8;
     }
+    continuity.stop(); tracking.stop(); publisher.clear();
+    if (tracking.accept(token) || publisher.latest() || publisher.publish(token, snapshot)) {
+      std::cerr << "stale analysis publication survived interruption\n"; return 22;
+    }
     if (monitor.pop(*block) || monitor.graph_clock() || monitor.install_worker_epoch(*epoch, {48000, 2, beatglass::ChannelLayout::stereo})) {
       std::cerr << "worker gate accepted after loss\n"; return 9;
+    }
+    if (argc > 2 && std::string_view(argv[2]) == "remove") {
+      const auto lost = std::string(argv[1]) + ".lost";
+      const auto replaced = std::string(argv[1]) + ".replaced";
+      { std::ofstream signal(lost); signal << "lost"; }
+      const auto replacement_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(8);
+      while (std::chrono::steady_clock::now() < replacement_deadline && !std::filesystem::exists(replaced))
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      if (!std::filesystem::exists(replaced)) { std::cerr << "replacement not observed\n"; return 17; }
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      if (monitor.pop_event(event) || monitor.pop(*block) ||
+          monitor.install_worker_epoch(*epoch, {48000, 2, beatglass::ChannelLayout::stereo})) {
+        std::cerr << "replacement revived invalidated attempt\n"; return 18;
+      }
     }
   }
   auto state = monitor.state();

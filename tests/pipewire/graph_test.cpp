@@ -46,3 +46,17 @@ TEST_CASE("graph rejects ambiguous explicit link ports") {
  graph.port(22,{5,"FL",false,false});
  CHECK(graph.endpoints(5, endpoints) == MonitorGraph::Result::invalid);
 }
+TEST_CASE("reused graph node ID does not recover selected sink identity") {
+ MonitorGraph graph("original-serial", "sink");
+ graph.node(3, "original-serial", "sink", true);
+ graph.port(10,{3,"FL",true,true}); graph.port(11,{3,"FR",true,true});
+ graph.port(20,{5,"FL",false,false}); graph.port(21,{5,"FR",false,false});
+ graph.link(30,{3,10,5,20}); graph.link(31,{3,11,5,21});
+ REQUIRE(graph.verify(5) == MonitorGraph::Result::verified);
+ graph.remove(3);
+ CHECK(graph.verify(5) == MonitorGraph::Result::waiting);
+ graph.node(3, "replacement-serial", "sink", true);
+ CHECK(graph.verify(5) != MonitorGraph::Result::verified);
+ MonitorGraph::Endpoints endpoints{};
+ CHECK(graph.endpoints(5, endpoints) != MonitorGraph::Result::verified);
+}
