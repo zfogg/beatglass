@@ -1,6 +1,6 @@
 # Beatglass
 
-Beatglass is planned as a local desktop music analysis application with a library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. Neither mode is implemented yet. A preliminary file-tempo CLI and desktop shell with Library and DJ navigation are available when built with optional dependencies. The Library page can inspect file metadata; library management and DJ capture are not yet available.
+Beatglass is planned as a local desktop music analysis application with a library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. Neither mode is implemented yet. A preliminary file-tempo CLI and desktop shell with Library and DJ navigation are available when built with optional dependencies. The Library page can browse folders and inspect file metadata; library management and DJ capture are not yet available.
 
 The intended stack is C++20, CMake, Qt 6 Quick, SQLite, aubio and Essentia, with PipeWire, Core Audio taps and WASAPI loopback for Linux, macOS and Windows respectively. Dependency availability, versions and licenses must be verified before selection. No account or network service should be required at runtime.
 
@@ -23,7 +23,7 @@ ctest --test-dir build -C Debug --output-on-failure
 The default builds the dependency-light foundation tests. To build the experimental CLI, install aubio and libsndfile development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON`. Add `-DBEATGLASS_BUILD_DESKTOP=ON` and Qt 6 Quick development and QML runtime modules for the metadata shell. For example on Ubuntu 22.04:
 
 ```sh
-sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml-workerscript
+sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript
 cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_TEST_V1_CODECS=OFF
 cmake --build build
 ctest --test-dir build --output-on-failure
@@ -62,6 +62,18 @@ ctest --preset prebuilt-qt-desktop
 ```
 
 On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the configure command. The SDK must match the compiler and target architecture. The preset enforces version 6.8.3 and uses the core vcpkg manifest; do not enable its `desktop` feature or point it at an install tree containing a different Qt version. The source-building `vcpkg-desktop` preset remains experimental. This is a development proposal, not a finished cross-platform package or fully hashed artifact lock; acquisition, platform and license caveats are in [decisions](docs/decisions.md).
+
+## Provisional library storage increment
+
+`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables private, not yet product-wired SQLite and job-executor primitives. SQLite is currently found from the host and is not pinned. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
+
+```sh
+cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src
+cmake --build /tmp/beatglass-library-phase1 -j 3
+ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure
+```
+
+This is an isolated review increment, not a functioning library backend. File hashing and file-version validation, actual DSP integration, typed public outcomes, individual job cancellation/progress, result schema, database location and pinning remain open. Do not use the prototype for user data. It does not write audio or tags.
 
 The [Essentia dependency spike](docs/essentia-spike.md) records research builds and the proposed tonal architecture; it is not integrated into the CLI or product.
 

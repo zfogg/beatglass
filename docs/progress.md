@@ -141,15 +141,31 @@ After merging the codec manifest in PR #13 at 2b74e90, a lock-free combined Wind
 
 After merging PR #18 at 2f66515 (documentation changes), the existing prebuilt Qt and codec-enabled Windows executable passed `ctest --test-dir build/prebuilt-qt-codecs -C Debug --output-on-failure` 34/34 without acquiring a vcpkg lock. The strict Docker Sphinx build passed with 21 indexed headers and 71 rendered declarations. The Mac smoke and current codec/Qt gate evidence are retained.
 
+## Provisional SQLite and bounded worker review increment
+
+On 2026-11-07, WSL Ubuntu 22.04 with GCC 11.4 and system SQLite 3.37.2, based on `6f927cb0eceb084a8333f6a90f25ccab84ada593`: `cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, `cmake --build /tmp/beatglass-library-phase1 -j 3`, and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` passed 23/23 CTest entries. The new entry exercises private prototype primitives, not a user workflow or real DSP. WSL is not native Linux qualification. SQLite and filesystem identity remain unpinned/unimplemented respectively; Windows and macOS checks were not run for this increment. See the Phase 1 proposal for schema limitations and remaining work.
+The documentation check `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html` passed using the existing docs image. No C++ headers were added or changed.
+
+Review update: the same WSL configure/build/CTest commands now pass 30/30 individually discovered tests linked to `beatglass_library_prototype`; tests cover SQLite binding length bounds and a second connection rejected while the first holds the exclusive lock. The CI proposal enables the target on Ubuntu. Windows and macOS remain untested for this increment.
+
 ## Phase 1 shared UI navigation increment
 
 On Windows 10.0.26300 x64, MSVC 19.44 and Qt 6.8.3, the shared desktop shell gained Library and DJ navigation while retaining real asynchronous file metadata inspection. Library indexing, analysis, playback, capture and overlay remain unavailable. From this worktree at base 6f927cb with `VCPKG_ROOT=C:/Users/zachf/.codex/worktrees/beatglass-vcpkg-prebuilt` and `BEATGLASS_QT_ROOT=$env:TEMP/beatglass-qt/6.8.3/msvc2022_64`, `cmake --preset prebuilt-qt-desktop -G "Visual Studio 17 2022" -A x64 -B "$env:TEMP/beatglass-ui-build" -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=C:/Users/zachf/.codex/worktrees/beatglass-codecs/build-pinned-win/vcpkg_installed`, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4`, and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 35/35, including the offscreen Qt Quick navigation test. The existing installed vcpkg tree was reused; this is not a fresh dependency qualification. `docker build -f docs/api/Dockerfile -t beatglass-docs .` and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html` passed. No native interactive UI, audio, or overlay qualification was performed for this increment.
+
+## Phase 1 filesystem browser and live presentation boundary
+
+On Windows 10.0.26300 x64 with MSVC 19.44 and Qt 6.8.3, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4` and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 36/36 using the existing vcpkg installation described above. After extending the QML test to activate a file with the keyboard, `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug -R desktop_navigation --output-on-failure` passed. The offscreen test browses checked-in audio fixtures; it does not qualify the native folder dialog or desktop accessibility. The current directory view is not an indexed or persistent collection, and cannot report a precise reason for an unreadable or empty folder. The GUI-thread presentation adapter rejects older revisions and clears estimates on invalidation/non-tracking states; no live producer is connected. Database integration, real capture, overlay and native platform qualification remain pending.
+The API index coverage check (`python docs/api/check_headers.py`) covered 22 headers; the warnings-as-errors Docker Sphinx build and `python docs/api/check_rendered.py "$env:TEMP/beatglass-docs-output/html/index.html"` passed. The new adapter is application-private and has no cross-thread delivery mechanism; integration must supply ordered GUI-thread delivery including clears and session/restart protection.
 
 # Source contract integration
 
 The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
+
+Concurrent process-epoch issuance is proposed with contention and exhaustion
+tests. The application must still share one allocator across live and offline
+paths and coordinate each source's lifecycle.
 
 # Cache contract integration
 
@@ -169,6 +185,8 @@ The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
 
+After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea57372aaab89`, WSL Ubuntu 22.04 with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, slice disabled and pinned Catch2 source reused passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 32/32. Windows 10.0.26300 x64/MSVC 19.44 with the previously configured static CRT and static SQLite development tree passed `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` 34/34. These are development checks only; WSL is not native Linux qualification and no decoder slice was included.
+
 ## Same-source integration proposal
 
 The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
@@ -184,6 +202,14 @@ Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built thi
 
 The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. The provisional public FileReader borrowed-source constructor and explicit-epoch seek expose this adapter for review; the legacy path-based seek retains local increment behavior. Snapshot creation and publication are still separate responsibilities.
 
+## Offline result contract proposal
+
+An owned offline result and bounded structural validator are proposed for
+composite evidence. Actual composite persistence, paged retrieval, native
+qualification and a validated track-level key remain open.
+
 ## Phase 1 tonal dependency experiment
 
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
+
+After merging main `6aade6e`, the provisional library option was configured with `cmake -S . -B /tmp/beatglass-foundation-review -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, then `cmake --build /tmp/beatglass-foundation-review -j 1` and `ctest --test-dir /tmp/beatglass-foundation-review --output-on-failure` passed 38/38 on Ubuntu 22.04 WSL. This configuration does not enable desktop, native audio or macOS qualification. CMake emitted an author warning that `SQLite::SQLite3` is deprecated in favor of `SQLite3::SQLite3` in the installed CMake version; host SQLite remains unpinned.
