@@ -1,5 +1,5 @@
 Beatglass API reference
-=======================
+================
 
 These interfaces describe the current foundation and are provisional. Headers
 under ``include/beatglass`` are library interfaces, not a promise of an
@@ -83,6 +83,11 @@ Experimental tonal worker internals
 -----------------------------------
 
 .. cpp:autodoc:: lib/core/tonal_tracker.hpp
+
+Experimental virtual file I/O
+-----------------------------
+
+.. cpp:autodoc:: lib/capture/file/virtual_io.hpp
 
 Experimental beat-event worker
 ------------------------------
