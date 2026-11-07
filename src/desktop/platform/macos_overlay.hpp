@@ -9,6 +9,7 @@
 
 class QEvent;
 class QQuickWindow;
+class QScreen;
 class QWindow;
 
 namespace beatglass::macos {
@@ -29,6 +30,7 @@ class OverlayController final : public QObject {
   Q_PROPERTY(bool clickThrough READ clickThrough NOTIFY clickThroughChanged)
   Q_PROPERTY(bool available READ available NOTIFY availableChanged)
   Q_PROPERTY(QStringList screenNames READ screenNames NOTIFY screensChanged)
+  Q_PROPERTY(int screenIndex READ screenIndex NOTIFY screensChanged)
   Q_PROPERTY(qreal opacity READ opacity NOTIFY opacityChanged)
 public:
   /** Own the native adapter and optional settings store; the Qt parent, if any, owns this controller. All methods run on the GUI thread. */
@@ -55,6 +57,8 @@ public:
   Q_INVOKABLE void keepOnScreen();
   /** Return current display labels in Qt's screen order; names are presentation labels, not persistent identifiers. */
   QStringList screenNames() const;
+  /** Index of the overlay's current display in screenNames(), or -1 when unattached or no display contains its center. Indices are session-local. */
+  int screenIndex() const;
   /** Move the overlay to the selected current display and clamp it to its available geometry. Return false if the display or overlay is unavailable. */
   Q_INVOKABLE bool moveToScreen(int index);
   /** Request a positive logical-pixel size, then clamp to the current display. Qt minimum-size constraints still apply. */
@@ -63,7 +67,7 @@ public:
   Q_SIGNAL void clickThroughChanged();
   /** Emitted when native availability changes. */
   Q_SIGNAL void availableChanged();
-  /** Emitted on display addition or removal; callers must refresh any selected index. */
+  /** Emitted when displays, their geometry, or overlay position change; callers must refresh any selected index. */
   Q_SIGNAL void screensChanged();
   /** Emitted when the overlay opacity changes. */
   Q_SIGNAL void opacityChanged();
@@ -75,13 +79,16 @@ private:
   void detach();
   void scheduleSave();
   void saveSettings();
+  void observeScreen(QScreen* screen);
+  void scheduleScreenUpdate();
   std::unique_ptr<OverlayNative> native_;
   std::unique_ptr<QSettings> settings_;
   QTimer save_timer_;
+  QTimer screen_timer_;
   QPointer<QQuickWindow> overlay_;
   QPointer<QWindow> control_;
   QRect saved_geometry_;
   qreal saved_opacity_{0.9};
-  bool available_{}, click_through_{}, restoring_{}, have_snapshot_{};
+  bool available_{}, click_through_{}, restoring_{}, have_snapshot_{}, updating_screens_{};
 };
 }
