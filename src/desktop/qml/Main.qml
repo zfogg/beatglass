@@ -19,11 +19,29 @@ ApplicationWindow {
     property var liveBridge: livePresentation
     property var collectionBridge: typeof experimentalCollection === "undefined" ? null : experimentalCollection
     property var djBridge: typeof windowsDj === "undefined" ? null : windowsDj
-    property var overlayBridge: null
+    property var overlayBridge: typeof macOverlayController === "undefined" ? null : macOverlayController
+    readonly property bool macOverlay: !!overlayBridge && typeof overlayBridge.showOverlay === "function"
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    onBrowseFolderChanged: {
+        invalidateSelection()
+    }
+    onSortDescendingChanged: invalidateSelection()
+
+    function invalidateSelection() {
+        browser.currentIndex = -1
+        selectEntry(-1)
+    }
+
+    function selectEntry(index) {
+        const isFile = index >= 0 && index < files.count && !files.isFolder(index)
+        selectedName = isFile ? files.get(index, "fileName") : ""
+        const url = isFile ? files.get(index, "fileUrl") : ""
+        if (window.collectionBridge) window.collectionBridge.selectSource(url)
+        metadataBridge.inspect(url)
+    }
 
     function formatTime(ms) {
         const tenths = Math.floor(Math.max(0, ms) / 100)
@@ -39,8 +57,7 @@ ApplicationWindow {
         } else {
             player.stop()
             player.source = url
-            selectedName = files.get(index, "fileName")
-            metadataBridge.inspect(url)
+            selectEntry(index)
         }
     }
 
@@ -53,6 +70,17 @@ ApplicationWindow {
         caseSensitive: false
         sortField: FolderListModel.Name
         sortReversed: window.sortDescending
+    }
+    Connections {
+        target: files
+        ignoreUnknownSignals: true
+        function onCountChanged() { window.invalidateSelection() }
+        function onRowsInserted() { window.invalidateSelection() }
+        function onRowsRemoved() { window.invalidateSelection() }
+        function onRowsMoved() { window.invalidateSelection() }
+        function onModelReset() { window.invalidateSelection() }
+        function onLayoutChanged() { window.invalidateSelection() }
+        function onDataChanged() { window.invalidateSelection() }
     }
     MediaDevices {
         id: playbackDevices
@@ -68,7 +96,10 @@ ApplicationWindow {
             if (playbackDevices.audioOutputs[i].isDefault) { playbackOutputSelector.currentIndex = i; break }
         }
     }
-    Component.onCompleted: selectDefaultPlaybackOutput()
+    Component.onCompleted: {
+        selectDefaultPlaybackOutput()
+        if (overlayBridge && typeof overlayBridge.attach === "function") overlayBridge.attach(djOverlay, window)
+    }
     MediaPlayer {
         id: player
         objectName: "player"
@@ -96,7 +127,7 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
                 Label { text: "Library"; font.pixelSize: 28; font.bold: true }
                 Label {
-                    text: "Browse local folders. Indexing, analysis and saved results are not available yet."
+                    text: window.collectionBridge && window.collectionBridge.compositeAvailable ? "Browse local folders and run provisional, uncached analysis." : "Browse local folders. Indexing, analysis and saved results are not available yet."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 RowLayout {
@@ -129,7 +160,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true; onTextChanged: window.invalidateSelection() }
                     Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
@@ -146,6 +177,7 @@ ApplicationWindow {
                         clip: true
                         model: window.browseFolder.toString() === "" ? null : files
                         currentIndex: -1
+                        onCurrentIndexChanged: window.selectEntry(currentIndex)
                         keyNavigationEnabled: true
                         activeFocusOnTab: true
                         Accessible.name: "Folder contents"
@@ -178,6 +210,25 @@ ApplicationWindow {
                         anchors.fill: parent
                         Label { text: window.selectedName || "No file selected"; font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true }
                         Label { objectName: "metadataStatus"; text: window.metadataStatus; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        Label { text: player.source.toString() === "" ? "No file loaded for playback" : "Playback source: " + player.source.toString(); elide: Text.ElideMiddle; Layout.fillWidth: true }
+                        RowLayout {
+                            visible: !!window.collectionBridge && window.collectionBridge.compositeAvailable
+                            Button { objectName: "analyzeSelected"; text: "Analyze provisionally"; enabled: !!window.collectionBridge && !!window.selectedName && !window.collectionBridge.analysisActive; onClicked: window.collectionBridge.analyzeSelected() }
+                            Button { objectName: "cancelAnalysis"; text: "Cancel"; enabled: !!window.collectionBridge && window.collectionBridge.analysisActive; onClicked: window.collectionBridge.cancelSelected() }
+                            Label { objectName: "analysisStatus"; text: window.collectionBridge ? window.collectionBridge.analysisStatus : ""; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                        }
+                        Label { objectName: "provisionalSummary"; visible: !!window.collectionBridge && window.collectionBridge.compositeAvailable; text: window.collectionBridge ? window.collectionBridge.provisionalSummary : ""; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                        ListView {
+                            objectName: "provisionalWindows"; visible: !!window.collectionBridge && window.collectionBridge.compositeAvailable && count > 0
+                            Layout.fillWidth: true; Layout.preferredHeight: visible ? 120 : 0; clip: true
+                            model: window.collectionBridge ? window.collectionBridge.provisionalWindows : []
+                            ScrollBar.vertical: ScrollBar {}
+                            delegate: Label {
+                                required property var modelData
+                                width: ListView.view.width; wrapMode: Text.WordWrap
+                                text: modelData.range + ": rolling/local key " + modelData.key + " (evidence from frame " + modelData.keyFrom + ", raw strength " + modelData.keyStrength + "); local chord " + modelData.chord + " (raw strength " + modelData.chordStrength + ")"
+                            }
+                        }
                         RowLayout {
                             Label { text: "Playback output" }
                             ComboBox {
@@ -247,7 +298,7 @@ ApplicationWindow {
                 Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
                 Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
-                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge; onClicked: { if (djOverlay.visible) { window.overlayBridge.endDrag(); window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { window.overlayBridge.keepOnScreen(); djOverlay.show() } } }
+                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge && (!window.macOverlay || window.overlayBridge.available); onClicked: { if (window.macOverlay) { if (djOverlay.visible) window.overlayBridge.hideOverlay(); else window.overlayBridge.showOverlay() } else if (djOverlay.visible) { window.overlayBridge.endDrag(); window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { window.overlayBridge.keepOnScreen(); djOverlay.show() } } }
                     Button { objectName: "lockOverlay"; text: window.overlayBridge && window.overlayBridge.clickThrough ? "Unlock overlay" : "Enable click-through"; enabled: !!window.overlayBridge && djOverlay.visible; onClicked: window.overlayBridge.setClickThrough(!window.overlayBridge.clickThrough) }
                     Button { objectName: "recoverOverlay"; text: "Move on screen"; enabled: !!window.overlayBridge; onClicked: window.overlayBridge.keepOnScreen() }
                     Label { text: "Drag when unlocked. Unlock: Ctrl+Shift+U while Beatglass is active"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
@@ -256,6 +307,14 @@ ApplicationWindow {
                     Label { text: "Overlay opacity" }
                     Slider { objectName: "overlayOpacity"; from: 0.25; to: 1.0; value: window.overlayBridge ? window.overlayBridge.opacity : 1; enabled: !!window.overlayBridge; Accessible.name: "Overlay opacity"; onMoved: window.overlayBridge.setOpacity(value); Layout.fillWidth: true }
                 }
+                RowLayout {
+                    visible: window.macOverlay
+                    Label { text: "Display" }
+                    ComboBox { objectName: "overlayDisplay"; model: window.macOverlay ? window.overlayBridge.screenNames : []; enabled: window.macOverlay && window.overlayBridge.available && count > 0; Layout.fillWidth: true; onActivated: window.overlayBridge.moveToScreen(currentIndex) }
+                    Label { text: "Size" }
+                    ComboBox { objectName: "overlaySize"; model: ["Compact", "Medium", "Large"]; currentIndex: 1; enabled: window.macOverlay && window.overlayBridge.available; onActivated: { const sizes = [[250, 110], [310, 130], [430, 180]]; window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1]) } }
+                }
+                Label { visible: window.macOverlay && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
                 Item { Layout.fillHeight: true }
             }
         }
@@ -270,7 +329,23 @@ ApplicationWindow {
         color: "transparent"
         Rectangle {
             anchors.fill: parent; radius: 10; color: "#d9202530"; border.color: "#92a2b8"
-            MouseArea { anchors.fill: parent; cursorShape: Qt.SizeAllCursor; onPressed: if (window.overlayBridge) window.overlayBridge.beginDrag(); onPositionChanged: if (pressed && window.overlayBridge) window.overlayBridge.dragToCursor() }
+            MouseArea {
+                anchors.fill: parent; cursorShape: Qt.SizeAllCursor
+                property bool fallbackMove: false
+                property point lastGlobal: Qt.point(0, 0)
+                onPressed: function(mouse) {
+                    if (window.macOverlay) {
+                        fallbackMove = typeof djOverlay.startSystemMove !== "function"
+                        if (fallbackMove) lastGlobal = mapToGlobal(mouse.x, mouse.y)
+                        else djOverlay.startSystemMove()
+                    } else if (window.overlayBridge) window.overlayBridge.beginDrag()
+                }
+                onPositionChanged: function(mouse) {
+                    if (!pressed || !window.overlayBridge) return
+                    if (!window.macOverlay) window.overlayBridge.dragToCursor()
+                    else if (fallbackMove) { const p = mapToGlobal(mouse.x, mouse.y); djOverlay.x += p.x - lastGlobal.x; djOverlay.y += p.y - lastGlobal.y; lastGlobal = p }
+                }
+            }
             Column {
                 anchors.centerIn: parent; spacing: 5
                 Label { text: window.djBridge ? window.djBridge.status : "Unavailable"; color: "white"; font.pixelSize: 16 }

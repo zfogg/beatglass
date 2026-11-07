@@ -24,22 +24,66 @@ private slots:
     CollectionView view(directory.filePath("library.sqlite"), epochs);
     bool guiThread = true;
     connect(&view, &CollectionView::changed, &view, [&] { guiThread &= QThread::currentThread() == view.thread(); });
-    QVERIFY(view.analyzeComposite(audio));
+    view.selectSource(QUrl::fromLocalFile(audio));
+    QVERIFY(view.analyzeSelected());
     view.refresh("");
-    QTRY_COMPARE_WITH_TIMEOUT(view.analysisStatus(), QStringLiteral("Unverified composite evidence received; result remains gated."), 30000);
+    QTRY_COMPARE_WITH_TIMEOUT(view.analysisStatus(), QStringLiteral("Provisional analysis complete; caching is disabled."), 30000);
     QVERIFY(guiThread); QVERIFY(view.compositeEvidence());
     QVERIFY(!view.compositeEvidence()->cache_reusable());
     QVERIFY(view.compositeEvidence()->value.epoch != 0);
     QVERIFY(view.compositeEvidence()->value.engine_version.empty());
     QVERIFY(view.compositeEvidence()->value.configuration_id.empty());
     QVERIFY(!view.compositeEvidence()->value.validated_track_key);
-    QVERIFY(view.analyzeComposite(audio));
+    QVERIFY(view.provisionalSummary().contains(QStringLiteral("Track-level key: Unknown")));
+    QVERIFY(!view.compositeEvidence()->value.tonal_windows.empty());
+    QVERIFY(!view.provisionalWindows().isEmpty());
+    const auto row = view.provisionalWindows().front().toMap();
+    const auto& actual = view.compositeEvidence()->value.tonal_windows.front();
+    QCOMPARE(row.value("key").toString(), actual.rolling_key ? QString::fromStdString(actual.rolling_key->label) : QStringLiteral("Unknown"));
+    QCOMPARE(row.value("keyFrom").toString(), actual.rolling_key_from ? QString::number(static_cast<qulonglong>(*actual.rolling_key_from)) : QStringLiteral("Unknown"));
+    QCOMPARE(row.value("chord").toString(), actual.local_chord ? QString::fromStdString(actual.local_chord->label) : QStringLiteral("Unknown"));
+    if (!actual.rolling_key || !actual.rolling_key->strength) QCOMPARE(row.value("keyStrength").toString(), QStringLiteral("Unknown"));
+    if (!actual.local_chord || !actual.local_chord->strength) QCOMPARE(row.value("chordStrength").toString(), QStringLiteral("Unknown"));
+    QVERIFY(view.analyzeSelected());
     QVERIFY(!view.compositeEvidence());
-    view.cancelAnalysis();
-    QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus() != QStringLiteral("Cancellation requested; awaiting terminal outcome."), 30000);
-    QVERIFY(view.analysisStatus() == QStringLiteral("Composite analysis cancelled.") ||
-            view.analysisStatus() == QStringLiteral("Analysis cancelled.") ||
-            view.analysisStatus() == QStringLiteral("Unverified composite evidence received; result remains gated."));
+    view.cancelSelected();
+    QTRY_VERIFY_WITH_TIMEOUT(!view.analysisActive(), 30000);
+    QCOMPARE(view.analysisStatus(), QStringLiteral("Analysis finished; result hidden."));
+    QVERIFY(view.provisionalWindows().isEmpty());
+    QVERIFY(view.analyzeSelected());
+    view.selectSource(QUrl::fromLocalFile(directory.filePath("different.aiff")));
+    QTRY_VERIFY_WITH_TIMEOUT(!view.analysisActive(), 30000);
+    QCOMPARE(view.analysisStatus(), QStringLiteral("Ready for provisional analysis."));
+    QVERIFY(view.provisionalWindows().isEmpty());
+    QVERIFY(view.provisionalSummary().contains(QStringLiteral("Track-level key: Unknown")));
+    view.selectSource(QUrl());
+    QVERIFY(!view.analyzeSelected());
+    QVERIFY(view.provisionalWindows().isEmpty());
+  }
+  void completedEvidenceCannotOutliveSelectionOrCancellation() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    const auto audio = directory.filePath("tone.aiff");
+    QVERIFY(QFile::copy(QStringLiteral(BEATGLASS_FIXTURES "/tone.aiff"), audio));
+    beatglass::SourceEpochAllocator epochs;
+    CollectionView view(directory.filePath("library.sqlite"), epochs);
+    for (bool cancel : {false, true}) {
+      view.selectSource(QUrl::fromLocalFile(audio));
+      QVERIFY(view.analyzeSelected());
+      view.poll_.stop();
+      QTRY_VERIFY_WITH_TIMEOUT(view.analysisTicket_->result().has_value(), 30000);
+      auto ready = view.analysisTicket_->result();
+      const auto* composite = std::get_if<LibraryBridge::Composite>(&ready->value);
+      QVERIFY(composite);
+      QCOMPARE(composite->status, beatglass::library_detail::CompositeJobStatus::complete);
+      if (cancel) view.cancelSelected();
+      else view.selectSource(QUrl::fromLocalFile(directory.filePath("different.aiff")));
+      const auto status = view.analysisStatus();
+      view.pollAnalysis();
+      QVERIFY(!view.analysisActive());
+      QCOMPARE(view.analysisStatus(), cancel ? QStringLiteral("Analysis finished; result hidden.") : status);
+      QVERIFY(view.provisionalWindows().isEmpty());
+      QVERIFY(!view.compositeEvidence());
+    }
   }
   void compositeDestructionJoinsWorker() {
     QTemporaryDir directory; QVERIFY(directory.isValid());

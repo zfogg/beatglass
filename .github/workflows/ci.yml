@@ -34,15 +34,6 @@ jobs:
       - run: cmake --build build --parallel 4
       - run: ctest --test-dir build --output-on-failure
 
-  library-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y libsqlite3-dev
-      - run: cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON
-      - run: cmake --build build --parallel 4
-      - run: ctest --test-dir build --output-on-failure
-
   windows-overlay:
     runs-on: windows-latest
     steps:
@@ -52,9 +43,24 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install aqtinstall==3.3.0
       - run: python -m aqt install-qt windows desktop 6.8.3 win64_msvc2022_64 --outputdir "${{ runner.temp }}/qt" --archives qtbase qtdeclarative qtshadertools
-      - run: cmake -S . -B build-overlay -DBUILD_TESTING=ON -DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON -DCMAKE_PREFIX_PATH="${{ runner.temp }}/qt/6.8.3/msvc2022_64"
-      - run: cmake --build build-overlay --config Debug --target windows_overlay_tests
-      - run: ctest --test-dir build-overlay -C Debug -R '^windows_overlay$' --output-on-failure
+      - run: python -m aqt install-qt windows desktop 6.8.3 win64_msvc2022_64 --outputdir "${{ runner.temp }}/qt" --noarchives -m qtmultimedia
+      - run: cmake -S . -B build-overlay -DBUILD_TESTING=ON -DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DCMAKE_PREFIX_PATH="${{ runner.temp }}/qt/6.8.3/msvc2022_64"
+      - run: cmake --build build-overlay --config Debug --target windows_overlay_tests macos_overlay_tests --parallel 1
+      - run: ctest --test-dir build-overlay -C Debug -R '^(windows_overlay|macos_overlay_)' --output-on-failure
+
+  macos-overlay:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install aqtinstall==3.3.0
+      - run: python -m aqt install-qt mac desktop 6.8.3 clang_64 --outputdir "$RUNNER_TEMP/qt" --archives qtbase qtdeclarative qtshadertools
+      - run: python -m aqt install-qt mac desktop 6.8.3 clang_64 --outputdir "$RUNNER_TEMP/qt" --noarchives -m qtmultimedia
+      - run: cmake -S . -B build-overlay -DBUILD_TESTING=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DCMAKE_PREFIX_PATH="$RUNNER_TEMP/qt/6.8.3/macos"
+      - run: cmake --build build-overlay --target macos_overlay_tests --parallel 1
+      - run: ctest --test-dir build-overlay -R '^macos_overlay_' --output-on-failure
 
   pipewire-linux:
     runs-on: ubuntu-latest

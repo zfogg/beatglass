@@ -5,6 +5,11 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#ifdef Q_OS_MACOS
+#include "platform/macos_overlay.hpp"
+#include <QSettings>
+#include <memory>
+#endif
 #ifdef BEATGLASS_EXPERIMENTAL_COLLECTION
 #include "collection_view.hpp"
 #include <memory>
@@ -21,6 +26,11 @@ int main(int argc, char** argv) {
   Metadata metadata;
   LivePresentation livePresentation;
   PlaybackGuard playbackGuard;
+#ifdef Q_OS_MACOS
+  beatglass::macos::OverlayController macOverlayController(
+      beatglass::macos::makeOverlayNative(), nullptr,
+      std::make_unique<QSettings>(QSettings::NativeFormat, QSettings::UserScope, QStringLiteral("Beatglass"), QStringLiteral("Beatglass")));
+#endif
 #ifdef _WIN32
   WindowsDj windowsDj(epochs);
   QSettings overlaySettings(QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
@@ -29,9 +39,15 @@ int main(int argc, char** argv) {
   engine.rootContext()->setContextProperty("metadata", &metadata);
   engine.rootContext()->setContextProperty("playbackGuard", &playbackGuard);
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
+#ifdef Q_OS_MACOS
+  engine.rootContext()->setContextProperty("macOverlayController", &macOverlayController);
+#endif
 #ifdef BEATGLASS_EXPERIMENTAL_COLLECTION
   std::unique_ptr<CollectionView> collection;
-  const auto database = qEnvironmentVariable("BEATGLASS_EXPERIMENTAL_LIBRARY_DB");
+  auto database = qEnvironmentVariable("BEATGLASS_EXPERIMENTAL_LIBRARY_DB");
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  if (database.isEmpty()) database = QStringLiteral(":memory:");
+#endif
   if (!database.isEmpty()) {
     collection = std::make_unique<CollectionView>(database, epochs);
     engine.rootContext()->setContextProperty("experimentalCollection", collection.get());
