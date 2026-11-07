@@ -65,3 +65,25 @@ with tempfile.TemporaryDirectory() as directory:
     assert "state: tracking" in resume_lines[-1], resume_lines[-1]
     missing = subprocess.run([exe, str(root / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0
+    import json
+    quiet_json = json.loads(subprocess.run([exe, "--json", str(silence)], capture_output=True, text=True, check=True).stdout)
+    assert quiet_json["schema_version"] == 1 and quiet_json["type"] == "result"
+    assert quiet_json["bpm"] is None and quiet_json["state"] == "silent"
+    result_json = json.loads(subprocess.run([exe, "--json", str(clicks)], capture_output=True, text=True, check=True).stdout)
+    assert result_json["sample_rate"] == 44100 and result_json["frames"] == 44100 * 20
+    assert abs(result_json["bpm"] - bpm) < .01
+    replay_json = [json.loads(line) for line in subprocess.run([exe, "--json", "--replay", str(clicks)], capture_output=True, text=True, check=True).stdout.splitlines()]
+    assert replay_json[-1] == result_json
+    observations = replay_json[:-1]
+    assert observations[0]["bpm"] is None and observations[-1]["observed_through"] == 44100 * 20
+    prefix_json = [json.loads(line) for line in subprocess.run([exe, "--replay", "--json", str(prefix)], capture_output=True, text=True, check=True).stdout.splitlines()][:-1]
+    # Metadata frames describes the whole input, so compare only causal fields.
+    for earlier, full in zip(prefix_json, observations):
+        for field in ("observed_through", "bpm", "beats", "state"):
+            assert earlier[field] == full[field], (field, earlier, full)
+    assert len(prefix_json) < len(observations)
+    assert subprocess.run([exe, "--json", "--json", str(clicks)], capture_output=True).returncode == 2
+    dash_path = root / "-clicks.wav"
+    dash_path.write_bytes(clicks.read_bytes())
+    dash_result = subprocess.run([exe, "--json", "--", "-clicks.wav"], cwd=root, capture_output=True, text=True, check=True)
+    assert json.loads(dash_result.stdout) == result_json

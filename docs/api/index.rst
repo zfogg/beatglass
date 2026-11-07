@@ -54,3 +54,8 @@ Desktop application internals
 -----------------------------
 
 .. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/playback_guard.hpp src/desktop/platform/windows_endpoints.hpp
+
+CLI application internals
+-------------------------
+
+.. cpp:autodoc:: src/cli/state_label.hpp
