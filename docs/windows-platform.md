@@ -177,3 +177,14 @@ failure, then restored a real endpoint and observed a running source with a fres
 attempt. The last parallel MSBuild invocation failed because the Windows paging
 file could not accommodate new processes; retrying the build with `-j 1` passed
 the same 11 CTest cases and both opt-in native cases.
+
+On Windows 11 Home 10.0.26300, MSVC 19.44, build `29ecc28` with the
+`[native-system-default]` test added, a manual Control Panel switch changed the
+multimedia default from Speakers (Realtek(R) Audio) to Speakers (Logitech G733
+Gaming Headset) and back. The test observed a clear and a running follower on
+each transition with fresh epochs; all 769 assertions passed. The original
+multimedia default was restored, and the Speakers (2K AUDIO) communications
+default remained unchanged. After a serial build of `windows_endpoint_tests`,
+the opt-in command was `windows_endpoint_tests.exe '[native-system-default]' -r compact`.
+This exercised actual OS default selection, not physical disconnection, real
+music, or QML interaction during the switch.
