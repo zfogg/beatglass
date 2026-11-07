@@ -13,7 +13,7 @@ std::filesystem::path nativePath(const QString& path) {
 }
 }
 
-CollectionView::CollectionView(const QString& database, QObject* parent) : QObject(parent) {
+CollectionView::CollectionView(const QString& database, beatglass::SourceEpochAllocator& epochs, QObject* parent) : QObject(parent), epochs_(epochs) {
   worker_ = std::make_unique<LibraryBridge>(database.toUtf8().toStdString(), [this](auto task) {
     if (!QMetaObject::invokeMethod(this, std::move(task), Qt::QueuedConnection))
       throw std::runtime_error("GUI dispatch failed");
@@ -23,7 +23,7 @@ CollectionView::CollectionView(const QString& database, QObject* parent) : QObje
 }
 CollectionView::~CollectionView() { worker_.reset(); }
 void CollectionView::refresh(const QString& search) {
-  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
+  auto token = requests_.beginBrowse(); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear(); status_ = QStringLiteral("Loading indexed files…");
   beatglass::library_detail::CollectionQuery query; query.search = search.toUtf8().toStdString(); query.limit = 100;
   worker_->entries(std::move(query), [this, token](LibraryBridge::Result result) {
     if (!result.error.empty() || result.cancelled) {
@@ -45,12 +45,13 @@ void CollectionView::refresh(const QString& search) {
   });
   emit changed();
 }
-bool CollectionView::analyzeIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch) {
-  if (path.isEmpty() || engine.isEmpty() || configuration.isEmpty() || !epoch || analysisTicket_) return false;
+bool CollectionView::analyzeIndexed(const QString& path, const QString& engine, const QString& configuration) {
+  if (path.isEmpty() || engine.isEmpty() || configuration.isEmpty() || analysisTicket_) return false;
+  auto epoch = epochs_.next(); if (!epoch) { analysisStatus_ = QStringLiteral("Analysis unavailable: epoch limit reached."); emit changed(); return false; }
   analysisToken_ = requests_.beginAnalysis();
   if (!analysisToken_) return false;
   analysisStatus_ = QStringLiteral("Analysis running.");
-  analysisTicket_ = worker_->analyze_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), epoch, {});
+  analysisTicket_ = worker_->analyze_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), *epoch, {});
   poll_.start(); emit changed(); return true;
 }
 void CollectionView::cancelAnalysis() {
@@ -78,9 +79,13 @@ void CollectionView::pollAnalysis() {
   } else analysisStatus_ = QStringLiteral("Unexpected analysis response.");
   requests_.acknowledgeAnalysis(); analysisToken_.reset(); emit changed();
 }
-void CollectionView::lookupIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch) {
-  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear(); status_ = QStringLiteral("Checking indexed analysis…");
-  worker_->lookup_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), epoch, [this, token](LibraryBridge::Result result) {
+void CollectionView::lookupIndexed(const QString& path, const QString& engine, const QString& configuration) {
+  auto token = requests_.beginBrowse(); offlinePage_.reset(); pageEpoch_.reset(); pagePath_.clear(); rows_.clear();
+  if (path.isEmpty() || engine.isEmpty() || configuration.isEmpty()) { status_ = QStringLiteral("Lookup unavailable: identity or epoch missing."); emit changed(); return; }
+  auto epoch = epochs_.next();
+  if (!epoch) { status_ = QStringLiteral("Lookup unavailable: identity or epoch missing."); emit changed(); return; }
+  status_ = QStringLiteral("Checking indexed analysis…");
+  worker_->lookup_indexed(path.toUtf8().toStdString(), nativePath(path), engine.toUtf8().toStdString(), configuration.toUtf8().toStdString(), *epoch, [this, token](LibraryBridge::Result result) {
     if (!requests_.finishBrowse(token, {})) return;
     if (!result.error.empty()) status_ = QStringLiteral("Lookup error: %1").arg(QString::fromStdString(result.error));
     else if (result.cancelled) status_ = QStringLiteral("Lookup cancelled.");
@@ -98,9 +103,14 @@ void CollectionView::lookupIndexed(const QString& path, const QString& engine, c
   });
   emit changed();
 }
-void CollectionView::requestOfflinePage(const QString& path, beatglass::library_detail::OfflineKey identity, const std::string& run, std::size_t beatOffset, std::size_t beatCount, std::size_t windowOffset, std::size_t windowCount, quint64 epoch) {
-  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear(); status_ = QStringLiteral("Checking offline page…");
-  worker_->offline_page(path.toUtf8().toStdString(), nativePath(path), std::move(identity), run, beatOffset, beatCount, windowOffset, windowCount, epoch, [this, token](LibraryBridge::Result result) {
+void CollectionView::requestOfflinePage(const QString& path, beatglass::library_detail::OfflineKey identity, const std::string& run, std::size_t beatOffset, std::size_t beatCount, std::size_t windowOffset, std::size_t windowCount) {
+  const bool continuation = !run.empty() && offlinePage_ && offlinePage_->run_id == run && pagePath_ == path && pageEpoch_;
+  const bool identityPresent = !path.isEmpty() && !identity.content_hash.empty() && !identity.engine_version.empty() && !identity.configuration_id.empty();
+  auto epoch = identityPresent ? (run.empty() ? epochs_.next() : (continuation ? pageEpoch_ : std::nullopt)) : std::nullopt;
+  auto token = requests_.beginBrowse(); offlinePage_.reset(); rows_.clear();
+  if (!epoch) { pageEpoch_.reset(); pagePath_.clear(); status_ = QStringLiteral("Offline page unavailable: identity, run, or epoch missing."); emit changed(); return; }
+  pageEpoch_ = *epoch; pagePath_ = path; status_ = QStringLiteral("Checking offline page…");
+  worker_->offline_page(path.toUtf8().toStdString(), nativePath(path), std::move(identity), run, beatOffset, beatCount, windowOffset, windowCount, *epoch, [this, token](LibraryBridge::Result result) {
     if (!requests_.finishBrowse(token, {})) return;
     if (!result.error.empty()) status_ = QStringLiteral("Offline page error: %1").arg(QString::fromStdString(result.error));
     else if (result.cancelled) status_ = QStringLiteral("Offline page cancelled.");

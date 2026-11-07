@@ -7,7 +7,7 @@
 #include <chrono>
 #include <limits>
 
-WindowsDj::WindowsDj(QObject* parent) : QObject(parent), timer_(new QTimer(this)) {
+WindowsDj::WindowsDj(beatglass::SourceEpochAllocator& epochs, QObject* parent) : QObject(parent), epochs_(epochs), timer_(new QTimer(this)) {
   connect(timer_, &QTimer::timeout, this, &WindowsDj::drain);
   timer_->start(50);
   worker_ = std::thread([this] { run(); });
@@ -42,9 +42,8 @@ void WindowsDj::drain() {
   }
 }
 void WindowsDj::run() {
-  beatglass::SourceEpochAllocator epochs;
-  beatglass::windows::LiveTempo capture(epochs);
-  beatglass::windows::DefaultTempoFollower follower(epochs);
+  beatglass::windows::LiveTempo capture(epochs_);
+  beatglass::windows::DefaultTempoFollower follower(epochs_);
   std::optional<float> followedBpm;
   bool following = false;
   std::uint64_t applied = 0;

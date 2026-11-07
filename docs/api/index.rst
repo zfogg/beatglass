@@ -18,6 +18,9 @@ causally ordered notifications to the control owner. A sequence gap or
 delivery loss invalidates the active epoch. Clock anchors are optional and
 carry a clock domain and optional uncertainty and latency; absence is not zero.
 These interfaces require adapter integration and do not implement capture.
+One process-owned ``SourceEpochAllocator`` may serve concurrent control and
+worker requests; it must outlive those callers and is never called by an audio
+callback. Issuance does not order worker completion or install stream formats.
 
 .. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/byte_source.hpp include/beatglass/capture/file_reader.hpp
 

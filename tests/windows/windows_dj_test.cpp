@@ -11,7 +11,7 @@ class WindowsDjTest : public QObject {
  Q_OBJECT
 private slots:
  void sourceListDoesNotResetOnPolling() {
-   WindowsDj model;
+   beatglass::SourceEpochAllocator epochs; WindowsDj model(epochs);
    QTRY_VERIFY_WITH_TIMEOUT(!model.sources().isEmpty(), 5000);
    QSignalSpy spy(&model, &WindowsDj::sourcesChanged);
    model.start(QStringLiteral("not-a-real-endpoint"));
@@ -19,7 +19,7 @@ private slots:
    QTest::qWait(250); QCOMPARE(spy.count(), 0);
  }
  void stopInvalidatesPendingFailure() {
-   WindowsDj model;
+   beatglass::SourceEpochAllocator epochs; WindowsDj model(epochs);
    model.start(QStringLiteral("not-a-real-endpoint"));
    QVERIFY(model.active());
    model.stop();
@@ -40,7 +40,7 @@ private slots:
    QVERIFY(endpoints.error.empty());
    const auto endpoint = std::find_if(endpoints.endpoints.begin(), endpoints.endpoints.end(), [](const auto& x) { return x.is_default; });
    QVERIFY(endpoint != endpoints.endpoints.end());
-   WindowsDj model;
+   beatglass::SourceEpochAllocator epochs; WindowsDj model(epochs);
    model.start(followDefault ? QStringLiteral("__beatglass_default__") : QString::fromStdString(endpoint->id));
    WAVEFORMATEX format{}; format.wFormatTag = WAVE_FORMAT_PCM; format.nChannels = 1; format.nSamplesPerSec = 44100;
    format.wBitsPerSample = 16; format.nBlockAlign = 2; format.nAvgBytesPerSec = 88200;
@@ -58,7 +58,7 @@ private slots:
    QTest::qWait(500); QCOMPARE(model.tempo(), QStringLiteral("\u2014")); QVERIFY(!model.active());
  }
  void failedEndpointCannotShowTempo() {
-   WindowsDj model;
+   beatglass::SourceEpochAllocator epochs; WindowsDj model(epochs);
    model.start(QStringLiteral("not-a-real-endpoint"));
    QTRY_VERIFY_WITH_TIMEOUT(!model.active(), 5000);
    QVERIFY(model.status().contains(QStringLiteral("failed"), Qt::CaseInsensitive) || model.status().contains(QStringLiteral("could not"), Qt::CaseInsensitive));

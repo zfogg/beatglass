@@ -6,6 +6,10 @@
 #include <QThread>
 #include <QFile>
 #include <QtTest>
+#include <limits>
+#ifdef _WIN32
+#include "windows_dj.hpp"
+#endif
 
 class CollectionViewTest : public QObject {
   Q_OBJECT
@@ -18,7 +22,7 @@ private slots:
       beatglass::library_detail::CollectionEntry a; a.path = "alpha.wav"; a.title = "Alpha"; db.put_entry(a);
       beatglass::library_detail::CollectionEntry b; b.path = "beta.wav"; b.title = "Beta"; db.put_entry(b);
     }
-    CollectionView view(path);
+    beatglass::SourceEpochAllocator epochs; CollectionView view(path, epochs);
     bool guiThread = true;
     connect(&view, &CollectionView::changed, &view, [&] { guiThread &= QThread::currentThread() == view.thread(); });
     view.refresh("alpha"); view.refresh("beta");
@@ -32,9 +36,35 @@ private slots:
   }
   void destructionCancelsPendingDelivery() {
     QTemporaryDir directory; QVERIFY(directory.isValid());
-    auto view = std::make_unique<CollectionView>(directory.filePath("empty.sqlite"));
+    beatglass::SourceEpochAllocator epochs; auto view = std::make_unique<CollectionView>(directory.filePath("empty.sqlite"), epochs);
     view->refresh(""); view.reset(); QCoreApplication::processEvents();
   }
+#ifdef _WIN32
+  void liveAndOfflineShareExhaustion() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    beatglass::SourceEpochAllocator epochs(std::numeric_limits<std::uint64_t>::max() - 2);
+    {
+      CollectionView view(directory.filePath("shared.sqlite"), epochs);
+      WindowsDj live(epochs);
+      live.start(QStringLiteral("not-a-real-endpoint"));
+      QVERIFY(view.analyzeIndexed(directory.filePath("missing.wav"), "integration-test-engine", "default"));
+      QTRY_VERIFY_WITH_TIMEOUT(!live.active(), 5000);
+      QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus() != QStringLiteral("Analysis running."), 10000);
+      QVERIFY(!epochs.next());
+      QVERIFY(!view.analyzeIndexed(directory.filePath("missing.wav"), "integration-test-engine", "default"));
+      QCOMPARE(view.analysisStatus(), QStringLiteral("Analysis unavailable: epoch limit reached."));
+      view.lookupIndexed(directory.filePath("missing.wav"), "integration-test-engine", "default");
+      QCOMPARE(view.status(), QStringLiteral("Lookup unavailable: identity or epoch missing."));
+      beatglass::library_detail::OfflineKey key{"hash", "integration-test-engine", "default", beatglass::OfflineMode::causal, {}};
+      view.requestOfflinePage(directory.filePath("missing.wav"), key, "", 0, 1, 0, 1);
+      QCOMPARE(view.status(), QStringLiteral("Offline page unavailable: identity, run, or epoch missing."));
+      live.start(QStringLiteral("not-a-real-endpoint"));
+      QTRY_VERIFY_WITH_TIMEOUT(!live.active(), 5000);
+      QCOMPARE(live.status(), QStringLiteral("Capture could not start"));
+    }
+    QVERIFY(!epochs.next());
+  }
+#endif
   void realIndexedAnalysisAndLookupRemainGated() {
     QTemporaryDir directory; QVERIFY(directory.isValid());
     const auto path = directory.filePath("library.sqlite");
@@ -44,19 +74,19 @@ private slots:
       beatglass::library_detail::SqliteCache db(path.toStdString());
       beatglass::library_detail::CollectionEntry row; row.path = audio.toUtf8().toStdString(); db.put_entry(row);
     }
-    CollectionView view(path);
-    view.lookupIndexed(audio, "integration-test-engine", "default", 1);
+    beatglass::SourceEpochAllocator epochs; CollectionView view(path, epochs);
+    view.lookupIndexed(audio, "integration-test-engine", "default");
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("No indexed analysis."), 10000);
-    QVERIFY(view.analyzeIndexed(audio, "integration-test-engine", "default", 2));
-    QVERIFY(!view.analyzeIndexed(audio, "integration-test-engine", "default", 3));
+    QVERIFY(view.analyzeIndexed(audio, "integration-test-engine", "default"));
+    QVERIFY(!view.analyzeIndexed(audio, "integration-test-engine", "default"));
     view.refresh("");
     QTRY_COMPARE_WITH_TIMEOUT(view.analysisStatus(), QStringLiteral("Analysis committed; result remains gated."), 15000);
-    view.lookupIndexed(audio, "integration-test-engine", "default", 4);
+    view.lookupIndexed(audio, "integration-test-engine", "default");
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Provisional analysis found; result remains gated."), 10000);
     QFile changed(audio); QVERIFY(changed.open(QIODevice::Append)); QCOMPARE(changed.write("x", 1), 1); changed.close();
-    view.lookupIndexed(audio, "integration-test-engine", "default", 5);
+    view.lookupIndexed(audio, "integration-test-engine", "default");
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Source changed or cannot be verified."), 10000);
-    QVERIFY(view.analyzeIndexed(audio, "integration-test-engine", "default", 6));
+    QVERIFY(view.analyzeIndexed(audio, "integration-test-engine", "default"));
     view.cancelAnalysis();
     QCOMPARE(view.analysisStatus(), QStringLiteral("Cancellation requested; awaiting terminal outcome."));
     QTRY_VERIFY_WITH_TIMEOUT(view.analysisStatus() != QStringLiteral("Cancellation requested; awaiting terminal outcome."), 15000);
@@ -96,28 +126,31 @@ private slots:
       QVERIFY(archive.publish(file,identity,value,"run-2",entry.path,verifier,{}).outcome==PublishOutcome::committed);
     }
     snapshot.value.reset();
-    CollectionView view(db);
-    view.requestOfflinePage(audio, identity, "", 0, 1, 0, 1, 11);
+    SourceEpochAllocator epochs; CollectionView view(db, epochs);
+    view.requestOfflinePage(audio, identity, "", 0, 1, 0, 1);
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Provisional offline page received; result remains gated."), 10000);
     QVERIFY(view.offlinePage()); QCOMPARE(QString::fromStdString(view.offlinePage()->run_id), QStringLiteral("run-2"));
+    const auto firstEpoch = view.offlinePage()->header.epoch;
+    QVERIFY(firstEpoch != 0);
     QVERIFY(!view.offlinePage()->beats.front().strength); QVERIFY(!view.offlinePage()->windows.front().rolling_key->strength);
     QCOMPARE(view.offlinePage()->header.beats.capacity(), std::size_t(0));
     QCOMPARE(view.offlinePage()->header.tonal_windows.capacity(), std::size_t(0));
-    view.requestOfflinePage(audio, identity, "run-2", 1, 1, 1, 1, 11);
+    view.requestOfflinePage(audio, identity, "run-2", 1, 1, 1, 1);
     QVERIFY(!view.offlinePage());
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Provisional offline page received; result remains gated."), 10000);
+    QCOMPARE(view.offlinePage()->header.epoch, firstEpoch);
     QCOMPARE(view.offlinePage()->windows.front().start_frame, std::uint64_t(100));
     QVERIFY(view.offlinePage()->windows.front().rolling_key_from == 100);
     QVERIFY(!view.offlinePage()->header.validated_track_key);
-    view.requestOfflinePage(audio, identity, "run-1", 0, 1, 0, 1, 11);
-    QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Offline source or active run changed."), 10000);
+    view.requestOfflinePage(audio, identity, "run-1", 0, 1, 0, 1);
+    QCOMPARE(view.status(), QStringLiteral("Offline page unavailable: identity, run, or epoch missing."));
     QVERIFY(!view.offlinePage());
-    view.requestOfflinePage(audio, identity, "run-2", 0, 1, 0, 1, 11);
+    view.requestOfflinePage(audio, identity, "", 0, 1, 0, 1);
     view.refresh("no match");
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("No indexed files."), 10000);
     QVERIFY(!view.offlinePage());
     QFile changed(audio); QVERIFY(changed.open(QIODevice::Append)); QCOMPARE(changed.write("x", 1), 1); changed.close();
-    view.requestOfflinePage(audio, identity, "run-2", 0, 1, 0, 1, 11);
+    view.requestOfflinePage(audio, identity, "", 0, 1, 0, 1);
     QTRY_COMPARE_WITH_TIMEOUT(view.status(), QStringLiteral("Offline source or active run changed."), 10000);
     QVERIFY(!view.offlinePage());
   }

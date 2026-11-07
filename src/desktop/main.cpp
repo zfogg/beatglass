@@ -1,6 +1,7 @@
 #include "metadata.hpp"
 #include "live_presentation.hpp"
 #include "playback_guard.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -15,11 +16,12 @@
 #endif
 int main(int argc, char** argv) {
   QGuiApplication app(argc, argv);
+  beatglass::SourceEpochAllocator epochs;
   Metadata metadata;
   LivePresentation livePresentation;
   PlaybackGuard playbackGuard;
 #ifdef _WIN32
-  WindowsDj windowsDj;
+  WindowsDj windowsDj(epochs);
 #endif
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);
@@ -29,7 +31,7 @@ int main(int argc, char** argv) {
   std::unique_ptr<CollectionView> collection;
   const auto database = qEnvironmentVariable("BEATGLASS_EXPERIMENTAL_LIBRARY_DB");
   if (!database.isEmpty()) {
-    collection = std::make_unique<CollectionView>(database);
+    collection = std::make_unique<CollectionView>(database, epochs);
     engine.rootContext()->setContextProperty("experimentalCollection", collection.get());
   }
 #endif

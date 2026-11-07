@@ -9,6 +9,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include "beatglass/capture/source_lifecycle.hpp"
 class QTimer;
 
 /** Windows-only GUI-thread bridge to a worker-owned experimental tempo source. The worker coalesces updates for nominal 50 ms GUI polling; invalidation is visible after polling, while stop clears immediately and rejects older generations. Destruction joins the worker. It supports the Windows default follower but does not provide key, chords or beat phase. */
@@ -19,8 +20,8 @@ class WindowsDj : public QObject {
   Q_PROPERTY(QString tempo READ tempo NOTIFY changed)
   Q_PROPERTY(bool active READ active NOTIFY changed)
 public:
-  /** Construct on the GUI thread and start a control worker; parent shares that thread. */
-  explicit WindowsDj(QObject* parent = nullptr);
+  /** Construct on the GUI thread with the process-owned epoch allocator, which must outlive this object and its joined worker. Allocation never occurs on the capture callback. */
+  explicit WindowsDj(beatglass::SourceEpochAllocator& epochs, QObject* parent = nullptr);
   // Documented manually in the API index for Hawkmoth destructor parsing.
   ~WindowsDj() override;
   /** Snapshot of discovered endpoint names and opaque IDs. */
@@ -46,6 +47,7 @@ private:
   struct Value { std::uint64_t generation{}; QString status; std::optional<float> bpm; bool active{}; QVariantList sources; };
   void run();
   void drain();
+  beatglass::SourceEpochAllocator& epochs_;
   std::mutex mutex_;
   std::condition_variable wake_;
   bool quitting_{}, requested_{}, refresh_{true}, pending_{};

@@ -1,6 +1,7 @@
 #pragma once
 #include "library_bridge.hpp"
 #include "collection_requests.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include <QObject>
 #include <QVariantList>
 #include <QTimer>
@@ -13,8 +14,8 @@ class CollectionView : public QObject {
   Q_PROPERTY(QString status READ status NOTIFY changed)
   Q_PROPERTY(QString analysisStatus READ analysisStatus NOTIFY changed)
 public:
-  /** Open the provisional database on the worker, not on the GUI thread. */
-  explicit CollectionView(const QString& database, QObject* parent = nullptr);
+  /** Open the provisional database on the worker. The shared process epoch allocator must outlive this object and its joined worker. */
+  explicit CollectionView(const QString& database, beatglass::SourceEpochAllocator& epochs, QObject* parent = nullptr);
   ~CollectionView() override;
   /** Return a copy of the current bounded page. */
   QVariantList rows() const { return rows_; }
@@ -24,14 +25,14 @@ public:
   QString analysisStatus() const { return analysisStatus_; }
   /** Replace the current browse query; older pages are never presented. */
   Q_INVOKABLE void refresh(const QString& search);
-  /** Submit a real indexed tempo job with the exact runtime identity and a nonzero epoch from the process-owned coordinator. The caller must not invent identities or reuse an epoch. Reject a second job until the first terminal has been observed. The source is not modified. */
-  bool analyzeIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch);
+  /** Submit a real indexed tempo job with the exact runtime identity and a fresh process epoch. Unknown identity or exhausted epochs reject the request. The source is not modified. */
+  bool analyzeIndexed(const QString& path, const QString& engine, const QString& configuration);
   /** Request cancellation; a commit already started may still succeed and its retained ticket remains authoritative. */
   void cancelAnalysis();
-  /** Look up an indexed file under the exact runtime identity and a nonzero process-coordinator-issued epoch. A hit is reported as provisional and its value is not exposed. This replaces pending browse work. */
-  void lookupIndexed(const QString& path, const QString& engine, const QString& configuration, quint64 epoch);
-  /** Request one independently bounded page for a caller-verified identity and coordinator-issued epoch. Empty run selects the active run; subsequent requests must pass its run ID. A result is provisional and is never shown by the product UI. Replaces pending browse work. */
-  void requestOfflinePage(const QString& path, beatglass::library_detail::OfflineKey identity, const std::string& run, std::size_t beatOffset, std::size_t beatCount, std::size_t windowOffset, std::size_t windowCount, quint64 epoch);
+  /** Look up an indexed file under the exact runtime identity and a fresh process epoch. A hit remains provisional and its value is not exposed. This replaces pending browse work. */
+  void lookupIndexed(const QString& path, const QString& engine, const QString& configuration);
+  /** Request a bounded page for a verified identity. An empty run starts a new process epoch; continuation requires the previously returned run and keeps its epoch. Results remain provisional and hidden from product UI. */
+  void requestOfflinePage(const QString& path, beatglass::library_detail::OfflineKey identity, const std::string& run, std::size_t beatOffset, std::size_t beatCount, std::size_t windowOffset, std::size_t windowCount);
   /** Read the last owned provisional page; invalidated immediately by another browse, lookup, or page request. */
   const std::optional<beatglass::library_detail::OfflinePage>& offlinePage() const { return offlinePage_; }
 signals:
@@ -40,6 +41,9 @@ signals:
 private:
   using Requests = CollectionRequests<LibraryBridge::Page, LibraryBridge::Result>;
   Requests requests_;
+  beatglass::SourceEpochAllocator& epochs_;
+  std::optional<std::uint64_t> pageEpoch_;
+  QString pagePath_;
   QVariantList rows_;
   QString status_;
   QString analysisStatus_;
