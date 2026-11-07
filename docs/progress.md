@@ -42,6 +42,9 @@ Ubuntu 22.04 WSL2: `cmake --build /tmp/beatglass-slice -j 6` and `ctest --test-d
 
 Windows x64 MSVC Debug, development dependencies: `cmake --build build-slice --config Debug -j 4`, `ctest --test-dir build-slice -C Debug --output-on-failure`: 9/9 passed. A separate pinned manifest build passed 9/9: `cmake -S . -B build-manifest -G "Visual Studio 17 2022" -A x64 -DBEATGLASS_BUILD_SLICE=ON -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=C:/Users/zachf/scoop/apps/vcpkg/current/scripts/buildsystems/vcpkg.cmake`, `cmake --build build-manifest --config Debug -j 6`, `ctest --test-dir build-manifest -C Debug --output-on-failure`. The optional Qt feature and presets were not run. WSL distribution dependency test was rerun after the prefix-causality fixture: 10/10 passed.
 
+## API documentation
+
+Hawkmoth/Sphinx reference and an Actions-based Pages workflow cover the current provisional headers. The strict documentation build validates parsing, not product functionality or native qualification. Pages publishing requires the workflow to reach main. Reconcile comments and the header index with continuing foundation changes.
 ## Continuity, clock and normalization increment
 
 `StreamContinuity` detects gaps, discontinuities and epochs, rejects format changes within an epoch, and is used by file replay. `AudioClockAnchor` maps same-epoch frame positions to a monotonic point estimate with overflow checks; drift, anchor validity and backend timing remain open. `reduce_loudest_channel` is now shared by the file path, with anti-phase, malformed and non-finite input tests. The policy is still provisional and may switch channels between blocks.

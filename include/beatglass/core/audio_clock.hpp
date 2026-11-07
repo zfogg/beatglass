@@ -3,7 +3,7 @@
 #include <limits>
 #include <optional>
 namespace beatglass {
-/// A point estimate relating one frame in an epoch to a monotonic clock.
+/** A point estimate relating one frame in an epoch to a monotonic clock. */
 struct AudioClockAnchor {
   std::uint64_t epoch{}; ///< Source session identifier.
   std::uint64_t frame{}; ///< Frame position within the epoch.

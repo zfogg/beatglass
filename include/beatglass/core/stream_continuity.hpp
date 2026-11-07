@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <limits>
 namespace beatglass {
-/// Result of inspecting a block against the previous accepted block.
+/** Result of inspecting a block against the previous accepted block. */
 enum class StreamTransition {
   invalid, ///< Malformed block or format changed within an epoch.
   acquire, ///< First accepted block after construction or stop.
@@ -35,7 +35,7 @@ public:
     started_ = true; epoch_ = block.epoch; format_ = f; next_ = block.first_frame + frames;
     return transition;
   }
-  /// Forget the active stream; the next accepted block starts acquisition.
+  /** Forget the active stream; the next accepted block starts acquisition. */
   void stop() noexcept { started_ = false; }
 private:
   bool started_ = false; std::uint64_t epoch_ = 0, next_ = 0; AudioFormat format_{};
