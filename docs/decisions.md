@@ -64,3 +64,7 @@ Snapshot publication uses exclusive `observed_through` frame boundaries and
 nonempty half-open chord intervals. A beat at the boundary and an empty chord
 are now rejected; existing producers must adjust. This does not qualify any
 native capture or presentation path.
+
+## Playback dependency proposal
+
+The desktop playback increment proposes Qt Multimedia 6.8.3 alongside the existing Qt SDK. It plays through the selected Qt multimedia backend, which can use different codecs from the libsndfile analysis path; support varies by platform and backend. The Windows development check used the official Qt 6.8.3 `qtmultimedia` module installed with aqt 3.3.0 and the SDK's FFmpeg backend. The module's complete archive hash and transitive acquisition lock have not yet been recorded, and Linux/macOS builds and codec behavior remain unverified. FFmpeg, Qt Multimedia and any platform codec distribution/license obligations require review along with the existing combined-distribution decision before release; this is a development dependency proposal, not a packaging approval.

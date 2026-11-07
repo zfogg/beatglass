@@ -3,6 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import Qt.labs.folderlistmodel
+import QtMultimedia
 
 ApplicationWindow {
     id: window
@@ -17,12 +18,20 @@ ApplicationWindow {
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
 
+    function formatTime(ms) {
+        const tenths = Math.floor(Math.max(0, ms) / 100)
+        const minutes = Math.floor(tenths / 600)
+        const seconds = Math.floor(tenths / 10) % 60
+        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "." + (tenths % 10)
+    }
     function activateEntry(index) {
         if (index < 0 || index >= files.count) return
         const url = files.get(index, "fileUrl")
         if (files.isFolder(index)) {
             browseFolder = url
         } else {
+            player.stop()
+            player.source = url
             selectedName = files.get(index, "fileName")
             metadataBridge.inspect(url)
         }
@@ -36,6 +45,11 @@ ApplicationWindow {
         nameFilters: ["*" + search.text + "*.wav", "*" + search.text + "*.flac", "*" + search.text + "*.mp3", "*" + search.text + "*.aiff", "*" + search.text + "*.aif"]
         caseSensitive: false
         sortField: FolderListModel.Name
+    }
+    MediaPlayer {
+        id: player
+        objectName: "player"
+        audioOutput: AudioOutput {}
     }
     header: ToolBar {
         RowLayout {
@@ -59,7 +73,7 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
                 Label { text: "Library"; font.pixelSize: 28; font.bold: true }
                 Label {
-                    text: "Browse local folders. Indexing, analysis, playback and saved results are not available yet."
+                    text: "Browse local folders. Indexing, analysis and saved results are not available yet."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 RowLayout {
@@ -129,7 +143,31 @@ ApplicationWindow {
                         anchors.fill: parent
                         Label { text: window.selectedName || "No file selected"; font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true }
                         Label { objectName: "metadataStatus"; text: window.metadataStatus; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                        Label { text: "Analysis details and playback are not available yet."; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                        RowLayout {
+                            Button {
+                                text: player.playbackState === MediaPlayer.PlayingState ? "Pause" : "Play"
+                                enabled: player.source.toString() !== "" && player.error === MediaPlayer.NoError
+                                onClicked: player.playbackState === MediaPlayer.PlayingState ? player.pause() : player.play()
+                            }
+                            Button { text: "Stop"; enabled: player.playbackState !== MediaPlayer.StoppedState; onClicked: player.stop() }
+                            Slider {
+                                id: seek
+                                objectName: "seek"
+                                Layout.fillWidth: true
+                                from: 0; to: Math.max(1, player.duration)
+                                value: player.position
+                                enabled: player.seekable && player.duration > 0
+                                Accessible.name: "Playback position"
+                                onMoved: player.position = value
+                            }
+                            Label { text: window.formatTime(player.position) + " / " + window.formatTime(player.duration) }
+                        }
+                        Label {
+                            objectName: "playbackStatus"
+                            text: player.error === MediaPlayer.NoError ? "" : "Playback error: " + player.errorString
+                            visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        Label { text: "Chord timeline and analysis details are not available yet."; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                     }
                 }
             }

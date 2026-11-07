@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import QtMultimedia
 import "../../src/desktop/qml"
 
 TestCase {
@@ -58,6 +59,16 @@ TestCase {
         keyClick(Qt.Key_Return)
         compare(app.selectedName, "tone.flac")
         verify(fakeMetadata.lastFile.toString().endsWith("/tone.flac"))
+        compare(app.formatTime(123400), "2:03.4")
+        let player = findChild(app, "player")
+        compare(player.playbackState, MediaPlayer.StoppedState)
+        tryVerify(() => player.duration >= 200, 10000)
+        verify(player.seekable)
+        player.position = 100
+        tryVerify(() => Math.abs(player.position - 100) < 50, 5000)
+        player.source = Qt.resolvedUrl("../fixtures/generated/missing.flac")
+        tryVerify(() => player.error !== MediaPlayer.NoError, 10000)
+        verify(findChild(app, "playbackStatus").text.startsWith("Playback error:"))
         app.destroy()
     }
 }

@@ -161,3 +161,7 @@ qualification are still in progress.
 The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
+
+## Phase 1 file playback increment
+
+On Windows 10.0.26300 x64 with MSVC 19.44, Qt 6.8.3 and the existing codec-enabled vcpkg installation, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4` and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 39/39. The offscreen Qt Quick test loaded the generated FLAC fixture via Qt Multimedia, checked its duration and a seek, and verified a missing-file error; it did not verify audible output, the native UI, other formats, or cross-platform playback. The Qt 6.8.3 Multimedia module was added to the existing development SDK with `PYTHONPATH=$env:TEMP/beatglass-aqt` and `python -m aqt install-qt windows desktop 6.8.3 win64_msvc2022_64 --noarchives -m qtmultimedia -O "$env:TEMP/beatglass-qt"`. This is not a complete artifact or licensing qualification. The SQLite collection API and time-aligned analysis details remain unimplemented; see `collection-ui-integration.md` for the proposed boundary.
