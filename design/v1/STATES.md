@@ -21,3 +21,5 @@ Additional implementation states to exercise: empty search; no selected track; u
 1. Show overlay → monitoring continues and main window hides. Provide a Windows/Linux tray icon or macOS menu-bar icon; omit the main window from the taskbar while hidden where supported.
 2. Tray/menu-bar actions restore controls, unlock/edit or hide the overlay, and quit. A second launch restores the existing window. No restore control is required on the overlay itself.
 3. If the platform cannot expose the icon, retain a visible window or taskbar recovery route and explain why. Test icon disappearance, process relaunch, permission loss, display changes, shutdown and compositor refusal on actual platforms.
+
+The overlay's default track-metadata state is unavailable: combined system output alone cannot identify a DJ app's tracks or decks. The underlying DJ application in the scene owns its own illustrative data. Any future DJ-app integration is optional and software-specific, must show provenance and freshness and clear on disconnect or deck change, and must not attribute combined-mix analysis to a deck without evidence. Generic MIDI is not a guaranteed live title/artist feed.

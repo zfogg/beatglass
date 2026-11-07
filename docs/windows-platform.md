@@ -286,4 +286,25 @@ The shared provisional tray/menu and per-user relaunch handoff keep controls dis
 
 The merged WASAPI device-position checks mark jumps, resets, invalid timestamps and flagged discontinuities for downstream reacquisition. Capture validates frame and timestamp arithmetic before publication; overflow releases the buffer and interrupts the attempt. Empty invalid or flagged buffers carry a discontinuity to the next nonempty packet. These checks have deterministic unit coverage; physical endpoint changes, driver overflow and integrated real-DJ reacquisition remain unqualified.
 
-The provisional composite worker can use a shared one-attempt start authorization. Stop or replacement cancels it without waiting for the worker; one worker may claim it. Cancellation is checked before and after audio start and during capture polling, but cannot preempt an executing native call. A racing poll or pop may still return a packet, so synchronized authorization or generation gating is required before publication. The bridge must retain and cancel its authorization on stop, switch and destruction and join the worker. Deterministic fake-backend coverage does not qualify bridge integration or physical device timing.
+Device-position continuity checks are deterministic unit coverage only. Physical
+endpoint switching, device removal and return, and integrated reacquisition over
+actual DJ output remain unqualified.
+
+Capture validates epoch-frame and valid QPC arithmetic for the complete WASAPI
+buffer before publishing a chunk. Arithmetic overflow releases that buffer and
+interrupts the attempt; invalid timestamps are not added. Empty invalid or
+flagged buffers retain a discontinuity for the next nonempty packet. Boundary
+checks are simulated; actual driver overflow and empty flagged buffers have not
+been observed or qualified.
+
+The provisional composite worker can use a shared one-attempt start
+authorization: Stop or replacement cancels it without waiting for the worker,
+and only one worker can claim it. A pre-claim cancellation prevents the start;
+after a claim, cancellation is checked before and after the audio start call
+and during capture polling; earlier initialization calls are not individually
+checked. A native call already in progress is not preempted. A racing poll or
+pop may return a packet, so synchronized authorization or generation gating
+is required before publishing. The desktop bridge must retain and cancel its own authorization on
+Stop, switch and destruction, gate stale deliveries, and join the worker. This
+contract has deterministic fake-backend coverage; the bridge integration and
+physical device timing remain unqualified.
