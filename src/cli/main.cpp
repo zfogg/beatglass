@@ -1,4 +1,5 @@
 #include "beatglass/core/file_analysis.hpp"
+#include "state_label.hpp"
 #include <exception>
 #include <iomanip>
 #include <iostream>
@@ -6,15 +7,6 @@
 #include <string_view>
 
 namespace {
-const char* state_label(beatglass::TrackingState state) {
-  switch (state) {
-    case beatglass::TrackingState::stopped: return "stopped";
-    case beatglass::TrackingState::silent: return "silent";
-    case beatglass::TrackingState::tracking: return "tracking";
-    case beatglass::TrackingState::reacquiring: return "reacquiring";
-    default: return "acquiring";
-  }
-}
 void json_string(std::string_view s) {
   constexpr char hex[] = "0123456789abcdef";
   std::cout << '"';
@@ -32,7 +24,7 @@ void json_result(const char* type, const beatglass::TempoResult& r, std::uint64_
   std::cout << ",\"sample_rate\":" << r.metadata.sample_rate << ",\"channels\":" << r.metadata.channels
             << ",\"frames\":" << r.metadata.frames << ",\"beats\":" << r.beats << ",\"bpm\":";
   if (r.bpm) std::cout << *r.bpm; else std::cout << "null";
-  std::cout << ",\"state\":\"" << state_label(r.state) << "\"}\n";
+  std::cout << ",\"state\":\"" << beatglass::cli::state_label(r.state) << "\"}\n";
 }
 }
 #ifdef _WIN32
@@ -58,7 +50,7 @@ int main(int argc, char** argv) {
       if (json) { json_result("replay", state, frame); return; }
       std::cout << "observed frame: " << frame << " tempo: ";
       if (state.bpm) std::cout << *state.bpm; else std::cout << "unknown";
-      std::cout << " state: " << state_label(state.state) << "\n";
+      std::cout << " state: " << beatglass::cli::state_label(state.state) << "\n";
     }) : beatglass::analyze_file(path);
     if (json) { json_result("result", r); return 0; }
     std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nbeats: " << r.beats << "\ntempo: ";
