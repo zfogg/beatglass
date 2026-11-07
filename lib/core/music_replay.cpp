@@ -19,6 +19,7 @@ CausalMusicState CausalMusicReplay::process(const AudioBlock& block, const BeatO
   auto& s = *impl_;
   if (s.failed) throw std::runtime_error("Music replay failed");
   try {
+    if (!block.epoch) throw std::invalid_argument("Music replay requires a nonzero epoch");
     if (s.require_new_epoch && block.epoch <= s.interrupted_epoch) throw std::invalid_argument("A new epoch is required after interruption");
     if (!s.tempo) s.tempo = std::make_unique<CausalTempoReplay>();
     if (s.has_source && (block.epoch != s.result.tempo.epoch || block.first_frame != s.result.tempo.observed_through || block.discontinuity)) s.clear_tonal();

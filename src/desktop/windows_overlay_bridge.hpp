@@ -19,6 +19,8 @@ public:
   bool clickThrough() const;
   /** Request click-through; false means the controller rejected the request. */
   Q_INVOKABLE bool setClickThrough(bool enabled);
+  /** Set the GUI-owned external recovery guarantee; revocation unlocks if controls are unavailable. */
+  void setExternalRecoveryAvailable(bool available);
   /** Clamp and apply the window opacity. */
   Q_INVOKABLE void setOpacity(qreal opacity);
   /** Current restored or selected window opacity. */

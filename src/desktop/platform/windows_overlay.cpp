@@ -52,7 +52,7 @@ void OverlayController::setOpacity(qreal opacity) {
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(1); }
 bool OverlayController::setClickThrough(bool enabled) {
-  if (enabled && (!overlay_ || !control_ || overlay_.data() == control_.data() || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) return false;
+  if (enabled && (!overlay_ || !control_ || overlay_.data() == control_.data() || (!external_recovery_ && (!control_->isVisible() || control_->windowState() == Qt::WindowMinimized)))) return false;
   const bool changed = click_through_ != enabled;
   if (enabled) endDrag();
   click_through_ = enabled;
@@ -61,6 +61,10 @@ bool OverlayController::setClickThrough(bool enabled) {
   return true;
 }
 bool OverlayController::clickThrough() const { return click_through_; }
+void OverlayController::setExternalRecoveryAvailable(bool available) {
+  external_recovery_ = available;
+  if (!available && (!control_ || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) setClickThrough(false);
+}
 bool OverlayController::beginDrag() {
   POINT cursor{}; RECT bounds{};
   if (!overlay_ || click_through_ || !GetCursorPos(&cursor) || !GetWindowRect(reinterpret_cast<HWND>(overlay_->winId()), &bounds)) return false;
@@ -91,7 +95,7 @@ void OverlayController::applyFlags() {
 }
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
-      (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) { endDrag(); setClickThrough(false); }
+      (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) { endDrag(); if (!external_recovery_) setClickThrough(false); }
   return QObject::eventFilter(watched, event);
 }
 void OverlayController::keepOnScreen() {

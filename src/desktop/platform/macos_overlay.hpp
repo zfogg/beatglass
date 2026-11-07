@@ -23,7 +23,7 @@ public:
 /** Create the AppKit implementation on macOS. Caller owns the result. */
 std::unique_ptr<OverlayNative> makeOverlayNative();
 
-/** Provisional GUI-thread-only overlay controller. The caller owns both distinct windows and supplies a separate visible control-window escape path. An optional owned QSettings store records geometry and opacity on the GUI thread; write failures are not currently surfaced, and click-through is never restored. AppKit hints do not guarantee visibility over other applications or fullscreen Spaces. */
+/** Provisional GUI-thread-only overlay controller. The caller owns both distinct windows and supplies a visible control-window escape or an established external recovery route. An optional owned QSettings store records geometry and opacity on the GUI thread; write failures are not currently surfaced, and click-through is never restored. AppKit hints do not guarantee visibility over other applications or fullscreen Spaces. */
 class OverlayController final : public QObject {
   Q_OBJECT
   Q_PROPERTY(bool clickThrough READ clickThrough NOTIFY clickThroughChanged)
@@ -45,8 +45,10 @@ public:
   Q_INVOKABLE void setOpacity(qreal value);
   /** Return the current overlay opacity or the default before attachment. */
   qreal opacity() const;
-  /** Apply input transparency only when a separate control window is visible and not minimized. A failed unlock hides the overlay. */
+  /** Apply input transparency only when a separate control window or established external recovery route is available. A failed unlock hides the overlay. */
   Q_INVOKABLE bool setClickThrough(bool enabled);
+  /** Set the GUI-owned tray recovery guarantee. Revocation unlocks if controls are hidden or minimized; a failed unlock hides the overlay. */
+  void setExternalRecoveryAvailable(bool available);
   /** True if click-through was successfully requested and remains active. */
   bool clickThrough() const;
   /** True while attached to valid windows and native setup succeeded. */
@@ -68,7 +70,7 @@ public:
   /** Emitted when the overlay opacity changes. */
   Q_SIGNAL void opacityChanged();
 protected:
-  /** Reconfigure on surface recreation and unlock on control hide, close or minimization. */
+  /** Reconfigure on surface recreation; loss of controls unlocks unless external recovery is established. */
   bool eventFilter(QObject* watched, QEvent* event) override;
 private:
   void setAvailable(bool available);
@@ -82,6 +84,6 @@ private:
   QPointer<QWindow> control_;
   QRect saved_geometry_;
   qreal saved_opacity_{0.9};
-  bool available_{}, click_through_{}, restoring_{}, have_snapshot_{};
+  bool available_{}, click_through_{}, restoring_{}, have_snapshot_{}, external_recovery_{};
 };
 }

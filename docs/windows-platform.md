@@ -281,3 +281,5 @@ and the targeted CTest expression `Queue overflow invalidates|Session|Default fo
 passed 11/11. This deterministic test does not reproduce hardware queue
 overflow. The default follower can retry after failure; selected-output UI
 recovery remains an integration behavior to verify.
+
+The shared provisional tray/menu and per-user relaunch handoff keep controls discoverable until a reliable Windows recovery route is established. Qt's reported tray availability and icon visibility do not prove reachability across Explorer loss or restart; no hidden-window guarantee is claimed. The external recovery contract unlocks the overlay when a verified route is revoked while controls are unavailable. Offscreen controller tests do not qualify Explorer, taskbar, pointer, or desktop behavior. The earlier Qt Windows platform-initialization crash and interrupted `windows_dj` run remain unverified.

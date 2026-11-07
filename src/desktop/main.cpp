@@ -1,8 +1,12 @@
 #include "metadata.hpp"
 #include "live_presentation.hpp"
 #include "playback_guard.hpp"
+#include "app_lifecycle.hpp"
 #include "beatglass/capture/source_lifecycle.hpp"
-#include <QGuiApplication>
+#include <QApplication>
+#include <QDir>
+#include <QStandardPaths>
+#include <QQuickWindow>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #ifdef Q_OS_MACOS
@@ -21,7 +25,14 @@
 #include <QSettings>
 #endif
 int main(int argc, char** argv) {
-  QGuiApplication app(argc, argv);
+  QApplication app(argc, argv);
+  app.setOrganizationName(QStringLiteral("Beatglass")); app.setApplicationName(QStringLiteral("Beatglass"));
+  app.setQuitOnLastWindowClosed(false);
+  const auto dataDirectory = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+  if (dataDirectory.isEmpty() || !QDir().mkpath(dataDirectory)) return 1;
+  AppLifecycle lifecycle(QStringLiteral("desktop"), dataDirectory);
+  const auto startup = lifecycle.start();
+  if (startup != AppLifecycle::Startup::primary) return startup == AppLifecycle::Startup::restored ? 0 : 1;
   beatglass::SourceEpochAllocator epochs;
   Metadata metadata;
   LivePresentation livePresentation;
@@ -39,6 +50,7 @@ int main(int argc, char** argv) {
   engine.rootContext()->setContextProperty("metadata", &metadata);
   engine.rootContext()->setContextProperty("playbackGuard", &playbackGuard);
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
+  engine.rootContext()->setContextProperty("appLifecycle", &lifecycle);
 #ifdef Q_OS_MACOS
   engine.rootContext()->setContextProperty("macOverlayController", &macOverlayController);
 #endif
@@ -58,12 +70,18 @@ int main(int argc, char** argv) {
 #endif
   engine.load(QUrl("qrc:/Main.qml"));
   if (engine.rootObjects().isEmpty()) return 1;
-#ifdef _WIN32
   auto* control = qobject_cast<QQuickWindow*>(engine.rootObjects().front());
+  if (!control) return 1;
+#ifdef _WIN32
   auto* overlay = control ? control->findChild<QQuickWindow*>(QStringLiteral("djOverlay")) : nullptr;
   if (!control || !overlay) return 1;
   WindowsOverlay overlayBridge(overlay, control, nullptr, &overlaySettings);
   control->setProperty("overlayBridge", QVariant::fromValue(static_cast<QObject*>(&overlayBridge)));
+  QObject::connect(&lifecycle, &AppLifecycle::recoveryAvailableChanged, &overlayBridge, [&] { overlayBridge.setExternalRecoveryAvailable(lifecycle.recoveryAvailable()); });
 #endif
+#ifdef Q_OS_MACOS
+  QObject::connect(&lifecycle, &AppLifecycle::recoveryAvailableChanged, &macOverlayController, [&] { macOverlayController.setExternalRecoveryAvailable(lifecycle.recoveryAvailable()); });
+#endif
+  lifecycle.attach(control);
   return app.exec();
 }

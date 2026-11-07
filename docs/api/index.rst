@@ -74,6 +74,12 @@ Desktop application internals
 
 .. cpp:autodoc:: src/desktop/collection_view.hpp
 
+.. cpp:autodoc:: src/desktop/app_lifecycle.hpp
+
+.. cpp:function:: AppLifecycle::~AppLifecycle()
+
+   Close the tray and local server on the GUI thread before releasing the per-user instance lock.
+
 .. cpp:function:: CollectionView::~CollectionView()
 
    Cancel and join the worker on the GUI thread. Filesystem I/O may delay destruction.

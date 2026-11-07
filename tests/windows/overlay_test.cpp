@@ -19,6 +19,14 @@ protected:
 class OverlayTest : public QObject {
   Q_OBJECT
 private slots:
+  void externalRecoveryKeepsAndRevokesClickThrough() {
+    QQuickWindow overlay; QWindow control; control.show();
+    beatglass::windows::OverlayController controller(&overlay, &control);
+    controller.setExternalRecoveryAvailable(true); QVERIFY(controller.setClickThrough(true));
+    control.hide(); QVERIFY(controller.clickThrough());
+    controller.setExternalRecoveryAvailable(false); QVERIFY(!controller.clickThrough());
+    QVERIFY(!controller.setClickThrough(true));
+  }
   void recoveredPositionIsPersistedImmediately() {
     QTemporaryDir directory;
     QVERIFY(directory.isValid());

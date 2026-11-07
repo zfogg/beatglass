@@ -20,11 +20,24 @@ ApplicationWindow {
     property var collectionBridge: typeof experimentalCollection === "undefined" ? null : experimentalCollection
     property var djBridge: typeof windowsDj === "undefined" ? null : windowsDj
     property var overlayBridge: typeof macOverlayController === "undefined" ? null : macOverlayController
+    property var lifecycleBridge: typeof appLifecycle === "undefined" ? null : appLifecycle
     readonly property bool macOverlay: !!overlayBridge && typeof overlayBridge.showOverlay === "function"
     property url browseFolder: ""
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    onClosing: if (!lifecycleBridge || !lifecycleBridge.recoveryAvailable) Qt.quit()
+    function hideOverlay() {
+        if (!overlayBridge) return
+        if (macOverlay) overlayBridge.hideOverlay()
+        else { overlayBridge.endDrag(); overlayBridge.setClickThrough(false); djOverlay.hide() }
+    }
+    function showOverlay() {
+        if (!overlayBridge) return
+        if (macOverlay) overlayBridge.showOverlay()
+        else { overlayBridge.keepOnScreen(); djOverlay.show() }
+        if (djOverlay.visible && lifecycleBridge) lifecycleBridge.hideControls()
+    }
     onBrowseFolderChanged: {
         invalidateSelection()
     }
@@ -298,11 +311,12 @@ ApplicationWindow {
                 Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
                 Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
-                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge && (!window.macOverlay || window.overlayBridge.available); onClicked: { if (window.macOverlay) { if (djOverlay.visible) window.overlayBridge.hideOverlay(); else window.overlayBridge.showOverlay() } else if (djOverlay.visible) { window.overlayBridge.endDrag(); window.overlayBridge.setClickThrough(false); djOverlay.hide() } else { window.overlayBridge.keepOnScreen(); djOverlay.show() } } }
+                    Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge && (!window.macOverlay || window.overlayBridge.available); onClicked: { if (djOverlay.visible) window.hideOverlay(); else window.showOverlay() } }
                     Button { objectName: "lockOverlay"; text: window.overlayBridge && window.overlayBridge.clickThrough ? "Unlock overlay" : "Enable click-through"; enabled: !!window.overlayBridge && djOverlay.visible; onClicked: window.overlayBridge.setClickThrough(!window.overlayBridge.clickThrough) }
                     Button { objectName: "recoverOverlay"; text: "Move on screen"; enabled: !!window.overlayBridge; onClicked: window.overlayBridge.keepOnScreen() }
                     Label { text: "Drag when unlocked. Unlock: Ctrl+Shift+U while Beatglass is active"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 }
+                Label { visible: !!window.lifecycleBridge && !window.lifecycleBridge.recoveryAvailable; text: "Controls stay open until tray recovery is verified."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
                     Label { text: "Overlay opacity" }
                     Slider { objectName: "overlayOpacity"; from: 0.25; to: 1.0; value: window.overlayBridge ? window.overlayBridge.opacity : 1; enabled: !!window.overlayBridge; Accessible.name: "Overlay opacity"; onMoved: window.overlayBridge.setOpacity(value); Layout.fillWidth: true }
@@ -354,6 +368,11 @@ ApplicationWindow {
         }
     }
     Shortcut { sequence: "Ctrl+Shift+U"; context: Qt.ApplicationShortcut; enabled: !!window.overlayBridge; onActivated: window.overlayBridge.setClickThrough(false) }
+    Connections {
+        target: window.lifecycleBridge
+        function onEditOverlayRequested() { if (window.overlayBridge) window.overlayBridge.setClickThrough(false) }
+        function onHideOverlayRequested() { window.hideOverlay() }
+    }
     Connections {
         target: window.metadataBridge
         function onStatusChanged(text) { window.metadataStatus = text }

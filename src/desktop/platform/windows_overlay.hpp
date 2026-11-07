@@ -24,8 +24,10 @@ public:
   Q_INVOKABLE void setOpacity(qreal opacity);
   /** Return the current whole-window opacity, or one if the overlay no longer exists. */
   qreal opacity() const;
-  /** Enable click-through only while the distinct control window is visible and not minimized; return whether the requested state was applied. Hiding, minimizing, closing or destroying the control window unlocks the overlay. */
+  /** Enable click-through only with a distinct visible control window or an established external recovery route. Loss of both unlocks the overlay. */
   Q_INVOKABLE bool setClickThrough(bool enabled);
+  /** Set the GUI-owned tray recovery guarantee. Revocation immediately unlocks if controls are hidden or minimized. */
+  void setExternalRecoveryAvailable(bool available);
   /** Return the current click-through state. */
   bool clickThrough() const;
   /** Move and resize an overlay into an available screen's logical-pixel geometry. No action occurs if no screen is available. */
@@ -41,7 +43,7 @@ public:
   /** Emitted on the GUI thread when the controller changes opacity. */
   Q_SIGNAL void opacityChanged(qreal opacity);
 protected:
-  /** Unlock if the control window is hidden, minimized or closed. */
+  /** Unlock on control-window loss unless external recovery is established. */
   bool eventFilter(QObject* watched, QEvent* event) override;
 private:
   void applyFlags();
@@ -52,5 +54,6 @@ private:
   bool dragging_{};
   long cursor_x_{}, cursor_y_{}, window_x_{}, window_y_{};
   bool click_through_{};
+  bool external_recovery_{};
 };
 }

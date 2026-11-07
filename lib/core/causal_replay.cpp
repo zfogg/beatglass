@@ -18,7 +18,7 @@ struct CausalTempoReplay::Impl {
   std::uint64_t hop_first{}, silent_frames{};
   std::uint32_t rate{}; std::uint16_t channels{};
   CausalTempoState result;
-  bool failed{}, reset_next{};
+  bool failed{}, reset_next{}, processing{};
   void begin(const AudioBlock& block, StreamTransition transition) {
     if (transition == StreamTransition::acquire) {
       if (!lifecycle.start(block.epoch)) throw std::runtime_error("Could not start tracking");
@@ -51,13 +51,18 @@ struct CausalTempoReplay::Impl {
     result.state = lifecycle.state(); result.beats = current.beats;
     result.bpm = result.state == TrackingState::tracking ? current.bpm : std::nullopt;
     if (observer) observer({result.epoch, first, rate, reset_next || reset || resumed, mono}, result.state);
+    if (failed) throw std::logic_error("Replay observer reentered process");
     reset_next = false;
   }
 };
 CausalTempoReplay::CausalTempoReplay() : impl_(std::make_unique<Impl>()) {}
 CausalTempoReplay::~CausalTempoReplay() = default;
 CausalTempoState CausalTempoReplay::process(const AudioBlock& block, const HopObserver& observer) {
-  auto& s = *impl_; if (s.failed) throw std::runtime_error("Replay engine failed");
+  auto& s = *impl_;
+  if (s.failed) throw std::runtime_error("Replay engine failed");
+  if (s.processing) { s.failed = true; throw std::logic_error("Replay observer reentered process"); }
+  struct ProcessingGuard { bool& flag; ~ProcessingGuard() { flag = false; } } guard{s.processing};
+  s.processing = true;
   try {
     if (!std::all_of(block.samples.begin(), block.samples.end(), [](float x) { return std::isfinite(x); })) throw std::invalid_argument("Audio contains invalid samples");
     if (s.tracker && (block.epoch < s.result.epoch ||

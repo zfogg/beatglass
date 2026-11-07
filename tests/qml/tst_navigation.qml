@@ -27,6 +27,12 @@ TestCase {
         function cancelSelected() { analysisActive = false; provisionalWindows = [] }
     }
     QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
+    QtObject {
+        id: fakeLifecycle
+        property bool recoveryAvailable: false; property int hideRequests: 0
+        signal editOverlayRequested(); signal hideOverlayRequested()
+        function hideControls() { hideRequests++; return recoveryAvailable }
+    }
     QtObject { id: fakeOverlay; property bool clickThrough: false; property real opacity: 1; property int endCount: 0; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) { opacity = value } function beginDrag() { return true } function dragToCursor() {} function endDrag() { endCount++ } }
     QtObject {
         id: fakeMacOverlay
@@ -45,6 +51,22 @@ TestCase {
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard } }
     Component { id: collectionShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; collectionBridge: fakeCollection } }
     Component { id: macShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; overlayBridge: fakeMacOverlay } }
+    Component { id: lifecycleShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; djBridge: fakeDj; overlayBridge: fakeOverlay; lifecycleBridge: fakeLifecycle } }
+    function test_overlayRequestsRecoveryAndRetainsFallback() {
+        fakeLifecycle.hideRequests = 0; fakeLifecycle.recoveryAvailable = false
+        fakeDj.active = true
+        let app = lifecycleShell.createObject(null)
+        let player = findChild(app, "player")
+        player.source = Qt.resolvedUrl("../fixtures/generated/tone.flac")
+        const playbackSource = player.source.toString()
+        findChild(app, "navigation").currentIndex = 1
+        findChild(app, "showOverlay").clicked()
+        compare(fakeLifecycle.hideRequests, 1); verify(app.visible)
+        verify(fakeDj.active); compare(player.source.toString(), playbackSource)
+        fakeOverlay.clickThrough = true; fakeLifecycle.editOverlayRequested(); verify(!fakeOverlay.clickThrough)
+        fakeLifecycle.hideOverlayRequested(); tryCompare(findChild(app, "djOverlay"), "visible", false)
+        app.destroy(); fakeDj.active = false
+    }
     function test_macOverlayControls() {
         fakeMacOverlay.attaches = 0; fakeMacOverlay.shows = 0; fakeMacOverlay.selectedScreen = -1; fakeMacOverlay.requestedWidth = 0
         let app = macShell.createObject(null)

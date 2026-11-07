@@ -42,6 +42,16 @@ public:
 class OverlayControlTest final : public QObject {
   Q_OBJECT
 private slots:
+  void externalRecoveryKeepsAndRevokesClickThrough() {
+    QQuickWindow overlay; QWindow control; control.show();
+    auto native = std::make_unique<FakeNative>(); auto* backend = native.get();
+    OverlayController controller(std::move(native));
+    QVERIFY(controller.attach(&overlay, &control)); QVERIFY(controller.showOverlay());
+    controller.setExternalRecoveryAvailable(true); QVERIFY(controller.setClickThrough(true));
+    control.hide(); QVERIFY(controller.clickThrough()); QVERIFY(backend->mode);
+    controller.setExternalRecoveryAvailable(false); QVERIFY(!controller.clickThrough()); QVERIFY(!backend->mode);
+    QVERIFY(!controller.setClickThrough(true));
+  }
   void escapeAndOpacity() {
     QQuickWindow overlay; QWindow control;
     overlay.setFlag(Qt::WindowTransparentForInput, true);

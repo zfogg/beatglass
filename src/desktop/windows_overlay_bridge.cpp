@@ -8,6 +8,7 @@ WindowsOverlay::WindowsOverlay(QQuickWindow* overlay, QWindow* control, QObject*
 WindowsOverlay::~WindowsOverlay() = default;
 bool WindowsOverlay::clickThrough() const { return controller_->clickThrough(); }
 bool WindowsOverlay::setClickThrough(bool enabled) { return controller_->setClickThrough(enabled); }
+void WindowsOverlay::setExternalRecoveryAvailable(bool available) { controller_->setExternalRecoveryAvailable(available); }
 void WindowsOverlay::setOpacity(qreal value) { controller_->setOpacity(value); }
 qreal WindowsOverlay::opacity() const { return controller_->opacity(); }
 void WindowsOverlay::keepOnScreen() { controller_->keepOnScreen(); }

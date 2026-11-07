@@ -100,8 +100,8 @@ void OverlayController::saveSettings() {
 }
 bool OverlayController::setClickThrough(bool enabled) {
   if (!overlay_ || !native_) return !enabled;
-  if (enabled && (!available_ || !control_ || overlay_.data() == control_.data() || !control_->isVisible() ||
-                  control_->windowState() == Qt::WindowMinimized || !overlay_->isVisible())) return false;
+  if (enabled && (!available_ || !control_ || overlay_.data() == control_.data() ||
+                  (!external_recovery_ && (!control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) || !overlay_->isVisible())) return false;
   if (!native_->apply(overlay_, enabled)) {
     // The actual input mode is unknown on failure: hide before declaring the feature unavailable.
     overlay_->hide(); setAvailable(false);
@@ -112,6 +112,10 @@ bool OverlayController::setClickThrough(bool enabled) {
   return true;
 }
 bool OverlayController::clickThrough() const { return click_through_; }
+void OverlayController::setExternalRecoveryAvailable(bool available) {
+  external_recovery_ = available;
+  if (!available && (!control_ || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) setClickThrough(false);
+}
 bool OverlayController::available() const { return available_; }
 QStringList OverlayController::screenNames() const {
   QStringList names;
@@ -138,7 +142,7 @@ bool OverlayController::resizeOverlay(int width, int height) {
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
       (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) {
-    saveSettings(); setClickThrough(false);
+    saveSettings(); if (!external_recovery_) setClickThrough(false);
   }
   if (watched == overlay_ && event->type() == QEvent::PlatformSurface &&
       static_cast<QPlatformSurfaceEvent*>(event)->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
