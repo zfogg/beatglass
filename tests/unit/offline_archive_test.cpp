@@ -23,7 +23,7 @@ TEST_CASE("offline archive preserves optionals and overlapping windows in bounde
   TempDb db; FileVersion source; source.content_hash="sha256:content"; source.path="song"; Verify verify;
   { SqliteCache cache(db.path.string()); CollectionEntry entry; entry.path="song"; cache.put_entry(entry); OfflineArchive archive(cache);
     REQUIRE(archive.publish(source,key(),value(),"run-1","song",verify,{}).outcome == PublishOutcome::committed);
-    auto p=archive.page(source,key(),"run-1",0,1,0,1,20,verify,{}); REQUIRE(p.status == OfflineReadStatus::hit); REQUIRE(p.page); REQUIRE(p.page->header.epoch==20); REQUIRE(p.page->total_beats==2); REQUIRE(p.page->next_beat==1);
+    auto p=archive.page(source,key(),"run-1",0,1,0,1,20,verify,{}); REQUIRE(p.status == OfflineReadStatus::hit); REQUIRE(p.page); REQUIRE(p.page->header.epoch==20); REQUIRE(p.page->header.beats.capacity()==0); REQUIRE(p.page->header.tonal_windows.capacity()==0); REQUIRE(p.page->total_beats==2); REQUIRE(p.page->next_beat==1);
     REQUIRE_FALSE(p.page->beats[0].strength); REQUIRE_FALSE(p.page->windows[0].rolling_key->strength); REQUIRE(p.page->windows[0].rolling_key_from == 0);
     auto q=archive.page(source,key(),"run-1",1,1,1,1,20,verify,{}); REQUIRE(q.status == OfflineReadStatus::hit); REQUIRE(q.page); REQUIRE(q.page->beats[0].strength == 0.5f); REQUIRE(q.page->windows[0].start_frame==100); REQUIRE_FALSE(q.page->windows[0].local_chord);
     REQUIRE(archive.page(source,key(),"run-1",0,201,0,1,20,verify,{}).status == OfflineReadStatus::error);
