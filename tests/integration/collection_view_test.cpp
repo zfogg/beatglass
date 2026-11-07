@@ -7,6 +7,9 @@
 #include <QFile>
 #include <QtTest>
 #include <limits>
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
 #ifdef _WIN32
 #include "windows_dj.hpp"
 #include "platform/windows_default_tempo.hpp"
@@ -15,6 +18,24 @@
 class CollectionViewTest : public QObject {
   Q_OBJECT
 private slots:
+  void invalidReplacementCancelsBlockedBrowseWorker() {
+    QTemporaryDir directory; QVERIFY(directory.isValid());
+    std::atomic<int> entered{0}, stopped{0}; std::mutex mutex; std::condition_variable_any waiting;
+    beatglass::SourceEpochAllocator epochs; CollectionView view(directory.filePath("library.sqlite"), epochs);
+    view.worker_->set_test_browse_hook([&](std::stop_token stop) {
+      std::unique_lock lock(mutex); ++entered; waiting.wait(lock, stop, [] { return false; }); ++stopped;
+    });
+    view.refresh(""); QTRY_COMPARE_WITH_TIMEOUT(entered.load(), 1, 10000);
+    view.lookupIndexed(QString(), QString(), QString());
+    QTRY_COMPARE_WITH_TIMEOUT(stopped.load(), 1, 10000);
+    QCOMPARE(view.status(), QStringLiteral("Lookup unavailable: identity or epoch missing."));
+    view.refresh(""); QTRY_COMPARE_WITH_TIMEOUT(entered.load(), 2, 10000);
+    beatglass::library_detail::OfflineKey invalid;
+    view.requestOfflinePage(QString(), invalid, "", 0, 1, 0, 1);
+    QTRY_COMPARE_WITH_TIMEOUT(stopped.load(), 2, 10000);
+    QCOMPARE(view.status(), QStringLiteral("Offline page unavailable: identity, run, or epoch missing."));
+    QCoreApplication::processEvents(); QCOMPARE(view.status(), QStringLiteral("Offline page unavailable: identity, run, or epoch missing."));
+  }
 #ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
   void realCompositeWorkerDeliversOnlyUnverifiedEvidence() {
     QTemporaryDir directory; QVERIFY(directory.isValid());

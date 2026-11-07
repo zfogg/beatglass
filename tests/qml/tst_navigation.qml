@@ -13,7 +13,7 @@ TestCase {
         signal statusChanged(string status)
         function inspect(url) { lastFile = url; statusChanged(url.toString() === "" ? "Select a local file." : "Metadata for " + url) }
     }
-    QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "â€”"; property string key: "â€”"; property string chord: "â€”" }
+    QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
     QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
     QtObject {
         id: fakeCollection
@@ -26,7 +26,7 @@ TestCase {
         function analyzeSelected() { analysisStatus = "Provisional analysis complete"; provisionalWindows = [{range:"Frames [0, 100)", key:"C", keyFrom:"0", keyStrength:"Unknown", chord:"Unknown", chordStrength:"Unknown"}]; return true }
         function cancelSelected() { analysisActive = false; provisionalWindows = [] }
     }
-    QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "â€”"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "â€”" } }
+    QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
     QtObject {
         id: fakeLifecycle
         property bool recoveryAvailable: false; property int hideRequests: 0
@@ -172,6 +172,14 @@ TestCase {
         compare(String(app.playbackDevice.id), String(selector.model[next].id))
         app.destroy()
     }
+    function test_unavailableMonitorAndUnicodeLabels() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "chooseFolder").text, "Choose folder…")
+        findChild(app, "navigation").currentIndex = 1
+        compare(findChild(app, "djTempo").text, "BPM: —")
+        verify(!findChild(app, "startMonitor").enabled)
+        app.destroy()
+    }
     function test_realFolderNavigationAndSelection() {
         let app = shell.createObject(null)
         let model = findChild(app, "fileModel")
@@ -190,12 +198,12 @@ TestCase {
             if (model.get(i, "fileName") === "tone.flac") audio = i
         verify(audio >= 0)
         let sort = findChild(app, "sortOrder")
-        compare(sort.text, "Name â†‘")
+        compare(sort.text, "Name ↑")
         sort.clicked()
-        compare(sort.text, "Name â†“")
+        compare(sort.text, "Name ↓")
         tryVerify(() => model.get(0, "fileName") === "tone.mp3")
         sort.clicked()
-        compare(sort.text, "Name â†‘")
+        compare(sort.text, "Name ↑")
         tryVerify(() => model.get(0, "fileName") === "tone.aiff")
         findChild(app, "search").text = "no-such-file"
         tryCompare(model, "count", 0)

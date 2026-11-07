@@ -157,7 +157,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { text: "Choose folderâ€¦"; objectName: "chooseFolder"; onClicked: folderPicker.open() }
+                    Button { text: "Choose folder…"; objectName: "chooseFolder"; onClicked: folderPicker.open() }
                     Button {
                         text: "Up"; objectName: "parentFolder"
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
@@ -174,7 +174,7 @@ ApplicationWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true; onTextChanged: window.invalidateSelection() }
-                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name â†“" : "Name â†‘"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -298,7 +298,7 @@ ApplicationWindow {
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
-                Label { text: window.djBridge ? "Monitor a selected Windows output. Other sounds on that output are included." : "Live output monitoring is not available on this platform yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                Label { text: window.djBridge ? "Monitor a selected Windows output. Other sounds on that output are included." : "Live output monitoring is unavailable until freshness checks are complete."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
                     ComboBox { id: sourceBox; objectName: "sourceBox"; model: window.djBridge ? window.djBridge.sources : []; textRole: "name"; Layout.fillWidth: true; Accessible.name: "Output to monitor"; enabled: window.djBridge && !window.djBridge.active }
                     Button { text: "Refresh outputs"; enabled: !!window.djBridge; onClicked: window.djBridge.refresh() }
@@ -308,7 +308,7 @@ ApplicationWindow {
                     Button { objectName: "stopMonitor"; text: "Stop monitoring"; enabled: !!window.djBridge && window.djBridge.active; onClicked: window.djBridge.stop() }
                 }
                 Label { objectName: "djStatus"; text: "Status: " + (window.djBridge ? window.djBridge.status : "Unavailable") }
-                Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "â€”"); font.pixelSize: 22 }
+                Label { objectName: "djTempo"; text: "BPM: " + (window.djBridge ? window.djBridge.tempo : "—"); font.pixelSize: 22 }
                 Label { text: "Key, chords and beat phase are not available yet."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
                     Button { objectName: "showOverlay"; text: djOverlay.visible ? "Hide overlay" : "Show overlay"; enabled: !!window.overlayBridge && (!window.macOverlay || window.overlayBridge.available); onClicked: { if (djOverlay.visible) window.hideOverlay(); else window.showOverlay() } }
@@ -376,7 +376,7 @@ ApplicationWindow {
             Column {
                 anchors.centerIn: parent; spacing: 5
                 Label { text: window.djBridge ? window.djBridge.status : "Unavailable"; color: "white"; font.pixelSize: 16 }
-                Label { text: "BPM " + (window.djBridge ? window.djBridge.tempo : "â€”"); color: "white"; font.pixelSize: 30; font.bold: true }
+                Label { text: "BPM " + (window.djBridge ? window.djBridge.tempo : "—"); color: "white"; font.pixelSize: 30; font.bold: true }
             }
         }
     }

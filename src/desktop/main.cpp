@@ -21,7 +21,6 @@
 #include <memory>
 #endif
 #ifdef _WIN32
-#include "windows_dj.hpp"
 #include "windows_overlay_bridge.hpp"
 #include <QQuickWindow>
 #include <QSettings>
@@ -69,7 +68,6 @@ int main(int argc, char** argv) {
       std::make_unique<QSettings>(QSettings::NativeFormat, QSettings::UserScope, QStringLiteral("Beatglass"), QStringLiteral("Beatglass")));
 #endif
 #ifdef _WIN32
-  WindowsDj windowsDj(epochs);
   QSettings overlaySettings(QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
 #endif
   QQmlApplicationEngine engine;
@@ -90,9 +88,6 @@ int main(int argc, char** argv) {
     collection = std::make_unique<CollectionView>(database, epochs);
     engine.rootContext()->setContextProperty("experimentalCollection", collection.get());
   }
-#endif
-#ifdef _WIN32
-  engine.rootContext()->setContextProperty("windowsDj", &windowsDj);
 #endif
   engine.load(QUrl("qrc:/Main.qml"));
   if (engine.rootObjects().isEmpty()) return 1;

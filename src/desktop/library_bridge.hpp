@@ -97,5 +97,8 @@ public:
   /** Cancel both lanes. Pending tickets retain cancellation; active tickets retain the actual eventual outcome, including a commit. */
   void cancel();
 private:
+  friend class CollectionViewTest;
+  /** Install a worker hook before requests for deterministic cancellation tests. */
+  void set_test_browse_hook(std::function<void(std::stop_token)> hook);
   std::shared_ptr<State> state_;
 };
