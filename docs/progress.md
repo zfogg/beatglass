@@ -264,3 +264,7 @@ With the same WSL and Windows build configurations and commands in the preceding
 ## Phase 1 tonal dependency experiment
 
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
+
+After merging main `e91c71e` (merged ByteSource #41), the bridge and snapshot integration retain the merged direct-read cancellation/EOF/buffer semantics and real decoder and mutation tests. Serial WSL build and CTest passed 98/98; serial Windows codec-enabled build and CTest passed 101/101 using the same commands and environments above. These do not enable desktop, PipeWire, composite tonal replay, or qualify native desktop/audio/overlay scenarios.
+
+Post-merge API documentation checks: `python docs/api/check_headers.py` and `docker run --rm -v "${PWD}:/work" beatglass-docs sh -c 'sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html19 && python3 docs/api/check_rendered.py /tmp/beatglass-docs-html19/index.html'` passed (71 rendered names).

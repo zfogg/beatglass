@@ -8,13 +8,19 @@
 /** Experimental application-private worker bridge. Construct, request, cancel and destroy on the GUI thread. The supplied dispatcher must enqueue its callable on that same thread, never invoke it inline; its captured objects must outlive the bridge. If dispatch throws, that completion is dropped. One request runs and one newest request waits; a newer request cancels and suppresses older completions. A suppressed completion may still have committed before cancellation. Destruction cancels and joins the worker, and suppresses queued deliveries. Blocking filesystem I/O can delay destruction. Not connected to product UI: snapshot identity guarantees remain provisional. */
 class LibraryBridge {
 public:
+  /** Owned metadata row. */
   using Entry = beatglass::library_detail::CollectionEntry;
+  /** Bounded owned collection page. */
   using Page = std::vector<Entry>;
+  /** Owned exact-path result or absence. */
   using Detail = std::optional<Entry>;
+  /** Owned tempo-only terminal result. */
   using Analysis = beatglass::library_detail::StoredSnapshotJobResult;
   /** Owned completion payload. Error text covers initialization, validation and query failures; analysis carries its own terminal status. */
   struct Result { std::variant<std::monostate, Page, Detail, Analysis> value; std::string error; bool cancelled{}; };
+  /** Enqueue a callable to the GUI thread. */
   using Dispatch = std::function<void(std::function<void()>)>;
+  /** GUI-thread receiver for one owned result. */
   using Completion = std::function<void(Result)>;
   /** Start the worker; it opens and closes the database on that worker. */
   LibraryBridge(std::string database, Dispatch dispatch);
