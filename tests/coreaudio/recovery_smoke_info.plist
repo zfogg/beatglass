@@ -8,4 +8,3 @@
 <key>CFBundleVersion</key><string>1</string>
 <key>NSAudioCaptureUsageDescription</key><string>Capture the selected output to test Beatglass system audio monitoring.</string>
 </dict></plist>
-
