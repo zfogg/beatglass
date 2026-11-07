@@ -43,3 +43,8 @@ Desktop application internals
 -----------------------------
 
 .. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp
+
+Experimental virtual file I/O
+-----------------------------
+
+.. cpp:autodoc:: lib/capture/file/virtual_io.hpp

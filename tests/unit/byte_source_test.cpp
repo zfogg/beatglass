@@ -23,7 +23,7 @@ public:
 TEST_CASE("byte cursor seeks and reads one borrowed source without reopening") {
  MemorySource source; ByteCursor decoder(source); std::array<std::byte, 2> out{};
  auto first = decoder.read(out); REQUIRE(first.status == ByteReadStatus::data); REQUIRE(first.bytes == 2);
- CHECK(out[0] == std::byte{1}); CHECK(out[1] == std::byte{2}); CHECK(decoder.position() == 2);
+ CHECK(std::to_integer<int>(out[0]) == 1); CHECK(std::to_integer<int>(out[1]) == 2); CHECK(decoder.position() == 2);
  REQUIRE(decoder.seek(0)); REQUIRE(decoder.read(out).bytes == 2);
  REQUIRE(decoder.read(out).bytes == 1); CHECK(decoder.position() == 3);
  CHECK(decoder.read(out).status == ByteReadStatus::end); CHECK_FALSE(decoder.seek(4)); CHECK(decoder.position() == 3);
