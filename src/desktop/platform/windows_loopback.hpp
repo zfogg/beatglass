@@ -22,6 +22,19 @@ struct LoopbackPacket {
   bool discontinuity{}; /**< True on a WASAPI discontinuity, device-position jump, timestamp error, position overflow or preceding queue drop; downstream must reset and reacquire. */
 };
 
+/** Shared one-attempt start authorization. Any thread may cancel; one control worker may claim. Cancellation before the claim prevents startup; after the claim it requests shutdown. Polling is asynchronous and may race cancellation; the consumer must synchronize its own generation or token gate before publishing. No operation allocates or blocks. */
+class LoopbackStartAuthorization {
+public:
+  /** Atomically commit the sole start unless cancellation won first. */
+  bool claim() noexcept { unsigned expected = 0; return state_.compare_exchange_strong(expected, 1, std::memory_order_acq_rel); }
+  /** Revoke the attempt. Safe concurrently with claim and native startup. */
+  void cancel() noexcept { state_.store(2, std::memory_order_release); }
+  /** True after revocation. */
+  bool cancelled() const noexcept { return state_.load(std::memory_order_acquire) == 2; }
+private:
+  std::atomic<unsigned> state_{0};
+};
+
 /** Provisional selected-endpoint capture, independent of the shared source contract. Virtual control methods allow deterministic adapter tests; production capture callbacks do not dispatch through this interface. */
 class Loopback {
 public:
@@ -42,6 +55,8 @@ public:
   Loopback& operator=(const Loopback&) = delete;
   /** Start the opaque UTF-8 render endpoint ID using a caller-allocated, never-reused epoch. Call on the control thread while stopped; errors are observable through state and error_code. */
   virtual bool start(const std::string& endpoint_id, std::uint64_t epoch);
+  /** Start with a claimed authorization retained by the capture worker. Cancellation is checked immediately before and after the audio start call, and during capture polling; earlier initialization calls are not individually checked. An already executing OS call is not preempted. */
+  virtual bool start(const std::string& endpoint_id, std::uint64_t epoch, std::shared_ptr<LoopbackStartAuthorization> authorization);
   /** Stop and join the capture thread. Call on the control thread; queued packets are discarded. */
   virtual void stop();
   /** Read current state from any non-capture thread. */
