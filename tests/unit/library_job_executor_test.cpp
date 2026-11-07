@@ -99,3 +99,72 @@ TEST_CASE("tracked failures and discarded jobs remain observable after shutdown"
   REQUIRE(failed->frames() == 7);
   REQUIRE(discarded->state() == TrackedState::cancelled);
 }
+
+TEST_CASE("shutdown destroys discarded work outside the queue lock") {
+  struct ReenterOnDestruction {
+    JobExecutor* executor;
+    std::promise<bool>* result;
+    ~ReenterOnDestruction() {
+      result->set_value(executor->submit(0, [](std::stop_token) {}));
+    }
+  };
+  JobExecutor executor(1);
+  std::promise<void> started;
+  std::promise<bool> reentered;
+  REQUIRE(executor.submit(0, [&](std::stop_token stop) {
+    started.set_value();
+    while (!stop.stop_requested()) std::this_thread::yield();
+  }));
+  REQUIRE(started.get_future().wait_for(5s) == std::future_status::ready);
+  auto capture = std::make_shared<ReenterOnDestruction>(&executor, &reentered);
+  REQUIRE(executor.submit(0, [capture](std::stop_token) {}));
+  capture.reset();
+  executor.shutdown();
+  auto result = reentered.get_future();
+  REQUIRE(result.wait_for(5s) == std::future_status::ready);
+  REQUIRE_FALSE(result.get());
+}
+
+TEST_CASE("terminal tracked jobs reject late progress and cancellation") {
+  using beatglass::library_detail::TrackedState;
+  JobExecutor executor(1);
+  std::function<void(std::uint64_t)> retained;
+  std::stop_token token;
+  auto handle = executor.submit_tracked(0, [&](std::stop_token stop, const auto& progress) {
+    token = stop; retained = progress; progress(3); return TrackedState::completed;
+  });
+  REQUIRE(handle);
+  const auto deadline = std::chrono::steady_clock::now() + 5s;
+  while (handle->state() != TrackedState::completed && std::chrono::steady_clock::now() < deadline) std::this_thread::yield();
+  REQUIRE(handle->state() == TrackedState::completed);
+  retained(100);
+  REQUIRE(handle->frames() == 3);
+  bool called = false;
+  std::stop_callback callback(token, [&] { called = true; });
+  handle->cancel();
+  REQUIRE_FALSE(called);
+  REQUIRE_FALSE(token.stop_requested());
+  executor.shutdown();
+}
+
+TEST_CASE("tracked cancellation runs stop callbacks outside the state lock") {
+  using beatglass::library_detail::TrackedState;
+  JobExecutor executor(1);
+  std::promise<void> armed, complete;
+  std::promise<std::shared_ptr<beatglass::library_detail::JobHandle>> published;
+  auto future = published.get_future().share();
+  auto handle = executor.submit_tracked(0, [&](std::stop_token stop, const auto&) {
+    auto self = future.get();
+    std::stop_callback callback(stop, [&] { (void)self->state(); complete.set_value(); });
+    armed.set_value();
+    while (!stop.stop_requested()) std::this_thread::yield();
+    return TrackedState::cancelled;
+  });
+  REQUIRE(handle);
+  published.set_value(handle);
+  REQUIRE(armed.get_future().wait_for(5s) == std::future_status::ready);
+  handle->cancel();
+  REQUIRE(complete.get_future().wait_for(5s) == std::future_status::ready);
+  executor.shutdown();
+  REQUIRE(handle->state() == TrackedState::cancelled);
+}

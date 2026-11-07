@@ -16,7 +16,10 @@ enum class TrackedState {
 /** Thread-safe retained view of one tracked job; may outlive the executor. */
 class JobHandle {
 public:
-  /** Request cooperative cancellation; a queued job is marked cancelled immediately. */
+  /** Request cooperative cancellation; a queued job is marked cancelled immediately.
+   * A call observing a terminal state does nothing. A request begun while work
+   * is running can race terminal publication; stop callbacks run without the
+   * handle mutex and may finish after terminal state becomes observable. */
   void cancel();
   /** Copy current state. */ TrackedState state() const;
   /** Copy the latest monotonic frame count. */ std::uint64_t frames() const;
@@ -31,7 +34,7 @@ class JobExecutor {
 public:
   /** A job invoked on the worker with a cooperative shutdown token. */
   using Work = std::function<void(std::stop_token)>;
-  /** Tracked work reports its terminal outcome itself, so late cancellation cannot relabel a successful commit. Progress calls are synchronous and monotonic. */
+  /** Tracked work reports its terminal outcome itself, so late cancellation cannot relabel a successful commit. The progress callback must not be retained after work returns; calls are synchronous and monotonic, and late calls cannot update terminal state. */
   using TrackedWork = std::function<TrackedState(std::stop_token, const std::function<void(std::uint64_t)>&)>;
   /** Start one worker; capacity bounds queued jobs, excluding the running job. */
   explicit JobExecutor(std::size_t capacity);

@@ -14,7 +14,13 @@ struct JobHandle::State {
 };
 JobHandle::JobHandle(std::shared_ptr<State> state) : state_(std::move(state)) {}
 void JobHandle::cancel() {
-  { std::lock_guard lock(state_->mutex); if (state_->status == TrackedState::queued) state_->status = TrackedState::cancelled; }
+  {
+    std::lock_guard lock(state_->mutex);
+    if (state_->status != TrackedState::queued && state_->status != TrackedState::running) return;
+    if (state_->status == TrackedState::queued) state_->status = TrackedState::cancelled;
+  }
+  // A cancellation begun while running can race terminal publication. Never
+  // invoke stop callbacks while holding the state mutex.
   state_->stop.request_stop();
 }
 TrackedState JobHandle::state() const { std::lock_guard lock(state_->mutex); return state_->status; }
@@ -63,7 +69,7 @@ std::shared_ptr<JobHandle> JobExecutor::submit_tracked(int priority, TrackedWork
       state->status = TrackedState::running;
     }
     std::stop_callback on_shutdown(shutdown, [state] { state->stop.request_stop(); });
-    auto progress = [state](std::uint64_t frames) { std::lock_guard lock(state->mutex); if (frames > state->frames) state->frames = frames; };
+    auto progress = [state](std::uint64_t frames) { std::lock_guard lock(state->mutex); if (state->status == TrackedState::running && frames > state->frames) state->frames = frames; };
     TrackedState result = TrackedState::failed;
     try { result = work(state->stop.get_token(), progress); } catch (...) {}
     if (result != TrackedState::completed && result != TrackedState::cancelled && result != TrackedState::failed) result = TrackedState::failed;
@@ -77,13 +83,15 @@ std::shared_ptr<JobHandle> JobExecutor::submit_tracked(int priority, TrackedWork
   return handle;
 }
 void JobExecutor::shutdown() {
+  std::deque<Impl::Job> discarded;
   {
     std::lock_guard lock(impl_->mutex);
     if (impl_->stopping) return;
     impl_->stopping = true;
-    for (const auto& job : impl_->queue) if (job.handle) job.handle->cancel();
-    impl_->queue.clear();
+    discarded.swap(impl_->queue);
   }
+  for (const auto& job : discarded) if (job.handle) job.handle->cancel();
+  discarded.clear();
   impl_->worker.request_stop();
   impl_->ready.notify_all();
   if (impl_->worker.joinable()) impl_->worker.join();
