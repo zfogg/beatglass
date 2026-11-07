@@ -161,9 +161,10 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
     if (published == Publish::stale_input) return verification_failure(verified);
     if (published == Publish::error) return {FileJobStatus::error, {}, "cache publication failed or commit outcome unknown", std::make_pair(id, key)};
     return {FileJobStatus::committed, result, {}};
-  } catch (const detail::VirtualOpenCancelled&) { return {FileJobStatus::cancelled, {}, {}}; }
+  } catch (const FileOpenCancelled&) { return {FileJobStatus::cancelled, {}, {}}; }
     catch (const Cancelled&) { return {FileJobStatus::cancelled, {}, {}}; }
     catch (const std::exception& e) { return {FileJobStatus::error, {}, e.what()}; }
 }
 
 }
+
