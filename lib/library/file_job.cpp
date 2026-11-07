@@ -148,6 +148,9 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
     catch (const std::exception& e) { return {FileJobStatus::error, {}, e.what()}; }
 }
 
+AnalysisIdentity snapshot_tempo_identity(const std::string& content, const std::string& engine, const std::string& configuration) {
+  return {content, replay_version(engine), configuration, "offline"};
+}
 StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const std::filesystem::path& path,
   const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop,
   const std::function<void(std::uint64_t)>& progress) {
@@ -160,7 +163,7 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
     auto modified = opened.value->modified_unix_ns();
     if (!modified) return {FileJobStatus::stale_input, {}, "original modification time cannot be represented", {}};
     FileVersion file{std::filesystem::absolute(path), opened.value->size(), *modified, opened.value->digest()};
-    AnalysisIdentity identity{opened.value->digest(), replay_version(engine), config, "offline"};
+    AnalysisIdentity identity = snapshot_tempo_identity(opened.value->digest(), engine, config);
     auto found = store.find(file, identity, stop);
     if (found.outcome == FindOutcome::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
     if (found.outcome == FindOutcome::error) return {FileJobStatus::error, {}, found.diagnostic, {}};

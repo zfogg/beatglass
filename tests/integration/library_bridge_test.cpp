@@ -72,3 +72,49 @@ TEST_CASE("library bridge retains cancellation of pending requests") {
   }
   std::error_code ignored; std::filesystem::remove_all(dir, ignored);
 }
+
+TEST_CASE("indexed analysis links content for verified lookup and rejects changed source") {
+  auto dir = std::filesystem::temp_directory_path() / ("beatglass-indexed-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+  std::filesystem::create_directory(dir); auto db = dir / "cache.sqlite"; auto audio = dir / "tone.aiff";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", audio);
+  auto key = audio.generic_string();
+  { TempoAnalysisStore store(db.string()); CollectionEntry row; row.path = key; row.title = "Indexed"; store.put_entry(row); }
+  Dispatcher queue; std::optional<LibraryBridge::Result> result;
+  {
+    LibraryBridge bridge(db.string(), [&](auto call) { queue.post(std::move(call)); });
+    bridge.lookup_indexed(key, audio, "indexed-v1", "default", 10, [&](auto r) { result = std::move(r); });
+    auto call = queue.take(); REQUIRE(call); call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::miss);
+    bridge.analyze_indexed(key, audio, "indexed-v1", "default", 11, [&](auto r) { result = std::move(r); });
+    call = queue.take(); REQUIRE(call); call(); REQUIRE(result->association_error.empty());
+    REQUIRE(std::get<LibraryBridge::Analysis>(result->value).status == FileJobStatus::committed);
+    bridge.lookup_indexed(key, audio, "indexed-v1", "default", 12, [&](auto r) { result = std::move(r); });
+    call = queue.take(); REQUIRE(call); call(); auto found = std::get<LibraryBridge::Lookup>(result->value);
+    REQUIRE(found.status == LibraryBridge::LookupStatus::hit); REQUIRE(found.value); REQUIRE(found.value->result.observed_through.epoch == 12);
+    { std::ofstream out(audio, std::ios::binary | std::ios::app); out << 'x'; }
+    bridge.lookup_indexed(key, audio, "indexed-v1", "default", 13, [&](auto r) { result = std::move(r); });
+    call = queue.take(); REQUIRE(call); call(); REQUIRE(std::get<LibraryBridge::Lookup>(result->value).status == LibraryBridge::LookupStatus::changed);
+  }
+  std::error_code ignored; std::filesystem::remove_all(dir, ignored);
+}
+
+TEST_CASE("browsing does not cancel queued analysis") {
+  auto dir = std::filesystem::temp_directory_path() / ("beatglass-lanes-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+  std::filesystem::create_directory(dir); auto audio = dir / "tone.aiff";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", audio);
+  std::mutex mutex; std::condition_variable ready; bool entered = false, release = false; Dispatcher queue;
+  {
+    LibraryBridge bridge((dir / "cache.sqlite").string(), [&](auto call) {
+      { std::unique_lock lock(mutex); if (!entered) { entered = true; ready.notify_one(); ready.wait(lock, [&] { return release; }); } }
+      queue.post(std::move(call));
+    });
+    bridge.entries({}, {});
+    { std::unique_lock lock(mutex); REQUIRE(ready.wait_for(lock, std::chrono::seconds(10), [&] { return entered; })); }
+    auto analysis = bridge.analyze(audio, "lanes-v1", "default", 77, {});
+    auto browse = bridge.detail("missing", {});
+    { std::lock_guard lock(mutex); release = true; } ready.notify_one();
+    for (int i = 0; i < 3; ++i) { auto call = queue.take(); REQUIRE(call); call(); }
+    REQUIRE(analysis->result()); auto value = std::get<LibraryBridge::Analysis>(analysis->result()->value);
+    REQUIRE(value.status == FileJobStatus::committed); REQUIRE(browse->result()); REQUIRE_FALSE(browse->result()->cancelled);
+  }
+  std::error_code ignored; std::filesystem::remove_all(dir, ignored);
+}

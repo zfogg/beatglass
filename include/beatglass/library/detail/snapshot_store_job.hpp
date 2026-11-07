@@ -3,6 +3,8 @@
 #include "beatglass/library/store.hpp"
 #include <optional>
 namespace beatglass::library_detail {
+/** Build the exact tempo-only cache identity used by the snapshot job. The content digest must be validated separately; engine and configuration must be nonempty. */
+AnalysisIdentity snapshot_tempo_identity(const std::string& content, const std::string& engine, const std::string& configuration);
 /** Outcome of the experimental shared-store snapshot job. */
 struct StoredSnapshotJobResult {
   /** Terminal job state. */ FileJobStatus status{FileJobStatus::error};

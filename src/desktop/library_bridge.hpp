@@ -6,7 +6,7 @@
 #include <mutex>
 #include <variant>
 
-/** Experimental application-private worker bridge. Construct, request, cancel and destroy on the GUI thread. The supplied dispatcher must enqueue its callable on that same thread, never invoke it inline; its captured objects must outlive the bridge. If dispatch throws, that completion is dropped. One request runs and one newest request waits; a newer request cancels and suppresses older completions. A suppressed completion may still have committed before cancellation. Destruction cancels and joins the worker, and suppresses queued deliveries. Blocking filesystem I/O can delay destruction. Not connected to product UI: snapshot identity guarantees remain provisional. */
+/** Experimental application-private worker bridge. Construct, request, cancel and destroy on the GUI thread. The supplied dispatcher must enqueue its callable on that same thread, never invoke it inline; its captured objects must outlive the bridge. If dispatch throws, that completion is dropped. One worker runs requests from independent browse and analysis lanes; each lane retains at most one newest pending request and replaces only its own work. A suppressed completion may still have committed before cancellation. Destruction cancels and joins the worker, and suppresses queued deliveries. Blocking filesystem I/O can delay destruction. Not connected to product UI: snapshot identity guarantees remain provisional. */
 class LibraryBridge {
   struct State;
 public:
@@ -37,6 +37,7 @@ public:
     std::variant<std::monostate, Page, Detail, Analysis, Lookup> value; ///< Owned operation payload, if available.
     std::string error; ///< Bridge, initialization or query error.
     bool cancelled{}; ///< Cancellation before a queued request started, or query cancellation.
+    std::string association_error; ///< Index update failed after analysis; the analysis outcome remains authoritative.
   };
   /** Thread-safe retained terminal result; remains usable after bridge destruction. Empty means work has not reached a terminal outcome. */
   class Ticket {
@@ -59,15 +60,23 @@ public:
   ~LibraryBridge();
   LibraryBridge(const LibraryBridge&) = delete;
   LibraryBridge& operator=(const LibraryBridge&) = delete;
-  /** Replace any pending operation with a bounded collection query. */
+  /** Replace pending browse work with a bounded collection query. */
   std::shared_ptr<Ticket> entries(beatglass::library_detail::CollectionQuery query, Completion completion);
-  /** Replace any pending operation with exact-path detail lookup. */
+  /** Replace pending browse work with exact-path detail lookup. */
   std::shared_ptr<Ticket> detail(std::string path, Completion completion);
-  /** Replace any pending operation with snapshot analysis. Epoch must be a nonzero coordinator-issued session epoch. */
+  /** Replace pending analysis work with snapshot analysis. Epoch must be a nonzero coordinator-issued session epoch. */
   std::shared_ptr<Ticket> analyze(std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
   /** Look up exactly the supplied content/engine/configuration/mode against a fresh source snapshot, without starting analysis. Epoch is nonzero and session-issued; cached positions are rebound. No result is returned on source mismatch or failed verification. */
   std::shared_ptr<Ticket> lookup(std::filesystem::path path, beatglass::AnalysisIdentity identity, std::uint64_t epoch, Completion completion);
-  /** Cancel and suppress the current and pending requests. Pending tickets retain cancellation; active tickets retain the actual eventual outcome, including a commit. */
+  /** Analyze an indexed path and associate its validated content hash after a hit or commit. Index update is separate from publication; failure is reported in association_error. The normalized key must name the supplied path. */
+  std::shared_ptr<Ticket> analyze_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
+  /** Look up an indexed path's recorded content under the requested tempo engine/configuration; snapshots and revalidates before returning an active value. Missing row/hash is a miss. */
+  std::shared_ptr<Ticket> lookup_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
+  /** Cancel and suppress only browsing and lookup requests. */
+  void cancel_browse();
+  /** Cancel and suppress only analysis requests; a commit already begun may succeed. */
+  void cancel_analysis();
+  /** Cancel both lanes. Pending tickets retain cancellation; active tickets retain the actual eventual outcome, including a commit. */
   void cancel();
 private:
   std::shared_ptr<State> state_;
