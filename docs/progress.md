@@ -145,6 +145,11 @@ After merging PR #18 at 2f66515 (documentation changes), the existing prebuilt Q
 
 On Windows 10.0.26300 x64, MSVC 19.44 and Qt 6.8.3, the shared desktop shell gained Library and DJ navigation while retaining real asynchronous file metadata inspection. Library indexing, analysis, playback, capture and overlay remain unavailable. From this worktree at base 6f927cb with `VCPKG_ROOT=C:/Users/zachf/.codex/worktrees/beatglass-vcpkg-prebuilt` and `BEATGLASS_QT_ROOT=$env:TEMP/beatglass-qt/6.8.3/msvc2022_64`, `cmake --preset prebuilt-qt-desktop -G "Visual Studio 17 2022" -A x64 -B "$env:TEMP/beatglass-ui-build" -DVCPKG_MANIFEST_INSTALL=OFF -DVCPKG_INSTALLED_DIR=C:/Users/zachf/.codex/worktrees/beatglass-codecs/build-pinned-win/vcpkg_installed`, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4`, and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 35/35, including the offscreen Qt Quick navigation test. The existing installed vcpkg tree was reused; this is not a fresh dependency qualification. `docker build -f docs/api/Dockerfile -t beatglass-docs .` and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html` passed. No native interactive UI, audio, or overlay qualification was performed for this increment.
 
+## Phase 1 filesystem browser and live presentation boundary
+
+On Windows 10.0.26300 x64 with MSVC 19.44 and Qt 6.8.3, `cmake --build "$env:TEMP/beatglass-ui-build" --config Debug -j 4` and `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug --output-on-failure` passed 36/36 using the existing vcpkg installation described above. After extending the QML test to activate a file with the keyboard, `ctest --test-dir "$env:TEMP/beatglass-ui-build" -C Debug -R desktop_navigation --output-on-failure` passed. The offscreen test browses checked-in audio fixtures; it does not qualify the native folder dialog or desktop accessibility. The current directory view is not an indexed or persistent collection, and cannot report a precise reason for an unreadable or empty folder. The GUI-thread presentation adapter rejects older revisions and clears estimates on invalidation/non-tracking states; no live producer is connected. Database integration, real capture, overlay and native platform qualification remain pending.
+The API index coverage check (`python docs/api/check_headers.py`) covered 22 headers; the warnings-as-errors Docker Sphinx build and `python docs/api/check_rendered.py "$env:TEMP/beatglass-docs-output/html/index.html"` passed. The new adapter is application-private and has no cross-thread delivery mechanism; integration must supply ordered GUI-thread delivery including clears and session/restart protection.
+
 # Source contract integration
 
 The proposed shared source types and ordered lifecycle helper have regression
@@ -172,6 +177,13 @@ platforms, licensing, and native v1 qualification remain open.
 ## Phase 1 private tonal tracker
 
 The optional private Essentia tracker is a worker-only experiment tested on generated triads and discontinuities. It is disabled by default and not connected to file analysis or live capture. Release licensing, Windows MSVC dependency build, key/chord quality, timestamped segment policy and native qualification remain open; see [tonal experiment](tonal-experiment.md).
+
+## Same-source integration proposal
+
+The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
+read-only byte boundary. The existing decoder does not consume it. Secure
+snapshot creation, native file identity and decoder integration remain open;
+see [same-source proposal](same-source-proposal.md).
 
 ## Phase 1 tonal dependency experiment
 
