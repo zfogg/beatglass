@@ -39,7 +39,9 @@ RUN mkdir -p /out && cp /src/essentia/build/src/libessentia.a /src/essentia/src/
 COPY tests/spikes/static-analysis/analysis_smoke.cpp /src/analysis_smoke.cpp
 COPY tests/spikes/static-analysis/check_imports.py /src/check_imports.py
 COPY tests/spikes/static-analysis/test_check_imports.py /src/test_check_imports.py
-RUN python3 /src/test_check_imports.py && \
+COPY tests/spikes/static-analysis/check_file_candidate.py /src/check_file_candidate.py
+COPY tests/spikes/static-analysis/test_check_file_candidate.py /src/test_check_file_candidate.py
+RUN python3 /src/test_check_imports.py && python3 /src/test_check_file_candidate.py && \
     x86_64-w64-mingw32-g++ -std=c++17 -static -static-libgcc -static-libstdc++ \
     -I/src/essentia/src -I/src/essentia/src/essentia -I/src/aubio/src -I/usr/include/eigen3 \
     /src/analysis_smoke.cpp /src/essentia/build/src/libessentia.a /src/aubio/build/src/libaubio.a \
