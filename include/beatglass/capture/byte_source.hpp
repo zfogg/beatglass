@@ -27,11 +27,13 @@ public:
   virtual ~ByteSource() = default;
   /** Size of the fixed byte sequence; no I/O is implied. */
   virtual std::uint64_t size() const = 0;
-  /** Read from an absolute offset into caller-owned storage.
-   * At or after size, return end; a data result contains 1..buffer.size() bytes
-   * and cannot extend beyond size. Cancellation before I/O returns cancelled;
-   * interruption of a blocking operation is implementation-dependent. A
-   * cancelled/error read has zero bytes. No buffer is retained after return.
+  /** Read from an absolute offset into nonempty caller-owned storage.
+   * Cancellation already requested takes precedence over EOF and returns
+   * cancelled. Otherwise, at or after size return end; a data result contains
+   * 1..buffer.size() bytes and cannot extend beyond size. Interruption of a
+   * blocking operation is implementation-dependent. A cancelled/error read
+   * has zero bytes, but may have modified the output; discard its contents.
+   * No buffer is retained after return. Empty buffers are not passed by ByteCursor.
    */
   virtual ByteReadResult read_at(std::uint64_t offset, std::span<std::byte> buffer,
                                  std::stop_token cancel) = 0;
@@ -76,6 +78,9 @@ public:
     return true;
   }
   /** Read nonempty output, retaining position on cancellation or error.
+   * Cancellation already requested takes precedence over empty output and EOF;
+   * otherwise empty output is an error, including at EOF. On cancellation or
+   * error, the source may have modified output and the caller must discard it.
    * Reject malformed source responses; successful EOF does not advance.
    * Exceptions from the source propagate and leave position unchanged.
    */

@@ -60,6 +60,13 @@ Experimental virtual file I/O
 
 .. cpp:autodoc:: lib/capture/file/virtual_io.hpp
 
+.. cpp:autodoc:: src/desktop/platform/windows_overlay.hpp
+
+.. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
+
+   Unlock the overlay and remove event filters. The caller retains ownership of
+   both windows. Call on the GUI thread.
+
 CLI application internals
 -------------------------
 

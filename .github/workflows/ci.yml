@@ -34,6 +34,19 @@ jobs:
       - run: cmake --build build --parallel 4
       - run: ctest --test-dir build --output-on-failure
 
+  windows-overlay:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install aqtinstall==3.3.0
+      - run: python -m aqt install-qt windows desktop 6.8.3 win64_msvc2022_64 --outputdir "${{ runner.temp }}/qt" --archives qtbase qtdeclarative qtshadertools
+      - run: cmake -S . -B build-overlay -DBUILD_TESTING=ON -DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON -DCMAKE_PREFIX_PATH="${{ runner.temp }}/qt/6.8.3/msvc2022_64"
+      - run: cmake --build build-overlay --config Debug --target windows_overlay_tests
+      - run: ctest --test-dir build-overlay -C Debug -R '^windows_overlay$' --output-on-failure
+
   pipewire-linux:
     runs-on: ubuntu-latest
     steps:
