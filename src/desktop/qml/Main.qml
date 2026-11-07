@@ -18,6 +18,12 @@ ApplicationWindow {
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    property string selectedTheme: "Light"
+    readonly property var themeNames: ["Light", "Dark", "High contrast", "Purple", "Blue", "Yellow"]
+    readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]
+    readonly property var themeForegrounds: ["#20242b", "#f4f6fb", "#ffffff", "#f4eaff", "#eaf4ff", "#fffbe6"]
+    readonly property var themeAccentColors: ["#3f51b5", "#90caf9", "#ffff00", "#c084fc", "#60a5fa", "#facc15"]
+    property int selectedThemeIndex: 0
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
     }
@@ -98,8 +104,21 @@ ApplicationWindow {
                 TabButton { text: "Library"; objectName: "libraryTab" }
                 TabButton { text: "DJ"; objectName: "djTab" }
             }
+            ComboBox {
+                id: themeSelector
+                objectName: "themeSelector"
+                model: window.themeNames
+                currentIndex: window.selectedThemeIndex
+                Accessible.name: "Color theme"
+                ToolTip.text: "Choose a color theme"
+                onActivated: {
+                    window.selectedThemeIndex = currentIndex
+                    window.selectedTheme = currentText
+                }
+            }
         }
     }
+    background: Rectangle { color: window.themeBackgrounds[window.selectedThemeIndex] }
     StackLayout {
         anchors.fill: parent
         currentIndex: navigation.currentIndex
@@ -107,7 +126,7 @@ ApplicationWindow {
             objectName: "libraryPage"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
-                Label { text: "Library"; font.pixelSize: 28; font.bold: true }
+                Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true }
                 Label {
                     text: "Browse local folders. Indexing, analysis, playback and saved results are not available yet."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true

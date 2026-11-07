@@ -74,6 +74,20 @@ TestCase {
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
         app.destroy()
     }
+    function test_themeSelectorOffersAllSixThemes() {
+        let app = shell.createObject(null)
+        let selector = findChild(app, "themeSelector")
+        verify(selector !== null)
+        compare(selector.count, 6)
+        compare(selector.currentText, "Light")
+        selector.activated(4)
+        compare(app.selectedTheme, "Blue")
+        compare(app.selectedThemeIndex, 4)
+        selector.activated(2)
+        compare(app.selectedTheme, "High contrast")
+        compare(app.selectedThemeIndex, 2)
+        app.destroy()
+    }
     function test_realFolderNavigationAndSelection() {
         let app = shell.createObject(null)
         let model = findChild(app, "fileModel")
