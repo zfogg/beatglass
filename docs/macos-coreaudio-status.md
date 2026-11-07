@@ -16,5 +16,5 @@ cmake --build /tmp/beatglass-coreaudio-root-build --parallel 4
 ctest --test-dir /tmp/beatglass-coreaudio-root-build --output-on-failure
 ```
 
-After an include-only cleanup, the build and `ctest --test-dir /tmp/beatglass-coreaudio-root-build --output-on-failure -R "Core Audio"` passed again. The linker reported an existing `/lib` search-path warning and a duplicate core-library warning. The test allows an empty device list and does not simulate hotplug or errors; it does not establish actual capture, desktop interaction or overlay qualification.\n
+After an include-only cleanup, the build and `ctest --test-dir /tmp/beatglass-coreaudio-root-build --output-on-failure -R "Core Audio"` passed again. The linker reported an existing `/lib` search-path warning and a duplicate core-library warning. The test allows an empty device list and does not simulate hotplug or errors; it does not establish actual capture, desktop interaction or overlay qualification.
 Follow-up discovery boundary and retry regression checks on the same Mac: the root build succeeded and both new device-list tests passed, but the full suite was 24/25 because the existing concurrent queue stress test exceeded its 30-second timeout during a period of SSH unresponsiveness. The warnings-as-errors documentation build passed. The suite therefore needs a clean rerun.

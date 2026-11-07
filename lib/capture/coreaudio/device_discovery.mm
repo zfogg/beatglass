@@ -73,4 +73,4 @@ std::vector<SourceInfo> enumerate_outputs(std::string& error) {
   }
   return result;
 }
-}\n
+}

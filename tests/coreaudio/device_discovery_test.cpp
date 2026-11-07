@@ -50,4 +50,4 @@ TEST_CASE("device list fails closed after repeated races or malformed size", "[c
   const auto malformed = [](std::uint32_t& size, std::uint32_t*) -> int { size = 3; return 0; };
   CHECK_FALSE(beatglass::coreaudio::detail::read_device_list(malformed, ids, status));
   CHECK(ids.empty());
-}\n
+}

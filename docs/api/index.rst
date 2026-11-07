@@ -36,4 +36,4 @@ Library jobs
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp\n
+.. cpp:autodoc:: src/desktop/metadata.hpp
