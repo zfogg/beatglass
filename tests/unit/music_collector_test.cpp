@@ -29,6 +29,8 @@ TEST_CASE("bounded music collector owns causal events and refuses cache reuse") 
   // Temporary fixture identity exercises structural mapping only, not provenance.
   result.engine_version="fixture"; result.configuration_id="fixture"; result.algorithms.push_back({"fixture","fixture"});
   CHECK(validate_offline_analysis(result,{100,1000,10,100})==OfflineValidation::valid);
+  // Structural validity and caller-filled identity cannot establish loaded-code provenance.
+  CHECK_FALSE(staged.cache_reusable());
   CHECK_THROWS(collector.finish()); CHECK_THROWS(collector.process(input(pcm)));
 }
 TEST_CASE("collector limits and discontinuities invalidate all staged output") {
