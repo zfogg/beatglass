@@ -90,6 +90,8 @@ bool DefaultTempoFollower::tick(std::chrono::steady_clock::time_point now) {
 }
 std::optional<PresentationUpdate> DefaultTempoFollower::takeUpdate() { auto result = std::move(pending_); pending_.reset(); return result; }
 void DefaultTempoFollower::stop() { enabled_ = false; if (!exhausted_) publishClear(); tempo_.stop(); endpoint_.clear(); next_probe_ = {}; if (!exhausted_) { status_ = Status::waiting; diagnostic_.clear(); } }
+std::shared_ptr<const LoopbackLossToken> DefaultTempoFollower::lossToken() const noexcept { return tempo_.lossToken(); }
+std::optional<std::uint64_t> DefaultTempoFollower::lossStamp() const noexcept { return tempo_.lossStamp(); }
 const std::string& DefaultTempoFollower::endpoint() const { return endpoint_; }
 DefaultTempoFollower::Status DefaultTempoFollower::status() const { return status_; }
 const std::string& DefaultTempoFollower::diagnostic() const { return diagnostic_; }

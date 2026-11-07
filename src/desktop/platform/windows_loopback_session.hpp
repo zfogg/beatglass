@@ -25,6 +25,8 @@ public:
   bool pop(LoopbackPacket& packet);
   /** Invalidate evidence, join capture, discard queued messages and stop the lifecycle. Call on the control thread. */
   void stop();
+  /** Share the backend loss token; call on the control worker. Retained references outlive the session. */
+  std::shared_ptr<const LoopbackLossToken> lossToken() const noexcept;
   /** Read lifecycle state on the control thread. */
   SourceState state() const;
 private:

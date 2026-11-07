@@ -279,8 +279,10 @@ evidence can incorrectly validate it. The capture worker is the token's sole
 writer and never allocates or blocks to invalidate it; exhaustion permanently
 rejects stamps. Session generation and publication revision remain necessary.
 
-This is a capture-side contract only. The desktop does not yet transfer the
-token to the GUI or clear already displayed results when it changes. A GUI
+The selected tempo consumer retains the packet stamp with its observed result
+and exposes the token and stamp to the worker; the default follower exposes
+the same contract. This is a capture-side contract only. The desktop does not
+yet transfer the token to the GUI or clear already displayed results when it changes. A GUI
 owner must reject queued stale stamps and check displayed stamps on its own
 thread; a physical loss cannot be reflected until that thread is scheduled.
 The actual loss-to-display delay, physical device behavior and token-integrated

@@ -26,6 +26,10 @@ public:
   std::optional<float> bpm() const;
   /** Exclusive frame boundary and epoch of the latest analyzed packet, or empty after invalidation. */
   std::optional<EventTime> observedThrough() const;
+  /** Share the capture loss token on the control worker; callers may retain it across threads. */
+  std::shared_ptr<const LoopbackLossToken> lossToken() const noexcept;
+  /** Packet token stamp associated with the current observed result, absent after a clear. Never replace it with a newer token snapshot. */
+  std::optional<std::uint64_t> lossStamp() const noexcept;
   /** Monotonic invalidation generation; changes whenever retained evidence is cleared. Exhaustion stops analysis rather than wrapping. */
   std::uint64_t invalidationGeneration() const;
   /** Return the source lifecycle state on the owning thread. */
@@ -40,6 +44,7 @@ private:
   std::vector<float> mono_;
   std::optional<float> bpm_;
   std::optional<EventTime> observed_;
+  std::optional<std::uint64_t> loss_stamp_;
   std::uint32_t rate_{}, channels_{};
   std::uint64_t silent_frames_{};
   std::uint64_t invalidation_generation_{};

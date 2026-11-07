@@ -24,7 +24,7 @@ public:
   std::uint64_t dropped_frames() const override { return dropped; }
   void add(std::uint64_t frame, std::uint64_t qpc=100000000) {
     beatglass::windows::LoopbackPacket packet; packet.epoch=epoch; packet.first_frame=frame;
-    packet.sample_rate=44100; packet.channels=1; packet.sample_count=512; packet.timestamp_valid=true; packet.qpc_100ns=qpc;
+    packet.sample_rate=44100; packet.channels=1; packet.sample_count=512; packet.timestamp_valid=true; packet.qpc_100ns=qpc; packet.loss_stamp=lossToken()->stamp();
     for(unsigned i=0;i<packet.sample_count;++i) packet.samples[i]=0.2f*std::sin(float(frame+i)*0.037f);
     packets.push_back(packet);
   }
@@ -151,4 +151,16 @@ TEST_CASE("Generated playback reaches live aubio tempo through WASAPI", "[.][nat
   REQUIRE_FALSE(gate.current());
   tempo.stop();
   REQUIRE_FALSE(tempo.bpm());
+}
+
+TEST_CASE("Live tempo rejects queued stamps when capture loss races DSP") {
+  beatglass::SourceEpochAllocator epochs; auto backend=std::make_unique<TempoFakeLoopback>(); auto* fake=backend.get();
+  auto token=std::const_pointer_cast<beatglass::windows::LoopbackLossToken>(fake->lossToken()); bool lose=false;
+  beatglass::windows::LiveTempo tempo(epochs,std::move(backend),[] { return std::optional<std::uint64_t>{100000000}; },[&] { if (lose) token->invalidate(); });
+  REQUIRE(tempo.start("fake")); fake->add(0); REQUIRE(tempo.pump()); REQUIRE(tempo.lossStamp());
+  const auto queued=*tempo.lossStamp(); REQUIRE(token->matches(queued));
+  fake->add(512); lose=true; REQUIRE(tempo.pump()); CHECK_FALSE(tempo.observedThrough());
+  CHECK_FALSE(tempo.lossStamp()); CHECK_FALSE(token->matches(queued));
+  lose=false; fake->add(1024); REQUIRE(tempo.pump()); REQUIRE(tempo.lossStamp());
+  CHECK(token->matches(*tempo.lossStamp())); CHECK_FALSE(token->matches(queued));
 }

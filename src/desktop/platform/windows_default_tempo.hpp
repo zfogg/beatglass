@@ -22,6 +22,10 @@ public:
   std::optional<PresentationUpdate> takeUpdate();
   /** Disable following, invalidate the current value and stop capture. A later start is required before tick can capture again. */
   void stop();
+  /** Share the current source loss token on the worker; retain the source stamp with each derived update. */
+  std::shared_ptr<const LoopbackLossToken> lossToken() const noexcept;
+  /** Token stamp for the currently observed tempo, absent after clear. */
+  std::optional<std::uint64_t> lossStamp() const noexcept;
   /** Current selected endpoint ID; empty while waiting or recovering. */
   const std::string& endpoint() const;
   /** Current worker-owned status; transfer it to the GUI through the owner's delivery mechanism. */
