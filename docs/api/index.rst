@@ -63,3 +63,10 @@ Desktop application internals
 
    Stop capture and clear the estimate on the owning worker thread.
 
+
+.. cpp:autodoc:: src/desktop/platform/windows_overlay.hpp
+
+.. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
+
+   Unlock the overlay and remove event filters. The caller retains ownership of
+   both windows. Call on the GUI thread.
