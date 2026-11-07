@@ -12,8 +12,8 @@ class DefaultTempoFollower {
 public:
   /** Control status; running does not imply that a BPM has been acquired. */
   enum class Status { waiting, starting, running, error };
-  /** Borrow a process epoch allocator. The optional discovery function is a test seam; an empty function uses actual Windows endpoint discovery. */
-  explicit DefaultTempoFollower(SourceEpochAllocator& epochs, std::function<EndpointResult()> discovery = {});
+  /** Borrow a process epoch allocator. An empty discovery function uses Windows discovery. An optional start guard synchronously decides whether to invoke a capture start on this worker; it must not retain the callable. */
+  explicit DefaultTempoFollower(SourceEpochAllocator& epochs, std::function<EndpointResult()> discovery = {}, std::function<bool(const std::function<bool()>&)> startGuard = {});
   /** Enable default following; the next tick performs discovery. Return false after fatal revision exhaustion. */
   bool start();
   /** Poll capture and periodically rediscover the multimedia default. now must be monotonic. On a new or lost endpoint, clear old evidence before stopping and restarting with a fresh epoch. False means a fatal failure or revision exhaustion; the owner must stop and clear the GUI using an external session boundary. */
@@ -34,6 +34,7 @@ private:
   bool nextRevision();
   LiveTempo tempo_;
   std::function<EndpointResult()> discovery_;
+  std::function<bool(const std::function<bool()>&)> start_guard_;
   std::string endpoint_;
   std::string diagnostic_;
   std::chrono::steady_clock::time_point next_probe_{};
