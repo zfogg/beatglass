@@ -1,12 +1,17 @@
 #include "beatglass/library/detail/file_snapshot.hpp"
 #include <openssl/evp.h>
 #include <array>
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <stdexcept>
 #include <limits>
 #include <vector>
-#ifndef _WIN32
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#include <openssl/rand.h>
+#else
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -55,11 +60,18 @@ std::string hash_fd(int fd, std::stop_token stop, int output = -1, const std::fu
 }
 }
 struct FileSnapshot::Impl {
-  Fd original, snapshot; std::filesystem::path path; struct stat evidence{}; std::string digest;
+  Fd original, snapshot; std::filesystem::path path; struct stat evidence{}; std::string digest; std::uint64_t size{};
 };
 FileSnapshot::FileSnapshot(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}
 FileSnapshot::~FileSnapshot() = default;
 int FileSnapshot::borrowed_descriptor() const noexcept { return impl_->snapshot.value; }
+SnapshotRead FileSnapshot::read_at(std::uint64_t offset, std::span<std::byte> buffer, std::stop_token stop) const {
+  if (stop.stop_requested()) return {SnapshotStatus::cancelled, 0};
+  if (offset > static_cast<std::uint64_t>(std::numeric_limits<off_t>::max()) || buffer.empty()) return {SnapshotStatus::error, 0};
+  auto n = ::pread(impl_->snapshot.value, buffer.data(), buffer.size(), static_cast<off_t>(offset));
+  return n < 0 ? SnapshotRead{SnapshotStatus::error, 0} : SnapshotRead{SnapshotStatus::ok, static_cast<std::size_t>(n)};
+}
+std::uint64_t FileSnapshot::size() const noexcept { return impl_->size; }
 const std::string& FileSnapshot::digest() const noexcept { return impl_->digest; }
 SnapshotStatus FileSnapshot::verify(std::stop_token stop) const {
   try {
@@ -101,6 +113,7 @@ SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_t
     check(::close(writer.release()) == 0, "close snapshot writer");
     impl->digest = hash_fd(impl->snapshot.value, stop);
     if (impl->digest != copied_digest) throw Stale{};
+    impl->size = static_cast<std::uint64_t>(after.st_size);
     impl->evidence = after;
     return {SnapshotStatus::ok, std::unique_ptr<FileSnapshot>(new FileSnapshot(std::move(impl))), {}};
   } catch (const Cancelled&) { return {SnapshotStatus::cancelled, {}, {}}; }
@@ -108,12 +121,106 @@ SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_t
     catch (const std::exception& e) { return {SnapshotStatus::error, {}, e.what()}; }
 }
 #else
-struct FileSnapshot::Impl {};
+namespace {
+struct Cancelled {};
+struct Stale {};
+struct WinHandle { HANDLE value{INVALID_HANDLE_VALUE}; ~WinHandle() { if (value != INVALID_HANDLE_VALUE) CloseHandle(value); } HANDLE release() { auto old = value; value = INVALID_HANDLE_VALUE; return old; } };
+void check_win(bool ok, const char* what) { if (!ok) throw std::runtime_error(std::string(what) + " (Windows error " + std::to_string(GetLastError()) + ")"); }
+struct Evidence { FILE_ID_INFO identity{}; FILE_BASIC_INFO basic{}; FILE_STANDARD_INFO standard{}; };
+Evidence evidence(HANDLE handle) {
+  Evidence out; check_win(GetFileInformationByHandleEx(handle, FileIdInfo, &out.identity, sizeof(out.identity)) != 0, "file identity");
+  check_win(GetFileInformationByHandleEx(handle, FileStandardInfo, &out.standard, sizeof(out.standard)) != 0, "file size");
+  check_win(GetFileInformationByHandleEx(handle, FileBasicInfo, &out.basic, sizeof(out.basic)) != 0, "file attributes");
+  if (out.standard.Directory || GetFileType(handle) != FILE_TYPE_DISK) throw std::runtime_error("source is not a regular disk file");
+  return out;
+}
+bool same(const Evidence& a, const Evidence& b) {
+  return a.identity.VolumeSerialNumber == b.identity.VolumeSerialNumber &&
+    std::memcmp(a.identity.FileId.Identifier, b.identity.FileId.Identifier, sizeof(a.identity.FileId.Identifier)) == 0 &&
+    a.standard.EndOfFile.QuadPart == b.standard.EndOfFile.QuadPart &&
+    a.basic.LastWriteTime.QuadPart == b.basic.LastWriteTime.QuadPart && a.basic.ChangeTime.QuadPart == b.basic.ChangeTime.QuadPart;
+}
+std::string hash_handle(HANDLE input, std::stop_token stop, HANDLE output = INVALID_HANDLE_VALUE,
+                        const std::function<void(std::uintmax_t)>& progress = {}) {
+  using Context = std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)>;
+  Context ctx(EVP_MD_CTX_new(), &EVP_MD_CTX_free);
+  if (!ctx || EVP_DigestInit_ex(ctx.get(), EVP_sha256(), nullptr) != 1) throw std::runtime_error("SHA-256 init failed");
+  LARGE_INTEGER zero{}; check_win(SetFilePointerEx(input, zero, nullptr, FILE_BEGIN) != 0, "seek source");
+  std::array<unsigned char, 65536> bytes{}; std::uintmax_t total = 0;
+  for (;;) {
+    if (stop.stop_requested()) throw Cancelled{};
+    DWORD n = 0; check_win(ReadFile(input, bytes.data(), static_cast<DWORD>(bytes.size()), &n, nullptr) != 0, "read source");
+    if (n == 0) break;
+    if (EVP_DigestUpdate(ctx.get(), bytes.data(), n) != 1) throw std::runtime_error("SHA-256 update failed");
+    if (output != INVALID_HANDLE_VALUE) {
+      DWORD offset = 0;
+      while (offset < n) { DWORD written = 0; check_win(WriteFile(output, bytes.data() + offset, n - offset, &written, nullptr) != 0 && written > 0, "write snapshot"); offset += written; }
+    }
+    total += n; if (progress) progress(total);
+  }
+  if (stop.stop_requested()) throw Cancelled{};
+  std::array<unsigned char, EVP_MAX_MD_SIZE> hash{}; unsigned length = 0;
+  if (EVP_DigestFinal_ex(ctx.get(), hash.data(), &length) != 1 || length != 32) throw std::runtime_error("SHA-256 finalization failed");
+  static constexpr char hex[] = "0123456789abcdef"; std::string out = "sha256:";
+  for (unsigned i = 0; i < length; ++i) { out.push_back(hex[hash[i] >> 4]); out.push_back(hex[hash[i] & 15]); }
+  return out;
+}
+}
+struct FileSnapshot::Impl { WinHandle original, snapshot; std::filesystem::path path; Evidence evidence{}; std::string digest; std::uint64_t size{}; };
 FileSnapshot::FileSnapshot(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}
 FileSnapshot::~FileSnapshot() = default;
 int FileSnapshot::borrowed_descriptor() const noexcept { return -1; }
-const std::string& FileSnapshot::digest() const noexcept { static const std::string empty; return empty; }
-SnapshotStatus FileSnapshot::verify(std::stop_token) const { return SnapshotStatus::unverifiable; }
-SnapshotOpen SnapshotOpen::create(const std::filesystem::path&, std::stop_token, const std::function<void(std::uintmax_t)>&) { return {SnapshotStatus::unverifiable, {}, "snapshot unsupported on Windows"}; }
+SnapshotRead FileSnapshot::read_at(std::uint64_t offset, std::span<std::byte> buffer, std::stop_token stop) const {
+  if (stop.stop_requested()) return {SnapshotStatus::cancelled, 0};
+  if (buffer.empty() || offset > static_cast<std::uint64_t>(std::numeric_limits<LONGLONG>::max())) return {SnapshotStatus::error, 0};
+  LARGE_INTEGER pos{}; pos.QuadPart = static_cast<LONGLONG>(offset);
+  if (!SetFilePointerEx(impl_->snapshot.value, pos, nullptr, FILE_BEGIN)) return {SnapshotStatus::error, 0};
+  DWORD read = 0; DWORD count = static_cast<DWORD>((std::min)(buffer.size(), static_cast<std::size_t>(MAXDWORD)));
+  if (!ReadFile(impl_->snapshot.value, buffer.data(), count, &read, nullptr)) return {SnapshotStatus::error, 0};
+  return {SnapshotStatus::ok, static_cast<std::size_t>(read)};
+}
+std::uint64_t FileSnapshot::size() const noexcept { return impl_->size; }
+const std::string& FileSnapshot::digest() const noexcept { return impl_->digest; }
+SnapshotStatus FileSnapshot::verify(std::stop_token stop) const {
+  try {
+    if (stop.stop_requested()) return SnapshotStatus::cancelled;
+    auto before = evidence(impl_->original.value); if (!same(before, impl_->evidence)) return SnapshotStatus::stale_input;
+    auto digest = hash_handle(impl_->original.value, stop); auto after = evidence(impl_->original.value);
+    WinHandle named; named.value = CreateFileW(impl_->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (named.value == INVALID_HANDLE_VALUE) return GetLastError() == ERROR_FILE_NOT_FOUND || GetLastError() == ERROR_PATH_NOT_FOUND ? SnapshotStatus::stale_input : SnapshotStatus::error;
+    return same(before, after) && same(after, evidence(named.value)) && digest == impl_->digest ? SnapshotStatus::ok : SnapshotStatus::stale_input;
+  } catch (const Cancelled&) { return SnapshotStatus::cancelled; } catch (...) { return SnapshotStatus::error; }
+}
+SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_token stop, const std::function<void(std::uintmax_t)>& progress) {
+  try {
+    if (stop.stop_requested()) return {SnapshotStatus::cancelled, {}, {}};
+    auto impl = std::make_unique<FileSnapshot::Impl>(); impl->path = std::filesystem::absolute(path);
+    impl->original.value = CreateFileW(impl->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    check_win(impl->original.value != INVALID_HANDLE_VALUE, "open source");
+    auto before = evidence(impl->original.value); WinHandle writer;
+    for (int attempt = 0; attempt < 16 && writer.value == INVALID_HANDLE_VALUE; ++attempt) {
+      std::array<unsigned char, 16> random{}; if (RAND_bytes(random.data(), static_cast<int>(random.size())) != 1) throw std::runtime_error("random snapshot name failed");
+      static constexpr wchar_t digits[] = L"0123456789abcdef"; std::wstring name = L"beatglass-snapshot-" + std::to_wstring(GetCurrentProcessId()) + L"-";
+      for (auto byte : random) { name.push_back(digits[byte >> 4]); name.push_back(digits[byte & 15]); }
+      auto temporary = std::filesystem::temp_directory_path() / name;
+      writer.value = CreateFileW(temporary.c_str(), GENERIC_READ | GENERIC_WRITE | DELETE, FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, CREATE_NEW, FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr);
+      if (writer.value == INVALID_HANDLE_VALUE && GetLastError() != ERROR_FILE_EXISTS && GetLastError() != ERROR_ALREADY_EXISTS) check_win(false, "create snapshot");
+    }
+    check_win(writer.value != INVALID_HANDLE_VALUE, "create snapshot");
+    auto copied = hash_handle(impl->original.value, stop, writer.value, progress); auto after = evidence(impl->original.value);
+    WinHandle named; named.value = CreateFileW(impl->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (named.value == INVALID_HANDLE_VALUE || !same(before, after) || !same(after, evidence(named.value))) throw Stale{};
+    HANDLE reader = INVALID_HANDLE_VALUE;
+    check_win(DuplicateHandle(GetCurrentProcess(), writer.value, GetCurrentProcess(), &reader, FILE_GENERIC_READ, FALSE, 0) != 0, "duplicate read-only snapshot");
+    impl->snapshot.value = reader; check_win(CloseHandle(writer.release()) != 0, "close snapshot writer");
+    impl->digest = hash_handle(impl->snapshot.value, stop);
+    if (impl->digest != copied) throw Stale{};
+    impl->size = static_cast<std::uint64_t>(after.standard.EndOfFile.QuadPart);
+    impl->evidence = after;
+    return {SnapshotStatus::ok, std::unique_ptr<FileSnapshot>(new FileSnapshot(std::move(impl))), {}};
+  } catch (const Cancelled&) { return {SnapshotStatus::cancelled, {}, {}}; }
+    catch (const Stale&) { return {SnapshotStatus::stale_input, {}, {}}; }
+    catch (const std::exception& e) { return {SnapshotStatus::error, {}, e.what()}; }
+}
 #endif
 }

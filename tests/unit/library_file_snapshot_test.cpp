@@ -1,9 +1,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/detail/file_snapshot.hpp"
 #include <chrono>
+#include <array>
 #include <filesystem>
 #include <fstream>
-#ifndef _WIN32
+#ifdef _WIN32
+#define NOMINMAX
+#include <windows.h>
+#else
 #include <unistd.h>
 #include <fcntl.h>
 #include <cerrno>
@@ -18,21 +22,20 @@ struct TempDir {
 void write(const std::filesystem::path& p, const std::string& value) { std::ofstream out(p, std::ios::binary | std::ios::trunc); out << value; }
 }
 TEST_CASE("private snapshot retains read-only bytes and detects source changes") {
-#ifdef _WIN32
-  auto unavailable = SnapshotOpen::create("unused"); REQUIRE(unavailable.status == SnapshotStatus::unverifiable);
-#else
   TempDir temp; auto file = temp.path / "source"; write(file, "abc");
   auto opened = SnapshotOpen::create(file); INFO(opened.diagnostic); REQUIRE(opened.status == SnapshotStatus::ok); REQUIRE(opened.value);
+  REQUIRE(opened.value->size() == 3);
   REQUIRE(opened.value->digest() == "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
-  char data[3]{}; REQUIRE(::pread(opened.value->borrowed_descriptor(), data, 3, 0) == 3); REQUIRE(std::string(data, 3) == "abc");
+  std::array<std::byte, 3> data{}; auto read = opened.value->read_at(0, data);
+  REQUIRE(read.status == SnapshotStatus::ok); REQUIRE(read.bytes == 3); REQUIRE(std::to_integer<char>(data[0]) == 'a');
+#ifndef _WIN32
   REQUIRE(::pwrite(opened.value->borrowed_descriptor(), "x", 1, 0) == -1);
+#endif
   REQUIRE(opened.value->verify() == SnapshotStatus::ok);
   write(file, "xyz"); REQUIRE(opened.value->verify() == SnapshotStatus::stale_input);
-  REQUIRE(::pread(opened.value->borrowed_descriptor(), data, 3, 0) == 3); REQUIRE(std::string(data, 3) == "abc");
-#endif
+  read = opened.value->read_at(0, data); REQUIRE(read.status == SnapshotStatus::ok); REQUIRE(read.bytes == 3); REQUIRE(std::to_integer<char>(data[0]) == 'a');
 }
 TEST_CASE("private snapshot rejects path replacement and honors cancellation") {
-#ifndef _WIN32
   TempDir temp; auto file = temp.path / "source"; write(file, "abc");
   auto opened = SnapshotOpen::create(file); REQUIRE(opened.status == SnapshotStatus::ok);
   std::filesystem::rename(file, temp.path / "old"); write(file, "abc");
@@ -41,7 +44,6 @@ TEST_CASE("private snapshot rejects path replacement and honors cancellation") {
   REQUIRE(SnapshotOpen::create(file, stop.get_token()).status == SnapshotStatus::cancelled);
   auto second = SnapshotOpen::create(file); REQUIRE(second.status == SnapshotStatus::ok);
   REQUIRE(second.value->verify(stop.get_token()) == SnapshotStatus::cancelled);
-#endif
 }
 
 TEST_CASE("snapshot retains bytes through source restoration and closes its descriptor") {
@@ -83,3 +85,57 @@ TEST_CASE("snapshot copying observes cancellation between chunks") {
   REQUIRE(std::filesystem::file_size(file) == 200000);
 #endif
 }
+
+#ifdef _WIN32
+TEST_CASE("Windows snapshot fails closed on non-files and cancels copying") {
+  TempDir temp; auto file = temp.path / L"\u97f3\u697d-source"; write(file, std::string(200000, 'x'));
+  std::stop_source stop; int calls = 0;
+  auto cancelled = SnapshotOpen::create(file, stop.get_token(), [&](auto) { ++calls; stop.request_stop(); });
+  INFO(cancelled.diagnostic); REQUIRE(calls == 1); REQUIRE(cancelled.status == SnapshotStatus::cancelled); REQUIRE_FALSE(cancelled.value);
+  auto opened = SnapshotOpen::create(file); INFO(opened.diagnostic); REQUIRE(opened.status == SnapshotStatus::ok);
+  REQUIRE(opened.value->verify() == SnapshotStatus::ok);
+  std::array<std::byte, 16> bytes{}; auto read = opened.value->read_at(0, bytes);
+  REQUIRE(read.status == SnapshotStatus::ok); REQUIRE(read.bytes == bytes.size());
+  REQUIRE(std::to_integer<char>(bytes[0]) == 'x');
+  REQUIRE(opened.value->size() == 200000);
+  auto eof = opened.value->read_at(opened.value->size(), bytes); REQUIRE(eof.status == SnapshotStatus::ok); REQUIRE(eof.bytes == 0);
+  std::stop_source already; already.request_stop(); REQUIRE(opened.value->read_at(0, bytes, already.get_token()).status == SnapshotStatus::cancelled);
+  REQUIRE(SnapshotOpen::create(temp.path).status != SnapshotStatus::ok);
+}
+#endif
+
+#ifdef _WIN32
+TEST_CASE("Windows snapshot denies write sharing and removes its temporary") {
+  TempDir temp; auto file = temp.path / "source"; write(file, std::string(200000, 'x'));
+  std::filesystem::path snapshot_path; bool denied = false;
+  auto prefix = L"beatglass-snapshot-" + std::to_wstring(GetCurrentProcessId()) + L"-";
+  {
+    auto snapshot = SnapshotOpen::create(file, {}, [&](auto) {
+      if (!snapshot_path.empty()) return;
+      for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::temp_directory_path())) {
+        if (entry.path().filename().wstring().starts_with(prefix)) {
+          snapshot_path = entry.path();
+          HANDLE h = CreateFileW(snapshot_path.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+          denied = h == INVALID_HANDLE_VALUE && GetLastError() == ERROR_SHARING_VIOLATION;
+          if (h != INVALID_HANDLE_VALUE) CloseHandle(h);
+          break;
+        }
+      }
+    });
+    INFO(snapshot.diagnostic); REQUIRE(snapshot.status == SnapshotStatus::ok);
+    REQUIRE_FALSE(snapshot_path.empty()); REQUIRE(denied); REQUIRE(std::filesystem::exists(snapshot_path));
+  }
+  REQUIRE_FALSE(std::filesystem::exists(snapshot_path));
+}
+#endif
+#ifdef _WIN32
+TEST_CASE("Windows snapshot retains bytes after original content restoration") {
+  TempDir temp; auto file = temp.path / "source"; write(file, "abc");
+  auto original_time = std::filesystem::last_write_time(file);
+  auto snapshot = SnapshotOpen::create(file); INFO(snapshot.diagnostic); REQUIRE(snapshot.status == SnapshotStatus::ok);
+  write(file, "xyz"); write(file, "abc"); std::filesystem::last_write_time(file, original_time);
+  auto status = snapshot.value->verify(); REQUIRE((status == SnapshotStatus::ok || status == SnapshotStatus::stale_input));
+  std::array<std::byte, 3> out{}; auto result = snapshot.value->read_at(0, out);
+  REQUIRE(result.status == SnapshotStatus::ok); REQUIRE(result.bytes == 3); REQUIRE(std::to_integer<char>(out[0]) == 'a');
+}
+#endif

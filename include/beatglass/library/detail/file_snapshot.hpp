@@ -3,6 +3,8 @@
 #include <functional>
 #include <cstdint>
 #include <memory>
+#include <span>
+#include <cstddef>
 #include <stop_token>
 #include <string>
 namespace beatglass::library_detail {
@@ -14,15 +16,21 @@ enum class SnapshotStatus {
   /** The platform or source cannot supply required evidence. */ unverifiable,
   /** I/O or cryptographic operation failed. */ error
 };
-/** Private immutable byte snapshot and retained original source, confined to one worker. Provisional POSIX-only implementation; Windows fails closed. Not a complete product integration or an installation API. */
+/** A bounded snapshot read result; zero bytes indicate EOF or failure. */
+struct SnapshotRead { /** Status of the read. */ SnapshotStatus status{SnapshotStatus::error}; /** Bytes copied, or zero on failure. */ std::size_t bytes{}; };
+/** Private immutable byte snapshot and retained original source, confined to one worker. Provisional platform implementation; no product integration. Not a complete product integration or an installation API. */
 class FileSnapshot {
 public:
   /** Release snapshot and original descriptors. A borrowing decoder must already be destroyed. */
   ~FileSnapshot();
   FileSnapshot(const FileSnapshot&) = delete;
   FileSnapshot& operator=(const FileSnapshot&) = delete;
-  /** POSIX read-only descriptor borrowed until destruction; it must not be closed or modified by the decoder. */
+  /** POSIX read-only descriptor borrowed until destruction; never close it. Returns -1 on Windows; use read_at there. */
   int borrowed_descriptor() const noexcept;
+  /** Read at a byte offset on the owning worker. No buffer is retained; cancellation is checked before blocking I/O. */
+  SnapshotRead read_at(std::uint64_t offset, std::span<std::byte> buffer, std::stop_token stop = {}) const;
+  /** Fixed length of the finalized snapshot in bytes. */
+  std::uint64_t size() const noexcept;
   /** Digest of finalized snapshot bytes, prefixed with sha256:. */
   const std::string& digest() const noexcept;
   /** Rehash the retained original and recheck original/path identity. Cancellation is checked between reads. A write or replacement after this check remains possible; unsupported identity evidence fails closed. */
