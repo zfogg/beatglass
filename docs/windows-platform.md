@@ -246,9 +246,11 @@ been observed or qualified.
 The provisional composite worker can use a shared one-attempt start
 authorization: Stop or replacement cancels it without waiting for the worker,
 and only one worker can claim it. A pre-claim cancellation prevents the start;
-after a claim, cancellation is observed around native calls and the worker
-clears and stops the attempt. A native call already in progress is not
-preempted. The desktop bridge must retain and cancel its own authorization on
+after a claim, cancellation is checked before and after the audio start call
+and during capture polling; earlier initialization calls are not individually
+checked. A native call already in progress is not preempted. A racing poll or
+pop may return a packet, so synchronized authorization or generation gating
+is required before publishing. The desktop bridge must retain and cancel its own authorization on
 Stop, switch and destruction, gate stale deliveries, and join the worker. This
 contract has deterministic fake-backend coverage; the bridge integration and
 physical device timing remain unqualified.
