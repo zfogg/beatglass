@@ -262,3 +262,11 @@ clears evidence and fails the attempt. Windows 11 10.0.26300 x64/MSVC 19.44
 fake-backend tests cover age boundaries, post-DSP interruption, aging and clock
 failure; native WASAPI timestamp compatibility and actual DJ output remain
 unqualified. Consumers still need synchronized delivery gates.
+
+The provisional live composite consumer rejects untimed, future, and more than
+one second old QPC capture packets. It checks age before and after DSP and
+polls the capture session again before publishing each result. Deterministic
+fake-backend tests exercise queued stale PCM and loss during DSP. A failed
+capture clock fails the attempt. Native WASAPI QPC behavior and production
+latency are not yet qualified; generation/token gates remain necessary for
+loss or cancellation racing the final check.
