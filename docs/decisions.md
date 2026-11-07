@@ -20,3 +20,11 @@ The experimental `TempoTracker` accepts arbitrary contiguous mono chunks on a wo
 ## API reference
 
 Use Hawkmoth with Sphinx to extract provisional C++ header comments, and publish the strict HTML build through GitHub Actions and Pages. The reference includes application-private headers without making them public API. The image and direct tool versions are pinned; Ubuntu transitive packages are not snapshot-pinned and remain a reproducibility limitation.
+
+## Platform API groundwork (not product support)
+
+- [Qt 6.11 supported platforms](https://doc.qt.io/qt-6.11/supported-platforms.html) lists Windows 10 1809+ x86-64 with MSVC 2022, Windows on ARM64 with MSVC 2022, and macOS 13+ x86-64/arm64 with Xcode 15 or newer. Linux configurations are distribution-specific; its table includes Ubuntu 22.04 x86-64 and 24.04 x86-64/arm64. These are Qt's configurations, not Beatglass minimum-version guarantees; the actual pinned port and native capture backends still require verification.
+- [Apple's Core Audio tap sample](https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps) requires macOS 14.2 or later for the sample, an `NSAudioCaptureUsageDescription`, and user permission. A future Beatglass tap adapter must verify its own minimum OS and permissions and must not mute or reroute playback.
+- [miniaudio's loopback example](https://github.com/mackron/miniaudio/blob/master/examples/simple_loopback.c) identifies WASAPI as its built-in loopback backend. This is not evidence of a working Beatglass endpoint selector, permissions, recovery, or non-Windows capture.
+
+All supported CPU/OS combinations, packaging, overlay/compositor behavior, devices, and runtime audio paths remain unqualified.
