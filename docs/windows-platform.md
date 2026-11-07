@@ -129,6 +129,33 @@ and call stop and deliver its clear before destruction. Revision exhaustion or a
 fatal error requires a separate session boundary to clear the display. No GUI
 bridge or DJ controls are connected by this work.
 
+The provisional Windows `DjBridge` exposes GUI-thread `start`/`stop`, an active
+flag and status, and emits revisioned presentation updates on the GUI thread.
+Its owned worker performs endpoint discovery and analysis; a single coalescing
+slot retains the latest update, including clears. The shared desktop should
+connect `presentationUpdate` to `LivePresentation::apply` on the GUI thread,
+bind start/stop controls and display status. It must stop, deliver the clear,
+and drain or otherwise guard old updates before recreating the bridge or
+presentation gate. A source revision is not a cross-process/session identity.
+Stop is asynchronous; destruction joins the worker and can wait for a stalled
+OS discovery call. The bridge is not yet instantiated by the shared desktop.
+
+Windows 11 x64, MSVC 19.44, Qt 6.8.3: serial
+`cmake --build "$env:TEMP/beatglass-overlay-build" --config Debug --target windows_dj_bridge_tests -j 1`
+and `ctest --test-dir "$env:TEMP/beatglass-overlay-build" -C Debug -R '^windows_dj_bridge$' --output-on-failure`
+passed. Qt tests exercise GUI-thread update delivery, rapid stop/start clears,
+delayed-update rejection, discovery error reporting, and destruction after a
+blocked discovery is released. An earlier test exposed a missing clear when a
+stop arrived before the worker observed a restart; the regression now passes.
+These tests use injected discovery and do not exercise the shared desktop's QML
+or prove responsiveness if an OS call stalls indefinitely.
+An additional opt-in `BEATGLASS_NATIVE_DJ_TEST=1` run of the same CTest target
+played a generated 120 BPM click track through the default Windows output and
+observed a tempo snapshot reach a GUI-thread `PresentationGate`; stopping the
+bridge cleared the gate, and it remained clear after a short wait. This is a
+native test of the private bridge and real capture/tempo path, not the actual
+QML control or overlay. The normal and opt-in test invocations both passed.
+
 Windows 11 x64, MSVC 19.44: `cmake --build "$env:TEMP/beatglass-wasapi-slice" --config Debug --target windows_endpoint_tests -j 4`
 and `ctest --test-dir "$env:TEMP/beatglass-wasapi-slice" -C Debug -R 'Default follower|Discovery exceptions|Live tempo|Session|endpoint|capture startup' --output-on-failure`
 passed 11/11. Opt-in `[native-default],[native-tempo]` tests passed: injected

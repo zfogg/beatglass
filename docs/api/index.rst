@@ -52,7 +52,7 @@ decision; the interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
@@ -62,3 +62,8 @@ Desktop application internals
 .. cpp:function:: beatglass::windows::LiveTempo::~LiveTempo()
 
    Stop capture and clear the estimate on the owning worker thread.
+
+.. cpp:function:: beatglass::windows::DjBridge::~DjBridge()
+
+   Stop and join the worker before destruction. Call on the GUI thread; an OS
+   device operation that stalls can delay destruction.
