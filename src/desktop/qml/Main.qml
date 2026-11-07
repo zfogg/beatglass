@@ -116,6 +116,32 @@ ApplicationWindow {
                     window.selectedTheme = currentText
                 }
             }
+            Row {
+                id: themePreviews
+                objectName: "themePreviews"
+                spacing: 3
+                Repeater {
+                    model: window.themeNames.length
+                    delegate: Rectangle {
+                        required property int index
+                        objectName: "themePreview" + index
+                        width: 18; height: 18; radius: 3
+                        color: window.themeBackgrounds[index]
+                        border.width: window.selectedThemeIndex === index ? 2 : 1
+                        border.color: window.themeAccentColors[index]
+                        Accessible.name: window.themeNames[index] + " theme preview"
+                        Accessible.role: Accessible.Button
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                window.selectedThemeIndex = index
+                                window.selectedTheme = window.themeNames[index]
+                                themeSelector.currentIndex = index
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     background: Rectangle { color: window.themeBackgrounds[window.selectedThemeIndex] }

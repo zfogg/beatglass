@@ -88,6 +88,19 @@ TestCase {
         compare(app.selectedThemeIndex, 2)
         app.destroy()
     }
+    function test_themePreviewsSelectTheirPalette() {
+        let app = shell.createObject(null)
+        let previews = findChild(app, "themePreviews")
+        verify(previews !== null)
+        compare(previews.children.length, 6)
+        let blue = findChild(app, "themePreview4")
+        verify(blue !== null)
+        compare(blue.color, "#10243d")
+        mouseClick(blue, blue.width / 2, blue.height / 2)
+        compare(app.selectedTheme, "Blue")
+        compare(app.selectedThemeIndex, 4)
+        app.destroy()
+    }
     function test_realFolderNavigationAndSelection() {
         let app = shell.createObject(null)
         let model = findChild(app, "fileModel")
