@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
   if (argc != 2) { std::cerr << "Usage: beatglass-music-cli <audio-file>\n"; return 2; }
   std::cout.imbue(std::locale::classic()); std::cout << std::setprecision(9);
   try {
+    auto previous_state=beatglass::TrackingState::stopped;
     const auto result=beatglass::replay_music_file(std::filesystem::path(argv[1]),0,[](const beatglass::CausalMusicBeat& beat) {
       std::cout << "{\"type\":\"beat\",\"schema_version\":1,\"epoch\":" << beat.epoch
                 << ",\"sample_rate\":" << beat.sample_rate << ",\"frame\":" << beat.frame << ",\"observed_through\":" << beat.observed_through << "}\n";
@@ -36,6 +37,12 @@ int main(int argc, char** argv) {
       optional_string(tonal.key); std::cout << ",\"key_from\":"; if(tonal.key_from) std::cout << *tonal.key_from; else std::cout << "null";
       std::cout << ",\"chord\":"; optional_string(tonal.chord);
       std::cout << "}\n";
+    }, [&](const beatglass::CausalMusicState& state) {
+      if (state.tempo.state == previous_state) return;
+      previous_state = state.tempo.state;
+      std::cout << "{\"type\":\"state\",\"schema_version\":1,\"epoch\":" << state.tempo.epoch
+                << ",\"sample_rate\":" << state.sample_rate << ",\"observed_through\":" << state.tempo.observed_through << ",\"state\":";
+      string_json(beatglass::cli::state_label(state.tempo.state)); std::cout << "}\n";
     });
     std::cout << "{\"type\":\"result\",\"schema_version\":1,\"epoch\":" << result.tempo.epoch
               << ",\"sample_rate\":" << result.sample_rate << ",\"observed_through\":" << result.tempo.observed_through << ",\"analyzed_through\":" << result.tempo.analyzed_through << ",\"bpm\":";

@@ -45,6 +45,13 @@ with tempfile.TemporaryDirectory() as directory:
     prefix_rows = [json.loads(line) for line in subprocess.run([exe, str(prefix)], capture_output=True, text=True, check=True).stdout.splitlines()]
     prior = [row for row in rows[:-1] if row["observed_through"] <= rate * 6]
     assert prefix_rows[:-1] == prior, "future PCM changed a previously emitted observation"
+    quiet_path = pathlib.Path(directory) / "silence-after.wav"
+    with wave.open(str(path), "rb") as source, wave.open(str(quiet_path), "wb") as target:
+        target.setparams(source.getparams())
+        target.writeframes(source.readframes(rate * 12) + bytes(rate * 2 * 2))
+    quiet_rows = [json.loads(line) for line in subprocess.run([exe, str(quiet_path)], capture_output=True, text=True, check=True).stdout.splitlines()]
+    assert any(row["type"] == "state" and row["state"] == "silent" and row["observed_through"] < rate * 14 for row in quiet_rows), quiet_rows[-10:]
+    assert quiet_rows[-1]["state"] == "silent" and quiet_rows[-1]["bpm"] is None and quiet_rows[-1]["key"] is None and quiet_rows[-1]["chord"] is None
     assert path.read_bytes() == before
     missing = subprocess.run([exe, str(path.parent / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0

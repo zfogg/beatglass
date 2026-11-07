@@ -95,6 +95,9 @@ TEST_CASE("file replay and incremental blocks use the same real music engine") {
   CHECK(contents()==before);
   std::stop_source cancelled; cancelled.request_stop(); CHECK_THROWS_AS(replay_music_file(fixture.path,73,{},cancelled.get_token()),MusicReplayCancelled);
   std::stop_source during; CHECK_THROWS_AS(replay_music_file(fixture.path,74,[&](const CausalMusicBeat&){during.request_stop();},during.get_token()),MusicReplayCancelled);
+  std::stop_source after_block; unsigned updates=0;
+  CHECK_THROWS_AS(replay_music_file(fixture.path,75,{},after_block.get_token(),{},[&](const CausalMusicState& s){++updates; CHECK(s.tempo.observed_through==512); after_block.request_stop();}),MusicReplayCancelled);
+  CHECK(updates==1);
 }
 TEST_CASE("combined callback failure clears state and fails closed") {
   auto pcm=music(20); CausalMusicReplay replay;

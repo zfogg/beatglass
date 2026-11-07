@@ -4,7 +4,8 @@
 namespace beatglass {
 CausalMusicState replay_music_file(const std::filesystem::path& path, std::uint64_t epoch,
                                   const CausalMusicReplay::BeatObserver& observer, std::stop_token cancel,
-                                  const CausalMusicReplay::TonalObserver& tonal_observer) {
+                                  const CausalMusicReplay::TonalObserver& tonal_observer,
+                                  const CausalMusicReplay::StateObserver& state_observer) {
   if (cancel.stop_requested()) throw MusicReplayCancelled();
   FileReader file(path, epoch);
   CausalMusicReplay replay;
@@ -15,6 +16,7 @@ CausalMusicState replay_music_file(const std::filesystem::path& path, std::uint6
     if (read.status == FileReadStatus::cancelled) throw MusicReplayCancelled();
     if (read.status == FileReadStatus::end) break;
     state = replay.process(read.block, observer, tonal_observer);
+    if (state_observer) state_observer(state);
   }
   return state;
 }

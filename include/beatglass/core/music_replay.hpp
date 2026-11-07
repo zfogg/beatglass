@@ -61,6 +61,8 @@ public:
   using BeatObserver = std::function<void(const CausalMusicBeat&)>;
   /** Called synchronously for each new tonal window; copy values retained after return. */
   using TonalObserver = std::function<void(const CausalTonalFrame&)>;
+  /** Called synchronously after a decoded block; copy retained values. */
+  using StateObserver = std::function<void(const CausalMusicState&)>;
   /** Construct an inactive engine; Essentia must be available in this build. */
   CausalMusicReplay();
   /** Destroy after worker calls and callbacks have completed. */
@@ -101,6 +103,7 @@ public:
  * @param observer Optional beat callback, invoked synchronously and not retained.
  * @param cancel Checked before decoder reads; it cannot interrupt blocking I/O.
  * @param tonal_observer Optional synchronous callback for tonal windows.
+ * @param state_observer Optional synchronous callback after each decoded block.
  * @return The latest owned state; an incomplete final hop is not analyzed.
  * @throws MusicReplayCancelled for cancellation; std::exception for I/O,
  * estimator or callback failure. No cached or shared result is published.
@@ -108,5 +111,6 @@ public:
 CausalMusicState replay_music_file(const std::filesystem::path& path, std::uint64_t epoch,
                                   const CausalMusicReplay::BeatObserver& observer = {},
                                   std::stop_token cancel = {},
-                                  const CausalMusicReplay::TonalObserver& tonal_observer = {});
+                                  const CausalMusicReplay::TonalObserver& tonal_observer = {},
+                                  const CausalMusicReplay::StateObserver& state_observer = {});
 }
