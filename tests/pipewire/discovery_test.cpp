@@ -1,41 +1,31 @@
 #include <catch2/catch_test_macros.hpp>
-#include "../../lib/capture/pipewire/discovery.cpp"
+#include "beatglass/capture/detail/pipewire_discovery.hpp"
+#include <cstdlib>
 
 TEST_CASE("registry discovery selects only addressable output sinks") {
-  using namespace beatglass::pipewire;
-  std::vector<Sink> sinks;
-  spa_dict_item items[] = {{PW_KEY_MEDIA_CLASS, "Audio/Sink"}, {PW_KEY_OBJECT_SERIAL, "123"},
-                           {PW_KEY_NODE_NAME, "output"}, {PW_KEY_NODE_DESCRIPTION, "Speakers"}};
-  spa_dict props = SPA_DICT_INIT(items, 4);
-  add_sink(sinks, PW_TYPE_INTERFACE_Node, &props);
+  beatglass::pipewire::RegistrySnapshot nodes;
+  constexpr auto node = "PipeWire:Interface:Node";
+  nodes.add(1, node, "Audio/Sink", "123", "output", "Speakers");
+  nodes.add(2, node, "Audio/Source", "124", "microphone", "Mic");
+  nodes.add(3, node, "Audio/Sink", "", "bad", nullptr);
+  nodes.add(4, "PipeWire:Interface:Device", "Audio/Sink", "125", "device", nullptr);
+  auto sinks = nodes.sinks();
   REQUIRE(sinks.size() == 1);
   CHECK(sinks[0].serial == "123");
   CHECK(sinks[0].description == "Speakers");
-  items[0].value = "Audio/Source";
-  add_sink(sinks, PW_TYPE_INTERFACE_Node, &props);
-  items[0].value = "Audio/Sink";
-  items[1].value = "";
-  add_sink(sinks, PW_TYPE_INTERFACE_Node, &props);
-  items[1].value = "123";
-  add_sink(sinks, "PipeWire:Interface:Device", &props);
-  CHECK(sinks.size() == 1);
 }
-
-TEST_CASE("sink names provide fallback when description is absent") {
-  std::vector<beatglass::pipewire::Sink> sinks;
-  spa_dict_item items[] = {{PW_KEY_MEDIA_CLASS, "Audio/Sink"}, {PW_KEY_OBJECT_SERIAL, "5"}, {PW_KEY_NODE_NAME, "sink"}};
-  spa_dict props = SPA_DICT_INIT(items, 3);
-  beatglass::pipewire::add_sink(sinks, PW_TYPE_INTERFACE_Node, &props);
-  REQUIRE(sinks.size() == 1);
-  CHECK(sinks[0].description == "sink");
+TEST_CASE("registry snapshot handles fallback names and removal") {
+  beatglass::pipewire::RegistrySnapshot nodes;
+  nodes.add(5, "PipeWire:Interface:Node", "Audio/Sink", "5", "sink", nullptr);
+  REQUIRE(nodes.sinks().size() == 1);
+  CHECK(nodes.sinks()[0].description == "sink");
+  nodes.remove(5);
+  CHECK(nodes.sinks().empty());
 }
-
-TEST_CASE("removed registry nodes are not returned") {
-  beatglass::pipewire::RegistryState state;
-  spa_dict_item items[] = {{PW_KEY_MEDIA_CLASS, "Audio/Sink"}, {PW_KEY_OBJECT_SERIAL, "5"}, {PW_KEY_NODE_NAME, "sink"}};
-  spa_dict props = SPA_DICT_INIT(items, 3);
-  beatglass::pipewire::global(&state, 7, 0, PW_TYPE_INTERFACE_Node, 0, &props);
-  REQUIRE(state.nodes.size() == 1);
-  beatglass::pipewire::global_remove(&state, 7);
-  CHECK(state.nodes.empty());
+TEST_CASE("unreachable PipeWire daemon is an error, not an empty success") {
+  REQUIRE(setenv("PIPEWIRE_REMOTE", "beatglass-test-nonexistent-server", 1) == 0);
+  auto result = beatglass::pipewire::discover_sinks(std::chrono::milliseconds(500));
+  unsetenv("PIPEWIRE_REMOTE");
+  CHECK_FALSE(result.error.empty());
+  CHECK(result.sinks.empty());
 }

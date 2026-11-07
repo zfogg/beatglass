@@ -1,5 +1,6 @@
 // Private PipeWire discovery implementation. The coordinator must agree the
 // shared API before other modules consume this translation unit.
+#include "beatglass/capture/detail/pipewire_discovery.hpp"
 #include <pipewire/pipewire.h>
 #include <spa/utils/result.h>
 #include <cerrno>
@@ -11,34 +12,32 @@
 #include <vector>
 
 namespace beatglass::pipewire {
-struct Sink { std::string serial, name, description; };
-struct Discovery { std::vector<Sink> sinks; std::string error; };
-
-// Registry properties are untrusted; accept only addressable output sinks.
-static void add_sink(std::vector<Sink>& sinks, const char* type, const spa_dict* props) {
-  if (!type || std::strcmp(type, PW_TYPE_INTERFACE_Node) || !props) return;
-  const auto* cls = spa_dict_lookup(props, PW_KEY_MEDIA_CLASS);
-  const auto* serial = spa_dict_lookup(props, PW_KEY_OBJECT_SERIAL);
-  const auto* name = spa_dict_lookup(props, PW_KEY_NODE_NAME);
-  if (!cls || std::strcmp(cls, "Audio/Sink") || !serial || !*serial || !name || !*name) return;
-  const auto* desc = spa_dict_lookup(props, PW_KEY_NODE_DESCRIPTION);
-  sinks.push_back({serial, name, desc && *desc ? desc : name});
+void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, const char* serial,
+                           const char* name, const char* desc) {
+  if (!type || std::strcmp(type, PW_TYPE_INTERFACE_Node) || !cls || std::strcmp(cls, "Audio/Sink") ||
+      !serial || !*serial || !name || !*name) return;
+  nodes_[id] = {serial, name, desc && *desc ? desc : name};
 }
-
+void RegistrySnapshot::remove(std::uint32_t id) { nodes_.erase(id); }
+std::vector<Sink> RegistrySnapshot::sinks() const {
+  std::vector<Sink> result;
+  for (const auto& [id, sink] : nodes_) result.push_back(sink);
+  return result;
+}
 struct RegistryState {
   Discovery result;
-  std::map<uint32_t, Sink> nodes;
+  RegistrySnapshot nodes;
   bool done = false;
   int sequence = -1;
 };
 static void global(void* data, uint32_t id, uint32_t, const char* type, uint32_t, const spa_dict* props) {
-  auto& state = *static_cast<RegistryState*>(data);
-  std::vector<Sink> found;
-  add_sink(found, type, props);
-  if (!found.empty()) state.nodes[id] = std::move(found.front());
+  if (!props) return;
+  static_cast<RegistryState*>(data)->nodes.add(id, type, spa_dict_lookup(props, PW_KEY_MEDIA_CLASS),
+      spa_dict_lookup(props, PW_KEY_OBJECT_SERIAL), spa_dict_lookup(props, PW_KEY_NODE_NAME),
+      spa_dict_lookup(props, PW_KEY_NODE_DESCRIPTION));
 }
 static void global_remove(void* data, uint32_t id) {
-  static_cast<RegistryState*>(data)->nodes.erase(id);
+  static_cast<RegistryState*>(data)->nodes.remove(id);
 }
 static void done(void* data, uint32_t id, int seq) {
   auto& state = *static_cast<RegistryState*>(data);
@@ -92,7 +91,7 @@ Discovery discover_sinks(std::chrono::milliseconds timeout) {
   pw_context_destroy(context);
   pw_loop_destroy(loop);
   if (state.result.error.empty())
-    for (auto& [id, sink] : state.nodes) state.result.sinks.push_back(std::move(sink));
+    state.result.sinks = state.nodes.sinks();
   return state.result;
 }
 } // namespace beatglass::pipewire
