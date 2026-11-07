@@ -24,14 +24,14 @@ static_assert(std::atomic<int>::is_always_lock_free);
 static_assert(std::atomic<bool>::is_always_lock_free);
 struct Monitor::Impl {
 public:
-  explicit Impl(std::uint64_t epoch, std::uint64_t attempt) : ingress_(epoch), epoch_(epoch), attempt_(attempt) {}
+  explicit Impl(std::uint64_t epoch, SourceAttempt attempt) : ingress_(epoch), epoch_(epoch), attempt_(attempt) {}
   ~Impl() { stop(); }
 
   // The serial must have come from an explicit sink selection. Epochs are
   // assigned externally and must never be reused while old data is in flight.
   bool start(const Sink& sink) {
     const auto& serial = sink.serial;
-    if (started_ || state_.load() != MonitorState::stopped || serial.empty() || sink.name.empty() || !epoch_ || !attempt_ ||
+    if (started_ || state_.load() != MonitorState::stopped || serial.empty() || sink.name.empty() || !epoch_ || !attempt_.generation ||
         !std::all_of(serial.begin(), serial.end(), [](unsigned char c) { return c >= '0' && c <= '9'; })) return false;
     started_ = true;
     const auto discovered = discover_sinks(std::chrono::seconds(2));
@@ -122,7 +122,7 @@ public:
   bool pop_event(MonitorEvent& event) noexcept {
     if (event_loss_.exchange(false, std::memory_order_acq_rel)) {
       event_read_.store(event_write_.load(std::memory_order_acquire), std::memory_order_release);
-      event = {attempt_, 0, 0, MonitorState::error, true}; return true;
+      event = {attempt_, 0, std::nullopt, SourceState::error, std::nullopt, true}; return true;
     }
     const auto read = event_read_.load(std::memory_order_relaxed);
     if (read == event_write_.load(std::memory_order_acquire)) return false;
@@ -130,7 +130,7 @@ public:
     event_read_.store((read + 1) % events_queue_.size(), std::memory_order_release);
     if (event_loss_.exchange(false, std::memory_order_acq_rel)) {
       event_read_.store(event_write_.load(std::memory_order_acquire), std::memory_order_release);
-      event = {attempt_, 0, 0, MonitorState::error, true};
+      event = {attempt_, 0, std::nullopt, SourceState::error, std::nullopt, true};
     }
     return true;
   }
@@ -148,7 +148,10 @@ private:
       event_loss_.store(true, std::memory_order_release);
       state_.store(MonitorState::error, std::memory_order_release); return;
     }
-    events_queue_[write] = {attempt_, ++event_sequence_, next == MonitorState::streaming ? epoch_ : 0, next, false};
+    const auto source_state = next == MonitorState::streaming ? SourceState::running :
+                              next == MonitorState::interrupted ? SourceState::interrupted : SourceState::error;
+    events_queue_[write] = {attempt_, ++event_sequence_, next == MonitorState::streaming ? std::optional{epoch_} : std::nullopt,
+                            source_state, std::nullopt, false};
     event_write_.store(after, std::memory_order_release);
     state_.store(next, std::memory_order_release);
   }
@@ -284,14 +287,15 @@ private:
   std::atomic<int> diagnostic_{0};
   std::atomic<bool> stop_requested_{false};
   MonitorIngress ingress_;
-  std::uint64_t epoch_{}, attempt_{}, event_sequence_{};
+  std::uint64_t epoch_{}, event_sequence_{};
+  SourceAttempt attempt_{};
   std::array<MonitorEvent, 16> events_queue_{};
   std::atomic<std::size_t> event_read_{0}, event_write_{0};
   std::atomic<bool> event_loss_{false};
   bool started_{};
   bool format_valid_{}; // control loop thread, after start before thread creation
 };
-Monitor::Monitor(std::uint64_t epoch, std::uint64_t attempt) : impl_(std::make_unique<Impl>(epoch, attempt)) {}
+Monitor::Monitor(std::uint64_t epoch, SourceAttempt attempt) : impl_(std::make_unique<Impl>(epoch, attempt)) {}
 Monitor::~Monitor() = default;
 bool Monitor::start(const Sink& sink) { return impl_->start(sink); }
 void Monitor::stop() noexcept { impl_->stop(); }

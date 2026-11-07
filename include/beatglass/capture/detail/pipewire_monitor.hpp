@@ -3,14 +3,19 @@
 #include <memory>
 #include <string>
 #include "beatglass/capture/detail/pipewire_ingress.hpp"
+#include "beatglass/capture/source.hpp"
+#include "beatglass/core/audio_clock.hpp"
 #include "beatglass/capture/detail/pipewire_discovery.hpp"
 namespace beatglass::pipewire {
 /** Provisional monitor state; interruption and error require a new instance. */
 enum class MonitorState : unsigned { stopped, starting, streaming, interrupted, error };
 /** Ordered event for one start attempt; a loss indication invalidates all evidence. */
 struct MonitorEvent {
-  std::uint64_t attempt{}, sequence{}, epoch{};
-  MonitorState state{MonitorState::stopped};
+  SourceAttempt attempt{};
+  std::uint64_t sequence{};
+  std::optional<std::uint64_t> epoch;
+  SourceState state{SourceState::stopped};
+  std::optional<AudioClockAnchor> anchor;
   bool delivery_lost{};
 };
 /**
@@ -25,7 +30,7 @@ struct MonitorEvent {
 class Monitor {
 public:
   /** Create an instance with a process-unique nonzero epoch and nonzero attempt. */
-  explicit Monitor(std::uint64_t epoch, std::uint64_t attempt);
+  explicit Monitor(std::uint64_t epoch, SourceAttempt attempt);
   /** Destroy after quiescing the consumer; also stops the PipeWire loop. */
   ~Monitor();
   Monitor(const Monitor&) = delete;

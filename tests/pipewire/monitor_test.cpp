@@ -5,12 +5,12 @@
 #include <thread>
 using namespace beatglass::pipewire;
 TEST_CASE("monitor rejects missing selection and zero epoch") {
-  Monitor invalid(0, 1); CHECK_FALSE(invalid.start({"123", "sink", ""}));
-  Monitor monitor(1, 1); CHECK_FALSE(monitor.start({"", "sink", ""})); CHECK_FALSE(monitor.start({"default", "sink", ""})); CHECK(monitor.state() == MonitorState::stopped);
+  Monitor invalid(0, {1}); CHECK_FALSE(invalid.start({"123", "sink", ""}));
+  Monitor monitor(1, {1}); CHECK_FALSE(monitor.start({"", "sink", ""})); CHECK_FALSE(monitor.start({"default", "sink", ""})); CHECK(monitor.state() == MonitorState::stopped);
 }
 TEST_CASE("unavailable PipeWire server never starts and stop quiesces") {
   REQUIRE(setenv("PIPEWIRE_REMOTE", "beatglass-test-nonexistent-server", 1) == 0);
-  Monitor monitor(3, 1);
+  Monitor monitor(3, {1});
   const bool accepted = monitor.start({"123", "sink", ""});
   if (accepted) {
     for (int n=0; n<100 && monitor.state() == MonitorState::starting; ++n)
