@@ -4,10 +4,10 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     ca-certificates git=1:2.43.0-1ubuntu7.4 python3=3.12.3-0ubuntu2.1 pkg-config=1.8.1-2build1 \
     libeigen3-dev=3.4.0-4build0.1 g++-mingw-w64-x86-64-posix=13.2.0-6ubuntu1+26.1 \
     gcc-mingw-w64-x86-64-posix=13.2.0-6ubuntu1+26.1 && rm -rf /var/lib/apt/lists/*
-RUN git clone https://github.com/MTG/essentia.git /src/essentia && \
-    git -C /src/essentia checkout 23ae7baddecfc3227ba23ad69fa11f73ac5293a4 && \
-    git clone https://github.com/aubio/aubio.git /src/aubio && \
-    git -C /src/aubio checkout 90bd27a23123fcc524c31787c9c8fc0ae4c79378
+RUN git init /src/essentia && git -C /src/essentia fetch --depth 1 https://github.com/MTG/essentia.git 23ae7baddecfc3227ba23ad69fa11f73ac5293a4 && \
+    git -C /src/essentia checkout FETCH_HEAD && \
+    git init /src/aubio && git -C /src/aubio fetch --depth 1 https://github.com/aubio/aubio.git 90bd27a23123fcc524c31787c9c8fc0ae4c79378 && \
+    git -C /src/aubio checkout FETCH_HEAD
 WORKDIR /src/essentia
 # Upstream cross-build currently hardcodes the 32-bit compiler prefix.
 RUN sed -i s/i686-w64-mingw32/x86_64-w64-mingw32/g wscript && \
