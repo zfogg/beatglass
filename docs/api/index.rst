@@ -31,7 +31,7 @@ Analysis
 Library jobs
 ------------
 
-.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/store.hpp
+.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp
 
 Desktop application internals
 -----------------------------
