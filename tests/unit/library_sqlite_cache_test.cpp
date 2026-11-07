@@ -97,3 +97,36 @@ TEST_CASE("reopen resolves committed and interrupted runs by exact ID and key") 
   }
   REQUIRE(std::filesystem::remove(path));
 }
+
+TEST_CASE("lost commit acknowledgement is resolved from persisted run ID") {
+  auto path = std::filesystem::temp_directory_path() /
+    ("beatglass-commit-fault-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  CacheKey key{"hash", "engine", "config", "offline"};
+  {
+    SqliteCache cache(path.string()); cache.begin("run", key);
+    REQUIRE(cache.publish("run", key, "result", {}, [] { return true; }, [] { throw std::runtime_error("lost acknowledgement"); }) == Publish::error);
+  }
+  {
+    SqliteCache cache(path.string());
+    REQUIRE(cache.recover("run", key) == RunRecovery::committed);
+    std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "result");
+  }
+  REQUIRE(std::filesystem::remove(path));
+}
+TEST_CASE("failure before commit preserves old result and interrupted run is retryable") {
+  auto path = std::filesystem::temp_directory_path() /
+    ("beatglass-rollback-fault-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  CacheKey key{"hash", "engine", "config", "offline"};
+  {
+    SqliteCache cache(path.string()); cache.begin("old", key);
+    REQUIRE(cache.publish("old", key, "old", {}, [] { return true; }) == Publish::committed);
+    cache.begin("new", key);
+    REQUIRE(cache.publish("new", key, "new", {}, []() -> bool { throw std::runtime_error("verification failed"); }) == Publish::error);
+  }
+  {
+    SqliteCache cache(path.string());
+    REQUIRE(cache.recover("new", key) == RunRecovery::retryable);
+    std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "old");
+  }
+  REQUIRE(std::filesystem::remove(path));
+}

@@ -41,9 +41,10 @@ public:
   bool find(const CacheKey& key, std::string& result);
   /** Recover a run outcome after reopening the database. The ID and all key fields must match. Throws on SQLite error. Reopening converts interrupted running rows to retryable; a completed row remains evidence of commit even if superseded. */
   RunRecovery recover(const std::string& id, const CacheKey& key);
-  /** Revalidate and atomically publish. Cancellation before commit rolls back; cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. */
+  /** Revalidate and atomically publish. Cancellation before commit rolls back; cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. The optional test probe runs immediately after successful COMMIT; throwing simulates a lost acknowledgement and returns error, which requires run-ID recovery. It must not reenter the cache. */
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
-                  std::stop_token stop, const std::function<bool()>& revalidate);
+                  std::stop_token stop, const std::function<bool()>& revalidate,
+                  const std::function<void()>& after_commit_probe = {});
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;

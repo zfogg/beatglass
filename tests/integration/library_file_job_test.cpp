@@ -1,10 +1,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/detail/file_job.hpp"
 #include "beatglass/library/detail/job_executor.hpp"
+#include "beatglass/library/detail/file_snapshot.hpp"
+#ifndef _WIN32
+#include <sndfile.h>
+#endif
 #include <future>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <vector>
 using namespace beatglass::library_detail;
 namespace {
 struct TempDirectory {
@@ -74,4 +79,26 @@ TEST_CASE("tracked queue cancels a real tempo job without publishing") {
   SqliteCache cache((temp.path / "library.sqlite").string());
   auto retry = analyze_cached_tempo(cache, input, "aubio-test-v1", "config");
   INFO(retry.diagnostic); REQUIRE(retry.status == FileJobStatus::committed);
+}
+
+TEST_CASE("decoder reads snapshot while source replacement blocks publication") {
+#ifndef _WIN32
+  TempDirectory temp; auto input = temp.path / "audio";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.flac", input);
+  auto opened = SnapshotOpen::create(input); INFO(opened.diagnostic); REQUIRE(opened.status == SnapshotStatus::ok);
+  SF_INFO info{}; auto decoder = sf_open_fd(opened.value->borrowed_descriptor(), SFM_READ, &info, 0);
+  REQUIRE(decoder != nullptr); REQUIRE(info.channels > 0);
+  std::vector<float> samples(static_cast<std::size_t>(info.channels) * 256);
+  REQUIRE(sf_readf_float(decoder, samples.data(), 256) > 0);
+  std::filesystem::rename(input, temp.path / "old");
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES) / "tone.aiff", input);
+  REQUIRE(sf_readf_float(decoder, samples.data(), 256) > 0);
+  REQUIRE(sf_close(decoder) == 0);
+  SqliteCache cache((temp.path / "library.sqlite").string());
+  CacheKey key{opened.value->digest(), "engine", "config", "offline"}; cache.begin("old", key);
+  REQUIRE(cache.publish("old", key, "old-result", {}, [] { return true; }) == Publish::committed);
+  cache.begin("run", key);
+  REQUIRE(cache.publish("run", key, "result", {}, [&] { return opened.value->verify() == SnapshotStatus::ok; }) == Publish::stale_input);
+  std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "old-result");
+#endif
 }

@@ -67,7 +67,8 @@ public:
   // must compare the opened input's current version with its pre-analysis evidence.
   // A stat/hash check cannot rule out all concurrent filesystem mutations.
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
-                  std::stop_token stop, const std::function<bool()>& revalidate) {
+                  std::stop_token stop, const std::function<bool()>& revalidate,
+                  const std::function<void()>& after_commit_probe) {
     try {
       if (!sqlite_length_representable(result.size())) return Publish::error;
       exec("BEGIN IMMEDIATE");
@@ -81,7 +82,7 @@ public:
       bind_key(active.p, 1, key); bind(active.p, 5, id); done(active.p);
       if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
       // After this point cancellation cannot change the result of COMMIT.
-      exec("COMMIT"); return Publish::committed;
+      exec("COMMIT"); if (after_commit_probe) after_commit_probe(); return Publish::committed;
     } catch (...) { rollback(); return Publish::error; }
   }
 private:
@@ -104,7 +105,8 @@ void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->beg
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
 RunRecovery SqliteCache::recover(const std::string& id, const CacheKey& key) { return impl_->recover(id, key); }
 Publish SqliteCache::publish(const std::string& id, const CacheKey& key, const std::string& result,
-                             std::stop_token stop, const std::function<bool()>& revalidate) {
-  return impl_->publish(id, key, result, stop, revalidate);
+                             std::stop_token stop, const std::function<bool()>& revalidate,
+                  const std::function<void()>& after_commit_probe) {
+  return impl_->publish(id, key, result, stop, revalidate, after_commit_probe);
 }
 }
