@@ -19,7 +19,7 @@ delivery loss invalidates the active epoch. Clock anchors are optional and
 carry a clock domain and optional uncertainty and latency; absence is not zero.
 These interfaces require adapter integration and do not implement capture.
 
-.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
+.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
 
 AudioSource stop
 ~~~~~~~~~~~~~~~~
@@ -68,3 +68,8 @@ Desktop application internals
 
    Stop and join the worker before destruction. Call on the GUI thread; an OS
    device operation that stalls can delay destruction.
+
+CLI application internals
+-------------------------
+
+.. cpp:autodoc:: src/cli/state_label.hpp

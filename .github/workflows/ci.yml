@@ -24,3 +24,12 @@ jobs:
       - run: cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON
       - run: cmake --build build --parallel 4
       - run: ctest --test-dir build --output-on-failure
+
+  pipewire-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libpipewire-0.3-dev
+      - run: cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_PIPEWIRE=ON
+      - run: cmake --build build --parallel 4
+      - run: ctest --test-dir build --output-on-failure
