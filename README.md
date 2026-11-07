@@ -35,7 +35,7 @@ For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` a
 
 ## API documentation
 
-The provisional library and application-private C++ interfaces are documented with Hawkmoth and Sphinx. Build the same Linux container used by CI from the repository root (Docker required):
+The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
 
 ```sh
 docker build -f docs/api/Dockerfile -t beatglass-docs .

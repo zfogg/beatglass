@@ -65,3 +65,10 @@ typed start failures. Control notifications carry attempt and serial sequence;
 gaps and delivery loss fail closed. The process coordinator owns epoch
 allocation, while optional anchors expose clock domain and known uncertainty
 and latency. Existing adapters must migrate; no platform backend is provided.
+
+# Phase 1 snapshot boundary
+
+Snapshot publication uses exclusive `observed_through` frame boundaries and
+nonempty half-open chord intervals. A beat at the boundary and an empty chord
+are now rejected; existing producers must adjust. This does not qualify any
+native capture or presentation path.

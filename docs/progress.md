@@ -146,6 +146,12 @@ The proposed shared source types and ordered lifecycle helper have regression
 coverage. Native adapters, control queues and actual source clock measurements
 remain unimplemented and require integration and platform qualification.
 
+# Shared timeline contract
+
+The snapshot publisher enforces exclusive observed-frame and nonempty
+half-open chord boundaries. The remaining Phase 1 contracts and native
+qualification are still in progress.
+
 # Phase 0 handoff decision
 
 The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
