@@ -165,4 +165,3 @@ std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::lookup_indexed(std::string
     return lookup_active(store, path, snapshot_tempo_identity(entry->content_hash, engine, configuration), epoch, stop);
   }, std::move(completion));
 }
-
