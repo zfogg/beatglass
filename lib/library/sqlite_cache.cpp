@@ -92,6 +92,19 @@ public:
     auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 0));
     auto n = sqlite3_column_bytes(s.p, 0); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
   }
+  std::optional<std::string> active_run(const CacheKey& key) {
+    Statement s(db_, "SELECT run_id FROM active WHERE content=? AND engine=? AND config=? AND mode=?"); bind_key(s.p, 1, key);
+    int rc = sqlite3_step(s.p); if (rc == SQLITE_DONE) return {}; if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_));
+    auto text = reinterpret_cast<const char*>(sqlite3_column_text(s.p, 0)); if (!text) throw std::runtime_error("invalid run ID"); return std::string(text);
+  }
+  bool find_run(const std::string& id, const CacheKey& key, std::string& result) {
+    Statement s(db_, "SELECT length(result), CASE WHEN length(result)<=8388608 THEN result ELSE NULL END FROM runs WHERE id=? AND content=? AND engine=? AND config=? AND mode=? AND status='complete'");
+    bind(s.p, 1, id); bind_key(s.p, 2, key); int rc = sqlite3_step(s.p);
+    if (rc == SQLITE_DONE) return false; if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_));
+    auto length = sqlite3_column_int64(s.p, 0); if (length < 0 || length > 8 * 1024 * 1024) throw std::runtime_error("offline result too large");
+    auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 1)); auto n = sqlite3_column_bytes(s.p, 1);
+    result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
+  }
   RunRecovery recover(const std::string& id, const CacheKey& key) {
     Statement s(db_, "SELECT status FROM runs WHERE id=? AND content=? AND engine=? AND config=? AND mode=?");
     bind(s.p, 1, id); bind_key(s.p, 2, key);
@@ -117,7 +130,7 @@ public:
   // A stat/hash check cannot rule out all concurrent filesystem mutations.
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
                   std::stop_token stop, const std::function<bool()>& revalidate,
-                  const std::function<void()>& after_commit_probe) {
+                  const std::function<void()>& after_commit_probe, const std::string* indexed_path = nullptr) {
     try {
       if (!sqlite_length_representable(result.size())) return Publish::error;
       exec("BEGIN IMMEDIATE");
@@ -129,9 +142,23 @@ public:
       if (sqlite3_changes(db_) != 1) throw std::runtime_error("unknown or non-running run");
       Statement active(db_, "INSERT INTO active(content,engine,config,mode,run_id) VALUES(?,?,?,?,?) ON CONFLICT(content,engine,config,mode) DO UPDATE SET run_id=excluded.run_id");
       bind_key(active.p, 1, key); bind(active.p, 5, id); done(active.p);
+      if (indexed_path) { Statement row(db_, "UPDATE collection SET content_hash=? WHERE path=?"); bind(row.p, 1, key.content); bind(row.p, 2, *indexed_path); done(row.p); if (sqlite3_changes(db_) != 1) throw std::runtime_error("indexed entry missing"); }
       if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
       // After this point cancellation cannot change the result of COMMIT.
       exec("COMMIT"); if (after_commit_probe) after_commit_probe(); return Publish::committed;
+    } catch (...) { rollback(); return Publish::error; }
+  }
+  Publish associate(const CacheKey& key, const std::string& path, std::stop_token stop, const std::function<bool()>& revalidate) {
+    try {
+      exec("BEGIN IMMEDIATE");
+      if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
+      if (!revalidate()) { rollback(); return Publish::stale_input; }
+      Statement exists(db_, "SELECT 1 FROM active WHERE content=? AND engine=? AND config=? AND mode=?"); bind_key(exists.p, 1, key);
+      if (sqlite3_step(exists.p) != SQLITE_ROW) throw std::runtime_error("active run missing");
+      Statement row(db_, "UPDATE collection SET content_hash=? WHERE path=?"); bind(row.p, 1, key.content); bind(row.p, 2, path); done(row.p);
+      if (sqlite3_changes(db_) != 1) throw std::runtime_error("indexed entry missing");
+      if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
+      exec("COMMIT"); return Publish::committed;
     } catch (...) { rollback(); return Publish::error; }
   }
 private:
@@ -173,6 +200,8 @@ std::optional<CollectionEntry> SqliteCache::entry(const std::string& path, std::
 std::vector<CollectionEntry> SqliteCache::entries(const CollectionQuery& q, std::stop_token stop) { return impl_->entries(q, stop); }
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
+std::optional<std::string> SqliteCache::active_run(const CacheKey& key) { return impl_->active_run(key); }
+bool SqliteCache::find_run(const std::string& id, const CacheKey& key, std::string& result) { return impl_->find_run(id, key, result); }
 RunRecovery SqliteCache::recover(const std::string& id, const CacheKey& key) { return impl_->recover(id, key); }
 bool SqliteCache::committed_run(const std::string& id) { return impl_->committed_run(id); }
 Publish SqliteCache::publish(const std::string& id, const CacheKey& key, const std::string& result,
@@ -180,4 +209,14 @@ Publish SqliteCache::publish(const std::string& id, const CacheKey& key, const s
                   const std::function<void()>& after_commit_probe) {
   return impl_->publish(id, key, result, stop, revalidate, after_commit_probe);
 }
+Publish SqliteCache::publish_indexed(const std::string& id, const CacheKey& key, const std::string& result, const std::string& path,
+                                    std::stop_token stop, const std::function<bool()>& revalidate, const std::function<void()>& after_commit_probe) {
+  if (path.empty()) return Publish::error;
+  return impl_->publish(id, key, result, stop, revalidate, after_commit_probe, &path);
+}
+Publish SqliteCache::associate(const CacheKey& key, const std::string& path, std::stop_token stop, const std::function<bool()>& revalidate) {
+  if (path.empty()) return Publish::error;
+  return impl_->associate(key, path, stop, revalidate);
+}
+
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "beatglass/library/detail/snapshot_store_job.hpp"
 #include "beatglass/library/detail/tempo_analysis_store.hpp"
+#include "beatglass/library/detail/offline_archive.hpp"
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -34,10 +35,10 @@ public:
   };
   /** Owned completion payload. Error text covers initialization, validation and query failures; lookup and analysis carry typed outcomes. */
   struct Result {
-    std::variant<std::monostate, Page, Detail, Analysis, Lookup> value; ///< Owned operation payload, if available.
+    std::variant<std::monostate, Page, Detail, Analysis, Lookup, beatglass::library_detail::OfflineReadResult> value; ///< Owned operation payload, if available.
     std::string error; ///< Bridge, initialization or query error.
     bool cancelled{}; ///< Cancellation before a queued request started, or query cancellation.
-    std::string association_error; ///< Index update failed after analysis; the analysis outcome remains authoritative.
+    std::string association_error; ///< Reserved for compatibility; indexed publication now reports failure in its typed outcome.
   };
   /** Thread-safe retained terminal result; remains usable after bridge destruction. Empty means work has not reached a terminal outcome. */
   class Ticket {
@@ -68,10 +69,12 @@ public:
   std::shared_ptr<Ticket> analyze(std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
   /** Look up exactly the supplied content/engine/configuration/mode against a fresh source snapshot, without starting analysis. Epoch is nonzero and session-issued; cached positions are rebound. No result is returned on source mismatch or failed verification. */
   std::shared_ptr<Ticket> lookup(std::filesystem::path path, beatglass::AnalysisIdentity identity, std::uint64_t epoch, Completion completion);
-  /** Analyze an indexed path and associate its validated content hash after a hit or commit. Index update is separate from publication; failure is reported in association_error. The normalized key must name the supplied path. */
+  /** Analyze an indexed path and associate its validated content hash after a hit or commit. The active result and index update commit atomically; failure rolls back both. The normalized key must name the supplied path. */
   std::shared_ptr<Ticket> analyze_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
   /** Look up an indexed path's recorded content under the requested tempo engine/configuration; snapshots and revalidates before returning an active value. Missing row/hash is a miss. */
   std::shared_ptr<Ticket> lookup_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
+  /** Fetch an owned, bounded offline page from an indexed path after snapshot verification. Empty run selects the active run; subsequent pages should use the returned run ID. */
+  std::shared_ptr<Ticket> offline_page(std::string key, std::filesystem::path path, beatglass::library_detail::OfflineKey identity, std::string run, std::size_t beat_offset, std::size_t beat_count, std::size_t window_offset, std::size_t window_count, std::uint64_t epoch, Completion completion);
   /** Cancel and suppress only browsing and lookup requests. */
   void cancel_browse();
   /** Cancel and suppress only analysis requests; a commit already begun may succeed. */

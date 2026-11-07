@@ -147,12 +147,7 @@ std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::analyze_indexed(std::strin
     if (!epoch || !key_matches(key, path)) { result.error = "invalid epoch or index path mismatch"; return result; }
     auto entry = store.entry(key, stop);
     if (!entry) { result.error = "indexed entry not found"; return result; }
-    auto analysis = analyze_snapshot_to_store(store, path, engine, configuration, epoch, stop);
-    if ((analysis.status == FileJobStatus::committed || analysis.status == FileJobStatus::cache_hit) && analysis.value) {
-      try { entry->content_hash = analysis.value->identity.content_hash; store.put_entry(*entry); }
-      catch (const std::exception& e) { result.association_error = e.what(); }
-      catch (...) { result.association_error = "index association failed"; }
-    }
+    auto analysis = analyze_indexed_snapshot_to_store(store, key, path, engine, configuration, epoch, stop);
     result.value = std::move(analysis); return result;
   }, std::move(completion));
 }
@@ -163,5 +158,44 @@ std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::lookup_indexed(std::string
     auto entry = store.entry(key, stop);
     if (!entry || entry->content_hash.empty()) { Lookup absent; absent.status = LookupStatus::miss; result.value = std::move(absent); return result; }
     return lookup_active(store, path, snapshot_tempo_identity(entry->content_hash, engine, configuration), epoch, stop);
+  }, std::move(completion));
+}
+
+std::shared_ptr<LibraryBridge::Ticket> LibraryBridge::offline_page(std::string key, std::filesystem::path path, OfflineKey identity, std::string run, std::size_t beat_offset, std::size_t beat_count, std::size_t window_offset, std::size_t window_count, std::uint64_t epoch, Completion completion) {
+  return state_->submit(0, [key = std::move(key), path = std::move(path), identity = std::move(identity), run = std::move(run), beat_offset, beat_count, window_offset, window_count, epoch](TempoAnalysisStore& store, std::stop_token stop) {
+    Result result; OfflineReadResult read;
+    if (!epoch || !key_matches(key, path)) { read.diagnostic = "invalid epoch or index path mismatch"; result.value = std::move(read); return result; }
+    auto entry = store.entry(key, stop);
+    if (!entry || entry->content_hash.empty()) { read.status = OfflineReadStatus::miss; result.value = std::move(read); return result; }
+    if (entry->content_hash != identity.content_hash) { read.status = OfflineReadStatus::changed; result.value = std::move(read); return result; }
+    auto opened = SnapshotOpen::create(path, stop);
+    if (opened.status == SnapshotStatus::cancelled) read.status = OfflineReadStatus::cancelled;
+    else if (opened.status == SnapshotStatus::stale_input || opened.status == SnapshotStatus::unverifiable) read.status = OfflineReadStatus::changed;
+    else if (opened.status != SnapshotStatus::ok) read.diagnostic = opened.diagnostic;
+    else if (opened.value->digest() != identity.content_hash) read.status = OfflineReadStatus::changed;
+    else {
+      auto modified = opened.value->modified_unix_ns();
+      if (!modified) read.status = OfflineReadStatus::changed;
+      else {
+        beatglass::FileVersion version{std::filesystem::absolute(path), opened.value->size(), *modified, opened.value->digest()};
+        class Verifier final : public beatglass::FileVersionVerifier {
+          FileSnapshot& snapshot_;
+        public:
+          explicit Verifier(FileSnapshot& snapshot) : snapshot_(snapshot) {}
+          beatglass::FileVerificationResult verify(std::stop_token stop) override {
+            switch (snapshot_.verify(stop)) {
+              case SnapshotStatus::ok: return {beatglass::FileVerificationOutcome::match, {}};
+              case SnapshotStatus::cancelled: return {beatglass::FileVerificationOutcome::cancelled, {}};
+              case SnapshotStatus::stale_input: return {beatglass::FileVerificationOutcome::changed, {}};
+              case SnapshotStatus::unverifiable: return {beatglass::FileVerificationOutcome::unverifiable, {}};
+              default: return {beatglass::FileVerificationOutcome::error, "snapshot verification failed"};
+            }
+          }
+        } verifier(*opened.value);
+        OfflineArchive archive(store.offline_cache());
+        read = archive.page(version, identity, run, beat_offset, beat_count, window_offset, window_count, epoch, verifier, stop);
+      }
+    }
+    result.value = std::move(read); return result;
   }, std::move(completion));
 }

@@ -2,6 +2,7 @@
 #include "beatglass/library/detail/file_fingerprint.hpp"
 #include "beatglass/library/detail/file_snapshot.hpp"
 #include "beatglass/library/detail/snapshot_store_job.hpp"
+#include "beatglass/library/detail/tempo_analysis_store.hpp"
 #include "beatglass/capture/byte_source.hpp"
 #include "beatglass/core/causal_replay.hpp"
 #include "../capture/file/virtual_io.hpp"
@@ -151,40 +152,8 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
 AnalysisIdentity snapshot_tempo_identity(const std::string& content, const std::string& engine, const std::string& configuration) {
   return {content, replay_version(engine), configuration, "offline"};
 }
-StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const std::filesystem::path& path,
-  const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop,
-  const std::function<void(std::uint64_t)>& progress) {
-  try {
-    if (engine.empty() || config.empty()) return {FileJobStatus::error, {}, "empty engine or configuration", {}};
-    auto opened = SnapshotOpen::create(path, stop);
-    if (opened.status == SnapshotStatus::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
-    if (opened.status == SnapshotStatus::stale_input || opened.status == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, opened.diagnostic, {}};
-    if (opened.status != SnapshotStatus::ok) return {FileJobStatus::error, {}, opened.diagnostic, {}};
-    auto modified = opened.value->modified_unix_ns();
-    if (!modified) return {FileJobStatus::stale_input, {}, "original modification time cannot be represented", {}};
-    FileVersion file{std::filesystem::absolute(path), opened.value->size(), *modified, opened.value->digest()};
-    AnalysisIdentity identity = snapshot_tempo_identity(opened.value->digest(), engine, config);
-    auto found = store.find(file, identity, stop);
-    if (found.outcome == FindOutcome::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
-    if (found.outcome == FindOutcome::error) return {FileJobStatus::error, {}, found.diagnostic, {}};
-    if (found.outcome == FindOutcome::hit) {
-      if (!found.result) return {FileJobStatus::error, {}, "store returned hit without value", {}};
-      auto verified = opened.value->verify(stop);
-      if (verified == SnapshotStatus::cancelled || stop.stop_requested()) return {FileJobStatus::cancelled, {}, {}, {}};
-      if (verified == SnapshotStatus::stale_input || verified == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, {}, {}};
-      if (verified != SnapshotStatus::ok) return {FileJobStatus::error, {}, "source revalidation failed", {}};
-      auto& snapshot = found.result->result; const auto old_epoch = snapshot.observed_through.epoch;
-      for (auto& beat : snapshot.beats) { if (beat.time.epoch != old_epoch) return {FileJobStatus::error, {}, "cached beat epoch mismatch", {}}; beat.time.epoch = epoch; }
-      for (auto& chord : snapshot.chords) { if (chord.start.epoch != old_epoch || chord.end.epoch != old_epoch) return {FileJobStatus::error, {}, "cached chord epoch mismatch", {}}; chord.start.epoch = epoch; chord.end.epoch = epoch; }
-      snapshot.observed_through.epoch = epoch; snapshot.publication_monotonic_ns = publication_time();
-      return {FileJobStatus::cache_hit, std::move(found.result), {}, {}};
-    }
-    if (found.outcome != FindOutcome::miss) return {FileJobStatus::error, {}, "unknown store lookup outcome", {}};
-    SnapshotSource source(*opened.value); std::uint64_t observed = 0;
-    auto tempo = replay_snapshot(source, epoch, stop, [&](auto frames) { observed = frames; if (progress) progress(frames); });
-    CachedAnalysis value; value.identity = identity; value.result.state = tempo.state; value.result.bpm = tempo.bpm;
-    value.result.observed_through = {epoch, observed}; value.result.publication_monotonic_ns = publication_time(); value.result.estimator_version = identity.engine_version; value.result.configuration_id = config;
-    class Verifier final : public FileVersionVerifier {
+namespace {
+class Verifier final : public FileVersionVerifier {
     public:
       explicit Verifier(FileSnapshot& source) : source_(source) {}
       FileVerificationResult verify(std::stop_token token) override {
@@ -199,8 +168,50 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
       }
     private:
       FileSnapshot& source_;
-    } verifier(*opened.value);
-    auto id = run_id(); auto published = store.publish(file, value, id, verifier, stop);
+};
+}
+static StoredSnapshotJobResult analyze_store_impl(AnalysisStore& store, TempoAnalysisStore* indexed_store, const std::string* index_path, const std::filesystem::path& path,
+  const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop,
+  const std::function<void(std::uint64_t)>& progress) {
+  try {
+    if (engine.empty() || config.empty()) return {FileJobStatus::error, {}, "empty engine or configuration", {}};
+    auto opened = SnapshotOpen::create(path, stop);
+    if (opened.status == SnapshotStatus::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
+    if (opened.status == SnapshotStatus::stale_input || opened.status == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, opened.diagnostic, {}};
+    if (opened.status != SnapshotStatus::ok) return {FileJobStatus::error, {}, opened.diagnostic, {}};
+    auto modified = opened.value->modified_unix_ns();
+    if (!modified) return {FileJobStatus::stale_input, {}, "original modification time cannot be represented", {}};
+    FileVersion file{std::filesystem::absolute(path), opened.value->size(), *modified, opened.value->digest()};
+    AnalysisIdentity identity = snapshot_tempo_identity(opened.value->digest(), engine, config);
+    Verifier verifier(*opened.value);
+    auto found = store.find(file, identity, stop);
+    if (found.outcome == FindOutcome::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
+    if (found.outcome == FindOutcome::error) return {FileJobStatus::error, {}, found.diagnostic, {}};
+    if (found.outcome == FindOutcome::hit) {
+      if (!found.result) return {FileJobStatus::error, {}, "store returned hit without value", {}};
+      if (indexed_store) {
+        auto associated = indexed_store->associate(file, identity, *index_path, verifier, stop);
+        if (associated.outcome == PublishOutcome::cancelled) return {FileJobStatus::cancelled, {}, associated.diagnostic, {}};
+        if (associated.outcome == PublishOutcome::stale_input) return {FileJobStatus::stale_input, {}, associated.diagnostic, {}};
+        if (associated.outcome != PublishOutcome::committed) return {FileJobStatus::error, {}, associated.diagnostic, {}};
+      }
+      auto verified = indexed_store ? SnapshotStatus::ok : opened.value->verify(stop);
+      if (verified == SnapshotStatus::cancelled || (!indexed_store && stop.stop_requested())) return {FileJobStatus::cancelled, {}, {}, {}};
+      if (verified == SnapshotStatus::stale_input || verified == SnapshotStatus::unverifiable) return {FileJobStatus::stale_input, {}, {}, {}};
+      if (verified != SnapshotStatus::ok) return {FileJobStatus::error, {}, "source revalidation failed", {}};
+      auto& snapshot = found.result->result; const auto old_epoch = snapshot.observed_through.epoch;
+      for (auto& beat : snapshot.beats) { if (beat.time.epoch != old_epoch) return {FileJobStatus::error, {}, "cached beat epoch mismatch", {}}; beat.time.epoch = epoch; }
+      for (auto& chord : snapshot.chords) { if (chord.start.epoch != old_epoch || chord.end.epoch != old_epoch) return {FileJobStatus::error, {}, "cached chord epoch mismatch", {}}; chord.start.epoch = epoch; chord.end.epoch = epoch; }
+      snapshot.observed_through.epoch = epoch; snapshot.publication_monotonic_ns = publication_time();
+      return {FileJobStatus::cache_hit, std::move(found.result), {}, {}};
+    }
+    if (found.outcome != FindOutcome::miss) return {FileJobStatus::error, {}, "unknown store lookup outcome", {}};
+    SnapshotSource source(*opened.value); std::uint64_t observed = 0;
+    auto tempo = replay_snapshot(source, epoch, stop, [&](auto frames) { observed = frames; if (progress) progress(frames); });
+    CachedAnalysis value; value.identity = identity; value.result.state = tempo.state; value.result.bpm = tempo.bpm;
+    value.result.observed_through = {epoch, observed}; value.result.publication_monotonic_ns = publication_time(); value.result.estimator_version = identity.engine_version; value.result.configuration_id = config;
+
+    auto id = run_id(); auto published = indexed_store ? indexed_store->publish_indexed(file, value, id, *index_path, verifier, stop) : store.publish(file, value, id, verifier, stop);
     if (published.outcome == PublishOutcome::committed) { value.result.publication_monotonic_ns = publication_time(); return {FileJobStatus::committed, value, {}, {}}; }
     if (published.outcome == PublishOutcome::cancelled) return {FileJobStatus::cancelled, {}, {}, {}};
     if (published.outcome == PublishOutcome::stale_input) return {FileJobStatus::stale_input, {}, published.diagnostic, {}};
@@ -208,6 +219,13 @@ StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const st
   } catch (const detail::VirtualOpenCancelled&) { return {FileJobStatus::cancelled, {}, {}, {}}; }
     catch (const Cancelled&) { return {FileJobStatus::cancelled, {}, {}, {}}; }
     catch (const std::exception& e) { return {FileJobStatus::error, {}, e.what(), {}}; }
+}
+
+StoredSnapshotJobResult analyze_snapshot_to_store(AnalysisStore& store, const std::filesystem::path& path, const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop, const std::function<void(std::uint64_t)>& progress) {
+  return analyze_store_impl(store, nullptr, nullptr, path, engine, config, epoch, stop, progress);
+}
+StoredSnapshotJobResult analyze_indexed_snapshot_to_store(TempoAnalysisStore& store, const std::string& index_path, const std::filesystem::path& path, const std::string& engine, const std::string& config, std::uint64_t epoch, std::stop_token stop, const std::function<void(std::uint64_t)>& progress) {
+  return analyze_store_impl(store, &store, &index_path, path, engine, config, epoch, stop, progress);
 }
 
 }

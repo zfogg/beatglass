@@ -85,6 +85,10 @@ public:
   void begin(const std::string& id, const CacheKey& key);
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */
   bool find(const CacheKey& key, std::string& result);
+  /** Return the current completed run ID for the exact key, or absence. */
+  std::optional<std::string> active_run(const CacheKey& key);
+  /** Read an immutable completed run by exact run ID and key, including a superseded run; returns false if absent. */
+  bool find_run(const std::string& id, const CacheKey& key, std::string& result);
   /** Recover a run outcome after reopening the database. The ID and all key fields must match. Throws on SQLite error. Reopening converts interrupted running rows to retryable; a completed row remains evidence of commit even if superseded. */
   RunRecovery recover(const std::string& id, const CacheKey& key);
   /** Query whether a unique run ID is committed, or not committed; throws on storage error. */
@@ -93,6 +97,11 @@ public:
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
                   std::stop_token stop, const std::function<bool()>& revalidate,
                   const std::function<void()>& after_commit_probe = {});
+  /** Atomically publish a run and update an existing collection row's content hash; rollback both if either write fails. The verifier and commit rules match publish(). */
+  Publish publish_indexed(const std::string& id, const CacheKey& key, const std::string& result, const std::string& path,
+                          std::stop_token stop, const std::function<bool()>& revalidate, const std::function<void()>& after_commit_probe = {});
+  /** Revalidate and associate an existing active key with an existing row in one transaction. */
+  Publish associate(const CacheKey& key, const std::string& path, std::stop_token stop, const std::function<bool()>& revalidate);
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
