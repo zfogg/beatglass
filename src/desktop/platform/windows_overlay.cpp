@@ -1,4 +1,5 @@
 #include "windows_overlay.hpp"
+#include "windows_overlay_policy.hpp"
 #include <QEvent>
 #include <QGuiApplication>
 #include <QQuickWindow>
@@ -52,7 +53,11 @@ void OverlayController::setOpacity(qreal opacity) {
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(1); }
 bool OverlayController::setClickThrough(bool enabled) {
-  if (enabled && (!overlay_ || !control_ || overlay_.data() == control_.data() || !control_->isVisible() || control_->windowState() == Qt::WindowMinimized)) return false;
+  if (enabled) {
+    const auto control_state = !control_ ? OverlayControlState::unavailable :
+        control_->isVisible() ? (control_->windowState() == Qt::WindowMinimized ? OverlayControlState::minimized : OverlayControlState::visible) : OverlayControlState::hidden;
+    if (!canEnableClickThrough(static_cast<bool>(overlay_), overlay_ && control_ && overlay_.data() == control_.data(), control_state)) return false;
+  }
   const bool changed = click_through_ != enabled;
   if (enabled) endDrag();
   click_through_ = enabled;

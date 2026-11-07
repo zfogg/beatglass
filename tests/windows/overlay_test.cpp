@@ -1,4 +1,5 @@
 #include "windows_overlay.hpp"
+#include "windows_overlay_policy.hpp"
 #include <QGuiApplication>
 #include <QDebug>
 #include <QQuickWindow>
@@ -19,6 +20,16 @@ protected:
 class OverlayTest : public QObject {
   Q_OBJECT
 private slots:
+  void clickThroughPolicyRequiresVisibleEscapePath() {
+    using beatglass::windows::OverlayControlState;
+    using beatglass::windows::canEnableClickThrough;
+    QVERIFY(!canEnableClickThrough(false, false, OverlayControlState::visible));
+    QVERIFY(!canEnableClickThrough(true, true, OverlayControlState::visible));
+    QVERIFY(!canEnableClickThrough(true, false, OverlayControlState::hidden));
+    QVERIFY(!canEnableClickThrough(true, false, OverlayControlState::minimized));
+    QVERIFY(!canEnableClickThrough(true, false, OverlayControlState::unavailable));
+    QVERIFY(canEnableClickThrough(true, false, OverlayControlState::visible));
+  }
   void recoveredPositionIsPersistedImmediately() {
     QTemporaryDir directory;
     QVERIFY(directory.isValid());
