@@ -53,7 +53,7 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/library_bridge.hpp src/desktop/platform/windows_endpoints.hpp
 
 Experimental virtual file I/O
 -----------------------------
