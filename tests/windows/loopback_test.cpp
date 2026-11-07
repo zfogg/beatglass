@@ -359,6 +359,30 @@ TEST_CASE("Cancellation after accepted start invalidates and discards queued pac
   CHECK(session.state()==beatglass::SourceState::error);
 }
 
+TEST_CASE("Discontinuous packet invalidates before delivery") {
+  beatglass::SourceEpochAllocator epochs;
+  unsigned clears = 0;
+  auto backend = std::make_unique<FakeLoopback>();
+  auto* fake = backend.get();
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++clears; }, std::move(backend));
+  REQUIRE(session.start("selected"));
+  session.poll();
+  REQUIRE(session.state() == beatglass::SourceState::running);
+
+  beatglass::windows::LoopbackPacket queued{};
+  queued.epoch = fake->currentEpoch;
+  queued.discontinuity = true;
+  queued.timestamp_valid = true;
+  queued.loss_stamp = 41;
+  fake->packets.push_back(queued);
+
+  beatglass::windows::LoopbackPacket delivered{};
+  REQUIRE(session.pop(delivered));
+  CHECK(clears == 1);
+  CHECK(delivered.discontinuity);
+  CHECK(delivered.loss_stamp == 41);
+}
+
 TEST_CASE("Claim and cancellation have ordered concurrent outcomes") {
   using beatglass::windows::LoopbackStartAuthorization;
   SECTION("cancellation completes before a competing claim") {
