@@ -26,9 +26,7 @@ public:
                            std::function<bool(LiveMusic&,const std::string&,std::shared_ptr<LoopbackStartAuthorization>)> startHook={});
   // Documented manually in the API reference due to Hawkmoth destructor parsing.
   ~LiveMusicBridge() override;
-  /** Request one selected endpoint; false for empty ID or exhausted sessions.
-   * Invalidates prior GUI state immediately; actual capture starts asynchronously.
-   * A claimed native start can remain in flight until its native call returns. */
+  /** Request an endpoint and clear prior state; a claimed native start may remain in flight until its call returns. */
   bool start(const QString& endpoint);
   /** Invalidate prior state immediately and request worker stop. */
   void stop();
