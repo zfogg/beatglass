@@ -1,0 +1,10 @@
+name: Experimental Essentia tonal tests
+on: [push, pull_request]
+jobs:
+  tonal-linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build pinned Essentia and run tonal tests
+        run: docker build -f tests/spikes/tonal-ci/Dockerfile -t beatglass-tonal-ci .
