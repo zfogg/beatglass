@@ -13,7 +13,7 @@ aspirational behavior; see the repository README and progress notes.
 Audio and capture
 -----------------
 
-.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/source.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/file_reader.hpp
+.. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/source.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/byte_source.hpp include/beatglass/capture/file_reader.hpp
 
 AudioSource stop
 ~~~~~~~~~~~~~~~~
@@ -47,3 +47,8 @@ Desktop application internals
 -----------------------------
 
 .. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp
+
+Experimental virtual file I/O
+-----------------------------
+
+.. cpp:autodoc:: lib/capture/file/virtual_io.hpp

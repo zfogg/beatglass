@@ -194,3 +194,15 @@ After merging shared cache contract commit `98be006c97445f987acea8ab16eea57372aa
 Windows 10.0.26300 x64/MSVC 19.44 with the existing static CRT/SQLite/OpenSSL development tree: `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` passed 48/48. Native tests cover read-only snapshot bytes, in-place source change, replacement, cancellation, Unicode names, denial of another write open while the snapshot is held, delete-on-close cleanup, and mutation/restoration limits. This was a unit/development build without the decoder slice; it does not establish safe product integration, native audio, or v1 qualification. The first cancellation run failed because the Windows copy omitted the progress callback; passing it through fixed the failure and the regression passed. The previous record that Windows was unsupported describes the earlier prototype, not this candidate.
 
 WSL Ubuntu 22.04 using the previously recorded full prototype/tempo configuration passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 58/58; WSL is not native Linux qualification. Header inventory and `docker run --rm -v "${PWD}:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /tmp/beatglass-docs-html10` passed. `ssh -o BatchMode=yes -o ConnectTimeout=10 -T zachbook-pro` reached `100.92.127.58` but timed out during SSH banner exchange on both attempts, so no native macOS test was run.
+## Same-source integration proposal
+
+The provisional `ByteSource` and `ByteCursor` establish a borrowed, worker-owned
+read-only byte boundary. The existing decoder does not consume it. Secure
+snapshot creation, native file identity and decoder integration remain open;
+see [same-source proposal](same-source-proposal.md).
+
+## Experimental virtual decoder
+
+A private libsndfile virtual-I/O adapter can synchronously decode a borrowed `ByteSource`; it is not connected to the CLI or cache. It keeps the source borrowed until decoder close, translates callback errors and cancellation to worker-visible outcomes, and is invalidated after mid-read cancellation or failure. Generated WAV, AIFF, FLAC and MP3 tests exercise the adapter on the codec-enabled Windows development build. The byte-source contract is proposed in PR #41; snapshot creation, original-file revalidation, secure cleanup, and native platform race tests remain unimplemented. No file is made immutable by this adapter.
+
+Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built this adapter and passed 44/44 CTest cases with `BEATGLASS_TEST_V1_CODECS=OFF`; the virtual codec fixture check covered AIFF there. This is not native desktop qualification, and the older decoder does not qualify MP3 support.
