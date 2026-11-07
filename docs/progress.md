@@ -164,3 +164,5 @@ qualification are still in progress.
 The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
+
+After reconciling the #26 branch with main at `98be006c97445f987acea8ab16eea57372aaab89`, WSL Ubuntu 22.04 with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, slice disabled and pinned Catch2 source reused passed `cmake --build /tmp/beatglass-library-phase1 -j 3` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` 32/32. Windows 10.0.26300 x64/MSVC 19.44 with the previously configured static CRT and static SQLite development tree passed `cmake --build C:/Users/zachf/.codex/builds/beatglass-library-static-crt --config Release -j 4` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-library-static-crt -C Release --output-on-failure` 34/34. These are development checks only; WSL is not native Linux qualification and no decoder slice was included.
