@@ -42,4 +42,4 @@ Library jobs
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp
