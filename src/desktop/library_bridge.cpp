@@ -36,6 +36,8 @@ struct LibraryBridge::State {
 std::optional<LibraryBridge::Result> LibraryBridge::Ticket::result() const { std::lock_guard lock(mutex_); return result_; }
 void LibraryBridge::Ticket::finish(Result result) { std::lock_guard lock(mutex_); if (!result_) result_ = std::move(result); }
 LibraryBridge::LibraryBridge(std::string database, Dispatch dispatch) : LibraryBridge(std::move(database), std::move(dispatch), {}) {}
+LibraryBridge::LibraryBridge(std::string database, Dispatch dispatch, beatglass::SourceEpochAllocator& epochs)
+  : LibraryBridge(std::move(database), std::move(dispatch), std::shared_ptr<beatglass::SourceEpochAllocator>(&epochs, [](auto*) {})) {}
 LibraryBridge::LibraryBridge(std::string database, Dispatch dispatch, std::shared_ptr<beatglass::SourceEpochAllocator> epochs) : state_(std::make_shared<State>()) {
   state_->epochs = std::move(epochs);
   if (!dispatch) throw std::invalid_argument("dispatcher required");

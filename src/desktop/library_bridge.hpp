@@ -72,6 +72,8 @@ public:
   LibraryBridge(std::string database, Dispatch dispatch);
   /** Inject the same process-owned allocator used by live sources; it must outlive all work. The two-argument constructor is a legacy experimental path. */
   LibraryBridge(std::string database, Dispatch dispatch, std::shared_ptr<beatglass::SourceEpochAllocator> epochs);
+  /** Borrow the application-owned allocator. The application must retain it until this bridge is destroyed and its worker is joined. */
+  LibraryBridge(std::string database, Dispatch dispatch, beatglass::SourceEpochAllocator& epochs);
   ~LibraryBridge();
   LibraryBridge(const LibraryBridge&) = delete;
   LibraryBridge& operator=(const LibraryBridge&) = delete;

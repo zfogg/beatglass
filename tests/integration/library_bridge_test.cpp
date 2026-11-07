@@ -187,7 +187,7 @@ TEST_CASE("library job issuance shares the coordinator allocator and fails on ex
   std::filesystem::create_directory(dir); auto audio=dir/"tone.aiff";
   std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES)/"tone.aiff",audio);
   { TempoAnalysisStore seed((dir/"two.sqlite").string()); CollectionEntry entry; entry.path=audio.generic_string(); seed.put_entry(entry); }
-  auto epochs=std::make_shared<beatglass::SourceEpochAllocator>(); Dispatcher first_queue, second_queue; std::optional<LibraryBridge::Result> result;
+  beatglass::SourceEpochAllocator epochs; Dispatcher first_queue, second_queue; std::optional<LibraryBridge::Result> result;
   {
     LibraryBridge one((dir/"one.sqlite").string(),[&](auto call){first_queue.post(std::move(call));},epochs);
     LibraryBridge two((dir/"two.sqlite").string(),[&](auto call){second_queue.post(std::move(call));},epochs);
