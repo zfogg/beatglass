@@ -167,4 +167,3 @@ FileJobResult analyze_snapshot_tempo(SqliteCache& cache, const std::filesystem::
 }
 
 }
-
