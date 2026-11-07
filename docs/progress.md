@@ -151,3 +151,7 @@ qualification are still in progress.
 The coordinator accepted the Phase 0 handoff for starting Phase 1 on merged
 commit `6f927cb`. Shared contracts, dependency and SDK integrity across
 platforms, licensing, and native v1 qualification remain open.
+
+## Phase 1 private tonal tracker
+
+The optional private Essentia tracker is a worker-only experiment tested on generated triads and discontinuities. It is disabled by default and not connected to file analysis or live capture. Release licensing, Windows MSVC dependency build, key/chord quality, timestamped segment policy and native qualification remain open; see [tonal experiment](tonal-experiment.md).

@@ -60,3 +60,5 @@ ctest --preset prebuilt-qt-desktop
 ```
 
 On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the configure command. The SDK must match the compiler and target architecture. The preset enforces version 6.8.3 and uses the core vcpkg manifest; do not enable its `desktop` feature or point it at an install tree containing a different Qt version. The source-building `vcpkg-desktop` preset remains experimental. This is a development proposal, not a finished cross-platform package or fully hashed artifact lock; acquisition, platform and license caveats are in [decisions](docs/decisions.md).
+
+The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
