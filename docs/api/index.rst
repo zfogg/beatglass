@@ -87,6 +87,7 @@ Desktop application internals
 
    Destroy the private native adapter on the GUI thread. It never owns the Qt
    window passed to its operations.
+
 Experimental beat-event worker
 ------------------------------
 
