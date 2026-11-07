@@ -28,3 +28,9 @@ Use Hawkmoth with Sphinx to extract provisional C++ header comments, and publish
 - [miniaudio's loopback example](https://github.com/mackron/miniaudio/blob/master/examples/simple_loopback.c) identifies WASAPI as its built-in loopback backend. This is not evidence of a working Beatglass endpoint selector, permissions, recovery, or non-Windows capture.
 
 All supported CPU/OS combinations, packaging, overlay/compositor behavior, devices, and runtime audio paths remain unqualified.
+
+## Capture and overlay feasibility notes
+
+- [Microsoft's WASAPI documentation](https://learn.microsoft.com/en-us/windows/win32/coreaudio/loopback-recording) describes loopback on a render endpoint in shared mode; exclusive-mode loopback is unavailable and protected streams can be excluded. The adapter must expose the selected endpoint and recovery errors; this research does not establish working capture.
+- [PipeWire's loopback module documentation](https://docs.pipewire.org/page_module_loopback.html) documents selecting a target node and `stream.capture.sink` for sink monitor ports. The future capture adapter still needs native device enumeration, routing, permission and recovery tests; no backend exists yet.
+- [Qt window flags](https://doc.qt.io/qt-6/qt.html) express stay-on-top and input transparency as window-system hints. The [wlr layer-shell protocol](https://wayland.app/protocols/wlr-layer-shell-unstable-v1) describes top and overlay layers where a compositor exposes it, including compositor-dependent placement and ordering. Neither is proof of universal fullscreen overlays: probe compositor capability, preserve a normal/compact fallback, and test X11, Wayland compositors, macOS Spaces and Windows behavior natively.
