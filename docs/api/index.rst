@@ -130,16 +130,6 @@ Experimental virtual file I/O
 
 .. cpp:autodoc:: lib/capture/file/virtual_io.hpp
 
-Experimental virtual file I/O
------------------------------
-
-.. cpp:autodoc:: lib/capture/file/virtual_io.hpp
-
-Experimental beat-event worker
-------------------------------
-
-.. cpp:autodoc:: lib/core/beat_tracker.hpp
-
 CLI application internals
 -------------------------
 
