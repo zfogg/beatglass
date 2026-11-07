@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 
 html = Path(sys.argv[1]).read_text(encoding="utf-8")
-expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_loudest_channel", "StreamContinuity", "AudioQueue", "AudioSource", 'id="beatglass::AudioSource::stop"', "SourceStatus", "ChannelLayout",
+expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_loudest_channel", "StreamContinuity", "AudioQueue", "AudioSource", 'id="beatglass::AudioSource::stop"', "SourceStatus", "ChannelLayout", "SourceAttempt", "SourceLifecycle",
             'id="beatglass::AcquisitionToken"', 'id="beatglass::AcquisitionToken::epoch__std::uint64_t"',
             'id="beatglass::AcquisitionToken::generation__std::uint64_t"',
             'id="beatglass::TrackingMachine"', 'id="beatglass::TrackingMachine::state__voidC"',
@@ -30,7 +30,7 @@ expected = ("AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_l
             'id="beatglass::FileReader::~FileReader__void"', 'id="beatglass::FileReader::FileReader__FileReaderCR"',
             'id="beatglass::FileReader::assign-operator__FileReaderCR"', 'id="beatglass::FileReader::metadata__voidC"',
             'id="beatglass::FileReader::read__std::span:float:.std::stop_token"',
-            'id="beatglass::FileReader::seek__std::uint64_t"', "AnalysisStore", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
+            'id="beatglass::FileReader::seek__std::uint64_t"', "AnalysisStore", "JobLifecycle", "JobSnapshot", "replay_file", "Metadata", 'id="beatglass::TempoEstimator::take_beats__void"',
             'id="beatglass::ChordEstimator::take_segments__void"',
             'id="beatglass::PresentationAdapter::present__SnapshotCRC"')
 missing = [name for name in expected if name not in html]
