@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import QtMultimedia
 import "../../src/desktop/qml"
 
 TestCase {
@@ -13,7 +14,21 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
+    QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
+    QtObject { id: fakeCollection; property var rows: []; property string status: "Ready"; function refresh(search) { rows = [{path: "indexed.wav"}]; status = "Loaded" } }
+    QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
+    QtObject { id: fakeOverlay; property bool clickThrough: false; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) {} }
+    Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay; playbackGuardBridge: fakeGuard } }
+    Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard } }
+    Component { id: collectionShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; collectionBridge: fakeCollection } }
+    function test_experimentalCollection() {
+        fakeCollection.rows = []; fakeCollection.status = "Ready"
+        let app = collectionShell.createObject(null)
+        findChild(app, "refreshCollection").clicked()
+        compare(findChild(app, "collectionStatus").text, "Loaded")
+        compare(findChild(app, "collectionRows").count, 1)
+        app.destroy()
+    }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)
@@ -29,6 +44,31 @@ TestCase {
         tabs.currentIndex = 0
         tryCompare(library, "visible", true)
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
+        app.destroy()
+    }
+    function test_djControlsAndOverlayEscape() {
+        fakeDj.active = false; fakeOverlay.clickThrough = false
+        let app = djShell.createObject(null)
+        findChild(app, "navigation").currentIndex = 1
+        let start = findChild(app, "startMonitor")
+        verify(start.enabled); start.clicked(); verify(fakeDj.active); compare(fakeDj.status, "test-id")
+        let show = findChild(app, "showOverlay"); show.clicked()
+        let overlay = findChild(app, "djOverlay"); tryCompare(overlay, "visible", true)
+        let lock = findChild(app, "lockOverlay"); lock.clicked(); verify(fakeOverlay.clickThrough)
+        show.clicked(); verify(!fakeOverlay.clickThrough); tryCompare(overlay, "visible", false)
+        findChild(app, "stopMonitor").clicked(); verify(!fakeDj.active)
+        app.destroy()
+    }
+    function test_playbackSelectionRequiresActivation() {
+        let app = shell.createObject(null)
+        let selector = findChild(app, "playbackOutputSelector")
+        if (selector.count < 2 || selector.currentIndex < 0) { app.destroy(); skip("Two playback outputs are unavailable") }
+        let original = String(app.playbackDevice.id)
+        let next = (selector.currentIndex + 1) % selector.count
+        selector.currentIndex = next
+        compare(String(app.playbackDevice.id), original)
+        selector.activated(next)
+        compare(String(app.playbackDevice.id), String(selector.model[next].id))
         app.destroy()
     }
     function test_realFolderNavigationAndSelection() {
@@ -66,6 +106,20 @@ TestCase {
         keyClick(Qt.Key_Return)
         compare(app.selectedName, "tone.flac")
         verify(fakeMetadata.lastFile.toString().endsWith("/tone.flac"))
+        compare(app.formatTime(123400), "2:03.4")
+        fakeGuard.warning = "Unsupported output"
+        compare(findChild(app, "playbackDeviceWarning").text, "Unsupported output")
+        verify(!findChild(app, "playButton").enabled)
+        fakeGuard.warning = ""
+        let player = findChild(app, "player")
+        compare(player.playbackState, MediaPlayer.StoppedState)
+        tryVerify(() => player.duration >= 200, 10000)
+        verify(player.seekable)
+        player.position = 100
+        tryVerify(() => Math.abs(player.position - 100) < 50, 5000)
+        player.source = Qt.resolvedUrl("../fixtures/generated/missing.flac")
+        tryVerify(() => player.error !== MediaPlayer.NoError, 10000)
+        verify(findChild(app, "playbackStatus").text.startsWith("Playback error:"))
         app.destroy()
     }
 }
