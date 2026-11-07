@@ -188,3 +188,14 @@ default remained unchanged. After a serial build of `windows_endpoint_tests`,
 the opt-in command was `windows_endpoint_tests.exe '[native-system-default]' -r compact`.
 This exercised actual OS default selection, not physical disconnection, real
 music, or QML interaction during the switch.
+
+Following merged allocator PR #63, the provisional `DjBridge` requires an
+injected process-session `SourceEpochAllocator`; its worker no longer creates a
+private allocator. The application owner must retain the same allocator across
+live and library sources until both workers have stopped and joined. The shared
+desktop does not instantiate this bridge in this branch. Noninteractive tests
+cover a generated file reader's coordinator-issued initial epoch alongside
+failed live starts and restarts, and allocation across bridge recreation. The
+legacy file reader seek still increments locally and must not be used in a
+shared epoch namespace; coordinated seeks require the explicit-epoch reader
+contract proposed in PR #45. Full live/library integration remains open.
