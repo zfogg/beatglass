@@ -55,7 +55,17 @@ bool DefaultTempoFollower::tick(std::chrono::steady_clock::time_point now) {
   }
   if (now >= next_probe_) {
     next_probe_ = now + std::chrono::seconds(1);
-    const auto result = discovery_();
+    EndpointResult result;
+    try {
+      result = discovery_();
+    } catch (const std::exception& error) {
+      // Device enumeration can fail transiently while an endpoint is being
+      // removed or its audio service is restarting. Treat that as a recoverable
+      // empty snapshot and let the next probe retry discovery.
+      result.error = error.what();
+    } catch (...) {
+      result.error = "Endpoint discovery failed";
+    }
     std::string selected;
     bool ambiguous = false;
     if (result.error.empty()) for (const auto& item : result.endpoints) if (item.is_default) {

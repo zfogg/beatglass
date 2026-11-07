@@ -64,11 +64,13 @@ TEST_CASE("Discovery exceptions produce a clear and stop the follower") {
   beatglass::SourceEpochAllocator epochs;
   beatglass::windows::DefaultTempoFollower follower(epochs, []() -> beatglass::windows::EndpointResult { throw std::runtime_error("discovery failed"); });
   REQUIRE(follower.start());
-  REQUIRE_FALSE(follower.tick(std::chrono::steady_clock::now()));
+  REQUIRE(follower.tick(std::chrono::steady_clock::now()));
   REQUIRE(follower.endpoint().empty());
-  auto update = follower.takeUpdate();
-  REQUIRE(update);
-  REQUIRE_FALSE(update->snapshot);
+  REQUIRE(follower.status() == beatglass::windows::DefaultTempoFollower::Status::error);
+  REQUIRE(follower.diagnostic() == "discovery failed");
+  REQUIRE_FALSE(follower.takeUpdate());
+  REQUIRE(follower.tick(std::chrono::steady_clock::now() + std::chrono::seconds(2)));
+  REQUIRE(follower.status() == beatglass::windows::DefaultTempoFollower::Status::error);
 }
 
 TEST_CASE("Default follower changes selected active endpoints without changing the OS default", "[.][native-default]") {
