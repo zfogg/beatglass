@@ -1,6 +1,7 @@
 #pragma once
 #include "windows_loopback_session.hpp"
 #include "beatglass/core/tempo_tracker.hpp"
+#include "beatglass/core/results.hpp"
 #include <chrono>
 #include <memory>
 #include <optional>
@@ -20,6 +21,10 @@ public:
   bool pump();
   /** Return the latest tempo in BPM, or empty while stopped, silent, stale or acquiring. The caller must not retain a displayed value across invalidation. */
   std::optional<float> bpm() const;
+  /** Exclusive frame boundary and epoch of the latest analyzed packet, or empty after invalidation. */
+  std::optional<EventTime> observedThrough() const;
+  /** Monotonic invalidation generation; changes whenever retained evidence is cleared. Exhaustion stops analysis rather than wrapping. */
+  std::uint64_t invalidationGeneration() const;
   /** Return the source lifecycle state on the owning thread. */
   SourceState state() const;
   /** Clear tempo and stop/join capture on the owning thread. */
@@ -29,10 +34,13 @@ private:
   std::unique_ptr<TempoTracker> tracker_;
   std::vector<float> mono_;
   std::optional<float> bpm_;
+  std::optional<EventTime> observed_;
   std::uint32_t rate_{}, channels_{};
   std::uint64_t silent_frames_{};
+  std::uint64_t invalidation_generation_{};
   std::chrono::steady_clock::time_point last_audio_{};
   bool analysis_error_{};
+  bool generation_exhausted_{};
   LoopbackSession session_;
 };
 }
