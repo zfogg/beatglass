@@ -217,3 +217,14 @@ TEST_CASE("unsupported source sharing restriction fails closed") {
   REQUIRE(SnapshotOpen::create(file, {}, {}, SnapshotSourcePolicy::deny_writes).status == SnapshotStatus::unverifiable);
 }
 #endif
+#ifdef _WIN32
+TEST_CASE("restricted Windows source policy rejects unknown and remote volume evidence") {
+  CHECK(windows_restricted_volume_supported(L"\\\\?\\C:\\music\\song.wav", DRIVE_FIXED, L"NTFS"));
+  CHECK(windows_restricted_volume_supported(L"\\\\?\\c:\\music\\song.wav", DRIVE_FIXED, L"ntfs"));
+  CHECK_FALSE(windows_restricted_volume_supported(L"\\\\?\\UNC\\server\\share\\song.wav", DRIVE_REMOTE, L"NTFS"));
+  CHECK_FALSE(windows_restricted_volume_supported(L"\\\\?\\C:\\song.wav", DRIVE_FIXED, L"ReFS"));
+  CHECK_FALSE(windows_restricted_volume_supported(L"\\\\?\\C:\\song.wav", DRIVE_REMOVABLE, L"NTFS"));
+  CHECK_FALSE(windows_restricted_volume_supported(L"C:\\song.wav", DRIVE_FIXED, L"NTFS"));
+  CHECK_FALSE(windows_restricted_volume_supported(L"\\\\?\\C:\\song.wav", DRIVE_FIXED, L""));
+}
+#endif

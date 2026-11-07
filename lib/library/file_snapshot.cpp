@@ -195,6 +195,28 @@ std::string hash_handle(HANDLE input, std::stop_token stop, HANDLE output = INVA
   return out;
 }
 }
+bool windows_restricted_volume_supported(std::wstring_view path, unsigned drive_type, std::wstring_view filesystem) noexcept {
+  if (drive_type != DRIVE_FIXED || path.size() < 7 || path.substr(0, 4) != L"\\\\?\\" || path[5] != L':' || path[6] != L'\\') return false;
+  const wchar_t drive = path[4]; if (!((drive >= L'A' && drive <= L'Z') || (drive >= L'a' && drive <= L'z'))) return false;
+  if (filesystem.size() != 4) return false;
+  constexpr wchar_t ntfs[] = L"NTFS";
+  for (std::size_t i=0; i<4; ++i) { auto c=filesystem[i]; if (c >= L'a' && c <= L'z') c -= L'a' - L'A'; if (c != ntfs[i]) return false; }
+  return true;
+}
+namespace {
+bool restricted_volume(HANDLE source) {
+  std::array<wchar_t, 32768> final_path{};
+  auto length = GetFinalPathNameByHandleW(source, final_path.data(), static_cast<DWORD>(final_path.size()), FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+  if (!length || length >= final_path.size()) return false;
+  std::wstring_view path(final_path.data(), length);
+  if (path.size() < 7 || path.substr(0,4) != L"\\\\?\\" || path[5] != L':' || path[6] != L'\\') return false;
+  std::array<wchar_t, 32768> root{};
+  if (!GetVolumePathNameW(final_path.data() + 4, root.data(), static_cast<DWORD>(root.size()))) return false;
+  std::array<wchar_t, 32> filesystem{};
+  if (!GetVolumeInformationByHandleW(source, nullptr, 0, nullptr, nullptr, nullptr, filesystem.data(), static_cast<DWORD>(filesystem.size()))) return false;
+  return windows_restricted_volume_supported(path, GetDriveTypeW(root.data()), filesystem.data());
+}
+}
 struct FileSnapshot::Impl { WinHandle original, snapshot; std::filesystem::path path; Evidence evidence{}; std::string digest; std::uint64_t size{}; };
 FileSnapshot::FileSnapshot(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}
 FileSnapshot::~FileSnapshot() = default;
@@ -238,6 +260,7 @@ SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_t
     impl->original.value = CreateFileW(impl->path.c_str(), GENERIC_READ, sharing, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (impl->original.value == INVALID_HANDLE_VALUE && policy == SnapshotSourcePolicy::deny_writes && GetLastError() == ERROR_SHARING_VIOLATION) return {SnapshotStatus::unverifiable, {}, "source is already open for write or delete"};
     check_win(impl->original.value != INVALID_HANDLE_VALUE, "open source");
+    if (policy == SnapshotSourcePolicy::deny_writes && !restricted_volume(impl->original.value)) return {SnapshotStatus::unverifiable, {}, "unsupported or unknown source volume"};
     auto before = evidence(impl->original.value); WinHandle writer;
     for (int attempt = 0; attempt < 16 && writer.value == INVALID_HANDLE_VALUE; ++attempt) {
       std::array<unsigned char, 16> random{}; if (RAND_bytes(random.data(), static_cast<int>(random.size())) != 1) throw std::runtime_error("random snapshot name failed");

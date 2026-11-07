@@ -8,7 +8,12 @@
 #include <cstddef>
 #include <stop_token>
 #include <string>
+#include <string_view>
 namespace beatglass::library_detail {
+#ifdef _WIN32
+/** Classify resolved Windows path, drive type and filesystem evidence for the restricted policy. This is necessary but not sufficient evidence of source safety. */
+bool windows_restricted_volume_supported(std::wstring_view resolved_path, unsigned drive_type, std::wstring_view filesystem) noexcept;
+#endif
 /** Source sharing policy for a provisional snapshot. */
 enum class SnapshotSourcePolicy {
   detect_changes, ///< Allow concurrent opens and detect changes with evidence checks.
@@ -54,7 +59,7 @@ struct SnapshotOpen {
   /** Result category. */ SnapshotStatus status{SnapshotStatus::error};
   /** Owned byte source on success. */ std::unique_ptr<FileSnapshot> value;
   /** Optional failure diagnostic. */ std::string diagnostic;
-  /** Create a private snapshot of the source using bounded memory. No original file is written. I/O and the optional byte-progress observer run synchronously on the calling worker and cannot interrupt an in-flight system call. The optional deny-writes policy currently requires Windows share-mode enforcement and fails closed elsewhere; it does not prove path or same-user safety. */
+  /** Create a private snapshot of the source using bounded memory. No original file is written. I/O and the optional byte-progress observer run synchronously on the calling worker and cannot interrupt an in-flight system call. The optional deny-writes policy currently requires a resolved fixed-drive NTFS path and Windows share-mode enforcement, and fails closed elsewhere; it does not prove path or same-user safety. */
   static SnapshotOpen create(const std::filesystem::path& source, std::stop_token stop = {},
                              const std::function<void(std::uintmax_t)>& progress = {},
                              SnapshotSourcePolicy policy = SnapshotSourcePolicy::detect_changes);
