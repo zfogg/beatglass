@@ -4,6 +4,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#ifdef BEATGLASS_EXPERIMENTAL_COLLECTION
+#include "collection_view.hpp"
+#include <memory>
+#endif
 #ifdef _WIN32
 #include "windows_dj.hpp"
 #include "windows_overlay_bridge.hpp"
@@ -21,6 +25,14 @@ int main(int argc, char** argv) {
   engine.rootContext()->setContextProperty("metadata", &metadata);
   engine.rootContext()->setContextProperty("playbackGuard", &playbackGuard);
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
+#ifdef BEATGLASS_EXPERIMENTAL_COLLECTION
+  std::unique_ptr<CollectionView> collection;
+  const auto database = qEnvironmentVariable("BEATGLASS_EXPERIMENTAL_LIBRARY_DB");
+  if (!database.isEmpty()) {
+    collection = std::make_unique<CollectionView>(database);
+    engine.rootContext()->setContextProperty("experimentalCollection", collection.get());
+  }
+#endif
 #ifdef _WIN32
   engine.rootContext()->setContextProperty("windowsDj", &windowsDj);
 #endif

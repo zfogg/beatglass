@@ -38,7 +38,7 @@ Snapshot timelines use an exclusive observed-frame boundary. Beats precede
 that boundary, and chord segments are nonempty half-open intervals whose end
 may equal it. Producers using the former inclusive boundary must adjust.
 
-.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
+.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
 
 Library jobs
 ------------
@@ -48,12 +48,18 @@ stale input and storage error. Its worker owns the cancellation-versus-commit
 decision; file verification accepts cooperative cancellation before that
 decision. The interface and helper do not implement SQLite transactions.
 
-.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp
+.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp include/beatglass/library/detail/file_fingerprint.hpp include/beatglass/library/detail/file_snapshot.hpp include/beatglass/library/detail/file_job.hpp include/beatglass/library/detail/job_executor.hpp include/beatglass/library/detail/sqlite_cache.hpp include/beatglass/library/detail/tempo_analysis_store.hpp include/beatglass/library/detail/snapshot_store_job.hpp
 
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/collection_requests.hpp src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/playback_guard.hpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp
+.. cpp:autodoc:: src/desktop/collection_view.hpp
+
+.. cpp:function:: CollectionView::~CollectionView()
+
+   Cancel and join the worker on the GUI thread. Filesystem I/O may delay destruction.
+
+.. cpp:autodoc:: src/desktop/library_bridge.hpp src/desktop/collection_requests.hpp src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/playback_guard.hpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
@@ -79,6 +85,11 @@ Desktop application internals
 .. cpp:function:: WindowsOverlay::~WindowsOverlay()
 
    Destroy the platform controller on the GUI thread before either borrowed window.
+
+Experimental virtual file I/O
+-----------------------------
+
+.. cpp:autodoc:: lib/capture/file/virtual_io.hpp
 
 CLI application internals
 -------------------------

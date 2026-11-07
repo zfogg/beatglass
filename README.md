@@ -22,6 +22,8 @@ ctest --test-dir build -C Debug --output-on-failure
 
 The default builds the dependency-light foundation tests. To build the experimental CLI, install aubio and libsndfile development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON`. Add `-DBEATGLASS_BUILD_DESKTOP=ON` and Qt 6 Quick development and QML runtime modules for the metadata shell. For example on Ubuntu 22.04:
 
+The draft SQLite collection bridge is separately enabled by `-DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON` together with the desktop and slice options. Setting `BEATGLASS_EXPERIMENTAL_LIBRARY_DB` to a development database path adds an experimental, bounded indexed-file page to the desktop. This does not index files or expose cached results; the index association and source-verification races remain unresolved. SQLite and OpenSSL runtime deployment is not yet qualified.
+
 ```sh
 sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev qt6-multimedia-dev gstreamer1.0-plugins-good libgl1-mesa-dev qml6-module-qtmultimedia qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript
 cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_TEST_V1_CODECS=OFF
@@ -62,6 +64,21 @@ ctest --preset prebuilt-qt-desktop
 ```
 
 On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the configure command. The SDK must match the compiler and target architecture. The preset enforces version 6.8.3 and uses the core vcpkg manifest; do not enable its `desktop` feature or point it at an install tree containing a different Qt version. The source-building `vcpkg-desktop` preset remains experimental. This is a development proposal, not a finished cross-platform package or fully hashed artifact lock; acquisition, platform and license caveats are in [decisions](docs/decisions.md).
+
+## Provisional library storage increment
+
+`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables private, not yet product-wired SQLite and job-executor primitives. SQLite is currently found from the host and is not pinned. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
+
+```sh
+cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src
+cmake --build /tmp/beatglass-library-phase1 -j 3
+ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure
+```
+
+This is an isolated review increment, not a product-ready library backend. Snapshot verification, shared replay and UI integration, full result schema, database location and dependency pinning remain open. Do not use the prototype for user data. It does not write audio or tags.
+
+The follow-up prototype can be built with `-DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON` together with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE` and `BEATGLASS_BUILD_SLICE`; it requires OpenSSL development libraries as well as SQLite, aubio, and libsndfile. It hashes file content, runs the existing tempo replay on cache misses, and exposes cooperative cancellation and progress. Its separate decoder and hash opens leave a concurrent-replacement race, so it is not a user-facing backend; see the [contract proposal](docs/phase1-contract-proposals.md).
+File replay and the private snapshot-job experiment use the proposed worker-owned `CausalTempoReplay` block interface. It accepts arbitrary interleaved chunk sizes, buffers partial 512-frame hops, and reports accepted and analyzed exclusive boundaries separately. An incomplete final hop is not analyzed. The snapshot job remains gated from the application, and live capture is not connected.
 
 The [Essentia dependency spike](docs/essentia-spike.md) records research builds and the proposed tonal architecture; it is not integrated into the CLI or product.
 

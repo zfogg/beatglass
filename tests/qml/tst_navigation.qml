@@ -15,10 +15,20 @@ TestCase {
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
     QtObject { id: fakeGuard; property string warning: ""; function diagnostic(device) { return warning } }
+    QtObject { id: fakeCollection; property var rows: []; property string status: "Ready"; function refresh(search) { rows = [{path: "indexed.wav"}]; status = "Loaded" } }
     QtObject { id: fakeDj; property var sources: [{name: "Test output", id: "test-id"}]; property string status: "Stopped"; property string tempo: "—"; property bool active: false; function refresh() {} function start(id) { active = true; status = id } function stop() { active = false; status = "Stopped"; tempo = "—" } }
     QtObject { id: fakeOverlay; property bool clickThrough: false; function setClickThrough(value) { clickThrough = value; return true } function keepOnScreen() {} function setOpacity(value) {} }
     Component { id: djShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; djBridge: fakeDj; overlayBridge: fakeOverlay; playbackGuardBridge: fakeGuard } }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard } }
+    Component { id: collectionShell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackGuardBridge: fakeGuard; collectionBridge: fakeCollection } }
+    function test_experimentalCollection() {
+        fakeCollection.rows = []; fakeCollection.status = "Ready"
+        let app = collectionShell.createObject(null)
+        findChild(app, "refreshCollection").clicked()
+        compare(findChild(app, "collectionStatus").text, "Loaded")
+        compare(findChild(app, "collectionRows").count, 1)
+        app.destroy()
+    }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)

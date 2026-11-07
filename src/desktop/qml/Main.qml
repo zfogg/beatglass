@@ -17,6 +17,7 @@ ApplicationWindow {
     property var playbackDevice: playbackDevices.defaultAudioOutput
     readonly property string playbackWarning: playbackGuardBridge.diagnostic(playbackDevice)
     property var liveBridge: livePresentation
+    property var collectionBridge: typeof experimentalCollection === "undefined" ? null : experimentalCollection
     property var djBridge: typeof windowsDj === "undefined" ? null : windowsDj
     property var overlayBridge: null
     property url browseFolder: ""
@@ -97,6 +98,18 @@ ApplicationWindow {
                 Label {
                     text: "Browse local folders. Indexing, analysis and saved results are not available yet."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
+                }
+                RowLayout {
+                    visible: !!window.collectionBridge
+                    Label { text: "Experimental indexed files" }
+                    Button { objectName: "refreshCollection"; text: "Refresh"; onClicked: window.collectionBridge.refresh("") }
+                    Label { objectName: "collectionStatus"; text: window.collectionBridge ? window.collectionBridge.status : ""; Layout.fillWidth: true }
+                }
+                ListView {
+                    objectName: "collectionRows"; visible: !!window.collectionBridge
+                    Layout.fillWidth: true; Layout.preferredHeight: visible ? 100 : 0; clip: true
+                    model: window.collectionBridge ? window.collectionBridge.rows : []
+                    delegate: Label { required property var modelData; width: ListView.view.width; text: modelData.path; elide: Text.ElideMiddle }
                 }
                 RowLayout {
                     Layout.fillWidth: true
