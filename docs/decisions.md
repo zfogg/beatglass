@@ -92,3 +92,9 @@ On the tested Windows machine, Qt 6.8.3's default FFmpeg backend reported an emp
 ### Windows output layout mitigation
 
 The Qt 6.8.3 device probe reported channel configuration mask `1` (the unknown-position bit) for the default Realtek speakers while their preferred format reported stereo mask `6`; Qt's FFmpeg audio renderer uses the device channel configuration for its output format. Explicitly rebinding that same default did not restore output. A user-selected Sonic Studio Virtual Mixer endpoint reported mask `6`; with the default FFmpeg backend, a generated two-tone WAV reached that endpoint's WASAPI loopback and a seek produced both tones. Loopback discontinuities and absence of physical listening limit this evidence. The UI now blocks Play with an explicit diagnostic on an absent device or an invalid Windows FFmpeg channel mask and offers a user-selected playback output; it never changes the OS default. This is a workaround, not a correction to Qt or the Realtek endpoint. Qt's renderer source is at https://github.com/qt/qtmultimedia/blob/v6.8.3/src/plugins/multimedia/ffmpeg/playbackengine/qffmpegaudiorenderer.cpp. The Windows Media Foundation FLAC timeout and all previously stated codec and platform qualification gaps remain open.
+# Offline result contract proposal
+
+Keep owned offline results separate from live snapshots. Preserve overlapping
+local tonal evidence and optional beat strengths; rolling keys are not
+track-level keys. Storage, paging, cache identity and result serialization
+remain subject to integration review and are not implemented by this value type.

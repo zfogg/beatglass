@@ -289,6 +289,11 @@ API documentation validation for this review: `python docs/api/check_headers.py`
 `LibraryBridge` is an experimental, unwired application-private bridge over the private collection/store and snapshot job. One dedicated thread opens, uses and closes the database; calls from the GUI thread replace any pending request, request cooperative cancellation of active work, and deliver owned values through a caller-provided GUI dispatcher. Dispatch must enqueue on the GUI thread and outlive the bridge. Superseded, cancelled, and post-destruction deliveries are suppressed; an already-started commit can still succeed. The destructor joins and can wait on blocking I/O. The bridge requires a nonzero coordinator-issued epoch and does not expose the legacy epoch-zero job. It is not a Qt model, is not connected to the desktop product, and its one global latest-request lane needs UI review. A failed dispatch drops that completion. Source identity races, composite analysis and native platform qualification remain product gates.
 
 With the same WSL and Windows build configurations and commands in the preceding section, `cmake --build /tmp/beatglass-library-phase1 -j 1` and `ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure` passed 98/98; Windows `cmake --build C:/Users/zachf/.codex/builds/beatglass-snapshot-pinned-codecs --config Release -j 1` and `ctest --test-dir C:/Users/zachf/.codex/builds/beatglass-snapshot-pinned-codecs -C Release --output-on-failure` passed 101/101. The integration test uses a real AIFF snapshot job and checks its caller-issued epoch, owned detail, stale-delivery suppression, cancellation and destruction. WSL is not native Linux qualification; macOS remained deferred during its upgrade.
+## Offline result contract proposal
+
+An owned offline result and bounded structural validator are proposed for
+composite evidence. Actual composite persistence, paged retrieval, native
+qualification and a validated track-level key remain open.
 
 ## Phase 1 tonal dependency experiment
 
