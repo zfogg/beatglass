@@ -15,11 +15,12 @@ void LiveMusic::invalidate_publication() noexcept {
   else { ++generation_; ++revision_; }
 }
 void LiveMusic::clear() noexcept { replay_.reset(); invalidate_publication(); }
-bool LiveMusic::start(const std::string& endpoint) {
+bool LiveMusic::start(const std::string& endpoint) { return start(endpoint, {}); }
+bool LiveMusic::start(const std::string& endpoint, std::shared_ptr<LoopbackStartAuthorization> authorization) {
   if (exhausted_ || session_.state()!=SourceState::stopped) return false;
   clear(); failed_=false; last_audio_=std::chrono::steady_clock::now();
   if (exhausted_) return false;
-  return session_.start(endpoint);
+  return session_.start(endpoint, std::move(authorization));
 }
 bool LiveMusic::pump() {
   if (failed_ || exhausted_) return false;

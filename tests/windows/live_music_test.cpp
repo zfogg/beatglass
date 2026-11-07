@@ -9,6 +9,7 @@ struct Loopback::Impl {};
 Loopback::Loopback() = default;
 Loopback::~Loopback() = default;
 bool Loopback::start(const std::string&,std::uint64_t) { return false; }
+bool Loopback::start(const std::string&,std::uint64_t,std::shared_ptr<LoopbackStartAuthorization>) { return false; }
 void Loopback::stop() {}
 Loopback::State Loopback::state() const { return State::stopped; }
 std::int32_t Loopback::error_code() const { return 0; }
@@ -25,6 +26,7 @@ public:
   std::uint64_t epoch{}, dropped{}; State current{State::stopped};
   std::deque<Event> events; std::deque<LoopbackPacket> packets;
   bool start(const std::string&,std::uint64_t e) override { epoch=e; dropped=0; current=State::running; events.push_back({State::running,1,e,0}); return true; }
+  bool start(const std::string& id,std::uint64_t e,std::shared_ptr<LoopbackStartAuthorization> authorization) override { return authorization && !authorization->cancelled() && start(id,e); }
   void stop() override { current=State::stopped; packets.clear(); events.clear(); }
   State state() const override { return current; }
   bool pop_event(Event& e) override { if(events.empty()) return false; e=events.front(); events.pop_front(); return true; }

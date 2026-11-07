@@ -242,3 +242,13 @@ interrupts the attempt; invalid timestamps are not added. Empty invalid or
 flagged buffers retain a discontinuity for the next nonempty packet. Boundary
 checks are simulated; actual driver overflow and empty flagged buffers have not
 been observed or qualified.
+
+The provisional composite worker can use a shared one-attempt start
+authorization: Stop or replacement cancels it without waiting for the worker,
+and only one worker can claim it. A pre-claim cancellation prevents the start;
+after a claim, cancellation is observed around native calls and the worker
+clears and stops the attempt. A native call already in progress is not
+preempted. The desktop bridge must retain and cancel its own authorization on
+Stop, switch and destruction, gate stale deliveries, and join the worker. This
+contract has deterministic fake-backend coverage; the bridge integration and
+physical device timing remain unqualified.

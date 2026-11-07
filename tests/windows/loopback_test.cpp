@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <chrono>
 #include <thread>
+#include <future>
 #include <algorithm>
 #include <cmath>
 #include <vector>
@@ -17,6 +18,9 @@ class FakeLoopback final : public beatglass::windows::Loopback {
 public:
   bool start(const std::string&, std::uint64_t epoch) override {
     current = State::running; currentEpoch = epoch; dropped = 0; events.push_back({State::running, 1, epoch, 0}); return true;
+  }
+  bool start(const std::string& endpoint, std::uint64_t epoch, std::shared_ptr<beatglass::windows::LoopbackStartAuthorization> auth) override {
+    return auth && !auth->cancelled() && start(endpoint, epoch);
   }
   void stop() override { current = State::stopped; packets.clear(); events.clear(); ++stops; }
   State state() const override { return current; }
@@ -300,4 +304,56 @@ TEST_CASE("Generated default endpoint playback is captured and overflow marks a 
   }
   REQUIRE(got_fresh_packet);
   capture.stop();
+}
+
+TEST_CASE("Cancelled start is rejected before backend claim") {
+  beatglass::SourceEpochAllocator epochs;
+  auto backend = std::make_unique<FakeLoopback>(); auto* fake = backend.get();
+  beatglass::windows::LoopbackSession session(epochs, [] {}, std::move(backend));
+  auto cancelled = std::make_shared<beatglass::windows::LoopbackStartAuthorization>();
+  cancelled->cancel();
+  REQUIRE_FALSE(session.start("old", cancelled));
+  CHECK(fake->current == beatglass::windows::Loopback::State::stopped);
+  auto replacement = std::make_shared<beatglass::windows::LoopbackStartAuthorization>();
+  // A switch cancels the old attempt, then starts only the replacement.
+  REQUIRE(session.start("replacement", replacement));
+  session.poll(); CHECK(session.state() == beatglass::SourceState::running);
+  CHECK(fake->currentEpoch == 1);
+  session.stop();
+}
+
+TEST_CASE("Cancellation while backend start is blocked stops accepted source") {
+  using namespace beatglass::windows;
+  class Blocked final : public Loopback {
+  public:
+    std::promise<void> entered, release;
+    std::atomic<unsigned> stops{0};
+    bool start(const std::string&, std::uint64_t, std::shared_ptr<LoopbackStartAuthorization>) override {
+      entered.set_value(); release.get_future().wait(); return true;
+    }
+    void stop() override { ++stops; }
+  };
+  beatglass::SourceEpochAllocator epochs; auto backend=std::make_unique<Blocked>(); auto* fake=backend.get();
+  LoopbackSession session(epochs, [] {}, std::move(backend));
+  auto authorization=std::make_shared<LoopbackStartAuthorization>();
+  auto entered=fake->entered.get_future();
+  auto result=std::async(std::launch::async,[&] { return session.start("old",authorization); });
+  REQUIRE(entered.wait_for(5s)==std::future_status::ready);
+  authorization->cancel(); fake->release.set_value();
+  REQUIRE(result.wait_for(5s)==std::future_status::ready);
+  CHECK_FALSE(result.get()); CHECK(fake->stops.load()>=1);
+  CHECK(session.state()==beatglass::SourceState::stopped);
+}
+
+TEST_CASE("Cancellation after accepted start invalidates and discards queued packets") {
+  beatglass::SourceEpochAllocator epochs; unsigned clears=0;
+  auto backend=std::make_unique<FakeLoopback>(); auto* fake=backend.get();
+  beatglass::windows::LoopbackSession session(epochs, [&] { ++clears; }, std::move(backend));
+  auto authorization=std::make_shared<beatglass::windows::LoopbackStartAuthorization>();
+  REQUIRE(session.start("selected", authorization)); session.poll();
+  REQUIRE(session.state()==beatglass::SourceState::running);
+  beatglass::windows::LoopbackPacket packet{}; packet.epoch=fake->currentEpoch;
+  fake->packets.push_back(packet); authorization->cancel();
+  REQUIRE_FALSE(session.pop(packet)); CHECK(clears==1); CHECK(fake->packets.empty());
+  CHECK(session.state()==beatglass::SourceState::error);
 }
