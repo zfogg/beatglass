@@ -213,3 +213,20 @@ real controller, window visibility, click-through, opacity and recovery. The
 first run without those DLL paths timed out on two test launches; the rerun
 passed. This is automated integration coverage, not a manual product overlay,
 physical monitor removal or exclusive fullscreen qualification.
+
+On Windows 11 Home 10.0.26300, MSVC 19.44, Qt 6.8.3, desktop build based on
+`8df919d` with the drag changes, interactive testing showed the overlay over the
+DJ controls. The opacity slider visibly changed transparency. With click-through
+enabled, clicks on covered Start and Stop monitoring controls reached them;
+after Unlock, a click on the covered Start control did not reach it. The
+control-window labels tracked the state. The application was closed after the
+test. The unlocked overlay now has a drag surface and starts near the control
+window. The opt-in `BEATGLASS_NATIVE_OVERLAY_TEST=1` invocation
+`windows_dj_ui_tests.exe nativeOverlayDrag` passed with native pointer input and
+observed a position change on one display. An earlier run of this test did not
+move the window; the revised test raises the window and sends incremental
+pointer movement. A proposed second-display version failed converting a point
+after changing screens and was not counted as a pass. Two-display pointer
+delivery for the standalone controller is recorded in `windows-overlay.md`,
+but cross-display movement of the complete DJ overlay is unqualified. Physical
+display removal and exclusive fullscreen product scenarios remain untested.

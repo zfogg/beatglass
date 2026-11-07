@@ -8,6 +8,7 @@
 #include <QtTest>
 #include <cmath>
 #include <vector>
+#include <thread>
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -17,6 +18,51 @@
 class DjUiTest : public QObject {
   Q_OBJECT
 private slots:
+  void nativeOverlayDrag() {
+    if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_OVERLAY_TEST")) QSKIP("Set BEATGLASS_NATIVE_OVERLAY_TEST for native pointer input");
+    struct RestoreCursor { POINT position{}; RestoreCursor() { GetCursorPos(&position); } ~RestoreCursor() { SetCursorPos(position.x, position.y); } } restore;
+    Metadata metadata;
+    LivePresentation presentation;
+    QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("metadata", &metadata);
+    engine.rootContext()->setContextProperty("livePresentation", &presentation);
+    engine.load(QUrl("qrc:/Main.qml"));
+    QVERIFY(!engine.rootObjects().isEmpty());
+    auto* root = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+    QVERIFY(root);
+    auto* overlay = root->findChild<QQuickWindow*>("overlayWindow");
+    QVERIFY(overlay);
+    beatglass::windows::OverlayController controller(overlay, root);
+    QVERIFY(root->setProperty("overlayControl", QVariant::fromValue(static_cast<QObject*>(&controller))));
+    auto* toggle = root->findChild<QObject*>("toggleOverlay");
+    QVERIFY(toggle);
+    QVERIFY(QMetaObject::invokeMethod(toggle, "clicked"));
+    QTRY_VERIFY(overlay->isVisible());
+    QTest::qWait(200);
+    {
+      const auto before = overlay->position();
+      const auto hwnd = reinterpret_cast<HWND>(overlay->winId());
+      QVERIFY(SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE));
+      SetForegroundWindow(hwnd);
+      auto point = overlay->mapToGlobal(QPoint(30, 30));
+      POINT native{point.x(), point.y()};
+      QVERIFY(LogicalToPhysicalPointForPerMonitorDPI(hwnd, &native));
+      std::jthread pointer([native] {
+        SetCursorPos(native.x, native.y);
+        INPUT input{}; input.type = INPUT_MOUSE; input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+        SendInput(1, &input, sizeof(INPUT));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        for (int step = 1; step <= 10; ++step) {
+          SetCursorPos(native.x + step * 10, native.y + step * 6);
+          std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+        SendInput(1, &input, sizeof(INPUT));
+      });
+      QTRY_VERIFY_WITH_TIMEOUT(overlay->position() != before, 2000);
+    }
+  }
   void overlayControlsUseRealController() {
     Metadata metadata;
     LivePresentation presentation;

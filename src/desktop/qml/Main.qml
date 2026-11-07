@@ -24,10 +24,16 @@ ApplicationWindow {
         id: overlay
         objectName: "overlayWindow"
         width: 320; height: 110
+        x: window.x + 100; y: window.y + 100
         visible: false
         color: "transparent"
         Rectangle {
             anchors.fill: parent; radius: 10; color: "#cc181820"
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.SizeAllCursor
+                onPressed: overlay.startSystemMove()
+            }
             Column {
                 anchors.centerIn: parent; spacing: 6
                 Label { text: "Beatglass · live tempo"; color: "white" }
@@ -176,6 +182,7 @@ ApplicationWindow {
                     Label { text: "Opacity" }
                     Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: 1; onMoved: window.overlayControl.setOpacity(value); Accessible.name: "Overlay opacity" }
                 }
+                Label { visible: window.overlayControl !== null; text: "Drag the unlocked overlay to move it."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Item { Layout.fillHeight: true }
             }
         }
