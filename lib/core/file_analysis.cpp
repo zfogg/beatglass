@@ -2,6 +2,7 @@
 #include "beatglass/core/tempo_tracker.hpp"
 #include "beatglass/core/channel_reduction.hpp"
 #include "beatglass/core/stream_continuity.hpp"
+#include "beatglass/core/tracking_machine.hpp"
 #include <sndfile.h>
 #include <algorithm>
 #include <cmath>
@@ -30,6 +31,9 @@ TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver&
   TempoTracker tracker(static_cast<std::uint32_t>(file.info.samplerate));
   std::uint64_t position = 0;
   StreamContinuity continuity;
+  TrackingMachine lifecycle;
+  if (!lifecycle.start(0)) throw std::runtime_error("Could not start tracking");
+  std::uint64_t silent_frames = 0;
   // Select the loudest channel per block rather than averaging anti-phase stereo.
   // Channel switches can introduce discontinuities: this is a baseline, not a final downmix.
   std::vector<float> pcm(static_cast<std::size_t>(hop) * file.info.channels);
@@ -45,12 +49,24 @@ TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver&
     mono.resize(static_cast<std::size_t>(n));
     if (!reduce_loudest_channel(interleaved, file.info.channels, mono))
       throw std::runtime_error("Audio contains invalid samples");
-    tracker.process(mono, 0, position, transition == StreamTransition::reacquire);
+    const bool active = std::any_of(mono.begin(), mono.end(), [](float sample) { return std::abs(sample) >= 0.0001f; });
+    bool reset = transition == StreamTransition::reacquire;
+    if (reset) lifecycle.discontinuity(block.epoch);
+    if (active) { silent_frames = 0; lifecycle.signal(); }
+    else {
+      silent_frames = std::min<std::uint64_t>(file.info.samplerate, silent_frames + mono.size());
+      if (silent_frames >= static_cast<std::uint64_t>(file.info.samplerate) && lifecycle.state() != TrackingState::silent) {
+        lifecycle.silence(); reset = true;
+      }
+    }
+    tracker.process(mono, 0, position, reset);
     position += mono.size();
-    const auto current = tracker.estimate(); result.beats = static_cast<unsigned>(current.beats); result.bpm = current.bpm;
+    const auto current = tracker.estimate();
+    if (current.bpm && lifecycle.state() != TrackingState::silent) lifecycle.accept(lifecycle.token());
+    result.state = lifecycle.state(); result.beats = static_cast<unsigned>(current.beats);
+    result.bpm = result.state == TrackingState::tracking ? current.bpm : std::nullopt;
     if (observer) observer(position, result);
   }
-  const auto estimate = tracker.estimate(); result.beats = static_cast<unsigned>(estimate.beats); result.bpm = estimate.bpm;
   return result;
 }
 TempoResult analyze_file(const std::filesystem::path& path) { return replay_file(path, {}); }

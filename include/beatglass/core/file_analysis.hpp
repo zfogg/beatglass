@@ -1,22 +1,55 @@
 #pragma once
+#include "beatglass/core/results.hpp"
 #include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <optional>
 #include <string>
 namespace beatglass {
-/** Decoded file properties; format is WAV or the generic audio label. */
-struct FileMetadata { std::uint32_t sample_rate{}, channels{}; std::uint64_t frames{}; std::string format; };
-/** File metadata, optional BPM, and detected beat count. */
-struct TempoResult { FileMetadata metadata; std::optional<float> bpm; unsigned beats{}; };
-/** Open a file and read metadata. Throws std::runtime_error on open or invalid format; other exceptions may propagate. */
+/** Decoded file properties; no reference to the open file is retained. */
+struct FileMetadata {
+  /** Frames per second. */
+  std::uint32_t sample_rate{};
+  /** Number of interleaved channels. */
+  std::uint32_t channels{};
+  /** Number of frames reported by the decoder. */
+  std::uint64_t frames{};
+  /** Decoder container label. */
+  std::string format;
+};
+/** Snapshot of preliminary file tempo analysis, owned by the caller. */
+struct TempoResult {
+  /** Source format and duration. */
+  FileMetadata metadata;
+  /** Current uncalibrated estimate, if available. */
+  std::optional<float> bpm;
+  /** Detected beats in the current acquisition. */
+  unsigned beats{};
+  /** Current lifecycle state. */
+  TrackingState state{TrackingState::stopped};
+};
+/** Read file properties on a worker thread; this may block on filesystem I/O.
+ * @param path Local file path; the source file is not modified.
+ * @return A value independent of the decoder's lifetime.
+ * @throws std::runtime_error if the file cannot be opened or has invalid format.
+ */
 FileMetadata read_metadata(const std::filesystem::path& path);
-/** Decode a file and run baseline tempo analysis. Each block uses its loudest channel; switches can introduce discontinuities. Throws std::runtime_error on file or decoder failure; tracker and allocation exceptions may propagate. */
+/** Analyze a file incrementally on the caller's worker thread, without pacing.
+ * @param path Local audio file; the source file is not modified.
+ * @return The latest state and uncalibrated tempo estimate.
+ * @throws std::exception on decoder, invalid PCM or estimator errors.
+ */
 TempoResult analyze_file(const std::filesystem::path& path);
-// Faster-than-real-time causal replay: callback receives only fully observed
-// frames and the current estimate, on the caller's thread. No pacing is implied.
-/** Replay observer called on the caller thread with observed frame count and current estimate. Its result reference is borrowed for the call. */
+/** Observer called synchronously after each fully observed decoded block.
+ * The first argument is the exclusive frame position within the file's epoch;
+ * the second is borrowed only for the call. Observers must copy retained data.
+ */
 using ReplayObserver = std::function<void(std::uint64_t observed_frames, const TempoResult&)>;
-/** Decode and analyze faster than real time, calling the observer after observed blocks without pacing. Decoder, tracker, and observer exceptions can propagate. */
+/** Replay a file causally, faster than real time, on the caller's worker thread.
+ * @param path Local audio file; no source tags or content are modified.
+ * @param observer Optional synchronous progress observer; it is not retained.
+ * @return The final state after all complete decoded blocks.
+ * @throws std::exception on decoder, invalid PCM, estimator or observer errors.
+ */
 TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver& observer);
 }
