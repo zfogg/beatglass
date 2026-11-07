@@ -20,7 +20,15 @@ struct FileFingerprint {
   /** Lowercase SHA-256 hex, prefixed with sha256:. */ std::string digest;
   /** Diagnostic when the operation fails. */ std::string diagnostic;
 };
-/** Hash a file on the calling worker using a bounded buffer; never writes the file. The observer, if present, runs synchronously after each chunk and may request stop. Blocking I/O cannot be interrupted. Attributes and digest cannot exclude all replacement, mutation, or ABA races; do not use this alone to prove that a separately opened decoder analyzed these bytes. */
+/** Hash a file on the calling worker using a bounded buffer; never writes the file.
+ * The observer, if present, runs synchronously after each nonempty chunk and may
+ * request stop; cancellation is cooperative and cannot interrupt blocking I/O.
+ * Observer and filesystem exceptions derived from std::exception return error
+ * with a diagnostic; other exceptions propagate. Input longer than the initial
+ * size, a short input, or changed attributes return changed; I/O errors return
+ * error. Attributes and digest cannot exclude all replacement, mutation, or ABA
+ * races; they do not prove that a separately opened decoder analyzed these bytes.
+ */
 FileFingerprint fingerprint_file(const std::filesystem::path& path, std::stop_token stop = {},
                                  const std::function<void(std::uintmax_t)>& observer = {});
 }

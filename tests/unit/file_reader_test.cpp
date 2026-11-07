@@ -76,3 +76,10 @@ TEST_CASE("reading and seeking leave the source file unchanged") {
  { FileReader reader(fixture.path); std::array<float,4> samples{}; REQUIRE(reader.read(samples).status == FileReadStatus::data); reader.seek(0); REQUIRE(reader.read(samples).status == FileReadStatus::data); }
  CHECK(bytes() == before);
 }
+TEST_CASE("path reader accepts externally allocated epochs without moving on rejection") {
+ WaveFixture fixture; FileReader reader(fixture.path, 7); std::array<float,2> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ CHECK_THROWS_AS(reader.seek(0,7),std::invalid_argument); CHECK_THROWS_AS(reader.seek(0,6),std::invalid_argument);
+ const auto unchanged=reader.read(samples); REQUIRE(unchanged.status==FileReadStatus::data); CHECK(unchanged.block.first_frame==1); CHECK(unchanged.block.epoch==7);
+ reader.seek(0,42); const auto changed=reader.read(samples); REQUIRE(changed.status==FileReadStatus::data); CHECK(changed.block.epoch==42); CHECK(changed.block.first_frame==0);
+}
