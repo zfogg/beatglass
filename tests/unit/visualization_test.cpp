@@ -28,8 +28,8 @@ TEST_CASE("visualization locates an FFT tone and preserves waveform extrema") {
 TEST_CASE("visualization discards partial windows after reset, gaps and source changes") {
   Gate gate; VisualizationProcessor p(Gate::clear, &gate); std::array<float,512> x{};
   REQUIRE_FALSE(p.process(1,0,44100,x)); REQUIRE_FALSE(p.process(1,700,44100,x));
-  REQUIRE_FALSE(p.process(2,1212,44100,x)); REQUIRE_FALSE(p.process(2,1724,48000,x));
-  p.reset(); REQUIRE_FALSE(p.process(2,2236,48000,x)); auto f=p.process(2,2748,48000,x); REQUIRE(f); CHECK(f->first_frame==2236);
+  REQUIRE_FALSE(p.process(2,1212,44100,x)); CHECK_THROWS(p.process(2,1724,48000,x));
+  p.reset(); REQUIRE_FALSE(p.process(3,2236,48000,x)); auto f=p.process(3,2748,48000,x); REQUIRE(f); CHECK(f->first_frame==2236);
 }
 TEST_CASE("visualization invalid input clears partial state") {
   Gate gate; VisualizationProcessor p(Gate::clear, &gate); std::array<float,512> x{}; REQUIRE_FALSE(p.process(1,0,48000,x));
@@ -49,7 +49,7 @@ TEST_CASE("visualization invalidation rejects delayed same-epoch and reordered f
   CHECK_FALSE(gate.apply(oldgen,oldrev)); CHECK_FALSE(gate.visible);
   REQUIRE(p.process(1,1712,48000,std::span(x).first(512))); auto gen=gate.generation; auto rev=++gate.revision;
   CHECK(gate.apply(gen,rev)); auto newer=++gate.revision; CHECK(gate.apply(gen,newer)); CHECK_FALSE(gate.apply(gen,rev));
-  REQUIRE_FALSE(p.process(1,2000,48000,std::span(x).first(512))); CHECK_FALSE(gate.apply(gen,newer)); CHECK_FALSE(gate.visible);
+  CHECK_THROWS(p.process(1,2000,48000,std::span(x).first(512))); CHECK_FALSE(gate.apply(gen,newer)); CHECK_FALSE(gate.visible);
   auto before=gate.generation; p.reset(); CHECK(gate.generation>before);
 }
 
@@ -75,4 +75,21 @@ TEST_CASE("FFT DC and Nyquist normalization and invalid range") {
   auto ny=p.process(1,1024,48000,x); REQUIRE(ny); CHECK(ny->magnitude[512]==Catch::Approx(.75f).margin(.001));
   x[0]=1.1f; auto old=gate.generation; CHECK_THROWS(p.process(1,2048,48000,x)); CHECK(gate.generation>old);
   x[0]=0; CHECK_THROWS(p.process(1,std::numeric_limits<std::uint64_t>::max()-1,48000,x));
+}
+
+TEST_CASE("stale epochs and overlaps remain rejected across reset") {
+  Gate gate; VisualizationProcessor p(Gate::clear,&gate); std::array<float,1024> x{};
+  REQUIRE(p.process(5,0,48000,x)); auto oldgen=gate.generation; auto oldrev=++gate.revision;
+  CHECK_THROWS(p.process(4,1024,48000,x)); CHECK_FALSE(gate.apply(oldgen,oldrev));
+  CHECK_THROWS(p.process(5,512,48000,x)); p.reset(); CHECK_THROWS(p.process(4,2048,48000,x));
+  CHECK_THROWS(p.process(5,0,48000,x)); REQUIRE(p.process(6,0,48000,x));
+  CHECK_THROWS(p.process(5,2048,48000,x));
+}
+
+TEST_CASE("sample rate cannot change within an epoch even after reset") {
+  Gate gate; VisualizationProcessor p(Gate::clear,&gate); std::array<float,512> x{};
+  REQUIRE_FALSE(p.process(1,0,44100,x)); auto old=gate.generation;
+  CHECK_THROWS(p.process(1,512,48000,x)); CHECK(gate.generation>old);
+  p.reset(); CHECK_THROWS(p.process(1,512,48000,x));
+  REQUIRE_FALSE(p.process(2,0,48000,x)); REQUIRE(p.process(2,512,48000,x));
 }

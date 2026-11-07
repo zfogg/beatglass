@@ -17,6 +17,10 @@ std::optional<VisualizationFrame> VisualizationProcessor::process(std::uint64_t 
   if (!epoch || !rate || input.size() > max_input_frames || input.size() > std::numeric_limits<std::uint64_t>::max() - first ||
       std::any_of(input.begin(), input.end(), [](float x){ return !std::isfinite(x) || x < -1.0f || x > 1.0f; }))
     { reset(); throw std::invalid_argument("invalid visualization PCM or timing"); }
+  if (epoch < high_epoch_ || (epoch == high_epoch_ && (first < high_next_ || rate != high_rate_))) {
+    reset(); throw std::invalid_argument("stale visualization PCM");
+  }
+  if (epoch > high_epoch_) { high_epoch_ = epoch; high_next_ = first; high_rate_ = rate; }
   if (discontinuity || epoch_ != epoch || sample_rate_ != rate || next_frame_ != first) {
     if (epoch_ || discontinuity) reset(); else clear_partial(); epoch_ = epoch; sample_rate_ = rate; next_frame_ = first;
   }
@@ -24,7 +28,7 @@ std::optional<VisualizationFrame> VisualizationProcessor::process(std::uint64_t 
   constexpr unsigned n = VisualizationFrame::window_size;
   for (float sample : input) {
     if (!count_) window_start_ = next_frame_;
-    samples_[count_++] = sample; ++next_frame_;
+    samples_[count_++] = sample; ++next_frame_; high_next_ = next_frame_;
     if (count_ != n) continue;
     VisualizationFrame frame; frame.epoch = epoch_; frame.first_frame = window_start_; frame.end_frame = next_frame_; frame.sample_rate = rate;
     std::array<std::complex<double>, n> fft{};

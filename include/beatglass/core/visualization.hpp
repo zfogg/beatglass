@@ -46,8 +46,10 @@ public:
   void reset() noexcept;
   /** Consume contiguous finite normalized mono PCM in [-1, 1]. Input must have nonzero epoch and rate and at most 4096 frames,
    * and sample positions must not overflow. Invalid input invalidates and clears the processor before throwing.
-   * Gaps, overlaps, epoch changes and rate changes discard the previous partial
-   * window and begin a new one. Out-of-range samples are rejected rather than clipped. Output owns its data.
+   * Forward gaps and epoch changes discard the previous partial
+   * window and begin a new one. Old epochs, same-epoch rate changes and overlaps are rejected
+   * and invalidate output. Epoch and frame high-water marks survive reset; seeking
+   * or restarting at an earlier frame requires a newer coordinator epoch. Out-of-range samples are rejected rather than clipped. Output owns its data.
    * @param epoch Coordinator-issued nonzero source epoch.
    * @param first_frame First source frame of the supplied span.
    * @param sample_rate Source sample rate in frames per second.
@@ -64,8 +66,8 @@ private:
   Invalidate invalidate_;
   void* context_;
   std::array<float, VisualizationFrame::window_size> samples_{};
-  std::uint64_t epoch_{}, next_frame_{}, window_start_{};
-  std::uint32_t sample_rate_{};
+  std::uint64_t epoch_{}, next_frame_{}, window_start_{}, high_epoch_{}, high_next_{};
+  std::uint32_t sample_rate_{}, high_rate_{};
   unsigned count_{};
 };
 }
