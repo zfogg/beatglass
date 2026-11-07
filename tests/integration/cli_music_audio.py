@@ -28,6 +28,7 @@ with tempfile.TemporaryDirectory() as directory:
     rows = [json.loads(line) for line in run.stdout.splitlines()]
     assert rows and rows[-1]["type"] == "result", run.stdout
     result = rows[-1]
+    assert result["epoch"] > 0 and all(row["epoch"] == result["epoch"] for row in rows), rows
     assert result["schema_version"] == 1 and result["sample_rate"] == rate and result["bpm"] is not None and result["state"] == "tracking", result
     assert result["rolling_key"] is not None and result["local_chord"] == "A minor", result
     assert result["tonal_through"] <= result["analyzed_through"] <= result["observed_through"] == rate * 12

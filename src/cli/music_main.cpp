@@ -1,4 +1,5 @@
 #include "beatglass/core/music_replay.hpp"
+#include "beatglass/capture/source_lifecycle.hpp"
 #include "state_label.hpp"
 #include <exception>
 #include <filesystem>
@@ -28,8 +29,11 @@ int main(int argc, char** argv) {
   if (argc != 2) { std::cerr << "Usage: beatglass-music-cli <audio-file>\n"; return 2; }
   std::cout.imbue(std::locale::classic()); std::cout << std::setprecision(9);
   try {
+    beatglass::SourceEpochAllocator epochs;
+    const auto epoch=epochs.next();
+    if (!epoch) throw std::runtime_error("source epoch exhausted");
     auto previous_state=beatglass::TrackingState::stopped;
-    const auto result=beatglass::replay_music_file(std::filesystem::path(argv[1]),0,[](const beatglass::CausalMusicBeat& beat) {
+    const auto result=beatglass::replay_music_file(std::filesystem::path(argv[1]),*epoch,[](const beatglass::CausalMusicBeat& beat) {
       std::cout << "{\"type\":\"beat\",\"schema_version\":1,\"epoch\":" << beat.epoch
                 << ",\"sample_rate\":" << beat.sample_rate << ",\"frame\":" << beat.frame << ",\"observed_through\":" << beat.observed_through << ",\"strength\":";
       optional_number(beat.strength); std::cout << "}\n";
