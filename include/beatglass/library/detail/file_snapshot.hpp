@@ -9,6 +9,11 @@
 #include <stop_token>
 #include <string>
 namespace beatglass::library_detail {
+/** Source sharing policy for a provisional snapshot. */
+enum class SnapshotSourcePolicy {
+  detect_changes, ///< Allow concurrent opens and detect changes with evidence checks.
+  deny_writes ///< Require an OS-enforced sharing restriction; unsupported platforms fail closed.
+};
 /** Snapshot creation and verification outcome. */
 enum class SnapshotStatus {
   /** Snapshot or source verification succeeded. */ ok,
@@ -49,8 +54,9 @@ struct SnapshotOpen {
   /** Result category. */ SnapshotStatus status{SnapshotStatus::error};
   /** Owned byte source on success. */ std::unique_ptr<FileSnapshot> value;
   /** Optional failure diagnostic. */ std::string diagnostic;
-  /** Create a private snapshot of the source using bounded memory. No original file is written. I/O and the optional byte-progress observer run synchronously on the calling worker and cannot interrupt an in-flight system call. */
+  /** Create a private snapshot of the source using bounded memory. No original file is written. I/O and the optional byte-progress observer run synchronously on the calling worker and cannot interrupt an in-flight system call. The optional deny-writes policy currently requires Windows share-mode enforcement and fails closed elsewhere; it does not prove path or same-user safety. */
   static SnapshotOpen create(const std::filesystem::path& source, std::stop_token stop = {},
-                             const std::function<void(std::uintmax_t)>& progress = {});
+                             const std::function<void(std::uintmax_t)>& progress = {},
+                             SnapshotSourcePolicy policy = SnapshotSourcePolicy::detect_changes);
 };
 }

@@ -28,4 +28,6 @@ TEST_CASE("analysis terminal remains until acknowledgement and stale jobs cannot
   CHECK_FALSE(requests.finishAnalysis(first, "stale"));
   REQUIRE(requests.finishAnalysis(second, "cancelled"));
   CHECK(*requests.terminal() == "cancelled");
+  auto owned = requests.takeAnalysis(); REQUIRE(owned); CHECK(*owned == "cancelled");
+  CHECK_FALSE(requests.terminal()); CHECK(requests.beginAnalysis());
 }

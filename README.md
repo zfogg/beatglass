@@ -65,6 +65,21 @@ ctest --preset prebuilt-qt-desktop
 
 On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the configure command. The SDK must match the compiler and target architecture. The preset enforces version 6.8.3 and uses the core vcpkg manifest; do not enable its `desktop` feature or point it at an install tree containing a different Qt version. The source-building `vcpkg-desktop` preset remains experimental. This is a development proposal, not a finished cross-platform package or fully hashed artifact lock; acquisition, platform and license caveats are in [decisions](docs/decisions.md).
 
+File replay uses the proposed worker-owned `CausalTempoReplay` block interface. It accepts arbitrary interleaved chunk sizes, buffers partial 512-frame hops, and reports accepted and analyzed exclusive boundaries separately. An incomplete final hop is not analyzed. The private library snapshot jobs can feed this replay; live capture is not connected.
+
+The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
+
+The experimental worker-only aubio beat tracker is used by the combined replay; see [progress](docs/progress.md) for its timing and qualification limits.
+
+## Experimental combined file and block replay
+
+With `BEATGLASS_BUILD_SLICE=ON`, `BEATGLASS_BUILD_TONAL_SPIKE=ON`, and `BEATGLASS_BUILD_MUSIC_REPLAY=ON`, the optional `beatglass-music-cli <file>` emits JSON Lines from actual aubio and Essentia analysis. `beat` records carry a source epoch, event frame and exclusive observed boundary. `tonal` records carry a half-open chord-analysis window, an optional earlier `rolling_key_from` boundary for the rolling key evidence, and `rolling_key`/`local_chord` labels or null. Beat strength is null because this tracker does not provide one; tonal strengths are uncalibrated and null when unavailable. These overlapping windows are not chord segments, and a rolling key is not a track-level key. `state` records report lifecycle changes; consumers should clear prior labels on silence or reacquisition. The final `result` records tempo, latest tonal labels and observed/analyzed boundaries; a failure can leave a partial stream and exits nonzero. The source file is not modified. This is a fast, causal replay without playback pacing, a calibrated model or release qualification.
+
+The same `CausalMusicReplay` consumes worker-delivered live `AudioBlock`s; its explicit interruption operation clears internal evidence and requires a fresh coordinator-issued epoch. The caller must also deliver revisioned clears to UI consumers. A provisional library snapshot worker feeds the collector without cache reuse; no capture backend or desktop presentation is connected. Generated synthetic tests do not establish real-music accuracy, latency, platform support, or legal clearance for distributing Essentia.
+
+
+The [Essentia dependency spike](docs/essentia-spike.md) records research builds, licensing considerations and the proposed tonal architecture; the combined CLI remains experimental.
+
 ## Provisional library storage increment
 
 `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables private, not yet product-wired SQLite and job-executor primitives. SQLite is currently found from the host and is not pinned. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
@@ -79,7 +94,5 @@ This is an isolated review increment, not a product-ready library backend. Snaps
 
 The follow-up prototype can be built with `-DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON` together with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE` and `BEATGLASS_BUILD_SLICE`; it requires OpenSSL development libraries as well as SQLite, aubio, and libsndfile. It hashes file content, runs the existing tempo replay on cache misses, and exposes cooperative cancellation and progress. Its separate decoder and hash opens leave a concurrent-replacement race, so it is not a user-facing backend; see the [contract proposal](docs/phase1-contract-proposals.md).
 File replay and the private snapshot-job experiment use the proposed worker-owned `CausalTempoReplay` block interface. It accepts arbitrary interleaved chunk sizes, buffers partial 512-frame hops, and reports accepted and analyzed exclusive boundaries separately. An incomplete final hop is not analyzed. The snapshot job remains gated from the application, and live capture is not connected.
-
-The [Essentia dependency spike](docs/essentia-spike.md) records research builds and the proposed tonal architecture; it is not integrated into the CLI or product.
 
 The experimental CLI also accepts `--json`, alone or with `--replay`. Normal JSON output is one object; replay emits one JSON object per observed block followed by a final result object (JSON Lines). `schema_version` is 1, `observed_through` is an exclusive frame boundary, and `bpm: null` means unknown. The beat count covers the current acquisition. These are preliminary tempo-only outputs: they do not contain key or chord estimates, and replay runs without real-time pacing. Errors are reported on stderr with a nonzero exit status; a replay error can leave a partial JSON Lines stream without a final result.

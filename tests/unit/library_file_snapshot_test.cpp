@@ -191,3 +191,29 @@ TEST_CASE("snapshot verification rejects altered snapshot bytes") {
   REQUIRE(snapshot.value->verify() == SnapshotStatus::unverifiable);
 }
 #endif
+
+#ifdef _WIN32
+TEST_CASE("Windows restricted source sharing rejects writers and existing write handles") {
+  TempDir temp; auto file = temp.path / L"restricted-source"; write(file, "source bytes");
+  HANDLE existing = CreateFileW(file.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+  REQUIRE(existing != INVALID_HANDLE_VALUE);
+  auto blocked = SnapshotOpen::create(file, {}, {}, SnapshotSourcePolicy::deny_writes);
+  REQUIRE(blocked.status == SnapshotStatus::unverifiable); REQUIRE(CloseHandle(existing));
+  {
+    auto opened = SnapshotOpen::create(file, {}, {}, SnapshotSourcePolicy::deny_writes);
+    INFO(opened.diagnostic); REQUIRE(opened.status == SnapshotStatus::ok);
+    HANDLE writer = CreateFileW(file.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    REQUIRE(writer == INVALID_HANDLE_VALUE); REQUIRE(GetLastError() == ERROR_SHARING_VIOLATION);
+    HANDLE deleter = CreateFileW(file.c_str(), DELETE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    REQUIRE(deleter == INVALID_HANDLE_VALUE); REQUIRE(GetLastError() == ERROR_SHARING_VIOLATION);
+    REQUIRE(opened.value->verify() == SnapshotStatus::ok);
+  }
+  HANDLE writer = CreateFileW(file.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+  REQUIRE(writer != INVALID_HANDLE_VALUE); REQUIRE(CloseHandle(writer));
+}
+#else
+TEST_CASE("unsupported source sharing restriction fails closed") {
+  TempDir temp; auto file = temp.path / "source"; write(file, "abc");
+  REQUIRE(SnapshotOpen::create(file, {}, {}, SnapshotSourcePolicy::deny_writes).status == SnapshotStatus::unverifiable);
+}
+#endif

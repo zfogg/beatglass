@@ -98,9 +98,10 @@ SnapshotStatus FileSnapshot::verify(std::stop_token stop, const std::function<vo
     return same(before, after) && same(after, path_stat) && digest == impl_->digest ? SnapshotStatus::ok : SnapshotStatus::stale_input;
   } catch (const Cancelled&) { return SnapshotStatus::cancelled; } catch (...) { return SnapshotStatus::error; }
 }
-SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_token stop, const std::function<void(std::uintmax_t)>& progress) {
+SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_token stop, const std::function<void(std::uintmax_t)>& progress, SnapshotSourcePolicy policy) {
   try {
     if (stop.stop_requested()) return {SnapshotStatus::cancelled, {}, {}};
+    if (policy != SnapshotSourcePolicy::detect_changes) return {SnapshotStatus::unverifiable, {}, "source sharing restriction unavailable"};
     auto impl = std::make_unique<FileSnapshot::Impl>(); impl->path = std::filesystem::absolute(path);
     impl->original.value = ::open(impl->path.c_str(), O_RDONLY | O_CLOEXEC);
     check(impl->original.value >= 0, "open source");
@@ -228,11 +229,14 @@ SnapshotStatus FileSnapshot::verify(std::stop_token stop, const std::function<vo
     return same(before, after) && same(after, evidence(named.value)) && digest == impl_->digest ? SnapshotStatus::ok : SnapshotStatus::stale_input;
   } catch (const Cancelled&) { return SnapshotStatus::cancelled; } catch (...) { return SnapshotStatus::error; }
 }
-SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_token stop, const std::function<void(std::uintmax_t)>& progress) {
+SnapshotOpen SnapshotOpen::create(const std::filesystem::path& path, std::stop_token stop, const std::function<void(std::uintmax_t)>& progress, SnapshotSourcePolicy policy) {
   try {
     if (stop.stop_requested()) return {SnapshotStatus::cancelled, {}, {}};
+    if (policy != SnapshotSourcePolicy::detect_changes && policy != SnapshotSourcePolicy::deny_writes) return {SnapshotStatus::unverifiable, {}, "invalid source policy"};
     auto impl = std::make_unique<FileSnapshot::Impl>(); impl->path = std::filesystem::absolute(path);
-    impl->original.value = CreateFileW(impl->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    const DWORD sharing = policy == SnapshotSourcePolicy::deny_writes ? FILE_SHARE_READ : FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+    impl->original.value = CreateFileW(impl->path.c_str(), GENERIC_READ, sharing, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (impl->original.value == INVALID_HANDLE_VALUE && policy == SnapshotSourcePolicy::deny_writes && GetLastError() == ERROR_SHARING_VIOLATION) return {SnapshotStatus::unverifiable, {}, "source is already open for write or delete"};
     check_win(impl->original.value != INVALID_HANDLE_VALUE, "open source");
     auto before = evidence(impl->original.value); WinHandle writer;
     for (int attempt = 0; attempt < 16 && writer.value == INVALID_HANDLE_VALUE; ++attempt) {

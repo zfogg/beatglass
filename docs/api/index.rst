@@ -41,13 +41,13 @@ Snapshot timelines use an exclusive observed-frame boundary. Beats precede
 that boundary, and chord segments are nonempty half-open intervals whose end
 may equal it. Producers using the former inclusive boundary must adjust.
 
-.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
+.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/music_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
 
 Offline results preserve overlapping local tonal evidence separately from an
 optional validated track-level key. Missing windows and scores remain unknown;
 the value type does not itself provide database paging or persistence.
 
-.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp
+.. cpp:autodoc:: include/beatglass/core/offline_analysis.hpp include/beatglass/core/music_collector.hpp
 
 Library jobs
 ------------
@@ -67,6 +67,14 @@ Desktop application internals
 .. cpp:function:: CollectionView::~CollectionView()
 
    Cancel and join the worker on the GUI thread. Filesystem I/O may delay destruction.
+
+.. cpp:function:: bool CollectionView::analyzeComposite(const QString& path)
+
+   When the private composite build is enabled, start uncached snapshot analysis with a fresh process epoch. The caller must serialize Essentia construction process-wide. Evidence remains provisional and is not exposed to QML.
+
+.. cpp:function:: const std::optional<beatglass::UnverifiedMusicAnalysis>& CollectionView::compositeEvidence() const
+
+   Return the last owned, non-cacheable composite evidence on the GUI thread. A new analysis or destruction invalidates the reference.
 
 .. cpp:autodoc:: src/desktop/library_bridge.hpp src/desktop/collection_requests.hpp src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/playback_guard.hpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_default_tempo.hpp
 
@@ -95,6 +103,16 @@ Desktop application internals
 
    Destroy the platform controller on the GUI thread before either borrowed window.
 
+Experimental tonal worker internals
+-----------------------------------
+
+.. cpp:autodoc:: lib/core/tonal_tracker.hpp
+
+Experimental beat-event worker
+------------------------------
+
+.. cpp:autodoc:: lib/core/beat_tracker.hpp
+
 Experimental virtual file I/O
 -----------------------------
 
@@ -104,3 +122,8 @@ CLI application internals
 -------------------------
 
 .. cpp:autodoc:: src/cli/state_label.hpp
+
+Experimental composite snapshot worker
+--------------------------------------
+
+.. cpp:autodoc:: include/beatglass/library/detail/composite_snapshot_job.hpp

@@ -105,3 +105,7 @@ Keep owned offline results separate from live snapshots. Preserve overlapping
 local tonal evidence and optional beat strengths; rolling keys are not
 track-level keys. Storage, paging, cache identity and result serialization
 remain subject to integration review and are not implemented by this value type.
+
+## Composite analysis identity (provisional)
+
+A build manifest may record pinned dependency digests and the complete effective analysis configuration, but embedded build metadata alone is not proof of dynamically loaded code. Cache eligibility must be granted only after the actual executable and linked dependency artifacts have been verified under a platform-specific, race-resistant policy, including relevant transitive DSP dependencies. Unknown provenance disables composite cache lookup and publication. The worker may still return bounded in-memory evidence after successful source verification; it must not fill identity fields with invented values. This remains a proposal, not a claim of a verified packaging mechanism.

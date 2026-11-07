@@ -2,6 +2,9 @@
 #include "beatglass/library/detail/snapshot_store_job.hpp"
 #include "beatglass/library/detail/tempo_analysis_store.hpp"
 #include "beatglass/library/detail/offline_archive.hpp"
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+#include "beatglass/library/detail/composite_snapshot_job.hpp"
+#endif
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -33,9 +36,17 @@ public:
     std::optional<beatglass::CachedAnalysis> value; ///< Present only for hit.
     std::string diagnostic; ///< Optional failure explanation.
   };
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  /** Worker-confined real composite job outcome; identity is not verified and cannot be cached. */
+  using Composite = beatglass::library_detail::CompositeJobResult;
+#endif
   /** Owned completion payload. Error text covers initialization, validation and query failures; lookup and analysis carry typed outcomes. */
   struct Result {
-    std::variant<std::monostate, Page, Detail, Analysis, Lookup, beatglass::library_detail::OfflineReadResult> value; ///< Owned operation payload, if available.
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+    std::variant<std::monostate, Page, Detail, Analysis, Lookup, beatglass::library_detail::OfflineReadResult, Composite> value;
+#else
+    std::variant<std::monostate, Page, Detail, Analysis, Lookup, beatglass::library_detail::OfflineReadResult> value;
+#endif ///< Owned operation payload, if available.
     std::string error; ///< Bridge, initialization or query error.
     bool cancelled{}; ///< Cancellation before a queued request started, or query cancellation.
     std::string association_error; ///< Reserved for compatibility; indexed publication now reports failure in its typed outcome.
@@ -75,6 +86,10 @@ public:
   std::shared_ptr<Ticket> lookup_indexed(std::string key, std::filesystem::path path, std::string engine, std::string configuration, std::uint64_t epoch, Completion completion);
   /** Fetch an owned, bounded offline page from an indexed path after snapshot verification. Empty run selects the active run; subsequent pages should use the returned run ID. */
   std::shared_ptr<Ticket> offline_page(std::string key, std::filesystem::path path, beatglass::library_detail::OfflineKey identity, std::string run, std::size_t beat_offset, std::size_t beat_count, std::size_t window_offset, std::size_t window_count, std::uint64_t epoch, Completion completion);
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+  /** Run real snapshot-backed composite analysis on the analysis lane. Results are owned and explicitly non-cacheable; this never calls the archive. The caller must serialize Essentia construction process-wide and supply a nonzero coordinator epoch. */
+  std::shared_ptr<Ticket> analyze_composite(std::filesystem::path path, std::uint64_t epoch, Completion completion);
+#endif
   /** Cancel and suppress only browsing and lookup requests. */
   void cancel_browse();
   /** Cancel and suppress only analysis requests; a commit already begun may succeed. */

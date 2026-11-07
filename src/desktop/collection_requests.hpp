@@ -39,6 +39,8 @@ public:
   const std::optional<Terminal>& terminal() const { return terminal_; }
   /** Discard a consumed terminal, allowing the next analysis. */
   void acknowledgeAnalysis() { terminal_.reset(); }
+  /** Move the retained terminal to its GUI owner and allow the next analysis. */
+  std::optional<Terminal> takeAnalysis() { auto result = std::move(terminal_); terminal_.reset(); return result; }
 private:
   Token browse_, analysis_;
   std::optional<Page> page_;
