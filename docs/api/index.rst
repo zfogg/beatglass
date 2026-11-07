@@ -53,7 +53,7 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_overlay.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_overlay.hpp
 
 .. cpp:function:: beatglass::windows::OverlayController::~OverlayController()
 
