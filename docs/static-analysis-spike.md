@@ -1,0 +1,4 @@
+
+## Static PCM-analysis experiment
+
+The experimental Windows recipe can build a narrow x64 executable that includes both aubio and Essentia analysis code and accepts no audio file input. Its synthetic smoke runs real aubio processing and the two Essentia triad checks. A build-time PE import allowlist rejects third-party DLL imports; its negative tests deliberately inject an aubio DLL and an empty import list. This is an experiment to measure whether static linking reduces the analysis dependency closure. It is not a product worker, does not decode audio, does not include libsndfile or codec dependencies, and does not verify the running image or operating-system modules. Neither a matching output hash nor an import-table check authorizes cache lookup or publication. Native Windows execution and the actual import set must pass before making even the narrower static-link claim.

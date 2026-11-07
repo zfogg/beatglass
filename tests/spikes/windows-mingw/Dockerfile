@@ -33,3 +33,16 @@ RUN mkdir -p /out && cp /src/essentia/build/src/libessentia.a /src/essentia/src/
       x86_64-w64-mingw32-g++ --version | head -1; \
       dpkg-query -W gcc-mingw-w64-x86-64-posix g++-mingw-w64-x86-64-posix libeigen3-dev; } > /out/BUILD-CONFIG.txt && \
     cd /out && sha256sum libessentia.a version.h libaubio-5.dll aubio.dll.a BUILD-CONFIG.txt > CANDIDATE-SHA256.txt
+
+# Narrow PCM smoke executable: all third-party analysis code is linked in.
+# This omits file decoding and does not establish runtime or cache identity.
+COPY tests/spikes/static-analysis/analysis_smoke.cpp /src/analysis_smoke.cpp
+COPY tests/spikes/static-analysis/check_imports.py /src/check_imports.py
+COPY tests/spikes/static-analysis/test_check_imports.py /src/test_check_imports.py
+RUN python3 /src/test_check_imports.py && \
+    x86_64-w64-mingw32-g++ -std=c++17 -static -static-libgcc -static-libstdc++ \
+    -I/src/essentia/src -I/src/essentia/src/essentia -I/src/aubio/src -I/usr/include/eigen3 \
+    /src/analysis_smoke.cpp /src/essentia/build/src/libessentia.a /src/aubio/build/src/libaubio.a \
+    -o /out/static-analysis-smoke.exe && \
+    python3 /src/check_imports.py x86_64-w64-mingw32-objdump /out/static-analysis-smoke.exe && \
+    cd /out && sha256sum static-analysis-smoke.exe >> CANDIDATE-SHA256.txt
