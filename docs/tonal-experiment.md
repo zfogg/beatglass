@@ -20,3 +20,5 @@ ctest --test-dir /tmp/beatglass-tonal-build --output-on-failure
 ```
 
 Install Eigen3 development files and make the pinned Catch2 source available to CMake or allow its pinned download. A normal installed Essentia puts `version.h` alongside its public headers, so the source-tree `CMAKE_CXX_FLAGS` workaround is unnecessary there. Compiler, ABI, static dependencies and runtime libraries must match; this example is not a packaging recipe. The experimental source emits a window estimate only; no beat timestamps or chord timeline are implemented here.
+
+The experimental Linux CI job runs `docker build -f tests/spikes/tonal-ci/Dockerfile -t beatglass-tonal-ci .`. It builds the pinned Essentia source and runs the real tonal CTest cases along with the dependency-light suite. The image digest, Essentia commit and Eigen package version are fixed; Ubuntu transitive packages and network availability are not fully locked. This hosted check does not establish native product or musical-accuracy qualification.
