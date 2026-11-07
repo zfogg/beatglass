@@ -38,6 +38,11 @@ allocator at exhaustion and verifies no live snapshot is delivered. These do
 not establish that an actual offline product path has adopted the allocator.
 The implementation depends on review and integration of #63 and the offline
 seek contract; it must not be advertised as complete process-wide uniqueness yet.
+The collection integration in #51 independently introduces an application-level
+allocator. Before combining these branches, reconcile them into exactly one
+object outside platform and feature conditionals, inject it into both bridges,
+and destroy and join both bridges before the allocator. Do not merge two
+separately owned allocators into the combined application.
 
 The file reader currently increments its own epoch on seek; merely injecting a
 shared initial value does not prevent it colliding with an epoch issued to
