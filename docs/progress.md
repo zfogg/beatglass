@@ -198,6 +198,14 @@ read-only byte boundary. The existing decoder does not consume it. Secure
 snapshot creation, native file identity and decoder integration remain open;
 see [same-source proposal](same-source-proposal.md).
 
+## Experimental virtual decoder
+
+A private libsndfile virtual-I/O adapter can synchronously decode a borrowed `ByteSource`; it is not connected to the CLI or cache. It keeps the source borrowed until decoder close, translates callback errors and cancellation to worker-visible outcomes, and is invalidated after mid-read cancellation or failure. Generated WAV, AIFF, FLAC and MP3 tests exercise the adapter on the codec-enabled Windows development build. The byte-source contract was merged in PR #41; snapshot creation, original-file revalidation, secure cleanup, and native platform race tests remain unimplemented. No file is made immutable by this adapter.
+
+Ubuntu 22.04 WSL with GCC 11.4, aubio 0.4.9 and libsndfile 1.0.31 also built this adapter and passed 53/53 CTest cases with `BEATGLASS_TEST_V1_CODECS=OFF`; the virtual codec fixture check covered AIFF there. This is not native desktop qualification, and the older decoder does not qualify MP3 support.
+
+The private virtual decoder now requires an externally issued initial epoch and a strictly increasing epoch for each seek. The process coordinator, not the decoder, must allocate globally unique epochs across reader recreation. The provisional public FileReader borrowed-source constructor and explicit-epoch seek expose this adapter for review; the legacy path-based seek retains local increment behavior. Snapshot creation and publication are still separate responsibilities.
+
 ## Offline result contract proposal
 
 An owned offline result and bounded structural validator are proposed for
@@ -209,3 +217,5 @@ qualification and a validated track-level key remain open.
 The standalone [Essentia spike](essentia-spike.md) built the pinned upstream static library and classified two synthetic triads on Linux container and Intel macOS over SSH. It is not integrated into the product, does not qualify musical accuracy or native capture/GUI, and does not resolve Windows MSVC or release-license requirements. Its proposed worker ownership, causal timing and same-open-file cache handoff remain integration work.
 
 After merging main `6aade6e`, the provisional library option was configured with `cmake -S . -B /tmp/beatglass-foundation-review -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src`, then `cmake --build /tmp/beatglass-foundation-review -j 1` and `ctest --test-dir /tmp/beatglass-foundation-review --output-on-failure` passed 38/38 on Ubuntu 22.04 WSL. This configuration does not enable desktop, native audio or macOS qualification. CMake emitted an author warning that `SQLite::SQLite3` is deprecated in favor of `SQLite3::SQLite3` in the installed CMake version; host SQLite remains unpinned.
+
+After the concurrent allocator contract merged, the provisional borrowed `FileReader` rejects epoch zero before source access, requires caller-issued increasing seek epochs and rejects its legacy one-argument seek. The caller must keep one process allocator, serialize reader operations, and discard stale publications. With `BEATGLASS_TEST_V1_CODECS=OFF`, WSL `cmake --build /tmp/beatglass-virtual-check -j1` and `ctest --test-dir /tmp/beatglass-virtual-check --output-on-failure` passed 59/59. Windows MSVC codec-enabled `cmake --build C:/Users/zachf/.codex/build/beatglass-phase1-verify --config Debug -- /m:1` and `ctest --test-dir C:/Users/zachf/.codex/build/beatglass-phase1-verify -C Debug --output-on-failure` passed 62/62. The desktop and library prototypes are not yet wired to one process-owned allocator; legacy path-based overloads remain isolated compatibility APIs.
