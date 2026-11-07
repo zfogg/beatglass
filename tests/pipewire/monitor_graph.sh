@@ -51,20 +51,28 @@ for _ in $(seq 1 100); do
  sleep 0.05
 done
 if [ "$ready" != 1 ]; then cat "$XDG_RUNTIME_DIR/session.log"; exit 1; fi
-python3 - "$XDG_RUNTIME_DIR/tone.wav" "$XDG_RUNTIME_DIR/tone2.wav" <<'PY'
+python3 - "$XDG_RUNTIME_DIR/tone.wav" "$XDG_RUNTIME_DIR/tone2.wav" "$XDG_RUNTIME_DIR/beats.wav" <<'PY'
 import math, struct, sys, wave
-for path, hz in zip(sys.argv[1:], (440, 880)):
+for path, hz in zip(sys.argv[1:3], (440, 880)):
     with wave.open(path, 'wb') as out:
         out.setparams((2, 2, 48000, 0, 'NONE', 'not compressed'))
         out.writeframes(b''.join(struct.pack('<hh', int(12000*math.sin(2*math.pi*hz*i/48000)), int(12000*math.sin(2*math.pi*hz*i/48000))) for i in range(48000*8)))
+with wave.open(sys.argv[3], 'wb') as out:
+    out.setparams((2, 2, 48000, 0, 'NONE', 'not compressed'))
+    def click(i):
+        phase = i % 24000
+        return int(26000 * math.exp(-phase / 100) * math.sin(phase * .4)) if phase < 1000 else 0
+    out.writeframes(b''.join(struct.pack('<hh', click(i), click(i)) for i in range(48000*20)))
 PY
 other_id=$(pw-dump | python3 -c 'import sys,json; print(next(x["id"] for x in json.load(sys.stdin) if x.get("info",{}).get("props",{}).get("node.name")=="beatglass_other_sink"))')
 wpctl set-default "$other_id"
 read -r sink_id sink_serial < <(pw-dump | python3 -c 'import sys,json; x=next(x for x in json.load(sys.stdin) if x.get("type")=="PipeWire:Interface:Node" and x.get("info",{}).get("props",{}).get("node.name")=="beatglass_test_sink"); print(x["id"], x["info"]["props"]["object.serial"])')
-pw-play --target "$sink_id" "$XDG_RUNTIME_DIR/tone.wav" >"$XDG_RUNTIME_DIR/play.log" 2>&1 & player=$!
-"$1" "$XDG_RUNTIME_DIR/capturing" "${2:-remove}" & test_pid=$!
+selected_audio="$XDG_RUNTIME_DIR/tone.wav"
+if [ "${3:-}" = tempo ]; then selected_audio="$XDG_RUNTIME_DIR/beats.wav"; fi
+pw-play --target "$sink_id" "$selected_audio" >"$XDG_RUNTIME_DIR/play.log" 2>&1 & player=$!
+"$1" "$XDG_RUNTIME_DIR/capturing" "${2:-remove}" "${3:-}" & test_pid=$!
 ready=0
-for _ in $(seq 1 200); do
+for _ in $(seq 1 500); do
  if [ -f "$XDG_RUNTIME_DIR/capturing" ]; then ready=1; break; fi
  if ! kill -0 "$test_pid" 2>/dev/null; then break; fi
  sleep 0.05

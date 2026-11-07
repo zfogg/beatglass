@@ -3,6 +3,7 @@
 #include "beatglass/core/stream_continuity.hpp"
 #include "beatglass/core/tracking_machine.hpp"
 #include "beatglass/core/snapshot_publisher.hpp"
+#include "beatglass/core/presentation_gate.hpp"
 #include "beatglass/capture/detail/pipewire_monitor.hpp"
 #include <chrono>
 #include <cmath>
@@ -11,8 +12,17 @@
 #include <filesystem>
 #include <string_view>
 #include <thread>
+#ifdef BEATGLASS_TEST_CAPTURE_TEMPO
+#include "beatglass/core/channel_reduction.hpp"
+#include "beatglass/core/tempo_tracker.hpp"
+#include <array>
+#endif
 int main(int argc, char** argv) {
   const bool missing = argc > 1 && std::string_view(argv[1]) == "missing";
+  const bool tempo_test = argc > 3 && std::string_view(argv[3]) == "tempo";
+#ifndef BEATGLASS_TEST_CAPTURE_TEMPO
+  if (tempo_test) return 23;
+#endif
   using namespace beatglass::pipewire;
   const auto sinks = discover_sinks(std::chrono::seconds(2));
   if (!sinks.error.empty()) { std::cerr << sinks.error << '\n'; return 1; }
@@ -27,7 +37,7 @@ int main(int argc, char** argv) {
   if (!epoch || !attempt) return 10;
   Monitor monitor(*epoch, *attempt);
   if (!monitor.start(selected).attempt) { if (missing) { std::cout << "missing target rejected\n"; return 0; } std::cerr << "start rejected\n"; return 3; }
-  const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(missing ? 5 : 12);
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(missing ? 5 : tempo_test ? 25 : 12);
   auto block = std::make_unique<MonitorIngress::Block>();
   MonitorIngress::Block before_install;
   if (monitor.pop(before_install)) { std::cerr << "PCM escaped before worker installation\n"; return 11; }
@@ -53,11 +63,18 @@ int main(int argc, char** argv) {
   beatglass::StreamContinuity continuity;
   beatglass::TrackingMachine tracking;
   beatglass::SnapshotPublisher publisher(2, 2);
+  beatglass::PresentationGate presentation;
+  beatglass::PublishedSnapshot retained;
   if (!tracking.start(*epoch)) return 19;
   const auto token = tracking.token();
   publisher.begin_acquisition(token);
   beatglass::Snapshot snapshot;
   bool published = false;
+#ifdef BEATGLASS_TEST_CAPTURE_TEMPO
+  beatglass::TempoTracker tempo(48000);
+  std::array<float, 8192> mono{};
+  bool tempo_acquired = false;
+#endif
   bool nonzero = false;
   unsigned positive_crossings = 0;
   float previous = 0.0f;
@@ -71,9 +88,20 @@ int main(int argc, char** argv) {
                                       block->discontinuity, {block->samples.data(), block->sample_count}};
       const auto transition = continuity.observe(view);
       if (transition != beatglass::StreamTransition::acquire && transition != beatglass::StreamTransition::contiguous) return 20;
+#ifdef BEATGLASS_TEST_CAPTURE_TEMPO
+      if (tempo_test) {
+        const auto frames = block->sample_count / 2;
+        if (!beatglass::reduce_loudest_channel(view.samples, 2, {mono.data(), frames})) return 24;
+        tempo.process({mono.data(), frames}, block->epoch, block->first_frame, block->discontinuity);
+        const auto estimate = tempo.estimate();
+        tempo_acquired = estimate.bpm && estimate.beats >= 3 && *estimate.bpm > 80 && *estimate.bpm < 160;
+      }
+#endif
       if (!published) {
         snapshot.observed_through = {*epoch, last_end};
         if (!tracking.accept(token) || !publisher.publish(token, snapshot) || !publisher.latest()) return 21;
+        retained = publisher.latest();
+        if (!presentation.apply({1, retained}) || !presentation.current()) return 27;
         published = true;
       }
       for (std::size_t i = 0; i < block->sample_count; i += 2) {
@@ -83,7 +111,11 @@ int main(int argc, char** argv) {
         previous = sample;
       }
     }
+#ifdef BEATGLASS_TEST_CAPTURE_TEMPO
+    if (tempo_test ? tempo_acquired : (nonzero && positive_crossings >= 20)) break;
+#else
     if (nonzero && positive_crossings >= 20) break;
+#endif
     if (monitor.state() == MonitorState::error || monitor.state() == MonitorState::interrupted) break;
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
@@ -111,7 +143,17 @@ int main(int argc, char** argv) {
         lifecycle.notify(event.attempt, event.sequence, event.state, event.epoch) != beatglass::SourceEventResult::accepted) {
       std::cerr << "missing ordered target-loss event state=" << static_cast<unsigned>(monitor.state()) << "\n"; return 8;
     }
+#ifdef BEATGLASS_TEST_CAPTURE_TEMPO
+    if (tempo_test) {
+      std::array<float, 512> silence{};
+      tempo.process(silence, *epoch, last_end, true);
+      if (tempo.estimate().bpm || tempo.estimate().beats) { std::cerr << "tempo survived discontinuity\n"; return 25; }
+    }
+#endif
     continuity.stop(); tracking.stop(); publisher.clear();
+    if (!presentation.apply({3, {}}) || presentation.current() || presentation.apply({2, retained}) || presentation.current()) {
+      std::cerr << "stale presentation survived interruption\n"; return 28;
+    }
     if (tracking.accept(token) || publisher.latest() || publisher.publish(token, snapshot)) {
       std::cerr << "stale analysis publication survived interruption\n"; return 22;
     }
@@ -140,6 +182,9 @@ int main(int argc, char** argv) {
     if (nonzero || state == MonitorState::streaming) { std::cerr << "missing target fell back to another sink\n"; return 5; }
     std::cout << "missing target did not fall back\n"; return 0;
   }
+#ifdef BEATGLASS_TEST_CAPTURE_TEMPO
+  if (tempo_test && !tempo_acquired) { std::cerr << "aubio did not acquire captured pulse train\n"; return 26; }
+#endif
   if (!nonzero || positive_crossings < 20) { std::cerr << "no output PCM, state=" << static_cast<unsigned>(state) << " diagnostic=" << diagnostic << '\n'; return 4; }
   std::cout << "observed virtual sink PCM\n";
 }
