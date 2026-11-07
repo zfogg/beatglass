@@ -154,3 +154,29 @@ TEST_CASE("offline bridge delivers an owned verified page and rejects changed so
   }
   std::error_code ignored; std::filesystem::remove_all(dir,ignored);
 }
+
+#ifdef BEATGLASS_PRIVATE_COMPOSITE_BRIDGE
+TEST_CASE("composite bridge returns real unverified evidence without publishing cache") {
+  auto dir = std::filesystem::temp_directory_path() / ("beatglass-composite-bridge-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+  std::filesystem::create_directory(dir); auto db=dir/"cache.sqlite"; auto audio=dir/"tone.aiff";
+  std::filesystem::copy_file(std::filesystem::path(BEATGLASS_FIXTURES)/"tone.aiff",audio);
+  Dispatcher queue; std::optional<LibraryBridge::Result> result;
+  {
+    LibraryBridge bridge(db.string(),[&](auto call){queue.post(std::move(call));});
+    bridge.analyze_composite(audio,81,[&](auto value){result=std::move(value);});
+    auto call=queue.take(); REQUIRE(call); call(); REQUIRE(result);
+    auto composite=std::get<LibraryBridge::Composite>(result->value); INFO(composite.diagnostic);
+    REQUIRE(composite.status==CompositeJobStatus::complete); REQUIRE(composite.value); REQUIRE_FALSE(composite.value->cache_reusable());
+    REQUIRE(composite.value->value.epoch==81); REQUIRE(composite.value->value.engine_version.empty()); REQUIRE(composite.value->value.configuration_id.empty());
+  }
+  auto snapshot=SnapshotOpen::create(audio); REQUIRE(snapshot.status==SnapshotStatus::ok);
+  beatglass::FileVersion source{audio,snapshot.value->size(),*snapshot.value->modified_unix_ns(),snapshot.value->digest()};
+  struct RejectVerifier : beatglass::FileVersionVerifier { int calls{}; beatglass::FileVerificationResult verify(std::stop_token) override { ++calls; return {beatglass::FileVerificationOutcome::match,{}}; } } verifier;
+  { TempoAnalysisStore store(db.string()); CollectionEntry entry; entry.path=audio.generic_string(); store.put_entry(entry); OfflineArchive archive(store.offline_cache());
+    OfflineKey fabricated{source.content_hash,"unverified","unverified",beatglass::OfflineMode::causal,{{"unverified","unverified"}}};
+    const auto& evidence=std::get<LibraryBridge::Composite>(result->value).value->value;
+    REQUIRE(archive.publish(source,fabricated,evidence,"must-not-publish",entry.path,verifier,{}).outcome==beatglass::PublishOutcome::error); REQUIRE(verifier.calls==0);
+  }
+  std::error_code ignored; std::filesystem::remove_all(dir,ignored);
+}
+#endif
