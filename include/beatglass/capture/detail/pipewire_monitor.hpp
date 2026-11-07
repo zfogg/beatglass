@@ -55,9 +55,7 @@ public:
   /** Pop the next ordered event on the sole control consumer. Delivery loss is
    * returned out of band and invalidates the entire attempt; queued events are discarded. */
   bool pop_event(MonitorEvent& event) noexcept;
-  /** Install the running epoch and format on the sole worker after applying the ordered
-   * running event and resetting its analysis. Reject stale or mismatched values.
-   * This does not order graph changes against already published results. */
+  /** Install the running epoch and format on the sole worker after applying the ordered running event and resetting analysis. Reject stale or mismatched values. This does not order graph changes against already published results. */
   bool install_worker_epoch(std::uint64_t epoch, AudioFormat format) noexcept;
   /** Copy on the sole consumer after installation; caller must reject old data and recheck status. */
   bool pop(MonitorIngress::Block& block) noexcept;

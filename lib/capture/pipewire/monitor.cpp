@@ -275,7 +275,12 @@ private:
     auto* spa = buffer->buffer;
     if (self.state() == MonitorState::streaming) {
       pw_time observation{};
-      if (pw_stream_get_time(self.stream_, &observation) >= 0 && observation.now > 0 && observation.rate.num && observation.rate.denom) {
+#if PW_CHECK_VERSION(0, 3, 50)
+      const int clock_result = pw_stream_get_time_n(self.stream_, &observation, sizeof(observation));
+#else
+      const int clock_result = pw_stream_get_time(self.stream_, &observation);
+#endif
+      if (clock_result >= 0 && observation.now > 0 && observation.rate.num && observation.rate.denom) {
         const auto sequence = self.clock_seq_.load();
         if (sequence <= UINT64_MAX - 2) {
           self.clock_seq_.store(sequence + 1);
