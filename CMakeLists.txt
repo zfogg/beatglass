@@ -254,6 +254,15 @@ if(BUILD_TESTING)
           COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt6::QWindowsIntegrationPlugin> $<TARGET_FILE_DIR:windows_overlay_bridge_tests>/platforms)
       endif()
       add_custom_command(TARGET windows_overlay_bridge_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:windows_overlay_bridge_tests> $<TARGET_FILE_DIR:windows_overlay_bridge_tests> COMMAND_EXPAND_LISTS)
+      add_executable(windows_combined_ui_tests tests/windows/windows_combined_ui_test.cpp src/desktop/windows_dj.cpp src/desktop/windows_dj.hpp src/desktop/windows_overlay_bridge.cpp src/desktop/windows_overlay_bridge.hpp src/desktop/resources.qrc)
+      target_include_directories(windows_combined_ui_tests PRIVATE src/desktop)
+      target_link_libraries(windows_combined_ui_tests PRIVATE beatglass_desktop_metadata beatglass_windows_endpoints beatglass_windows_overlay Qt6::Test Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::Multimedia)
+      add_test(NAME windows_combined_ui COMMAND windows_combined_ui_tests)
+      set_tests_properties(windows_combined_ui PROPERTIES LABELS "unit;platform" TIMEOUT 45)
+      add_custom_command(TARGET windows_combined_ui_tests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:windows_combined_ui_tests> $<TARGET_FILE_DIR:windows_combined_ui_tests>
+        COMMAND $<TARGET_FILE:Qt6::windeployqt> --no-translations --qmldir ${CMAKE_CURRENT_SOURCE_DIR}/src/desktop/qml $<TARGET_FILE:windows_combined_ui_tests>
+        COMMAND_EXPAND_LISTS VERBATIM)
       add_executable(windows_dj_tests tests/windows/windows_dj_test.cpp src/desktop/windows_dj.cpp src/desktop/windows_dj.hpp)
       target_include_directories(windows_dj_tests PRIVATE src/desktop)
       target_link_libraries(windows_dj_tests PRIVATE beatglass_windows_endpoints Qt6::Test winmm)
