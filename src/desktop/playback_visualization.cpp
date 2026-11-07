@@ -16,7 +16,7 @@
 #include <thread>
 
 namespace {
-constexpr unsigned maxFrames = 4096, maxChannels = 8, slots = 8;
+constexpr unsigned maxFrames = 4096, maxChannels = 8, queueCapacity = 8;
 constexpr qint64 maxTimestampUs = 7LL * 24 * 60 * 60 * 1000000;
 constexpr std::size_t maxBytes = std::size_t(maxFrames) * maxChannels * sizeof(float);
 using Status = PlaybackVisualization::Status;
@@ -27,7 +27,7 @@ struct Chunk {
   QAudioFormat::SampleFormat format{QAudioFormat::Unknown};
 };
 struct Shared {
-  std::array<Chunk, slots> queue{};
+  std::array<Chunk, queueCapacity> queue{};
   std::atomic<unsigned> head{0}, tail{0};
   std::atomic<unsigned> state{static_cast<unsigned>(Status::active)};
   std::atomic_flag producer = ATOMIC_FLAG_INIT;
@@ -56,12 +56,12 @@ struct Shared {
         (sample != QAudioFormat::UInt8 && sample != QAudioFormat::Int16 && sample != QAudioFormat::Int32 && sample != QAudioFormat::Float) ||
         (bytes != 1 && bytes != 2 && bytes != 4)) { stop(Status::unsupported_audio); return; }
     const std::size_t size = std::size_t(frames) * unsigned(channels) * unsigned(bytes);
-    if (size > maxBytes || buffer.byteCount() < qsizetype(size) || !buffer.constData()) { stop(Status::unsupported_audio); return; }
+    if (size > maxBytes || buffer.byteCount() < qsizetype(size) || !buffer.constData<void>()) { stop(Status::unsupported_audio); return; }
     const auto write = head.load(std::memory_order_relaxed);
-    if (write - tail.load(std::memory_order_acquire) >= slots) { stop(Status::overflow); return; }
-    auto& chunk = queue[write % slots];
+    if (write - tail.load(std::memory_order_acquire) >= queueCapacity) { stop(Status::overflow); return; }
+    auto& chunk = queue[write % queueCapacity];
     chunk.frames = unsigned(frames); chunk.channels = unsigned(channels); chunk.rate = unsigned(rate); chunk.format = sample; chunk.startUs = startUs;
-    std::memcpy(chunk.bytes.data(), buffer.constData(), size);
+    std::memcpy(chunk.bytes.data(), buffer.constData<void>(), size);
     head.store(write + 1, std::memory_order_release);
   }
 };
@@ -85,7 +85,7 @@ void run(const std::shared_ptr<Shared>& shared, std::stop_token stop) {
   while (!stop.stop_requested() && shared->active()) {
     const auto read = shared->tail.load(std::memory_order_relaxed);
     if (read == shared->head.load(std::memory_order_acquire)) { std::this_thread::sleep_for(std::chrono::milliseconds(5)); continue; }
-    const auto& chunk = shared->queue[read % slots];
+    const auto& chunk = shared->queue[read % queueCapacity];
     if (rate && (rate != chunk.rate || channels != chunk.channels || format != chunk.format)) { shared->stop(Status::unsupported_audio); break; }
     rate = chunk.rate; channels = chunk.channels; format = chunk.format;
     if (anchorUs < 0) anchorUs = chunk.startUs;
