@@ -75,10 +75,14 @@ int main() {
   std::filesystem::rename(dir.path / "Alpha.txt", dir.path / "Alpha.mp3");
   require(beatglass::library::browse(dir.path, "alpha").entries.size() == 1,
           "supported extension restoration was not visible");
+  std::ofstream(dir.path / "Alpha-copy.mp3") << "audio";
+  require(beatglass::library::browse(dir.path, "alpha").entries.size() == 2,
+          "renamed duplicate source was not represented");
   const auto empty = beatglass::library::browse(dir.path, "empty");
   require(empty.entries.size() == 1 && empty.entries[0].bytes == 0 && empty.entries[0].format == "WAV",
           "zero-byte supported source metadata was not retained");
   std::filesystem::remove(dir.path / "Alpha.mp3");
+  std::filesystem::remove(dir.path / "Alpha-copy.mp3");
   const auto after_remove = beatglass::library::browse(dir.path, "alpha");
   require(after_remove.entries.empty() && after_remove.diagnostic.empty(),
           "removed catalog entry remained visible");
