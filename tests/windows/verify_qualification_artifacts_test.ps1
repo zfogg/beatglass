@@ -16,4 +16,12 @@ try {
   @(@{ case = "show-hide-recovery"; status = "UNRUN" }, @{ case = "click-through-unlock"; status = "UNRUN" }, @{ case = "display-change-clamp"; status = "UNRUN" }, @{ case = "dpi-fullscreen"; status = "UNRUN" }) | ConvertTo-Json | Set-Content (Join-Path $root "native-overlay-evidence.json")
   & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root
   Write-Output "Windows qualification verifier regression passed"
+  $playbackPath = Join-Path $root "native-playback-evidence.json"
+  $tampered = @(Get-Content -LiteralPath $playbackPath -Raw | ConvertFrom-Json)
+  $tampered[0].status = "FAIL"
+  $tampered[0] | Add-Member -NotePropertyName observed -NotePropertyValue ""
+  $tampered[0] | Add-Member -NotePropertyName log -NotePropertyValue ""
+  $tampered | ConvertTo-Json | Set-Content -LiteralPath $playbackPath
+  try { & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root; throw "missing FAIL evidence unexpectedly passed" } catch { if ($_.Exception.Message -notmatch "observed result|log evidence") { throw } }
+  Write-Output "Windows failed-case evidence regression passed"
 } finally { if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force } }
