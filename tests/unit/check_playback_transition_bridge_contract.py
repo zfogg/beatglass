@@ -46,6 +46,7 @@ MARKERS = {
     "qml overlay geometry announcement": "DJ overlay geometry restored at ",
     "qml overlay relaunch geometry": "DJ overlay relaunched at its persisted position and size.",
     "qml overlay relaunch fallback": "DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.",
+    "qml overlay restore affordance": 'objectName: "restoreOverlay"',
     "qml overlay quit control": 'objectName: "quitBeatglass"',
     "qml overlay quit lifecycle": "Beatglass is quitting; overlay hidden and persisted settings retained.",
 }

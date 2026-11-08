@@ -520,6 +520,8 @@ def main() -> int:
         "overlay relaunch persisted geometry": "DJ overlay relaunched at its persisted position and size.",
         "overlay relaunch failure fallback": "DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.",
         "overlay relaunch fallback activation": "window.requestActivate()",
+        "overlay restore affordance": 'objectName: "restoreOverlay"',
+        "overlay restore persisted settings": "Restore the DJ overlay using its persisted display, position, size, and opacity",
         "overlay hide restores controls": "onClicked: window.hideOverlayAndRestoreControls()",
         "overlay quit control": 'objectName: "quitBeatglass"',
         "overlay quit lifecycle": "Beatglass is quitting; overlay hidden and persisted settings retained.",
