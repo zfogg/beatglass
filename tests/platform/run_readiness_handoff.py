@@ -20,13 +20,14 @@ handoff_docs = _load("check_qualification_handoff")
 consumer = _load("consume_readiness_handoff")
 ingester = _load("ingest_qualification_artifacts")
 reviewer = _load("review_readiness_handoff")
+packet_consumer = _load("consume_review_packet")
 
 
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
         check_docs: bool = False, consume_report: bool = False,
         native_output: Path | None = None, native_platform: str | None = None,
         review_output: Path | None = None, require_ready: bool = False,
-        review_json: Path | None = None) -> list[str]:
+        review_json: Path | None = None, consume_review: bool = False) -> list[str]:
     ingestion_errors = []
     if native_output is not None:
         if native_platform not in {"windows", "macos", "linux"}:
@@ -67,6 +68,8 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
     if review_json is not None:
         review_json.parent.mkdir(parents=True, exist_ok=True)
         review_json.write_text(json.dumps(reviewer.review_packet(output), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if consume_review:
+            errors.extend(packet_consumer.consume(review_json))
     if consume_report:
         errors.extend(consumer.consume(output))
     return errors
@@ -85,9 +88,11 @@ def main() -> int:
     parser.add_argument("--review-output", type=Path, help="write a human native-review checklist")
     parser.add_argument("--require-ready", action="store_true", help="fail if exported review is not READY")
     parser.add_argument("--review-json", type=Path, help="write a machine-readable review packet")
+    parser.add_argument("--consume-review", action="store_true", help="consume the emitted review JSON packet")
     args = parser.parse_args()
     errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs, args.consume,
-                 args.native_output, args.native_platform, args.review_output, args.require_ready, args.review_json)
+                 args.native_output, args.native_platform, args.review_output, args.require_ready, args.review_json,
+                 args.consume_review)
     if errors:
         print("\n".join(errors))
         return 1
