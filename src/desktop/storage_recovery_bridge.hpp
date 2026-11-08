@@ -23,6 +23,7 @@ class StorageRecoveryBridge final : public QObject {
   Q_PROPERTY(QString analysisResult READ analysisResult NOTIFY analysisResultChanged)
   Q_PROPERTY(bool analysisReserved READ analysisReserved NOTIFY analysisAdmissionChanged)
   Q_PROPERTY(QString analysisAdmissionResult READ analysisAdmissionResult NOTIFY analysisAdmissionChanged)
+  Q_PROPERTY(QString resetStatus READ resetStatus NOTIFY resetStatusChanged)
 public:
   explicit StorageRecoveryBridge(QObject* parent = nullptr);
   ~StorageRecoveryBridge() override;
@@ -60,6 +61,7 @@ public:
   QString analysisStatus() const { return analysisStatus_; }
   bool analysisReserved() const { return analysisReserved_; }
   QString analysisAdmissionResult() const { return analysisAdmissionResult_; }
+  QString resetStatus() const { return resetStatus_; }
 public slots:
   void setDatabasePath(const QString& path);
   void selectRun(const QString& id);
@@ -75,6 +77,7 @@ signals:
   void analysisProgressChanged();
   void analysisResultChanged();
   void analysisAdmissionChanged();
+  void resetStatusChanged();
 private:
   class Worker;
   QThread workerThread_;
@@ -93,4 +96,5 @@ private:
   QString analysisResult_;
   bool analysisReserved_{};
   QString analysisAdmissionResult_;
+  QString resetStatus_;
 };

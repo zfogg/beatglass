@@ -87,3 +87,7 @@ current Windows development host it is not claimed here because rebuilding
 the modified SQLite test binary has exhausted available memory and has also
 encountered executable permission locks. That limitation is tracked with the
 held cancellation PR rather than hidden by a source-only pass.
+
+The persisted storage bridge exposes the same reset state through
+`resetStatus`; discarding a selected retryable run announces
+`Persisted recovery discarded`, and a newly admitted retry clears that status.
