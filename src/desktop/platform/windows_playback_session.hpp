@@ -16,6 +16,8 @@ public:
   bool start_device(UINT device_id, std::uint32_t rate, std::uint16_t channels, std::size_t max_samples, std::uint64_t epoch, std::string& error);
   /** Pause/stop the control session; pause leaves the native device open. */
   bool pause() noexcept;
+  /** Resume a paused native session without reopening the device. */
+  bool resume() noexcept;
   /** Stop and close native output. */
   void stop() noexcept;
   /** Queue decoded PCM only while the session is playing. */

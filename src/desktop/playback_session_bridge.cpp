@@ -69,4 +69,8 @@ bool PlaybackSessionBridge::startNative(qulonglong epoch, int sampleRate, int ch
 }
 bool PlaybackSessionBridge::retryNative() { if (!native_epoch_ || native_rate_ <= 0 || native_channels_ <= 0 || native_max_samples_ <= 0) return false; return startNative(native_epoch_, native_rate_, native_channels_, native_max_samples_); }
 
-bool PlaybackSessionBridge::resume() { const bool ok = session_.resume(); if (ok) emit changed(); return ok; }
+bool PlaybackSessionBridge::resume() { const bool ok = session_.resume();
+#ifdef _WIN32
+  if (ok && native_ && !native_->resume()) return false;
+#endif
+  if (ok) emit changed(); return ok; }
