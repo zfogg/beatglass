@@ -35,6 +35,7 @@ def main() -> int:
         "playback frame actions accessible names": "Accessible.name: \"Seek to entered frame\"",
         "folder picker accessible name": "Accessible.name: \"Choose audio folder\"",
         "capture endpoint refresh accessible name": "Accessible.name: \"Refresh capture endpoints\"",
+        "reset appearance button role": "Accessible.name: \"Reset appearance settings\"\n                Accessible.role: Accessible.Button",
         "overlay tempo tooltip": "ToolTip.text: \"Current live tempo estimate\"",
         "overlay harmony tooltip": "ToolTip.text: \"Current live key and chord estimate\"",
         "overlay hide button role": "objectName: \"overlayWindowHide\"; Accessible.name: \"Hide overlay\"; Accessible.role: Accessible.Button",
