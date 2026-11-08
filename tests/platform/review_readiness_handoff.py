@@ -14,6 +14,10 @@ def render(report_path: Path) -> str:
     lines = ["# Native qualification review", "", f"Gate status: **{report.get('exit_gate_status', 'UNKNOWN')}**",
              f"Native qualification required: **{report.get('native_qualification_required', 'UNKNOWN')}**", "",
              "This checklist is review evidence only; it does not promote native qualification.", ""]
+    acceptance_errors = consumer.consume(report_path)
+    lines.append("## Acceptance diagnostics")
+    lines.extend([f"- {error}" for error in acceptance_errors] or ["- consumer validation passed"])
+    lines.append("")
     lines.append("## Platform support")
     lines.extend([f"- {row.get('platform')}: {row.get('status')}" for row in report.get("platform_support_status", [])] or ["- none recorded"])
     lines.append("")

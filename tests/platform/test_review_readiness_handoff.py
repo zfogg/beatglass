@@ -28,6 +28,8 @@ class ReadinessReviewTest(unittest.TestCase):
             self.assertIn("capture", text)
             self.assertIn("Artifacts:", text)
             self.assertIn("## ingestion_errors", text)
+            self.assertIn("## Acceptance diagnostics", text)
+            self.assertIn("readiness handoff is not accepted: PENDING", text)
 
     def test_strict_review_gate_rejects_pending_report(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
