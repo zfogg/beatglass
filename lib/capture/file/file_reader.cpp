@@ -3,7 +3,16 @@
 #include <sndfile.h>
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
+#include <cctype>
 namespace beatglass {
+namespace {
+bool unsupported_extension(const std::filesystem::path& path) {
+  auto ext = path.extension().string();
+  std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+  return ext == ".aac" || ext == ".m4a";
+}
+}
 struct FileReader::Impl {
   SNDFILE* handle{}; SF_INFO info{}; FileMetadata metadata; std::uint64_t epoch{}, position{}; bool ended{}, failed{};
   std::unique_ptr<detail::VirtualFileReader> virtual_reader;
@@ -13,9 +22,15 @@ struct FileReader::Impl {
 #else
     handle = sf_open(path.c_str(), SFM_READ, &info);
 #endif
-    if (!handle) throw std::runtime_error("Could not open audio file");
+    if (!handle) {
+      if (unsupported_extension(path))
+        throw FileOpenError(FileOpenErrorKind::unsupported_format,
+                            "Unsupported audio format (AAC/M4A is not enabled)");
+      throw FileOpenError(FileOpenErrorKind::unreadable, "Could not open audio file");
+    }
     if (info.samplerate <= 0 || info.channels <= 0 || info.channels > std::numeric_limits<std::uint16_t>::max() || info.frames < 0) {
-      sf_close(handle); handle = nullptr; throw std::runtime_error("Invalid audio format");
+      sf_close(handle); handle = nullptr;
+      throw FileOpenError(FileOpenErrorKind::invalid_format, "Invalid audio format");
     }
     try {
       metadata = {static_cast<std::uint32_t>(info.samplerate), static_cast<std::uint32_t>(info.channels),

@@ -15,6 +15,19 @@ public:
   /** Construct a typed cancellation exception. */
   FileOpenCancelled() : std::runtime_error("File open cancelled") {}
 };
+/** Classification for a local file that could not be opened by the decoder. */
+enum class FileOpenErrorKind { unreadable, unsupported_format, invalid_format };
+/** Typed decoder-open failure; no input file is modified by a failed open. */
+class FileOpenError : public std::runtime_error {
+public:
+  /** Construct an open failure with its stable caller-facing category. */
+  FileOpenError(FileOpenErrorKind kind, const std::string& message)
+      : std::runtime_error(message), kind_(kind) {}
+  /** Return whether the failure was an unsupported container/codec. */
+  FileOpenErrorKind kind() const noexcept { return kind_; }
+private:
+  FileOpenErrorKind kind_;
+};
 /** Result category for a pull-based file read. */
 enum class FileReadStatus {
   /** A nonempty block was decoded. */
@@ -47,7 +60,7 @@ public:
   /** Open a local file for reading.
    * @param path File path; the file is not modified.
    * @param initial_epoch Caller-owned unique epoch for this session.
-   * @throws std::runtime_error for an unreadable file or invalid format.
+   * @throws FileOpenError for an unreadable, unsupported, or invalid format.
    */
   explicit FileReader(const std::filesystem::path& path, std::uint64_t initial_epoch = 0);
   /** Open a borrowed, seekable byte source synchronously on the worker.
