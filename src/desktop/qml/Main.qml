@@ -491,6 +491,7 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = name
         window.overlayDisplaySelectionRequired = false
         window.overlayDisplayRecoveryPending = false
+        window.overlaySettingsRevision += 1
         window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.")
         return true
     }
@@ -2597,7 +2598,7 @@ ApplicationWindow {
                     }
                     Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
                     Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
-                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
+                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { window.overlayBridge.setOpacity(value); window.overlaySettingsRevision += 1 } } }
                     Connections {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge) overlayOpacityControl.value = window.overlayBridge.opacity }
@@ -2670,6 +2671,7 @@ ApplicationWindow {
                             const sizes = [[250, 110], [310, 130], [430, 180]]
                             window.overlayPreferredSizeIndex = currentIndex
                             window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
+                            window.overlaySettingsRevision += 1
                             window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
                         }
                     }
