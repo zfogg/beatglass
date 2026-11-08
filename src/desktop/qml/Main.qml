@@ -214,6 +214,7 @@ ApplicationWindow {
         target: window.liveBridge
         function onStatusChanged() {
             if (window.liveBridge.status === "Stopped" || window.liveBridge.status === "Error"
+                    || window.liveBridge.status === "Starting"
                     || window.liveBridge.status === "Reacquiring")
                 window.clearVisualizationForCaptureState()
         }
