@@ -20,3 +20,5 @@ For each session, record the exact distribution, kernel, compositor/session vers
 - Verify that no fallback silently captures a microphone or a different output sink, and that the user can always recover the main controls.
 
 Until these observations are recorded on actual Linux desktops, the project should describe Linux capture and overlay as experimental and unsupported.
+
+Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
