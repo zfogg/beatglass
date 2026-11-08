@@ -198,6 +198,7 @@ ApplicationWindow {
                     Accessible.name: "Overlay recovery hint"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
+                    ToolTip.text: "Library catalog status"
                     Accessible.description: text
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: "white"; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
@@ -413,6 +414,7 @@ ApplicationWindow {
                     Accessible.name: "Library catalog status: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
+                    ToolTip.text: "Current catalog result count"
                     Accessible.description: text
                 }
                 RowLayout {
@@ -469,8 +471,8 @@ ApplicationWindow {
                         Accessible.name: "Folder contents"
                         Accessible.value: currentIndex >= 0 ? (currentIndex + 1) + " of " + count : "No entry selected"
                         Accessible.role: Accessible.List
-                        Accessible.role: Accessible.List
                         Accessible.description: "Use Up and Down to select an entry, then Enter or Space to open a folder or select an audio file."
+                        ToolTip.text: "Folder contents; use arrow keys to navigate"
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
                         Keys.onEnterPressed: window.activateEntry(currentIndex)
                         Keys.onSpacePressed: window.activateEntry(currentIndex)
