@@ -43,7 +43,8 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     control_->installEventFilter(this);
     connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; setClickThrough(false); });
   }
-  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); }); });
+  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); emit screensChanged(); }); });
+  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen*) { emit screensChanged(); });
 }
 OverlayController::~OverlayController() { setClickThrough(false); if (control_) control_->removeEventFilter(this); }
 void OverlayController::setOpacity(qreal opacity) {
@@ -58,6 +59,29 @@ void OverlayController::setOpacity(qreal opacity) {
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(1); }
 QRect OverlayController::geometry() const { return overlay_ ? overlay_->geometry() : QRect{}; }
 QString OverlayController::displayName() const { auto* screen = overlay_ ? QGuiApplication::screenAt(overlay_->geometry().center()) : nullptr; return screen ? screen->name() : QString{}; }
+QStringList OverlayController::screenNames() const {
+  QStringList names;
+  for (const auto* screen : QGuiApplication::screens())
+    names.append(screen->name().isEmpty() ? QStringLiteral("Display %1").arg(names.size() + 1) : screen->name());
+  return names;
+}
+int OverlayController::screenIndex() const {
+  if (!overlay_) return -1;
+  return QGuiApplication::screens().indexOf(QGuiApplication::screenAt(overlay_->geometry().center()));
+}
+bool OverlayController::moveToScreen(int index) {
+  const auto screens = QGuiApplication::screens();
+  if (!overlay_ || index < 0 || index >= screens.size()) return false;
+  auto* screen = screens.at(index);
+  const auto bounds = screen->availableGeometry();
+  if (bounds.isEmpty()) return false;
+  const auto size = overlay_->size().boundedTo(bounds.size());
+  overlay_->setScreen(screen);
+  overlay_->setGeometry(QRect(bounds.center() - QPoint(size.width() / 2, size.height() / 2), size));
+  keepOnScreen();
+  emit screensChanged();
+  return true;
+}
 bool OverlayController::setClickThrough(bool enabled) {
   if (enabled) {
     const auto control_state = !control_ ? OverlayControlState::unavailable :
