@@ -323,3 +323,5 @@ The live monitoring state and guidance are now exposed as one grouped surface, w
 Visualization empty, load, data-count, selection, generation, and capture messages now share a grouped status surface with a live ready/waiting value and entry tooltip. This keeps the visualization’s changing data lifecycle coherent for assistive technology users while preserving each detailed status label.
 
 The visualization position status and clear action now share a selection group with a live percentage-or-none value and reset tooltip, making the keyboard/canvas selection lifecycle discoverable as one control cluster.
+
+The Library’s selected-audio panel now exposes one grouped details surface covering source identity, metadata status, recovery actions, analysis, and playback context. Its value follows the selected file and metadata state, giving assistive technology users a stable entry point for the whole source workflow.

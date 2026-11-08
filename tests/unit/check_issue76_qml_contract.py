@@ -370,6 +370,7 @@ def main() -> int:
         "live output monitoring tooltip": "ToolTip.text: \"Current live output monitoring state\"",
         "visualization status grouping": "objectName: \"visualizationStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Visualization data and capture status\"",
         "visualization selection grouping": "objectName: \"visualizationSelectionControls\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Visualization position selection\"",
+        "selected audio details grouping": "objectName: \"selectedAudioDetails\"\n                        Accessible.name: \"Selected audio details\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
