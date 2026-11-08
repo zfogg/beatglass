@@ -817,6 +817,7 @@ ApplicationWindow {
                                       + " · rejected " + window.analysisJobBridge.batchRejectedCount
                                       + " · published " + window.analysisJobBridge.batchResultsPublished
                                       + " · failed " + window.analysisJobBridge.batchFailedCount
+                                      + " · cancelled " + window.analysisJobBridge.batchCancelledCount
                                       + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")) : ""
                                 Accessible.name: "Batch analysis queue status: " + text
                                 ToolTip.text: "Accepted, rejected, and capacity limits for the analysis queue"
