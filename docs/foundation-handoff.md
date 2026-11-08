@@ -25,3 +25,7 @@ Audio callbacks may only copy into preallocated bounded storage and record timin
 ## Starting commands and evidence
 
 Use the repository README and CMake presets for current configure/build/CTest commands; `docs/progress.md` records exact environment-specific commands and results. Run tests that exercise actual production targets, plus relevant existing tests. Each handoff reports changed modules and APIs, commands, results, device/OS evidence and unresolved limitations. Native audio, desktop and overlay qualification is required before v1 completion, not before assigning these Phase 1 modules.
+
+## Evidence and support-status handoff
+
+The platform handoff is backed by executable preparation and evidence checks. A retained manifest must identify its platform, source commit, UTC capture time and environment; completed scenarios must reference retained, hashed artifacts; and the readiness report remains pending when a row is stale, invalidated, incomplete or inconsistent. This improves traceability but does not establish support: native desktop/audio/overlay runs and their screenshots, logs, exact commands and limitations are still required on each supported platform.

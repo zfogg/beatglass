@@ -270,9 +270,30 @@ int main() {
     std::string result;
     const CacheKey retained_config{key.content, key.engine, "config-b", key.mode};
     assert(reopened_again.find(retained_config, result) && result == "config-b-republished");
+    const CacheKey durable_engine{"sha256:durable-engine", "engine-durable", key.config, key.mode};
+    const CacheKey durable_content{"sha256:durable-content", key.engine, key.config, key.mode};
+    reopened_again.begin("durable-engine", durable_engine);
+    reopened_again.begin("durable-content", durable_content);
+    assert(reopened_again.publish("durable-engine", durable_engine, "engine-result", {}, [] { return true; }) == Publish::committed);
+    assert(reopened_again.publish("durable-content", durable_content, "content-result", {}, [] { return true; }) == Publish::committed);
+    assert(reopened_again.invalidate(durable_engine));
+    assert(reopened_again.invalidate(durable_content));
+    assert(!reopened_again.find(durable_engine, result));
+    assert(!reopened_again.find(durable_content, result));
     assert(reopened_again.invalidate(retained_config));
     assert(!reopened_again.invalidate(retained_config));
     assert(!reopened_again.find(retained_config, result));
+  }
+  {
+    SqliteCache reopened_third(path.string());
+    assert(reopened_third.retryable_runs().empty());
+    std::string result;
+    const CacheKey durable_engine{"sha256:durable-engine", "engine-durable", key.config, key.mode};
+    const CacheKey durable_content{"sha256:durable-content", key.engine, key.config, key.mode};
+    const CacheKey retained_config{key.content, key.engine, "config-b", key.mode};
+    assert(!reopened_third.find(durable_engine, result));
+    assert(!reopened_third.find(durable_content, result));
+    assert(!reopened_third.find(retained_config, result));
   }
   std::filesystem::remove(path, ec);
 }

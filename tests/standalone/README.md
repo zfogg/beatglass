@@ -37,3 +37,19 @@ tests/standalone/run-library-smokes.ps1 -SelectedCases storage_config -RunExisti
 ```
 
 The generated binaries are build artifacts and should not be committed.
+
+## Optional dependency-gated cases
+
+The default matrix intentionally excludes native dependencies so it can run on a
+clean toolchain. `sqlite_cache_acceptance` is added only when `-SQLiteRoot`
+points at a usable SQLite SDK containing `include/sqlite3.h` and a linkable
+SQLite library. It exercises cache identity, live/offline invalidation,
+republish, retryable recovery, transaction rollback, reopen retention, and
+multi-entry cleanup. `file_reader_contract` is similarly added only when
+`-SndfileRoot` points at a usable libsndfile SDK; it covers reader metadata,
+partial reads, epochs, mutation, rename/reopen errors, formats, and EOF.
+
+When either SDK is unavailable, the runner reports the portable cases normally
+and omits the gated executable; that is an environment limitation, not a
+passing result for the native case. Use `-ListCases` with the corresponding
+root to verify that the gated case was discovered before attempting a build.

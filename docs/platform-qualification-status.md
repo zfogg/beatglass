@@ -38,7 +38,7 @@ Artifact identity is canonical and relative to the retained bundle root. Alias p
 
 Scenario traceability is closed over the shared matrix: manifests must declare exactly the known `capture`, `recovery`, `output`, `display`, `playback`, and `overlay` scenario IDs. Unknown or duplicate IDs are verifier errors rather than silently ignored rows, so a typo cannot make a platform-specific native observation disappear from the readiness report.
 
-When a retained artifact declares a `role`, every completed scenario must match it (`capture`, `recovery`, `output`, `display`, `playback`, or `overlay`). A valid hash or screenshot in the wrong declared role is not evidence for that scenario; the verifier reports the mismatch and keeps the platform pending.
+Every completed scenario must declare an artifact `role` matching its scenario ID (`capture`, `recovery`, `output`, `display`, `playback`, or `overlay`). A valid hash or screenshot without a role, or in the wrong role, is not evidence for that scenario; the verifier reports the mismatch and keeps the platform pending.
 
 ## Issue #1 exit gate
 
@@ -67,3 +67,7 @@ The preparation scripts are executable on their respective hosts, but this Windo
 | Linux PipeWire timing and routing | Not runnable on Windows | Run the Linux qualification plan with a real graph and record clock-domain, queue-delay, drift, and uncertainty measurements. |
 
 This audit intentionally records unavailable evidence as pending rather than treating portable builds, fake backends, or headless tests as native support.
+
+## Documentation reconciliation
+
+The merged handoff tooling and this status page distinguish implemented preparation checks, attributable retained evidence, and native qualification observed on hardware. The first two states are covered by local verifier tests and portable fixtures; none changes the Windows, macOS or Linux rows to `READY`. Support language remains experimental until each row contains real desktop, audio and overlay evidence and the machine-readable report passes the all-platform exit gate.
