@@ -52,6 +52,12 @@ if "$verifier" "$out_dir"; then
   exit 1
 fi
 sed -i '' '2s/-FAIL-/UNRUN/' "$out_dir/qualification-cases.tsv"
+sed -i '' '2s/UNRUN/BOGUS/' "$out_dir/qualification-cases.tsv"
+if "$verifier" "$out_dir"; then
+  echo "invalid case status unexpectedly passed" >&2
+  exit 1
+fi
+sed -i '' '2s/BOGUS/UNRUN/' "$out_dir/qualification-cases.tsv"
 sed -i '1s/../00/' "$out_dir/qualification-artifacts.sha256"
 if "$verifier" "$out_dir"; then
   echo "tampered hash unexpectedly passed" >&2
