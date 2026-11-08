@@ -155,6 +155,15 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["platforms"][0]["manifest_platform"], "test")
             self.assertTrue(result["platforms"][0]["provenance_complete"])
 
+    def test_readiness_reports_missing_provenance_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64}); data.pop("environment")
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platforms"][0]["missing_provenance"], ["environment"])
+
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
