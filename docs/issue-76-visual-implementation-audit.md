@@ -627,3 +627,5 @@ Retry overlay is now disabled until a display target exists. Once a display retu
 After display restoration, Retry remains disabled until the user explicitly chooses a target. Selection clears that gate, restores focus to Retry, and announces readiness; reduced motion does not alter this keyboard/focus contract.
 
 When the overlay is unavailable, the recovery panel may show the persisted admission/rejection bridge result only for failed or cancelled analysis, explicitly labeling it historical rather than current visualization data. This prevents retry diagnostics from making stale-result claims.
+
+That historical diagnostic is dismissed when retry or discard is invoked, and restored only when a subsequent admission reports a new failed/cancelled result. Successful recovery therefore cannot leave old persisted rejection text visible.

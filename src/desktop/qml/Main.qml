@@ -21,6 +21,7 @@ ApplicationWindow {
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property bool overlayDisplaySelectionRequired: false
+    property bool overlayPersistedDiagnosticDismissed: false
     property url browseFolder: ""
     property var catalogRows: []
     property bool sortDescending: false
@@ -302,6 +303,7 @@ ApplicationWindow {
         window.announceVisualizationRecovery(message)
     }
     function retryVisualizationAnalysis() {
+        window.overlayPersistedDiagnosticDismissed = true
         if (window.analysisJobBridge && window.analysisJobBridge.retry !== undefined) {
             window.analysisJobBridge.retry()
             window.announceVisualizationRecovery("Analysis retry queued; focus will return after a fresh accepted result.")
@@ -419,6 +421,17 @@ ApplicationWindow {
                 window.overlayDisplaySelectionRequired = true
                 window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to resume overlay monitoring.")
             }
+        }
+    }
+    Connections {
+        target: typeof storageRecovery !== "undefined" ? storageRecovery : null
+        function onAnalysisAdmissionChanged() {
+            if (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled")
+                window.overlayPersistedDiagnosticDismissed = false
+        }
+        function onAnalysisStatusChanged() {
+            if (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled")
+                window.overlayPersistedDiagnosticDismissed = false
         }
     }
 
@@ -1117,7 +1130,7 @@ ApplicationWindow {
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
                                 onClicked: discardRecoveryDialog.open()
                             }
-                            Button { objectName: "retryPersistedRecovery"; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== ""; text: "Retry selected run"; onClicked: storageRecovery.retrySelectedRun() }
+                            Button { objectName: "retryPersistedRecovery"; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== ""; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun() } }
                             Dialog {
                                 id: discardRecoveryDialog
                                 title: "Discard saved analysis run?"
@@ -1129,7 +1142,7 @@ ApplicationWindow {
                                     Accessible.name: "Discard retryable run confirmation"
                                     Accessible.role: Accessible.StaticText
                                 }
-                                onAccepted: storageRecovery.discardSelectedRun()
+                                onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun() }
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
@@ -1977,6 +1990,7 @@ ApplicationWindow {
                         && typeof storageRecovery !== "undefined"
                         && storageRecovery.analysisAdmissionResult !== undefined
                         && storageRecovery.analysisAdmissionResult !== ""
+                        && !window.overlayPersistedDiagnosticDismissed
                         && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled")
                     text: visible ? "Persisted analysis admission result (not current visualization): " + storageRecovery.analysisAdmissionResult : ""
                     Accessible.name: "Overlay persisted recovery diagnostic: " + text
