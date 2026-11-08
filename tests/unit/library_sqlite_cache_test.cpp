@@ -37,6 +37,22 @@ TEST_CASE("SQLite cache persists an empty analysis result distinctly from a miss
   CacheKey missing = key; missing.content = "missing";
   REQUIRE_FALSE(cache.find(missing, result));
 }
+TEST_CASE("SQLite cache acceptance reuses unchanged identity without rerunning analysis") {
+  SqliteCache cache(":memory:");
+  CacheKey key{"sha256:unchanged", "engine", "config", "offline"};
+  int analysis_runs = 0;
+  auto analyze_if_missing = [&] {
+    std::string cached;
+    if (cache.find(key, cached)) return cached;
+    ++analysis_runs;
+    cache.begin("unchanged-run", key);
+    REQUIRE(cache.publish("unchanged-run", key, "result", {}, [] { return true; }) == Publish::committed);
+    return std::string("result");
+  };
+  REQUIRE(analyze_if_missing() == "result");
+  REQUIRE(analyze_if_missing() == "result");
+  CHECK(analysis_runs == 1);
+}
 TEST_CASE("SQLite cache rejects incomplete identities before creating runs") {
   SqliteCache cache(":memory:");
   REQUIRE_THROWS_AS(cache.begin("run", {"", "engine", "config", "offline"}), std::invalid_argument);
