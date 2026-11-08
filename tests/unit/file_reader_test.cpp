@@ -72,6 +72,21 @@ TEST_CASE("path reader rejects zero epoch before opening source") {
   CHECK_THROWS_AS(FileReader(fixture.path, 0), std::invalid_argument);
 }
 
+TEST_CASE("path reader classifies AAC and M4A as unsupported instead of unreadable") {
+  for (const auto extension : {".aac", ".m4a"}) {
+    const auto path = std::filesystem::temp_directory_path() /
+      ("beatglass-unsupported" + std::string(extension));
+    { std::ofstream out(path, std::ios::binary); out << "not a decoder fixture"; }
+    try {
+      try { FileReader reader(path, 1); FAIL("unsupported input opened"); }
+      catch (const FileOpenError& error) {
+        CHECK(error.kind() == FileOpenErrorKind::unsupported_format);
+      }
+    } catch (...) { std::filesystem::remove(path); throw; }
+    std::filesystem::remove(path);
+  }
+}
+
 TEST_CASE("file source changes sample rate only across distinct epochs") {
  WaveFixture first_file(44100), second_file(48000); std::array<float,4> first_buffer{}, second_buffer{};
  FileReader first(first_file.path, 1), second(second_file.path, 2); StreamContinuity continuity;
