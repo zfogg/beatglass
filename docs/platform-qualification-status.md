@@ -219,6 +219,8 @@ The readiness report preserves each artifact’s role through generation, allowi
 
 The final consumer rejects a `READY` report with missing or empty artifact roles, making provenance loss between ingestion and acceptance fail closed.
 
+The portable regression suite exercises the complete review path—generation, optional native ingestion, documentation/readiness checks, report persistence, and downstream consumption—and expects a nonzero `PENDING` result for incomplete native evidence. This verifies orchestration without treating fixtures as hardware proof.
+
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
