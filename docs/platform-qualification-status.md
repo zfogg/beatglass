@@ -84,6 +84,8 @@ Manifests also identify `qualification_output`, which must name a retained artif
 
 Generated rows also carry `qualification_output_sha256`; retained-file validation recomputes that digest so a command's claimed output cannot be replaced after capture without invalidating the report.
 
+The generated row also records `qualification_output_bytes`; the verifier checks the retained output size as well as its digest.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.

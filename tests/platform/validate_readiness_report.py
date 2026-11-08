@@ -48,6 +48,8 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: missing qualification output linkage")
             if not isinstance(item.get("qualification_output_sha256"), str) or len(item["qualification_output_sha256"]) != 64:
                 errors.append(f"{item.get('platform')}: invalid qualification output hash")
+            if not isinstance(item.get("qualification_output_bytes"), int) or item["qualification_output_bytes"] < 0:
+                errors.append(f"{item.get('platform')}: invalid qualification output byte count")
             inventory = item.get("artifact_inventory")
             if not isinstance(inventory, list) or not inventory:
                 errors.append(f"{item.get('platform')}: missing artifact inventory")
@@ -90,6 +92,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         elif output_path := (bundles / platform / output):
             if output_path.is_file() and hashlib.sha256(output_path.read_bytes()).hexdigest() != row.get("qualification_output_sha256"):
                 errors.append(f"{platform}: qualification output hash does not match report")
+            if output_path.is_file() and output_path.stat().st_size != row.get("qualification_output_bytes"):
+                errors.append(f"{platform}: qualification output byte count does not match report")
         if str(manifest_data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match report row")
         actual_manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()
