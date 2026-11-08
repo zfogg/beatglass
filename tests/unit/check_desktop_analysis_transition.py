@@ -32,6 +32,7 @@ required = {
     "invalid submit clears frames": 'if (frames_ != 0) { frames_ = 0; emit progressChanged(); }',
     "source attribution property": 'Q_PROPERTY(QString sourcePath READ sourcePath',
     "source attribution rendering": 'objectName: "analysisSourcePath"',
+    "batch clears single source": 'if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:
