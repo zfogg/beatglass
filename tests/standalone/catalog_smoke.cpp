@@ -108,6 +108,15 @@ int main() {
   require(directory_replacement.entries.size() == 1 && directory_replacement.entries[0].directory,
           "directory replacement was not visible after catalog refresh");
   std::filesystem::remove_all(dir.path / "Beta.mp3");
+  std::filesystem::create_directory(dir.path / "Gamma.mp3");
+  require(beatglass::library::browse(dir.path, "gamma").entries.size() == 1,
+          "new directory replacement was not visible");
+  std::filesystem::remove_all(dir.path / "Gamma.mp3");
+  std::ofstream(dir.path / "Gamma.mp3") << "audio";
+  const auto file_replacement = beatglass::library::browse(dir.path, "gamma");
+  require(file_replacement.entries.size() == 1 && !file_replacement.entries[0].directory && file_replacement.entries[0].format == "MP3",
+          "directory-to-file replacement was not classified as audio");
+  std::filesystem::remove(dir.path / "Gamma.mp3");
   std::filesystem::remove_all(dir.path / "Mixes");
   const auto after_directory_remove = beatglass::library::browse(dir.path, "mix");
   require(after_directory_remove.entries.empty() && after_directory_remove.diagnostic.empty(),
