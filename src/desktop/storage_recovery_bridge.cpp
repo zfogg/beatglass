@@ -1,5 +1,6 @@
 #include "storage_recovery_bridge.hpp"
 #include "beatglass/library/analysis_coordinator.hpp"
+#include "beatglass/library/file_analysis_operation.hpp"
 #include <QMetaObject>
 
 class StorageRecoveryBridge::Worker final : public QObject {
@@ -24,10 +25,17 @@ public slots:
     beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     std::string result; emit cached(coordinator_.storage().find_cached(identity, result), QString::fromStdString(result));
   }
+  void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
+    beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+    auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
+    auto handle = coordinator_.submit(runId.toStdString(), std::move(operation));
+    emit analysis(handle ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected"));
+  }
 signals:
   void result(bool ok, QString status);
   void runsChanged(QStringList ids);
   void cached(bool hit, QString result);
+  void analysis(QString status);
 private:
   beatglass::library::AnalysisCoordinator coordinator_;
 };
@@ -45,6 +53,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
   }, Qt::QueuedConnection);
+  connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; emit analysisStatusChanged(); }, Qt::QueuedConnection);
   workerThread_.start();
 }
 
@@ -61,4 +70,7 @@ void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ ==
 void StorageRecoveryBridge::discardSelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::findCached(QString content, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+}
+void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
+  if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
 }

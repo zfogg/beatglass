@@ -15,6 +15,8 @@ required = {
     "hit state binding": 'storageRecovery.cacheHit ? "Cached analysis ready"',
     "coordinator-owned worker": 'AnalysisCoordinator coordinator_',
     "coordinator storage lookup": 'coordinator_.storage().find_cached',
+    "coordinator analysis submit": 'Q_INVOKABLE void submitAnalysis',
+    "analysis status property": 'Q_PROPERTY(QString analysisStatus READ analysisStatus',
 }
 haystack = header + source + qml
 missing = [name for name, marker in required.items() if marker not in haystack]

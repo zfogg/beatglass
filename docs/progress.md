@@ -322,6 +322,8 @@ Starting a batch clears the prior single-operation source attribution; batch adm
 
 The desktop bridge now reports a bounded, source-attributed failure reason for invalid requests and worker failures, and clears it when a new attempt is accepted.
 
+`StorageRecoveryBridge::submitAnalysis` now queues a path-backed decoder through the coordinator-owned worker and reports accepted/rejected submission status to Qt; completion/retry polling remains worker-owned and native qualification is pending.
+
 The same failure explanation is surfaced when any accepted batch operation fails, while successful batch publications continue to report independently.
 
 Batch status now also reports the count of accepted operations that failed, alongside published results and admission counts.
