@@ -35,4 +35,18 @@ those observations still require a logged-in Windows session and evidence.
 5. Switch devices and unplug/replug the active device; verify capture stops, stale labels clear, and reacquisition requires a fresh source epoch.
 6. Stop monitoring and close the window; verify capture threads terminate and no device remains open.
 
+## Native file playback cases
+
+7. On the playback panel, refresh output devices, select an endpoint, enter the
+   decoded source sample rate/channel count, and start native playback. Record
+   the endpoint and confirm the UI reports `Native output active` only after
+   the device opens.
+8. Pause and resume the same source; confirm output stops while paused and
+   resumes without accepting stale frames. Seek or change source and verify the
+   previous native device is retired before restarting on a fresh epoch.
+9. Remove or disable the selected output while playback is active, refresh the
+   device list, and verify playback stops with an actionable recovery message.
+   Select a replacement endpoint and use Retry native; record successful and
+   failed-start diagnostics.
+
 For every case record timestamp, device, expected/observed result, logs, and a screenshot or recording. Do not claim qualification when any case is unrun or only simulated.
