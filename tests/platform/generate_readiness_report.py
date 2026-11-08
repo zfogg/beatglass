@@ -23,7 +23,14 @@ def build_report(root: Path) -> dict:
         bundle_root = bundle.resolve()
         errors = []
         manifest_path = bundle / "manifest.json"
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            manifest = {}
+            errors.append(f"invalid manifest JSON: {error}")
+        if not isinstance(manifest, dict):
+            manifest = {}
+            errors.append("manifest root must be an object")
         inventory = []
         for item in manifest.get("artifacts", []):
             path = bundle / str(item.get("path", ""))
@@ -63,7 +70,7 @@ def build_report(root: Path) -> dict:
                 evidence_hashes[scenario["id"]] = _sha(evidence_path) if evidence_path.is_file() else ""
         rows.append({"platform": platform,
                      "manifest": str(manifest_path),
-                     "manifest_sha256": _sha(manifest_path),
+                     "manifest_sha256": _sha(manifest_path) if manifest_path.is_file() else "",
                      "retained_artifacts": len(inventory),
                      "retained_bytes": sum(max(0, x["bytes"]) for x in inventory),
                      "artifact_inventory": inventory,
