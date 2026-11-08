@@ -758,6 +758,28 @@ ApplicationWindow {
                                 border.color: window.themeAccentColors[index]
                                 visible: themePreviewButton.activeFocus
                             }
+                            Rectangle {
+                                objectName: "themePreviewAccent" + index
+                                anchors.left: parent.left
+                                anchors.bottom: parent.bottom
+                                anchors.leftMargin: 3
+                                anchors.bottomMargin: 3
+                                width: parent.width - 6
+                                height: 3
+                                radius: 1
+                                color: window.themeAccentColors[index]
+                            }
+                            Rectangle {
+                                objectName: "themePreviewForeground" + index
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.rightMargin: 3
+                                anchors.topMargin: 3
+                                width: 5
+                                height: 5
+                                radius: 2
+                                color: window.themeForegrounds[index]
+                            }
                         }
                         Keys.onLeftPressed: {
                             const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length
