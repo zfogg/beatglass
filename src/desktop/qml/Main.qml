@@ -46,6 +46,18 @@ ApplicationWindow {
             ? window.playbackBridge.resume()
             : window.playbackBridge.pause()
     }
+    Shortcut {
+        objectName: "visualizationWaveformShortcut"
+        sequence: "Ctrl+1"
+        context: Qt.ApplicationShortcut
+        onActivated: visualizationCanvas.viewMode = "waveform"
+    }
+    Shortcut {
+        objectName: "visualizationSpectrumShortcut"
+        sequence: "Ctrl+2"
+        context: Qt.ApplicationShortcut
+        onActivated: visualizationCanvas.viewMode = "spectrum"
+    }
     property string selectedTheme: "Light"
     readonly property var themeNames: ["Light", "Dark", "High contrast", "Purple", "Blue", "Yellow"]
     readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]

@@ -440,6 +440,24 @@ TestCase {
         app.destroy()
     }
 
+    function test_visualizationModesHaveKeyboardShortcuts() {
+        let app = shell.createObject(null)
+        let canvas = findChild(app, "visualizationCanvas")
+        let waveform = findChild(app, "visualizationWaveformShortcut")
+        let spectrum = findChild(app, "visualizationSpectrumShortcut")
+        verify(canvas !== null); verify(waveform !== null); verify(spectrum !== null)
+        compare(waveform.sequence, "Ctrl+1")
+        compare(spectrum.sequence, "Ctrl+2")
+        compare(waveform.context, Qt.ApplicationShortcut)
+        compare(spectrum.context, Qt.ApplicationShortcut)
+        canvas.viewMode = "spectrum"
+        waveform.activated()
+        compare(canvas.viewMode, "waveform")
+        spectrum.activated()
+        compare(canvas.viewMode, "spectrum")
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")
