@@ -7,6 +7,9 @@ repo_root="$(cd "$(dirname "$0")/../.." && pwd)"
 out_dir="${1:-$repo_root/build/macos-qualification}"
 mkdir -p "$out_dir"
 exec > >(tee "$out_dir/qualification.log") 2>&1
+commands_log="$out_dir/qualification-commands.log"
+: > "$commands_log"
+record_command() { printf '%s\n' "$*" | tee -a "$commands_log"; }
 
 echo "Beatglass macOS qualification evidence"
 date -u +%FT%TZ
@@ -18,6 +21,7 @@ system_profiler SPHardwareDataType SPDisplaysDataType
 xcodebuild -version
 cmake --version | head -n 1
 
+record_command "cmake -S $repo_root -B $out_dir/build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DBEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON -DBEATGLASS_BUILD_MACOS_TAP_SMOKE=ON"
 cmake -S "$repo_root" -B "$out_dir/build" \
   -DBUILD_TESTING=ON \
   -DBEATGLASS_BUILD_DESKTOP=ON \
@@ -25,6 +29,7 @@ cmake -S "$repo_root" -B "$out_dir/build" \
   -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON \
   -DBEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON \
   -DBEATGLASS_BUILD_MACOS_TAP_SMOKE=ON
+record_command "cmake --build $out_dir/build --parallel 1"
 cmake --build "$out_dir/build" --parallel 1
 desktop_plist="$out_dir/build/beatglass-desktop.app/Contents/Info.plist"
 if [[ ! -f "$desktop_plist" ]]; then
@@ -87,6 +92,7 @@ validate_bundle_identity "$tap_bundle" "beatglass-coreaudio-smoke" "org.beatglas
 validate_bundle_identity "$recovery_bundle" "beatglass-coreaudio-recovery" "org.beatglass.coreaudio-recovery"
 if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   echo "Running Core Audio tap smoke for supplied UID"
+  record_command "$tap_binary $BEATGLASS_MACOS_TAP_UID"
   tap_log="$out_dir/tap-smoke.log"
   "$tap_binary" "$BEATGLASS_MACOS_TAP_UID" | tee "$tap_log"
   if ! grep -Eq 'frames=[1-9][0-9]* nonzero_samples=[1-9][0-9]* .*discontinuities=[0-9]+ dropped_frames=[0-9]+ timestamp_valid=1' "$tap_log"; then
@@ -94,6 +100,7 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
     exit 1
   fi
   echo "Running Core Audio recovery smoke for supplied UID"
+  record_command "$recovery_binary $BEATGLASS_MACOS_TAP_UID"
   recovery_log="$out_dir/recovery-smoke.log"
   "$recovery_binary" "$BEATGLASS_MACOS_TAP_UID" | tee "$recovery_log"
   for cycle in 0 1; do
@@ -106,12 +113,14 @@ else
   echo "UNRUN: set BEATGLASS_MACOS_TAP_UID to execute tap and recovery smoke bundles"
 fi
 test_filter='^(macos_overlay_|macos_native_overlay$)'
+record_command "ctest --test-dir $out_dir/build -N -R $test_filter"
 registered_tests="$(ctest --test-dir "$out_dir/build" -N -R "$test_filter")"
 printf '%s\n' "$registered_tests" > "$out_dir/overlay-ctest-discovery.log"
 if ! grep -Eq 'Total Tests: [1-9][0-9]*' <<<"$registered_tests"; then
   echo "No macOS overlay tests are registered for qualification" >&2
   exit 1
 fi
+record_command "ctest --test-dir $out_dir/build -R $test_filter --output-on-failure"
 overlay_log="$out_dir/overlay-ctest.log"
 ctest --test-dir "$out_dir/build" -R "$test_filter" --output-on-failure | tee "$overlay_log"
 if ! grep -Eq '[0-9]+% tests passed' "$overlay_log"; then
