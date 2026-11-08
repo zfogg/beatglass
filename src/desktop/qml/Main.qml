@@ -298,7 +298,8 @@ ApplicationWindow {
                             Accessible.description: text
                         }
                         Label {
-                            text: "Analysis details and playback are not available yet."
+                            objectName: "detailsAvailability"
+                            text: window.selectedName ? "Read-only file details are shown above. Playback controls are not enabled in this build." : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status"
                             Accessible.description: text
