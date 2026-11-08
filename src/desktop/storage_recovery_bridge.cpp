@@ -85,7 +85,9 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     emit statusChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids, const QStringList& details) {
-    retryableRunIds_ = ids; retryableRunDetails_ = details; emit retryableRunsChanged();
+    retryableRunIds_ = ids; retryableRunDetails_ = details;
+    if (!selectedRunId_.isEmpty() && !retryableRunIds_.contains(selectedRunId_)) { selectedRunId_.clear(); emit selectedRunChanged(); }
+    emit retryableRunsChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
