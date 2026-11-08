@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 
 EXPECTED_PLATFORMS = {"windows", "macos", "linux"}
+EXPECTED_SCENARIO_STATUSES = {"PASS", "FAIL", "UNRUN", "PENDING"}
 
 
 def _valid_digest(value: object) -> bool:
@@ -186,6 +187,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             if not scenario_id.strip() or scenario_id == "None":
                 errors.append(f"{platform}: manifest scenario id is missing")
                 continue
+            if scenario.get("status") not in EXPECTED_SCENARIO_STATUSES:
+                errors.append(f"{platform}: invalid manifest scenario status: {scenario.get('status')}")
             if scenario_id in scenario_ids:
                 errors.append(f"{platform}: duplicate manifest scenario id: {scenario_id}")
             scenario_ids.add(scenario_id)
