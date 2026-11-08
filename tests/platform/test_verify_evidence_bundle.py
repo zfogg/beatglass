@@ -22,6 +22,26 @@ class EvidenceBundleTest(unittest.TestCase):
             self.assertTrue(any("missing provenance" in error for error in errors))
             self.assertTrue(any("missing required scenarios" in error for error in errors))
 
+    def test_malformed_manifest_and_artifact_entries_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = root / "manifest.json"
+            manifest.write_text("{not-json", encoding="utf-8")
+            self.assertTrue(any("invalid manifest JSON" in error for error in module.verify(root, manifest)))
+            manifest.write_text(json.dumps({"artifacts": ["bad"], "scenarios": []}), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid artifact entry" in error for error in errors))
+
+    def test_pending_scenario_is_allowed_without_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": [
+                        {"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertFalse(any("invalid scenario" in error for error in errors))
+
     def test_pass_fixture_is_valid(self):
         root = Path(__file__).parent / "fixtures/evidence-bundle"
         self.assertEqual(module.verify(root, root / "manifest.json"), [])
