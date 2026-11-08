@@ -1539,7 +1539,9 @@ ApplicationWindow {
                                 Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable."
                                     : "Choose a saved analysis run to recover."
-                                ToolTip.text: "Choose a saved analysis run to recover"
+                                ToolTip.text: count > 0
+                                    ? "Choose one of " + count + " saved analysis runs" + (typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== "" ? ". Selected: " + storageRecovery.selectedRunId : "")
+                                    : "No saved analysis runs available"
                                 onActivated: { storageRecovery.selectRun(currentText); window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Retry and discard controls are now available when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
                             }
                             Label {
