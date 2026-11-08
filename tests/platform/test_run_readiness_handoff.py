@@ -96,3 +96,10 @@ class ReadinessHandoffTest(unittest.TestCase):
             handoff.run(bundles, output, review_output=review)
             self.assertIn("Gate status: **PENDING**", review.read_text(encoding="utf-8"))
 
+    def test_handoff_strict_review_gate_rejects_pending(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; review = root / "review.md"
+            errors = handoff.run(bundles, output, review_output=review, require_ready=True)
+            self.assertTrue(any("review gate is not ready" in error for error in errors))
+

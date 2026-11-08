@@ -25,7 +25,7 @@ reviewer = _load("review_readiness_handoff")
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
         check_docs: bool = False, consume_report: bool = False,
         native_output: Path | None = None, native_platform: str | None = None,
-        review_output: Path | None = None) -> list[str]:
+        review_output: Path | None = None, require_ready: bool = False) -> list[str]:
     ingestion_errors = []
     if native_output is not None:
         if native_platform not in {"windows", "macos", "linux"}:
@@ -61,6 +61,8 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
     if review_output is not None:
         review_output.parent.mkdir(parents=True, exist_ok=True)
         review_output.write_text(reviewer.render(output), encoding="utf-8")
+        if require_ready and report.get("exit_gate_status") != "READY":
+            errors.append(f"review gate is not ready: {report.get('exit_gate_status')}")
     if consume_report:
         errors.extend(consumer.consume(output))
     return errors
@@ -77,9 +79,10 @@ def main() -> int:
     parser.add_argument("--native-output", type=Path, help="native qualification script output to ingest")
     parser.add_argument("--native-platform", choices=("windows", "macos", "linux"))
     parser.add_argument("--review-output", type=Path, help="write a human native-review checklist")
+    parser.add_argument("--require-ready", action="store_true", help="fail if exported review is not READY")
     args = parser.parse_args()
     errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs, args.consume,
-                 args.native_output, args.native_platform, args.review_output)
+                 args.native_output, args.native_platform, args.review_output, args.require_ready)
     if errors:
         print("\n".join(errors))
         return 1
