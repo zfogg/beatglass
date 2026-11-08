@@ -153,3 +153,11 @@ TEST_CASE("catalog returns distinct case-sensitive paths for identical folded na
  CHECK(result.entries[0].name == "Song.WAV");
  CHECK(result.entries[1].name == "song.WAV");
 }
+
+TEST_CASE("catalog ignores unsupported files even with case-folded matches") {
+ TempDir dir; dir.file("TAKE.TXT"); dir.file("Take.FLAC");
+ const auto result = beatglass::library::browse(dir.path, "take");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].name == "Take.FLAC");
+ CHECK(result.entries[0].format == "FLAC");
+}

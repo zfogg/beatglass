@@ -122,6 +122,20 @@ TEST_CASE("cancellation at EOF wins before observing a later mutation") {
  CHECK_THROWS_WITH(reader.seek(0), "Audio source changed during seek");
 }
 
+TEST_CASE("cancellation after EOF leaves source identity usable for rewind") {
+ WaveFixture fixture; FileReader reader(fixture.path, 32); std::array<float,4> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::end);
+ std::stop_source stop; stop.request_stop();
+ CHECK(reader.read(samples, stop.get_token()).status == FileReadStatus::cancelled);
+ reader.seek(0, 99);
+ const auto replay = reader.read(samples);
+ REQUIRE(replay.status == FileReadStatus::data);
+ CHECK(replay.block.epoch == 99);
+ CHECK(replay.block.first_frame == 0);
+}
+
 TEST_CASE("invalid read buffers win over a simultaneous path mutation") {
  WaveFixture fixture; FileReader reader(fixture.path, 25); std::array<float,1> samples{};
  { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
