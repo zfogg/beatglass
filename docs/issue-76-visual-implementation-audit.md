@@ -396,6 +396,8 @@ The issue-76 contract suite now verifies the complete visualization interaction 
 
 The Clear position action now announces all equivalent recovery paths in its accessible description and selected/empty state in its tooltip, connecting the focused action to the broader keyboard and pointer interaction matrix.
 
+The visualization now renders a live interaction hint below the canvas: empty state guidance explains pointer/keyboard selection, while an active selection announces its percentage and clear gestures. This gives sighted and assistive users the same immediate recovery context.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

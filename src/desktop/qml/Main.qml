@@ -1088,6 +1088,19 @@ ApplicationWindow {
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
+                Label {
+                    objectName: "visualizationInteractionHint"
+                    text: visualizationCanvas.selectedPosition < 0
+                        ? "Select a waveform or FFT position with the pointer or keyboard."
+                        : "Position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
+                    Accessible.name: "Visualization interaction hint"
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: text
+                    ToolTip.text: "Current visualization selection and recovery hint"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
                 ColumnLayout {
                     objectName: "visualizationStatusGroup"
                     Layout.fillWidth: true
