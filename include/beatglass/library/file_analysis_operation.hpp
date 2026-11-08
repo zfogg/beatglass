@@ -2,6 +2,6 @@
 #include "beatglass/library/analysis_operation.hpp"
 #include <filesystem>
 namespace beatglass::library {
-/** Build a provisional worker-owned path decoder operation; no GUI/audio I/O. */
+/** Build a worker-owned path decoder operation; verification fails closed when the source is unavailable. */
 AnalysisOperation make_file_decode_operation(std::filesystem::path path, AnalysisIdentity identity);
 }
