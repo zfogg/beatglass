@@ -150,6 +150,26 @@ TEST_CASE("Core Audio status polling interrupts before queued PCM delivery", "[c
   CHECK_FALSE(source.latest_anchor());
 }
 
+TEST_CASE("Core Audio interruption is delivered once and cannot revive polling", "[coreaudio]") {
+  SourceEpochAllocator epochs;
+  auto fake = std::make_unique<FakeBackend>();
+  auto* backend = fake.get();
+  SourceAdapter source(epochs, std::move(fake));
+  const auto started = source.start("output", [](const AudioBlock&) {});
+  REQUIRE(started.attempt);
+  REQUIRE(source.take_event());
+  REQUIRE(source.acknowledge_running(*started.attempt, 1));
+
+  backend->native = {TapState::interrupted, "device lost", TapFailure::device_lost};
+  const auto interrupted = source.take_event();
+  REQUIRE(interrupted);
+  CHECK(interrupted->sequence == 2);
+  CHECK(interrupted->state == SourceState::interrupted);
+  CHECK_FALSE(source.take_event());
+  CHECK_FALSE(source.pump());
+  CHECK_FALSE(source.take_event());
+}
+
 TEST_CASE("Core Audio control rejects a queued block from a prior epoch", "[coreaudio]") {
   SourceEpochAllocator epochs;
   auto fake = std::make_unique<FakeBackend>();
