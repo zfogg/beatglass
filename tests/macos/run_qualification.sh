@@ -156,6 +156,11 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
 fi
 
 manifest="$out_dir/qualification-manifest.txt"
+permission_result="${BEATGLASS_MACOS_PERMISSION_RESULT:-UNRUN}"
+if [[ "$permission_result" != "allowed" && "$permission_result" != "denied" && "$permission_result" != "UNRUN" ]]; then
+  echo "BEATGLASS_MACOS_PERMISSION_RESULT must be allowed, denied, or UNRUN" >&2
+  exit 1
+fi
 signing_log="$out_dir/codesign-desktop.log"
 signing_state=unverified
 codesign --display --verbose=4 "$out_dir/build/beatglass-desktop.app" >"$signing_log" 2>&1 || true
@@ -178,6 +183,7 @@ if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_lo
   printf 'sdk_version=%s\n' "$(xcrun --sdk macosx --show-sdk-version)"
   printf 'desktop_signing=%s\ntap_signing=%s\nrecovery_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$tap_signing" "$recovery_signing" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
+  printf 'permission_result=%s\n' "$permission_result"
   printf 'commands=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
   if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
