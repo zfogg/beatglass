@@ -37,7 +37,10 @@ def identity_errors(data: dict, max_age_hours: float) -> list[str]:
 
 def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
     errors = []
-    for platform in platforms_from_status(status):
+    platforms = platforms_from_status(status)
+    if len(platforms) != len(set(platforms)):
+        errors.append("status matrix contains duplicate platform rows")
+    for platform in platforms:
         bundle = bundles / platform
         manifest = bundle / "manifest.json"
         if not manifest.is_file():
@@ -57,7 +60,9 @@ def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
 
 def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     rows = []
-    for platform in platforms_from_status(status):
+    platforms = platforms_from_status(status)
+    matrix_errors = ["status matrix contains duplicate platform rows"] if len(platforms) != len(set(platforms)) else []
+    for platform in platforms:
         bundle = bundles / platform
         manifest = bundle / "manifest.json"
         errors = []
@@ -107,7 +112,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             errors = [f"{platform}: missing manifest: {manifest}"]
         rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
-                     "artifact_inventory": inventory, "scenario_inventory": scenario_inventory, "errors": errors})
+                     "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
+                     "errors": matrix_errors + errors})
     return {"platforms": rows, "ready": not any(row["errors"] for row in rows)}
 
 
