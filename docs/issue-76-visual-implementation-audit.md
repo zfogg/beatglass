@@ -1,5 +1,9 @@
 # Issue #76 visual implementation audit
 
+Overlay Retry is readiness-gated by an available selected display. The unavailable/display-loss state keeps Retry disabled while no target exists, preserves reduced-motion behavior, and re-enables the action only after display restoration; the accessible value distinguishes “available” from “waiting for a display.”
+
+Overlay Retry is target-specific: it uses the selected display, announces the retry, and returns focus to the display selector after restoration. If no target is available, the unavailable state remains actionable without claiming recovery; native display-loss timing remains open.
+
 Display-loss evidence must show the overlay disappearing, the control window remaining available, an accessible display-unavailable announcement, and Retry succeeding after restoration. The QML fallback restores controls automatically; native monitor loss/recovery, click-through, and multi-display timing still require retained evidence.
 
 Overlay design states are covered by explicit Show, Unlock, Hide, display-change, unavailable-display, empty-display, and Retry controls. Each state keeps recovery guidance accessible and routes display changes through the native overlay bridge; native multi-monitor, click-through, and display-loss evidence remains required.
@@ -613,5 +617,3 @@ Overlay hide, unlock, and display changes now use that same helper. Their announ
 Overlay show and screen-list transitions use the same fallback contract: a missing display restores control-window guidance, while a restored display announces that a target must be chosen before overlay monitoring resumes.
 
 Retry overlay is now disabled until a display target exists. Once a display returns, the explicit retry action announces its attempt and keeps the control window available until the native overlay actually restores.
-
-After display restoration, Retry remains disabled until the user explicitly chooses a target. Selection clears that gate, restores focus to Retry, and announces readiness; reduced motion does not alter this keyboard/focus contract.
