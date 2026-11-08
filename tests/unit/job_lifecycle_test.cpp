@@ -17,6 +17,20 @@ TEST_CASE("job cancellation and completion are ordered terminal decisions") {
   JobLifecycle failed; REQUIRE(failed.fail()); CHECK_FALSE(failed.start()); CHECK_FALSE(failed.cancel());
 }
 
+TEST_CASE("cancelled and failed jobs can be retried from zero progress") {
+  JobLifecycle cancelled(100);
+  REQUIRE(cancelled.start()); REQUIRE(cancelled.progress(40)); REQUIRE(cancelled.cancel());
+  REQUIRE(cancelled.retry());
+  CHECK(cancelled.snapshot().status == JobStatus::queued);
+  CHECK(cancelled.snapshot().frames_processed == 0);
+  REQUIRE(cancelled.start()); REQUIRE(cancelled.progress(100)); REQUIRE(cancelled.complete());
+
+  JobLifecycle failed;
+  REQUIRE(failed.fail()); REQUIRE(failed.retry());
+  CHECK(failed.snapshot().status == JobStatus::queued);
+  CHECK_FALSE(failed.retry());
+}
+
 TEST_CASE("commit decision serializes cancellation at the commit boundary") {
  CommitDecision early; CHECK_FALSE(early.begin_commit(true)); CHECK(early.cancelled());
  CHECK_FALSE(early.begin_commit(false)); CHECK_FALSE(early.finish(true));

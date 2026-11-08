@@ -43,6 +43,13 @@ public:
   bool cancel() noexcept { return finish(JobStatus::cancelled); }
   /** Fail queued or running work. */
   bool fail() noexcept { return finish(JobStatus::failed); }
+  /** Requeue cancelled or failed work and discard its partial progress. */
+  bool retry() noexcept {
+    if (snapshot_.status != JobStatus::cancelled && snapshot_.status != JobStatus::failed) return false;
+    snapshot_.status = JobStatus::queued;
+    snapshot_.frames_processed = 0;
+    return true;
+  }
   /** Mark a running job complete; a known total must have been fully processed. */
   bool complete() noexcept {
     if (snapshot_.status != JobStatus::running ||
