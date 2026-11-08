@@ -80,6 +80,14 @@ TestCase {
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
         app.destroy()
     }
+
+    function test_libraryDetailsAvailabilityIsActionable() {
+        let app = shell.createObject(null)
+        let details = findChild(app, "detailsAvailability")
+        verify(details !== null)
+        compare(details.text, "Select an audio file to inspect its read-only details.")
+        app.destroy()
+    }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
         let app = shell.createObject(null)
         let tabs = findChild(app, "navigation")
