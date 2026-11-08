@@ -35,9 +35,11 @@ public:
     if (!advance()) return false;
     epoch_ = epoch; state_ = TrackingState::acquiring; return true;
   }
-  /** End the session; pending results are rejected until a new start. */
+  /** End the session; pending results are rejected until a new start.
+   * The generation is retained so a later start cannot reuse old tokens. */
   void stop() noexcept { state_ = TrackingState::stopped; }
-  /** Record a source or estimator error; pending results are rejected. */
+  /** Record a source or estimator error; pending results are rejected.
+   * A later start allocates a fresh generation. */
   void fail() noexcept { if (state_ != TrackingState::stopped) state_ = TrackingState::error; }
   /** Invalidate evidence on a gap, reset, format change or source interruption.
    * @param epoch Epoch of the next accepted samples.
