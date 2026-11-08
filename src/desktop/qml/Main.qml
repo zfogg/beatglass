@@ -985,7 +985,7 @@ ApplicationWindow {
                         objectName: "overlaySize"
                     Accessible.name: "Overlay size"; Accessible.description: "Choose the overlay window size; current size " + currentText; ToolTip.text: "Choose Compact, Medium, or Large overlay size"
                         model: ["Compact", "Medium", "Large"]; currentIndex: 1
-                        enabled: window.overlayBridge && window.overlayBridge.available
+                        enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onActivated: if (window.overlayBridge) {
                             const sizes = [[250, 110], [310, 130], [430, 180]]
                             window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
