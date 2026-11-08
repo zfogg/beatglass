@@ -58,6 +58,8 @@ For handoff automation, `native_qualification_blockers` gives one structured ent
 
 The companion `native_blockers_consistent` flag must also be true: it verifies that the blocker platform set exactly matches the source rows that have unpassed scenarios, missing roles, or errors. Consumers must reject reports that fail this invariant.
 
+Reports provide `platform_support_status` for dashboards: each row is explicitly `READY` or `PENDING`, with stable reason codes and blocker count. This is a projection of evidence readiness, not a claim that the platform has passed the required native desktop/audio/overlay review.
+
 Readiness is stricter than manifest syntax: every required `capture`, `recovery`, `output`, `display`, `playback`, and `overlay` scenario must be `PASS` before a platform can be ready. The report exposes `unpassed` scenario IDs, so a complete list containing `UNRUN` rows cannot be mistaken for native qualification.
 
 The same rule is enforced by the executable `check_evidence_readiness.py` command: any required scenario that is missing or not `PASS` makes the command exit nonzero. A report may still be generated for diagnosis, but its incomplete bundle must not be accepted by automation.
