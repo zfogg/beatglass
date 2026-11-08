@@ -53,6 +53,7 @@
         "UNRUN": 5
       },
       "fresh": true,
+      "freshness_errors": [],
       "manifest_platform": "windows",
       "provenance_complete": true,
       "missing_provenance": [],
@@ -116,6 +117,7 @@
         "UNRUN": 5
       },
       "fresh": true,
+      "freshness_errors": [],
       "manifest_platform": "macos",
       "provenance_complete": true,
       "missing_provenance": [],
@@ -179,6 +181,7 @@
         "UNRUN": 5
       },
       "fresh": true,
+      "freshness_errors": [],
       "manifest_platform": "linux",
       "provenance_complete": true,
       "missing_provenance": [],

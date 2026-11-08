@@ -148,6 +148,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "scenario_status_counts": scenario_status_counts,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
+                     "freshness_errors": [error for error in identity_failures if "stale" in error or "future" in error or "timestamp" in error],
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
                      "missing_provenance": missing_provenance,
                      "missing_scenarios": missing_scenarios,
