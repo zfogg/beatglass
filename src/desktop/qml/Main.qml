@@ -39,6 +39,7 @@ ApplicationWindow {
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     property string visualizationSelectionResetReason: ""
     property string visualizationRecoveryAnnouncement: ""
+    property string persistedRecoveryOutcomeAnnouncementKey: ""
     property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
@@ -131,12 +132,23 @@ ApplicationWindow {
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onAnalysisStatusChanged() {
-            if (storageRecovery.selectedRunId === "" || !storageRecovery.analysisRetryable)
+            if (storageRecovery.selectedRunId === "" || !storageRecovery.analysisRetryable) {
+                window.persistedRecoveryOutcomeAnnouncementKey = ""
                 return
-            if (storageRecovery.analysisStatus === "Analysis failed") {
+            }
+            const status = storageRecovery.analysisStatus
+            if (status !== "Analysis failed" && status !== "Analysis cancelled") {
+                window.persistedRecoveryOutcomeAnnouncementKey = ""
+                return
+            }
+            const outcomeKey = storageRecovery.selectedRunId + "|" + status
+            if (window.persistedRecoveryOutcomeAnnouncementKey === outcomeKey)
+                return
+            window.persistedRecoveryOutcomeAnnouncementKey = outcomeKey
+            if (status === "Analysis failed") {
                 window.announceVisualizationRecovery("Persisted recovery run " + storageRecovery.selectedRunId + " failed; retry is available.")
                 retryPersistedRecovery.forceActiveFocus()
-            } else if (storageRecovery.analysisStatus === "Analysis cancelled") {
+            } else {
                 window.announceVisualizationRecovery("Persisted recovery run " + storageRecovery.selectedRunId + " was canceled; retry is available.")
                 retryPersistedRecovery.forceActiveFocus()
             }
