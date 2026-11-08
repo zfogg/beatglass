@@ -530,6 +530,8 @@ The playback bridge helpers now enforce the same accepted-result identity and pr
 
 Seek availability now also requires live playback source/epoch alignment. The visualization reports the current epoch when aligned and carries the explicit source/discontinuity reset reason after a clear, so stale selections cannot silently remain actionable.
 
+Accepted snapshots now record the playback epoch used when they were published. The playback bridge change path compares that epoch before synchronizing selection and clears the local waveform/FFT snapshot plus selection on discontinuity, ensuring stale data cannot survive an epoch transition.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
