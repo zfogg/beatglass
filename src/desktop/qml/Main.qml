@@ -344,8 +344,9 @@ ApplicationWindow {
                 activeFocusOnTab: true
                 Accessible.name: "Reset appearance settings"
                 Accessible.role: Accessible.Button
+                Accessible.value: window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
                 Accessible.description: "Restore the default Light theme and turn off reduced motion."
-                ToolTip.text: "Restore the default theme and motion setting"
+                ToolTip.text: "Reset " + window.selectedTheme + " and " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full") + " motion to defaults"
                 onClicked: {
                     if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
                     window.selectedThemeIndex = 0
