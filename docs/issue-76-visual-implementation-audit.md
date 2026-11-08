@@ -496,6 +496,8 @@ The stacked visualization status group stays top-aligned as labels wrap, keeping
 
 Selection controls now include a bounded Seek to position action. When playback is active and waveform samples are available, the selected normalized position is converted to a source frame through the existing epoch-aware playback seek contract; the action remains unavailable without those real runtime prerequisites.
 
+Playback change notifications now synchronize the visualization selection from the live playback frame over the available waveform span, so the selected cursor follows actual source playback while preserving the existing clear-on-source/epoch transitions.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

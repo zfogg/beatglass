@@ -300,6 +300,12 @@ ApplicationWindow {
             if (window.playbackBridge.state === "Stopped")
                 window.clearVisualizationForCaptureState()
         }
+        function onChanged() {
+            if (window.playbackBridge.state !== "Stopped"
+                    && typeof visualizationPresentation !== "undefined"
+                    && visualizationPresentation.waveform.length > 0)
+                window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationPresentation.waveform.length)
+        }
     }
 
     FolderListModel {
