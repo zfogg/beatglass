@@ -294,6 +294,8 @@ Worker progress callbacks are lifetime-safe: queued GUI updates retain only a `Q
 
 The worker analysis contract now also hands the verified serialized result to an optional worker-owned publication callback before reporting completion. This is the handoff point for cache/UI consumers; the callback remains off the GUI and audio threads.
 
+`AnalysisJobBridge` now consumes that handoff as a queued `result` property, retaining the worker-thread boundary while making completed analysis inspectable by the desktop surface.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff

@@ -12,6 +12,7 @@ class AnalysisJobBridge final : public QObject {
   Q_OBJECT
   Q_PROPERTY(qulonglong frames READ frames NOTIFY progressChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
+  Q_PROPERTY(QString result READ result NOTIFY resultChanged)
   Q_PROPERTY(bool canCancel READ canCancel NOTIFY statusChanged)
   Q_PROPERTY(bool canRetry READ canRetry NOTIFY statusChanged)
   Q_PROPERTY(int batchAcceptedCount READ batchAcceptedCount NOTIFY batchChanged)
@@ -22,6 +23,7 @@ public:
   std::shared_ptr<beatglass::library::RetryableAnalysis> submit(beatglass::library::AnalysisOperation);
   qulonglong frames() const noexcept { return frames_; }
   QString status() const { return status_; }
+  QString result() const { return result_; }
   bool canCancel() const noexcept;
   bool canRetry() const noexcept;
   Q_INVOKABLE void cancel();
@@ -36,6 +38,7 @@ public:
 signals:
   void progressChanged();
   void statusChanged();
+  void resultChanged();
   void batchChanged();
 private slots:
   void poll();
@@ -51,4 +54,5 @@ private:
   QPointer<AnalysisJobBridge> weak_self_{this};
   qulonglong frames_{};
   QString status_{QStringLiteral("Idle")};
+  QString result_;
 };
