@@ -8,7 +8,7 @@ required = [
     "property bool overlayLaunchFallbackActive: false",
     "window.overlayLaunchFallbackActive = true",
     "window.overlayLaunchFallbackActive = false",
-    'launch fallback active',
+    '"launch fallback active"',
     "window.syncOverlaySettingsFromBridge()",
     "marks an “launch fallback active” state when the overlay bridge or display list is unavailable",
 ]
