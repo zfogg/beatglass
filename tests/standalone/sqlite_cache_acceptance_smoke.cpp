@@ -31,6 +31,11 @@ int main() {
     const auto stale_runs = cache.retryable_runs();
     assert(stale_runs.size() == 1 && stale_runs.front().id == "stale");
     assert(cache.discard_retryable("stale"));
+    bool empty_id_rejected = false;
+    try { (void)cache.discard_retryable(""); } catch (const std::invalid_argument&) { empty_id_rejected = true; }
+    bool nul_id_rejected = false;
+    try { (void)cache.discard_retryable(std::string("bad\0id", 6)); } catch (const std::invalid_argument&) { nul_id_rejected = true; }
+    assert(empty_id_rejected && nul_id_rejected);
     const CacheKey cancelled_key{"sha256:cancelled", key.engine, key.config, key.mode};
     cache.begin("cancelled", cancelled_key);
     std::stop_source stop;
