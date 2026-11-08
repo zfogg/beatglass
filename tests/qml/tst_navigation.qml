@@ -243,6 +243,20 @@ TestCase {
         compare(details.text, "Select an audio file to inspect its read-only details.")
         app.destroy()
     }
+    function test_selectedAnalysisCanReturnToEmptyState() {
+        let app = shell.createObject(null)
+        app.selectedName = "stale.wav"
+        app.selectedAudioUrl = Qt.resolvedUrl("../fixtures/generated/tone.flac")
+        app.metadataStatus = "WAV | 44100 Hz"
+        let clear = findChild(app, "clearSelectedAudio")
+        verify(clear.enabled)
+        clear.clicked()
+        compare(app.selectedName, "")
+        compare(app.selectedAudioUrl.toString(), "")
+        compare(findChild(app, "detailsAvailability").text, "Select an audio file to inspect its read-only details.")
+        compare(clear.Accessible.description, "Clear the selected audio source and return analysis details to the empty state.")
+        app.destroy()
+    }
     function test_sourceWorkflowStatusIsAccessible() {
         let app = shell.createObject(null)
         compare(findChild(app, "sourceWorkflowStatus").Accessible.name, "Selected source workflow status")
