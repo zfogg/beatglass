@@ -1,0 +1,8 @@
+#pragma once
+#include "beatglass/library/analysis_operation.hpp"
+#include "beatglass/library/detail/job_executor.hpp"
+#include <memory>
+namespace beatglass::library {
+/** Worker-owned adapter that executes an AnalysisOperation and retains its JobHandle. */
+class AnalysisRunner { public: explicit AnalysisRunner(library_detail::JobExecutor& executor):executor_(executor){} std::shared_ptr<library_detail::JobHandle> submit(AnalysisOperation operation, int priority = 0); private: library_detail::JobExecutor& executor_; };
+}
