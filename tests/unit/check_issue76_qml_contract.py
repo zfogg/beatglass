@@ -43,7 +43,7 @@ def main() -> int:
         "selected visualization status role": "Accessible.name: \"Selected visualization data status\"",
         "capture status role": "Accessible.name: \"Capture monitor status: \" + text",
         "live monitoring status role": "Accessible.name: \"Live output monitoring\"",
-        "metadata status role": "Accessible.name: \"Audio metadata status\"",
+        "metadata status role": "Accessible.name: \"Audio metadata status: \" + text",
         "current folder role": "Accessible.name: \"Current folder: \" + text",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
@@ -65,6 +65,7 @@ def main() -> int:
         "dynamic capture and settings names": "Accessible.name: \"Capture monitor status: \" + text",
         "dynamic visualization status names": "Accessible.name: \"Visualization load state: \" + text",
         "dynamic analysis status names": "Accessible.name: \"Analysis progress: \" + text",
+        "dynamic metadata names": "Accessible.name: \"Selected audio file: \" + text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
