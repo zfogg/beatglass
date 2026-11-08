@@ -842,6 +842,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
+                                objectName: "analysisWorkerResult"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.result !== ""
+                                text: visible ? ("Worker result: " + window.analysisJobBridge.result) : ""
+                                Accessible.name: "Worker analysis result"
+                                Accessible.description: visible ? text : "No worker analysis result is available."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
+                            }
+                            Label {
                                 objectName: "analysisQueueOutcome"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.status !== undefined
                                 text: visible ? ("Analysis queue: " + window.analysisJobBridge.status

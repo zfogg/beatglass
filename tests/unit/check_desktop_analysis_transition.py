@@ -18,6 +18,7 @@ required = {
     "guarded queued update": 'if (!weak_self) return;',
     "worker result property": 'Q_PROPERTY(QString result READ result',
     "worker result handoff": 'op.publish = [weak_self = weak_self_, publish]',
+    "worker result rendering": 'objectName: "analysisWorkerResult"',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:

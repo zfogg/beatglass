@@ -296,6 +296,8 @@ The worker analysis contract now also hands the verified serialized result to an
 
 `AnalysisJobBridge` now consumes that handoff as a queued `result` property, retaining the worker-thread boundary while making completed analysis inspectable by the desktop surface.
 
+The Library surface renders that worker result separately from cached-result status, preserving the distinction between a newly completed worker result and a cache lookup.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
