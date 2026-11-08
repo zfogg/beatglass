@@ -105,6 +105,15 @@ TEST_CASE("SQLite cache makes stale input runs immediately retryable") {
   REQUIRE(cache.publish("stale", key, "fresh", {}, [] { return true; }) == Publish::committed);
   REQUIRE(cache.find(key, result)); REQUIRE(result == "fresh");
 }
+TEST_CASE("SQLite cache discards only retryable runs") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("retry", key);
+  REQUIRE(cache.discard_retryable("retry") == false);
+  REQUIRE(cache.publish("retry", key, "discard", {}, [] { return false; }) == Publish::stale_input);
+  REQUIRE(cache.discard_retryable("retry"));
+  REQUIRE_FALSE(cache.discard_retryable("retry"));
+  REQUIRE_THROWS_AS(cache.discard_retryable(""), std::invalid_argument);
+}
 TEST_CASE("SQLite binding lengths are checked before narrowing") {
   auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
   REQUIRE(sqlite_length_representable(maximum));
