@@ -53,6 +53,11 @@ int main() {
     std::string live_result;
     assert(cache.find(live_key, live_result) && live_result == "live-data");
     assert(!cache.find(key, live_result));
+    const CacheKey next_engine{key.content, "engine-v2", key.config, key.mode};
+    cache.begin("next-engine", next_engine);
+    assert(cache.publish("next-engine", next_engine, "engine-v2-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_engine, live_result) && live_result == "engine-v2-data");
+    assert(cache.find(key, live_result) == false);
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
