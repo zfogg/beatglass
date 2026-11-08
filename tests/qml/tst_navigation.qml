@@ -194,6 +194,8 @@ TestCase {
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
         compare(findChild(app, "openPlayback").Accessible.description, "Open the selected audio source for playback")
         compare(findChild(app, "seekForwardPlayback").Accessible.description, "Seek playback forward five seconds")
+        compare(findChild(app, "pausePlayback").ToolTip.text, "Pause or resume playback")
+        compare(findChild(app, "stopPlayback").ToolTip.text, "Stop playback and clear the current source")
         compare(findChild(app, "seekFrame").Accessible.name, "Seek target frame")
         compare(findChild(app, "seekToFrame").Accessible.description, "Seek playback to the entered audio frame")
         app.destroy()
