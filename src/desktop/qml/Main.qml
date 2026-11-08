@@ -22,6 +22,7 @@ ApplicationWindow {
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property bool overlayDisplaySelectionRequired: false
     property bool overlayDisplayRecoveryPending: false
+    property bool overlayWasVisibleBeforeAvailabilityLoss: false
     property int overlayPreferredScreenIndex: -1
     property string overlayPreferredDisplayName: ""
     property int overlayPreferredSizeIndex: 1
@@ -164,10 +165,15 @@ ApplicationWindow {
                 return
             if (!window.overlayBridge.available) {
                 window.overlayDisplayRecoveryPending = true
+                window.overlayWasVisibleBeforeAvailabilityLoss = djOverlay.visible
                 if (djOverlay.visible)
                     window.hideOverlayAndRestoreControls()
             } else {
                 window.syncOverlaySettingsFromBridge()
+                if (window.overlayWasVisibleBeforeAvailabilityLoss) {
+                    window.overlayWasVisibleBeforeAvailabilityLoss = false
+                    window.recoverOverlayAfterDisplayChange()
+                }
             }
         }
     }
@@ -358,6 +364,7 @@ ApplicationWindow {
     }
     function hideOverlayAndRestoreControls() {
         if (!window.overlayBridge) return
+        window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayBridge.hideOverlay()
         window.announceCaptureRecoveryState("DJ overlay hidden; output monitoring remains available in the control window.")
         window.show()
