@@ -127,6 +127,20 @@ if ! grep -Eq '[0-9]+% tests passed' "$overlay_log"; then
   echo "Overlay qualification log has no passing CTest summary" >&2
   exit 1
 fi
+for evidence in "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"; do
+  if [[ ! -s "$evidence" ]]; then
+    echo "Qualification evidence file is missing or empty: $evidence" >&2
+    exit 1
+  fi
+done
+if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
+  for evidence in "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"; do
+    if [[ ! -s "$evidence" ]]; then
+      echo "Capture evidence file is missing or empty: $evidence" >&2
+      exit 1
+    fi
+  done
+fi
 
 cat <<'EOF'
 
