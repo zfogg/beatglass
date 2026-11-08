@@ -144,7 +144,19 @@ public:
       if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
       // After this point cancellation cannot change the result of COMMIT.
       exec("COMMIT"); return Publish::committed;
-    } catch (...) { rollback(); return Publish::error; }
+    } catch (...) {
+      rollback();
+      // Preserve recovery after verifier/serialization or transactional
+      // failures. A running row must never look like an active cache hit.
+      try {
+        Statement recover(db_, "UPDATE runs SET status='retryable',result=NULL WHERE id=? AND content=? AND engine=? AND config=? AND mode=? AND status='running'");
+        bind(recover.p, 1, id); bind_key(recover.p, 2, key); done(recover.p);
+      } catch (...) {
+        // Keep the original publication error; recovery can be retried after
+        // reopening the worker-owned store.
+      }
+      return Publish::error;
+    }
   }
 private:
   CollectionEntry read_entry(sqlite3_stmt* s) { return {reinterpret_cast<const char*>(sqlite3_column_text(s,0)),reinterpret_cast<const char*>(sqlite3_column_text(s,1)),reinterpret_cast<const char*>(sqlite3_column_text(s,2)),reinterpret_cast<const char*>(sqlite3_column_text(s,3)),static_cast<std::uint64_t>(sqlite3_column_int64(s,4)),sqlite3_column_int64(s,5)}; }

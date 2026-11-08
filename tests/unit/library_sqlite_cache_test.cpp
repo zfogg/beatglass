@@ -97,6 +97,9 @@ TEST_CASE("SQLite cache rolls back when revalidation throws") {
   cache.begin("new", key);
   REQUIRE(cache.publish("new", key, "discard", {}, []() -> bool { throw std::runtime_error("verification failed"); }) == Publish::error);
   std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "stable");
+  const auto retryable = cache.retryable_runs();
+  REQUIRE(retryable.size() == 1);
+  CHECK(retryable.front().id == "new");
 }
 
 TEST_CASE("SQLite cache persists completed work and recovers interrupted runs") {
