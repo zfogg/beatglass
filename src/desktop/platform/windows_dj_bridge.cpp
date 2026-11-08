@@ -41,7 +41,8 @@ void DjBridge::stop() {
 }
 bool DjBridge::active() const { std::lock_guard lock(mutex_); return requested_; }
 QString DjBridge::status() const { return status_; }
-void DjBridge::selectEndpoint(const QString& id) { if (id.isEmpty()) return; std::lock_guard lock(mutex_); pending_endpoint_ = id.toStdString(); reset_pending_ = true; wake_.notify_one(); }
+QString DjBridge::selectedEndpoint() const { std::lock_guard lock(mutex_); return selected_endpoint_; }
+void DjBridge::selectEndpoint(const QString& id) { if (id.isEmpty()) return; { std::lock_guard lock(mutex_); pending_endpoint_ = id.toStdString(); selected_endpoint_ = id; reset_pending_ = true; } emit stateChanged(); wake_.notify_one(); }
 void DjBridge::drain() {
   std::optional<PresentationUpdate> update;
   std::optional<std::string> status;
