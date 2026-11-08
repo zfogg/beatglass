@@ -8,6 +8,7 @@ import sys
 
 EXPECTED_PLATFORMS = {"windows", "macos", "linux"}
 EXPECTED_SCENARIO_STATUSES = {"PASS", "FAIL", "UNRUN", "PENDING"}
+REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
 
 
 def _valid_digest(value: object) -> bool:
@@ -186,6 +187,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         if not isinstance(scenarios, list):
             errors.append(f"{platform}: manifest scenarios must be an array")
             scenarios = []
+        manifest_ids = {str(item.get("id")) for item in scenarios if isinstance(item, dict)}
+        if manifest_ids != REQUIRED_SCENARIOS:
+            errors.append(f"{platform}: manifest scenarios must contain exactly the required scenario set")
         report_scenarios = row.get("scenario_inventory", [])
         manifest_scenario_map = {
             str(item.get("id")): (item.get("status"), item.get("evidence"))
