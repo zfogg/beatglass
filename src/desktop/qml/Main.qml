@@ -504,6 +504,24 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Button {
+                                objectName: "retryAnalysisBatch"
+                                text: "Retry batch"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.retryBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
+                                enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
+                                Accessible.name: "Retry analysis batch"
+                                Accessible.description: "Retry cancelled or failed analysis items retained in the current batch."
+                                onClicked: window.analysisJobBridge.retryBatch()
+                            }
+                            Button {
+                                objectName: "cancelAnalysisBatch"
+                                text: "Cancel batch"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.cancelBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
+                                enabled: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running")
+                                Accessible.name: "Cancel analysis batch"
+                                Accessible.description: "Cancel all queued or running analysis items retained in the current batch."
+                                onClicked: window.analysisJobBridge.cancelBatch()
+                            }
+                            Button {
                                 text: "Retry analysis"
                                 objectName: "retryAnalysis"
                                 visible: window.analysisJobBridge !== null

@@ -34,8 +34,12 @@ TestCase {
         property int batchCapacity: 0
         property int cancels: 0
         property int retries: 0
+        property int batchCancels: 0
+        property int batchRetries: 0
         function cancel() { cancels++ ; status = "Cancelled"; canCancel = false; canRetry = true }
         function retry() { retries++; status = "Queued"; canRetry = false; canCancel = true }
+        function cancelBatch() { batchCancels++; status = "Cancelled" }
+        function retryBatch() { batchRetries++; status = "Queued" }
     }
     QtObject {
         id: fakeThemePreferences
@@ -403,6 +407,17 @@ TestCase {
         verify(status.visible)
         compare(status.text, "Batch queue · accepted 3 · rejected 2 · capacity 4")
         compare(status.Accessible.name, "Batch analysis queue status")
+        app.destroy()
+    }
+    function test_batchRecoveryControlsUseBridge() {
+        fakeAnalysis.batchAcceptedCount = 2; fakeAnalysis.batchRejectedCount = 0; fakeAnalysis.batchCapacity = 2
+        fakeAnalysis.status = "Running"; fakeAnalysis.batchCancels = 0; fakeAnalysis.batchRetries = 0
+        let app = shellWithAnalysis.createObject(null)
+        let cancel = findChild(app, "cancelAnalysisBatch")
+        verify(cancel.visible); verify(cancel.enabled); cancel.clicked(); compare(fakeAnalysis.batchCancels, 1)
+        fakeAnalysis.status = "Failed"
+        let retry = findChild(app, "retryAnalysisBatch")
+        verify(retry.visible); verify(retry.enabled); retry.clicked(); compare(fakeAnalysis.batchRetries, 1)
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
