@@ -263,6 +263,7 @@ ApplicationWindow {
             visualizationCanvas.selectedPosition = -1
             visualizationCanvas.renderedRevision = -1
         visualizationCanvas.acceptedPlaybackEpoch = -1
+        visualizationCanvas.acceptedPlaybackSource = ""
             visualizationCanvas.renderedWaveform = []
             visualizationCanvas.renderedSpectrum = []
             visualizationCanvas.requestPaint()
@@ -317,6 +318,11 @@ ApplicationWindow {
                 window.clearVisualizationForCaptureState()
         }
         function onChanged() {
+            if (visualizationCanvas.acceptedPlaybackSource !== ""
+                    && window.playbackBridge.source.toString() !== visualizationCanvas.acceptedPlaybackSource) {
+                window.clearVisualizationForCaptureState("Selection cleared because the playback source changed.")
+                return
+            }
             if (visualizationCanvas.acceptedPlaybackEpoch >= 0
                     && window.playbackBridge.epoch !== visualizationCanvas.acceptedPlaybackEpoch) {
                 window.clearVisualizationForCaptureState("Selection cleared because the playback epoch changed.")
@@ -1153,6 +1159,7 @@ ApplicationWindow {
                     property real selectedPosition: -1
                     property int renderedRevision: -1
                     property int acceptedPlaybackEpoch: -1
+                    property string acceptedPlaybackSource: ""
                     property var renderedWaveform: []
                     property var renderedSpectrum: []
                     readonly property string acceptedResultIdentity: window.acceptedAnalysisIdentity
@@ -1299,7 +1306,7 @@ ApplicationWindow {
                         visible: visualizationCanvas.activeFocus
                         z: 2
                     }
-                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { if (visualizationPresentation.revision >= 0) { window.visualizationSelectionResetReason = ""; visualizationCanvas.renderedWaveform = visualizationPresentation.waveform.slice(); visualizationCanvas.renderedSpectrum = visualizationPresentation.spectrum.slice(); visualizationCanvas.acceptedPlaybackEpoch = window.playbackBridge ? window.playbackBridge.epoch : -1 } else { visualizationCanvas.renderedWaveform = []; visualizationCanvas.renderedSpectrum = []; visualizationCanvas.acceptedPlaybackEpoch = -1 } visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1; visualizationCanvas.requestPaint() } }
+                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { if (visualizationPresentation.revision >= 0) { window.visualizationSelectionResetReason = ""; visualizationCanvas.renderedWaveform = visualizationPresentation.waveform.slice(); visualizationCanvas.renderedSpectrum = visualizationPresentation.spectrum.slice(); visualizationCanvas.acceptedPlaybackEpoch = window.playbackBridge ? window.playbackBridge.epoch : -1; visualizationCanvas.acceptedPlaybackSource = window.playbackBridge ? window.playbackBridge.source.toString() : "" } else { visualizationCanvas.renderedWaveform = []; visualizationCanvas.renderedSpectrum = []; visualizationCanvas.acceptedPlaybackEpoch = -1; visualizationCanvas.acceptedPlaybackSource = "" } visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1; visualizationCanvas.requestPaint() } }
                 }
                 Label {
                     objectName: "visualizationInteractionHint"
