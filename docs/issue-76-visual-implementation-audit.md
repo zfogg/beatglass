@@ -319,3 +319,5 @@ DJ monitoring status, estimates, evidence quality, and monitoring guidance now e
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
 
 The live monitoring state and guidance are now exposed as one grouped surface, while the DJ status, estimates, and evidence-quality message share a second grouped surface. Both groups report the current monitoring state and provide entry tooltips, so assistive technology users can understand capture readiness and provisional evidence before navigating individual labels.
+
+Visualization empty, load, data-count, selection, generation, and capture messages now share a grouped status surface with a live ready/waiting value and entry tooltip. This keeps the visualization’s changing data lifecycle coherent for assistive technology users while preserving each detailed status label.
