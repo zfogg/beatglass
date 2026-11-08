@@ -103,7 +103,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 if len(scenario_ids) != len(set(scenario_ids)):
                     errors.append(f"{platform}: duplicate scenario id in manifest")
                 retained = len(data.get("artifacts", []))
-                declared_paths = {entry.get("path") for entry in data.get("artifacts", []) if isinstance(entry, dict)}
+                declared_paths = {entry.get("path") for entry in data.get("artifacts", [])
+                                  if isinstance(entry, dict) and isinstance(entry.get("path"), str)}
                 actual_files = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*") if path.is_file()
                                 and path.name not in {"readiness-report.json", "manifest.json"}}
                 unlisted = sorted(actual_files - declared_paths)
@@ -115,10 +116,11 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 manifest_sha256 = hashlib.sha256(manifest.read_bytes()).hexdigest()
                 inventory = []
                 for entry in sorted(data.get("artifacts", []), key=lambda item: str(item.get("path", ""))):
-                    path = bundle / entry.get("path", "")
-                    actual_hash = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+                    raw_path = entry.get("path", "")
+                    path = bundle / raw_path if isinstance(raw_path, str) else None
+                    actual_hash = hashlib.sha256(path.read_bytes()).hexdigest() if path and path.is_file() else None
                     inventory.append({"path": entry.get("path"), "sha256": entry.get("sha256"),
-                                      "bytes": path.stat().st_size if path.is_file() else None,
+                                      "bytes": path.stat().st_size if path and path.is_file() else None,
                                       "hash_valid": actual_hash == str(entry.get("sha256", "")).lower()})
                 missing_artifacts = sorted(item["path"] for item in inventory if item["bytes"] is None)
                 mismatched_artifacts = sorted(item["path"] for item in inventory if not item["hash_valid"] and item["bytes"] is not None)
@@ -135,7 +137,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 if unpassed_scenarios:
                     errors.append(f"{platform}: required scenarios are not PASS: {unpassed_scenarios}")
                 artifact_roles = {entry.get("path"): entry.get("role") for entry in data.get("artifacts", [])
-                                  if isinstance(entry, dict)}
+                                  if isinstance(entry, dict) and isinstance(entry.get("path"), str)}
                 missing_artifact_roles = sorted(
                     item.get("id") for item in data.get("scenarios", [])
                     if isinstance(item, dict) and item.get("status") != "UNRUN"
