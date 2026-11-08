@@ -308,6 +308,10 @@ TestCase {
         verify(empty !== null)
         verify(!empty.visible)
         compare(empty.Accessible.name, "Output endpoint empty state")
+        let recovery = findChild(app, "endpointRecoveryGuidance")
+        verify(recovery !== null)
+        verify(!recovery.visible)
+        compare(recovery.Accessible.name, "Output endpoint recovery guidance")
         app.destroy()
     }
 
