@@ -41,6 +41,7 @@ void DjBridge::stop() {
 }
 bool DjBridge::active() const { std::lock_guard lock(mutex_); return requested_; }
 QString DjBridge::status() const { return status_; }
+void DjBridge::selectEndpoint(const QString& id) { if (id.isEmpty()) return; std::lock_guard lock(mutex_); pending_endpoint_ = id.toStdString(); reset_pending_ = true; wake_.notify_one(); }
 void DjBridge::drain() {
   std::optional<PresentationUpdate> update;
   std::optional<std::string> status;
@@ -66,15 +67,18 @@ void DjBridge::run(std::function<EndpointResult()> discovery) {
   bool fatal = false;
   for (;;) {
     bool requested, quitting, reset, exhausted;
+    std::optional<std::string> endpoint;
     std::uint64_t generation;
     {
       std::unique_lock lock(mutex_);
       wake_.wait_for(lock, std::chrono::milliseconds(50));
       requested = requested_; quitting = quitting_; reset = reset_pending_; reset_pending_ = false; generation = request_generation_; exhausted = commands_exhausted_;
+      endpoint = std::move(pending_endpoint_);
     }
     if (quitting) break;
     attemptGeneration = generation;
     if (reset) { follower.stop(); active = false; fatal = false; }
+    if (endpoint) { follower.select_endpoint(std::move(*endpoint)); reset = true; }
     bool ok = true;
     if (requested != active) {
       if (requested) { fatal = false; if (!follower.start()) { requested = false; ok = false; } }

@@ -13,6 +13,7 @@ bool DefaultTempoFollower::start() {
   enabled_ = true; next_probe_ = {};
   return true;
 }
+void DefaultTempoFollower::select_endpoint(std::string id) { requested_endpoint_ = std::move(id); }
 bool DefaultTempoFollower::nextRevision() {
   if (revision_ == std::numeric_limits<std::uint64_t>::max()) { exhausted_ = true; pending_.reset(); published_bpm_.reset(); tempo_.stop(); endpoint_.clear(); status_ = Status::error; diagnostic_ = "Presentation revision exhausted"; return false; }
   ++revision_; return true;
@@ -66,9 +67,9 @@ bool DefaultTempoFollower::tick(std::chrono::steady_clock::time_point now) {
     } catch (...) {
       result.error = "Endpoint discovery failed";
     }
-    std::string selected;
+    std::string selected = std::move(requested_endpoint_);
     bool ambiguous = false;
-    if (result.error.empty()) for (const auto& item : result.endpoints) if (item.is_default) {
+    if (selected.empty() && result.error.empty()) for (const auto& item : result.endpoints) if (item.is_default) {
       if (!selected.empty()) ambiguous = true;
       selected = item.id;
     }
