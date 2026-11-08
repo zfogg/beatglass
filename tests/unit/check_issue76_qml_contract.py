@@ -74,6 +74,7 @@ def main() -> int:
         "secondary control tab focus": "objectName: \"playbackDevice\"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true",
         "combo role consistency": "Accessible.role: Accessible.ComboBox",
         "control role consistency": "Accessible.role: Accessible.Button",
+        "control value announcements": "Accessible.value: Math.round(value * 100) + \"%\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
