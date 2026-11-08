@@ -668,4 +668,6 @@ On relaunch, the control window hydrates its preferred display identity and inde
 
 Relaunch hydration now validates native geometry and opacity as well. Valid persisted geometry is reapplied through the bridge and announced; missing or invalid geometry explicitly keeps the control-window fallback active rather than presenting an unpositioned overlay.
 
+Invalid persisted opacity now falls back to a safe 90% value before any overlay show operation and announces the correction, preventing malformed native settings from producing an unusable or invisible overlay.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
