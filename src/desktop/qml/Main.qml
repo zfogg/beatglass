@@ -683,7 +683,9 @@ ApplicationWindow {
                     property string viewMode: "waveform"
                     Layout.fillWidth: true; Layout.preferredHeight: 120
                     Accessible.name: "Live waveform and spectrum"
-                    Accessible.description: "Bounded waveform and FFT magnitudes from the current output capture."
+                    Accessible.description: visualizationCanvas.viewMode === "waveform"
+                        ? "Bounded time-domain waveform from the current output capture."
+                        : "Bounded frequency-domain FFT magnitudes from the current output capture."
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
@@ -703,6 +705,18 @@ ApplicationWindow {
                         }
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
+                }
+                Label {
+                    objectName: "visualizationEmptyState"
+                    visible: typeof visualizationPresentation === "undefined"
+                        || (visualizationPresentation.waveform.length === 0 && visualizationPresentation.spectrum.length === 0)
+                    text: window.liveBridge.status === "Stopped"
+                        ? "Start monitoring to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
+                        : "Waiting for captured audio data to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                    Accessible.name: "Visualization empty state"
+                    Accessible.description: text
                 }
                 Label {
                     objectName: "visualizationStatus"
