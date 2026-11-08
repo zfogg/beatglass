@@ -28,21 +28,24 @@ int main() {
   TempDir dir;
   dir.file("zeta.WAV");
   dir.file("Alpha.mp3");
+  dir.file("ambient.FLAC");
+  dir.file("live.AIFF");
+  dir.file("take.aif");
   dir.file("notes.txt");
   dir.file("stream.ogg");
   std::filesystem::create_directory(dir.path / "Mixes");
 
   const auto result = beatglass::library::browse(dir.path);
   require(result.diagnostic.empty(), "unexpected browse diagnostic");
-  require(result.entries.size() == 3, "unsupported files were advertised");
+  require(result.entries.size() == 6, "supported files were not advertised");
   require(result.entries[0].name == "Alpha.mp3", "case-folded ordering changed");
-  require(result.entries[1].name == "Mixes", "directory navigation entry missing");
-  require(result.entries[2].name == "zeta.WAV", "supported audio entry missing");
+  require(result.entries[3].name == "Mixes", "directory navigation entry missing");
+  require(result.entries[5].name == "zeta.WAV", "supported audio entry missing");
   require(result.entries[0].title == "Alpha" && result.entries[0].format == "MP3",
           "audio display metadata was not derived from the filename");
   require(result.entries[0].bytes == 5 && result.entries[0].duration_seconds < 0.0,
           "filesystem-only catalog metadata contract changed");
-  require(result.entries[1].directory && result.entries[1].bytes == 0,
+  require(result.entries[3].directory && result.entries[3].bytes == 0,
           "directory entry metadata was not normalized");
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
@@ -50,6 +53,12 @@ int main() {
   const auto missing = beatglass::library::browse(dir.path / "missing");
   require(missing.entries.empty() && !missing.diagnostic.empty(),
           "missing directory was not reported atomically");
+  require(beatglass::library::browse(dir.path, "ambient").entries.size() == 1,
+          "FLAC extension was not discovered case-insensitively");
+  require(beatglass::library::browse(dir.path, "live").entries.size() == 1,
+          "AIFF extension was not discovered case-insensitively");
+  require(beatglass::library::browse(dir.path, "take").entries.size() == 1,
+          "AIF extension was not discovered case-insensitively");
   std::filesystem::remove(dir.path / "Alpha.mp3");
   const auto after_remove = beatglass::library::browse(dir.path, "alpha");
   require(after_remove.entries.empty() && after_remove.diagnostic.empty(),
