@@ -1131,6 +1131,18 @@ ApplicationWindow {
                         visualizationCanvas.forceActiveFocus()
                     }
                 }
+                Label {
+                    objectName: "visualizationRetryFeedback"
+                    visible: window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring"
+                    text: window.liveBridge.status === "Reacquiring" ? "Reacquiring capture; visualization will resume when output is available." : "Starting capture; visualization will populate when output is available."
+                    Accessible.name: "Visualization capture recovery status"
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: text
+                    ToolTip.text: "Current visualization capture recovery transition"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
                 ColumnLayout {
                     objectName: "visualizationStatusGroup"
                     Layout.fillWidth: true
