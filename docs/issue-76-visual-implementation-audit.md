@@ -465,3 +465,5 @@ Generation and revision status now use the theme foreground and compact typograp
 Capture-status guidance now uses the theme foreground in normal operation and the existing error tint when capture fails, with compact typography for narrow layouts.
 
 The selection status/action row now reduces spacing in compact headers, preserving room for both the current position and its reset affordance without changing keyboard order.
+
+Generation/revision evidence now wraps within the available width, keeping long provenance values readable instead of truncating them on compact screens.

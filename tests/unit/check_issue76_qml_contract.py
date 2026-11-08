@@ -436,6 +436,7 @@ def main() -> int:
         "visualization selection status theme": 'objectName: "visualizationSelectionStatus"',
         "visualization inline clear theme": 'objectName: "clearVisualizationSelection"',
         "visualization revision theme": 'objectName: "visualizationRevisionStatus"',
+        "visualization revision wraps": 'objectName: "visualizationRevisionStatus"',
         "visualization capture status theme": 'objectName: "visualizationCaptureStatus"',
         "visualization selection responsive spacing": "spacing: window.compactHeader ? 4 : 8",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
