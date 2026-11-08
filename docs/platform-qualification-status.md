@@ -213,6 +213,8 @@ Ingestion also requires a 40-hex source commit and nonempty capture time in the 
 
 Capture times are parsed as ISO-8601 during ingestion; a malformed timestamp is rejected before the artifact can participate in a readiness handoff.
 
+Ingestion also imports the native script’s referenced playback, overlay, display-topology, and audio-inventory files into the artifact inventory, so those handoff inputs cannot be silently omitted from provenance review.
+
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
