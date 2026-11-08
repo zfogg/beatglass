@@ -598,7 +598,7 @@ ApplicationWindow {
                             text: window.selectedName
                                   ? "Track key: Unknown · No validated track-level key. Window evidence is provisional and source-attributed."
                                   : "Track key: Unknown until a source is selected."
-                            Accessible.name: "Analysis uncertainty"
+                            Accessible.name: "Analysis uncertainty: " + text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -606,7 +606,7 @@ ApplicationWindow {
                         Label {
                             objectName: "analysisFreshness"
                             text: window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? "Analysis freshness: source-linked analysis complete." : "Analysis freshness: waiting for source-linked analysis evidence."
-                            Accessible.name: "Analysis freshness"
+                            Accessible.name: "Analysis freshness: " + text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -625,7 +625,7 @@ ApplicationWindow {
                             Label {
                                 text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (window.analysisJobBridge ? (window.analysisJobBridge.status + " · observed " + window.analysisJobBridge.frames + " frames.") : "Analysis progress unavailable")
                                 objectName: "analysisProgress"
-                                Accessible.name: "Analysis progress"
+                                Accessible.name: "Analysis progress: " + text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -636,7 +636,7 @@ ApplicationWindow {
                                 text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount
                                       + " · rejected " + window.analysisJobBridge.batchRejectedCount
                                       + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")) : ""
-                                Accessible.name: "Batch analysis queue status"
+                                Accessible.name: "Batch analysis queue status: " + text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? text : "Batch queue status is unavailable until the analysis bridge reports it."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -645,7 +645,7 @@ ApplicationWindow {
                                 objectName: "persistedRecoveryStatus"
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
-                                Accessible.name: "Persisted analysis recovery status"
+                                Accessible.name: "Persisted analysis recovery status: " + text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
