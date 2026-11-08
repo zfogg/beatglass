@@ -622,6 +622,8 @@ Visualization status, data counts, and selected-view readouts now consume the ca
 
 Appearance settings now publish live accessible announcements when a theme is restored or reduced-motion changes. Reduced-motion messaging explicitly confirms that static accepted visualization snapshots remain available, keeping settings state aligned with runtime rendering behavior.
 
+Overlay display selection now persists in the desktop session: when the screen list returns and the saved index is still valid, QML reselects that target and announces readiness; if it is absent, explicit target selection remains required.
+
 Endpoint bridge transitions now actively clear source-bound visualization selection, distinguish retry failure from no-device reacquisition, and restore focus to the endpoint selector. A replacement accepted snapshot is therefore required after endpoint replacement rather than reusing stale waveform/FFT state.
 
 Settings endpoint, DJ monitoring, and overlay availability now share the same capture-recovery reset path and no-device/reacquisition language. A failed monitor or unavailable overlay clears stale visualization selection and returns focus to the recovery target.

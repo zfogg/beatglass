@@ -36,6 +36,8 @@ MARKERS = {
     "qml overlay selection readiness": "DJ overlay display selected; retry is now available.",
     "qml overlay persisted diagnostic": "Persisted analysis admission result (not current visualization):",
     "qml overlay diagnostic dismissal": "!window.overlayPersistedDiagnosticDismissed",
+    "qml overlay saved target": "overlayPreferredScreenIndex",
+    "qml overlay target restoration": "saved display target selected.",
 }
 
 
