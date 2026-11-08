@@ -50,7 +50,7 @@ for ($i = 0; $i -lt $expectedCases.Count; $i++) {
     if ([string]::IsNullOrWhiteSpace($evidence[$i].log) -or [IO.Path]::IsPathRooted($evidence[$i].log)) { throw "PASS case lacks relative log evidence: $($evidence[$i].case)" }
     $logPath = [IO.Path]::GetFullPath((Join-Path $OutputDirectory $evidence[$i].log))
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
-    if (-not $logPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw "Missing log evidence for $($evidence[$i].case): $($evidence[$i].log)" }
+    if (-not $logPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $logPath -PathType Leaf) -or (Get-Item -LiteralPath $logPath).Length -eq 0) { throw "Missing or empty log evidence for $($evidence[$i].case): $($evidence[$i].log)" }
     if ((Get-Item -LiteralPath $logPath).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Log evidence must not be a reparse point: $($evidence[$i].log)" }
   }
 }
@@ -65,7 +65,7 @@ for ($i = 0; $i -lt $expectedOverlayCases.Count; $i++) {
     if ([string]::IsNullOrWhiteSpace($overlayEvidence[$i].screenshot) -or [IO.Path]::IsPathRooted($overlayEvidence[$i].screenshot)) { throw "PASS overlay case lacks relative screenshot evidence: $($overlayEvidence[$i].case)" }
     $screenshotPath = [IO.Path]::GetFullPath((Join-Path $OutputDirectory $overlayEvidence[$i].screenshot))
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
-    if (-not $screenshotPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $screenshotPath -PathType Leaf)) { throw "Missing screenshot evidence for $($overlayEvidence[$i].case): $($overlayEvidence[$i].screenshot)" }
+    if (-not $screenshotPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $screenshotPath -PathType Leaf) -or (Get-Item -LiteralPath $screenshotPath).Length -eq 0) { throw "Missing or empty screenshot evidence for $($overlayEvidence[$i].case): $($overlayEvidence[$i].screenshot)" }
     if ((Get-Item -LiteralPath $screenshotPath).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Screenshot evidence must not be a reparse point: $($overlayEvidence[$i].screenshot)" }
   }
 }
