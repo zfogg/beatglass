@@ -474,6 +474,16 @@ TestCase {
         app.destroy()
     }
 
+    function test_playbackSourceAndEpochChangesClearVisualization() {
+        let app = shellWithPlayback.createObject(null)
+        let empty = findChild(app, "visualizationEmptyState")
+        verify(empty !== null)
+        fakePlayback.source = Qt.resolvedUrl("../fixtures/tone.flac")
+        fakePlayback.epoch = 2
+        verify(empty.visible)
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")
