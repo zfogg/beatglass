@@ -1,0 +1,32 @@
+/* Keep the Hawkmoth API reference usable on narrow screens. */
+html,
+body {
+  overflow-x: hidden;
+}
+
+div.body {
+  overflow-wrap: anywhere;
+}
+
+div.body pre,
+div.body table,
+div.body .sig,
+div.body .highlight {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+div.body pre,
+div.body .highlight {
+  overflow-x: auto;
+}
+
+@media screen and (max-width: 940px) {
+  div.body .sig,
+  div.body .sig span,
+  div.body code.descname,
+  div.body code.descclassname {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
