@@ -12,6 +12,7 @@ ApplicationWindow {
     minimumWidth: 600; minimumHeight: 440
     title: "Beatglass"
     property var metadataBridge: metadata
+    property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
@@ -278,6 +279,13 @@ ApplicationWindow {
                             anchors.centerIn: parent
                             visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)
                             text: window.browseFolder.toString() ? "No matching audio files or folders, or this folder cannot be read." : "Choose a folder to browse."
+                        }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Button { text: "Open"; objectName: "openPlayback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.open(1) }
+                            Button { text: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume" : "Pause"; objectName: "pausePlayback"; enabled: window.playbackBridge && window.playbackBridge.state === "Playing"; onClicked: window.playbackBridge.pause() }
+                            Button { text: "Stop"; objectName: "stopPlayback"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.stop() }
+                            Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState" }
                         }
                     }
                 }
