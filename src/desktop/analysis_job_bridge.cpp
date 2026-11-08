@@ -90,6 +90,7 @@ void AnalysisJobBridge::cancel() {
   if (!canCancel()) return;
   retryable_->cancel();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
   poll();
 }
 
@@ -142,6 +143,7 @@ void AnalysisJobBridge::cancelBatch() {
   for (const auto& operation : batch_) if (operation) operation->cancel();
   batchResultsPublished_ = 0; batchLastResult_.clear();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!batch_.empty() && status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
   poll();
 }
 

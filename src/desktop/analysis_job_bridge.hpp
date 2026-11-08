@@ -34,12 +34,12 @@ public:
   QString failureReason() const { return failureReason_; }
   bool canCancel() const noexcept;
   bool canRetry() const noexcept;
-  /** Cancel the active job and clear stale result presentation. */
+  /** Cancel the active job, publish Cancelled immediately, and clear stale result presentation. */
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void retry();
   /** Submit a bounded batch, publish Queued/Failed aggregate state, and retain accepted operations for retry. */
   int submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority = 0);
-  /** Cancel active batch jobs and clear stale result/batch presentation. */
+  /** Cancel active batch jobs, publish Cancelled immediately, and clear stale result/batch presentation. */
   Q_INVOKABLE void cancelBatch();
   /** Retry terminal batch jobs and immediately publish the refreshed aggregate state. */
   Q_INVOKABLE void retryBatch();
