@@ -17,3 +17,11 @@ class ReadinessReportContractTest(unittest.TestCase):
                   "exit_gate_status": "READY", "exit_gate_reason_codes": ["scenario"],
                   "platform_support_status": [{"platform": p} for p in ("windows", "macos", "linux")]}
         self.assertIn("READY report cannot contain", "\n".join(module.validate(report)))
+
+    def test_report_requires_platform_manifest_and_provenance_linkage(self):
+        report = __import__("json").loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0].pop("manifest_sha256")
+        report["platforms"][1]["provenance_complete"] = False
+        errors = "\n".join(module.validate(report))
+        self.assertIn("invalid manifest hash linkage", errors)
+        self.assertIn("provenance is incomplete", errors)
