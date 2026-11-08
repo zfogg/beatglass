@@ -339,6 +339,15 @@ ApplicationWindow {
                         RowLayout { Layout.fillWidth: true
                             Label { text: "Analysis integration is unavailable until a decoder-backed operation is connected."; objectName: "analysisProgress"; Accessible.name: "Analysis progress"; Accessible.description: text; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                         }
+                        Label {
+                            objectName: "sourceWorkflowStatus"
+                            text: window.selectedAudioUrl.toString() === ""
+                                  ? "Select an audio source to inspect, analyze, and play it."
+                                  : "Source workflow · metadata: " + window.metadataStatus + " · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · analyzed frames: " + (analysisJob ? analysisJob.frames : 0)
+                            Accessible.name: "Selected source workflow status"
+                            Accessible.description: text
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
                     }
                 }
             }
