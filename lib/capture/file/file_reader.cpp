@@ -13,6 +13,11 @@ bool unsupported_extension(const std::filesystem::path& path) {
   std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return ext == ".aac" || ext == ".m4a";
 }
+bool known_audio_extension(const std::filesystem::path& path) {
+  auto ext = path.extension().string();
+  std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+  return ext == ".wav" || ext == ".flac" || ext == ".mp3" || ext == ".aif" || ext == ".aiff";
+}
 }
 struct FileReader::Impl {
   SNDFILE* handle{}; SF_INFO info{}; FileMetadata metadata; std::filesystem::path path; std::filesystem::file_time_type initial_modified{}; std::uintmax_t initial_size{}; std::uint64_t epoch{}, position{}; bool ended{}, failed{};
@@ -27,6 +32,9 @@ struct FileReader::Impl {
       if (unsupported_extension(path))
         throw FileOpenError(FileOpenErrorKind::unsupported_format,
                             "Unsupported audio format (AAC/M4A is not enabled)");
+      std::error_code ec;
+      if (known_audio_extension(path) && std::filesystem::is_regular_file(path, ec) && !ec)
+        throw FileOpenError(FileOpenErrorKind::invalid_format, "Invalid audio format");
       throw FileOpenError(FileOpenErrorKind::unreadable, "Could not open audio file");
     }
     if (info.samplerate <= 0 || info.channels <= 0 || info.channels > std::numeric_limits<std::uint16_t>::max() || info.frames < 0) {
