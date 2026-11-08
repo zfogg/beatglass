@@ -111,6 +111,8 @@ try {
     "artifact_sha256=qualification-artifacts.sha256"
     "playback_evidence=native-playback-evidence.json"
     "overlay_evidence=native-overlay-evidence.json"
+    "display_topology=display-topology.json"
+    "audio_inventory=audio-endpoints.json"
   ) | Set-Content -LiteralPath $identityManifest -Encoding utf8
   "Qualification identity manifest: $identityManifest"
   $evidencePath = Join-Path $OutputDirectory "native-playback-evidence.json"
