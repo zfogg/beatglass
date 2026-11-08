@@ -300,6 +300,8 @@ Duplicate catalog-status and output-device value declarations were consolidated 
 
 The separate filtered-result count now has a distinct `catalogResultCount` object identity, preventing duplicate automation targets while preserving the primary catalog-status contract.
 
+Redundant text labels inside each folder-list delegate are now excluded from the accessibility tree; the delegate’s richer list-item name, value, and action description remain the single announcement surface.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.

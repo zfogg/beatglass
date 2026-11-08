@@ -507,8 +507,8 @@ ApplicationWindow {
                             ToolTip.text: fileIsDir ? "Open folder " + fileName : "Select audio file " + fileName
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
                             contentItem: RowLayout {
-                                Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                                Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100 }
+                                Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.ignored: true }
+                                Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100; Accessible.ignored: true }
                             }
                         }
                         Column {
