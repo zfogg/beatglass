@@ -933,18 +933,19 @@ ApplicationWindow {
                     objectName: "visualizationCaptureStatus"
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
                     Accessible.name: "Visualization capture status"
+                    Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
                     Layout.fillWidth: true; wrapMode: Text.WordWrap
                 }
                 Label {
                     objectName: "djStatus"; text: "Status: " + window.liveBridge.status
-                    Accessible.name: "DJ monitoring status"; Accessible.description: text
+                    Accessible.name: "DJ monitoring status"; Accessible.role: Accessible.StaticText; Accessible.description: text
                 }
                 Label {
                     objectName: "djEstimates"
                     text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
-                    Accessible.name: "DJ estimates"; Accessible.description: text
+                    Accessible.name: "DJ estimates"; Accessible.role: Accessible.StaticText; Accessible.description: text
                 }
                  Label {
                      objectName: "djEvidenceStatus"
@@ -957,6 +958,7 @@ ApplicationWindow {
                          return "Live evidence is unavailable until output monitoring starts."
                      }
                      Accessible.name: "DJ evidence status"
+                     Accessible.role: Accessible.StaticText
                      Accessible.description: text
                      wrapMode: Text.WordWrap; Layout.fillWidth: true
                  }
