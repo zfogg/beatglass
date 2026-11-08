@@ -52,7 +52,9 @@ int main() {
     assert(retryable.size() == 2 && retryable[0].id == "a-retry" && retryable[1].id == "m-retry");
     bool invalid_limit = false;
     try { (void)reopened.retryable_runs(0); } catch (const std::invalid_argument&) { invalid_limit = true; }
-    assert(invalid_limit && !reopened.discard_retryable("missing-retry"));
+    bool oversized_limit = false;
+    try { (void)reopened.retryable_runs(10001); } catch (const std::invalid_argument&) { oversized_limit = true; }
+    assert(invalid_limit && oversized_limit && !reopened.discard_retryable("missing-retry"));
     std::string result;
     assert(reopened.find(key, result) && result == "result-a");
     assert(reopened.discard_retryable("m-retry"));
