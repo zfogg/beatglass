@@ -3,6 +3,10 @@ set -euo pipefail
 
 repo_root=$(cd "$(dirname "$0")/../.." && pwd)
 verifier="$repo_root/tests/macos/verify_qualification_artifacts.sh"
+if ! command -v shasum >/dev/null 2>&1; then
+  echo "SKIP: shasum is required for macOS verifier regression"
+  exit 0
+fi
 out_dir=$(mktemp -d "${TMPDIR:-/tmp}/beatglass-verify.XXXXXX")
 trap 'rm -rf "$out_dir"' EXIT
 mkdir -p "$out_dir/build/beatglass-desktop.app/Contents/MacOS" "$out_dir/build/beatglass-coreaudio-smoke.app/Contents/MacOS" "$out_dir/build/beatglass-coreaudio-recovery.app/Contents/MacOS"
