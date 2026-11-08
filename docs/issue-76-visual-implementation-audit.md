@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Endpoint replacement and reacquisition preserve focus on the endpoint selector and route announcements through the shared recovery helper. Reduced-motion mode changes animation presentation only; stale clearing, status text, and keyboard focus remain identical across Settings, DJ, and overlay surfaces.
+
 Endpoint recovery status is consistent across Settings, DJ monitoring, and overlay: endpoint changes announce stale-selection clearing, retry/reacquisition, and fresh accepted snapshots through one helper. Reduced-motion mode suppresses transition animation while preserving the same text and focus semantics; native cross-screen timing remains open.
 
 The complete Settings output-device flow is now traceable across design states: selection announces the chosen endpoint, refresh restores focus to the endpoint selector, permission failure exposes recovery guidance, replacement clears the stale selection, and reacquisition announces the new endpoint. Native device/permission timing remains a qualification gap.
