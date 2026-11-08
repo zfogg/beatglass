@@ -45,6 +45,10 @@ int main() {
     cache.begin("z-retry", key);
     cache.begin("a-retry", key);
     cache.begin("m-retry", key);
+    cache.begin("marked", key);
+    assert(!cache.mark_retryable("marked", CacheKey{"sha256:wrong", key.engine, key.config, key.mode}));
+    assert(cache.mark_retryable("marked", key));
+    assert(cache.discard_retryable("marked"));
   }
   {
     SqliteCache reopened(path.string());
