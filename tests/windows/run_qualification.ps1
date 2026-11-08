@@ -67,7 +67,8 @@ try {
 
   $required = @(
     (Join-Path $buildDirectory "Release/beatglass-desktop.exe"),
-    (Join-Path $buildDirectory "Release/windows_endpoint_tests.exe")
+    (Join-Path $buildDirectory "Release/windows_endpoint_tests.exe"),
+    (Join-Path $buildDirectory "Release/windows_overlay_tests.exe")
   )
   foreach ($path in $required) {
     if (-not (Test-Path $path)) { throw "Required qualification artifact is missing: $path" }
