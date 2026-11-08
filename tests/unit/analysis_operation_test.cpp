@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <stdexcept>
 #include "beatglass/library/analysis_operation.hpp"
 #include "beatglass/library/analysis_commit.hpp"
 TEST_CASE("analysis operation retains source identity and bounded callback contract") { beatglass::library::AnalysisOperation op; op.source.size_bytes=12; op.identity.mode="offline"; op.serialize=[] { return std::string("result"); }; REQUIRE(op.serialize()=="result"); REQUIRE(op.identity.mode=="offline"); }
@@ -40,6 +41,16 @@ TEST_CASE("analysis publication observes cancellation before serialization") {
   std::stop_source stop; stop.request_stop();
   REQUIRE(beatglass::library::publish_operation(cache, "run", op, stop.get_token()) == beatglass::library_detail::Publish::cancelled);
   CHECK_FALSE(serialized); CHECK_FALSE(verified);
+}
+TEST_CASE("analysis publication converts serialization failures into errors") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library::AnalysisOperation op;
+  op.source.path = "track.wav"; op.source.content_hash = "sha256:test";
+  op.identity.content_hash = op.source.content_hash; op.identity.engine_version = "engine";
+  op.identity.configuration_id = "config"; op.identity.mode = "offline";
+  op.serialize = []() -> std::string { throw std::runtime_error("serialization failed"); };
+  op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  REQUIRE(beatglass::library::publish_operation(cache, "run", op, {}) == beatglass::library_detail::Publish::error);
 }
 TEST_CASE("analysis publication stops after cancellation during serialization") {
   beatglass::library_detail::SqliteCache cache(":memory:");
