@@ -271,3 +271,6 @@ The qualification work now has an executable, fail-closed preparation path on me
 The remaining Issue #1 exit gate is explicit: perform supported Windows WASAPI, macOS Core Audio and Linux PipeWire desktop/audio/overlay runs, retain build identity, environment, exact commands, logs and screenshots/recordings for every applicable scenario, and obtain an all-platform `READY` report. Headless, CI, WSL, SSH-only, synthetic and portable-fixture results remain preparation evidence rather than qualification.
 
 The readiness report contract is versioned as `readiness_report_schema: 1`; `exit_gate_status` and `exit_gate_reason_codes` are the stable handoff fields. Product support language remains experimental while native qualification is open.
+
+## Cache acceptance integration
+A cache acceptance regression now demonstrates that a committed unchanged identity is found on the next analysis request and the analysis callback is not rerun. Changed identity and configuration invalidation remain covered by the existing cache lifecycle tests; end-to-end decoder/UI integration and native qualification remain pending.
