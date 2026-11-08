@@ -123,15 +123,19 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         if not isinstance(scenarios, list):
             errors.append(f"{platform}: manifest scenarios must be an array")
             scenarios = []
+        scenario_ids = set()
         for scenario in scenarios:
             if not isinstance(scenario, dict):
                 errors.append(f"{platform}: manifest scenario entry must be an object")
                 continue
+            scenario_id = str(scenario.get("id"))
+            if scenario_id in scenario_ids:
+                errors.append(f"{platform}: duplicate manifest scenario id: {scenario_id}")
+            scenario_ids.add(scenario_id)
             evidence = scenario.get("evidence")
             if not evidence:
                 continue
             path = bundles / platform / str(evidence)
-            scenario_id = str(scenario.get("id"))
             if not path.resolve().is_relative_to(platform_root):
                 errors.append(f"{platform}: scenario evidence escapes retained bundle: {evidence}")
                 continue
