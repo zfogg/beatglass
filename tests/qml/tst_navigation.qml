@@ -74,6 +74,7 @@ TestCase {
     Component { id: shellWithPlayback; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackBridge: fakePlayback } }
     Component { id: shellWithAnalysis; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; analysisJobBridge: fakeAnalysis } }
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay; captureMonitorBridge: fakeCapture } }
+    Component { id: shellWithOverlayPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay; captureMonitorBridge: fakeCapture; themePreferencesBridge: fakeThemePreferences } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
         fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = -1; fakeOverlay.screenIndex = -1; fakeOverlay.requestedWidth = 0
@@ -380,6 +381,22 @@ TestCase {
         let pulse = findChild(app, "beatPulse")
         verify(pulse !== null)
         compare(pulse.repeat, true)
+        app.destroy()
+    }
+
+    function test_reducedMotionStopsAndClearsOverlayPulse() {
+        fakeThemePreferences.reduceMotion = false
+        fakeLive.status = "Tracking"
+        let app = shellWithOverlayPreferences.createObject(null)
+        let pulse = findChild(app, "beatPulse")
+        let fade = findChild(app, "pulseFade")
+        let surface = findChild(app, "overlaySurface")
+        verify(pulse !== null); verify(fade !== null); verify(surface !== null)
+        fakeThemePreferences.reduceMotion = true
+        tryCompare(pulse, "running", false)
+        compare(fade.running, false)
+        compare(surface.pulseOpacity, 0.0)
+        fakeLive.status = "Stopped"
         app.destroy()
     }
 

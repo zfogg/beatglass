@@ -129,7 +129,23 @@ ApplicationWindow {
                 onTriggered: { overlaySurface.pulseOpacity = 1.0; pulseFade.restart() }
             }
             Timer { id: pulseFade; interval: 120; onTriggered: overlaySurface.pulseOpacity = 0.0 }
-            Connections { target: window.liveBridge; function onChanged() { beatPulse.restart() } }
+            Connections {
+                target: window.themePreferencesBridge
+                function onReduceMotionChanged() {
+                    if (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion) {
+                        beatPulse.stop()
+                        pulseFade.stop()
+                        overlaySurface.pulseOpacity = 0.0
+                    }
+                }
+            }
+            Connections {
+                target: window.liveBridge
+                function onChanged() {
+                    if (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion)
+                        beatPulse.restart()
+                }
+            }
             MouseArea {
                 anchors.fill: parent
                 property bool fallbackMove: false
