@@ -29,3 +29,5 @@ The source adapters, library backend, DSP and UI agents can propose the typed er
 ## Qualification evidence handoff update
 
 The merged qualification tooling now provides a fail-closed handoff path: the status checker requires Windows, macOS and Linux rows; the retained-bundle verifier checks provenance, hashes, canonical paths, required scenario IDs, duplicate/unknown scenarios and one retained artifact per completed scenario; and the report exposes per-platform and aggregate readiness failures. These are preparation and evidence-integrity gates, not native qualification results. Actual desktop, audio and overlay observations on supported hardware remain open, and headless tests, CI, WSL, SSH-only runs and portable fixtures do not satisfy the native gate.
+
+The shared readiness report uses `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes`. Support language remains experimental until native qualification is complete.

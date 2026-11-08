@@ -45,3 +45,136 @@ TEST_CASE("catalog does not advertise unqualified codecs") {
   REQUIRE(result.entries.size() == 1);
   CHECK(result.entries[0].name == "track.aiff");
 }
+
+TEST_CASE("catalog normalizes the short AIFF extension") {
+  TempDir dir; dir.file("voice.aif");
+  const auto result = beatglass::library::browse(dir.path);
+  REQUIRE(result.entries.size() == 1);
+  CHECK(result.entries[0].format == "AIFF");
+  CHECK(result.entries[0].title == "voice");
+}
+
+TEST_CASE("catalog normalizes uppercase short AIFF extension") {
+  TempDir dir; dir.file("VOICE.AIF");
+  const auto result = beatglass::library::browse(dir.path);
+  REQUIRE(result.entries.size() == 1);
+  CHECK(result.entries[0].format == "AIFF");
+}
+
+TEST_CASE("catalog filters directories and files case-insensitively") {
+  TempDir dir; dir.file("Track.WAV"); std::filesystem::create_directory(dir.path / "Samples");
+  const auto result = beatglass::library::browse(dir.path, "SAMP");
+  REQUIRE(result.entries.size() == 1);
+  CHECK(result.entries[0].directory);
+  CHECK(result.entries[0].name == "Samples");
+  CHECK(result.entries[0].format.empty());
+}
+
+TEST_CASE("catalog preserves multi-dot and spaced source identity") {
+ TempDir dir; dir.file("Live.Set.v2.WAV"); dir.file("Morning Take.mp3");
+ const auto result = beatglass::library::browse(dir.path, "TAKE");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].name == "Morning Take.mp3");
+ CHECK(result.entries[0].title == "Morning Take");
+ CHECK(result.entries[0].format == "MP3");
+}
+
+TEST_CASE("catalog keeps hidden supported sources discoverable") {
+ TempDir dir; dir.file(".hidden.FLAC");
+ const auto result = beatglass::library::browse(dir.path, "HIDDEN");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].name == ".hidden.FLAC");
+ CHECK(result.entries[0].title == ".hidden");
+ CHECK(result.entries[0].format == "FLAC");
+}
+
+TEST_CASE("catalog reports a replaced folder path without stale entries") {
+ TempDir dir; std::filesystem::create_directory(dir.path / "Library.wav");
+ const auto first = beatglass::library::browse(dir.path);
+ REQUIRE(first.entries.size() == 1);
+ CHECK(first.entries[0].directory);
+ std::filesystem::remove_all(dir.path / "Library.wav");
+ dir.file("Library.wav");
+ const auto replaced = beatglass::library::browse(dir.path);
+ REQUIRE(replaced.entries.size() == 1);
+ CHECK_FALSE(replaced.entries[0].directory);
+ CHECK(replaced.entries[0].name == "Library.wav");
+ CHECK(replaced.entries[0].format == "WAV");
+}
+
+TEST_CASE("catalog reports a replaced audio file as a directory") {
+ TempDir dir; dir.file("Session.wav");
+ const auto first = beatglass::library::browse(dir.path, "SESSION");
+ REQUIRE(first.entries.size() == 1);
+ CHECK_FALSE(first.entries[0].directory);
+ std::filesystem::remove(dir.path / "Session.wav");
+ std::filesystem::create_directory(dir.path / "Session.wav");
+ const auto replaced = beatglass::library::browse(dir.path, "session");
+ REQUIRE(replaced.entries.size() == 1);
+ CHECK(replaced.entries[0].directory);
+ CHECK(replaced.entries[0].format.empty());
+}
+
+TEST_CASE("catalog orders case-fold collisions by original name and preserves paths") {
+ TempDir dir; dir.file("alpha.wav"); dir.file("Alpha.wav");
+ const auto result = beatglass::library::browse(dir.path);
+ REQUIRE(result.entries.size() == 2);
+ CHECK(result.entries[0].name == "Alpha.wav");
+ CHECK(result.entries[1].name == "alpha.wav");
+ CHECK(result.entries[0].path == dir.path / "Alpha.wav");
+ CHECK(result.entries[1].path == dir.path / "alpha.wav");
+}
+
+TEST_CASE("catalog excludes unsupported files from matching searches") {
+ TempDir dir; dir.file("notes.txt"); dir.file("mix.wav");
+ const auto result = beatglass::library::browse(dir.path, "notes");
+ CHECK(result.entries.empty());
+ CHECK(result.diagnostic.empty());
+}
+
+TEST_CASE("catalog search remains deterministic after replacing a filtered entry") {
+ TempDir dir; dir.file("Take.wav"); dir.file("Take.txt");
+ auto first = beatglass::library::browse(dir.path, "take");
+ REQUIRE(first.entries.size() == 1);
+ CHECK(first.entries[0].name == "Take.wav");
+ std::filesystem::remove(dir.path / "Take.wav");
+ dir.file("Take.mp3");
+ const auto replaced = beatglass::library::browse(dir.path, "TAKE");
+ REQUIRE(replaced.entries.size() == 1);
+ CHECK(replaced.entries[0].name == "Take.mp3");
+ CHECK(replaced.entries[0].format == "MP3");
+}
+
+TEST_CASE("catalog returns distinct case-sensitive paths for identical folded names") {
+ TempDir dir; dir.file("Song.WAV"); dir.file("song.WAV");
+ const auto result = beatglass::library::browse(dir.path, "song");
+ REQUIRE(result.entries.size() == 2);
+ CHECK(result.entries[0].path != result.entries[1].path);
+ CHECK(result.entries[0].name == "Song.WAV");
+ CHECK(result.entries[1].name == "song.WAV");
+}
+
+TEST_CASE("catalog ignores unsupported files even with case-folded matches") {
+ TempDir dir; dir.file("TAKE.TXT"); dir.file("Take.FLAC");
+ const auto result = beatglass::library::browse(dir.path, "take");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].name == "Take.FLAC");
+ CHECK(result.entries[0].format == "FLAC");
+}
+
+TEST_CASE("catalog preserves empty directories as navigable entries") {
+ TempDir dir; std::filesystem::create_directory(dir.path / "Empty Mix");
+ const auto result = beatglass::library::browse(dir.path, "empty");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].directory);
+ CHECK(result.entries[0].name == "Empty Mix");
+ CHECK(result.entries[0].bytes == 0);
+ CHECK(result.entries[0].format.empty());
+}
+
+TEST_CASE("catalog reports a file path as an invalid browse root") {
+ TempDir dir; dir.file("track.wav");
+ const auto result = beatglass::library::browse(dir.path / "track.wav");
+ CHECK(result.entries.empty());
+ CHECK_FALSE(result.diagnostic.empty());
+}

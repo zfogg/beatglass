@@ -37,19 +37,41 @@ int main() {
   dir.file("notes.txt");
   dir.file("stream.ogg");
   std::filesystem::create_directory(dir.path / "Mixes");
+  std::filesystem::create_directory(dir.path / "Folder.WAV");
 
   const auto result = beatglass::library::browse(dir.path);
   require(result.diagnostic.empty(), "unexpected browse diagnostic");
-  require(result.entries.size() == 7, "supported files were not advertised");
+  require(result.entries.size() == 8, "supported files were not advertised");
   require(result.entries[0].name == "Alpha.mp3", "case-folded ordering changed");
-  require(result.entries[4].name == "Mixes", "directory navigation entry missing");
-  require(result.entries[6].name == "zeta.WAV", "supported audio entry missing");
+  require(result.entries[5].name == "Mixes", "directory navigation entry missing");
+  require(result.entries[7].name == "zeta.WAV", "supported audio entry missing");
   require(result.entries[0].title == "Alpha" && result.entries[0].format == "MP3",
           "audio display metadata was not derived from the filename");
   require(result.entries[0].bytes == 5 && result.entries[0].duration_seconds < 0.0,
           "filesystem-only catalog metadata contract changed");
-  require(result.entries[4].directory && result.entries[4].bytes == 0,
+  require(result.entries[5].directory && result.entries[5].bytes == 0,
           "directory entry metadata was not normalized");
+  const auto extension_named_directory = beatglass::library::browse(dir.path, "folder");
+  require(extension_named_directory.entries.size() == 1 && extension_named_directory.entries[0].directory,
+          "directory with an audio-like extension was filtered as a file");
+  std::ofstream(dir.path / "Take One.mp3") << "audio";
+  const auto spaced_source = beatglass::library::browse(dir.path, "TAKE ONE");
+  require(spaced_source.entries.size() == 1 && spaced_source.entries[0].name == "Take One.mp3" &&
+              spaced_source.entries[0].title == "Take One" && spaced_source.entries[0].path.filename() == "Take One.mp3",
+          "source identity with spaces was not preserved");
+  std::filesystem::remove(dir.path / "Take One.mp3");
+  std::ofstream(dir.path / ".hidden.mp3") << "audio";
+  const auto hidden_source = beatglass::library::browse(dir.path, "HIDDEN");
+  require(hidden_source.entries.size() == 1 && hidden_source.entries[0].name == ".hidden.mp3" &&
+              hidden_source.entries[0].title == ".hidden" && hidden_source.entries[0].format == "MP3",
+          "hidden source identity was not preserved");
+  std::filesystem::remove(dir.path / ".hidden.mp3");
+  std::ofstream(dir.path / "mix.v2.mp3") << "audio";
+  const auto dotted_source = beatglass::library::browse(dir.path, "MIX.V2");
+  require(dotted_source.entries.size() == 1 && dotted_source.entries[0].title == "mix.v2" &&
+              dotted_source.entries[0].format == "MP3",
+          "multi-dot source identity was not preserved");
+  std::filesystem::remove(dir.path / "mix.v2.mp3");
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
   require(filtered.entries.empty(), "filter returned an unexpected entry");
@@ -85,6 +107,10 @@ int main() {
   const auto tied = beatglass::library::browse(dir.path, "alpha");
   require(tied.entries.size() >= 2,
           "duplicate sources were not represented");
+  for (const auto& entry : tied.entries) {
+    require(!entry.name.empty() && !entry.path.empty() && entry.format == "MP3",
+            "duplicate catalog entries lost identity metadata");
+  }
   const auto empty = beatglass::library::browse(dir.path, "empty");
   require(empty.entries.size() == 1 && empty.entries[0].bytes == 0 && empty.entries[0].format == "WAV",
           "zero-byte supported source metadata was not retained");
@@ -98,7 +124,23 @@ int main() {
   const auto renamed_replacement = beatglass::library::browse(dir.path, "beta");
   require(renamed_replacement.entries.size() == 1 && renamed_replacement.entries[0].name == "Beta.mp3",
           "replacement source was not visible after catalog refresh");
+  std::filesystem::remove(dir.path / "Beta.mp3");
+  std::filesystem::create_directory(dir.path / "Beta.mp3");
+  const auto directory_replacement = beatglass::library::browse(dir.path, "beta");
+  require(directory_replacement.entries.size() == 1 && directory_replacement.entries[0].directory,
+          "directory replacement was not visible after catalog refresh");
+  std::filesystem::remove_all(dir.path / "Beta.mp3");
+  std::filesystem::create_directory(dir.path / "Gamma.mp3");
+  require(beatglass::library::browse(dir.path, "gamma").entries.size() == 1,
+          "new directory replacement was not visible");
+  std::filesystem::remove_all(dir.path / "Gamma.mp3");
+  std::ofstream(dir.path / "Gamma.mp3") << "audio";
+  const auto file_replacement = beatglass::library::browse(dir.path, "gamma");
+  require(file_replacement.entries.size() == 1 && !file_replacement.entries[0].directory && file_replacement.entries[0].format == "MP3",
+          "directory-to-file replacement was not classified as audio");
+  std::filesystem::remove(dir.path / "Gamma.mp3");
   std::filesystem::remove_all(dir.path / "Mixes");
+  std::filesystem::remove_all(dir.path / "Folder.WAV");
   const auto after_directory_remove = beatglass::library::browse(dir.path, "mix");
   require(after_directory_remove.entries.empty() && after_directory_remove.diagnostic.empty(),
           "removed navigation directory remained visible");

@@ -40,6 +40,32 @@ class QualificationHandoffTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("qualification handoff covers", result.stdout)
 
+    def test_handoff_docs_describe_versioned_report_contract(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        docs = (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8")
+        for phrase in ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "platform_support_status", "native_qualification_required"):
+            self.assertIn(phrase, docs)
+
+    def test_current_status_has_one_row_per_platform(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        rows = [line for line in (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8").splitlines()
+                if line.startswith(("| Windows |", "| macOS |", "| Linux |"))]
+        self.assertEqual(len(rows), len({row.split("|")[1].strip() for row in rows}))
+
+    def test_four_handoff_documents_share_readiness_contract(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        for relative in ("docs/progress.md", "docs/phase0-gate.md", "docs/foundation-handoff.md", "docs/platform-qualification-status.md"):
+            text = (root / relative).read_text(encoding="utf-8").lower()
+            self.assertIn("readiness_report_schema: 1", text, relative)
+            self.assertIn("native qualification", text, relative)
+            self.assertIn("experimental", text, relative)
+
+    def test_handoff_checker_validates_relative_documentation_links(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        for relative in ("docs/progress.md", "docs/phase0-gate.md", "docs/foundation-handoff.md", "docs/platform-qualification-status.md"):
+            text = (root / relative).read_text(encoding="utf-8")
+            self.assertNotIn("](missing-", text, relative)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -22,6 +22,26 @@ class EvidenceBundleTest(unittest.TestCase):
             self.assertTrue(any("missing provenance" in error for error in errors))
             self.assertTrue(any("missing required scenarios" in error for error in errors))
 
+    def test_malformed_manifest_and_artifact_entries_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = root / "manifest.json"
+            manifest.write_text("{not-json", encoding="utf-8")
+            self.assertTrue(any("invalid manifest JSON" in error for error in module.verify(root, manifest)))
+            manifest.write_text(json.dumps({"artifacts": ["bad"], "scenarios": []}), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid artifact entry" in error for error in errors))
+
+    def test_pending_scenario_is_allowed_without_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": [
+                        {"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertFalse(any("invalid scenario" in error for error in errors))
+
     def test_pass_fixture_is_valid(self):
         root = Path(__file__).parent / "fixtures/evidence-bundle"
         self.assertEqual(module.verify(root, root / "manifest.json"), [])
@@ -106,6 +126,15 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             status.write_text("| Windows | prep | gates |\n| macOS | prep | gates |\n| Linux | prep | gates |\n", encoding="utf-8")
             (bundles / "windows").mkdir()
             self.assertIn("macos: missing manifest", "\n".join(readiness.check(status, bundles)))
+
+    def test_readiness_cli_rejects_unrun_required_scenarios(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            (bundles / "windows" / "capture.txt").write_text("actual\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": __import__("hashlib").sha256(b"actual\n").hexdigest()})
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("required scenarios are not PASS", "\n".join(readiness.check(status, bundles)))
 
     def test_readiness_rejects_platform_mismatch(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -240,6 +269,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
             result = readiness.report(status, bundles)
             self.assertEqual(result["platforms"][0]["scenario_status_counts"], {"PASS": 1, "UNRUN": 1})
+            self.assertIn("recovery", result["platforms"][0]["unpassed_scenarios"])
 
     def test_readiness_reports_freshness_details(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -301,6 +331,21 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertTrue(result["inventory_bytes_consistent"])
             self.assertTrue(result["inventory_count_consistent"])
             self.assertFalse(result["all_platforms_ready"])
+            self.assertEqual(result["exit_gate_status"], "PENDING")
+            self.assertTrue(result["exit_gate_reasons"])
+            self.assertIn("manifest", result["exit_gate_reason_codes"])
+            self.assertIn("native_qualification_summary", result)
+            self.assertFalse(result["native_qualification_ready"])
+            self.assertTrue(result["native_summary_consistent"])
+            self.assertTrue(result["native_qualification_blockers"])
+            self.assertEqual(result["native_qualification_blockers"][0]["platform"], "windows")
+            self.assertTrue(result["native_blockers_consistent"])
+            self.assertEqual(result["platform_support_status"][0]["status"], "PENDING")
+            self.assertIn("scenario", result["platform_support_status"][0]["reason_codes"])
+            self.assertTrue(result["platform_support_status_consistent"])
+            self.assertEqual(result["support_language"], "experimental")
+            self.assertTrue(result["native_qualification_required"])
+            self.assertEqual(result["readiness_report_schema"], 1)
             self.assertEqual(result["not_ready_platforms"], ["windows"])
             self.assertTrue(result["failure_summary_consistent"])
             self.assertFalse(result["aggregate_consistent"])

@@ -34,17 +34,23 @@ int main() {
     try { (void)reader.read(std::span<float>{}); }
     catch (const std::invalid_argument&) { empty_buffer_rejected = true; }
     assert(empty_buffer_rejected);
+    std::stop_source cancelled_read;
+    cancelled_read.request_stop();
+    std::vector<float> cancelled_samples(2);
+    const auto cancelled = reader.read(cancelled_samples, cancelled_read.get_token());
+    assert(cancelled.status == FileReadStatus::cancelled);
     std::vector<float> partial_samples(2);
     const auto partial_first = reader.read(partial_samples);
     assert(partial_first.status == FileReadStatus::data && partial_first.block.samples.size() == 2 && partial_first.block.first_frame == 0);
     const auto partial_second = reader.read(partial_samples);
     assert(partial_second.status == FileReadStatus::data && partial_second.block.samples.size() == 2 && partial_second.block.first_frame == 2);
     std::vector<float> samples(4);
+    reader.seek(0);
     const auto first = reader.read(samples);
-    assert(first.status == FileReadStatus::data && first.block.start_frame == 0 && first.block.epoch == 7);
+    assert(first.status == FileReadStatus::data && first.block.first_frame == 0 && first.block.epoch == 8);
     reader.seek(2, 9);
     const auto seeked = reader.read(samples);
-    assert(seeked.status == FileReadStatus::data && seeked.block.start_frame == 2 && seeked.block.epoch == 9);
+    assert(seeked.status == FileReadStatus::data && seeked.block.first_frame == 2 && seeked.block.epoch == 9);
     bool stale_epoch = false;
     try { reader.seek(0, 9); } catch (const std::invalid_argument&) { stale_epoch = true; }
     assert(stale_epoch);
@@ -55,22 +61,47 @@ int main() {
     assert(out_of_range);
     const auto end = reader.read(samples);
     assert(end.status == FileReadStatus::end);
+    const auto repeated_end = reader.read(samples);
+    assert(repeated_end.status == FileReadStatus::end && repeated_end.block.samples.empty());
+    std::stop_source eof_cancel;
+    eof_cancel.request_stop();
+    const auto cancelled_eof = reader.read(samples, eof_cancel.get_token());
+    assert(cancelled_eof.status == FileReadStatus::cancelled);
+    reader.seek(0, 12);
+    const auto replayed = reader.read(samples);
+    assert(replayed.status == FileReadStatus::data && replayed.block.first_frame == 0 && replayed.block.epoch == 12);
+    bool reused_epoch_rejected = false;
+    try { reader.seek(1, 12); } catch (const std::invalid_argument&) { reused_epoch_rejected = true; }
+    assert(reused_epoch_rejected);
+    reader.seek(1, 13);
+    const auto reseeked = reader.read(samples);
+    assert(reseeked.status == FileReadStatus::data && reseeked.block.first_frame == 1 && reseeked.block.epoch == 13);
   }
-  { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
-  { FileReader reader(wav, 8); assert(reader.source_changed()); }
+  {
+    FileReader reader(wav, 8);
+    assert(!reader.source_changed());
+    { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
+    { std::ofstream append(wav, std::ios::binary | std::ios::app); append.put('\2'); }
+    assert(reader.source_changed());
+  }
   const auto moved = wav.string() + ".moved";
   std::filesystem::rename(wav, moved);
   bool rename_failed = false;
   try { FileReader reader(wav, 10); }
   catch (const FileOpenError& error) { rename_failed = error.kind() == FileOpenErrorKind::unreadable; }
   assert(rename_failed);
+  assert(!std::filesystem::exists(wav) && std::filesystem::exists(moved));
   std::filesystem::remove(moved, cleanup);
   bool reopen_failed = false;
   try { FileReader reader(wav, 10); }
   catch (const FileOpenError& error) { reopen_failed = error.kind() == FileOpenErrorKind::unreadable; }
   assert(reopen_failed);
+  write_wav(wav);
+  { FileReader replacement(wav, 11); assert(replacement.metadata().frames == 4 && !replacement.source_changed()); }
+  std::filesystem::remove(wav, cleanup);
 
   const auto unsupported = std::filesystem::temp_directory_path() / "beatglass-reader.m4a";
+  { std::ofstream out(unsupported, std::ios::binary); out << "not-audio"; }
   bool classified = false;
   try { FileReader reader(unsupported, 1); }
   catch (const FileOpenError& error) {
@@ -78,15 +109,20 @@ int main() {
   }
   assert(classified);
   const auto unsupported_upper = std::filesystem::temp_directory_path() / "beatglass-reader.M4A";
+  { std::ofstream out(unsupported_upper, std::ios::binary); out << "not-audio"; }
   bool upper_classified = false;
   try { FileReader reader(unsupported_upper, 1); }
   catch (const FileOpenError& error) { upper_classified = error.kind() == FileOpenErrorKind::unsupported_format; }
   assert(upper_classified);
   const auto unsupported_aac = std::filesystem::temp_directory_path() / "beatglass-reader.aac";
+  { std::ofstream out(unsupported_aac, std::ios::binary); out << "not-audio"; }
   bool aac_classified = false;
   try { FileReader reader(unsupported_aac, 1); }
   catch (const FileOpenError& error) { aac_classified = error.kind() == FileOpenErrorKind::unsupported_format; }
   assert(aac_classified);
+  std::filesystem::remove(unsupported, cleanup);
+  std::filesystem::remove(unsupported_upper, cleanup);
+  std::filesystem::remove(unsupported_aac, cleanup);
   const auto empty_wav = std::filesystem::temp_directory_path() / "beatglass-reader-empty.wav";
   { std::ofstream empty(empty_wav, std::ios::binary); }
   bool empty_rejected = false;
@@ -96,6 +132,14 @@ int main() {
   }
   assert(empty_rejected);
   std::filesystem::remove(empty_wav, cleanup);
+  const auto corrupt_wav = std::filesystem::temp_directory_path() / "beatglass-reader-corrupt.wav";
+  { std::ofstream corrupt(corrupt_wav, std::ios::binary); corrupt << "not-a-wave-file"; }
+  bool corrupt_rejected = false;
+  try { FileReader reader(corrupt_wav, 2); }
+  catch (const FileOpenError& error) { corrupt_rejected = error.kind() == FileOpenErrorKind::invalid_format; }
+  assert(corrupt_rejected);
+  assert(std::filesystem::exists(corrupt_wav));
+  std::filesystem::remove(corrupt_wav, cleanup);
   bool directory_rejected = false;
   try { FileReader reader(std::filesystem::temp_directory_path(), 3); }
   catch (const FileOpenError& error) { directory_rejected = error.kind() == FileOpenErrorKind::unreadable; }

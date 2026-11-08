@@ -12,6 +12,8 @@ For every native run, record the OS version, kernel or build number, compiler, Q
 
 The platform status row and retained manifest must agree on source commit, capture time, and environment/toolchain; otherwise the run is not attributable to the documented build. Readiness reports also verify that aggregate failure-category counts, retained-artifact counts, and retained-artifact bytes equal the sum of their per-platform counts, expose retained artifact counts/bytes by platform, and require each retained count/byte total to match its artifact inventory.
 
+The handoff matrix must contain exactly one Windows, one macOS, and one Linux row. Duplicate platform rows are a documentation error and fail the executable handoff check before retained evidence is considered.
+
 Each retained evidence bundle must include `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-playback-evidence.json`, and `native-overlay-evidence.json` where those scenarios apply.
 
 Every manifest must also identify its platform, source commit, UTC capture time, and environment/toolchain identity so evidence cannot be detached from the build that produced it.
@@ -49,6 +51,91 @@ The three platform rows must be backed by actual desktop, audio, and overlay obs
 The exit-gate decision is therefore: `READY` only when the machine-readable readiness report passes every platform and aggregate check; otherwise `PENDING` with the report's per-platform failures preserved. Do not claim issue #1 or v1 completion while any native scenario, platform row, artifact, or required evidence record remains pending.
 
 Readiness reports also expose `artifact_role_summary` per platform. This is an audit view of which completed scenarios lack a declared retained-artifact role; any non-empty entry is a platform failure and keeps the handoff pending.
+
+Reports additionally expose `native_qualification_summary` and `native_qualification_ready`. Each platform entry carries its unpassed scenarios, missing artifact roles, verifier error count, and readiness flag. Consumers must use this explicit summary, and may treat `native_qualification_ready: true` as an evidence-gate result only; it is not a substitute for the release owner’s review of the retained desktop/audio/overlay recordings and limitations.
+
+The report also emits `native_summary_consistent`; it must be true before any readiness result is consumable. This cross-check ensures platform names, evidence-complete flags, and per-platform ready flags agree with the underlying rows.
+
+For handoff automation, `native_qualification_blockers` gives one structured entry per blocked platform, including unpassed scenario IDs, missing artifact roles, and verifier errors. An empty list is necessary but not sufficient for a release decision; the owner must still review the retained native recordings and limitations.
+
+The companion `native_blockers_consistent` flag must also be true: it verifies that the blocker platform set exactly matches the source rows that have unpassed scenarios, missing roles, or errors. Consumers must reject reports that fail this invariant.
+
+Reports provide `platform_support_status` for dashboards: each row is explicitly `READY` or `PENDING`, with stable reason codes and blocker count. This is a projection of evidence readiness, not a claim that the platform has passed the required native desktop/audio/overlay review.
+
+The companion `platform_support_status_consistent` flag must be true before consumers use that projection; it verifies that row order and READY/PENDING values still agree with the underlying native qualification summary.
+
+Reports explicitly set `support_language` to `experimental` and `native_qualification_required` to `true`. These fields are intentionally conservative: evidence tooling cannot promote product support language or waive the native desktop/audio/overlay exit gate.
+
+The machine-readable report declares `readiness_report_schema: 1`. Consumers must reject unknown schema versions rather than assuming that newly added fields or changed semantics are compatible.
+
+Before handing a report to automation, run `python tests/platform/validate_readiness_report.py <retained-bundle-root>/readiness-report.json`. This local consumer check verifies the versioned conservative fields, exact platform status rows, and the fail-closed relationship between exit status and reason codes.
+
+The consumer check also requires each platform row to link a manifest path and SHA-256 plus `provenance_complete: true`; a report with detached or incomplete platform identity is rejected before native evidence is considered.
+
+Each platform artifact inventory must likewise retain a path, SHA-256, byte count, and `hash_valid: true`. This validates report linkage to retained files; it does not replace review of the actual native screenshots, recordings, logs, and command output.
+
+Pass `--bundles <retained-bundle-root>` to `validate_readiness_report.py` to recompute each manifest and retained artifact hash/byte count locally. A report is not accepted when its recorded provenance or artifact inventory disagrees with the files on disk.
+
+To create a conservative report from retained platform bundles, run `python tests/platform/generate_readiness_report.py <retained-bundle-root> <readiness-report.json>`. Generation always emits `PENDING`, keeps support language experimental, and requires a later native-evidence review before any gate can change.
+
+The generator creates missing parent directories for the output path and writes
+stable, sorted JSON, so reports can be safely produced into a fresh evidence
+workspace and compared across runs.
+
+Each retained manifest must include `qualification_command`; the generated platform row echoes it so reviewers can trace report values back to the exact command that produced the bundle. The command string is provenance metadata, not proof that native qualification succeeded.
+
+Manifests also identify `qualification_output`, which must name a retained artifact. The validator checks that the report echoes this path and that the output is present in the manifest inventory, preventing command claims that cannot be tied to retained output.
+
+Generated rows also carry `qualification_output_sha256`; retained-file validation recomputes that digest so a command's claimed output cannot be replaced after capture without invalidating the report.
+
+The generated row also records `qualification_output_bytes`; the verifier checks the retained output size as well as its digest.
+
+The retained-file verifier also requires the report artifact inventory to match the
+manifest inventory exactly, requires unique scenario IDs and artifact paths, and
+requires every scenario evidence hash mapping to match the manifest's scenario set.
+Malformed JSON, path traversal, duplicate rows, and non-hexadecimal digests fail
+closed before any qualification claim is accepted.
+
+Each retained manifest must also carry a 40-character hexadecimal commit identity
+and an ISO-8601 capture timestamp, so provenance fields are machine-checkable rather
+than merely present.
+
+Every retained artifact must declare a non-empty role, preserving the distinction
+between command output, scenario evidence, and other captured files.
+
+When consuming a generated report with `--bundles`, the scenario inventory is
+cross-checked against each retained manifest (status and evidence path), so a
+report cannot silently describe a different scenario state than the captured
+bundle.
+
+The consumer also requires the complete capture, recovery, output, display,
+playback, and overlay scenario set on every manifest; partial bundles remain
+ineligible for acceptance.
+
+For completed scenarios, the retained evidence artifact's declared role must
+match the scenario ID, preventing a valid file from being reassigned to a
+different scenario after capture.
+
+The consumer recomputes every manifest artifact hash as well as the report's
+inventory hashes; a manifest that names a file but carries a stale digest is
+rejected even when the report row itself is internally consistent.
+
+Generated rows also echo the manifest platform identity, and the consumer checks
+that echo before accepting any platform-specific evidence.
+
+For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
+
+The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
+
+The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.
+
+Readiness is stricter than manifest syntax: every required `capture`, `recovery`, `output`, `display`, `playback`, and `overlay` scenario must be `PASS` before a platform can be ready. The report exposes `unpassed` scenario IDs, so a complete list containing `UNRUN` rows cannot be mistaken for native qualification.
+
+The same rule is enforced by the executable `check_evidence_readiness.py` command: any required scenario that is missing or not `PASS` makes the command exit nonzero. A report may still be generated for diagnosis, but its incomplete bundle must not be accepted by automation.
+
+Every report includes `exit_gate_status` (`PENDING` or `READY`) and `exit_gate_reasons`. Automation should consume these fields together; `PENDING` is the safe default for missing, stale, inconsistent, or incomplete native evidence.
+
+For stable automation, `exit_gate_reason_codes` contains normalized categories such as `manifest`, `retention`, `freshness`, `scenario`, `hash`, `path`, and consistency codes. Unpassed scenarios and missing artifact roles are classified as `scenario`. Human-readable reasons remain available for handoff diagnosis; consumers must not infer readiness by matching prose.
 
 Before accepting a handoff, run `python tests/platform/check_evidence_readiness.py --status docs/platform-qualification-status.md --bundles <retained-bundle-root> --report <retained-bundle-root>/readiness-report.json`. The command requires exactly one unique Windows, macOS, and Linux status row with one attributable manifest beneath the bundle root, and reports platform-count/summary consistency plus per-platform failure summaries (including ready flags, ready count, not-ready platform names, category-count consistency, and category-to-platform details) and failure/aggregate-summary, error-count, failure-category-count, and category-to-platform consistency checks alongside manifest identity, provenance status and freshness error details, invalidation, retention status, missing or hash-mismatched artifact paths, manifest hashes, retained artifact counts/bytes, sorted artifact/scenario inventories, scenario status counts, plus top-level/per-platform error/count/failure-category summaries, required-scenario summaries, provenance summaries, and `summary_consistent`/`all_platforms_ready`/`aggregate_consistent` checks in a reproducible machine-readable report. A stale, invalidated, inconsistent-summary, inconsistent-error-count, inconsistent-category-count, inconsistent-category-platform-list, incomplete-retention, hash-mismatched, invalid-scenario, or `ready: false` report must remain pending; consumers must propagate its top-level errors rather than treating individual row output as informational.
 

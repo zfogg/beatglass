@@ -1,13 +1,34 @@
 {
+  "readiness_report_schema": 1,
+  "support_language": "experimental",
+  "native_qualification_required": true,
+  "exit_gate_status": "PENDING",
+  "exit_gate_reason_codes": [
+    "native_qualification_required",
+    "generated_report_pending_review"
+  ],
+  "ready": false,
+  "platform_support_status": [
+    {
+      "platform": "windows",
+      "status": "experimental"
+    },
+    {
+      "platform": "macos",
+      "status": "experimental"
+    },
+    {
+      "platform": "linux",
+      "status": "experimental"
+    }
+  ],
   "platforms": [
     {
       "platform": "windows",
       "manifest": "tests\\platform\\fixtures\\readiness-bundles\\windows\\manifest.json",
-      "manifest_sha256": "c3e2ee3672d185828938c7a0767ffa82dc09a9091878185cc6dc30efe0b31d24",
+      "manifest_sha256": "c3396aad18bb226b9f990fddb3eb288271021090589f735551298ffebd410d6b",
       "retained_artifacts": 1,
       "retained_bytes": 26,
-      "missing_artifacts": [],
-      "mismatched_artifacts": [],
       "artifact_inventory": [
         {
           "path": "capture.txt",
@@ -48,32 +69,23 @@
           "evidence": null
         }
       ],
-      "scenario_status_counts": {
-        "PASS": 1,
-        "UNRUN": 5
+      "qualification_command": "fixture-generator --platform windows",
+      "qualification_output": "capture.txt",
+      "qualification_output_sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
+      "qualification_output_bytes": 26,
+      "scenario_evidence_sha256": {
+        "capture": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901"
       },
-      "fresh": true,
-      "freshness_errors": [],
       "manifest_platform": "windows",
       "provenance_complete": true,
-      "missing_provenance": [],
-      "missing_scenarios": [],
-      "invalid_scenarios": [],
-      "failure_categories": {},
-      "failure_category_count_consistent": true,
-      "error_count": 0,
-      "retention_ok": true,
-      "invalidated": false,
       "errors": []
     },
     {
       "platform": "macos",
       "manifest": "tests\\platform\\fixtures\\readiness-bundles\\macos\\manifest.json",
-      "manifest_sha256": "8486c14d40802f1d5c0967b4f69d5be16a4e39f80cb0df95b098632b4ff917fc",
+      "manifest_sha256": "d98a89f9401a3e64fcab33b06db491fd144ac0a906a2eccfb33eba285c76c04c",
       "retained_artifacts": 1,
       "retained_bytes": 26,
-      "missing_artifacts": [],
-      "mismatched_artifacts": [],
       "artifact_inventory": [
         {
           "path": "capture.txt",
@@ -114,32 +126,23 @@
           "evidence": null
         }
       ],
-      "scenario_status_counts": {
-        "PASS": 1,
-        "UNRUN": 5
+      "qualification_command": "fixture-generator --platform macos",
+      "qualification_output": "capture.txt",
+      "qualification_output_sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
+      "qualification_output_bytes": 26,
+      "scenario_evidence_sha256": {
+        "capture": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901"
       },
-      "fresh": true,
-      "freshness_errors": [],
       "manifest_platform": "macos",
       "provenance_complete": true,
-      "missing_provenance": [],
-      "missing_scenarios": [],
-      "invalid_scenarios": [],
-      "failure_categories": {},
-      "failure_category_count_consistent": true,
-      "error_count": 0,
-      "retention_ok": true,
-      "invalidated": false,
       "errors": []
     },
     {
       "platform": "linux",
       "manifest": "tests\\platform\\fixtures\\readiness-bundles\\linux\\manifest.json",
-      "manifest_sha256": "6dd90cf83995a5fa737b35b177bd223a5c91f7818bf3e7e5d72e70570c6a96ed",
+      "manifest_sha256": "c690fd0da4a33bda960c504de6f2eafa6806bce577c8a0299d96f16952e4bec3",
       "retained_artifacts": 1,
       "retained_bytes": 26,
-      "missing_artifacts": [],
-      "mismatched_artifacts": [],
       "artifact_inventory": [
         {
           "path": "capture.txt",
@@ -180,130 +183,16 @@
           "evidence": null
         }
       ],
-      "scenario_status_counts": {
-        "PASS": 1,
-        "UNRUN": 5
+      "qualification_command": "fixture-generator --platform linux",
+      "qualification_output": "capture.txt",
+      "qualification_output_sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
+      "qualification_output_bytes": 26,
+      "scenario_evidence_sha256": {
+        "capture": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901"
       },
-      "fresh": true,
-      "freshness_errors": [],
       "manifest_platform": "linux",
       "provenance_complete": true,
-      "missing_provenance": [],
-      "missing_scenarios": [],
-      "invalid_scenarios": [],
-      "failure_categories": {},
-      "failure_category_count_consistent": true,
-      "error_count": 0,
-      "retention_ok": true,
-      "invalidated": false,
       "errors": []
     }
-  ],
-  "platform_count": 3,
-  "expected_platforms": [
-    "windows",
-    "macos",
-    "linux"
-  ],
-  "platform_summary_consistent": false,
-  "platform_failure_summary": [
-    {
-      "platform": "windows",
-      "errors": 0,
-      "fresh": true,
-      "retention_ok": true,
-      "invalidated": false,
-      "ready": true
-    },
-    {
-      "platform": "macos",
-      "errors": 0,
-      "fresh": true,
-      "retention_ok": true,
-      "invalidated": false,
-      "ready": true
-    },
-    {
-      "platform": "linux",
-      "errors": 0,
-      "fresh": true,
-      "retention_ok": true,
-      "invalidated": false,
-      "ready": true
-    }
-  ],
-  "failure_summary_consistent": true,
-  "error_count_consistent": true,
-  "ready_platform_count": 3,
-  "retained_artifact_count": 3,
-  "retained_artifact_bytes": 78,
-  "retained_artifacts_by_platform": {
-    "windows": 1,
-    "macos": 1,
-    "linux": 1
-  },
-  "retained_bytes_by_platform": {
-    "windows": 26,
-    "macos": 26,
-    "linux": 26
-  },
-  "retained_bytes_consistent": true,
-  "inventory_bytes_consistent": true,
-  "inventory_count_consistent": true,
-  "not_ready_platforms": [],
-  "all_platforms_ready": false,
-  "error_count": 1,
-  "failure_categories": {
-    "manifest": 1
-  },
-  "failure_category_count_consistent": true,
-  "failure_category_platforms": {
-    "manifest": []
-  },
-  "category_platforms_consistent": true,
-  "category_platform_lists_consistent": true,
-  "category_platform_counts": {
-    "manifest": 0
-  },
-  "category_counts_consistent": false,
-  "required_scenario_summary": [
-    {
-      "platform": "windows",
-      "missing": [],
-      "invalid": []
-    },
-    {
-      "platform": "macos",
-      "missing": [],
-      "invalid": []
-    },
-    {
-      "platform": "linux",
-      "missing": [],
-      "invalid": []
-    }
-  ],
-  "provenance_summary": [
-    {
-      "platform": "windows",
-      "complete": true,
-      "missing": []
-    },
-    {
-      "platform": "macos",
-      "complete": true,
-      "missing": []
-    },
-    {
-      "platform": "linux",
-      "complete": true,
-      "missing": []
-    }
-  ],
-  "summary_consistent": true,
-  "errors": [
-    "status matrix must contain exactly Windows, macOS, and Linux rows"
-  ],
-  "aggregate_consistent": false,
-  "ready": false
+  ]
 }

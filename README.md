@@ -67,7 +67,7 @@ Open `build/docs/html/index.html`. On Windows PowerShell, use `${PWD}` in the vo
 
 The [Phase 0 gate audit](docs/phase0-gate.md) records the coordinator's acceptance for starting Phase 1 and remaining gaps. The current experimental shell is not the full application.
 
-See the [platform qualification status](docs/platform-qualification-status.md) for executable preparation checks and the native gates that remain open on Windows, macOS, and Linux.
+See the [platform qualification status](docs/platform-qualification-status.md) for executable preparation checks and the native gates that remain open on Windows, macOS, and Linux. Its versioned readiness report (`readiness_report_schema: 1`) is fail-closed: incomplete or unrun scenarios produce `PENDING`/a nonzero checker result, and the report cannot promote the repository's explicitly experimental support language without actual native desktop, audio, and overlay evidence.
 
 ## Qt 6.8.3 prebuilt desktop preset
 

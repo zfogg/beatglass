@@ -54,6 +54,10 @@ def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
             continue
         if str(data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match status row")
+        scenario_status = {item.get("id"): item.get("status") for item in data.get("scenarios", []) if isinstance(item, dict)}
+        unpassed = sorted(scenario_id for scenario_id in verifier.REQUIRED_SCENARIOS if scenario_status.get(scenario_id) != "PASS")
+        if unpassed:
+            errors.append(f"{platform}: required scenarios are not PASS: {unpassed}")
         errors.extend(f"{platform}: {error}" for error in identity_errors(data, max_age_hours))
         errors.extend(f"{platform}: {error}" for error in verifier.verify(bundle, manifest))
     return errors
@@ -120,6 +124,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
                     key=lambda item: str(item.get("id", "")))
                 scenario_status_counts = dict(sorted(Counter(item["status"] for item in scenario_inventory).items()))
+                scenario_status_by_id = {item.get("id"): item.get("status") for item in scenario_inventory}
+                unpassed_scenarios = sorted(
+                    scenario_id for scenario_id in verifier.REQUIRED_SCENARIOS
+                    if scenario_status_by_id.get(scenario_id) != "PASS")
+                if unpassed_scenarios:
+                    errors.append(f"{platform}: required scenarios are not PASS: {unpassed_scenarios}")
                 artifact_roles = {entry.get("path"): entry.get("role") for entry in data.get("artifacts", [])
                                   if isinstance(entry, dict)}
                 missing_artifact_roles = sorted(
@@ -134,6 +144,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 inventory = []
                 scenario_inventory = []
                 scenario_status_counts = {}
+                unpassed_scenarios = []
                 missing_artifacts = []
                 mismatched_artifacts = []
                 invalid_scenarios = []
@@ -146,6 +157,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             inventory = []
             scenario_inventory = []
             scenario_status_counts = {}
+            unpassed_scenarios = sorted(verifier.REQUIRED_SCENARIOS)
             missing_artifacts = []
             mismatched_artifacts = []
             invalid_scenarios = []
@@ -157,6 +169,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         row_categories = Counter()
         for error in matrix_errors + errors:
             if "hash mismatch" in error: row_categories["hash"] += 1
+            elif "scenario" in error or "artifact role" in error: row_categories["scenario"] += 1
             elif "missing artifact" in error or "missing manifest" in error: row_categories["retention"] += 1
             elif "stale" in error or "future" in error: row_categories["freshness"] += 1
             elif "path" in error or "escapes bundle" in error: row_categories["path"] += 1
@@ -167,6 +180,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "scenario_status_counts": scenario_status_counts,
                      "artifact_roles": artifact_roles, "missing_artifact_roles": missing_artifact_roles,
+                     "unpassed_scenarios": unpassed_scenarios,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "freshness_errors": [error for error in identity_failures if "stale" in error or "future" in error or "timestamp" in error],
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
@@ -183,6 +197,39 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           "fresh": row["fresh"], "retention_ok": row["retention_ok"],
                           "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
                          for row in rows]
+    native_qualification_summary = [
+        {"platform": row["platform"],
+         "evidence_complete": not row["unpassed_scenarios"] and not row["missing_artifact_roles"],
+         "unpassed_scenarios": row["unpassed_scenarios"],
+         "missing_artifact_roles": row["missing_artifact_roles"],
+         "verifier_errors": row["error_count"],
+         "ready": next(item["ready"] for item in platform_failures if item["platform"] == row["platform"])}
+        for row in rows]
+    native_qualification_blockers = [
+        {"platform": row["platform"], "unpassed_scenarios": row["unpassed_scenarios"],
+         "missing_artifact_roles": row["missing_artifact_roles"], "errors": row["errors"]}
+        for row in rows if row["unpassed_scenarios"] or row["missing_artifact_roles"] or row["errors"]]
+    expected_blocker_platforms = {row["platform"] for row in rows if row["unpassed_scenarios"] or row["missing_artifact_roles"] or row["errors"]}
+    native_blockers_consistent = {item["platform"] for item in native_qualification_blockers} == expected_blocker_platforms
+    platform_support_status = []
+    for item in native_qualification_summary:
+        blockers = next((entry for entry in native_qualification_blockers if entry["platform"] == item["platform"]), None)
+        platform_support_status.append({"platform": item["platform"],
+            "status": "READY" if item["ready"] and item["evidence_complete"] else "PENDING",
+            "reason_codes": (["scenario"] if item["unpassed_scenarios"] or item["missing_artifact_roles"] else []) + (["verifier"] if item["verifier_errors"] else []),
+            "blocker_count": len(blockers["errors"]) if blockers else 0})
+    platform_support_status_consistent = (
+        [item["platform"] for item in platform_support_status] == [item["platform"] for item in native_qualification_summary]
+        and all(item["status"] == ("READY" if summary["ready"] and summary["evidence_complete"] else "PENDING")
+                for item, summary in zip(platform_support_status, native_qualification_summary)))
+    native_summary_consistent = (
+        [item["platform"] for item in native_qualification_summary] == [row["platform"] for row in rows]
+        and all(item["evidence_complete"] == (not item["unpassed_scenarios"] and not item["missing_artifact_roles"])
+                for item in native_qualification_summary)
+        and all(item["ready"] == next(row["error_count"] == 0 and row["fresh"] and row["retention_ok"]
+                                      for row in rows if row["platform"] == item["platform"])
+                for item in native_qualification_summary)
+    )
     ready_platforms = sum(item["ready"] for item in platform_failures)
     retained_artifact_count = sum(row["retained_artifacts"] for row in rows)
     retained_artifact_bytes = sum(row["retained_bytes"] for row in rows)
@@ -200,6 +247,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     categories = Counter()
     for error in errors:
         if "hash mismatch" in error: categories["hash"] += 1
+        elif "scenario" in error or "artifact role" in error: categories["scenario"] += 1
         elif "escapes bundle" in error or "path" in error: categories["path"] += 1
         elif "stale" in error or "future" in error: categories["freshness"] += 1
         elif "missing artifact" in error or "missing manifest" in error: categories["retention"] += 1
@@ -214,7 +262,11 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     category_platform_counts = {category: sum(row["failure_categories"].get(category, 0) for row in rows)
                                 for category in sorted(categories)}
     category_counts_consistent = category_platform_counts == dict(categories)
-    required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
+    readiness_ready = (not errors and aggregate_consistent and native_summary_consistent and native_blockers_consistent
+                       and error_count_consistent and failure_category_count_consistent and category_platforms_consistent
+                       and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent
+                       and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows))
+    required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "unpassed": row["unpassed_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
     artifact_roles = [{"platform": row["platform"], "missing": row["missing_artifact_roles"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
     summary_consistent = (len(required) == len(rows) == len(provenance)
@@ -222,9 +274,25 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           and [item["platform"] for item in provenance] == [row["platform"] for row in rows])
     aggregate_consistent = (summary_consistent and platform_summary_consistent and failure_summary_consistent
                             and len(required) == len(platform_failures))
-    return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
+    exit_gate_reason_codes = sorted(categories)
+    if not platform_summary_consistent:
+        exit_gate_reason_codes.append("platform-matrix")
+    for name, valid in (("summary-consistency", summary_consistent), ("native-summary-consistency", native_summary_consistent),
+                        ("native-blocker-consistency", native_blockers_consistent), ("aggregate-consistency", aggregate_consistent)):
+        if not valid and name not in exit_gate_reason_codes:
+            exit_gate_reason_codes.append(name)
+    return {"readiness_report_schema": 1, "platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
+            "native_qualification_summary": native_qualification_summary,
+            "native_qualification_blockers": native_qualification_blockers,
+            "native_blockers_consistent": native_blockers_consistent,
+            "platform_support_status": platform_support_status,
+            "platform_support_status_consistent": platform_support_status_consistent,
+            "support_language": "experimental",
+            "native_qualification_required": True,
+            "native_qualification_ready": bool(native_qualification_summary) and all(item["ready"] and item["evidence_complete"] for item in native_qualification_summary),
+            "native_summary_consistent": native_summary_consistent,
             "failure_summary_consistent": failure_summary_consistent,
             "error_count_consistent": error_count_consistent,
             "ready_platform_count": ready_platforms,
@@ -247,7 +315,10 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "required_scenario_summary": required, "artifact_role_summary": artifact_roles, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows)}
+            "exit_gate_status": "READY" if readiness_ready else "PENDING",
+            "exit_gate_reasons": [] if readiness_ready else errors,
+            "exit_gate_reason_codes": [] if readiness_ready else sorted(exit_gate_reason_codes),
+            "ready": readiness_ready and platform_support_status_consistent}
 
 
 def main() -> int:

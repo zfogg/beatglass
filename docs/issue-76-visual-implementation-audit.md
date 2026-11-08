@@ -164,6 +164,56 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+The consolidated loading/error audit now asserts visualization loading and empty states, focus affordance, metadata retry, analysis retry/cancel, and batch retry/cancel controls.
+
+The browser/library audit now consolidates folder navigation, delegate semantics, selected-source, metadata, analysis progress, and analysis-waiting states in the static contract.
+
+The consolidated keyboard/accessibility audit now asserts library search, sort, browser navigation, and empty-state keyboard surfaces.
+
+The visualization audit now covers waveform/spectrum shortcuts, focus-ring affordance, overall visualization status, selected-data status, and DJ status/estimate/evidence surfaces alongside the existing canvas and recovery states.
+
+Visualization selection and accepted revision status surfaces are now explicitly asserted in the static visual contract.
+
+Visualization canvas, data, generation, capture, and load-status surfaces are now explicitly asserted in the static visual contract.
+
+Waveform mode controls, visualization mode status, selection status, and selection clearing are now explicitly asserted in the static visual contract.
+
+Overlay opacity control/value and display selection/status surfaces are now explicitly asserted in the static visual contract.
+
+Overlay Escape recovery, unavailable-display, and platform permission guidance surfaces are now explicitly asserted in the static visual contract.
+
+Overlay capture retry, show, unlock, hide, and unavailable-display retry controls are now explicitly asserted in the static visual contract.
+
+Output endpoint empty, unavailable-build, and recovery-guidance states are now explicitly asserted in the static visual contract.
+
+Output-device selection, endpoint refresh, endpoint status, and selected-endpoint surfaces are now explicitly asserted in the static visual contract.
+
+Native playback running/error, playback state/source, and unavailable-build surfaces are now explicitly asserted in the static visual contract.
+
+Native playback start/retry, output refresh, sample-rate, and channel controls are now explicitly asserted in the static visual contract.
+
+Playback reopen, pause/resume, stop, backward-seek, forward-seek, and frame-seek controls are now explicitly asserted in the static visual contract.
+
+Metadata status/retry and analysis uncertainty/freshness surfaces are now explicitly asserted in the static visual contract.
+
+Clear-selection, playback-unavailable recovery, analysis-detail availability, and source-workflow status are now explicitly asserted in the static visual contract.
+
+Selected audio identity, source path, duration, metadata status, and metadata recovery guidance are now explicitly asserted in the static visual contract.
+
+Analysis detail availability, uncertainty, freshness, source workflow, and progress states are now explicitly asserted in the static visual contract.
+
+Analysis batch status, persisted recovery selection/discard, retry, and cancellation controls are now explicitly asserted in the static visual contract.
+
+Playback sample-rate, channel-count, output-device, playback-state, and playback-source controls are now explicitly asserted in the static visual contract.
+
+Library choose-folder, parent-folder, search, sort-order, and empty-state chooser controls are now explicitly asserted in the static visual contract.
+
+Library folder-path, browser-list, empty-state container, and empty-state message surfaces are now explicitly asserted in the static visual contract.
+
+Overlay interaction mode, opacity value, and display status are now explicitly covered in the static visual contract for live presentation state.
+
+Overlay capture, monitor status, monitoring guidance, permission guidance, and selected-endpoint states are now explicitly included in the static accessibility contract.
+
 Output endpoint empty, status, unavailable, recovery, and selected-endpoint surfaces are now explicitly asserted in the visual accessibility contract.
 
 Overlay opacity and display status surfaces are now explicitly included in the static visual contract for display-routing recovery and state reporting.
@@ -193,3 +243,103 @@ Selected-source identity, analysis detail/uncertainty/freshness, source workflow
 Capture status, endpoint discovery and selection status, permission guidance, and the monitoring action now expose contextual tooltips that mirror their accessible recovery semantics.
 
 Library folder and audio-file entries now expose context-specific tooltips that match their accessible action descriptions, making directory navigation and source selection discoverable on hover as well as through assistive technology.
+
+Analysis recovery actions now participate in the keyboard tab order explicitly. Retry/cancel controls for single and batch analysis expose matching tooltips and accessible descriptions, so keyboard and pointer users receive the same recovery guidance while jobs are queued, running, cancelled, or failed.
+
+Metadata recovery, source clearing, and waveform/FFT mode controls now explicitly participate in keyboard traversal. Their focusable state is covered alongside the existing error, empty, and loading semantics so recovery remains discoverable without a pointer.
+
+Appearance reset and theme-preview choices now explicitly participate in keyboard traversal as well. Settings recovery and palette selection therefore share the same focus contract as the primary navigation and analysis controls.
+
+The settings output-device surface now exposes a contextual tooltip that mirrors its accessible value, keeping unavailable/default-device guidance discoverable for keyboard, assistive-technology, and pointer users.
+
+Appearance-state and settings-persistence summaries now expose contextual tooltips as well, making theme/motion state and the user-audio safety promise discoverable through the same visual and semantic channel.
+
+Output-endpoint empty, unavailable-build, and recovery guidance now expose dedicated tooltips matching their accessible descriptions, keeping device-discovery recovery actionable across visual and assistive interfaces.
+
+The endpoint selector now exposes a concise tooltip for choosing the live-capture source, aligning the primary settings control with its empty, unavailable, and recovery-state guidance.
+
+Overlay opacity value, display status, and unavailable-display messaging now expose contextual tooltips, completing the visual guidance for overlay routing and native-availability states.
+
+The overlay-display empty state now provides a direct tooltip explaining how to recover when no destination display is present.
+
+Overlay opacity, display, and size labels now expose heading semantics with concise contextual tooltips, keeping the grouped routing controls understandable before the associated values are reached.
+
+The Settings page and output-device subsection now expose heading semantics with contextual guidance, making the purpose of the capture, appearance, and overlay controls discoverable before focus enters each field.
+
+Audio-capture and appearance groups now expose grouping semantics, descriptions, and section-level tooltips; the appearance introduction is also exposed as a static guidance surface for consistent screen-reader and pointer context.
+
+The Settings tab now explicitly participates in tab navigation with a tab role and entry tooltip, while the persistence status exposes an explicit safety description for the user-audio preservation promise.
+
+The DJ tab now has explicit page-tab semantics, keyboard participation, and an entry tooltip; the Beatglass header label is exposed as a heading with workspace context for assistive and pointer users.
+
+The primary navigation bar now exposes toolbar semantics, a concise description, and an entry tooltip so page switching is announced as one coherent navigation surface.
+
+The reduced-motion switch now exposes matching tooltip guidance for its animated-transition preference, keeping the visual affordance aligned with its checkbox semantics and dynamic enabled state.
+
+Theme selection and reduced-motion guidance now reflect their live values in tooltip text, so pointer users receive the same current-state context exposed through accessible values.
+
+The appearance summary tooltip now also reports the current theme and motion mode directly, keeping the persisted state readable without requiring focus on the individual controls.
+
+Reset appearance now exposes the current theme/motion value and dynamically explains exactly which settings will be restored, reducing ambiguity before destructive-looking recovery actions.
+
+The Library page heading now exposes explicit heading semantics and a concise browse tooltip, giving the primary file-navigation surface the same entry context as DJ and Settings.
+
+Library browser column headers now expose column-header semantics and concise name/type tooltips, making the folder listing structure discoverable before users navigate individual entries.
+
+The filtered catalog result summary now exposes an explicit description and current-count tooltip, keeping result-state context available independently of the browser list.
+
+The playback control row is now exposed as one grouped accessible surface with a concise tooltip, giving users context before navigating format, transport, seek, and output-device controls.
+
+Theme preview swatches now expose a grouped semantic surface and entry tooltip, clarifying that the individual radio-style controls are one coordinated palette choice.
+
+Reset appearance now includes the current theme and motion mode in its accessible description as well as its tooltip, keeping recovery context consistent across assistive and pointer interfaces.
+
+Each theme preview swatch now exposes an explicit selected/not-selected accessible value in addition to its radio-button description, making palette state unambiguous to assistive technology.
+
+Duplicate catalog-status and output-device value declarations were consolidated so each surface has one authoritative accessible/tooltip value, avoiding conflicting announcements.
+
+The separate filtered-result count now has a distinct `catalogResultCount` object identity, preventing duplicate automation targets while preserving the primary catalog-status contract.
+
+Redundant text labels inside each folder-list delegate are now excluded from the accessibility tree; the delegate’s richer list-item name, value, and action description remain the single announcement surface.
+
+The browser empty-state container now exposes grouping semantics and recovery guidance, so its message and chooser action are announced as one coherent unavailable-state surface.
+
+The folder browser frame and overlay action row now expose grouping semantics with concise entry tooltips, giving users context before navigating list items or show/unlock/hide actions.
+
+Overlay interaction/opacity and display/size rows now expose separate grouping semantics and entry tooltips, clarifying the two distinct routing-control clusters before focus reaches their individual fields.
+
+Playback and overlay control groups now expose live state values in addition to static descriptions, so assistive technology and tooltips can communicate availability, playback state, interaction mode, opacity, and destination display together.
+
+Live monitoring and visualization-mode rows now expose grouped semantics and live values, giving users one coherent context surface before reaching start/stop or waveform/FFT controls.
+
+The live visualization canvas now exposes its current mode and selected-position value directly, aligning keyboard selection feedback with the rendered waveform/FFT surface.
+
+DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
+
+The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
+
+The live monitoring state and guidance are now exposed as one grouped surface, while the DJ status, estimates, and evidence-quality message share a second grouped surface. Both groups report the current monitoring state and provide entry tooltips, so assistive technology users can understand capture readiness and provisional evidence before navigating individual labels.
+
+Visualization empty, load, data-count, selection, generation, and capture messages now share a grouped status surface with a live ready/waiting value and entry tooltip. This keeps the visualization’s changing data lifecycle coherent for assistive technology users while preserving each detailed status label.
+
+The visualization position status and clear action now share a selection group with a live percentage-or-none value and reset tooltip, making the keyboard/canvas selection lifecycle discoverable as one control cluster.
+
+The Library’s selected-audio panel now exposes one grouped details surface covering source identity, metadata status, recovery actions, analysis, and playback context. Its value follows the selected file and metadata state, giving assistive technology users a stable entry point for the whole source workflow.
+
+Selected-audio recovery actions now expose live values: clearing reports the selected filename or “no selection,” and metadata retry reports the current metadata error/status. This makes action availability and recovery context explicit before activation.
+
+The selected-audio details column now sits inside an explicitly named panel grouping with its own entry tooltip, preserving the visual card boundary as a meaningful navigation boundary for assistive technology.
+
+The overlay’s live evidence surface now exposes one grouped semantic boundary for its header state, tempo/harmony estimates, capture status, recovery hint, and retry action. The group reports the current capture state and provides a single entry tooltip before users navigate its dynamic evidence.
+
+The live visualization canvas now declares graphic semantics in addition to its mode/position value, and its empty state provides a direct availability/next-action tooltip. This aligns the interactive rendered surface and its no-data state for keyboard and assistive navigation.
+
+The live visualization canvas now supports Escape as a keyboard recovery action that clears the selected position, and both its accessible description and tooltip document that path alongside Left/Right/Home/End navigation. This keeps selection state reversible without requiring pointer input or a separate button.
+
+Waveform and FFT mode controls now expose explicit radio-button roles, while the clear-position action reports whether it is available or has no selection to clear. Together with the grouped selection surface, this makes the visualization’s mode and position interaction state explicit before activation.
+
+Primary navigation now reports the current Library, DJ, or Settings page as a live toolbar value, and its tooltip includes the same current-page context. This gives keyboard and assistive navigation a stable location announcement while switching between the three product surfaces.
+
+The Settings tab now uses the same explicit page-tab role as Library and DJ, keeping the primary navigation contract consistent across all three destinations for keyboard and assistive technology users.
+
+All three primary navigation tabs now report a selected/not-selected value in addition to the toolbar’s current-page value, so users can understand both the active destination and each tab’s state while moving through the navigation.

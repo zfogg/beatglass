@@ -103,9 +103,11 @@ TestCase {
         compare(size.Accessible.description, "Choose the overlay window size; current size Medium")
         compare(size.ToolTip.text, "Choose Compact, Medium, or Large overlay size")
         compare(findChild(app, "overlayOpacityValue").Accessible.name, "Current overlay opacity")
+        compare(findChild(app, "overlayOpacityValue").ToolTip.text, "Current overlay opacity value")
         compare(findChild(app, "overlayInteractionMode").Accessible.name, "Overlay interaction mode")
         compare(findChild(app, "overlayInteractionMode").ToolTip.text, "Current overlay pointer interaction mode")
         compare(findChild(app, "overlayDisplayStatus").Accessible.name, "Current overlay display")
+        compare(findChild(app, "overlayDisplayStatus").ToolTip.text, "Current overlay display status")
         display.activated(0); compare(fakeOverlay.selectedScreen, 0); compare(display.currentIndex, 0)
         size.currentIndex = 2; size.activated(2); compare(fakeOverlay.requestedWidth, 430)
         fakeOverlay.opacity = 0.6; tryCompare(findChild(app, "overlayOpacity"), "value", 0.6)
@@ -325,6 +327,7 @@ TestCase {
         let selector = findChild(app, "endpointSelector")
         verify(selector !== null)
         compare(selector.Accessible.description, "Choose the output endpoint used for live capture.")
+        compare(selector.ToolTip.text, "Choose the output endpoint used for live capture")
         compare(findChild(app, "refreshEndpoints").Accessible.description, "Refresh the available output capture endpoints.")
         verify(findChild(app, "refreshEndpoints") !== null)
         let status = findChild(app, "endpointStatus")
@@ -335,14 +338,17 @@ TestCase {
         verify(empty !== null)
         verify(!empty.visible)
         compare(empty.Accessible.name, "Output endpoint empty state")
+        compare(empty.ToolTip.text, "No output endpoint is available; refresh after connecting a device")
         let recovery = findChild(app, "endpointRecoveryGuidance")
         verify(recovery !== null)
         verify(!recovery.visible)
         compare(recovery.Accessible.name, "Output endpoint recovery guidance")
+        compare(recovery.ToolTip.text, "Connect an output device and refresh endpoint discovery")
         let unavailable = findChild(app, "endpointUnavailableState")
         verify(unavailable !== null)
         verify(unavailable.visible)
         compare(unavailable.Accessible.name, "Output endpoint discovery availability")
+        compare(unavailable.ToolTip.text, "Output endpoint discovery is unavailable in this build")
         app.destroy()
     }
 
@@ -371,6 +377,7 @@ TestCase {
         let state = findChild(app, "overlayUnavailable")
         verify(state !== null)
         compare(state.Accessible.name, "Overlay availability")
+        compare(state.ToolTip.text, "Native overlay is unavailable on the selected display")
         app.destroy()
     }
     function test_overlayUnavailableOffersRetry() {
@@ -396,6 +403,7 @@ TestCase {
         verify(!findChild(app, "clickThrough").enabled)
         verify(!findChild(app, "overlayOpacity").enabled)
         compare(empty.Accessible.name, "Overlay display empty state")
+        compare(empty.ToolTip.text, "Connect a display before choosing an overlay destination")
         app.destroy()
         fakeOverlay.screenNames = ["Display"]
     }
@@ -478,6 +486,8 @@ TestCase {
         let spectrum = findChild(app, "spectrumView")
         verify(waveform !== null)
         verify(spectrum !== null)
+        verify(waveform.activeFocusOnTab)
+        verify(spectrum.activeFocusOnTab)
         compare(waveform.background.border.width, 1)
         waveform.forceActiveFocus()
         tryCompare(waveform.background, "border.width", 3)
@@ -613,6 +623,7 @@ TestCase {
         app.metadataStatus = "WAV | 44100 Hz"
         let clear = findChild(app, "clearSelectedAudio")
         verify(clear.enabled)
+        verify(clear.activeFocusOnTab)
         clear.clicked()
         compare(app.selectedName, "")
         compare(app.selectedAudioUrl.toString(), "")
@@ -627,6 +638,7 @@ TestCase {
         app.metadataStatus = "Error: unreadable audio"
         let retry = findChild(app, "retryMetadata")
         verify(retry.visible)
+        verify(retry.activeFocusOnTab)
         let guidance = findChild(app, "metadataErrorGuidance")
         verify(guidance.visible)
         compare(guidance.Accessible.name, "Metadata error recovery guidance")
@@ -675,7 +687,12 @@ TestCase {
         verify(!findChild(app, "analysisWaitingIndicator").visible)
         let retry = findChild(app, "retryAnalysis")
         verify(!retry.enabled)
+        verify(retry.activeFocusOnTab)
         compare(retry.Accessible.description, "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations.")
+        compare(retry.ToolTip.text, retry.Accessible.description)
+        verify(findChild(app, "cancelAnalysis").activeFocusOnTab)
+        verify(findChild(app, "retryAnalysisBatch").activeFocusOnTab)
+        verify(findChild(app, "cancelAnalysisBatch").activeFocusOnTab)
         app.destroy()
     }
     function test_analysisWaitingIndicatorUsesRealFrameState() {
@@ -716,9 +733,10 @@ TestCase {
         let app = shellWithAnalysis.createObject(null)
         let cancel = findChild(app, "cancelAnalysisBatch")
         verify(cancel.visible); verify(cancel.enabled); cancel.clicked(); compare(fakeAnalysis.batchCancels, 1)
+        compare(cancel.ToolTip.text, cancel.Accessible.description)
         fakeAnalysis.status = "Failed"
         let retry = findChild(app, "retryAnalysisBatch")
-        verify(retry.visible); verify(retry.enabled); retry.clicked(); compare(fakeAnalysis.batchRetries, 1)
+        verify(retry.visible); verify(retry.enabled); compare(retry.ToolTip.text, retry.Accessible.description); retry.clicked(); compare(fakeAnalysis.batchRetries, 1)
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
@@ -732,13 +750,17 @@ TestCase {
         compare(device.count, 1)
         compare(device.currentText, "No output device detected")
         verify(!device.enabled)
+        compare(device.ToolTip.text, "Current system output device used for monitoring")
         let guidance = findChild(app, "permissionGuidance")
         verify(guidance.text.length > 20)
          if (Qt.platform.os === "osx") verify(guidance.text.indexOf("14.2") >= 0)
         compare(findChild(app, "settingsStatus").text, "Settings are saved for this desktop profile. User audio files are never modified.")
+        compare(findChild(app, "settingsStatus").ToolTip.text, "Settings persistence and source-file safety")
         compare(findChild(app, "resetAppearance").ToolTip.text, "Restore Light theme and full motion")
+        verify(findChild(app, "resetAppearance").activeFocusOnTab)
         let appearance = findChild(app, "appearanceState")
         verify(appearance !== null)
+        compare(appearance.ToolTip.text, "Current theme and motion settings")
         compare(appearance.text, "Theme: Light · Motion: full")
         fakeThemePreferences.reduceMotion = true
         tryCompare(appearance, "text", "Theme: Light · Motion: reduced")
@@ -769,6 +791,7 @@ TestCase {
             verify(preview.Accessible.name.length > 0)
             verify(preview.Accessible.description.indexOf("Select " + app.themeNames[i] + " theme;") === 0)
             verify(preview.checkable)
+            verify(preview.activeFocusOnTab)
             compare(preview.Accessible.role, Accessible.RadioButton)
         }
         app.destroy()
@@ -793,11 +816,17 @@ TestCase {
         let status = findChild(app, "djStatus")
         let estimates = findChild(app, "djEstimates")
         let evidence = findChild(app, "djEvidenceStatus")
+        let guidance = findChild(app, "monitoringGuidance")
         verify(status !== null); verify(estimates !== null)
         verify(evidence !== null)
+        verify(guidance !== null)
         compare(status.Accessible.name, "DJ monitoring status")
         compare(estimates.Accessible.name, "DJ estimates")
         compare(evidence.Accessible.name, "DJ evidence status")
+        compare(status.ToolTip.text, "Current DJ monitoring status")
+        compare(estimates.ToolTip.text, "Current BPM, key, and chord estimates")
+        compare(evidence.ToolTip.text, "Live evidence quality and recovery status")
+        compare(guidance.ToolTip.text, "Monitoring guidance and next action")
         fakeLive.status = "Reacquiring"
         tryCompare(evidence, "text", "Reacquiring the selected output source; previous BPM, key, and chord evidence has been cleared.")
         fakeLive.status = "Tracking"

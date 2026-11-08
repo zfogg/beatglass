@@ -1,6 +1,7 @@
 """Verify that platform qualification docs point at executable preparation tools."""
 from pathlib import Path
 import sys
+import re
 
 REQUIRED = (
     "tests/windows/run_qualification.ps1",
@@ -9,6 +10,12 @@ REQUIRED = (
     "docs/linux-qualification-plan.md",
     "docs/windows-qualification.md",
     "docs/macos-qualification.md",
+)
+DOCUMENTATION_CONTRACT_FILES = (
+    "docs/progress.md",
+    "docs/phase0-gate.md",
+    "docs/foundation-handoff.md",
+    "docs/platform-qualification-status.md",
 )
 
 # A generic "native qualification" claim is not enough: each matrix row must
@@ -26,6 +33,7 @@ def main() -> int:
     docs = (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8")
     readme = (root / "README.md").read_text(encoding="utf-8")
     checklists = "\n".join((root / path).read_text(encoding="utf-8") for path in ("docs/windows-qualification.md", "docs/macos-qualification.md", "docs/linux-qualification-plan.md"))
+    documentation_contract = "\n".join((root / path).read_text(encoding="utf-8") for path in DOCUMENTATION_CONTRACT_FILES)
     required_disclaimers = ("does not establish native", "support language must remain experimental")
     required_platform_rows = ("| Windows |", "| macOS |", "| Linux |")
     required_matrix_columns = ("Current integrated/preparation evidence", "Native gates still required")
@@ -38,6 +46,8 @@ def main() -> int:
     required_scenarios = ("permission", "device", "recovery")
     required_runtime_evidence = ("audio backend", "display server", "exact commands", "limitations")
     required_evidence_schema = ("timestamp", "logs", "screenshot")
+    required_report_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "platform_support_status", "native_qualification_required")
+    required_cross_document_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "native qualification", "experimental")
     required_exit_gate = (
         "## Issue #1 exit gate",
         "all_platforms_ready: true",
@@ -46,9 +56,17 @@ def main() -> int:
         "Do not claim issue #1 or v1 completion",
     )
     platform_rows = tuple(line for line in docs.splitlines() if line.startswith(("| Windows |", "| macOS |", "| Linux |")))
+    platform_names = tuple(row.strip("|").split("|")[0].strip() for row in platform_rows)
     required_sections = ("## Issue #76 UI gate", "Linux capture gate")
     missing = [path for path in REQUIRED if not (root / path).is_file()]
     unlinked = [path for path in REQUIRED if path not in docs and path not in ("docs/linux-qualification-plan.md", "docs/windows-qualification.md", "docs/macos-qualification.md")]
+    for relative in DOCUMENTATION_CONTRACT_FILES:
+        source = root / relative
+        text = source.read_text(encoding="utf-8")
+        for target in re.findall(r"\[[^]]+\]\(([^)]+)\)", text):
+            target = target.split("#", 1)[0].strip()
+            if target and not target.startswith(("http://", "https://", "mailto:")) and not (source.parent / target).resolve().is_file():
+                unlinked.append(f"broken documentation link: {relative} -> {target}")
     if "docs/linux-qualification-plan.md" not in readme:
         unlinked.append("docs/linux-qualification-plan.md (README)")
     if "docs/platform-qualification-status.md" not in readme:
@@ -65,6 +83,8 @@ def main() -> int:
     unlinked.extend(f"scenario requirement: {scenario}" for scenario in required_scenarios if scenario.lower() not in docs.lower())
     unlinked.extend(f"runtime evidence field: {field}" for field in required_runtime_evidence if field.lower() not in docs.lower())
     unlinked.extend(f"evidence schema field: {field}" for field in required_evidence_schema if field.lower() not in docs.lower())
+    unlinked.extend(f"readiness report contract: {field}" for field in required_report_contract if field.lower() not in docs.lower())
+    unlinked.extend(f"cross-document contract: {field}" for field in required_cross_document_contract if field.lower() not in documentation_contract.lower())
     unlinked.extend(f"issue #1 exit-gate contract: {phrase}" for phrase in required_exit_gate if phrase.lower() not in docs.lower())
     for row in platform_rows:
         cells = [cell.strip() for cell in row.strip("|").split("|")]
@@ -74,6 +94,8 @@ def main() -> int:
             for evidence in PLATFORM_NATIVE_EVIDENCE[cells[0]]:
                 if evidence.lower() not in row.lower():
                     unlinked.append(f"{cells[0]} native evidence: {evidence}")
+    if len(platform_names) != len(set(platform_names)):
+        unlinked.append("duplicate platform status row")
     unlinked.extend(f"status section: {section}" for section in required_sections if section not in docs)
     unlinked.extend(f"status disclaimer: {phrase}" for phrase in required_disclaimers if phrase not in docs)
     if missing or unlinked:

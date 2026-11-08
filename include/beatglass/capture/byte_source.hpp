@@ -39,25 +39,29 @@ public:
                                  std::stop_token cancel) = 0;
 };
 /** Worker-local cursor borrowing a source; it does not extend source lifetime.
- * It validates source responses and advances only after valid data. It is not
- * thread-safe and cannot turn a mutable underlying source into a snapshot.
+ * It validates source responses and advances only after valid data. A source
+ * size change is a terminal error for this cursor; callers must reopen against
+ * a fresh source snapshot. It is not thread-safe and cannot turn a mutable
+ * underlying source into a snapshot.
  */
 class ByteCursor {
 public:
   /** Borrow a source and begin at byte zero. */
-  explicit ByteCursor(ByteSource& source) noexcept : source_(source) {}
+  explicit ByteCursor(ByteSource& source) : source_(source), snapshot_size_(source.size()) {}
   /** Current byte offset. */
   std::uint64_t position() const noexcept { return position_; }
   /** Seek to an absolute byte offset through EOF; reject offsets beyond EOF. */
   bool seek(std::uint64_t offset) {
-    if (offset > source_.size()) return false;
+    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return false; }
+    if (offset > snapshot_size_) return false;
     position_ = offset; return true;
   }
   /** Seek by a signed displacement from begin, current position or EOF.
    * Reject underflow, overflow and positions past EOF without changing position.
    */
   bool seek_relative(std::int64_t displacement, ByteSeekOrigin origin) {
-    const auto size = source_.size();
+    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return false; }
+    const auto size = snapshot_size_;
     std::uint64_t base;
     switch (origin) {
       case ByteSeekOrigin::begin: base = 0; break;
@@ -87,10 +91,15 @@ public:
   ByteReadResult read(std::span<std::byte> buffer, std::stop_token cancel = {}) {
     if (cancel.stop_requested()) return {ByteReadStatus::cancelled, 0};
     if (buffer.empty()) return {ByteReadStatus::error, 0};
-    const auto size = source_.size();
+    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return {ByteReadStatus::error, 0}; }
+    const auto size = snapshot_size_;
     if (position_ > size) return {ByteReadStatus::error, 0};
     if (position_ == size) return {ByteReadStatus::end, 0};
     auto result = source_.read_at(position_, buffer, cancel);
+    // A source may finish a non-interruptible read after cancellation was
+    // requested. Cancellation wins over data or EOF, and the cursor must not
+    // advance because the caller will discard the buffer.
+    if (cancel.stop_requested()) return {ByteReadStatus::cancelled, 0};
     if (result.status == ByteReadStatus::data && result.bytes > 0 &&
         result.bytes <= buffer.size() && result.bytes <= size - position_) {
       position_ += result.bytes; return result;
@@ -100,6 +109,8 @@ public:
   }
 private:
   ByteSource& source_;
+  const std::uint64_t snapshot_size_;
   std::uint64_t position_{};
+  bool failed_{};
 };
 }

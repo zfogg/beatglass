@@ -180,7 +180,13 @@ ApplicationWindow {
                 }
             }
             ColumnLayout {
+                objectName: "overlayLiveEvidenceGroup"
                 anchors.fill: parent; anchors.margins: 14; spacing: 4
+                Accessible.name: "Overlay live evidence"
+                Accessible.value: window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable"
+                Accessible.role: Accessible.Grouping
+                Accessible.description: "Current live status, tempo, harmony, capture state, and recovery action for the DJ overlay."
+                ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true
                     Label { text: "Beatglass · " + window.liveBridge.status; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
@@ -294,14 +300,19 @@ ApplicationWindow {
     header: ToolBar {
         RowLayout {
             anchors.fill: parent
-            Label { text: "Beatglass"; font.pixelSize: 20; font.bold: true; Layout.leftMargin: 16; Layout.rightMargin: 24 }
+            Label { text: "Beatglass"; font.pixelSize: 20; font.bold: true; Layout.leftMargin: 16; Layout.rightMargin: 24; Accessible.name: "Beatglass"; Accessible.role: Accessible.Heading; ToolTip.text: "Beatglass desktop audio workspace" }
             TabBar {
                 id: navigation
                 objectName: "navigation"
                 Layout.fillWidth: true
-                TabButton { id: libraryTab; text: "Library"; objectName: "libraryTab"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: "Browse local audio files"; Accessible.name: "Library"; Accessible.description: "Browse local audio files. Shortcut Ctrl+Shift+1; focus returns to this tab."; background: Rectangle { color: libraryTab.checked ? "#273b5d" : "transparent"; border.width: libraryTab.activeFocus ? 3 : 1; border.color: libraryTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
-                TabButton { id: djTab; text: "DJ"; objectName: "djTab"; Accessible.name: "DJ"; Accessible.description: "View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2; focus returns to this tab."; background: Rectangle { color: djTab.checked ? "#273b5d" : "transparent"; border.width: djTab.activeFocus ? 3 : 1; border.color: djTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
-                TabButton { id: settingsTab; text: "Settings"; objectName: "settingsTab"; Accessible.name: "Settings"; Accessible.description: "Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab."; background: Rectangle { color: settingsTab.checked ? "#273b5d" : "transparent"; border.width: settingsTab.activeFocus ? 3 : 1; border.color: settingsTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
+                Accessible.name: "Primary navigation"
+                Accessible.value: currentIndex === 0 ? "Library" : (currentIndex === 1 ? "DJ" : (currentIndex === 2 ? "Settings" : "no page selected"))
+                Accessible.role: Accessible.Toolbar
+                Accessible.description: "Switch between Library, DJ, and Settings pages."
+                ToolTip.text: "Primary workspace navigation; current page: " + (currentIndex === 0 ? "Library" : (currentIndex === 1 ? "DJ" : (currentIndex === 2 ? "Settings" : "none")))
+                TabButton { id: libraryTab; text: "Library"; objectName: "libraryTab"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: "Browse local audio files"; Accessible.name: "Library"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "Browse local audio files. Shortcut Ctrl+Shift+1; focus returns to this tab."; background: Rectangle { color: libraryTab.checked ? "#273b5d" : "transparent"; border.width: libraryTab.activeFocus ? 3 : 1; border.color: libraryTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
+                TabButton { id: djTab; text: "DJ"; objectName: "djTab"; activeFocusOnTab: true; Accessible.name: "DJ"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2; focus returns to this tab."; Accessible.role: Accessible.PageTab; ToolTip.text: "Open live DJ controls and overlay settings"; background: Rectangle { color: djTab.checked ? "#273b5d" : "transparent"; border.width: djTab.activeFocus ? 3 : 1; border.color: djTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
+                TabButton { id: settingsTab; text: "Settings"; objectName: "settingsTab"; activeFocusOnTab: true; Accessible.name: "Settings"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab."; Accessible.role: Accessible.PageTab; ToolTip.text: "Open audio, appearance, and overlay settings"; background: Rectangle { color: settingsTab.checked ? "#273b5d" : "transparent"; border.width: settingsTab.activeFocus ? 3 : 1; border.color: settingsTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
             }
             ComboBox {
                 id: themeSelector
@@ -313,7 +324,7 @@ ApplicationWindow {
                 Accessible.value: currentText
                 Accessible.name: "Color theme"
                 Accessible.description: "Choose one of six color themes for the Beatglass desktop; current theme " + currentText
-                ToolTip.text: "Choose a color theme"
+                ToolTip.text: "Choose a color theme; current theme: " + currentText
                 onActivated: {
                     window.selectedThemeIndex = currentIndex
                     window.selectedTheme = currentText
@@ -330,17 +341,19 @@ ApplicationWindow {
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
+                ToolTip.text: checked ? "Reduced motion is enabled; disable to restore transitions" : "Enable reduced motion to minimize animation and transitions"
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
             }
             Button {
                 objectName: "resetAppearance"
                 text: "Reset appearance"
                 visible: !window.compactHeader
+                activeFocusOnTab: true
                 Accessible.name: "Reset appearance settings"
                 Accessible.role: Accessible.Button
-                Accessible.description: "Restore the default Light theme and turn off reduced motion."
-                ToolTip.text: "Restore Light theme and full motion"
-                ToolTip.text: "Restore the default theme and motion setting"
+                Accessible.value: window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
+                Accessible.description: "Restore the default Light theme and turn off reduced motion. Current settings: " + window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion") + "."
+                ToolTip.text: "Reset " + window.selectedTheme + " and " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full") + " motion to defaults"
                 onClicked: {
                     if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
                     window.selectedThemeIndex = 0
@@ -353,6 +366,10 @@ ApplicationWindow {
                 objectName: "themePreviews"
                 visible: !window.compactHeader
                 spacing: 3
+                Accessible.name: "Theme previews"
+                Accessible.role: Accessible.Grouping
+                Accessible.description: "Choose a color theme preview; the selected swatch is marked as selected."
+                ToolTip.text: "Theme preview choices"
                 Repeater {
                     model: window.themeNames.length
                     delegate: Button {
@@ -362,11 +379,13 @@ ApplicationWindow {
                         width: 18; height: 18
                         padding: 0
                         checkable: true
+                        activeFocusOnTab: true
                         checked: window.selectedThemeIndex === index
                         Accessible.name: window.themeNames[index] + " theme preview"
                         Accessible.description: "Select " + window.themeNames[index] + " theme; "
                                               + (checked ? "selected" : "not selected")
                         Accessible.role: Accessible.RadioButton
+                        Accessible.value: checked ? "selected" : "not selected"
                         ToolTip.text: "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
                             objectName: "themePreviewSurface" + index
@@ -408,7 +427,7 @@ ApplicationWindow {
             objectName: "libraryPage"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
-                Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true }
+                Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true; Accessible.name: "Library"; Accessible.role: Accessible.Heading; ToolTip.text: "Browse local audio files and folders" }
                 Label {
                     objectName: "catalogStatus"
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
@@ -450,18 +469,25 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Label { text: "Name"; font.bold: true; Layout.fillWidth: true }
-                    Label { text: "Type"; font.bold: true; Layout.preferredWidth: 100 }
+                    Label { text: "Name"; font.bold: true; Layout.fillWidth: true; Accessible.name: "File name column"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: "Audio file or folder name" }
+                    Label { text: "Type"; font.bold: true; Layout.preferredWidth: 100; Accessible.name: "File type column"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: "Audio format or folder type" }
                 }
                 Label {
-                    objectName: "catalogStatus"
+                    objectName: "catalogResultCount"
                     text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : "Catalog: " + window.catalogRows.length + " matching entries"
                     Accessible.name: "Catalog results: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
+                    Accessible.description: text
+                    ToolTip.text: "Current filtered catalog result count"
                 }
                 Frame {
+                    objectName: "browserFrame"
                     Layout.fillWidth: true; Layout.fillHeight: true
+                    Accessible.name: "Library folder browser"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Browse folders and audio files in the current location."
+                    ToolTip.text: "Library folder and audio-file browser"
                     ListView {
                         id: browser
                         objectName: "browser"
@@ -493,8 +519,8 @@ ApplicationWindow {
                             ToolTip.text: fileIsDir ? "Open folder " + fileName : "Select audio file " + fileName
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
                             contentItem: RowLayout {
-                                Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                                Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100 }
+                                Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.ignored: true }
+                                Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100; Accessible.ignored: true }
                             }
                         }
                         Column {
@@ -502,6 +528,10 @@ ApplicationWindow {
                             objectName: "browserEmptyState"
                             visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)
                             spacing: 8
+                            Accessible.name: "Library browser empty state"
+                            Accessible.role: Accessible.Grouping
+                            Accessible.description: "No folder entries are available; choose a folder to recover browsing."
+                            ToolTip.text: "Library browser empty or unavailable state"
                             Label {
                                 objectName: "browserEmptyMessage"
                                 text: window.browserEmptyMessage()
@@ -522,7 +552,13 @@ ApplicationWindow {
                             }
                         }
                         RowLayout {
+                            objectName: "playbackControls"
                             Layout.fillWidth: true
+                            Accessible.name: "Playback controls"
+                            Accessible.value: window.playbackBridge ? window.playbackBridge.state : "unavailable"
+                            Accessible.role: Accessible.Grouping
+                            Accessible.description: "Open, configure, and control playback for the selected audio source."
+                            ToolTip.text: window.playbackBridge ? "Playback controls; current state: " + window.playbackBridge.state : "Playback controls are unavailable"
                             Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; ToolTip.text: "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
                             SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
                             SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
@@ -559,9 +595,20 @@ ApplicationWindow {
                     }
                 }
                 Frame {
+                    objectName: "selectedAudioPanel"
                     Layout.fillWidth: true
+                    Accessible.name: "Selected audio panel"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Read-only details and recovery actions for the selected audio source."
+                    ToolTip.text: "Selected audio source details"
                     ColumnLayout {
                         anchors.fill: parent
+                        objectName: "selectedAudioDetails"
+                        Accessible.name: "Selected audio details"
+                        Accessible.value: window.selectedName !== "" ? window.selectedName + ", " + window.metadataStatus : "no audio selected"
+                        Accessible.role: Accessible.Grouping
+                        Accessible.description: "Selected audio source, metadata, analysis, and recovery details."
+                        ToolTip.text: "Selected audio details and recovery state"
                         Label {
                             objectName: "selectedAudioName"
                             text: window.selectedName || "No file selected"
@@ -596,8 +643,10 @@ ApplicationWindow {
                         Button {
                             objectName: "clearSelectedAudio"
                             text: "Clear selection"
+                            activeFocusOnTab: true
                             enabled: window.selectedName !== ""
                             Accessible.name: "Clear selected audio"
+                            Accessible.value: enabled ? window.selectedName : "no selection"
                             Accessible.role: Accessible.Button
                             Accessible.description: window.selectedName !== "" ? "Clear the selected audio source and return analysis details to the empty state: " + window.selectedName : "No audio source is selected."
                             ToolTip.text: window.selectedName !== "" ? "Clear " + window.selectedName : "No audio source selected"
@@ -616,8 +665,10 @@ ApplicationWindow {
                             objectName: "retryMetadata"
                             text: "Retry metadata"
                             visible: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0
+                            activeFocusOnTab: true
                             enabled: visible
                             Accessible.name: "Retry metadata"
+                            Accessible.value: window.metadataStatus
                             Accessible.role: Accessible.Button
                             Accessible.description: "Retry reading metadata for the selected audio source after an error. Current status: " + window.metadataStatus
                             ToolTip.text: "Retry metadata for the selected source"
@@ -721,6 +772,7 @@ ApplicationWindow {
                             }
                             Button {
                                 objectName: "discardPersistedRecovery"
+                                activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
                                 enabled: visible && storageRecovery.selectedRunId !== ""
                                 text: "Discard saved run"
@@ -744,25 +796,30 @@ ApplicationWindow {
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
+                                activeFocusOnTab: true
                                 text: "Retry batch"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.retryBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
                                 Accessible.name: "Retry analysis batch"
                                 Accessible.description: "Retry cancelled or failed analysis items retained in the current batch."
+                                ToolTip.text: Accessible.description
                                 onClicked: window.analysisJobBridge.retryBatch()
                             }
                             Button {
                                 objectName: "cancelAnalysisBatch"
+                                activeFocusOnTab: true
                                 text: "Cancel batch"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.cancelBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running")
                                 Accessible.name: "Cancel analysis batch"
                                 Accessible.description: "Cancel all queued or running analysis items retained in the current batch."
+                                ToolTip.text: Accessible.description
                                 onClicked: window.analysisJobBridge.cancelBatch()
                             }
                             Button {
                                 text: "Retry analysis"
                                 objectName: "retryAnalysis"
+                                activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
                                 enabled: visible && window.analysisJobBridge.canRetry
                                 Accessible.name: "Retry analysis"
@@ -773,10 +830,12 @@ ApplicationWindow {
                             Button {
                                 objectName: "cancelAnalysis"
                                 text: "Cancel analysis"
+                                activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
                                 enabled: visible && window.analysisJobBridge.canCancel
                                 Accessible.name: "Cancel analysis"
                                 Accessible.description: "Cancel the active source-attributed analysis operation."
+                                ToolTip.text: Accessible.description
                                 onClicked: window.analysisJobBridge.cancel()
                             }
                             BusyIndicator {
@@ -796,18 +855,38 @@ ApplicationWindow {
             objectName: "djPage"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
-                Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
+                Label { text: "DJ"; font.pixelSize: 28; font.bold: true; Accessible.name: "DJ monitoring"; Accessible.role: Accessible.Heading; ToolTip.text: "Live output monitoring and visualization" }
                 RowLayout {
+                    objectName: "monitoringControls"
+                    Accessible.name: "Live monitoring controls"
+                    Accessible.value: window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Start, stop, or retry live output monitoring."
+                    ToolTip.text: "Live monitoring controls; current state is announced when available"
                     Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: window.captureMonitorBridge !== null && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; ToolTip.text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring" : window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry live output monitoring" : "Start live output monitoring"; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
                     Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current capture monitor status and recovery state" }
+                ColumnLayout {
+                    objectName: "monitoringStatusGroup"
+                    Layout.fillWidth: true
+                    Accessible.name: "Live monitoring status and guidance"
+                    Accessible.value: window.liveBridge.status
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Current output monitoring state and the next action needed to produce live estimates."
+                    ToolTip.text: "Live monitoring state and next action"
+                    Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current live output monitoring state" }
+                    Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; objectName: "monitoringGuidance"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Monitoring guidance"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Monitoring guidance and next action" }
                 }
-                Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
-                Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; objectName: "monitoringGuidance"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Monitoring guidance"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                 RowLayout {
                     objectName: "visualizationModeControls"
+                    Accessible.name: "Visualization mode controls"
+                    Accessible.value: visualizationCanvas.viewMode
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose waveform or frequency-domain FFT visualization."
+                    ToolTip.text: "Visualization mode controls; current mode is announced when available"
                     Button {
                         id: waveformView
-                        text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"
+                        activeFocusOnTab: true
+                        text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
                         Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."
                         ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
                         onClicked: visualizationCanvas.viewMode = "waveform"
@@ -822,7 +901,8 @@ ApplicationWindow {
                     }
                     Button {
                         id: spectrumView
-                        text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"
+                        activeFocusOnTab: true
+                        text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
                         Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."
                         ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
                         onClicked: visualizationCanvas.viewMode = "spectrum"
@@ -859,17 +939,21 @@ ApplicationWindow {
                     }
                     Keys.onHomePressed: { selectedPosition = 0; requestPaint() }
                     Keys.onEndPressed: { selectedPosition = 1; requestPaint() }
+                    Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
                             : visualizationPresentation.spectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: 120
                     Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
+                    Accessible.value: visualizationCanvas.viewMode + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%")
+                    Accessible.role: Accessible.Graphic
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
                         : "Bounded frequency-domain FFT magnitudes from the current output capture.")
-                        + " " + (visualizationCanvas.selectedPosition < 0 ? "No position selected." : "Selected position " + Math.round(visualizationCanvas.selectedPosition * 100) + " percent.")
-                    ToolTip.text: "Click to select a position; use Left/Right/Home/End when focused"
+                        + " Use Left/Right/Home/End to navigate and Escape to clear. "
+                        + (visualizationCanvas.selectedPosition < 0 ? "No position selected." : "Selected position " + Math.round(visualizationCanvas.selectedPosition * 100) + " percent.")
+                    ToolTip.text: "Click to select a position; use Left/Right/Home/End to navigate or Escape to clear"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
@@ -910,6 +994,14 @@ ApplicationWindow {
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
+                ColumnLayout {
+                    objectName: "visualizationStatusGroup"
+                    Layout.fillWidth: true
+                    Accessible.name: "Visualization data and capture status"
+                    Accessible.value: visualizationCanvas.modeHasData ? "ready" : "waiting"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Current waveform or FFT availability, generation, and capture state."
+                    ToolTip.text: "Visualization data, generation, and capture status"
                 Label {
                     objectName: "visualizationEmptyState"
                     visible: !visualizationCanvas.modeHasData
@@ -924,6 +1016,7 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
+                    ToolTip.text: "Visualization data availability and next action"
                 }
                 Label {
                     objectName: "visualizationLoadState"
@@ -968,6 +1061,14 @@ ApplicationWindow {
                     ToolTip.text: "Data available in the selected waveform or FFT view"
                     Layout.fillWidth: true
                 }
+                RowLayout {
+                    objectName: "visualizationSelectionControls"
+                    Layout.fillWidth: true
+                    Accessible.name: "Visualization position selection"
+                    Accessible.value: visualizationCanvas.selectedPosition < 0 ? "none" : Math.round(visualizationCanvas.selectedPosition * 100) + "% selected"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Review or clear the selected waveform or FFT position."
+                    ToolTip.text: "Visualization position selection and reset"
                 Label {
                     objectName: "visualizationSelectionStatus"
                     text: visualizationCanvas.selectedPosition < 0 ? "No visualization position selected" : "Selected visualization position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%"
@@ -984,11 +1085,14 @@ ApplicationWindow {
                     ToolTip.text: "Clear the selected waveform or FFT position"
                     enabled: visualizationCanvas.selectedPosition >= 0
                     Accessible.name: "Clear visualization position"
+                    Accessible.value: enabled ? "available" : "no position selected"
+                    Accessible.role: Accessible.Button
                     Accessible.description: "Remove the selected waveform or FFT position"
                     onClicked: {
                         visualizationCanvas.selectedPosition = -1
                         visualizationCanvas.requestPaint()
                     }
+                }
                 }
                 Label {
                     objectName: "visualizationRevisionStatus"
@@ -1012,16 +1116,26 @@ ApplicationWindow {
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
                     Layout.fillWidth: true; wrapMode: Text.WordWrap
                 }
-                Label {
-                    objectName: "djStatus"; text: "Status: " + window.liveBridge.status
-                    Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text
                 }
-                Label {
-                    objectName: "djEstimates"
-                    text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
-                    Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text
                 }
-                 Label {
+                ColumnLayout {
+                    objectName: "djEvidenceGroup"
+                    Layout.fillWidth: true
+                    Accessible.name: "DJ monitoring evidence"
+                    Accessible.value: window.liveBridge.status
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Current DJ monitoring state, estimates, and evidence-quality guidance."
+                    ToolTip.text: "DJ monitoring state, estimates, and evidence quality"
+                    Label {
+                        objectName: "djStatus"; text: "Status: " + window.liveBridge.status
+                        Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current DJ monitoring status"
+                    }
+                    Label {
+                        objectName: "djEstimates"
+                        text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
+                        Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current BPM, key, and chord estimates"
+                    }
+                    Label {
                      objectName: "djEvidenceStatus"
                      text: {
                          const state = window.liveBridge.status
@@ -1035,16 +1149,30 @@ ApplicationWindow {
                      Accessible.value: text
                      Accessible.role: Accessible.StaticText
                      Accessible.description: text
+                     ToolTip.text: "Live evidence quality and recovery status"
                      wrapMode: Text.WordWrap; Layout.fillWidth: true
-                 }
+                    }
+                }
                 RowLayout {
+                    objectName: "overlayActions"
                     visible: window.overlayBridge !== null
+                    Accessible.name: "Overlay actions"
+                    Accessible.value: window.overlayBridge && window.overlayBridge.available ? "available" : "unavailable"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Show, unlock, or hide the DJ overlay window."
+                    ToolTip.text: window.overlayBridge && window.overlayBridge.available ? "Overlay window actions are available" : "Overlay window actions are unavailable"
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Show the DJ overlay window"; ToolTip.text: "Show the DJ overlay and hide the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
                     Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
+                    objectName: "overlayRoutingControls"
+                    Accessible.name: "Overlay interaction and opacity controls"
+                    Accessible.value: window.overlayBridge ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" : "unavailable"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Configure pointer click-through and overlay opacity."
+                    ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
@@ -1065,17 +1193,23 @@ ApplicationWindow {
                         }
                     }
                     Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
-                    Label { text: "Opacity" }
+                    Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
                     Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                     Connections {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge) overlayOpacityControl.value = window.overlayBridge.opacity }
                     }
-                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay opacity value" }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
-                    Label { text: "Display" }
+                    objectName: "overlayDisplayControls"
+                    Accessible.name: "Overlay display and size controls"
+                    Accessible.value: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "unavailable"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose the overlay destination display and window size."
+                    ToolTip.text: "Overlay destination display and window size; current display is announced when available"
+                    Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"
                     Accessible.name: "Overlay display"; Accessible.value: currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"); ToolTip.text: "Choose the display where the overlay is shown"
@@ -1085,7 +1219,7 @@ ApplicationWindow {
                         onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
                         Layout.fillWidth: true
                     }
-                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay display status" }
                     Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
@@ -1094,8 +1228,9 @@ ApplicationWindow {
                         Accessible.value: text
                         Accessible.role: Accessible.StaticText
                         Accessible.description: text + " Connect a display before choosing an overlay destination."
+                        ToolTip.text: "Connect a display before choosing an overlay destination"
                     }
-                    Label { text: "Size" }
+                    Label { text: "Size"; Accessible.name: "Overlay size control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay window size" }
                     ComboBox {
                         objectName: "overlaySize"
                     Accessible.name: "Overlay size"; Accessible.value: currentText; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the overlay window size; current size " + currentText; ToolTip.text: "Choose Compact, Medium, or Large overlay size"
@@ -1107,7 +1242,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; wrapMode: Text.WordWrap }
+                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
                 Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Retry showing the native DJ overlay"; ToolTip.text: "Retry showing the native DJ overlay on the selected display"; onClicked: window.showOverlayAndHideControls() }
                 Item { Layout.fillHeight: true }
             }
@@ -1116,13 +1251,17 @@ ApplicationWindow {
             objectName: "settingsPage"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 14
-                Label { text: "Settings"; font.pixelSize: 28; font.bold: true; color: window.themeForegrounds[window.selectedThemeIndex] }
+                Label { text: "Settings"; font.pixelSize: 28; font.bold: true; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Settings"; Accessible.role: Accessible.Heading; ToolTip.text: "Audio capture, appearance, and overlay settings" }
                 GroupBox {
                     title: "Audio capture"
+                    Accessible.name: "Audio capture settings"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose the output endpoint and device used for live monitoring."
+                    ToolTip.text: "Configure live audio capture sources"
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
-                        Label { text: "Output device"; font.bold: true }
+                        Label { text: "Output device"; font.bold: true; Accessible.name: "Output device settings"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the system output device used for monitoring" }
                             RowLayout {
                                 ComboBox {
                                     objectName: "endpointSelector"
@@ -1135,6 +1274,7 @@ ApplicationWindow {
                                     Accessible.value: currentText
                                     Accessible.role: Accessible.ComboBox
                                     Accessible.description: currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture."
+                                    ToolTip.text: "Choose the output endpoint used for live capture"
                                     onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
                                 }
                                 Button { text: "Refresh"; objectName: "refreshEndpoints"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.role: Accessible.Button; Accessible.description: "Refresh the available output capture endpoints."; ToolTip.text: "Refresh available output capture endpoints"; onClicked: window.endpointSelectionBridge.refresh() }
@@ -1147,6 +1287,7 @@ ApplicationWindow {
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
+                                ToolTip.text: "No output endpoint is available; refresh after connecting a device"
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -1159,6 +1300,7 @@ ApplicationWindow {
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
+                                ToolTip.text: "Output endpoint discovery is unavailable in this build"
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -1170,6 +1312,7 @@ ApplicationWindow {
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
+                                ToolTip.text: "Connect an output device and refresh endpoint discovery"
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -1182,9 +1325,9 @@ ApplicationWindow {
                             enabled: true
                             Accessible.name: "Output device"
                             Accessible.value: currentText
-                            Accessible.value: currentText
                             Accessible.role: Accessible.ComboBox
                             Accessible.description: "Current output device: " + currentText + ". Monitoring follows the operating system default output device."
+                            ToolTip.text: "Current system output device used for monitoring"
                             Layout.fillWidth: true
                         }
                         Label {
@@ -1203,10 +1346,14 @@ ApplicationWindow {
                 }
                 GroupBox {
                     title: "Appearance"
+                    Accessible.name: "Appearance settings"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose the color theme and motion preference for the desktop."
+                    ToolTip.text: "Configure theme and motion preferences"
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
-                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Appearance guidance"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Theme and reduced-motion guidance" }
                         Label {
                             objectName: "appearanceState"
                             text: "Theme: " + window.selectedTheme + " · Motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
@@ -1214,6 +1361,7 @@ ApplicationWindow {
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
+                            ToolTip.text: "Current theme: " + window.selectedTheme + "; motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Layout.fillWidth: true
                         }
                     }
@@ -1224,6 +1372,8 @@ ApplicationWindow {
                     Accessible.name: "Settings status: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
+                    Accessible.description: "Settings persistence status and user-audio safety guarantee."
+                    ToolTip.text: "Settings persistence and source-file safety"
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 Item { Layout.fillHeight: true }
