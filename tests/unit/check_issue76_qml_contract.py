@@ -445,6 +445,7 @@ def main() -> int:
         "visualization selected counts wrap": 'objectName: "visualizationSelectedDataStatus"',
         "visualization selected data responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization data status shrinks": 'objectName: "visualizationStatus"',
+        "visualization data status responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization revision wraps": 'objectName: "visualizationRevisionStatus"',
         "visualization selection status theme": 'objectName: "visualizationSelectionStatus"',
         "visualization selection status wraps": 'objectName: "visualizationSelectionStatus"',
