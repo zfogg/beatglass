@@ -434,6 +434,14 @@ if(BUILD_TESTING)
   endif()
   catch_discover_tests(beatglass_tests PROPERTIES LABELS unit TIMEOUT 30)
   add_dependencies(beatglass_all_tests beatglass_tests analysis_runner_tests)
+  foreach(optional_test_target IN ITEMS
+      library_prototype_tests pipewire_tests macos_overlay_tests
+      macos_native_overlay_tests live_presentation_tests metadata_tests
+      theme_preferences_tests windows_dj_bridge_tests windows_overlay_tests)
+    if(TARGET ${optional_test_target})
+      add_dependencies(beatglass_all_tests ${optional_test_target})
+    endif()
+  endforeach()
   if(WIN32)
     add_executable(windows_endpoint_tests tests/windows/endpoints_test.cpp tests/windows/loopback_test.cpp tests/windows/device_position_test.cpp tests/windows/overlay_policy_test.cpp)
     if(BEATGLASS_BUILD_SLICE)
