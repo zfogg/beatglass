@@ -2092,6 +2092,19 @@ ApplicationWindow {
                     Layout.fillWidth: true
                 }
                 Label {
+                    objectName: "overlayRestoreState"
+                    text: window.overlayBridge && window.overlayBridge.displayName !== ""
+                        ? "Persisted restore: " + window.overlayBridge.displayName + " · " + Math.round(window.overlayBridge.opacity * 100) + "% opacity"
+                        : "Persisted restore state unavailable; control-window fallback remains active."
+                    Accessible.name: "Overlay persisted restore state: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Restored overlay display and opacity, or the fallback state when native restore data is unavailable."
+                    ToolTip.text: "Persisted display and opacity restored by the native overlay bridge"
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "overlayPersistedRecoveryDiagnostic"
                     visible: window.overlayBridge !== null && !window.overlayBridge.available
                         && typeof storageRecovery !== "undefined"

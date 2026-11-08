@@ -44,6 +44,8 @@ MARKERS = {
     "qml overlay fallback": "Control window remains available as the tray/taskbar fallback until the overlay display recovers.",
     "qml overlay geometry status": 'objectName: "overlayGeometryStatus"',
     "qml overlay geometry announcement": "DJ overlay geometry restored at ",
+    "qml overlay restore state": 'objectName: "overlayRestoreState"',
+    "qml overlay restore fallback": "Persisted restore state unavailable; control-window fallback remains active.",
     "qml overlay relaunch geometry": "DJ overlay relaunched at its persisted position and size.",
     "qml overlay relaunch fallback": "DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.",
     "qml overlay restore affordance": 'objectName: "restoreOverlay"',
