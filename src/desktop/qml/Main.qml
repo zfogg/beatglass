@@ -402,6 +402,14 @@ ApplicationWindow {
                                 Accessible.description: text
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Button {
+                                text: "Retry analysis"
+                                objectName: "retryAnalysis"
+                                enabled: false
+                                Accessible.name: "Retry analysis"
+                                Accessible.description: "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations."
+                                ToolTip.text: Accessible.description
+                            }
                         }
                     }
                 }
