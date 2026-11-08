@@ -4,7 +4,7 @@ This checklist records native macOS audio and overlay evidence. Do not mark a ca
 
 The repeatable build and evidence setup is `tests/macos/run_qualification.sh`. Run it from a logged-in Mac with an output-specific `NSAudioCaptureUsageDescription` that explicitly describes system-output capture and does not mention microphone or camera capture; it records the build identity, verifies launchable `APPL` bundle executable/identifier/name/version metadata, runs native test output, then prints the manual cases that still require permission, playback and desktop interaction.
 
-For an actual output-capture run, pass the exact UID printed by the smoke bundle's discovery mode:
+For an actual output-capture run, pass the exact UID printed by the smoke bundle's discovery mode. The runner retains `output-discovery.log` and verifies any supplied UID is present in the current enumeration before capture:
 
 ```sh
 BEATGLASS_MACOS_TAP_UID='CoreAudio-output-UID' \

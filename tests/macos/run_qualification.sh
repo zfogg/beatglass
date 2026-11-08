@@ -120,6 +120,17 @@ for bundle in "$out_dir/build/beatglass-desktop.app" "$tap_bundle" "$recovery_bu
     fi
   done
 done
+output_discovery_log="$out_dir/output-discovery.log"
+record_command "$tap_binary"
+"$tap_binary" | tee "$output_discovery_log"
+if [[ ! -s "$output_discovery_log" ]]; then
+  echo "Core Audio output discovery log is missing or empty" >&2
+  exit 1
+fi
+if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]] && ! grep -Fq "$BEATGLASS_MACOS_TAP_UID" "$output_discovery_log"; then
+  echo "Selected output UID was not present in current Core Audio discovery" >&2
+  exit 1
+fi
 if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   echo "Running Core Audio tap smoke for supplied UID"
   record_command "$tap_binary $BEATGLASS_MACOS_TAP_UID"
@@ -207,7 +218,7 @@ if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_lo
   printf 'desktop_signing=%s\ntap_signing=%s\nrecovery_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$tap_signing" "$recovery_signing" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'permission_result=%s\n' "$permission_result"
-  printf 'commands=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
+  printf 'commands=%s\noutput_discovery=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$output_discovery_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
   if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
