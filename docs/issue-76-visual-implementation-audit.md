@@ -550,6 +550,8 @@ The shortcut contract is executable: the focused regression verifies each sequen
 
 Shortcut and pointer recovery actions now publish the same live accessible status label. Resume announces that the accepted snapshot was retained; Stop announces that it was cleared, making keyboard-triggered state changes observable to assistive technology.
 
+The announcement lifecycle now also updates on analysis cancellation, endpoint changes, and capture/source resets. Each transition explains that the current snapshot is stale or awaiting replacement, so recovery feedback cannot remain stuck on an earlier playback action.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

@@ -274,6 +274,7 @@ ApplicationWindow {
             : window.liveBridge.status === "Starting"
             ? "Selection cleared while capture is starting."
             : "Selection cleared because capture stopped.")
+        window.visualizationRecoveryAnnouncement = window.visualizationSelectionResetReason
         if (typeof visualizationCanvas !== "undefined") {
             visualizationCanvas.selectedPosition = -1
             visualizationCanvas.renderedRevision = -1
@@ -347,6 +348,12 @@ ApplicationWindow {
                     && typeof visualizationPresentation !== "undefined"
                     && visualizationCanvas.renderedWaveform.length > 0)
                 window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationCanvas.renderedWaveform.length)
+        }
+    }
+    Connections {
+        target: window.endpointSelectionBridge
+        function onChanged() {
+            window.visualizationRecoveryAnnouncement = "Capture endpoint state changed; visualization selection may require a fresh snapshot."
         }
     }
 
@@ -971,7 +978,7 @@ ApplicationWindow {
                                 objectName: "analysisLifecycleControls"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 Label { text: visible ? storageRecovery.analysisStatus : ""; Accessible.name: "Analysis lifecycle status"; Layout.fillWidth: true }
-                                Button { objectName: "cancelAdmittedAnalysis"; text: "Cancel analysis"; visible: parent.visible && storageRecovery.cancelAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running"); onClicked: storageRecovery.cancelAnalysis(); Accessible.name: "Cancel admitted analysis" }
+                                Button { objectName: "cancelAdmittedAnalysis"; text: "Cancel analysis"; visible: parent.visible && storageRecovery.cancelAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running"); onClicked: { storageRecovery.cancelAnalysis(); window.visualizationRecoveryAnnouncement = "Analysis cancelled; waiting for a replacement accepted snapshot." }; Accessible.name: "Cancel admitted analysis" }
                                 Button { objectName: "retryAdmittedAnalysis"; text: "Retry analysis"; visible: parent.visible && storageRecovery.retryAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled"); onClicked: storageRecovery.retryAnalysis(); Accessible.name: "Retry admitted analysis" }
                             }
                             RowLayout {
@@ -1054,7 +1061,7 @@ ApplicationWindow {
                                 Accessible.name: "Cancel analysis batch"
                                 Accessible.description: "Cancel all queued or running analysis items retained in the current batch."
                                 ToolTip.text: Accessible.description
-                                onClicked: window.analysisJobBridge.cancelBatch()
+                                onClicked: { window.analysisJobBridge.cancelBatch(); window.visualizationRecoveryAnnouncement = "Analysis batch cancelled; waiting for a replacement accepted snapshot." }
                             }
                             Button {
                                 text: "Retry analysis"
@@ -1076,7 +1083,7 @@ ApplicationWindow {
                                 Accessible.name: "Cancel analysis"
                                 Accessible.description: "Cancel the active source-attributed analysis operation."
                                 ToolTip.text: Accessible.description
-                                onClicked: window.analysisJobBridge.cancel()
+                                onClicked: { window.analysisJobBridge.cancel(); window.visualizationRecoveryAnnouncement = "Analysis cancelled; waiting for a replacement accepted snapshot." }
                             }
                             BusyIndicator {
                                 objectName: "analysisWaitingIndicator"

@@ -468,6 +468,8 @@ def main() -> int:
         "visualization recovery announcement role": "Accessible.role: Accessible.Status",
         "visualization keyboard resume announcement": "Playback resumed from keyboard shortcut; accepted snapshot retained.",
         "visualization keyboard stop announcement": "Playback stopped from keyboard shortcut; accepted snapshot cleared.",
+        "visualization cancellation announcement": "Analysis cancelled; waiting for a replacement accepted snapshot.",
+        "visualization endpoint announcement": "Capture endpoint state changed; visualization selection may require a fresh snapshot.",
         "visualization waveform validation": "if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))",
         "visualization spectrum validation": "if (!isFinite(spec[k]))",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
