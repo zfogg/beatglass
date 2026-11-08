@@ -469,6 +469,8 @@ ApplicationWindow {
                 window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
         }
         function onScreensChanged() {
+            if (window.overlayBridge && window.overlayBridge.displayName !== "")
+                window.overlayPreferredDisplayName = window.overlayBridge.displayName
             if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
                 window.announceCaptureRecoveryState("DJ overlay display disappeared; controls restored until a display is available.")
             else {
@@ -497,6 +499,8 @@ ApplicationWindow {
                 window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
         }
         function onGeometryChanged() {
+            if (window.overlayBridge && window.overlayBridge.displayName !== "")
+                window.overlayPreferredDisplayName = window.overlayBridge.displayName
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
         }
@@ -2086,6 +2090,18 @@ ApplicationWindow {
                         Accessible.role: Accessible.StaticText
                         Accessible.description: text + " Connect a display before choosing an overlay destination."
                         ToolTip.text: "Connect a display before choosing an overlay destination"
+                    }
+                    Label {
+                        objectName: "overlayMissingDisplayRecovery"
+                        visible: window.overlayDisplaySelectionRequired && window.overlayPreferredDisplayName !== ""
+                        text: "Saved display unavailable: " + window.overlayPreferredDisplayName + ". Connect it or choose another display."
+                        Accessible.name: "Overlay saved display recovery: " + text
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: "The native overlay bridge saved a display that is not currently enumerated."
+                        ToolTip.text: "Reconnect the saved display or choose another available display"
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
                     }
                     Label { text: "Size"; Accessible.name: "Overlay size control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay window size" }
                     ComboBox {
