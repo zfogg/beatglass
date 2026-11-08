@@ -25,6 +25,16 @@ class ReviewBundlePromotionTest(unittest.TestCase):
             self.assertTrue(errors)
             self.assertFalse(destination.exists())
 
+    def test_pending_bundle_does_not_write_release_manifest(self):
+        fixture = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source"; destination = Path(tmp) / "release"
+            source.mkdir()
+            shutil.copyfile(fixture / "readiness-report.json", source / "readiness-report.json")
+            accepted, _ = promoter.promote(source, destination)
+            self.assertFalse(accepted)
+            self.assertFalse((destination / "release-manifest.json").exists())
+
     def test_missing_bundle_cannot_be_promoted(self):
         with tempfile.TemporaryDirectory() as tmp:
             accepted, errors = promoter.promote(Path(tmp) / "missing", Path(tmp) / "release")
