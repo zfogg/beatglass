@@ -1,6 +1,7 @@
 """Verify that platform qualification docs point at executable preparation tools."""
 from pathlib import Path
 import sys
+import re
 
 REQUIRED = (
     "tests/windows/run_qualification.ps1",
@@ -59,6 +60,13 @@ def main() -> int:
     required_sections = ("## Issue #76 UI gate", "Linux capture gate")
     missing = [path for path in REQUIRED if not (root / path).is_file()]
     unlinked = [path for path in REQUIRED if path not in docs and path not in ("docs/linux-qualification-plan.md", "docs/windows-qualification.md", "docs/macos-qualification.md")]
+    for relative in DOCUMENTATION_CONTRACT_FILES:
+        source = root / relative
+        text = source.read_text(encoding="utf-8")
+        for target in re.findall(r"\[[^]]+\]\(([^)]+)\)", text):
+            target = target.split("#", 1)[0].strip()
+            if target and not target.startswith(("http://", "https://", "mailto:")) and not (source.parent / target).resolve().is_file():
+                unlinked.append(f"broken documentation link: {relative} -> {target}")
     if "docs/linux-qualification-plan.md" not in readme:
         unlinked.append("docs/linux-qualification-plan.md (README)")
     if "docs/platform-qualification-status.md" not in readme:

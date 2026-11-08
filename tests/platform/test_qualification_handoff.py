@@ -60,6 +60,12 @@ class QualificationHandoffTest(unittest.TestCase):
             self.assertIn("native qualification", text, relative)
             self.assertIn("experimental", text, relative)
 
+    def test_handoff_checker_validates_relative_documentation_links(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        for relative in ("docs/progress.md", "docs/phase0-gate.md", "docs/foundation-handoff.md", "docs/platform-qualification-status.md"):
+            text = (root / relative).read_text(encoding="utf-8")
+            self.assertNotIn("](missing-", text, relative)
+
 
 if __name__ == "__main__":
     unittest.main()
