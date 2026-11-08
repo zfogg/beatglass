@@ -30,11 +30,13 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   frames_ = 0;
   batch_.clear(); batchAccepted_ = batchRejected_ = 0; emit batchChanged();
   auto progress = op.progress;
-  op.progress = [this, progress](auto done, auto total) {
+  op.progress = [weak_self = weak_self_, progress](auto done, auto total) {
     if (progress) progress(done, total);
-    QMetaObject::invokeMethod(this, [this, done] {
-      frames_ = done;
-      emit progressChanged();
+    if (!weak_self) return;
+    QMetaObject::invokeMethod(weak_self, [weak_self, done] {
+      if (!weak_self) return;
+      weak_self->frames_ = done;
+      emit weak_self->progressChanged();
     }, Qt::QueuedConnection);
   };
   retryable_ = runner_.submit_retryable(std::move(op));

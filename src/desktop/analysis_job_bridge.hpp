@@ -1,6 +1,7 @@
 #pragma once
 #include "beatglass/library/analysis_runner.hpp"
 #include <QObject>
+#include <QPointer>
 #include <QTimer>
 #include <vector>
 
@@ -47,6 +48,7 @@ private:
   int batchRejected_{};
   const int batchCapacity_{2};
   QTimer poll_timer_;
+  QPointer<AnalysisJobBridge> weak_self_{this};
   qulonglong frames_{};
   QString status_{QStringLiteral("Idle")};
 };

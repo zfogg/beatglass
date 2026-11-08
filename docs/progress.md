@@ -290,6 +290,8 @@ The Library surface now also renders queue outcome and retry availability beside
 
 The queue row now includes observed frame progress alongside state and retry availability, giving the UI a source-attributed progress signal without moving decoder or analysis work onto the GUI thread.
 
+Worker progress callbacks are lifetime-safe: queued GUI updates retain only a `QPointer` and are discarded after the bridge is destroyed, so decoder/worker completion cannot publish into a dead UI object.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
