@@ -160,3 +160,36 @@ TEST_CASE("byte cursor seek relative rejects mutation before changing position")
  CHECK_FALSE(cursor.seek_relative(-1, ByteSeekOrigin::current));
  CHECK(cursor.position() == 1);
 }
+
+TEST_CASE("byte cursor can rewind after repeated EOF observations") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ REQUIRE(cursor.seek(source.size()));
+ CHECK(cursor.read(out).status == ByteReadStatus::end);
+ CHECK(cursor.read(out).status == ByteReadStatus::end);
+ REQUIRE(cursor.seek(0));
+ CHECK(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 2);
+}
+
+TEST_CASE("byte cursor cancellation at EOF does not poison a later rewind") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ REQUIRE(cursor.seek(source.size()));
+ std::stop_source stop; stop.request_stop();
+ CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
+ CHECK(cursor.position() == source.size());
+ REQUIRE(cursor.seek(0));
+ CHECK(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 2);
+}
+
+TEST_CASE("byte cursor empty reads preserve position before EOF and after rewind") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ CHECK(cursor.read({}).status == ByteReadStatus::error);
+ CHECK(cursor.position() == 0);
+ REQUIRE(cursor.seek(source.size()));
+ CHECK(cursor.read({}).status == ByteReadStatus::error);
+ CHECK(cursor.position() == source.size());
+ REQUIRE(cursor.seek(0));
+ CHECK(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 2);
+}
