@@ -6,6 +6,8 @@ The desktop recovery bridge emits terminal `Analysis failed` and `Analysis cance
 
 Rapid persisted-run changes are guarded separately: selecting a different run clears the prior outcome key and terminal worker notifications remain silent until that new selector value is explicitly activated. This prevents a late status signal from the previous run from being presented as an outcome for the newly highlighted run.
 
+Selector activation is explicit: programmatic selected-run changes clear outcome/focus state without stealing focus or announcing a terminal result; user activation marks the run eligible for worker outcome feedback, restores selector focus, and instructs keyboard users to Tab into Retry or Discard.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.

@@ -1578,12 +1578,12 @@ ApplicationWindow {
                                 Accessible.role: Accessible.ComboBox
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
                                 Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
-                                    ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable."
-                                    : (count > 0 ? "Choose one of " + count + " saved analysis runs to recover." : "No saved analysis runs available.")
+                                    ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable. Press Tab to reach them."
+                                    : (count > 0 ? "Choose one of " + count + " saved analysis runs to recover. Press Tab to reach retry and discard actions after selection." : "No saved analysis runs available.")
                                 ToolTip.text: count > 0
                                     ? "Choose one of " + count + " saved analysis runs" + (typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== "" ? ". Selected: " + storageRecovery.selectedRunId : "")
                                     : "No saved analysis runs available"
-                                onActivated: { storageRecovery.selectRun(currentText); window.persistedRecoverySelectionActivated = true; window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Retry and discard controls are now available when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
+                                onActivated: { storageRecovery.selectRun(currentText); window.persistedRecoverySelectionActivated = true; window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Press Tab to reach retry and discard controls when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
                             }
                             Label {
                                 objectName: "persistedRecoveryRunDetails"
