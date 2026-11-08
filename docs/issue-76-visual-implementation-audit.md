@@ -429,3 +429,5 @@ Capture transitions now expose a visible and accessible reset explanation when s
 The waveform and FFT canvas now consumes the active six-theme palette at render time: the background follows the theme surface, plotted data uses the theme accent, and the selection cursor uses the theme foreground for contrast. Theme changes therefore affect the live visualization rather than only surrounding controls.
 
 The canvas also draws a low-contrast, foreground-derived three-row grid and resets its alpha before rendering data, giving each theme a consistent orientation cue without overpowering waveform, FFT bars, or the selection cursor.
+
+In compact headers the grid reduces to one center guide, matching the shorter canvas height and preserving data area for waveform/FFT content; full layouts retain the three-row grid.
