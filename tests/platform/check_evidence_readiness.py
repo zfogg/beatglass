@@ -192,6 +192,14 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           "fresh": row["fresh"], "retention_ok": row["retention_ok"],
                           "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
                          for row in rows]
+    native_qualification_summary = [
+        {"platform": row["platform"],
+         "evidence_complete": not row["unpassed_scenarios"] and not row["missing_artifact_roles"],
+         "unpassed_scenarios": row["unpassed_scenarios"],
+         "missing_artifact_roles": row["missing_artifact_roles"],
+         "verifier_errors": row["error_count"],
+         "ready": next(item["ready"] for item in platform_failures if item["platform"] == row["platform"])}
+        for row in rows]
     ready_platforms = sum(item["ready"] for item in platform_failures)
     retained_artifact_count = sum(row["retained_artifacts"] for row in rows)
     retained_artifact_bytes = sum(row["retained_bytes"] for row in rows)
@@ -234,6 +242,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
+            "native_qualification_summary": native_qualification_summary,
+            "native_qualification_ready": bool(native_qualification_summary) and all(item["ready"] and item["evidence_complete"] for item in native_qualification_summary),
             "failure_summary_consistent": failure_summary_consistent,
             "error_count_consistent": error_count_consistent,
             "ready_platform_count": ready_platforms,
