@@ -7,15 +7,15 @@ MARKERS = {
     "resume shortcut object": 'objectName: "visualizationResumeShortcut"',
     "resume shortcut sequence": 'sequence: "Ctrl+Alt+R"',
     "resume shortcut enabled": 'enabled: window.playbackBridge !== null && window.playbackBridge.state === "Paused"',
-    "resume shortcut action": "onActivated: window.playbackBridge.resume()",
+    "resume shortcut action": "window.playbackBridge.resume(); window.visualizationRecoveryAnnouncement",
     "stop shortcut object": 'objectName: "visualizationStopShortcut"',
     "stop shortcut sequence": 'sequence: "Ctrl+Alt+Shift+S"',
     "stop shortcut enabled": 'enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped"',
-    "stop shortcut action": "onActivated: window.playbackBridge.stop()",
+    "stop shortcut action": "window.playbackBridge.stop(); window.visualizationRecoveryAnnouncement",
     "resume button object": 'objectName: "resumeVisualizationPlayback"',
-    "resume button action": "onClicked: window.playbackBridge.resume()",
+    "resume button action": "window.playbackBridge.resume(); window.visualizationRecoveryAnnouncement",
     "stop button object": 'objectName: "stopVisualizationPlayback"',
-    "stop button action": "onClicked: window.playbackBridge.stop()",
+    "stop button action": "window.playbackBridge.stop(); window.visualizationRecoveryAnnouncement",
 }
 
 
