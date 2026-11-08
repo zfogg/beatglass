@@ -30,11 +30,28 @@ private:
 /** Worker-owned adapter that executes an AnalysisOperation and retains its JobHandle. Empty serialized results fail closed before persistence. */
 class AnalysisRunner {
 public:
+  /**
+   * Bind the runner to an existing worker executor; the executor must outlive
+   * this runner and owns queue capacity, ordering, and shutdown.
+   */
   explicit AnalysisRunner(library_detail::JobExecutor& executor):executor_(executor){}
+  /**
+   * Submit one operation to the worker queue. The returned handle is empty
+   * when the bounded queue rejects the work; execution and callbacks remain
+   * off the audio and GUI threads.
+   */
   std::shared_ptr<library_detail::JobHandle> submit(AnalysisOperation operation, int priority = 0);
-  /** Retain an operation so a cancelled or failed attempt can be retried without reconstructing source identity. */
+  /**
+   * Retain an operation so a cancelled or failed attempt can be retried
+   * without reconstructing source identity. The returned controller owns its
+   * operation copy and must not outlive the runner or its executor.
+   */
   std::shared_ptr<RetryableAnalysis> submit_retryable(AnalysisOperation operation, int priority = 0);
-  /** Submit a bounded batch in input order; returns only accepted operations when queue capacity is exhausted. */
+  /**
+   * Submit a bounded batch in input order. The result contains only accepted
+   * operations when queue capacity is exhausted; input operations are copied
+   * or moved into worker-owned jobs before this call returns.
+   */
   std::vector<std::shared_ptr<library_detail::JobHandle>> submit_batch(std::vector<AnalysisOperation> operations, int priority = 0);
 private: library_detail::JobExecutor& executor_;
 };
