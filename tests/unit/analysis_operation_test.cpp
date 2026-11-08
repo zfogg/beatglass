@@ -114,6 +114,24 @@ TEST_CASE("coordinator cancellation does not publish a stale result") {
   CHECK(handle->state() == beatglass::library_detail::TrackedState::cancelled);
   CHECK_FALSE(published.load());
 }
+TEST_CASE("cancelled analysis can be retried with a compatible snapshot") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library_detail::CacheKey key{"retry-hash", "engine", "config", "offline"};
+  cache.begin("retry-run", key, "track.wav", beatglass::library::kFileDecoderSnapshot);
+  std::stop_source stop;
+  stop.request_stop();
+  CHECK(cache.publish("retry-run", key, "stale", stop.get_token(), [] { return true; }) == beatglass::library_detail::Publish::cancelled);
+  std::string result;
+  CHECK_FALSE(cache.find(key, result));
+  const auto pending = cache.retryable_runs();
+  REQUIRE(pending.size() == 1);
+  CHECK(pending.front().decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
+  cache.begin("retry-run", key, pending.front().source_path, pending.front().decoder_snapshot);
+  REQUIRE(cache.publish("retry-run", key, "fresh", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  REQUIRE(cache.find(key, result));
+  CHECK(result == "fresh");
+  CHECK(cache.retryable_runs().empty());
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
