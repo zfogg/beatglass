@@ -24,6 +24,7 @@ int main() {
   assert(invalid_epoch);
 
   const auto wav = std::filesystem::temp_directory_path() / "beatglass-reader.wav";
+  std::error_code cleanup;
   write_wav(wav);
   {
     FileReader reader(wav, 7);
@@ -43,8 +44,11 @@ int main() {
   }
   { std::ofstream append(wav, std::ios::app | std::ios::binary); append.put('\0'); }
   { FileReader reader(wav, 8); assert(reader.source_changed()); }
-  std::error_code cleanup;
   std::filesystem::remove(wav, cleanup);
+  bool reopen_failed = false;
+  try { FileReader reader(wav, 10); }
+  catch (const FileOpenError& error) { reopen_failed = error.kind() == FileOpenErrorKind::unreadable; }
+  assert(reopen_failed);
 
   const auto unsupported = std::filesystem::temp_directory_path() / "beatglass-reader.m4a";
   bool classified = false;
