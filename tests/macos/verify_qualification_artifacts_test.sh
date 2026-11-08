@@ -15,7 +15,7 @@ printf smoke > "$out_dir/build/beatglass-coreaudio-smoke.app/Contents/MacOS/beat
 printf recovery > "$out_dir/build/beatglass-coreaudio-recovery.app/Contents/MacOS/beatglass-coreaudio-recovery"
 cat > "$out_dir/qualification-manifest.txt" <<'EOF'
 captured_at=2026-01-01T00:00:00Z
-commit=test
+commit=0123456789abcdef0123456789abcdef01234567
 macos_version=test
 architecture=x86_64
 hardware_model=fixture
