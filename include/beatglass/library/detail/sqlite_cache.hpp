@@ -64,7 +64,7 @@ public:
   bool discard_retryable(const std::string& id);
   /** Mark a matching running operation retryable after a pre-publication worker failure; returns false when ID/key do not match a running row and throws for invalid inputs. */
   bool mark_retryable(const std::string& id, const CacheKey& key);
-  /** Remove the active result for an exact identity; source files and historical runs remain untouched. */
+  /** Remove the active result for an exact identity; returns false when none exists, throws for an invalid key, and leaves source files and historical runs untouched. */
   bool invalidate(const CacheKey& key);
   /** Revalidate and atomically publish. Cancellation before commit rolls back; cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. */
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
