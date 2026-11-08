@@ -189,6 +189,12 @@ ApplicationWindow {
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
         return window.showOverlayAndHideControls()
     }
+    function forgetUnavailableOverlayDisplay() {
+        window.overlayPreferredDisplayName = ""
+        window.overlayPreferredScreenIndex = -1
+        window.overlayDisplaySelectionRequired = true
+        window.announceCaptureRecoveryState("Saved overlay display cleared; choose an available display to restore monitoring.")
+    }
     function hideOverlayAndRestoreControls() {
         if (!window.overlayBridge) return
         window.overlayBridge.hideOverlay()
@@ -2087,6 +2093,16 @@ ApplicationWindow {
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
                         onActivated: if (window.overlayBridge) { window.overlayBridge.moveToScreen(currentIndex); window.overlayPreferredScreenIndex = currentIndex; window.overlayPreferredDisplayName = currentText; window.overlayDisplaySelectionRequired = false; window.announceCaptureRecoveryState("DJ overlay display selected; retry is now available."); retryOverlay.forceActiveFocus() }
                         Layout.fillWidth: true
+                    }
+                    Button {
+                        objectName: "forgetUnavailableOverlayDisplay"
+                        visible: window.overlayDisplaySelectionRequired && window.overlayPreferredDisplayName !== ""
+                        text: "Forget saved display"
+                        Accessible.name: "Forget saved overlay display"
+                        Accessible.role: Accessible.Button
+                        Accessible.description: "Clear the unavailable saved display so another display can be selected"
+                        ToolTip.text: "Clear the unavailable saved display and choose a replacement"
+                        onClicked: window.forgetUnavailableOverlayDisplay()
                     }
                     Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay display status" }
                     Label {
