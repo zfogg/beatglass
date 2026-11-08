@@ -61,6 +61,7 @@ def main() -> int:
         "canvas selection announcement": "Selected position \" + Math.round(visualizationCanvas.selectedPosition * 100)",
         "dynamic sort and output descriptions": "Current order: \" + (window.sortDescending ? \"descending\"",
         "dynamic visualization and playback names": "Accessible.name: \"Live \" + (visualizationCanvas.viewMode",
+        "dynamic overlay status names": "Accessible.name: \"Overlay interaction mode: \" + text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
