@@ -51,3 +51,16 @@ TEST_CASE("cache identity revalidation rejects changed content and cancellation"
  std::stop_source stop; stop.request_stop();
  CHECK(revalidate_file_identity(f.path, identity.key.content, stop.get_token()) == FingerprintStatus::cancelled);
 }
+
+TEST_CASE("stale identity invalidation removes only the active cached result") {
+ Fixture f; SqliteCache cache(":memory:");
+ const auto identity = cache_identity_from_file(f.path, "e", "c", "offline");
+ REQUIRE(identity.status == FingerprintStatus::ok);
+ cache.begin("run", identity.key);
+ REQUIRE(cache.publish("run", identity.key, "cached", {}, [] { return true; }) == Publish::committed);
+ CHECK(invalidate_if_stale(cache, identity.key, f.path) == FingerprintStatus::ok);
+ std::string result; REQUIRE(cache.find(identity.key, result)); CHECK(result == "cached");
+ { std::ofstream out(f.path, std::ios::binary | std::ios::trunc); out << "new bytes"; }
+ CHECK(invalidate_if_stale(cache, identity.key, f.path) == FingerprintStatus::changed);
+ CHECK_FALSE(cache.find(identity.key, result));
+}

@@ -37,4 +37,12 @@ FingerprintStatus revalidate_file_identity(const std::filesystem::path& path,
                                            const std::string& expected_content,
                                            std::stop_token stop = {},
                                            std::string* diagnostic = nullptr);
+/** Revalidate a cached identity and remove its active result only when stale.
+ * Matching, cancelled, and unreadable observations leave the active row intact;
+ * callers can distinguish the outcome and choose whether to retry or surface it.
+ */
+FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
+                                      const std::filesystem::path& path,
+                                      std::stop_token stop = {},
+                                      std::string* diagnostic = nullptr);
 }

@@ -37,4 +37,12 @@ FingerprintStatus revalidate_file_identity(const std::filesystem::path& path,
   }
   return FingerprintStatus::ok;
 }
+
+FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
+                                      const std::filesystem::path& path,
+                                      std::stop_token stop, std::string* diagnostic) {
+  const auto status = revalidate_file_identity(path, key.content, stop, diagnostic);
+  if (status == FingerprintStatus::changed) cache.invalidate(key);
+  return status;
+}
 }
