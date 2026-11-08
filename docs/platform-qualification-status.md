@@ -86,6 +86,12 @@ Generated rows also carry `qualification_output_sha256`; retained-file validatio
 
 The generated row also records `qualification_output_bytes`; the verifier checks the retained output size as well as its digest.
 
+The retained-file verifier also requires the report artifact inventory to match the
+manifest inventory exactly, requires unique scenario IDs and artifact paths, and
+requires every scenario evidence hash mapping to match the manifest's scenario set.
+Malformed JSON, path traversal, duplicate rows, and non-hexadecimal digests fail
+closed before any qualification claim is accepted.
+
 For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
 
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
