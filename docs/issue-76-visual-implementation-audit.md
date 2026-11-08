@@ -274,6 +274,8 @@ The DJ tab now has explicit page-tab semantics, keyboard participation, and an e
 
 The primary navigation bar now exposes toolbar semantics, a concise description, and an entry tooltip so page switching is announced as one coherent navigation surface.
 
+The reduced-motion switch now exposes matching tooltip guidance for its animated-transition preference, keeping the visual affordance aligned with its checkbox semantics and dynamic enabled state.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
