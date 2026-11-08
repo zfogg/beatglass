@@ -148,6 +148,16 @@ private slots:
     QVERIFY(controller.moveToScreen(controller.screenIndex()));
     QCOMPARE(controller.screenIndex(), QGuiApplication::screens().indexOf(screen));
   }
+  void closingControlHidesOverlay() {
+    QQuickWindow overlay; QWindow control; control.show();
+    OverlayController controller(std::make_unique<FakeNative>());
+    QVERIFY(controller.attach(&overlay, &control));
+    QVERIFY(controller.showOverlay());
+    QVERIFY(overlay.isVisible());
+    QVERIFY(control.close());
+    QTRY_VERIFY(!overlay.isVisible());
+    QVERIFY(!controller.clickThrough());
+  }
   void screenGeometryNotificationsCoalesceAndRecoverOverlay() {
     QQuickWindow overlay; QWindow control;
     auto* screen = QGuiApplication::primaryScreen(); QVERIFY(screen);
