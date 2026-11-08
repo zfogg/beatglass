@@ -1,4 +1,5 @@
 #include "beatglass/core/playback_session.hpp"
+#include <limits>
 namespace beatglass {
 bool PlaybackSession::start(std::uint64_t epoch) noexcept {
   if (state_ != PlaybackState::stopped || !epoch) return false;
@@ -21,6 +22,7 @@ bool PlaybackSession::accept(std::uint64_t epoch, std::uint64_t first_frame) noe
 bool PlaybackSession::accept(std::uint64_t epoch, std::uint64_t first_frame,
                              std::uint64_t frame_count) noexcept {
   if (state_ != PlaybackState::playing || epoch != epoch_ || first_frame != next_frame_ || !frame_count) return false;
+  if (frame_count > std::numeric_limits<std::uint64_t>::max() - next_frame_) return false;
   next_frame_ += frame_count; return true;
 }
 }

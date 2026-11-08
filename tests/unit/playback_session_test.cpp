@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <limits>
 #include "beatglass/core/playback_session.hpp"
 using namespace beatglass;
 TEST_CASE("playback seek retires old epoch and reacquires from requested frame") {
@@ -29,4 +30,10 @@ TEST_CASE("playback advances by decoded block frame count") {
   REQUIRE(session.accept(11, 0, 512)); CHECK(session.next_frame() == 512);
   REQUIRE(session.accept(11, 512, 256)); CHECK(session.next_frame() == 768);
   CHECK_FALSE(session.accept(11, 768, 0));
+}
+TEST_CASE("playback rejects frame cursor overflow without advancing") {
+  PlaybackSession session; REQUIRE(session.start(12));
+  REQUIRE(session.seek(std::numeric_limits<std::uint64_t>::max() - 1, 13));
+  CHECK_FALSE(session.accept(13, std::numeric_limits<std::uint64_t>::max() - 1, 2));
+  CHECK(session.next_frame() == std::numeric_limits<std::uint64_t>::max() - 1);
 }
