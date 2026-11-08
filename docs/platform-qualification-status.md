@@ -82,6 +82,8 @@ Each retained manifest must include `qualification_command`; the generated platf
 
 Manifests also identify `qualification_output`, which must name a retained artifact. The validator checks that the report echoes this path and that the output is present in the manifest inventory, preventing command claims that cannot be tied to retained output.
 
+Generated rows also carry `qualification_output_sha256`; retained-file validation recomputes that digest so a command's claimed output cannot be replaced after capture without invalidating the report.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.

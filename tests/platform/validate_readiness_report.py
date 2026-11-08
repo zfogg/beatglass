@@ -46,6 +46,8 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: missing qualification command linkage")
             if not isinstance(item.get("qualification_output"), str) or not item["qualification_output"].strip():
                 errors.append(f"{item.get('platform')}: missing qualification output linkage")
+            if not isinstance(item.get("qualification_output_sha256"), str) or len(item["qualification_output_sha256"]) != 64:
+                errors.append(f"{item.get('platform')}: invalid qualification output hash")
             inventory = item.get("artifact_inventory")
             if not isinstance(inventory, list) or not inventory:
                 errors.append(f"{item.get('platform')}: missing artifact inventory")
@@ -85,6 +87,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             errors.append(f"{platform}: qualification output does not match report")
         elif not any(item.get("path") == output for item in manifest_data.get("artifacts", [])):
             errors.append(f"{platform}: qualification output is not retained as an artifact")
+        elif output_path := (bundles / platform / output):
+            if output_path.is_file() and hashlib.sha256(output_path.read_bytes()).hexdigest() != row.get("qualification_output_sha256"):
+                errors.append(f"{platform}: qualification output hash does not match report")
         if str(manifest_data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match report row")
         actual_manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()

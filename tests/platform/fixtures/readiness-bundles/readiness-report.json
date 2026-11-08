@@ -71,6 +71,7 @@
       ],
       "qualification_command": "fixture-generator --platform windows",
       "qualification_output": "capture.txt",
+      "qualification_output_sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
       "manifest_platform": "windows",
       "provenance_complete": true,
       "errors": []
@@ -123,6 +124,7 @@
       ],
       "qualification_command": "fixture-generator --platform macos",
       "qualification_output": "capture.txt",
+      "qualification_output_sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
       "manifest_platform": "macos",
       "provenance_complete": true,
       "errors": []
@@ -175,6 +177,7 @@
       ],
       "qualification_command": "fixture-generator --platform linux",
       "qualification_output": "capture.txt",
+      "qualification_output_sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
       "manifest_platform": "linux",
       "provenance_complete": true,
       "errors": []

@@ -48,3 +48,10 @@ class ReadinessReportContractTest(unittest.TestCase):
         report["platforms"][0]["qualification_output"] = "missing-output.txt"
         errors = "\n".join(module.validate_retained_files(report, root))
         self.assertIn("qualification output does not match", errors)
+
+    def test_qualification_output_hash_is_verified(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        report = __import__("json").loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0]["qualification_output_sha256"] = "0" * 64
+        errors = "\n".join(module.validate_retained_files(report, root))
+        self.assertIn("output hash does not match", errors)
