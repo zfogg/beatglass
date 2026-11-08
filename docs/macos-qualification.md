@@ -44,7 +44,7 @@ Record `PASS`, `FAIL`, or `UNRUN` for each case with timestamp, action or comman
 
 ## Native access limitation
 
-Current qualification status is `UNRUN` with `NATIVE_MAC_REQUIRED=1`. The portable Windows workspace cannot provide the required macOS Core Audio, Qt/AppKit, Screen & System Audio Recording, or overlay behavior. The previously identified `zachbook-pro` host is not reachable for this run, so no native result is inferred from local checks.
+Current qualification status is `UNRUN` with `NATIVE_MAC_REQUIRED=1`. The `zachbook-pro` Tailscale host is reachable (macOS 26.7.2, x86_64), but it has no Beatglass checkout or native qualification build available to the runner. The portable Windows workspace still cannot provide the required macOS Core Audio, Qt/AppKit, Screen & System Audio Recording, or overlay behavior, so no native result is inferred from the SSH connectivity check alone.
 
 The remaining native cases are: permission prompt, allow/deny/revoke recovery, generated-tone output capture with nonzero frames and valid timestamps, output switching and UID evidence, tap/recovery smoke, and the interactive overlay/menu-bar/display/click-through/fullscreen/Spaces scenarios above. Do not mark these cases `PASS` until evidence is captured on the intended signed macOS production build.
 
