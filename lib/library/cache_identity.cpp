@@ -24,4 +24,17 @@ FingerprintStatus refresh_collection_file(SqliteCache& cache, const std::filesys
                    fingerprint.modified.time_since_epoch().count()});
   return FingerprintStatus::ok;
 }
+
+FingerprintStatus revalidate_file_identity(const std::filesystem::path& path,
+                                           const std::string& expected_content,
+                                           std::stop_token stop, std::string* diagnostic) {
+  const auto fingerprint = fingerprint_file(path, stop);
+  if (diagnostic) *diagnostic = fingerprint.diagnostic;
+  if (fingerprint.status != FingerprintStatus::ok) return fingerprint.status;
+  if (fingerprint.digest != expected_content) {
+    if (diagnostic) *diagnostic = "content identity changed";
+    return FingerprintStatus::changed;
+  }
+  return FingerprintStatus::ok;
+}
 }

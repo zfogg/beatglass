@@ -39,3 +39,15 @@ TEST_CASE("collection refresh publishes only a validated fingerprint") {
  CHECK(refresh_collection_file(cache, f.path, stop.get_token(), &diagnostic) == FingerprintStatus::cancelled);
  CHECK(cache.entry(f.path.string()).has_value());
 }
+
+TEST_CASE("cache identity revalidation rejects changed content and cancellation") {
+ Fixture f; const auto identity = cache_identity_from_file(f.path, "e", "c", "offline");
+ REQUIRE(identity.status == FingerprintStatus::ok);
+ CHECK(revalidate_file_identity(f.path, identity.key.content) == FingerprintStatus::ok);
+ { std::ofstream out(f.path, std::ios::binary | std::ios::trunc); out << "changed"; }
+ std::string diagnostic;
+ CHECK(revalidate_file_identity(f.path, identity.key.content, {}, &diagnostic) == FingerprintStatus::changed);
+ CHECK(diagnostic == "content identity changed");
+ std::stop_source stop; stop.request_stop();
+ CHECK(revalidate_file_identity(f.path, identity.key.content, stop.get_token()) == FingerprintStatus::cancelled);
+}
