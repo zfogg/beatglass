@@ -735,8 +735,13 @@ ApplicationWindow {
                         Accessible.name: window.themeNames[index] + " theme preview"
                         Accessible.description: "Select " + window.themeNames[index] + " theme; "
                                               + (checked ? "selected" : "not selected")
+                                              + ". Palette background " + window.themeBackgrounds[index]
+                                              + ", accent " + window.themeAccentColors[index]
+                                              + ", foreground " + window.themeForegrounds[index]
+                                              + ". Use Left and Right to move, Home and End to jump, or Escape to return to the theme selector."
                         Accessible.role: Accessible.RadioButton
-                        Accessible.value: checked ? "selected" : "not selected"
+                        Accessible.value: (checked ? "selected" : "not selected")
+                                              + "; " + window.themeAccentColors[index] + " accent"
                         ToolTip.text: checked ? window.themeNames[index] + " theme is selected" : "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
                             objectName: "themePreviewSurface" + index
