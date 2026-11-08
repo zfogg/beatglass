@@ -513,7 +513,7 @@ ApplicationWindow {
                     text: "Press Escape to unlock overlay controls"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     Accessible.name: "Overlay recovery hint"
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
@@ -2565,7 +2565,7 @@ ApplicationWindow {
                         ? "Overlay position/size: " + window.overlayBridge.geometry.x + "," + window.overlayBridge.geometry.y + " · " + window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height
                         : "Overlay geometry unavailable; control-window fallback remains active."
                     Accessible.name: "Overlay geometry status: " + text
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
                         ? "Persisted overlay position and size: " + text + "."
