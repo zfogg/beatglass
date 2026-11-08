@@ -43,6 +43,7 @@ public slots:
   void invalidateCached(QString content, QString engine, QString configuration, QString mode) {
     beatglass::library::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     const bool removed = coordinator_.storage().invalidate_cached(identity);
+    if (removed) emit cached(false, QString{});
     emit result(removed, removed ? QStringLiteral("Cached analysis invalidated") : QStringLiteral("No cached analysis found"));
   }
   void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
