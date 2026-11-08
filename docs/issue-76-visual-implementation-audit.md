@@ -16,6 +16,8 @@ Active worker terminal announcements are de-duplicated by status and reset as so
 
 The de-duplication key also resets when the real worker handle reports `canRetry: false`, including close/reopen and new-job admission boundaries. A reopened bridge cannot inherit a prior failure announcement, and a new terminal transition is eligible for fresh announcement and focus restoration.
 
+Storage bridge disconnects are an explicit recovery boundary: `Storage closed` and `Storage error:*` clear active-worker/persisted outcome keys and selection activation, announce that retry is unavailable until reopen, and return focus to `Reopen storage`. Reopening therefore starts with fresh recovery state instead of stale retry affordances.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
