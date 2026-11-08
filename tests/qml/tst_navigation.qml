@@ -231,6 +231,8 @@ TestCase {
     function test_analysisControlsAreAccessible() {
         let app = shell.createObject(null)
         compare(findChild(app, "analysisProgress").Accessible.name, "Analysis progress")
+        compare(findChild(app, "analysisUncertainty").Accessible.name, "Analysis uncertainty")
+        verify(findChild(app, "analysisUncertainty").text.indexOf("Track key: Unknown") === 0)
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
