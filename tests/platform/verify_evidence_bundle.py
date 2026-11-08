@@ -26,7 +26,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
         errors.append("artifacts must be a nonempty list")
     if not isinstance(scenarios, list) or not scenarios:
         errors.append("scenarios must be a nonempty list")
-    scenario_ids = {scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)}
+    scenario_ids = {
+        scenario.get("id") for scenario in scenarios or []
+        if isinstance(scenario, dict) and isinstance(scenario.get("id"), str)
+    }
     missing_scenarios = REQUIRED_SCENARIOS - scenario_ids
     if missing_scenarios:
         errors.append(f"missing required scenarios: {sorted(missing_scenarios)}")
@@ -66,7 +69,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
     evidence_owners = {}
     artifact_roles = {entry.get("path"): entry.get("role") for entry in artifacts or [] if isinstance(entry, dict)}
     for scenario in scenarios or []:
-        if not isinstance(scenario, dict) or not scenario.get("id") or scenario.get("status") not in {"PASS", "FAIL", "UNRUN", "PENDING"}:
+        if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
+                or not scenario.get("id") or scenario.get("status") not in {"PASS", "FAIL", "UNRUN", "PENDING"}):
             errors.append(f"invalid scenario: {scenario}"); continue
         if scenario["status"] not in {"UNRUN", "PENDING"}:
             evidence = scenario.get("evidence")

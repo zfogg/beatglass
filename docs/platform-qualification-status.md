@@ -166,3 +166,5 @@ The evidence-bundle verifier also rejects incomplete (`UNRUN` or `PENDING`) scen
 Completed scenario evidence references are also required to be a single retained path string. Malformed values such as arrays fail closed as unretained evidence rather than being interpreted as a valid artifact reference.
 
 Artifact manifest hashes follow the same fail-closed rule: `sha256` must be a string before normalization or comparison. Structured or otherwise malformed hash values are rejected as invalid artifact entries instead of causing verifier exceptions.
+
+Scenario inventory IDs are validated as strings before set-based completeness checks. Structured IDs fail as invalid scenarios and preserve the missing-required-scenario signal, keeping malformed manifests pending rather than allowing an exception to bypass the consumer decision.
