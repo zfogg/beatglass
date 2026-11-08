@@ -103,3 +103,12 @@ class ReadinessHandoffTest(unittest.TestCase):
             errors = handoff.run(bundles, output, review_output=review, require_ready=True)
             self.assertTrue(any("review gate is not ready" in error for error in errors))
 
+    def test_handoff_exports_machine_review_packet(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            handoff.run(bundles, output, review_json=packet)
+            data = json.loads(packet.read_text(encoding="utf-8"))
+            self.assertEqual(data["gate_status"], "PENDING")
+            self.assertEqual(len(data["platforms"]), 3)
+
