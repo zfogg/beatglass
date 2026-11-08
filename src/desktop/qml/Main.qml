@@ -1707,9 +1707,9 @@ ApplicationWindow {
                     objectName: "visualizationStatus"
                     text: typeof visualizationPresentation === "undefined"
                           ? "Visualization unavailable"
-                          : (visualizationPresentation.waveform.length === 0 && visualizationPresentation.spectrum.length === 0
+                          : (visualizationCanvas.renderedWaveform.length === 0 && visualizationCanvas.renderedSpectrum.length === 0
                              ? "Waiting for captured audio data"
-                             : "Waveform samples: " + visualizationPresentation.waveform.length + " · Spectrum bins: " + visualizationPresentation.spectrum.length)
+                             : "Waveform samples: " + visualizationCanvas.renderedWaveform.length + " · Spectrum bins: " + visualizationCanvas.renderedSpectrum.length)
                     Accessible.name: "Visualization data status"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
@@ -1722,7 +1722,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "visualizationDataStatus"
-                    text: (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " waveform samples · " + (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " spectrum bins"
+                    text: visualizationCanvas.renderedWaveform.length + " waveform samples · " + visualizationCanvas.renderedSpectrum.length + " spectrum bins"
                     Accessible.name: "Visualization data status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
@@ -1733,8 +1733,8 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationSelectedDataStatus"
                     text: visualizationCanvas.viewMode === "waveform"
-                        ? ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " samples in selected waveform view")
-                        : ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " bins in selected FFT view")
+                        ? (visualizationCanvas.renderedWaveform.length + " samples in selected waveform view")
+                        : (visualizationCanvas.renderedSpectrum.length + " bins in selected FFT view")
                     Accessible.name: "Selected visualization data status: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
