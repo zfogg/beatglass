@@ -55,6 +55,7 @@ $cases = @(
 )
 if (-not [string]::IsNullOrWhiteSpace($OpenSSLRoot)) { $cases += @{ Name = "file_fingerprint"; Sources = @("lib/library/file_fingerprint.cpp", "tests/standalone/file_fingerprint_smoke.cpp"); Extra = @("-I$OpenSSLRoot/include", "-L$OpenSSLRoot/lib", "-lcrypto") } }
 if (-not [string]::IsNullOrWhiteSpace($SQLiteRoot)) { $cases += @{ Name = "sqlite_cache_acceptance"; Sources = @("lib/library/sqlite_cache.cpp", "tests/standalone/sqlite_cache_acceptance_smoke.cpp"); Extra = @("-I$SQLiteRoot/include", "-L$SQLiteRoot/lib", "-lsqlite3") } }
+if (-not [string]::IsNullOrWhiteSpace($SQLiteRoot)) { $cases += @{ Name = "storage_owner_acceptance"; Sources = @("lib/library/sqlite_cache.cpp", "lib/library/storage_owner.cpp", "tests/standalone/storage_owner_acceptance_smoke.cpp"); Extra = @("-I$SQLiteRoot/include", "-L$SQLiteRoot/lib", "-lsqlite3") } }
 if ($ListCases) { $cases | ForEach-Object { $_.Name }; exit 0 }
 if ($SelectedCases.Count -gt 0) {
   $SelectedCases = @($SelectedCases | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
