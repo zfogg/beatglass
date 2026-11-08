@@ -453,3 +453,5 @@ The Clear selection action now uses the active theme foreground as its surface a
 Selection-reset explanations now use the active theme accent and compact typography, keeping transition feedback visually prominent without introducing a new one-off color token.
 
 Load-state and data-status labels now consume the theme foreground and compact typography tokens, keeping runtime evidence readable as the visualization moves between unavailable, waiting, and populated states.
+
+Waveform/FFT sample totals and selected-view summaries now use the same tokens, completing the responsive visual hierarchy for runtime evidence and preventing a palette change from leaving secondary status text behind.
