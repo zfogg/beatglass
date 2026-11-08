@@ -60,9 +60,10 @@ public:
     if ((state_ != SourceState::stopped && state_ != SourceState::error) || generation_ == std::numeric_limits<std::uint64_t>::max()) return std::nullopt;
     ++generation_; last_sequence_ = 0; epoch_.reset(); state_ = SourceState::starting; return SourceAttempt{generation_};
   }
-  /** Apply an ordered transition. Running requires a fresh epoch; other states require no epoch.
+  /** Apply an ordered transition. Running requires a fresh, nonzero epoch; other states require no epoch.
    * Old attempts and duplicate numbers are stale. A gap or invalid transition
    * invalidates the epoch and enters error; the owner must clear publication.
+   * Invalid input never publishes an active epoch.
    */
   SourceEventResult notify(SourceAttempt attempt, std::uint64_t sequence, SourceState next, std::optional<std::uint64_t> epoch = std::nullopt) noexcept {
     if (state_ == SourceState::stopped || state_ == SourceState::error || attempt.generation != generation_ || generation_ == 0 || sequence <= last_sequence_) return SourceEventResult::stale;
