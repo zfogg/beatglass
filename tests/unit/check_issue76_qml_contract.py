@@ -374,6 +374,7 @@ def main() -> int:
         "clear audio selection value": "Accessible.name: \"Clear selected audio\"\n                            Accessible.value: enabled ? window.selectedName : \"no selection\"",
         "retry metadata state value": "Accessible.name: \"Retry metadata\"\n                            Accessible.value: window.metadataStatus",
         "selected audio panel grouping": "objectName: \"selectedAudioPanel\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Selected audio panel\"",
+        "overlay live evidence grouping": "objectName: \"overlayLiveEvidenceGroup\"\n                anchors.fill: parent; anchors.margins: 14; spacing: 4\n                Accessible.name: \"Overlay live evidence\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
