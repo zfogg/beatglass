@@ -21,6 +21,7 @@ ApplicationWindow {
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property bool overlayDisplaySelectionRequired: false
+    property bool overlayDisplayRecoveryPending: false
     property int overlayPreferredScreenIndex: -1
     property string overlayPreferredDisplayName: ""
     property int overlayPreferredSizeIndex: 1
@@ -227,6 +228,37 @@ ApplicationWindow {
             return false
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
         return window.showOverlayAndHideControls()
+    }
+    function recoverOverlayAfterDisplayChange() {
+        if (!window.overlayBridge || !window.overlayBridge.available
+                || window.overlayBridge.screenNames.length === 0) {
+            window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
+            return false
+        }
+        const savedNameIndex = window.overlayPreferredDisplayName !== ""
+            ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName) : -1
+        const savedIndex = savedNameIndex >= 0 ? savedNameIndex : window.overlayPreferredScreenIndex
+        if (savedIndex < 0 || savedIndex >= window.overlayBridge.screenNames.length) {
+            window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
+            return false
+        }
+        if (!window.overlayBridge.moveToScreen(savedIndex)
+                || !window.restoreOverlayVisualStateFromBridge()) {
+            window.overlayDisplayRecoveryPending = true
+            window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied.")
+            return false
+        }
+        window.overlayPreferredScreenIndex = savedIndex
+        window.overlayPreferredDisplayName = window.overlayBridge.screenNames[savedIndex]
+        window.overlayDisplaySelectionRequired = false
+        if (window.overlayDisplayRecoveryPending) {
+            window.overlayDisplayRecoveryPending = false
+            window.overlayBridge.showOverlay()
+            window.announceCaptureRecoveryState("DJ overlay recovered on the saved display with persisted visual settings.")
+        }
+        return true
     }
     function forgetUnavailableOverlayDisplay() {
         window.overlayPreferredDisplayName = ""
@@ -528,18 +560,22 @@ ApplicationWindow {
             if (window.overlayBridge && window.overlayBridge.displayName !== "")
                 window.overlayPreferredDisplayName = window.overlayBridge.displayName
             if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
-                window.announceCaptureRecoveryState("DJ overlay display disappeared; controls restored until a display is available.")
+                {
+                    window.overlayDisplayRecoveryPending = true
+                    window.overlayDisplaySelectionRequired = true
+                    window.announceCaptureRecoveryState("DJ overlay display disappeared; controls restored until a display is available.")
+                }
             else {
                 const savedNameIndex = window.overlayPreferredDisplayName !== ""
                     ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName) : -1
                 const savedIndex = savedNameIndex >= 0 ? savedNameIndex : window.overlayPreferredScreenIndex
                 if (savedIndex >= 0 && savedIndex < window.overlayBridge.screenNames.length) {
-                    window.overlayBridge.moveToScreen(savedIndex)
                     window.overlayPreferredScreenIndex = savedIndex
                     window.overlayDisplaySelectionRequired = false
-                    window.announceCaptureRecoveryState("DJ overlay display restored; saved display target selected by name.")
+                    window.recoverOverlayAfterDisplayChange()
                 } else {
                     window.overlayDisplaySelectionRequired = true
+                    window.overlayDisplayRecoveryPending = true
                     window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to resume overlay monitoring.")
                 }
             }
