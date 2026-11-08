@@ -1,6 +1,7 @@
 """Run retention, decision, and promotion as one fail-closed release workflow."""
 import argparse
 import importlib.util
+import shutil
 from pathlib import Path
 
 
@@ -37,7 +38,13 @@ def prepare(report: Path, packet: Path, retained: Path, release: Path, signoff: 
     if not accepted:
         return promotion_errors
     if signoff is not None:
-        return manifest_verifier.verify(release, signoff)
+        verification_errors = manifest_verifier.verify(release, signoff)
+        if verification_errors:
+            return verification_errors
+        try:
+            shutil.copyfile(signoff, release / "signoff.json")
+        except OSError as error:
+            return [f"unable to retain release signoff: {error}"]
     return []
 
 

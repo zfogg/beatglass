@@ -29,3 +29,11 @@ class ReleaseWorkflowTest(unittest.TestCase):
             errors = workflow.prepare(fixture, packet, root / "retained", root / "release", signoff)
             self.assertTrue(errors)
             self.assertFalse((root / "release").exists())
+
+    def test_pending_workflow_does_not_retain_signoff(self):
+        fixture = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); packet = root / "review.json"; signoff = root / "signoff.json"
+            packet.write_text("{}", encoding="utf-8"); signoff.write_text("{}", encoding="utf-8")
+            workflow.prepare(fixture, packet, root / "retained", root / "release", signoff)
+            self.assertFalse((root / "release" / "signoff.json").exists())
