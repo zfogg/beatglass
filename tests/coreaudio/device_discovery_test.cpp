@@ -34,6 +34,19 @@ TEST_CASE("device list retries a change between size and read", "[coreaudio]") {
   CHECK(reads == 2);
 }
 
+TEST_CASE("device list accepts a successful empty result without stale IDs", "[coreaudio]") {
+  std::vector<std::uint32_t> ids{42, 99};
+  int status = -1;
+  const auto empty = [](std::uint32_t& size, std::uint32_t* data) -> int {
+    if (!data) size = 0;
+    return 0;
+  };
+
+  REQUIRE(beatglass::coreaudio::detail::read_device_list(empty, ids, status));
+  CHECK(ids.empty());
+  CHECK(status == 0);
+}
+
 TEST_CASE("device list fails closed after repeated races or malformed size", "[coreaudio]") {
   std::vector<std::uint32_t> ids{99};
   int status = 0;
