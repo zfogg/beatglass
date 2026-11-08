@@ -131,7 +131,7 @@ if ! awk 'NF >= 2 { if (++seen[$1] > 1) exit 1 }' "$output_discovery_log"; then
   echo "Core Audio output discovery contains duplicate UIDs" >&2
   exit 1
 fi
-if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]] && ! grep -Fq "$BEATGLASS_MACOS_TAP_UID" "$output_discovery_log"; then
+if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]] && ! awk -v uid="$BEATGLASS_MACOS_TAP_UID" '$1 == uid { found = 1 } END { exit !found }' "$output_discovery_log"; then
   echo "Selected output UID was not present in current Core Audio discovery" >&2
   exit 1
 fi
