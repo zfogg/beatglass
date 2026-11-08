@@ -591,3 +591,5 @@ The canvas now also has explicit compact/full minimum heights, preserving a usab
 The visualization status group explicitly permits zero minimum width, allowing its evidence labels to wrap instead of forcing the surrounding screen wider under responsive pressure.
 
 The interaction hint reserves a taller compact-layout line box for wrapped guidance, preventing keyboard/pointer instructions from colliding with adjacent recovery controls.
+
+Endpoint bridge transitions now actively clear source-bound visualization selection, distinguish retry failure from no-device reacquisition, and restore focus to the endpoint selector. A replacement accepted snapshot is therefore required after endpoint replacement rather than reusing stale waveform/FFT state.
