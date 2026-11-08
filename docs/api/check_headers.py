@@ -1,19 +1,29 @@
 """Fail when a production C++ header is absent from the API index."""
 from pathlib import Path
+import glob
 import sys
 
 
 def coverage(root: Path) -> tuple[list[str], list[str]]:
     """Return missing and stale index entries, including private lib headers."""
     index = (root / "docs/api/index.rst").read_text(encoding="utf-8")
-    listed = set()
+    patterns = []
     for line in index.splitlines():
         if line.startswith(".. cpp:autodoc:: "):
-            listed.update(line.split("::", 1)[1].split())
+            patterns.extend(line.split("::", 1)[1].split())
+    listed = set()
+    unmatched = set()
+    for pattern in patterns:
+        matches = [Path(path).resolve().relative_to(root.resolve()).as_posix()
+                   for path in glob.glob(str(root / pattern)) if Path(path).is_file()]
+        if matches:
+            listed.update(matches)
+        else:
+            unmatched.add(pattern)
     headers = {p.relative_to(root).as_posix() for directory in ("include", "lib", "src")
                for p in (root / directory).rglob("*")
                if p.is_file() and p.suffix in (".h", ".hh", ".hpp", ".hxx")}
-    return sorted(headers - listed), sorted(listed - headers)
+    return sorted(headers - listed), sorted((listed - headers) | unmatched)
 
 
 def duplicates(root: Path) -> list[str]:
