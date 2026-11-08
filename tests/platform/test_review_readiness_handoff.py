@@ -50,6 +50,11 @@ class ReadinessReviewTest(unittest.TestCase):
     def test_machine_review_packet_preserves_gate_and_diagnostics(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
         packet = review.review_packet(source)
+        self.assertEqual(packet["review_packet_schema"], 1)
         self.assertEqual(packet["gate_status"], "PENDING")
         self.assertTrue(packet["acceptance_errors"])
         self.assertEqual(len(packet["platforms"]), 3)
+        self.assertEqual(review.validate_packet(packet), [])
+
+    def test_review_packet_rejects_unknown_schema(self):
+        self.assertIn("unsupported review_packet_schema", review.validate_packet({"review_packet_schema": 99}))

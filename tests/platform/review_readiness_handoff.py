@@ -44,7 +44,7 @@ def render(report_path: Path) -> str:
 
 def review_packet(report_path: Path) -> dict:
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    return {"gate_status": report.get("exit_gate_status"),
+    return {"review_packet_schema": 1, "gate_status": report.get("exit_gate_status"),
             "native_qualification_required": report.get("native_qualification_required"),
             "acceptance_errors": consumer.consume(report_path),
             "platform_support_status": report.get("platform_support_status", []),
@@ -53,6 +53,15 @@ def review_packet(report_path: Path) -> dict:
                            "scenarios": row.get("scenario_inventory", []),
                            "artifacts": row.get("artifact_inventory", [])}
                           for row in report.get("platforms", [])]}
+
+
+def validate_packet(packet: dict) -> list[str]:
+    errors = []
+    if not isinstance(packet, dict) or packet.get("review_packet_schema") != 1:
+        errors.append("unsupported review_packet_schema")
+    if isinstance(packet, dict) and not isinstance(packet.get("acceptance_errors"), list):
+        errors.append("review packet acceptance_errors must be a list")
+    return errors
 
 
 def main() -> int:
