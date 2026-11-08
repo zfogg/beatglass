@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 path = Path(__file__).with_name("generate_readiness_report.py")
 spec = importlib.util.spec_from_file_location("generate", path)
@@ -19,6 +20,15 @@ class GenerateReadinessReportTest(unittest.TestCase):
         self.assertTrue(report["native_qualification_required"])
         self.assertEqual({r["platform"] for r in report["platforms"]}, set(module.PLATFORMS))
         self.assertTrue(all(a["hash_valid"] for r in report["platforms"] for a in r["artifact_inventory"]))
+
+    def test_cli_creates_nested_output_directory(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "nested" / "reports" / "readiness.json"
+            with mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(output)]):
+                self.assertEqual(module.main(), 0)
+            self.assertTrue(output.is_file())
+            self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["exit_gate_status"], "PENDING")
 
     def test_missing_artifact_remains_fail_closed(self):
         with tempfile.TemporaryDirectory() as temp:
