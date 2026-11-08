@@ -267,7 +267,7 @@ The release boundary is executable: `python tests/platform/promote_review_bundle
 
 Downstream release jobs must verify the promoted artifact with `python tests/platform/verify_release_manifest.py <release-root> --signoff <signoff.json>`. The verifier recomputes both hashes, requires manifest schema 1 and `ACCEPTED`, binds the signoff to the manifest report hash, and rejects missing, modified, or unsigned files before publication.
 
-The complete release workflow is `python tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root>`: it retains and verifies the pair, evaluates the conservative decision, promotes only `ACCEPTED`, and verifies the resulting manifest. Native-pending evidence stops before release output is created.
+The complete signed release workflow is `python tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root> --signoff <signoff.json>`: it retains and verifies the pair, evaluates the conservative decision, promotes only `ACCEPTED`, and verifies the resulting manifest against the human signoff. Native-pending evidence or a mismatched signoff stops before release output is created.
 
 After automation accepts a bundle, a release owner records manual acceptance with `python tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`. The signoff is bound to the decision's report hash and refuses `PENDING`; it is an audit record, not a substitute for native desktop/audio/overlay qualification.
 
