@@ -92,12 +92,14 @@ void FileReader::seek(std::uint64_t frame) {
   if (f.virtual_reader) throw std::logic_error("Borrowed sources require an explicit epoch");
   if (frame > f.metadata.frames) throw std::out_of_range("Seek outside file");
   if (f.epoch == std::numeric_limits<std::uint64_t>::max()) throw std::overflow_error("Epoch exhausted");
+  if (f.source_changed()) { f.failed = true; throw std::runtime_error("Audio source changed during seek"); }
   seek(frame, f.epoch + 1);
 }
 void FileReader::seek(std::uint64_t frame, std::uint64_t new_epoch) {
   auto& f = *impl_; if (f.failed) throw std::runtime_error("File reader failed");
   if (frame > f.metadata.frames) throw std::out_of_range("Seek outside file");
   if (new_epoch <= f.epoch) throw std::invalid_argument("Epoch must increase");
+  if (f.source_changed()) { f.failed = true; throw std::runtime_error("Audio source changed during seek"); }
   if (f.virtual_reader) { f.virtual_reader->seek(frame, new_epoch); f.epoch = new_epoch; return; }
   const auto actual = sf_seek(f.handle, static_cast<sf_count_t>(frame), SEEK_SET);
   if (actual < 0 || static_cast<std::uint64_t>(actual) != frame) { f.failed = true; throw std::runtime_error("Audio seek failed"); }

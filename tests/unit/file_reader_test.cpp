@@ -98,6 +98,13 @@ TEST_CASE("invalid read buffers win over a simultaneous path mutation") {
  CHECK_THROWS_WITH(reader.read(valid), "Audio source changed during read");
 }
 
+TEST_CASE("invalid seek bounds win over a simultaneous path mutation") {
+ WaveFixture fixture; FileReader reader(fixture.path, 26);
+ { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
+ CHECK_THROWS_AS(reader.seek(99), std::out_of_range);
+ CHECK_THROWS_WITH(reader.seek(0), "Audio source changed during seek");
+}
+
 TEST_CASE("file reader rejects source mutation before rewind") {
  WaveFixture fixture; FileReader reader(fixture.path, 23);
  { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
