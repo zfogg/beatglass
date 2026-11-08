@@ -405,7 +405,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { text: "Choose folder…"; objectName: "chooseFolder"; Accessible.description: "Choose a local folder to browse"; onClicked: folderPicker.open() }
+                    Button { text: "Choose folder…"; objectName: "chooseFolder"; Accessible.name: "Choose audio folder"; Accessible.description: "Choose a local folder to browse"; onClicked: folderPicker.open() }
                     Button {
                         text: "Up"; objectName: "parentFolder"
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
