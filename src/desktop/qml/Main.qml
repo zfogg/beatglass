@@ -858,7 +858,7 @@ ApplicationWindow {
                     Label { text: "Size" }
                     ComboBox {
                         objectName: "overlaySize"
-                    Accessible.name: "Overlay size"; Accessible.description: "Choose the overlay window size"
+                    Accessible.name: "Overlay size"; Accessible.description: "Choose the overlay window size; current size " + currentText
                         model: ["Compact", "Medium", "Large"]; currentIndex: 1
                         enabled: window.overlayBridge && window.overlayBridge.available
                         onActivated: if (window.overlayBridge) {
