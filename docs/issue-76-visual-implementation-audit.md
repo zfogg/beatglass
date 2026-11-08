@@ -92,6 +92,8 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Catalog status, result counts, and folder-list navigation now have visual tooltips paired with explicit accessible values and roles.
+
 Current-folder context and empty-library recovery now have dedicated visual tooltips matching their accessible state semantics.
 
 Parent-folder navigation, search, and sort controls now pair explicit roles with visual tooltips for library browsing and recovery.
