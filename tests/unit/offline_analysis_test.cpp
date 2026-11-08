@@ -26,8 +26,10 @@ TEST_CASE("offline results preserve unknown beat strength and overlapping eviden
 TEST_CASE("offline result validation enforces exclusive boundaries and chronological order") {
  auto r = example(); r.beats[0].frame = r.beats[0].observed_through;
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_beat);
- r = example(); r.beats[1].observed_through = 101;
- CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_beat);
+  r = example(); r.beats[1].observed_through = 101;
+  // A beat may be observed after analyzed_through, up to the result's
+  // exclusive observed boundary; this is a valid final partial hop.
+  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::valid);
  r = example(); r.beats[1].frame = 8;
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_beat);
  r = example(); r.beats = {{9, 70, std::nullopt}, {49, 60, std::nullopt}};
