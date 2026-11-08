@@ -229,6 +229,8 @@
       "ready": true
     }
   ],
+  "ready_platform_count": 3,
+  "all_platforms_ready": false,
   "error_count": 1,
   "failure_categories": {
     "manifest": 1
