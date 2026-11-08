@@ -1,5 +1,7 @@
 # Progress and handoff
 
+Keyboard playback recovery parity is part of the readiness handoff: transport, retry, endpoint refresh, and clear/reacquire actions must be reachable through the same focus order and accessible names as pointer controls. Portable UI contracts document this parity; native assistive-technology and hardware recovery remain unqualified.
+
 Playback recovery controls and the storage bridge transition surface are now documented as one handoff: queued/running/completed/cancelled/failed states remain distinct, stale results clear across epoch or endpoint transitions, and retry controls require preserved identity. Local transition contracts are preparation evidence; native playback, endpoint-loss, and overlay behavior remain open.
 
 Retry decisions are now explicit: a persisted run is resubmitted only when source path, content identity, engine, configuration, mode, and decoder snapshot are present and compatible; cache hits complete without decoder work; missing or mismatched metadata rejects fail-closed. Local checks are `python tests/unit/check_bridge_resubmit_contract.py`, `python tests/unit/check_retry_evidence_docs.py`, and `git diff --check`. These portable checks do not qualify native codecs, devices, or desktop recovery.
