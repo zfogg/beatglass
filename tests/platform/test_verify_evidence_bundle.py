@@ -106,6 +106,16 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertIn("duplicate scenario", "\n".join(result["platforms"][0]["errors"]))
             self.assertEqual([item["status"] for item in result["platforms"][0]["scenario_inventory"]], ["UNRUN", "PASS"])
 
+    def test_readiness_rejects_unlisted_retained_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            bundle = bundles / "windows"
+            (bundle / "extra.log").write_text("not declared", encoding="utf-8")
+            (bundle / "manifest.json").write_text(json.dumps(manifest({"path": "capture.txt", "sha256": "0" * 64})), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertIn("unlisted retained files", "\n".join(result["platforms"][0]["errors"]))
+
 
 if __name__ == "__main__":
     unittest.main()
