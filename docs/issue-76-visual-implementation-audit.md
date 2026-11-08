@@ -343,3 +343,5 @@ Primary navigation now reports the current Library, DJ, or Settings page as a li
 The Settings tab now uses the same explicit page-tab role as Library and DJ, keeping the primary navigation contract consistent across all three destinations for keyboard and assistive technology users.
 
 All three primary navigation tabs now report a selected/not-selected value in addition to the toolbar’s current-page value, so users can understand both the active destination and each tab’s state while moving through the navigation.
+
+The primary navigation group now documents all three page-switch shortcuts in its accessible description, keeping keyboard-discoverable navigation available even when focus is on the toolbar as a whole.
