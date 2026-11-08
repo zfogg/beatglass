@@ -27,7 +27,11 @@ public:
     std::size_t sample_count{};
     std::array<float, MaxSamples> samples{};
   };
-/** Copy a block on the producer thread. Reject invalid, oversized, or full-queue input; count its complete frames as dropped and mark the next accepted block discontinuous. */
+/** Copy a block on the producer thread. Reject invalid, oversized, full-queue,
+ * zero-epoch, or overflowing-frame-range input; count complete frames from a
+ * rejected block as dropped (with saturating accounting) and mark the next
+ * accepted block discontinuous. The callback-safe path performs no allocation,
+ * blocking, logging, or callbacks. */
   bool push(const AudioBlock& input) noexcept {
     const auto frames = input.format.channels ? input.samples.size() / input.format.channels : 0;
     const auto write = write_.load(std::memory_order_relaxed);
