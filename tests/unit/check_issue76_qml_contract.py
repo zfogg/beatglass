@@ -417,7 +417,20 @@ def main() -> int:
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
         raise SystemExit("Missing issue #76 QML contract markers: " + ", ".join(missing))
-    print(f"Issue #76 QML contract markers verified ({len(required)} checks)")
+    interaction_matrix = {
+        "clear helper": "function clearVisualizationPositionAndFocus()",
+        "keyboard escape clear": "Keys.onEscapePressed: { window.clearVisualizationPositionAndFocus(); event.accepted = true }",
+        "keyboard enter clear focus": "Keys.onReturnPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }",
+        "keyboard space clear focus": "Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }",
+        "pointer right clear": "if (mouse.button === Qt.RightButton)",
+        "pointer double clear": "onDoubleClicked: {\n                            window.clearVisualizationPositionAndFocus()",
+        "pointer wheel scrub": "onWheel: {",
+        "pointer focus restore": "visualizationCanvas.forceActiveFocus()",
+    }
+    matrix_missing = [name for name, marker in interaction_matrix.items() if marker not in qml]
+    if matrix_missing:
+        raise SystemExit("Missing issue #76 interaction matrix markers: " + ", ".join(matrix_missing))
+    print(f"Issue #76 QML contract markers verified ({len(required) + len(interaction_matrix)} checks)")
     return 0
 
 
