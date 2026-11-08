@@ -92,9 +92,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 inventory = []
                 for entry in sorted(data.get("artifacts", []), key=lambda item: str(item.get("path", ""))):
                     path = bundle / entry.get("path", "")
+                    actual_hash = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
                     inventory.append({"path": entry.get("path"), "sha256": entry.get("sha256"),
-                                      "bytes": path.stat().st_size if path.is_file() else None})
+                                      "bytes": path.stat().st_size if path.is_file() else None,
+                                      "hash_valid": actual_hash == str(entry.get("sha256", "")).lower()})
                 missing_artifacts = sorted(item["path"] for item in inventory if item["bytes"] is None)
+                mismatched_artifacts = sorted(item["path"] for item in inventory if not item["hash_valid"] and item["bytes"] is not None)
                 scenario_inventory = sorted(
                     [{"id": item.get("id"), "status": item.get("status"), "evidence": item.get("evidence")}
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
@@ -107,6 +110,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 inventory = []
                 scenario_inventory = []
                 missing_artifacts = []
+                mismatched_artifacts = []
         else:
             retained = 0
             artifact_bytes = 0
@@ -114,10 +118,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             inventory = []
             scenario_inventory = []
             missing_artifacts = []
+            mismatched_artifacts = []
             errors = [f"{platform}: missing manifest: {manifest}"]
         rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
-                     "missing_artifacts": missing_artifacts, "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
+                     "missing_artifacts": missing_artifacts, "mismatched_artifacts": mismatched_artifacts,
+                     "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
     errors = [error for row in rows for error in row["errors"]]
