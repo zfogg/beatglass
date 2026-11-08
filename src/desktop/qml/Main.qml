@@ -889,6 +889,7 @@ ApplicationWindow {
                         : "Visualization generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
                     Accessible.name: "Visualization generation status"
                     Accessible.description: text
+                    ToolTip.text: "Current accepted visualization generation and revision"
                     Layout.fillWidth: true
                 }
                 Label {

@@ -432,6 +432,7 @@ TestCase {
         let revision = findChild(app, "visualizationRevisionStatus")
         verify(revision !== null)
         compare(revision.text, "No visualization generation is active")
+        compare(revision.ToolTip.text, "Current accepted visualization generation and revision")
         let empty = findChild(app, "visualizationEmptyState")
         verify(empty !== null)
         verify(empty.visible)
