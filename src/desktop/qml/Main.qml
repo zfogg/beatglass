@@ -119,6 +119,14 @@ ApplicationWindow {
                     if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = currentIndex
                 }
             }
+            Switch {
+                id: reduceMotion
+                objectName: "reduceMotion"
+                text: "Reduce motion"
+                checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
+                Accessible.name: "Reduce motion"
+                onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
+            }
             Row {
                 id: themePreviews
                 objectName: "themePreviews"

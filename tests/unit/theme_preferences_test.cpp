@@ -16,6 +16,8 @@ private slots:
       QCOMPARE(prefs.themeIndex(), 0);
       prefs.setThemeIndex(99);
       QCOMPARE(prefs.themeIndex(), 5);
+      prefs.setReduceMotion(true);
+      QVERIFY(prefs.reduceMotion());
     }
     {
       auto settings = std::make_unique<QSettings>(path, QSettings::IniFormat);
@@ -23,6 +25,7 @@ private slots:
       QCOMPARE(prefs.themeIndex(), 5);
       prefs.setThemeIndex(-2);
       QCOMPARE(prefs.themeIndex(), 0);
+      QVERIFY(prefs.reduceMotion());
     }
   }
 };
