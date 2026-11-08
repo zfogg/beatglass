@@ -114,7 +114,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "errors": matrix_errors + errors})
-    return {"platforms": rows, "ready": not any(row["errors"] for row in rows)}
+    errors = [error for row in rows for error in row["errors"]]
+    return {"platforms": rows, "error_count": len(errors), "errors": errors,
+            "ready": not errors}
 
 
 def main() -> int:
