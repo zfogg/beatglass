@@ -86,6 +86,13 @@ int main() {
     assert(cache.find(next_config, live_result) && live_result == "config-b-republished");
     assert(cache.discard_retryable("stale-active"));
     assert(cache.find(next_config, live_result) && live_result == "config-b-republished");
+    cache.begin("stale-engine", next_engine);
+    assert(cache.publish("stale-engine", next_engine, "discarded-engine", {}, [] { return false; }) == Publish::stale_input);
+    assert(cache.find(next_engine, live_result) && live_result == "engine-v2-data");
+    assert(cache.discard_retryable("stale-engine"));
+    assert(!cache.discard_retryable("stale-active"));
+    assert(cache.find(next_config, live_result) && live_result == "config-b-republished");
+    assert(cache.find(next_engine, live_result) && live_result == "engine-v2-data");
     const CacheKey next_content{"sha256:two", key.engine, key.config, key.mode};
     cache.begin("next-content", next_content);
     assert(cache.publish("next-content", next_content, "content-two-data", {}, [] { return true; }) == Publish::committed);
