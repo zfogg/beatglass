@@ -8,6 +8,14 @@ ThemePreferences::ThemePreferences(QObject* parent, std::unique_ptr<QSettings> s
                                             QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
   }
   setThemeIndex(settings_->value(QStringLiteral("desktop/themeIndex"), 0).toInt());
+  setReduceMotion(settings_->value(QStringLiteral("desktop/reduceMotion"), false).toBool());
+}
+
+void ThemePreferences::setReduceMotion(bool value) {
+  if (reduce_motion_ == value) return;
+  reduce_motion_ = value;
+  if (settings_) settings_->setValue(QStringLiteral("desktop/reduceMotion"), reduce_motion_);
+  emit reduceMotionChanged();
 }
 
 void ThemePreferences::setThemeIndex(int index) {
