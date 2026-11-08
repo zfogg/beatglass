@@ -213,4 +213,6 @@ The consumer also rejects any report containing nonempty generation, handoff, do
 
 The consumer additionally rejects `READY` while `native_qualification_required` remains true. A downstream acceptance decision therefore requires both an error-free report and an explicit native-qualification state change; portable preparation evidence cannot be promoted by editing the gate flag alone.
 
+The portable consumer tests cover the eventual transition explicitly: clearing `native_qualification_required` removes only that native-state rejection; all remaining report-contract, provenance, and readiness checks still apply. This is a transition contract, not native evidence.
+
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.
