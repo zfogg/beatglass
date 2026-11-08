@@ -1091,8 +1091,8 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationInteractionHint"
                     text: visualizationCanvas.selectedPosition < 0
-                        ? "Select a waveform or FFT position with the pointer or keyboard."
-                        : "Position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
+                        ? "Select a " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + " position with the pointer or keyboard."
+                        : (visualizationCanvas.viewMode === "waveform" ? "Waveform" : "FFT") + " position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
                     Accessible.name: "Visualization interaction hint"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText

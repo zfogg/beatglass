@@ -398,6 +398,8 @@ The Clear position action now announces all equivalent recovery paths in its acc
 
 The visualization now renders a live interaction hint below the canvas: empty state guidance explains pointer/keyboard selection, while an active selection announces its percentage and clear gestures. This gives sighted and assistive users the same immediate recovery context.
 
+The interaction hint now follows the active Waveform/FFT mode at runtime, naming the exact surface users are selecting or clearing. This keeps the responsive hint aligned with mode changes from buttons, shortcuts, or Ctrl+Up/Ctrl+Down canvas navigation.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
