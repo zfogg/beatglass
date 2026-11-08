@@ -16,6 +16,9 @@ try {
   @(@{ case = "show-hide-recovery"; status = "UNRUN" }, @{ case = "click-through-unlock"; status = "UNRUN" }, @{ case = "display-change-clamp"; status = "UNRUN" }, @{ case = "dpi-fullscreen"; status = "UNRUN" }) | ConvertTo-Json | Set-Content (Join-Path $root "native-overlay-evidence.json")
   & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root
   Write-Output "Windows qualification verifier regression passed"
+  Add-Content -LiteralPath (Join-Path $root "qualification-manifest.txt") -Value "commit=0123456789abcdef0123456789abcdef01234567"
+  try { & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root; throw "duplicate manifest key unexpectedly passed" } catch { if ($_.Exception.Message -notmatch "duplicate") { throw } }
+  Write-Output "Windows duplicate-manifest regression passed"
   $playbackPath = Join-Path $root "native-playback-evidence.json"
   $tampered = @(Get-Content -LiteralPath $playbackPath -Raw | ConvertFrom-Json)
   $tampered[0].status = "FAIL"
