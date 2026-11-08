@@ -478,6 +478,8 @@ TestCase {
         let spectrum = findChild(app, "spectrumView")
         verify(waveform !== null)
         verify(spectrum !== null)
+        verify(waveform.activeFocusOnTab)
+        verify(spectrum.activeFocusOnTab)
         compare(waveform.background.border.width, 1)
         waveform.forceActiveFocus()
         tryCompare(waveform.background, "border.width", 3)
@@ -613,6 +615,7 @@ TestCase {
         app.metadataStatus = "WAV | 44100 Hz"
         let clear = findChild(app, "clearSelectedAudio")
         verify(clear.enabled)
+        verify(clear.activeFocusOnTab)
         clear.clicked()
         compare(app.selectedName, "")
         compare(app.selectedAudioUrl.toString(), "")
@@ -627,6 +630,7 @@ TestCase {
         app.metadataStatus = "Error: unreadable audio"
         let retry = findChild(app, "retryMetadata")
         verify(retry.visible)
+        verify(retry.activeFocusOnTab)
         let guidance = findChild(app, "metadataErrorGuidance")
         verify(guidance.visible)
         compare(guidance.Accessible.name, "Metadata error recovery guidance")
