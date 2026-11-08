@@ -11,6 +11,7 @@ public:
  std::array<std::byte, 3> bytes{std::byte{1}, std::byte{2}, std::byte{3}};
  std::uint64_t reported_size{3};
  bool invalid{};
+ bool invalid_after_read{};
  bool premature_end{};
  bool cancelled_after_write{};
  bool error_after_write{};
@@ -26,6 +27,7 @@ public:
    auto n = std::min(out.size(), bytes.size() - static_cast<std::size_t>(offset));
    std::copy_n(bytes.begin() + static_cast<std::ptrdiff_t>(offset), n, out.begin());
    if (cancel_after_read) cancel_after_read->request_stop();
+   if (invalid_after_read) return {ByteReadStatus::data, out.size() + 1};
    return {ByteReadStatus::data, n};
  }
 };
@@ -83,6 +85,16 @@ TEST_CASE("byte cursor cancellation wins when source returns data after stop") {
  std::stop_source stop; source.cancel_after_read = &stop;
  CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
  CHECK(cursor.position() == 0);
+}
+
+TEST_CASE("byte cursor cancellation wins over a malformed late response") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ std::stop_source stop; source.cancel_after_read = &stop; source.invalid_after_read = true;
+ CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
+ CHECK(cursor.position() == 0);
+ source.cancel_after_read = nullptr; source.invalid_after_read = false;
+ CHECK(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 2);
 }
 
 TEST_CASE("byte cursor preserves position when source throws") {
