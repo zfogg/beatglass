@@ -23,6 +23,13 @@ int main() {
     cache.begin("republish", key);
     assert(cache.publish("republish", key, "result-b", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(key, result) && result == "result-b");
+    const CacheKey unknown{"sha256:unknown", key.engine, key.config, key.mode};
+    assert(!cache.invalidate(unknown));
+    cache.begin("stale", unknown);
+    assert(cache.publish("stale", unknown, "stale-result", {}, [] { return false; }) == Publish::stale_input);
+    const auto stale_runs = cache.retryable_runs();
+    assert(stale_runs.size() == 1 && stale_runs.front().id == "stale");
+    assert(cache.discard_retryable("stale"));
     assert(!cache.find(CacheKey{key.content, key.engine, "config-b", key.mode}, result));
     assert(!cache.find(CacheKey{"sha256:two", key.engine, key.config, key.mode}, result));
     cache.begin("z-retry", key);
