@@ -52,3 +52,14 @@ TEST_CASE("visualization presentation rejects malformed frames before publicatio
   frame.magnitude[3] = 0.1f;
   REQUIRE(presentation.accept(generation, 1, frame));
 }
+
+TEST_CASE("visualization presentation preserves exclusive sample-frame boundaries") {
+  VisualizationPresentation presentation;
+  VisualizationFrame frame;
+  frame.epoch = 9; frame.sample_rate = 44100; frame.first_frame = 44100; frame.end_frame = 88200;
+  REQUIRE(presentation.accept(presentation.generation(), 1, frame));
+  REQUIRE(presentation.current());
+  CHECK(presentation.current()->first_frame == 44100);
+  CHECK(presentation.current()->end_frame == 88200);
+  CHECK(presentation.current()->end_frame > presentation.current()->first_frame);
+}
