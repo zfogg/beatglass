@@ -264,6 +264,8 @@ The overlay-display empty state now provides a direct tooltip explaining how to 
 
 Overlay opacity, display, and size labels now expose heading semantics with concise contextual tooltips, keeping the grouped routing controls understandable before the associated values are reached.
 
+The Settings page and output-device subsection now expose heading semantics with contextual guidance, making the purpose of the capture, appearance, and overlay controls discoverable before focus enters each field.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
