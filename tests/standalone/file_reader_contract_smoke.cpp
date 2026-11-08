@@ -134,6 +134,7 @@ int main() {
   try { FileReader reader(corrupt_wav, 2); }
   catch (const FileOpenError& error) { corrupt_rejected = error.kind() == FileOpenErrorKind::invalid_format; }
   assert(corrupt_rejected);
+  assert(std::filesystem::exists(corrupt_wav));
   std::filesystem::remove(corrupt_wav, cleanup);
   bool directory_rejected = false;
   try { FileReader reader(std::filesystem::temp_directory_path(), 3); }
