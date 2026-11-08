@@ -116,6 +116,14 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles)
             self.assertIn("unlisted retained files", "\n".join(result["platforms"][0]["errors"]))
 
+    def test_readiness_rejects_duplicate_status_platform_row(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n| Windows | prep | gates |\n", encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertFalse(result["ready"])
+            self.assertIn("duplicate platform rows", "\n".join(result["platforms"][0]["errors"]))
+
 
 if __name__ == "__main__":
     unittest.main()
