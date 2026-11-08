@@ -614,6 +614,7 @@ ApplicationWindow {
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
+                            ToolTip.text: "Metadata error recovery guidance"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         Label {

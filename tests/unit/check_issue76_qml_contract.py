@@ -84,6 +84,7 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "metadata recovery tooltip": "ToolTip.text: \"Metadata error recovery guidance\"",
         "browser recovery action guidance": "objectName: \"browserEmptyMessage\"",
         "metadata recovery dynamic name": "Accessible.name: \"Metadata error recovery guidance: \" + text",
         "empty folder current context": "objectName: \"chooseFolderEmpty\"",
