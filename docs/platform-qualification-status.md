@@ -251,6 +251,8 @@ Strict review also invokes the downstream consumer, so malformed audit trails, u
 
 Use `--json-output <review.json>` alongside the Markdown export for machine-readable review tooling; the packet carries gate state, acceptance diagnostics, platform support, provenance anchors, scenario status, and artifact summaries without changing acceptance semantics.
 
+Machine review packets use `review_packet_schema: 1`; consumers should reject unsupported versions rather than infer fields from an unversioned export.
+
 The handoff command can emit the same packet directly with `--review-json <review.json>`, ensuring Markdown and machine-readable review outputs are derived from the identical generated report.
 
 The equivalent end-to-end invocation is `run_readiness_handoff.py ... --review-output review.md --require-ready`; it writes the checklist and fails the same handoff run when native acceptance has not been reached.
