@@ -4,7 +4,7 @@ from pathlib import Path
 root = Path(__file__).resolve().parents[2]
 bridge = (root / "src/desktop/storage_recovery_bridge.cpp").read_text(encoding="utf-8")
 storage = (root / "tests/unit/library_sqlite_cache_test.cpp").read_text(encoding="utf-8")
-compatible = "found->decoder_snapshot != beatglass::library::kFileDecoderSnapshot"
+compatible = "file_decoder_snapshot_compatible(found->decoder_snapshot)"
 required = [
     compatible,
     "Retry rejected: incompatible decoder snapshot",

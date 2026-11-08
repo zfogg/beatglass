@@ -5,7 +5,7 @@ root = Path(__file__).resolve().parents[2]
 bridge = (root / "src/desktop/storage_recovery_bridge.cpp").read_text(encoding="utf-8")
 cache_test = (root / "tests/unit/library_sqlite_cache_test.cpp").read_text(encoding="utf-8")
 required = [
-    "found->decoder_snapshot != beatglass::library::kFileDecoderSnapshot",
+    "file_decoder_snapshot_compatible(found->decoder_snapshot)",
     "Retry rejected: incompatible decoder snapshot",
     '"decoder-v3;pcm-f32;44100"',
     "runs.front().decoder_snapshot ==",
