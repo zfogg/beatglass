@@ -70,6 +70,7 @@ private slots:
       control.show();
       beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
       overlay.setPosition(position);
+      QVERIFY(controller.resizeOverlay(420, 180));
       controller.setOpacity(0.4);
       QVERIFY(controller.setClickThrough(true));
       settings.sync();
@@ -82,6 +83,7 @@ private slots:
       QWindow control;
       beatglass::windows::OverlayController controller(&overlay, &control, nullptr, &settings);
       QCOMPARE(overlay.position(), position);
+      QCOMPARE(overlay.size(), QSize(420, 180));
       QVERIFY(qAbs(overlay.opacity() - 0.4) < 0.02);
       QVERIFY(!controller.clickThrough());
       QVERIFY(!overlay.isVisible());

@@ -31,12 +31,19 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     if (settings) {
       const auto savedPosition = settings->value(QStringLiteral("overlay/position"));
       if (savedPosition.canConvert<QPoint>()) overlay_->setPosition(savedPosition.toPoint());
+      const auto savedSize = settings->value(QStringLiteral("overlay/size"));
+      if (savedSize.canConvert<QSize>()) {
+        const auto size = savedSize.toSize();
+        if (size.width() > 0 && size.height() > 0) overlay_->resize(size);
+      }
       bool validOpacity = false;
       const auto opacity = settings->value(QStringLiteral("overlay/opacity")).toDouble(&validOpacity);
       if (validOpacity && std::isfinite(opacity)) setOpacity(opacity);
       keepOnScreen();
       connect(overlay_, &QWindow::xChanged, this, [this, settings] { if (overlay_) settings->setValue(QStringLiteral("overlay/position"), overlay_->position()); });
       connect(overlay_, &QWindow::yChanged, this, [this, settings] { if (overlay_) settings->setValue(QStringLiteral("overlay/position"), overlay_->position()); });
+      connect(overlay_, &QWindow::widthChanged, this, [this, settings] { if (overlay_) settings->setValue(QStringLiteral("overlay/size"), overlay_->size()); });
+      connect(overlay_, &QWindow::heightChanged, this, [this, settings] { if (overlay_) settings->setValue(QStringLiteral("overlay/size"), overlay_->size()); });
       connect(overlay_, &QWindow::opacityChanged, this, [settings](qreal value) { settings->setValue(QStringLiteral("overlay/opacity"), value); });
     }
   }
@@ -102,6 +109,7 @@ void OverlayController::hideOverlay() {
 bool OverlayController::resizeOverlay(int width, int height) {
   if (!overlay_ || width <= 0 || height <= 0) return false;
   overlay_->resize(width, height);
+  if (settings_) settings_->setValue(QStringLiteral("overlay/size"), overlay_->size());
   keepOnScreen();
   return true;
 }
