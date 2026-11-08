@@ -198,3 +198,5 @@ The end-to-end local handoff command is `python tests/platform/run_readiness_han
 `documentation_check_errors` is also required and typed as a list of nonempty strings. Generated reports initialize both error lists explicitly; a consumer must reject reports that omit either audit trail.
 
 The report consumer is `python tests/platform/consume_readiness_handoff.py <report.json>`. It validates the complete report contract and rejects `PENDING` (including all reports generated before native gates pass); only an explicitly validated `READY` report can be accepted by downstream automation. Add `--consume` to `run_readiness_handoff.py` to execute this consumer against the report produced by the same handoff run.
+
+Portable regression coverage executes the cross-platform qualification script syntax/required-artifact dry run when PowerShell is available and checks the macOS verifier shell syntax when Bash is available. These dry runs exercise script wiring and artifact-tool presence only; they do not establish native device, desktop, audio, or overlay qualification.
