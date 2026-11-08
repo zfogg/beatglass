@@ -192,6 +192,15 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles, max_age_hours=1)
             self.assertTrue(result["platforms"][0]["freshness_errors"])
 
+    def test_readiness_reports_invalid_scenarios(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64}); data["scenarios"] = [{"id": "capture", "status": "BOGUS"}]
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platforms"][0]["invalid_scenarios"], ["capture"])
+
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
