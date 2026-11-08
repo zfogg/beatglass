@@ -326,6 +326,10 @@ ApplicationWindow {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
+                        window.themePreferenceAnnouncement = "Reduced motion enabled; overlay beat pulse disabled."
+                    } else if (djOverlay.visible && window.liveBridge.status === "Tracking") {
+                        beatPulse.restart()
+                        window.themePreferenceAnnouncement = "Reduced motion disabled; overlay beat pulse restored."
                     }
                 }
             }
