@@ -62,6 +62,7 @@ def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
 def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     rows = []
     platforms = platforms_from_status(status)
+    expected_platforms = ["windows", "macos", "linux"]
     matrix_errors = ["status matrix contains duplicate platform rows"] if len(platforms) != len(set(platforms)) else []
     for platform in platforms:
         bundle = bundles / platform
@@ -70,6 +71,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         provenance_complete = False
         missing_provenance = []
         missing_scenarios = []
+        invalid_scenarios = []
         manifest_platform = None
         errors = []
         if manifest.is_file():
@@ -82,6 +84,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                                       if not isinstance(data.get(field), str) or not data[field].strip()]
                 scenario_ids = {item.get("id") for item in data.get("scenarios", []) if isinstance(item, dict)}
                 missing_scenarios = sorted(verifier.REQUIRED_SCENARIOS - scenario_ids)
+                invalid_scenarios = [item.get("id") if isinstance(item, dict) else str(item)
+                                     for item in data.get("scenarios", [])
+                                     if not isinstance(item, dict) or item.get("status") not in {"PASS", "FAIL", "UNRUN"}]
                 errors = [f"{platform}: {error}" for error in verifier.verify(bundle, manifest)]
                 if str(data.get("platform", "")).lower() != platform:
                     errors.append(f"{platform}: manifest platform does not match status row")
@@ -125,6 +130,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 scenario_status_counts = {}
                 missing_artifacts = []
                 mismatched_artifacts = []
+                invalid_scenarios = []
         else:
             retained = 0
             artifact_bytes = 0
@@ -134,6 +140,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             scenario_status_counts = {}
             missing_artifacts = []
             mismatched_artifacts = []
+            invalid_scenarios = []
+            missing_scenarios = sorted(verifier.REQUIRED_SCENARIOS)
+            missing_provenance = list(verifier.REQUIRED_PROVENANCE)
             errors = [f"{platform}: missing manifest: {manifest}"]
         row_categories = Counter()
         for error in matrix_errors + errors:
@@ -152,11 +161,24 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
                      "missing_provenance": missing_provenance,
                      "missing_scenarios": missing_scenarios,
+                     "invalid_scenarios": invalid_scenarios,
                      "failure_categories": dict(sorted(row_categories.items())),
+                     "failure_category_count_consistent": sum(row_categories.values()) == len(matrix_errors + errors),
                      "error_count": len(matrix_errors + errors),
                      "retention_ok": not missing_artifacts and not mismatched_artifacts,
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
+    platform_summary_consistent = sorted(platforms) == expected_platforms
+    platform_failures = [{"platform": row["platform"], "errors": row["error_count"],
+                          "fresh": row["fresh"], "retention_ok": row["retention_ok"],
+                          "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
+                         for row in rows]
+    ready_platforms = sum(item["ready"] for item in platform_failures)
+    error_count_consistent = sum(item["errors"] for item in platform_failures) == len(errors)
+    not_ready_platforms = [item["platform"] for item in platform_failures if not item["ready"]]
+    failure_summary_consistent = [item["platform"] for item in platform_failures] == [row["platform"] for row in rows]
     errors = [error for row in rows for error in row["errors"]]
+    if not platform_summary_consistent:
+        errors.append("status matrix must contain exactly Windows, macOS, and Linux rows")
     categories = Counter()
     for error in errors:
         if "hash mismatch" in error: categories["hash"] += 1
@@ -164,8 +186,31 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         elif "stale" in error or "future" in error: categories["freshness"] += 1
         elif "missing artifact" in error or "missing manifest" in error: categories["retention"] += 1
         else: categories["manifest"] += 1
-    return {"platforms": rows, "error_count": len(errors), "failure_categories": dict(sorted(categories.items())), "errors": errors,
-            "ready": not errors}
+    failure_category_count_consistent = sum(categories.values()) == len(errors)
+    category_platforms = {category: [row["platform"] for row in rows if row["failure_categories"].get(category)]
+                          for category in sorted(categories)}
+    required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
+    provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
+    summary_consistent = (len(required) == len(rows) == len(provenance)
+                          and [item["platform"] for item in required] == [row["platform"] for row in rows]
+                          and [item["platform"] for item in provenance] == [row["platform"] for row in rows])
+    aggregate_consistent = (summary_consistent and platform_summary_consistent and failure_summary_consistent
+                            and len(required) == len(platform_failures))
+    return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
+            "platform_summary_consistent": platform_summary_consistent,
+            "platform_failure_summary": platform_failures,
+            "failure_summary_consistent": failure_summary_consistent,
+            "error_count_consistent": error_count_consistent,
+            "ready_platform_count": ready_platforms,
+            "not_ready_platforms": not_ready_platforms,
+            "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
+            "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
+            "failure_category_count_consistent": failure_category_count_consistent,
+            "failure_category_platforms": category_platforms,
+            "required_scenario_summary": required, "provenance_summary": provenance,
+            "summary_consistent": summary_consistent, "errors": errors,
+            "aggregate_consistent": aggregate_consistent,
+            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:

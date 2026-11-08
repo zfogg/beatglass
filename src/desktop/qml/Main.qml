@@ -410,7 +410,8 @@ ApplicationWindow {
                     objectName: "catalogStatus"
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
-                    Accessible.name: "Library catalog status"
+                    Accessible.name: "Library catalog status: " + text
+                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                 }
@@ -423,6 +424,7 @@ ApplicationWindow {
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
                         onClicked: window.browseFolder = files.parentFolder
                         Accessible.name: "Go to parent folder"
+                        Accessible.role: Accessible.Button
                         Accessible.description: "Go to the parent folder"
                     }
                     Label {
@@ -430,13 +432,14 @@ ApplicationWindow {
                         text: window.browseFolder.toString() || "No folder selected"
                         elide: Text.ElideMiddle; Layout.fillWidth: true
                         Accessible.name: "Current folder: " + text
+                        Accessible.value: text
                         Accessible.role: Accessible.StaticText
                     }
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
-                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.role: Accessible.Button; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -446,7 +449,9 @@ ApplicationWindow {
                 Label {
                     objectName: "catalogStatus"
                     text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : "Catalog: " + window.catalogRows.length + " matching entries"
-                    Accessible.name: text
+                    Accessible.name: "Catalog results: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
                 }
                 Frame {
                     Layout.fillWidth: true; Layout.fillHeight: true
@@ -460,6 +465,9 @@ ApplicationWindow {
                         keyNavigationEnabled: true
                         activeFocusOnTab: true
                         Accessible.name: "Folder contents"
+                        Accessible.value: currentIndex >= 0 ? (currentIndex + 1) + " of " + count : "No entry selected"
+                        Accessible.role: Accessible.List
+                        Accessible.role: Accessible.List
                         Accessible.description: "Use Up and Down to select an entry, then Enter or Space to open a folder or select an audio file."
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
                         Keys.onEnterPressed: window.activateEntry(currentIndex)
@@ -472,6 +480,8 @@ ApplicationWindow {
                             width: ListView.view.width
                             highlighted: ListView.isCurrentItem
                             Accessible.name: fileName + (fileIsDir ? ", folder" : ", audio file")
+                            Accessible.value: fileIsDir ? "folder" : "audio file"
+                            Accessible.role: Accessible.ListItem
                             Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
                             contentItem: RowLayout {
@@ -487,16 +497,18 @@ ApplicationWindow {
                             Label {
                                 objectName: "browserEmptyMessage"
                                 text: window.browserEmptyMessage()
-                                Accessible.name: "Library browser empty state"
+                                Accessible.name: "Library browser empty state: " + text
+                                Accessible.value: text
                                 Accessible.role: Accessible.StaticText
-                                Accessible.description: text
+                                Accessible.description: text + " Use Choose folder to recover from an empty or unreadable location."
+                                ToolTip.text: "Library browser recovery state"
                             }
                             Button {
                                 objectName: "chooseFolderEmpty"
                                 text: "Choose folder…"
                                 Accessible.name: "Choose a folder"
                                 Accessible.role: Accessible.Button
-                                Accessible.description: "Choose a local folder to populate the Library."
+                                Accessible.description: "Choose a local folder to populate the Library. Current state: " + window.browserEmptyMessage()
                                 onClicked: folderPicker.open()
                             }
                         }
@@ -509,7 +521,7 @@ ApplicationWindow {
                             Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                             Label { text: window.playbackBridge ? window.playbackBridge.nativeError : ""; objectName: "nativePlaybackError"; Accessible.name: "Native playback error: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native playback error details"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                             Button { text: "Retry native"; objectName: "retryNativePlayback"; enabled: window.playbackBridge && window.playbackBridge.nativeError !== ""; Accessible.name: "Retry native playback"; Accessible.role: Accessible.Button; Accessible.description: "Retry starting native playback after an output error"; ToolTip.text: "Retry native playback after the output error"; onClicked: window.playbackBridge.retryNative() }
-                            Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.name: "Reopen selected playback source"; Accessible.description: "Replace the current playback source with the selected audio source"; ToolTip.text: "Replace playback with the selected audio source"; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1) }
+                            Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.name: "Reopen selected playback source"; Accessible.role: Accessible.Button; Accessible.description: "Replace the current playback source with the selected audio source: " + window.selectedName; ToolTip.text: "Replace playback with the selected audio source"; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1) }
                             Button { text: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume" : "Pause"; objectName: "pausePlayback"; Accessible.name: text + " playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume the selected audio source." : "Pause the selected audio source."; ToolTip.text: "Pause or resume playback"; enabled: window.playbackBridge && (window.playbackBridge.state === "Playing" || window.playbackBridge.state === "Paused"); onClicked: window.playbackBridge.state === "Paused" ? window.playbackBridge.resume() : window.playbackBridge.pause() }
                             Button { text: "Stop"; objectName: "stopPlayback"; Accessible.name: "Stop playback"; Accessible.role: Accessible.Button; Accessible.description: "Stop playback and clear the current source."; ToolTip.text: "Stop playback and clear the current source"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.stop() }
                             Button { text: "−5 s"; objectName: "seekBackPlayback"; Accessible.name: "Seek backward five seconds"; Accessible.role: Accessible.Button; Accessible.description: "Move playback five seconds earlier"; ToolTip.text: "Seek backward 5 seconds"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - 5 * 44100), window.playbackBridge.epoch + 1) }
@@ -545,6 +557,7 @@ ApplicationWindow {
                             text: window.selectedName || "No file selected"
                             font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio file: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -553,6 +566,8 @@ ApplicationWindow {
                             text: window.selectedAudioUrl.toString() !== "" ? "Source: " + window.selectedAudioUrl : "Source unavailable"
                             elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio source: " + text
+                            ToolTip.text: "Selected source path"
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -560,6 +575,8 @@ ApplicationWindow {
                             objectName: "selectedAudioDuration"
                             text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
                             Accessible.name: "Selected audio duration: " + text
+                            ToolTip.text: "Selected source duration"
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap
@@ -570,13 +587,16 @@ ApplicationWindow {
                             text: "Clear selection"
                             enabled: window.selectedName !== ""
                             Accessible.name: "Clear selected audio"
-                            Accessible.description: "Clear the selected audio source and return analysis details to the empty state."
+                            Accessible.role: Accessible.Button
+                            Accessible.description: window.selectedName !== "" ? "Clear the selected audio source and return analysis details to the empty state: " + window.selectedName : "No audio source is selected."
+                            ToolTip.text: window.selectedName !== "" ? "Clear " + window.selectedName : "No audio source selected"
                             onClicked: window.clearSelectedAudio()
                         }
                         Label {
                             objectName: "metadataStatus"; text: window.metadataStatus
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio metadata status: " + text
+                            ToolTip.text: "Current metadata status"
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
@@ -587,17 +607,20 @@ ApplicationWindow {
                             visible: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0
                             enabled: visible
                             Accessible.name: "Retry metadata"
-                            Accessible.description: "Retry reading metadata for the selected audio source after an error."
+                            Accessible.role: Accessible.Button
+                            Accessible.description: "Retry reading metadata for the selected audio source after an error. Current status: " + window.metadataStatus
+                            ToolTip.text: "Retry metadata for the selected source"
                             onClicked: window.metadataBridge.inspect(window.selectedAudioUrl)
                         }
                         Label {
                             objectName: "metadataErrorGuidance"
                             text: "Metadata could not be read. Retry this file or clear the selection and choose another source."
                             visible: window.metadataStatus.indexOf("Error:") === 0
-                            Accessible.name: "Metadata error recovery guidance"
+                            Accessible.name: "Metadata error recovery guidance: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
+                            ToolTip.text: "Metadata error recovery guidance"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         Label {

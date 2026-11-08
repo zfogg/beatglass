@@ -192,6 +192,58 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles, max_age_hours=1)
             self.assertTrue(result["platforms"][0]["freshness_errors"])
 
+    def test_readiness_reports_invalid_scenarios(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64}); data["scenarios"] = [{"id": "capture", "status": "BOGUS"}]
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platforms"][0]["invalid_scenarios"], ["capture"])
+
+    def test_readiness_aggregates_required_scenario_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["required_scenario_summary"][0]["platform"], "windows")
+            self.assertIn("capture", result["required_scenario_summary"][0]["missing"])
+
+    def test_readiness_aggregates_provenance_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertFalse(result["provenance_summary"][0]["complete"])
+            self.assertIn("platform", result["provenance_summary"][0]["missing"])
+            self.assertTrue(result["summary_consistent"])
+
+    def test_readiness_reports_platform_summary_consistency(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platform_count"], 1)
+            self.assertFalse(result["platform_summary_consistent"])
+
+    def test_readiness_reports_platform_failure_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platform_failure_summary"][0]["platform"], "windows")
+            self.assertTrue(result["platform_failure_summary"][0]["invalidated"])
+            self.assertFalse(result["platform_failure_summary"][0]["ready"])
+            self.assertEqual(result["ready_platform_count"], 0)
+            self.assertFalse(result["all_platforms_ready"])
+            self.assertEqual(result["not_ready_platforms"], ["windows"])
+            self.assertTrue(result["failure_summary_consistent"])
+            self.assertFalse(result["aggregate_consistent"])
+            self.assertTrue(result["error_count_consistent"])
+            self.assertTrue(result["platforms"][0]["failure_category_count_consistent"])
+            self.assertTrue(result["failure_category_count_consistent"])
+            self.assertIn("retention", result["failure_category_platforms"])
+
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)

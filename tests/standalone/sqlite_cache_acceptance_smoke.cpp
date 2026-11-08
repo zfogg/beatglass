@@ -25,6 +25,15 @@ int main() {
     bool long_config_rejected = false;
     try { cache.begin("long-config", CacheKey{key.content, key.engine, std::string(4097, 'c'), key.mode}); }
     catch (const std::invalid_argument&) { long_config_rejected = true; }
+    bool long_content_rejected = false;
+    try { cache.begin("long-content", CacheKey{std::string(4097, 'h'), key.engine, key.config, key.mode}); }
+    catch (const std::invalid_argument&) { long_content_rejected = true; }
+    bool long_engine_rejected = false;
+    try { cache.begin("long-engine", CacheKey{key.content, std::string(4097, 'e'), key.config, key.mode}); }
+    catch (const std::invalid_argument&) { long_engine_rejected = true; }
+    bool long_mode_rejected = false;
+    try { cache.begin("long-mode", CacheKey{key.content, key.engine, key.config, std::string(4097, 'm')}); }
+    catch (const std::invalid_argument&) { long_mode_rejected = true; }
     bool invalid_mode_rejected = false;
     try { cache.begin("invalid-mode", CacheKey{key.content, key.engine, key.config, "unknown"}); }
     catch (const std::invalid_argument&) { invalid_mode_rejected = true; }
@@ -37,13 +46,56 @@ int main() {
     bool empty_mode_rejected = false;
     try { cache.begin("empty-mode", CacheKey{key.content, key.engine, key.config, ""}); }
     catch (const std::invalid_argument&) { empty_mode_rejected = true; }
-    assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected && invalid_mode_rejected && empty_engine_rejected && empty_config_rejected && empty_mode_rejected);
+    assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected && long_content_rejected && long_engine_rejected && long_mode_rejected && invalid_mode_rejected && empty_engine_rejected && empty_config_rejected && empty_mode_rejected);
+    const CacheKey live_key{key.content, key.engine, key.config, "live"};
+    cache.begin("live-result", live_key);
+    assert(cache.publish("live-result", live_key, "live-data", {}, [] { return true; }) == Publish::committed);
+    std::string live_result;
+    assert(cache.find(live_key, live_result) && live_result == "live-data");
+    assert(!cache.find(key, live_result));
+    const CacheKey next_engine{key.content, "engine-v2", key.config, key.mode};
+    cache.begin("next-engine", next_engine);
+    assert(cache.publish("next-engine", next_engine, "engine-v2-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_engine, live_result) && live_result == "engine-v2-data");
+    assert(cache.find(key, live_result) == false);
+    const CacheKey next_config{key.content, key.engine, "config-b", key.mode};
+    cache.begin("next-config", next_config);
+    assert(cache.publish("next-config", next_config, "config-b-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_config, live_result) && live_result == "config-b-data");
+    const CacheKey next_content{"sha256:two", key.engine, key.config, key.mode};
+    cache.begin("next-content", next_content);
+    assert(cache.publish("next-content", next_content, "content-two-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_content, live_result) && live_result == "content-two-data");
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
     assert(cache.find(key, result) && result == "result-a");
     assert(cache.invalidate(key));
     assert(!cache.find(key, result));
+    assert(cache.find(live_key, result) && result == "live-data");
+    assert(cache.invalidate(live_key));
+    assert(!cache.find(live_key, result));
+    assert(cache.find(next_config, result) && result == "config-b-data");
+    assert(cache.invalidate(next_config));
+    assert(!cache.find(next_config, result));
+    assert(cache.find(next_engine, result) && result == "engine-v2-data");
+    cache.begin("config-republish", next_config);
+    assert(cache.publish("config-republish", next_config, "config-b-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_config, result) && result == "config-b-republished");
+    assert(cache.invalidate(next_content));
+    assert(!cache.find(next_content, result));
+    assert(cache.find(next_engine, result) && result == "engine-v2-data");
+    cache.begin("content-republish", next_content);
+    assert(cache.publish("content-republish", next_content, "content-two-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_content, result) && result == "content-two-republished");
+    assert(cache.invalidate(next_content));
+    assert(!cache.find(next_content, result));
+    assert(cache.find(next_config, result) && result == "config-b-republished");
+    assert(cache.invalidate(next_engine));
+    assert(!cache.find(next_engine, result));
+    cache.begin("engine-republish", next_engine);
+    assert(cache.publish("engine-republish", next_engine, "engine-v2-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_engine, result) && result == "engine-v2-republished");
     cache.begin("republish", key);
     assert(cache.publish("republish", key, "result-b", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(key, result) && result == "result-b");

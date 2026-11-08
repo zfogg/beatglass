@@ -92,6 +92,36 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Clear-selection and metadata-retry actions now have contextual visual tooltips matching their accessible recovery descriptions.
+
+Selected source path, duration, and metadata status now have visual tooltips alongside their dynamic accessibility announcements.
+
+The library browser empty/error state now has a visual recovery tooltip alongside its accessible guidance.
+
+Metadata error recovery guidance now has an explicit tooltip label as a visual fallback for users who do not receive accessibility announcements.
+
+Library empty-state text now includes recovery action guidance, and metadata-error guidance includes its current message in the accessible name.
+
+Empty-library folder recovery now includes the live browser state in its accessible description, and duplicate role declarations were removed.
+
+Reopen and clear-source actions now include the current selected source in their accessible descriptions and preserve explicit recovery roles.
+
+The metadata retry action now includes the current error/status text in its accessible description, connecting recovery guidance to the live source state.
+
+Library empty/loading/error announcements now include their current message in the accessible name, while metadata recovery remains explicitly valued and role-annotated.
+
+Library-empty and metadata-error guidance now expose explicit values, preserving actionable source recovery context for assistive technology.
+
+Selected-file name, source, and duration details now expose explicit values for assistive technology.
+
+Metadata retry now declares an explicit button role, completing source-error recovery semantics alongside the existing guidance and status value.
+
+Folder contents now announce selection position and file/folder type, while each browser entry declares a ListItem role for source navigation.
+
+Catalog result counts, current folder, folder-list navigation, sort order, and empty-library actions now expose explicit accessible values and roles.
+
+The library search field and clear-selection action now declare explicit accessible input/button semantics for source browsing and recovery.
+
 Library folder selection, empty-library recovery, and opening the selected playback source now declare explicit button roles alongside their existing keyboard focus behavior.
 
 Native playback sample-rate and channel inputs now declare explicit SpinBox roles alongside their hertz/channel values.
