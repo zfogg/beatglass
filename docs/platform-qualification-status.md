@@ -180,3 +180,5 @@ The readiness report consumer also stringifies malformed status values when buil
 Readiness retained-file and artifact-role indexes include only validated string paths. Structured paths are surfaced through verifier errors and unlisted-file diagnostics without causing report aggregation to raise.
 
 Readiness artifact-role diagnostics also require each scenario evidence reference to be a string before lookup. Structured evidence references are classified as missing ownership and keep the platform pending instead of raising during report generation.
+
+Readiness report aggregation treats non-list `artifacts` or `scenarios` containers as empty diagnostic inventories while the verifier records the manifest contract error. This preserves a machine-readable pending report for malformed container types.
