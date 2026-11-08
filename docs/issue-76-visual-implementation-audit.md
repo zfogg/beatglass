@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Source replacement, endpoint switch, discontinuity, and retry transitions expose one accessible recovery narrative: stale labels are cleared before new work is announced, focus remains on the recovery surface, and queued/running status identifies the transition without presenting prior source results as current.
+
 The Library surface now exposes an accessible stale-result status when cancellation or failure invalidates an analysis: the prior result is cleared and retry requires fresh source evidence. The same contract applies after source changes and endpoint/discontinuity transitions; native announcement timing remains a qualification gap.
 
 ## Shortcut announcement contract
