@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.24)
 project(beatglass VERSION 0.1.0 LANGUAGES C CXX)
 include(CTest)
+if(BUILD_TESTING)
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  add_test(NAME desktop_cache_bridge_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_cache_bridge_contract.py)
+  set_tests_properties(desktop_cache_bridge_contract PROPERTIES LABELS unit TIMEOUT 10)
+endif()
 
 if(BUILD_TESTING)
   find_program(BEATGLASS_BASH bash)
