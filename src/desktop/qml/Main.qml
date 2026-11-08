@@ -410,9 +410,10 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { text: "Choose folder…"; objectName: "chooseFolder"; Accessible.name: "Choose audio folder"; Accessible.description: "Choose a local folder to browse"; onClicked: folderPicker.open() }
+                    Button { text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.description: "Choose a local folder to browse"; onClicked: folderPicker.open() }
                     Button {
                         text: "Up"; objectName: "parentFolder"
+                        activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
                         onClicked: window.browseFolder = files.parentFolder
                         Accessible.name: "Go to parent folder"
@@ -429,7 +430,7 @@ ApplicationWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
-                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -494,7 +495,7 @@ ApplicationWindow {
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            Button { text: "Open"; objectName: "openPlayback"; Accessible.name: "Open selected playback source"; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
+                            Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
                             SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
                             SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
                             Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge; Accessible.name: "Start native playback"; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096) }
@@ -738,7 +739,7 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 RowLayout {
-                    Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; enabled: window.captureMonitorBridge !== null && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
+                    Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: window.captureMonitorBridge !== null && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
                     Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                 }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring"; Accessible.role: Accessible.StaticText; Accessible.description: text }
@@ -913,6 +914,7 @@ ApplicationWindow {
                 }
                 Button {
                     objectName: "clearVisualizationSelection"
+                    activeFocusOnTab: true
                     text: "Clear position"
                     ToolTip.text: "Clear the selected waveform or FFT position"
                     enabled: visualizationCanvas.selectedPosition >= 0
