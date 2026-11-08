@@ -1,5 +1,9 @@
 # Issue #76 visual implementation audit
 
+## Persisted recovery outcome announcements
+
+The desktop recovery bridge emits terminal `Analysis failed` and `Analysis cancelled` states through the real `analysisStatus` signal. The QML recovery surface announces each selected-run/status pair once, restores focus to Retry, and clears the de-duplication key when the run is cleared or transitions back to a non-terminal state. This prevents repeated worker notifications from producing stale or duplicate spoken feedback while keeping retry available for a genuine new failure or cancellation.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
