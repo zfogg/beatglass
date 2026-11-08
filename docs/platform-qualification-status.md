@@ -1,5 +1,7 @@
 # Platform qualification status
 
+Native readiness handoff must include bridge transition evidence for playback recovery controls: queued, running, cancellation, retry, completion, endpoint loss, reacquisition, and stale-result clearing. Reproduce portable checks with `python tests/unit/check_desktop_analysis_transition.py` and `python tests/unit/check_playback_epoch_docs_contract.py`; these do not replace native desktop/audio/overlay observations.
+
 The local retry decision contract is reproducible with `python tests/unit/check_bridge_resubmit_contract.py`, `python tests/unit/check_retry_evidence_docs.py`, and `git diff --check`. It verifies compatible retry admission and fail-closed rejection, but native decoder/runtime, playback, endpoint-loss, and overlay evidence remain required.
 
 ## Decoder retry evidence handoff
