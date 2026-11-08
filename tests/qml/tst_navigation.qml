@@ -81,6 +81,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_djMonitoringExplainsCurrentState() {
+        let app = shell.createObject(null)
+        let dj = findChild(app, "djPage")
+        verify(dj !== null)
+        verify(dj.visible === false || findChild(app, "djStatus") !== null)
+        app.destroy()
+    }
+
     function test_libraryDetailsAvailabilityIsActionable() {
         let app = shell.createObject(null)
         let details = findChild(app, "detailsAvailability")
