@@ -32,6 +32,12 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
             target = bundles / native_platform / "manifest.json"
             target.parent.mkdir(parents=True, exist_ok=True)
             ingestion_errors.extend(ingester.ingest(native_output, target))
+            try:
+                ingested = json.loads(target.read_text(encoding="utf-8"))
+                if ingested.get("platform", "").lower() != native_platform:
+                    ingestion_errors.append(f"native artifact platform mismatch: {ingested.get('platform')} != {native_platform}")
+            except (OSError, json.JSONDecodeError):
+                pass
     report = generator.build_report(bundles)
     errors = list(ingestion_errors)
     report["ingestion_errors"] = ingestion_errors
