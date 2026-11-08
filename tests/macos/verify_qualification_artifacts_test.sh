@@ -25,6 +25,7 @@ artifact_sha256=qualification-artifacts.sha256
 case_matrix=qualification-cases.tsv
 EOF
 printf '{"SPDisplaysDataType":[],"SPHardwareDataType":[]}' > "$out_dir/display-topology.json"
+printf '{"SPAudioDataType":[]}' > "$out_dir/audio-endpoints.json"
 cat > "$out_dir/qualification-cases.tsv" <<'EOF'
 case_id	status	evidence
 permission_prompt	UNRUN	-

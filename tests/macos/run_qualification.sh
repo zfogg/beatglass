@@ -25,6 +25,11 @@ record_command "system_profiler SPHardwareDataType SPDisplaysDataType -json > $t
 system_profiler SPHardwareDataType SPDisplaysDataType -json > "$topology_path"
 [[ -s "$topology_path" ]] || { echo "display topology evidence is empty" >&2; exit 1; }
 echo "Display topology evidence: $topology_path"
+audio_inventory_path="$out_dir/audio-endpoints.json"
+record_command "system_profiler SPAudioDataType -json > $audio_inventory_path"
+system_profiler SPAudioDataType -json > "$audio_inventory_path"
+[[ -s "$audio_inventory_path" ]] || { echo "audio endpoint inventory is empty" >&2; exit 1; }
+echo "Audio endpoint inventory: $audio_inventory_path"
 record_command "xcodebuild -version"
 xcodebuild -version
 record_command "cmake --version"

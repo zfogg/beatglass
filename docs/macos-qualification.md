@@ -68,6 +68,8 @@ The verifier requires the manifest identity fields, exactly three relative artif
 The runner also records `display-topology.json` from `system_profiler` and the
 verifier requires it to be valid JSON; use it to tie display-selection, DPI,
 fullscreen, and overlay observations to the qualified machine.
+It records `audio-endpoints.json` from `SPAudioDataType` as well, tying output
+UID/device-selection and recovery observations to the actual Mac inventory.
 
 The verifier also requires the three expected desktop, tap-smoke, and recovery executable identities, not merely any three hashed files.
 
