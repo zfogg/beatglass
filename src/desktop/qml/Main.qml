@@ -305,8 +305,15 @@ ApplicationWindow {
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 Label { text: "Live output monitoring is not available yet."; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Label { text: "Capture, live estimates and the overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                Label { text: "Status: " + window.liveBridge.status }
-                Label { text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord }
+                Label {
+                    objectName: "djStatus"; text: "Status: " + window.liveBridge.status
+                    Accessible.name: "DJ monitoring status"; Accessible.description: text
+                }
+                Label {
+                    objectName: "djEstimates"
+                    text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
+                    Accessible.name: "DJ estimates"; Accessible.description: text
+                }
                 RowLayout {
                     visible: window.overlayBridge !== null
                     Button { text: "Show overlay"; objectName: "showOverlay"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.showOverlay() }
