@@ -119,3 +119,10 @@ class ReadinessHandoffTest(unittest.TestCase):
             errors = handoff.run(bundles, output, review_json=packet, consume_review=True)
             self.assertTrue(any("review packet" in error for error in errors))
 
+    def test_strict_gate_automatically_consumes_review_packet(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            errors = handoff.run(bundles, output, review_json=packet, require_ready=True)
+            self.assertTrue(any("review packet" in error for error in errors))
+

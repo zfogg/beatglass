@@ -68,7 +68,7 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
     if review_json is not None:
         review_json.parent.mkdir(parents=True, exist_ok=True)
         review_json.write_text(json.dumps(reviewer.review_packet(output), indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        if consume_review:
+        if consume_review or require_ready:
             errors.extend(packet_consumer.consume(review_json))
     if consume_report:
         errors.extend(consumer.consume(output))
