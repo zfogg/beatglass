@@ -231,6 +231,11 @@ ApplicationWindow {
                 window.clearVisualizationForCaptureState()
         }
     }
+    Connections {
+        target: window.playbackBridge
+        function onSourceChanged() { window.clearVisualizationForCaptureState() }
+        function onEpochChanged() { window.clearVisualizationForCaptureState() }
+    }
 
     FolderListModel {
         id: files
