@@ -87,3 +87,17 @@ TEST_CASE("catalog keeps hidden supported sources discoverable") {
  CHECK(result.entries[0].title == ".hidden");
  CHECK(result.entries[0].format == "FLAC");
 }
+
+TEST_CASE("catalog reports a replaced folder path without stale entries") {
+ TempDir dir; std::filesystem::create_directory(dir.path / "Library.wav");
+ const auto first = beatglass::library::browse(dir.path);
+ REQUIRE(first.entries.size() == 1);
+ CHECK(first.entries[0].directory);
+ std::filesystem::remove_all(dir.path / "Library.wav");
+ dir.file("Library.wav");
+ const auto replaced = beatglass::library::browse(dir.path);
+ REQUIRE(replaced.entries.size() == 1);
+ CHECK_FALSE(replaced.entries[0].directory);
+ CHECK(replaced.entries[0].name == "Library.wav");
+ CHECK(replaced.entries[0].format == "WAV");
+}
