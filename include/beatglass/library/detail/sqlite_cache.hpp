@@ -2,9 +2,19 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <stop_token>
 #include <string>
+#include <vector>
 namespace beatglass::library_detail {
+/** Metadata for one indexed local-library item; the source file is never owned or modified. */
+struct CollectionEntry {
+  std::string path, name, kind, fingerprint;
+  std::uint64_t size_bytes{};
+  std::int64_t modified_ns{};
+};
+/** Bounded, case-insensitive name query over indexed entries. */
+struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; };
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;
 /** Provisional caller-supplied cache identity. The caller must establish a validated content hash and stable algorithm/configuration versions. */
