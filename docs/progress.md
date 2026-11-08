@@ -336,6 +336,8 @@ A provisional `make_file_decode_operation` now supplies the worker-side decoder 
 
 `AnalysisJobBridge::submitFile` now connects that provisional operation to the desktop worker queue with explicit content hash, engine, configuration, and mode identity. Decoder I/O remains off the GUI thread; source hashing, cache admission, musical analysis, and native codec qualification remain open.
 
+Decode progress now flows through the operation’s wrapped progress callback, so the worker handle and desktop bridge observe the same incremental frame counts rather than only the terminal result.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
