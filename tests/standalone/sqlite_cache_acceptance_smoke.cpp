@@ -37,6 +37,7 @@ int main() {
     stop.request_stop();
     assert(cache.publish("cancelled", cancelled_key, "cancelled-result", stop.get_token(), [] { return true; }) == Publish::cancelled);
     assert(!cache.find(cancelled_key, result));
+    assert(!cache.invalidate(cancelled_key));
     const auto cancelled_runs = cache.retryable_runs();
     assert(cancelled_runs.size() == 1 && cancelled_runs.front().id == "cancelled");
     assert(cache.discard_retryable("cancelled"));
