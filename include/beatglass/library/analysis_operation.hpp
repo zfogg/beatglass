@@ -15,7 +15,7 @@ struct AnalysisOperation {
   std::function<FileVerificationResult(std::stop_token)> verify;
   /** Monotonic progress in source frames; zero total means unknown. */
   std::function<void(std::uint64_t processed, std::uint64_t total)> progress;
-  /** Return whether source attribution, identity, and required callbacks are complete. */
-  bool valid() const noexcept { return !source.path.empty() && !source.content_hash.empty() && source.content_hash == identity.content_hash && !identity.engine_version.empty() && !identity.configuration_id.empty() && !identity.mode.empty() && static_cast<bool>(serialize) && static_cast<bool>(verify); }
+  /** Return whether source attribution, bounded identity fields, supported mode, and required callbacks are complete. */
+  bool valid() const noexcept { return !source.path.empty() && !source.content_hash.empty() && source.content_hash.size() <= 512 && source.content_hash == identity.content_hash && !identity.engine_version.empty() && identity.engine_version.size() <= 4096 && !identity.configuration_id.empty() && identity.configuration_id.size() <= 4096 && (identity.mode == "offline" || identity.mode == "live") && static_cast<bool>(serialize) && static_cast<bool>(verify); }
 };
 }

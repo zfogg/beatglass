@@ -19,3 +19,4 @@ TEST_CASE("analysis runner retains cancellable worker operation") {
   beatglass::library::AnalysisOperation op; op.source.size_bytes=10; op.identity.mode="offline"; op.serialize=[] { return std::string("x"); }; op.verify=[](std::stop_token){ return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match,{}}; };
   auto handle=runner.submit(std::move(op)); REQUIRE(handle); handle->cancel(); REQUIRE((handle->state()==beatglass::library_detail::TrackedState::cancelled || handle->state()==beatglass::library_detail::TrackedState::completed));
 }
+TEST_CASE("analysis operation validity bounds cache identity fields") { auto invalid=op(true); invalid.identity.mode="unknown"; CHECK_FALSE(invalid.valid()); invalid=op(true); invalid.identity.configuration_id.assign(4097, 'x'); CHECK_FALSE(invalid.valid()); }
