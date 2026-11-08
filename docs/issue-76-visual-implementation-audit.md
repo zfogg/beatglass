@@ -164,4 +164,6 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Capture status, endpoint discovery and selection status, permission guidance, and the monitoring action now expose contextual tooltips that mirror their accessible recovery semantics.
+
 Library folder and audio-file entries now expose context-specific tooltips that match their accessible action descriptions, making directory navigation and source selection discoverable on hover as well as through assistive technology.
