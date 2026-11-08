@@ -271,6 +271,8 @@ The final release-directory check is `python tests/platform/verify_release_bundl
 
 Native review owners can create an explicit assessment with `python tests/platform/review_native_evidence.py <report.json> <reviewer> <native-review.json>`. The assessment lists every platform/scenario blocker and remains `PENDING` until required scenarios have retained `PASS` evidence; it records review metadata but does not replace actual desktop/audio/overlay qualification.
 
+The end-to-end handoff emits this assessment with `--native-review-output <native-review.json> --native-reviewer <reviewer>`, alongside the report and packet. A pending assessment returns nonzero and remains an explicit qualification blocker.
+
 The complete signed release workflow is `python tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root> --signoff <signoff.json>`: it retains and verifies the pair, evaluates the conservative decision, checks both signoff hashes, promotes only `ACCEPTED`, and verifies the resulting manifest against the human signoff. Native-pending evidence or a mismatched signoff stops before release output is created.
 
 After automation accepts a bundle, a release owner records manual acceptance with `python tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`. The signoff is bound to the decision's report and review-packet hashes and refuses `PENDING`; it is an audit record, not a substitute for native desktop/audio/overlay qualification.
