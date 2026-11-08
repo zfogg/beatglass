@@ -1080,7 +1080,7 @@ ApplicationWindow {
                         }
                     }
                     Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
-                    Label { text: "Opacity" }
+                    Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
                     Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                     Connections {
                         target: window.overlayBridge
@@ -1090,7 +1090,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
-                    Label { text: "Display" }
+                    Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"
                     Accessible.name: "Overlay display"; Accessible.value: currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"); ToolTip.text: "Choose the display where the overlay is shown"
@@ -1111,7 +1111,7 @@ ApplicationWindow {
                         Accessible.description: text + " Connect a display before choosing an overlay destination."
                         ToolTip.text: "Connect a display before choosing an overlay destination"
                     }
-                    Label { text: "Size" }
+                    Label { text: "Size"; Accessible.name: "Overlay size control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay window size" }
                     ComboBox {
                         objectName: "overlaySize"
                     Accessible.name: "Overlay size"; Accessible.value: currentText; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the overlay window size; current size " + currentText; ToolTip.text: "Choose Compact, Medium, or Large overlay size"
