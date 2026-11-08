@@ -20,17 +20,39 @@ reference.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Project and engineering documentation
+   :caption: Navigation
 
+   ../README.md
    ../../README.md
-   ../../AGENTS.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Status and coordination
+
    ../progress.md
-   ../decisions.md
-   ../contracts.md
    ../phase0-gate.md
-   ../phase1-contract-proposals.md
    ../foundation-handoff.md
    ../platform-qualification-status.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Architecture and contracts
+
+   ../contracts.md
+   ../decisions.md
+   ../phase1-contract-proposals.md
+   ../audio-format-support.md
+   ../collection-ui-integration.md
+   ../pipewire-status-contract.md
+   ../library-duration-contract.md
+   ../dependency-identity-proposal.md
+   ../epoch-handoff-proposal.md
+   ../same-source-proposal.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Platform and qualification
+
    ../linux-qualification-plan.md
    ../linux-platform-increment.md
    ../linux-native-evidence-template.md
@@ -41,20 +63,24 @@ reference.
    ../windows-platform.md
    ../windows-overlay.md
    ../packaging-qualification.md
-   ../audio-format-support.md
-   ../collection-ui-integration.md
-   ../pipewire-status-contract.md
-   ../library-duration-contract.md
-   ../dependency-identity-proposal.md
-   ../epoch-handoff-proposal.md
-   ../same-source-proposal.md
-   ../essentia-spike.md
-   ../tonal-experiment.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Design and experiments
+
    ../../design/v1/README.md
    ../../design/v1/PRODUCT.md
    ../../design/v1/DESIGN.md
    ../../design/v1/STATES.md
    ../../design/v1/REVIEW.md
+   ../essentia-spike.md
+   ../tonal-experiment.md
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributor guidance
+
+   ../../AGENTS.md
    ../../skills/beatglass-documentation/SKILL.md
 
 Audio and capture
