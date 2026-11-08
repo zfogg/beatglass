@@ -90,6 +90,14 @@ TEST_CASE("cancellation wins over a simultaneous path mutation") {
  CHECK_THROWS_WITH(reader.read(samples), "Audio source changed during read");
 }
 
+TEST_CASE("invalid read buffers win over a simultaneous path mutation") {
+ WaveFixture fixture; FileReader reader(fixture.path, 25); std::array<float,1> samples{};
+ { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
+ CHECK_THROWS_AS(reader.read(samples), std::invalid_argument);
+ std::array<float,2> valid{};
+ CHECK_THROWS_WITH(reader.read(valid), "Audio source changed during read");
+}
+
 TEST_CASE("file reader rejects source mutation before rewind") {
  WaveFixture fixture; FileReader reader(fixture.path, 23);
  { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
