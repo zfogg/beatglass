@@ -244,7 +244,12 @@ int main() {
     assert(remaining.size() == 3 && remaining[0].id == "a-retry" && remaining[1].id == "z-retry" && remaining[2].id == "zz-crash-recovery");
     assert(reopened.discard_retryable("a-retry"));
     assert(reopened.discard_retryable("z-retry"));
-    assert(reopened.discard_retryable("zz-crash-recovery"));
+    const CacheKey interrupted_key{"sha256:interrupted", key.engine, key.config, key.mode};
+    reopened.begin("zz-crash-recovery", interrupted_key);
+    assert(reopened.publish("zz-crash-recovery", interrupted_key, "recovered-after-reopen", {}, [] { return true; }) == Publish::committed);
+    assert(reopened.find(interrupted_key, result) && result == "recovered-after-reopen");
+    assert(reopened.invalidate(interrupted_key));
+    assert(!reopened.discard_retryable("zz-crash-recovery"));
     assert(reopened.retryable_runs().empty());
   }
   std::filesystem::remove(path, ec);
