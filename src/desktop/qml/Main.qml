@@ -318,9 +318,9 @@ ApplicationWindow {
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
-                    Button { text: "Show overlay"; objectName: "showOverlay"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.showOverlay() }
-                    Button { text: "Unlock overlay"; objectName: "unlockOverlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
-                    Button { text: "Hide overlay"; objectName: "hideOverlay"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.hideOverlay() }
+                    Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.description: "Show the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.showOverlay() }
+                    Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.description: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
+                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.description: "Hide the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.hideOverlay() }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
