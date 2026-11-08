@@ -507,8 +507,7 @@ ApplicationWindow {
                                 text: "Choose folder…"
                                 Accessible.name: "Choose a folder"
                                 Accessible.role: Accessible.Button
-                                Accessible.role: Accessible.Button
-                                Accessible.description: "Choose a local folder to populate the Library."
+                                Accessible.description: "Choose a local folder to populate the Library. Current state: " + window.browserEmptyMessage()
                                 onClicked: folderPicker.open()
                             }
                         }

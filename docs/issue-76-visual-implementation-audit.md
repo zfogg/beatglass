@@ -92,6 +92,8 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Empty-library folder recovery now includes the live browser state in its accessible description, and duplicate role declarations were removed.
+
 Reopen and clear-source actions now include the current selected source in their accessible descriptions and preserve explicit recovery roles.
 
 The metadata retry action now includes the current error/status text in its accessible description, connecting recovery guidance to the live source state.
