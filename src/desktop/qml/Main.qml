@@ -905,6 +905,15 @@ ApplicationWindow {
                                 Layout.fillWidth: true
                             }
                             Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status"; Accessible.description: text }
+                            Label {
+                                objectName: "endpointRecoveryGuidance"
+                                visible: window.endpointSelectionBridge && window.endpointSelectionBridge.status.indexOf("Error") >= 0
+                                text: "Output endpoint recovery is available: connect an output device and refresh the endpoint list."
+                                Accessible.name: "Output endpoint recovery guidance"
+                                Accessible.description: text
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
                             Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint"; Accessible.description: text; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         ComboBox {
                             id: outputDevice
