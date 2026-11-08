@@ -13,6 +13,36 @@ TEST_CASE("storage owner exposes persisted retryable runs only while open") {
   owner.close(); CHECK(owner.retryable_runs().empty());
   std::filesystem::remove(path, ec);
 }
+TEST_CASE("storage owner reopens the same database with retryable recovery intact") {
+  beatglass::library::StorageOwner owner;
+  const auto path = std::filesystem::temp_directory_path() / "beatglass-storage-owner-reopen-recovery.sqlite";
+  std::error_code ec; std::filesystem::remove(path, ec);
+  const beatglass::library_detail::CacheKey key{"reopen-hash", "engine", "config", "offline"};
+  REQUIRE(owner.open({path}));
+  REQUIRE(owner.cache()->begin("reopen-run", key, "/music/reopen.wav"));
+  REQUIRE(owner.cache()->publish("reopen-run", key, "partial", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  CHECK(owner.retryable_runs().size() == 1);
+  owner.close();
+  REQUIRE(owner.open({path}));
+  const auto recovered = owner.retryable_runs();
+  REQUIRE(recovered.size() == 1);
+  CHECK(recovered.front().id == "reopen-run");
+  CHECK(recovered.front().source_path == "/music/reopen.wav");
+  owner.close(); std::filesystem::remove(path, ec);
+}
+TEST_CASE("storage owner closes the previous database before a failed reopen") {
+  beatglass::library::StorageOwner owner;
+  const auto path = std::filesystem::temp_directory_path() / "beatglass-storage-owner-failed-reopen.sqlite";
+  std::error_code ec; std::filesystem::remove(path, ec);
+  REQUIRE(owner.open({path}));
+  REQUIRE(owner.cache());
+  std::string diagnostic;
+  CHECK_FALSE(owner.open({}, &diagnostic));
+  CHECK_FALSE(owner.cache());
+  CHECK(owner.retryable_runs().empty());
+  CHECK_FALSE(diagnostic.empty());
+  std::filesystem::remove(path, ec);
+}
 TEST_CASE("storage owner discards retryable runs without touching source files") {
   beatglass::library::StorageOwner owner;
   const auto path = std::filesystem::temp_directory_path() / "beatglass-storage-owner-discard.sqlite";
