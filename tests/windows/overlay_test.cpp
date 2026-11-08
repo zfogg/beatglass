@@ -161,6 +161,17 @@ private slots:
     adapter.hideOverlay();
     QVERIFY(!overlay.isVisible());
   }
+  void closingControlHidesOrphanedOverlay() {
+    QQuickWindow overlay;
+    QWindow control;
+    beatglass::windows::OverlayController adapter(&overlay, &control);
+    control.show();
+    QVERIFY(adapter.showOverlay());
+    QVERIFY(overlay.isVisible());
+    QVERIFY(control.close());
+    QTRY_VERIFY(!overlay.isVisible());
+    QVERIFY(!adapter.clickThrough());
+  }
   void controlCannotBeOverlay() {
     QQuickWindow window;
     window.show();

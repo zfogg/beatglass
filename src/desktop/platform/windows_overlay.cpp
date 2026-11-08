@@ -155,6 +155,7 @@ bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   }
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
       (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) { endDrag(); setClickThrough(false); }
+  if (watched == control_ && event->type() == QEvent::Close && overlay_) overlay_->hide();
   return QObject::eventFilter(watched, event);
 }
 void OverlayController::keepOnScreen() {
