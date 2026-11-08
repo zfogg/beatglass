@@ -28,6 +28,8 @@ This audit is intentionally a completion aid, not a claim that issue #76 or issu
 
 The remaining library detail and analysis status labels now use explicit static-text roles while retaining source-attributed dynamic descriptions.
 
+Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
+
 Analysis progress, batch queue, persisted recovery, and confirmation text are also exposed as static status text; their dynamic descriptions continue to reflect bridge state.
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.

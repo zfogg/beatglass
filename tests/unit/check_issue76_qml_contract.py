@@ -53,6 +53,7 @@ def main() -> int:
         "library capture status roles": "objectName: \"endpointStatus\"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: \"Output endpoint status\"; Accessible.role: Accessible.StaticText",
         "library detail status roles": "objectName: \"selectedAudioName\"",
         "analysis status roles": "objectName: \"analysisProgress\"",
+        "visual status roles": "objectName: \"visualizationLoadState\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
