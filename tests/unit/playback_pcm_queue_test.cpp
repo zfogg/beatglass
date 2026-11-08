@@ -2,6 +2,10 @@
 #include "beatglass/capture/playback_pcm_queue.hpp"
 #include <array>
 using namespace beatglass;
+TEST_CASE("playback queue rejects blocks without a source epoch") {
+  PlaybackPcmQueue q(2, 2); std::array<float,1> samples{1};
+  AudioBlock source{{44100,1},0,0,0,false,samples}; CHECK_FALSE(q.push(source)); CHECK(q.size()==0);
+}
 TEST_CASE("playback queue copies block metadata and samples") {
   PlaybackPcmQueue q(2, 4); std::array<float,3> in{.1f,.2f,.3f}; AudioBlock source{{48000,2},9,12,77,true,in};
   REQUIRE(q.push(source)); REQUIRE(q.size()==1); std::array<float,4> out{}; AudioBlock got{};

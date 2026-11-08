@@ -8,7 +8,7 @@ PlaybackPcmQueue::PlaybackPcmQueue(std::size_t slot_count, std::size_t samples_p
   for (std::size_t i = 0; i < capacity_; ++i) slots_[i].samples = std::make_unique<float[]>(samples_per_slot_);
 }
 bool PlaybackPcmQueue::push(const AudioBlock& block) noexcept {
-  if (block.samples.empty() || block.samples.size() > samples_per_slot_) return false;
+  if (!block.epoch || block.samples.empty() || block.samples.size() > samples_per_slot_) return false;
   const auto w = write_.load(std::memory_order_relaxed), next = (w + 1) % capacity_;
   if (next == read_.load(std::memory_order_acquire)) return false;
   auto& s = slots_[w]; std::copy(block.samples.begin(), block.samples.end(), s.samples.get());
