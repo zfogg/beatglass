@@ -21,3 +21,4 @@ TEST_CASE("analysis runner retains cancellable worker operation") {
   auto handle=runner.submit(std::move(op)); REQUIRE(handle); handle->cancel(); REQUIRE((handle->state()==beatglass::library_detail::TrackedState::cancelled || handle->state()==beatglass::library_detail::TrackedState::completed));
 }
 TEST_CASE("analysis operation validity bounds cache identity fields") { auto invalid=op(true); invalid.identity.mode="unknown"; CHECK_FALSE(invalid.valid()); invalid=op(true); invalid.identity.configuration_id.assign(4097, 'x'); CHECK_FALSE(invalid.valid()); }
+TEST_CASE("analysis operation validity requires serialization and verification callbacks") { auto missing=op(true); missing.serialize={}; CHECK_FALSE(missing.valid()); missing=op(true); missing.verify={}; CHECK_FALSE(missing.valid()); }
