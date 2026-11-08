@@ -26,7 +26,7 @@ def main() -> None:
     missing = [marker for marker in required if marker not in source]
     if missing:
         raise AssertionError("missing reopen restoration markers: " + ", ".join(missing))
-    if "retryableRunsChanged refresh completion" not in doc:
+    if "retryableRunsChanged` refresh completion" not in doc:
         raise AssertionError("missing reopen restoration documentation")
     print(f"recovery bridge reopen restoration contract: {len(required) + 1} checks passed")
 
