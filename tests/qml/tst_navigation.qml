@@ -742,6 +742,7 @@ TestCase {
         compare(device.count, 1)
         compare(device.currentText, "No output device detected")
         verify(!device.enabled)
+        compare(device.ToolTip.text, "Current system output device used for monitoring")
         let guidance = findChild(app, "permissionGuidance")
         verify(guidance.text.length > 20)
          if (Qt.platform.os === "osx") verify(guidance.text.indexOf("14.2") >= 0)
