@@ -46,6 +46,18 @@ for required_path in "$desktop_binary" "$tap_bundle" "$tap_binary" "$recovery_bu
     exit 1
   fi
 done
+for bundle in "$tap_bundle" "$recovery_bundle"; do
+  bundle_plist="$bundle/Contents/Info.plist"
+  if [[ ! -f "$bundle_plist" ]]; then
+    echo "Native smoke bundle plist not found: $bundle_plist" >&2
+    exit 1
+  fi
+  bundle_usage="$(/usr/libexec/PlistBuddy -c 'Print :NSAudioCaptureUsageDescription' "$bundle_plist")"
+  if [[ -z "$bundle_usage" ]]; then
+    echo "NSAudioCaptureUsageDescription is empty in $bundle_plist" >&2
+    exit 1
+  fi
+done
 echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
 ctest --test-dir "$out_dir/build" -R '^(macos_overlay_|macos_native_overlay$)' --output-on-failure
 
