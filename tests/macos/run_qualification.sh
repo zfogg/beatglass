@@ -92,10 +92,12 @@ validate_bundle_identity "$tap_bundle" "beatglass-coreaudio-smoke" "org.beatglas
 validate_bundle_identity "$recovery_bundle" "beatglass-coreaudio-recovery" "org.beatglass.coreaudio-recovery"
 for bundle in "$out_dir/build/beatglass-desktop.app" "$tap_bundle" "$recovery_bundle"; do
   bundle_plist="$bundle/Contents/Info.plist"
-  if microphone_usage="$(/usr/libexec/PlistBuddy -c 'Print :NSMicrophoneUsageDescription' "$bundle_plist" 2>/dev/null)" && [[ -n "$microphone_usage" ]]; then
-    echo "Microphone permission is not allowed in qualification bundle: $bundle_plist" >&2
-    exit 1
-  fi
+  for forbidden_key in NSMicrophoneUsageDescription NSCameraUsageDescription; do
+    if forbidden_usage="$(/usr/libexec/PlistBuddy -c "Print :$forbidden_key" "$bundle_plist" 2>/dev/null)" && [[ -n "$forbidden_usage" ]]; then
+      echo "$forbidden_key is not allowed in qualification bundle: $bundle_plist" >&2
+      exit 1
+    fi
+  done
 done
 if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   echo "Running Core Audio tap smoke for supplied UID"
