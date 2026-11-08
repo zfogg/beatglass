@@ -254,6 +254,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         manifest_platform = manifest_data.get("platform")
         if not isinstance(manifest_platform, str) or manifest_platform.lower() != platform:
             errors.append(f"{platform}: manifest platform does not match report row")
+        if "manifest_platform" in row and row.get("manifest_platform") != manifest_platform:
+            errors.append(f"{platform}: report manifest platform does not match manifest")
         actual_manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()
         if actual_manifest_hash != row.get("manifest_sha256"):
             errors.append(f"{platform}: manifest SHA-256 does not match report")

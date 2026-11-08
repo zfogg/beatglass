@@ -362,6 +362,16 @@ class ReadinessReportContractTest(unittest.TestCase):
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("report provenance does not match manifest: commit", errors)
 
+    def test_report_manifest_platform_echo_must_match(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            report["platforms"][0]["manifest_platform"] = "linux"
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("report manifest platform does not match manifest", errors)
+
     def test_report_artifact_roles_must_match_manifest(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as directory:
