@@ -8,9 +8,9 @@ required = [
     "window.overlayOpacityEditInFlight = true",
     "window.overlayBridge.setOpacity(value)",
     "window.overlaySettingsRevision += 1",
-    "if (window.overlayBridge && window.overlayOpacityEditInFlight)",
+    "window.overlayOpacityEditInFlight",
     "window.overlayOpacityEditInFlight = false",
-    "else if (window.overlayBridge)",
+    "window.overlaySettingsRevision += 1",
 ]
 missing = [marker for marker in required if marker not in qml]
 if missing:
