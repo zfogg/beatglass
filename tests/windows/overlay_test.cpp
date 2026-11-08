@@ -147,6 +147,20 @@ private slots:
     overlay.show();
     QVERIFY(adapter.setClickThrough(true));
   }
+  void lifecycleAndResizeAreSafe() {
+    QQuickWindow overlay;
+    QWindow control;
+    beatglass::windows::OverlayController adapter(&overlay, &control);
+    QVERIFY(adapter.available());
+    QVERIFY(!overlay.isVisible());
+    QVERIFY(adapter.showOverlay());
+    QVERIFY(overlay.isVisible());
+    QVERIFY(adapter.resizeOverlay(420, 180));
+    QCOMPARE(overlay.size(), QSize(420, 180));
+    QVERIFY(!adapter.resizeOverlay(0, 180));
+    adapter.hideOverlay();
+    QVERIFY(!overlay.isVisible());
+  }
   void controlCannotBeOverlay() {
     QQuickWindow window;
     window.show();
