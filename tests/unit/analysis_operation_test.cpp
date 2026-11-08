@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include <atomic>
 #include <thread>
+#include <filesystem>
+#include <chrono>
 #include "beatglass/library/analysis_operation.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
 #include "beatglass/library/analysis_commit.hpp"
@@ -178,6 +180,30 @@ TEST_CASE("endpoint replacement publishes only the new source epoch") {
   REQUIRE(retryable.size() == 1);
   CHECK(retryable.front().source_path == "endpoint://device-a");
   CHECK(retryable.front().key.content == "endpoint-a-epoch-1");
+}
+TEST_CASE("endpoint replacement retry state survives cache restart") {
+  const auto path = std::filesystem::temp_directory_path() /
+    ("beatglass-endpoint-restart-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  beatglass::library_detail::CacheKey old_key{"endpoint-a-epoch-1", "engine", "config", "offline"};
+  beatglass::library_detail::CacheKey new_key{"endpoint-b-epoch-2", "engine", "config", "offline"};
+  {
+    beatglass::library_detail::SqliteCache cache(path.string());
+    cache.begin("endpoint-old", old_key, "endpoint://device-a", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("endpoint-old", old_key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+    cache.begin("endpoint-new", new_key, "endpoint://device-b", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("endpoint-new", new_key, "fresh", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  }
+  {
+    beatglass::library_detail::SqliteCache cache(path.string());
+    std::string result;
+    REQUIRE(cache.find(new_key, result));
+    CHECK(result == "fresh");
+    const auto retryable = cache.retryable_runs();
+    REQUIRE(retryable.size() == 1);
+    CHECK(retryable.front().source_path == "endpoint://device-a");
+    CHECK(retryable.front().key.content == "endpoint-a-epoch-1");
+  }
+  REQUIRE(std::filesystem::remove(path));
 }
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
