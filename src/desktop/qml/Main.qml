@@ -15,6 +15,7 @@ ApplicationWindow {
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
     property var captureMonitorBridge: typeof captureMonitor !== "undefined" ? captureMonitor : null
+    property var endpointSelectionBridge: typeof endpointSelection !== "undefined" ? endpointSelection : null
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property url browseFolder: ""
@@ -444,6 +445,11 @@ ApplicationWindow {
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
                         Label { text: "Output device"; font.bold: true }
+                            RowLayout {
+                                ComboBox { objectName: "endpointSelector"; model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []; enabled: count > 0; Layout.fillWidth: true }
+                                Button { text: "Refresh"; objectName: "refreshEndpoints"; enabled: window.endpointSelectionBridge !== null; onClicked: window.endpointSelectionBridge.refresh() }
+                            }
+                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         ComboBox {
                             id: outputDevice
                             objectName: "outputDevice"

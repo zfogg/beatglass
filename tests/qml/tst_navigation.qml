@@ -120,6 +120,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_endpointSelectionControlsAreBound() {
+        let app = shell.createObject(null)
+        verify(findChild(app, "endpointSelector") !== null)
+        verify(findChild(app, "refreshEndpoints") !== null)
+        verify(findChild(app, "endpointStatus") !== null)
+        app.destroy()
+    }
+
     function test_overlayReportsCaptureRecoveryStatus() {
         let app = shell.createObject(null)
         verify(findChild(app, "overlayCaptureStatus") !== null)
