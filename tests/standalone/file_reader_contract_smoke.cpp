@@ -68,4 +68,9 @@ int main() {
     classified = error.kind() == FileOpenErrorKind::unsupported_format;
   }
   assert(classified);
+  const auto unsupported_aac = std::filesystem::temp_directory_path() / "beatglass-reader.aac";
+  bool aac_classified = false;
+  try { FileReader reader(unsupported_aac, 1); }
+  catch (const FileOpenError& error) { aac_classified = error.kind() == FileOpenErrorKind::unsupported_format; }
+  assert(aac_classified);
 }
