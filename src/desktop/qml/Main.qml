@@ -450,6 +450,7 @@ ApplicationWindow {
                         onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
                         Layout.fillWidth: true
                     }
+                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display"; Accessible.description: text }
                     Label { text: "Size" }
                     ComboBox {
                         objectName: "overlaySize"
