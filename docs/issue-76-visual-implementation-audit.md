@@ -20,6 +20,8 @@ Storage bridge disconnects are an explicit recovery boundary: `Storage closed` a
 
 On reopen, `Opening storage` clears the same keys and marks a pending restoration. The real `retryableRunsChanged` refresh completion then announces the reopened run count, focuses the selector when runs exist, or returns focus to Library with an explicit empty-state announcement.
 
+The C++ storage bridge now resets active analysis retryability, progress, result, and lifecycle status before reopening. Reopen cannot leave a stale active-job Retry enabled while persisted runs are being refreshed; the subsequent worker refresh repopulates only current retryable identities.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
