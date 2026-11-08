@@ -8,11 +8,12 @@ namespace {
 class MemorySource : public ByteSource {
 public:
  std::array<std::byte, 3> bytes{std::byte{1}, std::byte{2}, std::byte{3}};
+ std::uint64_t reported_size{3};
  bool invalid{};
  bool premature_end{};
  bool cancelled_after_write{};
  bool error_after_write{};
- std::uint64_t size() const noexcept override { return bytes.size(); }
+ std::uint64_t size() const noexcept override { return reported_size; }
  ByteReadResult read_at(std::uint64_t offset, std::span<std::byte> out, std::stop_token) override {
    if (invalid) return {ByteReadStatus::data, out.size() + 1};
    if (premature_end) return {ByteReadStatus::end, 0};
@@ -60,5 +61,14 @@ TEST_CASE("signed byte seeks handle origins and extreme displacements") {
  CHECK_FALSE(cursor.seek_relative(1, ByteSeekOrigin::current));
  CHECK_FALSE(cursor.seek_relative(std::numeric_limits<std::int64_t>::min(), ByteSeekOrigin::end));
  CHECK_FALSE(cursor.seek_relative(std::numeric_limits<std::int64_t>::max(), ByteSeekOrigin::current));
+ CHECK(cursor.position() == 3);
+}
+
+TEST_CASE("byte cursor retains the opening size when the source mutates") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ source.reported_size = 5;
+ CHECK_FALSE(cursor.seek(4));
+ REQUIRE(cursor.seek(3));
+ CHECK(cursor.read(out).status == ByteReadStatus::end);
  CHECK(cursor.position() == 3);
 }
