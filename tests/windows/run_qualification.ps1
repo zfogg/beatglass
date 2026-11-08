@@ -68,12 +68,20 @@ try {
   $required = @(
     (Join-Path $buildDirectory "Release/beatglass-desktop.exe"),
     (Join-Path $buildDirectory "Release/windows_endpoint_tests.exe"),
+    (Join-Path $buildDirectory "Release/windows_dj_bridge_tests.exe"),
     (Join-Path $buildDirectory "Release/windows_overlay_tests.exe")
   )
   foreach ($path in $required) {
     if (-not (Test-Path $path)) { throw "Required qualification artifact is missing: $path" }
   }
   "Prepared artifacts: $($required -join ', ')"
+  $manifestPath = Join-Path $OutputDirectory "qualification-artifacts.sha256"
+  $hashLines = foreach ($path in $required) {
+    $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $path
+    "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), (Resolve-Path -LiteralPath $path -Relative)
+  }
+  $hashLines | Set-Content -LiteralPath $manifestPath -Encoding utf8
+  "Artifact SHA-256 manifest: $manifestPath"
   "UNRUN: native WASAPI routing, endpoint removal/recovery, overlay, DPI, and interactive UI cases require a logged-in Windows session."
 }
 finally {
