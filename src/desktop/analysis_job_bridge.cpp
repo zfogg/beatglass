@@ -141,7 +141,8 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
 
 void AnalysisJobBridge::cancelBatch() {
   for (const auto& operation : batch_) if (operation) operation->cancel();
-  batchResultsPublished_ = 0; batchLastResult_.clear();
+  batchResultsPublished_ = batchFailedCount_ = 0; batchLastResult_.clear();
+  emit batchChanged();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   if (!batch_.empty() && status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
   poll();
