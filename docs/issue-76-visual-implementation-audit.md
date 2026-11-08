@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Native playback running/error, playback state/source, and unavailable-build surfaces are now explicitly asserted in the static visual contract.
+
 Native playback start/retry, output refresh, sample-rate, and channel controls are now explicitly asserted in the static visual contract.
 
 Playback reopen, pause/resume, stop, backward-seek, forward-seek, and frame-seek controls are now explicitly asserted in the static visual contract.
