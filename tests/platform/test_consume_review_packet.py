@@ -23,3 +23,13 @@ class ReviewPacketConsumerTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "review.json"; path.write_text(json.dumps({"review_packet_schema": 99}), encoding="utf-8")
             self.assertTrue(consumer.consume(path))
+
+    def test_tampered_ready_packet_is_rejected(self):
+        report = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        review_spec = importlib.util.spec_from_file_location("review", Path(__file__).with_name("review_readiness_handoff.py"))
+        review = importlib.util.module_from_spec(review_spec); assert review_spec.loader
+        review_spec.loader.exec_module(review)
+        packet = review.review_packet(report); packet["gate_status"] = "READY"; packet["acceptance_errors"] = []
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "review.json"; path.write_text(json.dumps(packet), encoding="utf-8")
+            self.assertTrue(any("requires native qualification" in error for error in consumer.consume(path)))
