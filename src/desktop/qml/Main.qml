@@ -941,7 +941,7 @@ ApplicationWindow {
                         Accessible.role: Accessible.CheckBox
                         Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled")
                         ToolTip.text: "Toggle pointer click-through for the overlay"
-                        enabled: window.overlayBridge && window.overlayBridge.available
+                        enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onClicked: if (window.overlayBridge) {
                             window.overlayBridge.setClickThrough(checked)
                             checked = window.overlayBridge.clickThrough
