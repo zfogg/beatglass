@@ -27,6 +27,7 @@ ApplicationWindow {
     property url selectedAudioUrl: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     property string visualizationSelectionResetReason: ""
+    property string visualizationRecoveryAnnouncement: ""
     property string catalogDiagnostic: ""
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
         && analysisJobBridge !== null
@@ -60,14 +61,14 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+R"
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null && window.playbackBridge.state === "Paused"
-        onActivated: window.playbackBridge.resume()
+        onActivated: { window.playbackBridge.resume(); window.visualizationRecoveryAnnouncement = "Playback resumed from keyboard shortcut; accepted snapshot retained." }
     }
     Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped"
-        onActivated: window.playbackBridge.stop()
+        onActivated: { window.playbackBridge.stop(); window.visualizationRecoveryAnnouncement = "Playback stopped from keyboard shortcut; accepted snapshot cleared." }
     }
     Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus() } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
@@ -1524,6 +1525,21 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
                 Label {
+                    objectName: "visualizationRecoveryAnnouncement"
+                    text: window.visualizationRecoveryAnnouncement
+                    visible: text !== ""
+                    Accessible.name: "Visualization recovery announcement: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Live announcement for keyboard or pointer playback recovery actions."
+                    ToolTip.text: "Latest visualization playback recovery action"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "visualizationPlaybackEpochFeedback"
                     text: visualizationCanvas.playbackSnapshotAligned
                         ? "Playback aligned · epoch " + window.playbackBridge.epoch + " · accepted snapshot seek available"
@@ -1668,7 +1684,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled ? "Resume playback while retaining the accepted visualization snapshot." : "Playback must be paused to resume it."
                     ToolTip.text: enabled ? "Resume playback without clearing the accepted snapshot" : "Resume is available when playback is paused"
-                    onClicked: window.playbackBridge.resume()
+                    onClicked: { window.playbackBridge.resume(); window.visualizationRecoveryAnnouncement = "Playback resumed; accepted snapshot retained." }
                 }
                 Button {
                     objectName: "stopVisualizationPlayback"
@@ -1680,7 +1696,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled ? "Stop playback and clear the accepted visualization snapshot." : "Playback is already stopped."
                     ToolTip.text: enabled ? "Stop playback and clear the accepted visualization snapshot" : "Playback is already stopped"
-                    onClicked: window.playbackBridge.stop()
+                    onClicked: { window.playbackBridge.stop(); window.visualizationRecoveryAnnouncement = "Playback stopped; accepted snapshot cleared." }
                 }
                 }
                 Label {
