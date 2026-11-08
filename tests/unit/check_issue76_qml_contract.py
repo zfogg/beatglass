@@ -81,6 +81,7 @@ def main() -> int:
         "visual recovery values": "objectName: \"visualizationLoadState\"",
         "settings recovery values": "objectName: \"permissionGuidance\"",
         "recovery batch values": "objectName: \"endpointRecoveryGuidance\"",
+        "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
