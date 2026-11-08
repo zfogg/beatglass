@@ -7,6 +7,8 @@ class VisualizationPresentationBridge final : public QObject {
   Q_OBJECT
   Q_PROPERTY(QVariantList waveform READ waveform NOTIFY changed)
   Q_PROPERTY(QVariantList spectrum READ spectrum NOTIFY changed)
+  Q_PROPERTY(qulonglong generation READ generation NOTIFY changed)
+  Q_PROPERTY(qulonglong revision READ revision NOTIFY changed)
 public:
   using QObject::QObject;
   /** Apply an immutable worker frame; stale or malformed frames are rejected. */
@@ -15,6 +17,8 @@ public:
   Q_INVOKABLE void clear() noexcept;
   QVariantList waveform() const { return waveform_; }
   QVariantList spectrum() const { return spectrum_; }
+  qulonglong generation() const { return presentation_.generation(); }
+  qulonglong revision() const { return presentation_.acceptedRevision(); }
 signals: void changed();
 private:
   beatglass::VisualizationPresentation presentation_;

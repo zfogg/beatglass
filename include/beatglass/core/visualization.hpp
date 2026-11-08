@@ -82,6 +82,8 @@ public:
   void clear() noexcept { ++generation_; accepted_revision_ = 0; }
   /** Current opaque generation token. */
   std::uint64_t generation() const noexcept { return generation_; }
+  /** Most recently accepted revision for the current generation. */
+  std::uint64_t acceptedRevision() const noexcept { return accepted_revision_; }
   /** Accept a newer nonzero revision for the current generation. */
   bool accept(std::uint64_t generation, std::uint64_t revision) noexcept {
     if (!generation || generation != generation_ || !revision || revision <= accepted_revision_) return false;

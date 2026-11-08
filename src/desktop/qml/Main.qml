@@ -762,6 +762,15 @@ ApplicationWindow {
                     Layout.fillWidth: true
                 }
                 Label {
+                    objectName: "visualizationRevisionStatus"
+                    text: typeof visualizationPresentation === "undefined"
+                        ? "No visualization generation is active"
+                        : "Visualization generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
+                    Accessible.name: "Visualization generation status"
+                    Accessible.description: text
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "visualizationCaptureStatus"
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
                     Accessible.name: "Visualization capture status"
