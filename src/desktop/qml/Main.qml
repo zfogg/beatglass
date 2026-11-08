@@ -376,6 +376,15 @@ ApplicationWindow {
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
                 Label {
+                    objectName: "visualizationStatus"
+                    text: typeof visualizationPresentation === "undefined"
+                          ? "Visualization unavailable"
+                          : "Waveform samples: " + visualizationPresentation.waveform.length + " · Spectrum bins: " + visualizationPresentation.spectrum.length
+                    Accessible.name: "Visualization data status"
+                    Accessible.description: text
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "visualizationDataStatus"
                     text: (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " waveform samples · " + (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " spectrum bins"
                     Accessible.name: "Visualization data status"; Accessible.description: text

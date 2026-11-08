@@ -172,6 +172,7 @@ TestCase {
         let canvas = findChild(app, "visualizationCanvas")
         verify(canvas !== null)
         compare(canvas.Accessible.name, "Live waveform and spectrum")
+        compare(findChild(app, "visualizationStatus").Accessible.name, "Visualization data status")
         app.destroy()
     }
 
