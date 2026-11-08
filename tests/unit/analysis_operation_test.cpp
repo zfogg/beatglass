@@ -5,6 +5,14 @@
 #include "beatglass/library/analysis_commit.hpp"
 #include "beatglass/library/analysis_admission.hpp"
 #include "beatglass/library/storage_owner.hpp"
+TEST_CASE("analysis admission rejects incompatible decoder snapshots") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  const auto rejected = beatglass::library::admit_analysis(cache, "bad-snapshot", identity, "/music/a.flac", "file-reader-v0");
+  CHECK_FALSE(rejected.decoder_compatible);
+  CHECK_FALSE(rejected.analysis_reserved);
+  CHECK_FALSE(rejected.cached.has_value());
+}
 TEST_CASE("analysis operation retains source identity and bounded callback contract") { beatglass::library::AnalysisOperation op; op.source.size_bytes=12; op.identity.mode="offline"; op.serialize=[] { return std::string("result"); }; REQUIRE(op.serialize()=="result"); REQUIRE(op.identity.mode=="offline"); }
 TEST_CASE("analysis source identity includes a selected catalog path") {
   beatglass::library::AnalysisOperation op;
