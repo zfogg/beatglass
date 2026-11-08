@@ -1,0 +1,13 @@
+#include "beatglass/library/detail/job_executor.hpp"
+#include <chrono>
+#include <cstdlib>
+#include <iostream>
+#include <thread>
+namespace { void require(bool ok, const char* msg) { if (!ok) { std::cerr << msg << '\n'; std::exit(EXIT_FAILURE); } } }
+int main() {
+  using namespace beatglass::library_detail; JobExecutor executor(1);
+  auto handle=executor.submit_tracked(0,[](std::stop_token,const auto&){ return TrackedState::queued; });
+  require(handle!=nullptr,"invalid-state work rejected");
+  for(int i=0;i<100&&handle->state()!=TrackedState::failed;++i) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  require(handle->state()==TrackedState::failed,"invalid tracked outcome was not normalized"); executor.shutdown(); return EXIT_SUCCESS;
+}
