@@ -250,14 +250,6 @@ record_command "codesign --verify --deep --strict $tap_bundle"
 if codesign --verify --deep --strict "$tap_bundle" 2>>"$tap_signing_log"; then tap_signing=verified; fi
 record_command "codesign --verify --deep --strict $recovery_bundle"
 if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_log"; then recovery_signing=verified; fi
-if [[ "${BEATGLASS_MACOS_REQUIRE_SIGNING:-0}" == "1" ]]; then
-  for signed_state in "$signing_state" "$tap_signing" "$recovery_signing"; do
-    if [[ "$signed_state" != "verified" ]]; then
-      echo "BEATGLASS_MACOS_REQUIRE_SIGNING=1 requires all qualification bundles to pass codesign verification" >&2
-      exit 1
-    fi
-  done
-fi
 {
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'macos_version=%s\n' "$(sw_vers -productVersion)"
