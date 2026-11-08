@@ -330,6 +330,8 @@ It reports cancelled accepted operations separately from failures, preserving th
 
 Batch status also reports accepted operations that reached completion, completing the queued batch outcome breakdown.
 
+The derived queued count identifies accepted operations that have not yet published, failed, cancelled, or completed.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
