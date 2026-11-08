@@ -290,6 +290,8 @@ The filtered catalog result summary now exposes an explicit description and curr
 
 The playback control row is now exposed as one grouped accessible surface with a concise tooltip, giving users context before navigating format, transport, seek, and output-device controls.
 
+Theme preview swatches now expose a grouped semantic surface and entry tooltip, clarifying that the individual radio-style controls are one coordinated palette choice.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
