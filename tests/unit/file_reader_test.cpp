@@ -59,6 +59,11 @@ TEST_CASE("seek refuses epoch overflow") {
  REQUIRE(first.status == FileReadStatus::data); CHECK(first.block.first_frame == 0);
 }
 
+TEST_CASE("path reader rejects zero epoch before opening source") {
+  WaveFixture fixture;
+  CHECK_THROWS_AS(FileReader(fixture.path, 0), std::invalid_argument);
+}
+
 TEST_CASE("file source changes sample rate only across distinct epochs") {
  WaveFixture first_file(44100), second_file(48000); std::array<float,4> first_buffer{}, second_buffer{};
  FileReader first(first_file.path, 1), second(second_file.path, 2); StreamContinuity continuity;
