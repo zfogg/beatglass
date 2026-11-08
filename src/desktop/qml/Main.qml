@@ -30,6 +30,7 @@ ApplicationWindow {
     property bool overlayHiddenByUser: false
     property bool overlayLaunchFallbackActive: false
     property int overlayGeometryRevision: 0
+    property int overlaySettingsRevision: 0
     property int overlayPreferredScreenIndex: -1
     property string overlayPreferredDisplayName: ""
     property int overlayPreferredSizeIndex: 1
@@ -308,6 +309,16 @@ ApplicationWindow {
         window.syncOverlaySizePreferenceFromGeometry(geometry)
         window.overlayGeometryRevision += 1
         return true
+    }
+    function syncOverlaySettingsStateFromBridge() {
+        if (!window.overlayBridge)
+            return false
+        const geometryReady = window.syncOverlayGeometryStateFromBridge()
+        const opacity = Number(window.overlayBridge.opacity)
+        if (!isFinite(opacity) || opacity < 0.2 || opacity > 1.0)
+            return false
+        window.overlaySettingsRevision += 1
+        return geometryReady
     }
     function syncOverlaySettingsFromBridge() {
         if (!window.overlayBridge) {
@@ -827,7 +838,7 @@ ApplicationWindow {
                 window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
         }
         function onGeometryChanged() {
-            window.syncOverlayGeometryStateFromBridge()
+            window.syncOverlaySettingsStateFromBridge()
             if (window.overlayDisplayRecoveryPending && window.overlayBridge
                     && window.overlayBridge.screenNames.length > 0
                     && !window.overlayDisplaySelectionRequired) {
@@ -2714,6 +2725,7 @@ ApplicationWindow {
                         + " · " + (window.overlayBridge ? Math.round(window.overlayBridge.opacity * 100) : 90) + "% opacity"
                         + (window.overlayHiddenByUser ? " · hidden by user" : "")
                         + (window.overlayLaunchFallbackActive ? " · launch fallback active" : "")
+                        + " · settings revision " + window.overlaySettingsRevision
                         + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
                     Accessible.name: "Overlay settings summary"
                     Accessible.value: text

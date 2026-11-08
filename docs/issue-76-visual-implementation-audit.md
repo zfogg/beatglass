@@ -694,6 +694,8 @@ Native geometry changes (including DPI/layout updates and monitor replacement) n
 
 Geometry callbacks now update the preferred display, native position/size-derived preference, and an accessible geometry revision through one synchronization helper. The settings summary therefore reflects a coherent post-layout state rather than mixing values from different monitor/DPI events.
 
+The settings synchronization path now validates native opacity alongside display, position, and size, then advances one accessible settings revision. The summary and recovery gate therefore describe a single coherent bridge snapshot across DPI/layout changes.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
