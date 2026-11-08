@@ -64,6 +64,11 @@ public:
     auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 0));
     auto n = sqlite3_column_bytes(s.p, 0); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
   }
+  bool invalidate(const CacheKey& key) {
+    validate_key(key);
+    Statement s(db_, "DELETE FROM active WHERE content=? AND engine=? AND config=? AND mode=?");
+    bind_key(s.p, 1, key); done(s.p); return sqlite3_changes(db_) == 1;
+  }
   void put_entry(const CollectionEntry& e) {
     if (e.path.empty() || e.name.empty() || e.kind.empty()) throw std::invalid_argument("invalid collection entry");
     Statement s(db_, "INSERT INTO collection_entries(path,name,kind,fingerprint,size_bytes,modified_ns) VALUES(?,?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET name=excluded.name,kind=excluded.kind,fingerprint=excluded.fingerprint,size_bytes=excluded.size_bytes,modified_ns=excluded.modified_ns");
@@ -120,6 +125,7 @@ SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>
 SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
+bool SqliteCache::invalidate(const CacheKey& key) { return impl_->invalidate(key); }
 void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }
 bool SqliteCache::remove_entry(const std::string& path) { return impl_->remove_entry(path); }
 std::optional<CollectionEntry> SqliteCache::entry(const std::string& path, std::stop_token stop) { return impl_->entry(path, stop); }

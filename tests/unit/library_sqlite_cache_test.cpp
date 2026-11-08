@@ -99,3 +99,11 @@ TEST_CASE("SQLite cache stores and pages collection metadata") {
   REQUIRE(cache.entry("/music/Beta.flac")->size_bytes == 20);
   REQUIRE(cache.remove_entry("/music/Beta.flac")); REQUIRE_FALSE(cache.entry("/music/Beta.flac"));
 }
+TEST_CASE("SQLite cache invalidates one active identity without deleting its source") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("run", key);
+  REQUIRE(cache.publish("run", key, "result", {}, [] { return true; }) == Publish::committed);
+  std::string result; REQUIRE(cache.find(key, result));
+  REQUIRE(cache.invalidate(key)); REQUIRE_FALSE(cache.find(key, result));
+  REQUIRE_FALSE(cache.invalidate(key));
+}
