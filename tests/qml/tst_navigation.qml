@@ -367,6 +367,7 @@ TestCase {
         verify(retry !== null)
         verify(retry.visible)
         compare(retry.Accessible.description, "Retry showing the native DJ overlay")
+        compare(retry.ToolTip.text, "Retry showing the native DJ overlay on the selected display")
         app.destroy()
         fakeOverlay.available = true
     }
