@@ -169,6 +169,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         row_categories = Counter()
         for error in matrix_errors + errors:
             if "hash mismatch" in error: row_categories["hash"] += 1
+            elif "scenario" in error or "artifact role" in error: row_categories["scenario"] += 1
             elif "missing artifact" in error or "missing manifest" in error: row_categories["retention"] += 1
             elif "stale" in error or "future" in error: row_categories["freshness"] += 1
             elif "path" in error or "escapes bundle" in error: row_categories["path"] += 1
@@ -235,6 +236,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     categories = Counter()
     for error in errors:
         if "hash mismatch" in error: categories["hash"] += 1
+        elif "scenario" in error or "artifact role" in error: categories["scenario"] += 1
         elif "escapes bundle" in error or "path" in error: categories["path"] += 1
         elif "stale" in error or "future" in error: categories["freshness"] += 1
         elif "missing artifact" in error or "missing manifest" in error: categories["retention"] += 1
