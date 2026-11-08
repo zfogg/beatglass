@@ -140,6 +140,16 @@ ApplicationWindow {
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
+        function onStatusChanged() {
+            if (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0) {
+                window.activeWorkerOutcomeAnnouncementKey = ""
+                window.persistedRecoveryOutcomeAnnouncementKey = ""
+                window.persistedRecoverySelectionActivated = false
+                if (typeof reopenStorage !== "undefined")
+                    reopenStorage.forceActiveFocus()
+                window.announceVisualizationRecovery("Storage is unavailable; reopen storage before retrying analysis recovery.")
+            }
+        }
         function onSelectedRunIdChanged() {
             window.persistedRecoverySelectionActivated = false
             window.persistedRecoveryOutcomeAnnouncementKey = ""
