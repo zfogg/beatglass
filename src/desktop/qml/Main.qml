@@ -321,6 +321,7 @@ ApplicationWindow {
                 objectName: "reduceMotion"
                 text: "Reduce motion"
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
+                Accessible.value: checked ? "enabled" : "disabled"
                 activeFocusOnTab: true
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
@@ -499,8 +500,8 @@ ApplicationWindow {
                         RowLayout {
                             Layout.fillWidth: true
                             Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
-                            SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
-                            SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
+                            SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
+                            SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
                             Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096) }
                             Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state"; Accessible.role: Accessible.StaticText; Accessible.description: text }
                             Label { text: window.playbackBridge ? window.playbackBridge.nativeError : ""; objectName: "nativePlaybackError"; Accessible.name: "Native playback error"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native playback error details"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
@@ -985,6 +986,7 @@ ApplicationWindow {
                         text: "Click through"; objectName: "clickThrough"
                         activeFocusOnTab: true
                         Accessible.name: checked ? "Disable click-through" : "Enable click-through"
+                        Accessible.value: checked ? "enabled" : "disabled"
                         Accessible.role: Accessible.CheckBox
                         Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled")
                         ToolTip.text: "Toggle pointer click-through for the overlay"
@@ -1000,7 +1002,7 @@ ApplicationWindow {
                     }
                     Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
                     Label { text: "Opacity" }
-                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
+                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                     Connections {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge) overlayOpacityControl.value = window.overlayBridge.opacity }
