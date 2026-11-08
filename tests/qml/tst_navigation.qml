@@ -204,6 +204,7 @@ TestCase {
         compare(findChild(app, "playbackChannels").Accessible.name, "Playback channels")
         verify(findChild(app, "nativePlaybackState") !== null)
         verify(findChild(app, "nativePlaybackError") !== null)
+        verify(findChild(app, "retryNativePlayback") !== null)
     }
 
     function test_frameSeekUsesPlaybackBridge() {
