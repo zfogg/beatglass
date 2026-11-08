@@ -198,7 +198,7 @@ ApplicationWindow {
                     Accessible.name: "Overlay recovery hint"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
-                    ToolTip.text: "Library catalog status"
+                    ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: "white"; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
@@ -412,6 +412,7 @@ ApplicationWindow {
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                     Accessible.name: "Library catalog status: " + text
+                    ToolTip.text: "Library catalog status"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Current catalog result count"
