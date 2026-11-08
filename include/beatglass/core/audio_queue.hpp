@@ -11,14 +11,17 @@ namespace beatglass {
 // One producer and one consumer. Slots are allocated with the queue. A failed
 // push drops the entire block; the next successful push reports discontinuity.
 // The producer must not be called concurrently, including during shutdown.
-/** Bounded preallocated single-producer, single-consumer queue. One slot is reserved; the producer must not run concurrently, including shutdown. A rejected block is dropped and the next successful push marks a discontinuity. Atomics must be lock-free. */
+/// Bounded preallocated single-producer, single-consumer queue. One slot is
+/// reserved; the producer must not run concurrently, including shutdown. A
+/// rejected block is dropped and the next successful push marks a
+/// discontinuity. Atomics must be lock-free.
 template<std::size_t Slots, std::size_t MaxSamples> class AudioQueue {
   static_assert(Slots >= 2 && MaxSamples > 0);
   static_assert(std::atomic<std::size_t>::is_always_lock_free &&
                 std::atomic<std::uint64_t>::is_always_lock_free,
                 "Audio callback requires lock-free atomics");
 public:
-/** Consumer-owned copy of one block, including sample count and timing. */
+/// Consumer-owned copy of one block, including sample count and timing.
   struct Block {
     AudioFormat format{};
     std::uint64_t epoch{}, first_frame{};
@@ -27,11 +30,11 @@ public:
     std::size_t sample_count{};
     std::array<float, MaxSamples> samples{};
   };
-/** Copy a block on the producer thread. Reject invalid, oversized, full-queue,
- * zero-epoch, or overflowing-frame-range input; count complete frames from a
- * rejected block as dropped (with saturating accounting) and mark the next
- * accepted block discontinuous. The callback-safe path performs no allocation,
- * blocking, logging, or callbacks. */
+/// Copy a block on the producer thread. Reject invalid, oversized, full-queue,
+/// zero-epoch, or overflowing-frame-range input; count complete frames from a
+/// rejected block as dropped (with saturating accounting) and mark the next
+/// accepted block discontinuous. The callback-safe path performs no allocation,
+/// blocking, logging, or callbacks.
   bool push(const AudioBlock& input) noexcept {
     const auto frames = input.format.channels ? input.samples.size() / input.format.channels : 0;
     const auto write = write_.load(std::memory_order_relaxed);
@@ -53,9 +56,9 @@ public:
     return true;
   }
   // Copies into consumer-owned storage; no slot pointer escapes.
-/** Copy the next block into consumer-owned storage; return false if empty.
- * The destination is fully overwritten only on success; an empty queue leaves
- * the caller's output object unchanged. */
+/// Copy the next block into consumer-owned storage; return false if empty.
+/// The destination is fully overwritten only on success; an empty queue leaves
+/// the caller's output object unchanged.
   bool pop(Block& out) noexcept {
     const auto read = read_.load(std::memory_order_relaxed);
     if (read == write_.load(std::memory_order_acquire)) return false;
@@ -63,7 +66,7 @@ public:
     read_.store((read + 1) % Slots, std::memory_order_release);
     return true;
   }
-/** Return the cumulative number of complete frames counted in rejected blocks. */
+/// Return the cumulative number of complete frames counted in rejected blocks.
   std::uint64_t dropped_frames() const noexcept { return dropped_.load(std::memory_order_relaxed); }
 private:
   std::array<Block, Slots> slots_{};
