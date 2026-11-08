@@ -336,12 +336,7 @@ ApplicationWindow {
                             Accessible.name: "Analysis and playback status"
                             Accessible.description: text
                         }
-                        RowLayout { Layout.fillWidth: true
-                            Button { text: "Start analysis"; objectName: "startAnalysis"; Accessible.description: "Start analysis for the selected source"; enabled: analysisJob && analysisJob.status === "Queued"; onClicked: analysisJob.start() }
-                            Button { text: "Cancel"; objectName: "cancelAnalysis"; Accessible.description: "Cancel the running analysis job"; enabled: analysisJob && analysisJob.status === "Running"; onClicked: analysisJob.cancel() }
-                            Button { text: "Retry"; objectName: "retryAnalysis"; Accessible.description: "Retry cancelled or failed analysis"; enabled: analysisJob && (analysisJob.status === "Cancelled" || analysisJob.status === "Failed"); onClicked: analysisJob.retry() }
-                            Label { text: analysisJob ? "Analysis frames processed: " + analysisJob.frames : "Analysis unavailable"; objectName: "analysisProgress"; Accessible.name: "Analysis progress"; Accessible.description: text }
-                        }
+                        Label { text: analysisJob ? "Analysis frames processed: " + analysisJob.frames : "Analysis unavailable"; objectName: "analysisProgress"; Accessible.name: "Analysis progress"; Accessible.description: text; Layout.fillWidth: true }
                     }
                 }
             }
