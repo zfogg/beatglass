@@ -33,6 +33,7 @@ manifest_display_ref=$(sed -n 's/^display_topology=//p' "$manifest")
 manifest_audio_ref=$(sed -n 's/^audio_inventory=//p' "$manifest")
 [[ "$manifest_display_ref" == "display-topology.json" && "$manifest_audio_ref" == "audio-endpoints.json" ]] || { echo "manifest machine evidence links are unexpected" >&2; exit 1; }
 expected_cases=(permission_prompt capture_nonzero_timestamp permission_revoke_recovery output_switch_uid fifo_exhaustion_recovery overlay_visibility overlay_click_through_recovery overlay_display_change overlay_fullscreen_spaces menubar_dock_reopen)
+declare -A evidence_seen=()
 mapfile -t case_lines < "$case_matrix"
 [[ "${case_lines[0]:-}" == $'case_id\tstatus\tevidence' ]] || { echo "invalid qualification case matrix header" >&2; exit 1; }
 [[ "${#case_lines[@]}" -eq 11 ]] || { echo "expected exactly ten qualification cases" >&2; exit 1; }
@@ -49,6 +50,8 @@ for i in "${!expected_cases[@]}"; do
     esac
     [[ -s "$evidence_path" ]] || { echo "missing or empty evidence file for $case_id: $evidence" >&2; exit 1; }
     [[ ! -L "$evidence_path" ]] || { echo "evidence must not be a symlink: $evidence" >&2; exit 1; }
+    [[ -z "${evidence_seen[$evidence_path]:-}" ]] || { echo "duplicate PASS evidence path: $evidence" >&2; exit 1; }
+    evidence_seen[$evidence_path]=1
   fi
 done
 command -v shasum >/dev/null 2>&1 || { echo "shasum is required" >&2; exit 1; }
