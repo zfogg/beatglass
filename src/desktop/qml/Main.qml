@@ -1498,7 +1498,10 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined"
                                 enabled: visible && storageRecovery.selectedRunId !== ""
                                 text: "Discard saved run"
-                                Accessible.name: "Discard saved retryable analysis run"
+                                Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                    ? "Discard saved retryable analysis run " + storageRecovery.selectedRunId
+                                    : "Discard saved retryable analysis run"
+                                Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
                                 ToolTip.text: "Discard the selected saved analysis run"
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
                                 onClicked: discardRecoveryDialog.open()
@@ -1521,7 +1524,9 @@ ApplicationWindow {
                                         ? "This removes only retry record " + storageRecovery.selectedRunId + ". The source audio file is not changed."
                                         : "This removes only the retry record. The source audio file is not changed."
                                     wrapMode: Text.WordWrap
-                                    Accessible.name: "Discard retryable run confirmation"
+                                    Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                        ? "Discard retryable run " + storageRecovery.selectedRunId + " confirmation"
+                                        : "Discard retryable run confirmation"
                                     Accessible.description: "The selected retry record will be removed; source audio remains unchanged."
                                     Accessible.role: Accessible.StaticText
                                 }
