@@ -41,6 +41,9 @@ def validate(report: dict) -> list[str]:
         errors.append("support_language must remain experimental")
     if report.get("native_qualification_required") is not True:
         errors.append("native_qualification_required must be true")
+    if not isinstance(report.get("handoff_check_errors"), list) or not all(
+            isinstance(error, str) and error for error in report.get("handoff_check_errors", [])):
+        errors.append("handoff_check_errors must be a list of nonempty strings")
     if report.get("exit_gate_status") not in {"PENDING", "READY"}:
         errors.append("exit_gate_status must be PENDING or READY")
     reason_codes = report.get("exit_gate_reason_codes")

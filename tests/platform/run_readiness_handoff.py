@@ -20,13 +20,14 @@ readiness = _load("check_evidence_readiness")
 
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168) -> list[str]:
     report = generator.build_report(bundles)
-    errors = validator.validate(report)
+    errors = []
     if status is not None:
         readiness_errors = readiness.check(status, bundles, max_age_hours)
         report["handoff_check_errors"] = readiness_errors
         errors.extend(readiness_errors)
     else:
         report["handoff_check_errors"] = []
+    errors.extend(validator.validate(report))
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return errors

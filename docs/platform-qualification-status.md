@@ -192,3 +192,5 @@ Artifact diagnostic inventories sort paths by their string representation, so mi
 The lightweight readiness check also normalizes null or non-list artifact/scenario containers before iteration, matching report generation and preserving verifier contract errors rather than raising.
 
 The end-to-end local handoff command is `python tests/platform/run_readiness_handoff.py <retained-bundle-root> <report.json> --status docs/platform-qualification-status.md`. It generates the conservative report, validates the same JSON contract consumed by readiness tooling, checks retained bundles against the documented platform matrix, and records any `handoff_check_errors` in the report artifact itself. A structurally valid result remains `PENDING` until native desktop/audio/overlay evidence is reviewed; incomplete scenarios intentionally produce a nonzero result.
+
+`handoff_check_errors` is a required report field: it is always a list of nonempty strings (possibly empty when no status matrix was supplied), so consumers can distinguish a validated handoff artifact from one whose readiness checks were never recorded.
