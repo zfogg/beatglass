@@ -116,6 +116,7 @@ def main() -> int:
         "metadata retry button role": "objectName: \"retryMetadata\"\n                            text: \"Retry metadata\"\n                            visible:",
         "folder browser selection value": "objectName: \"browser\"",
         "folder item semantics": "Accessible.name: fileName + (fileIsDir ? \", folder\" : \", audio file\")",
+        "folder item action tooltip": "ToolTip.text: fileIsDir ? \"Open folder \" + fileName : \"Select audio file \" + fileName",
         "catalog status values": "objectName: \"catalogStatus\"",
         "folder path current value": "objectName: \"folderPath\"",
         "folder browser list role": "objectName: \"browser\"",
