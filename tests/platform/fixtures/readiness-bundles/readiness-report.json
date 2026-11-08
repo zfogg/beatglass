@@ -9,6 +9,7 @@
   ],
   "ready": false,
   "handoff_check_errors": [],
+  "documentation_check_errors": [],
   "platform_support_status": [
     {
       "platform": "windows",

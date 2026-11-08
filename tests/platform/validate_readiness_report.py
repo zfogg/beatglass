@@ -44,6 +44,9 @@ def validate(report: dict) -> list[str]:
     if not isinstance(report.get("handoff_check_errors"), list) or not all(
             isinstance(error, str) and error for error in report.get("handoff_check_errors", [])):
         errors.append("handoff_check_errors must be a list of nonempty strings")
+    if not isinstance(report.get("documentation_check_errors"), list) or not all(
+            isinstance(error, str) and error for error in report.get("documentation_check_errors", [])):
+        errors.append("documentation_check_errors must be a list of nonempty strings")
     if report.get("exit_gate_status") not in {"PENDING", "READY"}:
         errors.append("exit_gate_status must be PENDING or READY")
     reason_codes = report.get("exit_gate_reason_codes")

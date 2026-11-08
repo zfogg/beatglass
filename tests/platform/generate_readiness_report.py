@@ -106,7 +106,8 @@ def build_report(root: Path) -> dict:
             "native_qualification_required": True, "exit_gate_status": "PENDING",
             "exit_gate_reason_codes": ["native_qualification_required", "generated_report_pending_review"],
             "ready": False, "platform_support_status": status, "platforms": rows,
-            "generation_errors": generation_errors}
+            "generation_errors": generation_errors, "handoff_check_errors": [],
+            "documentation_check_errors": []}
 
 
 def main() -> int:
