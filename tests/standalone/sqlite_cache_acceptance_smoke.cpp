@@ -47,6 +47,12 @@ int main() {
     try { cache.begin("empty-mode", CacheKey{key.content, key.engine, key.config, ""}); }
     catch (const std::invalid_argument&) { empty_mode_rejected = true; }
     assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected && long_content_rejected && long_engine_rejected && long_mode_rejected && invalid_mode_rejected && empty_engine_rejected && empty_config_rejected && empty_mode_rejected);
+    const CacheKey live_key{key.content, key.engine, key.config, "live"};
+    cache.begin("live-result", live_key);
+    assert(cache.publish("live-result", live_key, "live-data", {}, [] { return true; }) == Publish::committed);
+    std::string live_result;
+    assert(cache.find(live_key, live_result) && live_result == "live-data");
+    assert(!cache.find(key, live_result));
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
