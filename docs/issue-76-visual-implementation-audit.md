@@ -437,3 +437,5 @@ External theme preference changes now explicitly request a visualization repaint
 The visualization keyboard focus ring now uses the active theme accent token, keeping focus visibility aligned with the selected palette instead of a fixed blue highlight.
 
 Waveform and FFT mode controls now use the same theme accent for active focus and the theme foreground for their resting border, keeping keyboard mode navigation visually consistent with the canvas focus ring across all six palettes.
+
+Selected waveform and FFT controls now use a derived darker accent fill, while unselected controls use the active theme surface. This preserves mode hierarchy and contrast as the user changes palettes.
