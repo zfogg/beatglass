@@ -35,6 +35,7 @@ public:
   /** Submit a bounded batch and retain each accepted operation for retry. */
   int submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority = 0);
   Q_INVOKABLE void cancelBatch();
+  /** Retry terminal batch jobs and immediately publish the refreshed aggregate state. */
   Q_INVOKABLE void retryBatch();
   int batchAcceptedCount() const noexcept { return batchAccepted_; }
   int batchRejectedCount() const noexcept { return batchRejected_; }

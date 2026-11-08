@@ -95,7 +95,7 @@ void AnalysisJobBridge::retry() {
     frames_ = retryable_->frames();
     emit progressChanged();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
-    status_ = QStringLiteral("Queued"); poll_timer_.start(); emit statusChanged();
+    status_ = QStringLiteral("Queued"); poll_timer_.start(); emit statusChanged(); poll();
   }
 }
 
@@ -140,7 +140,7 @@ void AnalysisJobBridge::retryBatch() {
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
     batchResultsPublished_ = 0; batchLastResult_.clear();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
-    poll_timer_.start(); emit statusChanged();
+    poll_timer_.start(); emit statusChanged(); poll();
   }
 }
 
