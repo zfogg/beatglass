@@ -229,6 +229,8 @@ ApplicationWindow {
             if (!window.overlayBridge)
                 return
             if (!window.overlayBridge.available) {
+                window.overlayOpacityEditInFlight = false
+                window.overlayPendingOpacity = -1
                 window.overlayDisplayRecoveryPending = true
                 window.announceCaptureRecoveryState("Overlay actions disabled; control-window fallback remains available until the native overlay recovers.")
                 window.overlayWasVisibleBeforeAvailabilityLoss = djOverlay.visible
@@ -236,6 +238,8 @@ ApplicationWindow {
                     window.hideOverlayAndRestoreControls()
             } else {
                 window.syncOverlaySettingsFromBridge()
+                window.overlayOpacityEditInFlight = false
+                window.overlayPendingOpacity = -1
                 window.announceCaptureRecoveryState("Overlay actions restored; native display settings are available.")
                 if (window.overlayWasVisibleBeforeAvailabilityLoss) {
                     window.overlayWasVisibleBeforeAvailabilityLoss = false
