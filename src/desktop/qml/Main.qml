@@ -1118,7 +1118,8 @@ ApplicationWindow {
                                 objectName: "analysisQueueProgress"
                                 visible: window.analysisJobBridge !== null
                                 text: visible ? ("Queue state: " + window.analysisJobBridge.status + " · frames " + window.analysisJobBridge.frames
-                                      + (window.analysisJobBridge.canRetry ? " · retry available" : "")) : ""
+                                      + (window.analysisJobBridge.canRetry ? " · retry available" : "")
+                                      + (typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== "" ? (" · recovery: " + storageRecovery.analysisError) : "")) : ""
                                 Accessible.name: "Analysis queue progress"
                                 Accessible.description: visible ? text : "Analysis queue progress is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
