@@ -226,6 +226,12 @@ ApplicationWindow {
                 && visualizationPresentation.clear)
             visualizationPresentation.clear()
     }
+    function visualizationPositionToFrame(position, durationFrames) {
+        if (!isFinite(position) || !isFinite(durationFrames) || durationFrames < 0)
+            return -1
+        const clamped = Math.max(0, Math.min(1, position))
+        return Math.min(durationFrames, Math.floor(clamped * durationFrames))
+    }
     Connections {
         target: window.liveBridge
         function onStatusChanged() {
