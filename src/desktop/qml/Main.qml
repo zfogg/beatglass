@@ -317,7 +317,7 @@ ApplicationWindow {
                 Accessible.value: currentText
                 Accessible.name: "Color theme"
                 Accessible.description: "Choose one of six color themes for the Beatglass desktop; current theme " + currentText
-                ToolTip.text: "Choose a color theme"
+                ToolTip.text: "Choose a color theme; current theme: " + currentText
                 onActivated: {
                     window.selectedThemeIndex = currentIndex
                     window.selectedTheme = currentText
@@ -334,7 +334,7 @@ ApplicationWindow {
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
-                ToolTip.text: "Toggle reduced motion for animations and transitions"
+                ToolTip.text: checked ? "Reduced motion is enabled; disable to restore transitions" : "Enable reduced motion to minimize animation and transitions"
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
             }
             Button {

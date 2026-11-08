@@ -338,6 +338,8 @@ def main() -> int:
         "brand heading guidance": "Accessible.name: \"Beatglass\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Beatglass desktop audio workspace\"",
         "primary navigation guidance": "objectName: \"navigation\"\n                Layout.fillWidth: true\n                Accessible.name: \"Primary navigation\"",
         "reduce motion guidance": "Accessible.name: \"Reduce motion\"\n                Accessible.role: Accessible.CheckBox\n                Accessible.description: \"Reduce animation and transition effects in the desktop presentation; currently \"",
+        "theme dynamic guidance": "ToolTip.text: \"Choose a color theme; current theme: \" + currentText",
+        "reduce motion dynamic guidance": "ToolTip.text: checked ? \"Reduced motion is enabled; disable to restore transitions\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
         "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",
