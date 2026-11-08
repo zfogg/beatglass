@@ -9,6 +9,9 @@ class StorageRecoveryBridge::Worker final : public QObject {
   Q_OBJECT
 public slots:
   void open(QString path) {
+    // Clear the previous database's selection before asynchronous transition work begins.
+    emit runsChanged({}, {});
+    emit analysis(QStringLiteral("Analysis idle"));
     beatglass::library::StorageConfig config{path.toStdString()};
     std::string diagnostic;
     const bool ok = coordinator_.open_storage(config, &diagnostic);
