@@ -54,6 +54,7 @@ def main() -> int:
         "library detail status roles": "objectName: \"selectedAudioName\"",
         "analysis status roles": "objectName: \"analysisProgress\"",
         "visual status roles": "objectName: \"visualizationLoadState\"",
+        "recovery status roles": "objectName: \"playbackSeekLimitation\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
