@@ -591,6 +591,11 @@ TestCase {
         verify(guidance.text.length > 20)
          if (Qt.platform.os === "osx") verify(guidance.text.indexOf("14.2") >= 0)
         compare(findChild(app, "settingsStatus").text, "Settings are saved for this desktop profile. User audio files are never modified.")
+        let appearance = findChild(app, "appearanceState")
+        verify(appearance !== null)
+        compare(appearance.text, "Theme: Light · Motion: full")
+        fakeThemePreferences.reduceMotion = true
+        tryCompare(appearance, "text", "Theme: Light · Motion: reduced")
         app.destroy()
     }
     function test_themeSelectorOffersAllSixThemes() {
