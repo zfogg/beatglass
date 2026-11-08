@@ -181,7 +181,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Label { text: "Beatglass · " + window.liveBridge.status; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight }
                     Button {
-                        text: "×"; Accessible.name: "Hide overlay"
+                        text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.description: "Hide the overlay window and restore the control window"
                         visible: window.overlayBridge && !window.overlayBridge.clickThrough
                         onClicked: window.overlayBridge.hideOverlay()
                     }
