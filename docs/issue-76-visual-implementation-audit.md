@@ -253,3 +253,5 @@ Appearance reset and theme-preview choices now explicitly participate in keyboar
 The settings output-device surface now exposes a contextual tooltip that mirrors its accessible value, keeping unavailable/default-device guidance discoverable for keyboard, assistive-technology, and pointer users.
 
 Appearance-state and settings-persistence summaries now expose contextual tooltips as well, making theme/motion state and the user-audio safety promise discoverable through the same visual and semantic channel.
+
+Output-endpoint empty, unavailable-build, and recovery guidance now expose dedicated tooltips matching their accessible descriptions, keeping device-discovery recovery actionable across visual and assistive interfaces.

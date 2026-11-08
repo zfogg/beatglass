@@ -1161,6 +1161,7 @@ ApplicationWindow {
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
+                                ToolTip.text: "No output endpoint is available; refresh after connecting a device"
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -1173,6 +1174,7 @@ ApplicationWindow {
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
+                                ToolTip.text: "Output endpoint discovery is unavailable in this build"
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
@@ -1184,6 +1186,7 @@ ApplicationWindow {
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
+                                ToolTip.text: "Connect an output device and refresh endpoint discovery"
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
