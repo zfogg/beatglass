@@ -108,6 +108,17 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "persistedRecoveryDiscardShortcut"
+        sequence: "Ctrl+Shift+D"
+        context: Qt.ApplicationShortcut
+        enabled: typeof storageRecovery !== "undefined"
+            && storageRecovery.selectedRunId !== ""
+        onActivated: {
+            discardPersistedRecoveryButton.forceActiveFocus()
+            window.announceVisualizationRecovery("Persisted recovery discard focused; press Enter to review the confirmation dialog.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationWaveformShortcut"
         sequence: "Ctrl+1"
         context: Qt.ApplicationShortcut
