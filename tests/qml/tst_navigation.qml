@@ -192,6 +192,8 @@ TestCase {
         compare(findChild(app, "playbackPosition").Accessible.name, "Playback position")
         compare(findChild(app, "playbackState").Accessible.name, "Playback state")
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
+        compare(findChild(app, "playbackSampleRate").ToolTip.text, "Choose the native playback sample rate in hertz")
+        compare(findChild(app, "playbackChannels").ToolTip.text, "Choose the native playback channel count")
         compare(findChild(app, "startNativePlayback").Accessible.description, "Native playback is unavailable in this build")
         compare(findChild(app, "playbackDevice").ToolTip.text, "Choose the output device used for native playback")
         compare(findChild(app, "openPlayback").Accessible.description, "Select an audio source before opening playback")
