@@ -676,6 +676,8 @@ Explicit hide/unhide now tracks user intent separately from monitor-loss recover
 
 On relaunch, native bridge synchronization explicitly marks an “launch fallback active” state when the overlay bridge or display list is unavailable. The control window remains the discoverable fallback until a native target returns; a successful synchronization clears the launch fallback marker.
 
+The overlay action group now surfaces both launch fallback and explicit hidden-by-user state, so the primary Show/Restore/Reapply/Hide controls remain understandable even when the native overlay is unavailable or intentionally hidden.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.

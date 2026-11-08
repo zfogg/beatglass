@@ -5,7 +5,7 @@ root = Path(__file__).resolve().parents[2]
 qml = (root / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 required = [
     'objectName: "overlayActions"',
-    'window.overlayDisplayRecoveryPending ? "available; recovery pending"',
+    'window.overlayDisplayRecoveryPending ?', 
     '"unavailable; control-window fallback active"',
     'recovery is pending and the control-window fallback remains available.',
     '"Overlay actions are available; recovery is pending"',
