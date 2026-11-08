@@ -44,7 +44,7 @@ public:
    * @return False if inactive or generation space is exhausted.
    */
   bool discontinuity(std::uint64_t epoch) noexcept {
-    if (!active() || !advance()) return false;
+    if (!active() || !epoch || !advance()) return false;
     epoch_ = epoch; state_ = TrackingState::reacquiring; return true;
   }
   /** Mark silence and invalidate prior estimates once per period. */
