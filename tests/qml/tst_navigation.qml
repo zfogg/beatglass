@@ -340,6 +340,18 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlayDisplayEmptyStateIsAccessible() {
+        fakeOverlay.screenNames = []
+        let app = shellWithOverlay.createObject(null)
+        let empty = findChild(app, "overlayDisplayEmptyState")
+        verify(empty !== null)
+        verify(empty.visible)
+        compare(empty.text, "No displays are available for the overlay.")
+        compare(empty.Accessible.name, "Overlay display empty state")
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+    }
+
     function test_visualizationCanvasIsAccessible() {
         let app = shell.createObject(null)
         let canvas = findChild(app, "visualizationCanvas")

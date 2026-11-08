@@ -848,6 +848,13 @@ ApplicationWindow {
                         Layout.fillWidth: true
                     }
                     Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display"; Accessible.description: text }
+                    Label {
+                        objectName: "overlayDisplayEmptyState"
+                        visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
+                        text: "No displays are available for the overlay."
+                        Accessible.name: "Overlay display empty state"
+                        Accessible.description: text
+                    }
                     Label { text: "Size" }
                     ComboBox {
                         objectName: "overlaySize"
