@@ -45,19 +45,19 @@ public:
 class ByteCursor {
 public:
   /** Borrow a source and begin at byte zero. */
-  explicit ByteCursor(ByteSource& source) noexcept : source_(source) {}
+  explicit ByteCursor(ByteSource& source) : source_(source), snapshot_size_(source.size()) {}
   /** Current byte offset. */
   std::uint64_t position() const noexcept { return position_; }
   /** Seek to an absolute byte offset through EOF; reject offsets beyond EOF. */
   bool seek(std::uint64_t offset) {
-    if (offset > source_.size()) return false;
+    if (offset > snapshot_size_) return false;
     position_ = offset; return true;
   }
   /** Seek by a signed displacement from begin, current position or EOF.
    * Reject underflow, overflow and positions past EOF without changing position.
    */
   bool seek_relative(std::int64_t displacement, ByteSeekOrigin origin) {
-    const auto size = source_.size();
+    const auto size = snapshot_size_;
     std::uint64_t base;
     switch (origin) {
       case ByteSeekOrigin::begin: base = 0; break;
@@ -87,7 +87,7 @@ public:
   ByteReadResult read(std::span<std::byte> buffer, std::stop_token cancel = {}) {
     if (cancel.stop_requested()) return {ByteReadStatus::cancelled, 0};
     if (buffer.empty()) return {ByteReadStatus::error, 0};
-    const auto size = source_.size();
+    const auto size = snapshot_size_;
     if (position_ > size) return {ByteReadStatus::error, 0};
     if (position_ == size) return {ByteReadStatus::end, 0};
     auto result = source_.read_at(position_, buffer, cancel);
@@ -100,6 +100,7 @@ public:
   }
 private:
   ByteSource& source_;
+  const std::uint64_t snapshot_size_;
   std::uint64_t position_{};
 };
 }
