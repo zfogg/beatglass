@@ -73,4 +73,13 @@ int main() {
   try { FileReader reader(unsupported_aac, 1); }
   catch (const FileOpenError& error) { aac_classified = error.kind() == FileOpenErrorKind::unsupported_format; }
   assert(aac_classified);
+  const auto empty_wav = std::filesystem::temp_directory_path() / "beatglass-reader-empty.wav";
+  { std::ofstream empty(empty_wav, std::ios::binary); }
+  bool empty_rejected = false;
+  try { FileReader reader(empty_wav, 2); }
+  catch (const FileOpenError& error) {
+    empty_rejected = error.kind() == FileOpenErrorKind::unreadable || error.kind() == FileOpenErrorKind::invalid_format;
+  }
+  assert(empty_rejected);
+  std::filesystem::remove(empty_wav, cleanup);
 }
