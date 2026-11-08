@@ -477,6 +477,16 @@ ApplicationWindow {
                                 Accessible.description: text
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Label {
+                                objectName: "analysisBatchStatus"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount !== undefined
+                                text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount
+                                      + " · rejected " + window.analysisJobBridge.batchRejectedCount
+                                      + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")) : ""
+                                Accessible.name: "Batch analysis queue status"
+                                Accessible.description: visible ? text : "Batch queue status is unavailable until the analysis bridge reports it."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
                             Button {
                                 text: "Retry analysis"
                                 objectName: "retryAnalysis"
