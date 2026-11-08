@@ -862,6 +862,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisAdmissionStatus"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
+                                text: visible ? ("Analysis admission: " + storageRecovery.analysisStatus) : ""
+                                Accessible.name: "Analysis admission status"
+                                Accessible.description: visible ? text : "Analysis admission status is unavailable."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisCacheStatus"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.cachedResult !== undefined
                                 text: visible ? (storageRecovery.cacheHit ? "Cached analysis ready" : "No cached analysis for the requested identity") : ""
