@@ -333,3 +333,5 @@ The selected-audio details column now sits inside an explicitly named panel grou
 The overlay’s live evidence surface now exposes one grouped semantic boundary for its header state, tempo/harmony estimates, capture status, recovery hint, and retry action. The group reports the current capture state and provides a single entry tooltip before users navigate its dynamic evidence.
 
 The live visualization canvas now declares graphic semantics in addition to its mode/position value, and its empty state provides a direct availability/next-action tooltip. This aligns the interactive rendered surface and its no-data state for keyboard and assistive navigation.
+
+The live visualization canvas now supports Escape as a keyboard recovery action that clears the selected position, and both its accessible description and tooltip document that path alongside Left/Right/Home/End navigation. This keeps selection state reversible without requiring pointer input or a separate button.
