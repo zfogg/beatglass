@@ -211,7 +211,10 @@ int main() {
     assert(!cache.invalidate(cancelled_key));
     const auto cancelled_runs = cache.retryable_runs();
     assert(cancelled_runs.size() == 1 && cancelled_runs.front().id == "cancelled");
-    assert(cache.discard_retryable("cancelled"));
+    assert(cache.publish("cancelled", cancelled_key, "recovered-cancelled", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(cancelled_key, result) && result == "recovered-cancelled");
+    assert(cache.invalidate(cancelled_key));
+    assert(!cache.discard_retryable("cancelled"));
     assert(!cache.find(CacheKey{key.content, key.engine, "config-b", key.mode}, result));
     assert(!cache.find(CacheKey{"sha256:two", key.engine, key.config, key.mode}, result));
     cache.begin("z-retry", key);
