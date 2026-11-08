@@ -40,6 +40,8 @@ MARKERS = {
     "qml overlay saved display name": "overlayPreferredDisplayName",
     "qml overlay display name restore": "saved display target selected by name.",
     "qml overlay missing display recovery": 'objectName: "overlayMissingDisplayRecovery"',
+    "qml overlay forget display": 'objectName: "forgetUnavailableOverlayDisplay"',
+    "qml overlay forget announcement": "Saved overlay display cleared; choose an available display to restore monitoring.",
     "qml overlay target restoration": "saved display target selected by name.",
     "qml overlay click-through state": "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.",
     "qml overlay opacity state": "DJ overlay opacity set to ",
