@@ -722,6 +722,7 @@ ApplicationWindow {
                         id: waveformView
                         text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"
                         Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."
+                        ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
                         onClicked: visualizationCanvas.viewMode = "waveform"
                         background: Rectangle {
                             color: waveformView.checked ? "#273b5d" : "#182231"
@@ -734,6 +735,7 @@ ApplicationWindow {
                         id: spectrumView
                         text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"
                         Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."
+                        ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
                         onClicked: visualizationCanvas.viewMode = "spectrum"
                         background: Rectangle {
                             color: spectrumView.checked ? "#432c56" : "#182231"
