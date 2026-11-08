@@ -49,7 +49,7 @@ ApplicationWindow {
         sequence: "Escape"
         context: Qt.ApplicationShortcut
         onActivated: if (window.overlayBridge && window.overlayBridge.clickThrough)
-                         window.overlayBridge.setClickThrough(false)
+                         window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
         objectName: "playbackPauseShortcut"
@@ -163,6 +163,15 @@ ApplicationWindow {
             ? "DJ overlay relaunched at its persisted position and size."
             : "DJ overlay shown; output monitoring remains bound to the selected display.")
         window.hide()
+        return true
+    }
+    function unlockOverlayAndRestoreFocus() {
+        if (!window.overlayBridge || !window.overlayBridge.clickThrough)
+            return false
+        window.overlayBridge.setClickThrough(false)
+        window.announceCaptureRecoveryState("DJ overlay unlocked; keyboard and pointer interaction restored.")
+        if (typeof unlockOverlay !== "undefined")
+            unlockOverlay.forceActiveFocus()
         return true
     }
     function reapplyOverlaySettingsAndRestore() {
@@ -2004,7 +2013,7 @@ ApplicationWindow {
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Show the DJ overlay window"; ToolTip.text: "Show the DJ overlay and hide the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Restore overlay"; objectName: "restoreOverlay"; Accessible.name: "Restore DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore the DJ overlay using its persisted display, position, size, and opacity"; ToolTip.text: "Restore the overlay with persisted settings"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Reapply saved settings"; objectName: "reapplyOverlaySettings"; Accessible.name: "Reapply saved overlay settings"; Accessible.role: Accessible.Button; Accessible.description: "Reapply the saved display, position, size, and opacity before restoring the DJ overlay"; ToolTip.text: "Reapply saved overlay display, geometry, and opacity"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.reapplyOverlaySettingsAndRestore() }
-                    Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: { window.overlayBridge.setClickThrough(false); window.announceCaptureRecoveryState("DJ overlay unlocked; visualization recovery focus restored.") } }
+                    Button { id: unlockOverlay; text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.unlockOverlayAndRestoreFocus() }
                     Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
                     Button { text: "Quit Beatglass"; objectName: "quitBeatglass"; Accessible.name: "Quit Beatglass"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay and quit Beatglass while retaining persisted settings"; ToolTip.text: "Quit Beatglass and retain overlay settings"; onClicked: window.quitApplication() }
                 }

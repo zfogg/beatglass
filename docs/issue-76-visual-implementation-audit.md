@@ -654,4 +654,6 @@ The restore status now surfaces the native bridge's persisted display and opacit
 
 Reapply saved settings now performs the native display, geometry, and opacity calls before restoring the overlay, making the persisted-state path executable from Settings rather than informational only.
 
+Click-through unlock now shares one recovery function across the Escape shortcut and Settings button. It restores native pointer/keyboard interaction, announces the transition, and returns focus to the unlock control so the fallback remains keyboard-operable.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.

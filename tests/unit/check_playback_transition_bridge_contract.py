@@ -48,6 +48,8 @@ MARKERS = {
     "qml overlay restore fallback": "Persisted restore state unavailable; control-window fallback remains active.",
     "qml overlay reapply control": 'objectName: "reapplyOverlaySettings"',
     "qml overlay reapply announcement": "Persisted overlay display, geometry, and opacity reapplied.",
+    "qml overlay unlock helper": "function unlockOverlayAndRestoreFocus()",
+    "qml overlay unlock announcement": "DJ overlay unlocked; keyboard and pointer interaction restored.",
     "qml overlay relaunch geometry": "DJ overlay relaunched at its persisted position and size.",
     "qml overlay relaunch fallback": "DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.",
     "qml overlay restore affordance": 'objectName: "restoreOverlay"',
