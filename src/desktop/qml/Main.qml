@@ -681,6 +681,10 @@ ApplicationWindow {
                 Canvas {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
                     property string viewMode: "waveform"
+                    readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
+                        && (viewMode === "waveform"
+                            ? visualizationPresentation.waveform.length > 0
+                            : visualizationPresentation.spectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: 120
                     Accessible.name: "Live waveform and spectrum"
                     Accessible.description: visualizationCanvas.viewMode === "waveform"
@@ -708,8 +712,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "visualizationEmptyState"
-                    visible: typeof visualizationPresentation === "undefined"
-                        || (visualizationPresentation.waveform.length === 0 && visualizationPresentation.spectrum.length === 0)
+                    visible: !visualizationCanvas.modeHasData
                     text: window.liveBridge.status === "Stopped"
                         ? "Start monitoring to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
                         : "Waiting for captured audio data to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
