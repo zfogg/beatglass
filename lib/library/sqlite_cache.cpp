@@ -18,7 +18,7 @@ void validate_text(const std::string& value, const char* field, std::size_t maxi
 }
 void validate_collection_entry(const CollectionEntry& e) {
   validate_text(e.path, "path", 4096);
-  validate_text(e.name, "name", 1024);
+  validate_text(e.name, "name", kMaxCollectionNameBytes);
   validate_text(e.kind, "kind", 128);
   validate_text(e.fingerprint, "fingerprint", kMaxCollectionFingerprintBytes);
 }
