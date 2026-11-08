@@ -783,6 +783,7 @@ ApplicationWindow {
                     window.overlayDisplayRecoveryPending = true
                     window.overlayDisplaySelectionRequired = true
                     window.announceCaptureRecoveryState("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.")
+                    overlayDisplay.forceActiveFocus()
                 }
             else {
                 const savedNameIndex = window.overlayPreferredDisplayName !== ""
@@ -792,10 +793,12 @@ ApplicationWindow {
                     window.overlayPreferredScreenIndex = savedIndex
                     window.overlayDisplaySelectionRequired = false
                     window.recoverOverlayAfterDisplayChange()
+                    retryOverlay.forceActiveFocus()
                 } else {
                     window.overlayDisplaySelectionRequired = true
                     window.overlayDisplayRecoveryPending = true
                     window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.")
+                    overlayDisplay.forceActiveFocus()
                 }
             }
         }
