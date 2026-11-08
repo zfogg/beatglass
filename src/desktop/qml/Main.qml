@@ -79,6 +79,8 @@ ApplicationWindow {
                                                window.themePreferencesBridge.themeIndex))
             window.selectedThemeIndex = index
             window.selectedTheme = window.themeNames[index]
+            if (typeof visualizationCanvas !== "undefined")
+                visualizationCanvas.requestPaint()
         }
     }
     Connections {

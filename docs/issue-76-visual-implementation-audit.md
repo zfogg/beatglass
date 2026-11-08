@@ -431,3 +431,5 @@ The waveform and FFT canvas now consumes the active six-theme palette at render 
 The canvas also draws a low-contrast, foreground-derived three-row grid and resets its alpha before rendering data, giving each theme a consistent orientation cue without overpowering waveform, FFT bars, or the selection cursor.
 
 In compact headers the grid reduces to one center guide, matching the shorter canvas height and preserving data area for waveform/FFT content; full layouts retain the three-row grid.
+
+External theme preference changes now explicitly request a visualization repaint after updating the selected theme token, keeping the canvas synchronized when settings are restored or changed from another surface.
