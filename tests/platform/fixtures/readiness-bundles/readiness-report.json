@@ -242,6 +242,9 @@
     "manifest": 1
   },
   "failure_category_count_consistent": true,
+  "failure_category_platforms": {
+    "manifest": []
+  },
   "required_scenario_summary": [
     {
       "platform": "windows",
