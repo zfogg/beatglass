@@ -1231,6 +1231,7 @@ ApplicationWindow {
                     ToolTip.text: "Retry output monitoring for visualization data"
                     contentItem: Text { text: parent.text; color: window.themeBackgrounds[window.selectedThemeIndex]; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     background: Rectangle { color: window.themeAccentColors[window.selectedThemeIndex]; radius: 5 }
+                    Layout.minimumWidth: window.compactHeader ? 112 : 136
                     onClicked: {
                         window.captureMonitorBridge.start()
                         visualizationCanvas.forceActiveFocus()
