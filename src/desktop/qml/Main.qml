@@ -288,6 +288,7 @@ ApplicationWindow {
                             width: ListView.view.width
                             highlighted: ListView.isCurrentItem
                             Accessible.name: fileName + (fileIsDir ? ", folder" : ", audio file")
+                            Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
                             contentItem: RowLayout {
                                 Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true }
@@ -374,6 +375,15 @@ ApplicationWindow {
                         for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
+                }
+                Label {
+                    objectName: "visualizationStatus"
+                    text: typeof visualizationPresentation === "undefined"
+                          ? "Visualization unavailable"
+                          : "Waveform samples: " + visualizationPresentation.waveform.length + " · Spectrum bins: " + visualizationPresentation.spectrum.length
+                    Accessible.name: "Visualization data status"
+                    Accessible.description: text
+                    Layout.fillWidth: true
                 }
                 Label {
                     objectName: "visualizationDataStatus"

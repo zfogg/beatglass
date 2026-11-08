@@ -172,6 +172,7 @@ TestCase {
         let canvas = findChild(app, "visualizationCanvas")
         verify(canvas !== null)
         compare(canvas.Accessible.name, "Live waveform and spectrum")
+        compare(findChild(app, "visualizationStatus").Accessible.name, "Visualization data status")
         app.destroy()
     }
 
@@ -196,6 +197,11 @@ TestCase {
         let details = findChild(app, "detailsAvailability")
         verify(details !== null)
         compare(details.text, "Select an audio file to inspect its read-only details.")
+        app.destroy()
+    }
+    function test_libraryBrowserIsAccessible() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "browser").Accessible.name, "Folder contents")
         app.destroy()
     }
     function test_analysisControlsAreAccessible() {
