@@ -2553,8 +2553,8 @@ ApplicationWindow {
                     Accessible.name: "Overlay persisted restore state: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Restored overlay display and opacity, or the fallback state when native restore data is unavailable."
-                    ToolTip.text: "Persisted display and opacity restored by the native overlay bridge"
+                    Accessible.description: "Restored overlay display, size, and opacity, including whether recovery is pending, or the fallback state when native restore data is unavailable."
+                    ToolTip.text: "Persisted display, size, opacity, and recovery state from the native overlay bridge"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
