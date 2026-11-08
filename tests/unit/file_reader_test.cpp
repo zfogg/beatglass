@@ -185,6 +185,15 @@ TEST_CASE("file reader reports source mutation before explicit-epoch rewind") {
  CHECK_THROWS_WITH(reader.seek(0, 44), "Audio source changed during seek");
  CHECK_THROWS_WITH(reader.seek(0, 45), "File reader failed");
 }
+
+TEST_CASE("file reader keeps failure terminal across repeated explicit epoch seeks") {
+ WaveFixture fixture; FileReader reader(fixture.path, 34); std::array<float,2> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
+ CHECK_THROWS_WITH(reader.seek(0, 44), "Audio source changed during seek");
+ CHECK_THROWS_WITH(reader.seek(0, 45), "File reader failed");
+ CHECK_THROWS_WITH(reader.seek(0, 46), "File reader failed");
+}
 TEST_CASE("file reader rejects replacement at the original path") {
  WaveFixture fixture; FileReader reader(fixture.path, 24); std::array<float,2> samples{};
  const auto moved = fixture.path.string() + ".moved";
