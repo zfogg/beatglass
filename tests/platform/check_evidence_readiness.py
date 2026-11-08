@@ -189,6 +189,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     summary_consistent = (len(required) == len(rows) == len(provenance)
                           and [item["platform"] for item in required] == [row["platform"] for row in rows]
                           and [item["platform"] for item in provenance] == [row["platform"] for row in rows])
+    aggregate_consistent = (summary_consistent and platform_summary_consistent and failure_summary_consistent
+                            and len(required) == len(platform_failures))
     return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
@@ -199,7 +201,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
-            "ready": not errors and platform_summary_consistent and failure_summary_consistent and ready_platforms == len(rows)}
+            "aggregate_consistent": aggregate_consistent,
+            "ready": not errors and aggregate_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:

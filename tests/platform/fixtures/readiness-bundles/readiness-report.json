@@ -275,5 +275,6 @@
   "errors": [
     "status matrix must contain exactly Windows, macOS, and Linux rows"
   ],
+  "aggregate_consistent": false,
   "ready": false
 }
