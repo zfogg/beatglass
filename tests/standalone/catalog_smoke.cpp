@@ -66,6 +66,12 @@ int main() {
               hidden_source.entries[0].title == ".hidden" && hidden_source.entries[0].format == "MP3",
           "hidden source identity was not preserved");
   std::filesystem::remove(dir.path / ".hidden.mp3");
+  std::ofstream(dir.path / "mix.v2.mp3") << "audio";
+  const auto dotted_source = beatglass::library::browse(dir.path, "MIX.V2");
+  require(dotted_source.entries.size() == 1 && dotted_source.entries[0].title == "mix.v2" &&
+              dotted_source.entries[0].format == "MP3",
+          "multi-dot source identity was not preserved");
+  std::filesystem::remove(dir.path / "mix.v2.mp3");
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
   require(filtered.entries.empty(), "filter returned an unexpected entry");
