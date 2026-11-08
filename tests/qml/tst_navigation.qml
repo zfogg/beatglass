@@ -133,6 +133,7 @@ TestCase {
         verify(toggle !== null)
         compare(toggle.Accessible.description, "Start monitoring, or retry after a capture error.")
         verify(findChild(app, "captureStatus") !== null)
+        compare(findChild(app, "captureStatus").Accessible.name, "Capture monitor status")
         app.destroy()
     }
 
