@@ -11,6 +11,10 @@ case_matrix="$out_dir/qualification-cases.tsv"
 for key in commit macos_version architecture xcode_version sdk_version sdk_path developer_dir artifact_sha256; do
   grep -q "^${key}=." "$manifest" || { echo "manifest missing ${key}" >&2; exit 1; }
 done
+manifest_hash_ref=$(sed -n 's/^artifact_sha256=//p' "$manifest")
+[[ "$manifest_hash_ref" == "qualification-artifacts.sha256" ]] || { echo "manifest artifact_sha256 must point to qualification-artifacts.sha256" >&2; exit 1; }
+manifest_case_ref=$(sed -n 's/^case_matrix=//p' "$manifest")
+[[ "$manifest_case_ref" == "qualification-cases.tsv" ]] || { echo "manifest case_matrix must point to qualification-cases.tsv" >&2; exit 1; }
 expected_cases=(permission_prompt capture_nonzero_timestamp permission_revoke_recovery output_switch_uid fifo_exhaustion_recovery overlay_visibility overlay_click_through_recovery overlay_display_change overlay_fullscreen_spaces menubar_dock_reopen)
 mapfile -t case_lines < "$case_matrix"
 [[ "${case_lines[0]:-}" == $'case_id\tstatus\tevidence' ]] || { echo "invalid qualification case matrix header" >&2; exit 1; }
