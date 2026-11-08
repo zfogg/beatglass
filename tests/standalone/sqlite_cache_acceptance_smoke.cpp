@@ -20,7 +20,12 @@ int main() {
     bool empty_content_rejected = false;
     try { cache.begin("invalid-key", CacheKey{"", key.engine, key.config, key.mode}); }
     catch (const std::invalid_argument&) { empty_content_rejected = true; }
-    assert(empty_run_rejected && empty_content_rejected);
+    bool long_run_rejected = false;
+    try { cache.begin(std::string(4097, 'r'), key); } catch (const std::invalid_argument&) { long_run_rejected = true; }
+    bool long_config_rejected = false;
+    try { cache.begin("long-config", CacheKey{key.content, key.engine, std::string(4097, 'c'), key.mode}); }
+    catch (const std::invalid_argument&) { long_config_rejected = true; }
+    assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected);
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
