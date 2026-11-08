@@ -41,8 +41,8 @@ status](platform-qualification-status.md): [Linux plan](linux-qualification-plan
 
 ### Research and experiments
 
-Experimental work is intentionally separated from product commitments on the
-single [experimental research](experiments.md) page.
+Experimental work is intentionally separated from product commitments: [Essentia
+spike](essentia-spike.md) and [tonal experiment](tonal-experiment.md).
 
 ## Publishing and API reference
 
