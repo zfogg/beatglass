@@ -342,6 +342,7 @@ def main() -> int:
         "reduce motion dynamic guidance": "ToolTip.text: checked ? \"Reduced motion is enabled; disable to restore transitions\"",
         "appearance state dynamic guidance": "ToolTip.text: \"Current theme: \" + window.selectedTheme + \"; motion: \"",
         "reset appearance dynamic guidance": "Accessible.value: window.selectedTheme + \", \" + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? \"reduced motion\" : \"full motion\")",
+        "reset appearance dynamic description": "Accessible.description: \"Restore the default Light theme and turn off reduced motion. Current settings: \" + window.selectedTheme",
         "library heading guidance": "Accessible.name: \"Library\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Browse local audio files and folders\"",
         "library name column guidance": "Accessible.name: \"File name column\"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: \"Audio file or folder name\"",
         "theme preview grouping": "objectName: \"themePreviews\"\n                visible: !window.compactHeader\n                spacing: 3\n                Accessible.name: \"Theme previews\"",
