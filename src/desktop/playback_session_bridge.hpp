@@ -4,6 +4,10 @@
 #include <QString>
 #include <QUrl>
 #include <QStringList>
+#include <memory>
+#ifdef _WIN32
+#include "platform/windows_playback_session.hpp"
+#endif
 /** GUI-thread control bridge for the core playback seek/session contract. */
 class PlaybackSessionBridge final : public QObject {
   Q_OBJECT
@@ -23,6 +27,8 @@ public:
   int deviceId() const noexcept { return device_id_; }
   void setDeviceId(int id) noexcept { if (device_id_ != id) { device_id_ = id; emit changed(); } }
   Q_INVOKABLE void refreshDevices();
+  /** Start native playback with decoded source format and selected device. */
+  Q_INVOKABLE bool startNative(qulonglong epoch, int sampleRate, int channels, int maxSamples);
   Q_INVOKABLE bool open(qulonglong epoch);
   Q_INVOKABLE bool openSource(const QUrl& source, qulonglong epoch);
   Q_INVOKABLE bool replaceSource(const QUrl& source, qulonglong epoch);
@@ -36,4 +42,7 @@ private:
   QUrl source_;
   QStringList devices_;
   int device_id_{-1};
+#ifdef _WIN32
+  std::unique_ptr<beatglass::windows::WindowsPlaybackSession> native_;
+#endif
 };
