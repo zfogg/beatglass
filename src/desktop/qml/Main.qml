@@ -516,6 +516,10 @@ ApplicationWindow {
                             objectName: "browserEmptyState"
                             visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)
                             spacing: 8
+                            Accessible.name: "Library browser empty state"
+                            Accessible.role: Accessible.Grouping
+                            Accessible.description: "No folder entries are available; choose a folder to recover browsing."
+                            ToolTip.text: "Library browser empty or unavailable state"
                             Label {
                                 objectName: "browserEmptyMessage"
                                 text: window.browserEmptyMessage()

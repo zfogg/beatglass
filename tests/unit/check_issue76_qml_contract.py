@@ -351,6 +351,7 @@ def main() -> int:
         "catalog filtered results guidance": "Accessible.name: \"Catalog results: \" + text\n                    Accessible.value: text\n                    Accessible.role: Accessible.StaticText\n                    Accessible.description: text\n                    ToolTip.text: \"Current filtered catalog result count\"",
         "catalog result count identity": "objectName: \"catalogResultCount\"",
         "folder delegate child labels ignored": "Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.ignored: true }",
+        "browser empty grouping": "objectName: \"browserEmptyState\"\n                            visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)\n                            spacing: 8\n                            Accessible.name: \"Library browser empty state\"",
         "playback controls grouping": "objectName: \"playbackControls\"\n                            Layout.fillWidth: true\n                            Accessible.name: \"Playback controls\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
