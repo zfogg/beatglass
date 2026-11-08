@@ -87,6 +87,18 @@ TEST_CASE("path reader classifies AAC and M4A as unsupported instead of unreadab
   }
 }
 
+TEST_CASE("path reader classifies malformed known audio as invalid format") {
+  const auto path = std::filesystem::temp_directory_path() / "beatglass-malformed.wav";
+  { std::ofstream out(path, std::ios::binary); out << "not a wave"; }
+  try {
+    try { FileReader reader(path, 1); FAIL("malformed input opened"); }
+    catch (const FileOpenError& error) {
+      CHECK(error.kind() == FileOpenErrorKind::invalid_format);
+    }
+  } catch (...) { std::filesystem::remove(path); throw; }
+  std::filesystem::remove(path);
+}
+
 TEST_CASE("file source changes sample rate only across distinct epochs") {
  WaveFixture first_file(44100), second_file(48000); std::array<float,4> first_buffer{}, second_buffer{};
  FileReader first(first_file.path, 1), second(second_file.path, 2); StreamContinuity continuity;
