@@ -599,6 +599,7 @@ ApplicationWindow {
                             visible: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0
                             enabled: visible
                             Accessible.name: "Retry metadata"
+                            Accessible.role: Accessible.Button
                             Accessible.description: "Retry reading metadata for the selected audio source after an error."
                             onClicked: window.metadataBridge.inspect(window.selectedAudioUrl)
                         }
