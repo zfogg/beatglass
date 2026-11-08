@@ -42,7 +42,7 @@ def main() -> int:
         "visualization status role": "Accessible.name: \"Visualization data status\"",
         "selected visualization status role": "Accessible.name: \"Selected visualization data status: \" + text",
         "capture status role": "Accessible.name: \"Capture monitor status: \" + text",
-        "live monitoring status role": "Accessible.name: \"Live output monitoring\"",
+        "live monitoring status role": "Accessible.name: \"Live output monitoring: \" + text; Accessible.value: text",
         "metadata status role": "Accessible.name: \"Audio metadata status: \" + text",
         "current folder role": "Accessible.name: \"Current folder: \" + text",
         "visualization empty state": "visualizationEmptyState",
