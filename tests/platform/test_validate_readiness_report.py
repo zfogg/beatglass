@@ -31,6 +31,7 @@ class ReadinessReportContractTest(unittest.TestCase):
 
     def test_report_root_must_be_object(self):
         self.assertEqual(module.validate([]), ["readiness report must be a JSON object"])
+        self.assertEqual(module.validate_retained_files([], Path(".")), ["readiness report must be a JSON object"])
 
     def test_report_requires_platform_manifest_and_provenance_linkage(self):
         report = __import__("json").loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))

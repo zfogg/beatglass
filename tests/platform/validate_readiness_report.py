@@ -76,6 +76,8 @@ def validate(report: dict) -> list[str]:
 
 
 def validate_retained_files(report: dict, bundles: Path) -> list[str]:
+    if not isinstance(report, dict):
+        return ["readiness report must be a JSON object"]
     errors = []
     for row in report.get("platforms", []):
         platform = row.get("platform")
