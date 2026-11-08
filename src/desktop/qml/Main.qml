@@ -14,6 +14,7 @@ ApplicationWindow {
     property var metadataBridge: metadata
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
+    property var captureMonitorBridge: typeof captureMonitor !== "undefined" ? captureMonitor : null
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property url browseFolder: ""
@@ -341,6 +342,12 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring"; Accessible.description: text }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Button { text: "Start monitoring"; objectName: "startMonitoring"; enabled: window.captureMonitorBridge && window.captureMonitorBridge.status === "Stopped"; onClicked: window.captureMonitorBridge.start() }
+                    Button { text: "Stop monitoring"; objectName: "stopMonitoring"; enabled: window.captureMonitorBridge && window.captureMonitorBridge.status !== "Stopped"; onClicked: window.captureMonitorBridge.stop() }
+                    Label { text: window.captureMonitorBridge ? "Capture: " + window.captureMonitorBridge.status : "Capture unavailable"; objectName: "captureStatus" }
+                }
                 Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Canvas {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
