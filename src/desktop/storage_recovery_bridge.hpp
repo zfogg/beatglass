@@ -16,6 +16,7 @@ class StorageRecoveryBridge final : public QObject {
   Q_PROPERTY(bool cacheHit READ cacheHit NOTIFY cachedResultChanged)
   Q_PROPERTY(QString cachedResult READ cachedResult NOTIFY cachedResultChanged)
   Q_PROPERTY(QString analysisStatus READ analysisStatus NOTIFY analysisStatusChanged)
+  Q_PROPERTY(QString analysisResult READ analysisResult NOTIFY analysisResultChanged)
 public:
   explicit StorageRecoveryBridge(QObject* parent = nullptr);
   ~StorageRecoveryBridge() override;
@@ -31,9 +32,12 @@ public:
   Q_INVOKABLE void findCached(QString content, QString engine, QString configuration, QString mode);
   /** Submit a path-backed analysis through the worker-owned coordinator. */
   Q_INVOKABLE void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode);
+  Q_INVOKABLE void cancelAnalysis();
+  Q_INVOKABLE void retryAnalysis();
   bool cacheHit() const { return cacheHit_; }
   QString cachedResult() const { return cachedResult_; }
   QString analysisStatus() const { return analysisStatus_; }
+  QString analysisResult() const { return analysisResult_; }
 public slots:
   void setDatabasePath(const QString& path);
   void selectRun(const QString& id);
@@ -44,6 +48,7 @@ signals:
   void selectedRunChanged();
   void cachedResultChanged();
   void analysisStatusChanged();
+  void analysisResultChanged();
 private:
   class Worker;
   QThread workerThread_;
@@ -55,4 +60,5 @@ private:
   bool cacheHit_{};
   QString cachedResult_;
   QString analysisStatus_{QStringLiteral("Analysis idle")};
+  QString analysisResult_;
 };

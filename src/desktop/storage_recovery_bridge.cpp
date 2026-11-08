@@ -2,6 +2,7 @@
 #include "beatglass/library/analysis_coordinator.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
 #include <QMetaObject>
+#include <QTimer>
 
 class StorageRecoveryBridge::Worker final : public QObject {
   Q_OBJECT
@@ -28,16 +29,30 @@ public slots:
   void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
     beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
+    operation.publish = [this](const std::string& value) { emit analysisResult(QString::fromStdString(value)); };
     auto handle = coordinator_.submit(runId.toStdString(), std::move(operation));
-    emit analysis(handle ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected"));
+    handle_ = std::move(handle); emit analysis(handle_ ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected"));
+    if (handle_) QTimer::singleShot(50, this, &Worker::pollAnalysis);
   }
+  void cancelAnalysis() { if (handle_) { handle_->cancel(); pollAnalysis(); } }
+  void retryAnalysis() { if (handle_ && handle_->retry()) { emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); } }
 signals:
   void result(bool ok, QString status);
   void runsChanged(QStringList ids);
   void cached(bool hit, QString result);
   void analysis(QString status);
+  void analysisResult(QString result);
 private:
+  void pollAnalysis() {
+    if (!handle_) return;
+    using beatglass::library_detail::TrackedState;
+    const auto state = handle_->state();
+    const auto status = state == TrackedState::queued ? "Analysis queued" : state == TrackedState::running ? "Analysis running" : state == TrackedState::completed ? "Analysis complete" : state == TrackedState::cancelled ? "Analysis cancelled" : "Analysis failed";
+    emit analysis(QString::fromLatin1(status));
+    if (state == TrackedState::queued || state == TrackedState::running) QTimer::singleShot(50, this, &Worker::pollAnalysis); else refresh();
+  }
   beatglass::library::AnalysisCoordinator coordinator_;
+  std::shared_ptr<beatglass::library::RetryableAnalysis> handle_;
 };
 
 StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent), worker_(new Worker) {
@@ -54,6 +69,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; emit analysisStatusChanged(); }, Qt::QueuedConnection);
+  connect(worker_, &Worker::analysisResult, this, [this](const QString& text) { analysisResult_ = text; emit analysisResultChanged(); }, Qt::QueuedConnection);
   workerThread_.start();
 }
 
@@ -74,3 +90,5 @@ void StorageRecoveryBridge::findCached(QString content, QString engine, QString 
 void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
 }
+void StorageRecoveryBridge::cancelAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); }
+void StorageRecoveryBridge::retryAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); }
