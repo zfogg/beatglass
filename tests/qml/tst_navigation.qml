@@ -352,6 +352,7 @@ TestCase {
         let status = findChild(app, "overlayCaptureStatus")
         verify(status !== null)
         compare(status.Accessible.name, "Overlay capture status")
+        compare(status.ToolTip.text, "Current output capture status")
         let retry = findChild(app, "overlayRetryCapture")
         verify(retry !== null)
         verify(!retry.visible)
