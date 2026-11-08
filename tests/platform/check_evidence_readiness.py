@@ -175,8 +175,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         else: categories["manifest"] += 1
     required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
+    summary_consistent = (len(required) == len(rows) == len(provenance)
+                          and [item["platform"] for item in required] == [row["platform"] for row in rows]
+                          and [item["platform"] for item in provenance] == [row["platform"] for row in rows])
     return {"platforms": rows, "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
-            "required_scenario_summary": required, "provenance_summary": provenance, "errors": errors,
+            "required_scenario_summary": required, "provenance_summary": provenance,
+            "summary_consistent": summary_consistent, "errors": errors,
             "ready": not errors}
 
 

@@ -216,6 +216,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles)
             self.assertFalse(result["provenance_summary"][0]["complete"])
             self.assertIn("platform", result["provenance_summary"][0]["missing"])
+            self.assertTrue(result["summary_consistent"])
 
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
