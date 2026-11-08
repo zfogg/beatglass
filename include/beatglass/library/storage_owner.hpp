@@ -37,6 +37,8 @@ public:
   std::optional<library_detail::RetryableRun> retryable_run(const std::string& id) const;
   /** Discard one retryable run on the storage worker; never removes source audio. */
   bool discard_retryable(const std::string& id);
+  /** Atomically discard a bounded batch of retryable runs; returns the number removed. */
+  std::size_t discard_retryable(const std::vector<std::string>& ids);
 private:
   std::unique_ptr<library_detail::SqliteCache> cache_;
 };
