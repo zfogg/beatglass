@@ -48,6 +48,15 @@ reference.
    ../dependency-identity-proposal.md
    ../epoch-handoff-proposal.md
    ../same-source-proposal.md
+   ../library-catalog-contract.md
+   ../library-file-details-contract.md
+   ../library-fingerprint-contract.md
+   ../library-format-support.md
+   ../library-recovery-contract.md
+   ../library-storage-open-contract.md
+   ../library-storage-owner-contract.md
+   ../visualization-playback-contract.md
+   ../playback-visualization-frame-mapping.md
 
 .. toctree::
    :maxdepth: 1
@@ -63,6 +72,7 @@ reference.
    ../windows-platform.md
    ../windows-overlay.md
    ../packaging-qualification.md
+   ../native-qualification-evidence.md
 
 .. toctree::
    :maxdepth: 1
@@ -75,6 +85,7 @@ reference.
    ../../design/v1/REVIEW.md
    ../essentia-spike.md
    ../tonal-experiment.md
+   ../issue-76-visual-implementation-audit.md
 
 .. toctree::
    :maxdepth: 1
@@ -82,6 +93,7 @@ reference.
 
    ../../AGENTS.md
    ../../skills/beatglass-documentation/SKILL.md
+   ../../tests/standalone/README.md
 
 Audio and capture
 -----------------
@@ -97,7 +109,11 @@ callback. Issuance does not order worker completion or install stream formats.
 
 .. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/decoded_pcm_pump.hpp include/beatglass/capture/playback_output_adapter.hpp include/beatglass/capture/playback_pcm_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/coreaudio_fifo_internal.hpp include/beatglass/capture/coreaudio_tap_internal.hpp include/beatglass/capture/coreaudio_source_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/byte_source.hpp include/beatglass/capture/file_reader.hpp
 
-.. cpp:autodoc:: include/beatglass/capture/decoded_pcm_pump.hpp include/beatglass/capture/playback_output_adapter.hpp include/beatglass/capture/playback_pcm_queue.hpp
+.. cpp:class:: beatglass::AudioQueue
+
+   Bounded preallocated single-producer, single-consumer handoff. The concrete
+   template parameters are documented in ``audio_queue.hpp``; the producer
+   copies into preallocated storage and the consumer receives a complete block.
 
 .. cpp:function:: bool beatglass::coreaudio::SourceBackend::stop() noexcept
 
@@ -157,8 +173,6 @@ Desktop application internals
 -----------------------------
 
 .. cpp:autodoc:: include/beatglass/desktop/macos_playback_session.hpp src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/analysis_job_bridge.hpp src/desktop/analysis_presentation.hpp src/desktop/capture_monitor_bridge.hpp src/desktop/library_catalog_bridge.hpp src/desktop/platform/windows_endpoint_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_device_position.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_live_music.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/windows_overlay_policy.hpp src/desktop/platform/macos_overlay.hpp src/desktop/platform/windows_playback_session.hpp src/desktop/platform/windows_waveout_devices.hpp src/desktop/platform/windows_waveout_playback.hpp src/desktop/playback_session_bridge.hpp src/desktop/storage_recovery_bridge.hpp src/desktop/theme_preferences.hpp src/desktop/visualization_presentation_bridge.hpp
-
-.. cpp:autodoc:: include/beatglass/desktop/macos_playback_session.hpp src/desktop/platform/windows_playback_session.hpp src/desktop/platform/windows_waveout_devices.hpp src/desktop/platform/windows_waveout_playback.hpp src/desktop/storage_recovery_bridge.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
