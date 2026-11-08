@@ -104,7 +104,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
   }, Qt::QueuedConnection);
-  connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; emit analysisStatusChanged(); }, Qt::QueuedConnection);
+  connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; const bool retryable = text == QStringLiteral("Analysis cancelled") || text == QStringLiteral("Analysis failed") || text == QStringLiteral("Analysis recovery available"); if (analysisRetryable_ != retryable) { analysisRetryable_ = retryable; emit analysisRetryableChanged(); } emit analysisStatusChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisProgress, this, [this](qulonglong frames) { analysisFrames_ = frames; emit analysisProgressChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisResult, this, [this](const QString& text) { analysisResult_ = text; emit analysisResultChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; emit analysisAdmissionChanged(); }, Qt::QueuedConnection);
