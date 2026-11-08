@@ -9,6 +9,9 @@ required = [
     "Retry rejected: incompatible decoder snapshot",
     '"decoder-v3;pcm-f32;44100"',
     "runs.front().decoder_snapshot ==",
+    'cache.begin("legacy-snapshot", key, "/music/legacy.flac")',
+    "runs.front().decoder_snapshot.empty()",
+    "Retry rejected: incompatible decoder snapshot",
 ]
 missing = [marker for marker in required if marker not in bridge + cache_test]
 if missing:
