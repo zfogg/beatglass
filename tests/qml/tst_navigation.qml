@@ -137,6 +137,7 @@ TestCase {
         let status = findChild(app, "endpointStatus")
         verify(status !== null)
         compare(status.Accessible.name, "Output endpoint status")
+        compare(findChild(app, "selectedEndpointStatus").Accessible.name, "Selected output endpoint")
         app.destroy()
     }
 
