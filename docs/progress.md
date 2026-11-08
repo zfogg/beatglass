@@ -359,3 +359,4 @@ The library now exposes `reuse_cached_operation`, a worker-owned identity lookup
 
 StorageOwner now exposes the same completed-result lookup at the storage lifetime boundary, with a regression covering open/lookup/close behavior. This is an integration handoff for the future desktop analysis queue; the GUI still does not schedule real file analysis.
 Coordinator admission now returns cache hits without queueing decoder work and reserves a run before submitting misses. The explicit `Submission` result distinguishes cached, reserved, and rejected paths for the desktop lifecycle; retryable persistence remains worker-owned.
+Submission now uses coordinator admission: cache hits publish directly to the recovery result without creating a decoder handle, while misses reserve a run and enter the queued lifecycle.

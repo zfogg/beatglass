@@ -20,6 +20,8 @@ required = {
     "analysis result property": 'Q_PROPERTY(QString analysisResult READ analysisResult',
     "analysis cancel": 'Q_INVOKABLE void cancelAnalysis()',
     "analysis retry": 'Q_INVOKABLE void retryAnalysis()',
+    "admission-aware submit": 'coordinator_.submit_admitted',
+    "cache skips decoder": 'Cached analysis ready',
     "admission properties": 'Q_PROPERTY(bool analysisReserved READ analysisReserved NOTIFY analysisAdmissionChanged)',
     "admission invokable": 'Q_INVOKABLE void admitAnalysis',
     "worker admission": 'coordinator_.storage().admit_analysis',
