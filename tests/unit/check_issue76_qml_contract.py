@@ -30,6 +30,7 @@ def main() -> int:
         "overlay unlock accessible name": "Accessible.name: \"Unlock DJ overlay\"",
         "click-through action accessible name": "Accessible.name: checked ? \"Disable click-through\"",
         "refresh outputs accessible name": "Accessible.name: \"Refresh playback outputs\"",
+        "open playback accessible name": "Accessible.name: \"Open selected playback source\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
