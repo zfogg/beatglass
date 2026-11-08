@@ -1523,7 +1523,7 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined"
                                 enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable
                                 text: "Retry selected run"
-                                onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); window.announceVisualizationRecovery("Persisted recovery retry admitted; reset status cleared."); forceActiveFocus() }
+                                onClicked: { const runId = storageRecovery.selectedRunId; window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); window.announceVisualizationRecovery("Persisted recovery retry admitted for " + runId + "; reset status cleared."); forceActiveFocus() }
                                 Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Retry selected persisted analysis run " + storageRecovery.selectedRunId
                                     : "Retry selected persisted analysis run"
