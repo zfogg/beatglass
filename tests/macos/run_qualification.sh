@@ -16,9 +16,13 @@ date -u +%FT%TZ
 git -C "$repo_root" rev-parse HEAD
 echo "Qualification output directory: $out_dir"
 echo "Selected output UID: ${BEATGLASS_MACOS_TAP_UID:-UNRUN (BEATGLASS_MACOS_TAP_UID not set)}"
+record_command "sw_vers"
 sw_vers
+record_command "system_profiler SPHardwareDataType SPDisplaysDataType"
 system_profiler SPHardwareDataType SPDisplaysDataType
+record_command "xcodebuild -version"
 xcodebuild -version
+record_command "cmake --version"
 cmake --version | head -n 1
 sdk_path="$(xcrun --sdk macosx --show-sdk-path)"
 if [[ ! -d "$sdk_path" ]]; then
