@@ -1,4 +1,5 @@
-"""Verify the checked-in API documentation build contract is complete."""
+"""Verify API documentation build inputs and indexed production headers."""
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 import sys
 
@@ -10,10 +11,17 @@ def main() -> int:
     readme = (root / "README.md").read_text(encoding="utf-8")
     if "sphinx-build -W --keep-going -b html docs/api" not in readme:
         missing.append("README.md:sphinx-build -W --keep-going")
+    spec = spec_from_file_location("check_headers", root / "docs/api/check_headers.py")
+    checker = module_from_spec(spec); assert spec.loader
+    spec.loader.exec_module(checker)
+    missing_headers, stale = checker.coverage(root)
+    repeated = checker.duplicates(root) if hasattr(checker, "duplicates") else []
+    if missing_headers or stale or repeated:
+        missing.append(f"header index (missing={missing_headers}, stale={stale}, duplicates={repeated})")
     if missing:
-        print(f"missing API documentation contract entries: {missing}", file=sys.stderr)
+        print(f"incomplete API documentation contract: {missing}", file=sys.stderr)
         return 1
-    print("API documentation build contract is present")
+    print("API documentation build and header-index contract is complete")
     return 0
 
 
