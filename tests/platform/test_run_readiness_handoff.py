@@ -112,3 +112,10 @@ class ReadinessHandoffTest(unittest.TestCase):
             self.assertEqual(data["gate_status"], "PENDING")
             self.assertEqual(len(data["platforms"]), 3)
 
+    def test_handoff_consumes_emitted_review_packet(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            errors = handoff.run(bundles, output, review_json=packet, consume_review=True)
+            self.assertTrue(any("review packet" in error for error in errors))
+

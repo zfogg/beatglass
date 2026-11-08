@@ -257,6 +257,8 @@ The machine consumer is `python tests/platform/consume_review_packet.py <review.
 
 The handoff command can emit the same packet directly with `--review-json <review.json>`, ensuring Markdown and machine-readable review outputs are derived from the identical generated report.
 
+Add `--consume-review` to validate that emitted packet immediately; pending native evidence intentionally makes this integrated command nonzero.
+
 The equivalent end-to-end invocation is `run_readiness_handoff.py ... --review-output review.md --require-ready`; it writes the checklist and fails the same handoff run when native acceptance has not been reached.
 
 The portable consumer tests cover the eventual transition explicitly: clearing `native_qualification_required` removes only that native-state rejection; all remaining report-contract, provenance, and readiness checks still apply. This is a transition contract, not native evidence.
