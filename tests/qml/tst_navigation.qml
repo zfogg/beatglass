@@ -257,6 +257,18 @@ TestCase {
         compare(clear.Accessible.description, "Clear the selected audio source and return analysis details to the empty state.")
         app.destroy()
     }
+    function test_metadataErrorOffersRetryRecovery() {
+        let app = shell.createObject(null)
+        app.selectedName = "broken.wav"
+        app.selectedAudioUrl = Qt.resolvedUrl("../fixtures/generated/tone.flac")
+        app.metadataStatus = "Error: unreadable audio"
+        let retry = findChild(app, "retryMetadata")
+        verify(retry.visible)
+        compare(retry.Accessible.description, "Retry reading metadata for the selected audio source after an error.")
+        retry.clicked()
+        compare(fakeMetadata.lastFile, app.selectedAudioUrl)
+        app.destroy()
+    }
     function test_sourceWorkflowStatusIsAccessible() {
         let app = shell.createObject(null)
         compare(findChild(app, "sourceWorkflowStatus").Accessible.name, "Selected source workflow status")
