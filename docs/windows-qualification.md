@@ -32,6 +32,9 @@ The runner also emits `native-playback-evidence.json`, a fixed six-case matrix
 initialized to `UNRUN`; update statuses and log/screenshot fields only after
 observing each native playback scenario, then rerun the verifier before claiming
 qualification.
+For `PASS` rows, the verifier requires relative log and screenshot paths that
+exist inside the transferred qualification output, preventing status-only or
+external-path claims.
 It emits `native-overlay-evidence.json` for the four overlay recovery, click-through,
 display/DPI, and fullscreen cases; a `PASS` requires screenshot evidence and is
 rejected by the verifier when that field is missing.
