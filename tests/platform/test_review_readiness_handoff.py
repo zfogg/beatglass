@@ -23,6 +23,8 @@ class ReadinessReviewTest(unittest.TestCase):
             self.assertIn("## Platform support", text)
             self.assertIn("Manifest SHA-256:", text)
             self.assertIn("Source commit:", text)
+            self.assertIn("Qualification command:", text)
+            self.assertIn("Qualification output:", text)
             self.assertIn("capture", text)
             self.assertIn("Artifacts:", text)
             self.assertIn("## ingestion_errors", text)

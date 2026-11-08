@@ -26,7 +26,8 @@ def render(report_path: Path) -> str:
         lines.extend([f"## {row.get('platform', 'unknown')}", ""])
         lines.extend([f"- Manifest: `{row.get('manifest')}`", f"- Manifest SHA-256: `{row.get('manifest_sha256')}`",
                       f"- Source commit: `{row.get('commit')}`", f"- Captured at: `{row.get('captured_at')}`",
-                      f"- Environment: `{row.get('environment')}`", ""])
+                      f"- Environment: `{row.get('environment')}`", f"- Qualification command: `{row.get('qualification_command')}`",
+                      f"- Qualification output: `{row.get('qualification_output')}`", ""])
         for scenario in row.get("scenario_inventory", []):
             lines.append(f"- [{'x' if scenario.get('status') == 'PASS' else ' '}] {scenario.get('id')}: {scenario.get('status')}")
         lines.append("")
