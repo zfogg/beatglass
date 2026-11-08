@@ -161,6 +161,10 @@ if [[ "$permission_result" != "allowed" && "$permission_result" != "denied" && "
   echo "BEATGLASS_MACOS_PERMISSION_RESULT must be allowed, denied, or UNRUN" >&2
   exit 1
 fi
+if [[ "$permission_result" == "allowed" && -z "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
+  echo "An allowed permission result requires BEATGLASS_MACOS_TAP_UID" >&2
+  exit 1
+fi
 signing_log="$out_dir/codesign-desktop.log"
 signing_state=unverified
 codesign --display --verbose=4 "$out_dir/build/beatglass-desktop.app" >"$signing_log" 2>&1 || true
