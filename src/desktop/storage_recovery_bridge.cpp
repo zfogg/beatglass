@@ -93,6 +93,13 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(&workerThread_, &QThread::finished, worker_, &QObject::deleteLater);
   connect(worker_, &Worker::result, this, [this](bool ok, const QString& text) {
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
+    if (!ok) {
+      if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
+      if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
+      if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
+      if (!resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
+      analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
+    }
     if (ok && (text == QStringLiteral("Retry queued") || text == QStringLiteral("Retryable run discarded") || text == QStringLiteral("Cached analysis invalidated"))) {
       if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
     }
@@ -124,6 +131,10 @@ StorageRecoveryBridge::~StorageRecoveryBridge() { close(); workerThread_.quit();
 void StorageRecoveryBridge::setDatabasePath(const QString& path) { if (databasePath_ == path) return; databasePath_ = path; emit databasePathChanged(); }
 void StorageRecoveryBridge::open() {
   if (databasePath_.isEmpty()) { status_ = QStringLiteral("Storage error: database path is required"); emit statusChanged(); return; }
+  if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
+  if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
+  if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
+  if (!resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
   QMetaObject::invokeMethod(worker_, "open", Qt::QueuedConnection, Q_ARG(QString, databasePath_));
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
