@@ -10,6 +10,8 @@ Selector activation is explicit: programmatic selected-run changes clear outcome
 
 Active-job rejection is isolated from persisted-run recovery: when no persisted run is selected, a real worker `Analysis failed` or `Analysis cancelled` transition is announced once as an admitted Retry action and focus returns to `Retry analysis`. Persisted terminal outcomes use their own run-keyed announcement state, so neither surface duplicates or steals focus for the other.
 
+The active analysis surface now gates admission through the actual worker handle: `retry()` is called only when `canRetry` is true, storage fallback requires `analysisRetryable`, and worker `Failed`/`Cancelled` status transitions announce the available Retry action and restore focus to it. This prevents a stale enabled button from claiming a retry when the worker has already accepted or cleared the job.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.

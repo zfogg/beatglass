@@ -647,12 +647,12 @@ ApplicationWindow {
     }
     function retryVisualizationAnalysis() {
         window.overlayPersistedDiagnosticDismissed = true
-        if (window.analysisJobBridge && window.analysisJobBridge.retry !== undefined) {
+        if (window.analysisJobBridge && window.analysisJobBridge.retry !== undefined && window.analysisJobBridge.canRetry) {
             window.analysisJobBridge.retry()
             window.announceVisualizationRecovery("Analysis retry queued; focus will return after a fresh accepted result.")
             return true
         }
-        if (typeof storageRecovery !== "undefined" && storageRecovery.retryAnalysis !== undefined) {
+        if (typeof storageRecovery !== "undefined" && storageRecovery.retryAnalysis !== undefined && storageRecovery.analysisRetryable) {
             storageRecovery.retryAnalysis()
             window.announceVisualizationRecovery("Analysis retry admitted; focus will return after a fresh accepted result.")
             return true
@@ -664,6 +664,9 @@ ApplicationWindow {
         function onStatusChanged() {
             if (window.analysisJobBridge.status === "Complete" && window.libraryAnalysisResultReady) {
                 window.announceVisualizationRecovery("Fresh analysis result accepted; visualization recovery focus restored.")
+            } else if (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") {
+                window.announceVisualizationRecovery("Analysis " + window.analysisJobBridge.status.toLowerCase() + "; Retry analysis is available.")
+                retryAnalysis.forceActiveFocus()
             }
         }
     }
