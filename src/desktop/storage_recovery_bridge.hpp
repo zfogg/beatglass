@@ -32,6 +32,7 @@ public:
   Q_INVOKABLE void close();
   Q_INVOKABLE void refreshRetryableRuns();
   Q_INVOKABLE void discardSelectedRun();
+  Q_INVOKABLE void retrySelectedRun(QString path, QString contentHash, QString engine, QString configuration, QString mode);
   /** Look up a completed result on the storage worker without starting analysis. */
   Q_INVOKABLE void findCached(QString content, QString engine, QString configuration, QString mode);
   /** Submit a path-backed analysis through the worker-owned coordinator. */

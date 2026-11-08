@@ -993,6 +993,7 @@ ApplicationWindow {
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
                                 onClicked: discardRecoveryDialog.open()
                             }
+                            Button { objectName: "retryPersistedRecovery"; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== ""; text: "Retry selected run"; onClicked: storageRecovery.retrySelectedRun(window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text) }
                             Dialog {
                                 id: discardRecoveryDialog
                                 title: "Discard saved analysis run?"
