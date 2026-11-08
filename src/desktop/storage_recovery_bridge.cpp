@@ -69,6 +69,7 @@ signals:
   void runsChanged(QStringList ids, QStringList details);
   void cached(bool hit, QString result);
   void analysis(QString status);
+  void analysisError(QString error);
   void analysisProgress(qulonglong frames);
   void analysisResult(QString result);
   void admitted(bool reserved, QString cachedResult);
@@ -80,6 +81,7 @@ private:
     emit analysisProgress(static_cast<qulonglong>(handle_->frames()));
     const auto status = state == TrackedState::queued ? "Analysis queued" : state == TrackedState::running ? "Analysis running" : state == TrackedState::completed ? "Analysis complete" : state == TrackedState::cancelled ? "Analysis cancelled" : "Analysis failed";
     emit analysis(QString::fromLatin1(status));
+    if (state == TrackedState::failed) emit analysisError(QStringLiteral("Analysis failed; retryable work was preserved for recovery."));
     if (state == TrackedState::queued || state == TrackedState::running) QTimer::singleShot(50, this, &Worker::pollAnalysis); else refresh();
   }
   beatglass::library::AnalysisCoordinator coordinator_;
@@ -106,6 +108,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; const bool retryable = text == QStringLiteral("Analysis cancelled") || text == QStringLiteral("Analysis failed") || text == QStringLiteral("Analysis recovery available"); if (analysisRetryable_ != retryable) { analysisRetryable_ = retryable; emit analysisRetryableChanged(); } emit analysisStatusChanged(); }, Qt::QueuedConnection);
+  connect(worker_, &Worker::analysisError, this, [this](const QString& text) { analysisError_ = text; emit analysisErrorChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisProgress, this, [this](qulonglong frames) { analysisFrames_ = frames; emit analysisProgressChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisResult, this, [this](const QString& text) { analysisResult_ = text; emit analysisResultChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; emit analysisAdmissionChanged(); }, Qt::QueuedConnection);

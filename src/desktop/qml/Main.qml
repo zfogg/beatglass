@@ -1098,6 +1098,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisQueueError"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== ""
+                                text: visible ? storageRecovery.analysisError : ""
+                                Accessible.name: "Analysis queue error"
+                                Accessible.description: visible ? text : "No analysis queue error is present."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "persistedAnalysisProgress"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisFrames !== undefined
                                 text: visible ? ("Persisted analysis progress: " + storageRecovery.analysisFrames + " frames") : ""
