@@ -1327,7 +1327,8 @@ ApplicationWindow {
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
                                 onClicked: discardRecoveryDialog.open()
                             }
-                            Button { objectName: "retryPersistedRecovery"; activeFocusOnTab: true; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); forceActiveFocus() }; Accessible.name: "Retry selected persisted analysis run"; Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted." }
+                            Button { objectName: "retryPersistedRecovery"; activeFocusOnTab: true; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); window.announceVisualizationRecovery("Persisted recovery retry admitted; reset status cleared."); forceActiveFocus() }; Accessible.name: "Retry selected persisted analysis run"; Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted." }
+                            Label { objectName: "selectedPersistedRecoveryResetStatus"; visible: typeof storageRecovery !== "undefined" && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== ""; text: visible ? ("Selected recovery: " + storageRecovery.resetStatus) : ""; Accessible.name: "Selected persisted recovery status"; Accessible.description: visible ? text : "No selected persisted recovery reset has been performed."; Accessible.role: Accessible.Status; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                             Dialog {
                                 id: discardRecoveryDialog
                                 title: "Discard saved analysis run?"
@@ -1339,7 +1340,7 @@ ApplicationWindow {
                                     Accessible.name: "Discard retryable run confirmation"
                                     Accessible.role: Accessible.StaticText
                                 }
-                                onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); discardPersistedRecoveryButton.forceActiveFocus() }
+                                onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discarded; selected retry state cleared."); discardPersistedRecoveryButton.forceActiveFocus() }
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
