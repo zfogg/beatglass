@@ -388,6 +388,7 @@ def main() -> int:
         "navigation selected tooltips": "ToolTip.text: checked ? \"Library is selected; browse local audio files\" : \"Browse local audio files\"",
         "appearance group live value": "Accessible.name: \"Appearance settings\"\n                    Accessible.value: window.selectedTheme + \", \"",
         "theme preview group live value": "Accessible.name: \"Theme previews\"\n                Accessible.value: window.selectedTheme",
+        "theme preview selected tooltip": "ToolTip.text: checked ? window.themeNames[index] + \" theme is selected\" : \"Select \" + window.themeNames[index] + \" theme\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
