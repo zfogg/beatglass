@@ -35,6 +35,24 @@ private slots:
     QCOMPARE(prefs.themeIndex(), 0);
     QVERIFY(!prefs.reduceMotion());
   }
+
+  void resetRepairsStoredValuesWhenAlreadyDefault() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("prefs.ini"));
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      settings.setValue(QStringLiteral("desktop/themeIndex"), QStringLiteral("not-a-theme"));
+      settings.setValue(QStringLiteral("desktop/reduceMotion"), QStringLiteral("not-a-bool"));
+      settings.sync();
+    }
+    auto settings = std::make_unique<QSettings>(path, QSettings::IniFormat);
+    ThemePreferences prefs(nullptr, std::move(settings));
+    prefs.reset();
+    QSettings repaired(path, QSettings::IniFormat);
+    QCOMPARE(repaired.value(QStringLiteral("desktop/themeIndex")).toInt(), 0);
+    QVERIFY(!repaired.value(QStringLiteral("desktop/reduceMotion")).toBool());
+  }
 };
 
 QTEST_MAIN(ThemePreferencesTest)

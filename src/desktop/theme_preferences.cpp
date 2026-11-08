@@ -29,4 +29,11 @@ void ThemePreferences::setThemeIndex(int index) {
 void ThemePreferences::reset() {
   setThemeIndex(0);
   setReduceMotion(false);
+  // Re-write defaults even when the in-memory value was already default; this
+  // repairs a settings store containing an invalid or stale representation.
+  if (settings_) {
+    settings_->setValue(QStringLiteral("desktop/themeIndex"), 0);
+    settings_->setValue(QStringLiteral("desktop/reduceMotion"), false);
+    settings_->sync();
+  }
 }
