@@ -1312,6 +1312,25 @@ ApplicationWindow {
                                 onClicked: { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result.") }
                             }
                             Button {
+                                objectName: "discardAnalysisBatch"
+                                activeFocusOnTab: true
+                                text: "Discard batch"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.discardBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
+                                enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
+                                Accessible.name: "Discard analysis batch"
+                                Accessible.description: "Clear the terminal batch recovery state without changing source audio. Confirmation is required."
+                                ToolTip.text: Accessible.description
+                                onClicked: discardAnalysisBatchDialog.open()
+                            }
+                            Dialog {
+                                id: discardAnalysisBatchDialog
+                                modal: true
+                                title: "Discard analysis batch?"
+                                standardButtons: Dialog.Ok | Dialog.Cancel
+                                contentItem: Label { text: "This clears the retained batch recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis batch confirmation"; Accessible.role: Accessible.StaticText }
+                                onAccepted: { window.analysisJobBridge.discardBatch(); window.announceVisualizationRecovery("Analysis batch recovery discarded; focus remains on the recovery controls.") }
+                            }
+                            Button {
                                 objectName: "cancelAnalysisBatch"
                                 activeFocusOnTab: true
                                 text: "Cancel batch"
@@ -1332,6 +1351,25 @@ ApplicationWindow {
                                 Accessible.description: "Retry the last source-attributed analysis operation after cancellation or failure."
                                 onClicked: window.retryVisualizationAnalysis()
                                 ToolTip.text: Accessible.description
+                            }
+                            Button {
+                                objectName: "discardAnalysis"
+                                activeFocusOnTab: true
+                                text: "Discard recovery"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.discard !== undefined
+                                enabled: visible && window.analysisJobBridge.canRetry
+                                Accessible.name: "Discard analysis recovery"
+                                Accessible.description: "Clear the failed or cancelled analysis recovery state without changing source audio. Confirmation is required."
+                                ToolTip.text: Accessible.description
+                                onClicked: discardAnalysisDialog.open()
+                            }
+                            Dialog {
+                                id: discardAnalysisDialog
+                                modal: true
+                                title: "Discard analysis recovery?"
+                                standardButtons: Dialog.Ok | Dialog.Cancel
+                                contentItem: Label { text: "This clears the retained analysis recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis recovery confirmation"; Accessible.role: Accessible.StaticText }
+                                onAccepted: { window.analysisJobBridge.discard(); window.announceVisualizationRecovery("Analysis recovery discarded; focus remains on the recovery controls.") }
                             }
                             Button {
                                 objectName: "cancelAnalysis"
