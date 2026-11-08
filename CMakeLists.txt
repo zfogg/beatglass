@@ -3,6 +3,15 @@ project(beatglass VERSION 0.1.0 LANGUAGES C CXX)
 include(CTest)
 
 if(BUILD_TESTING)
+  if(WIN32)
+    find_program(BEATGLASS_PWSH pwsh)
+    if(BEATGLASS_PWSH)
+      add_test(NAME windows_qualification_manifest_verifier
+        COMMAND "${BEATGLASS_PWSH}" -NoProfile -File
+          "${CMAKE_CURRENT_SOURCE_DIR}/tests/windows/verify_artifact_manifest.ps1"
+          -Manifest "${CMAKE_CURRENT_SOURCE_DIR}/tests/windows/fixtures/manifest-smoke/qualification-artifacts.sha256")
+    endif()
+  endif()
   find_package(Python3 QUIET COMPONENTS Interpreter)
   if(Python3_Interpreter_FOUND)
     add_test(
