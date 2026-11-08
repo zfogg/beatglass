@@ -451,3 +451,5 @@ The visualization Retry monitoring action now uses the active theme accent as it
 The Clear selection action now uses the active theme foreground as its surface and theme background as its label, with reduced opacity when unavailable, aligning selection recovery with the retry control while preserving disabled-state clarity.
 
 Selection-reset explanations now use the active theme accent and compact typography, keeping transition feedback visually prominent without introducing a new one-off color token.
+
+Load-state and data-status labels now consume the theme foreground and compact typography tokens, keeping runtime evidence readable as the visualization moves between unavailable, waiting, and populated states.
