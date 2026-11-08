@@ -83,6 +83,17 @@ ApplicationWindow {
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
     Shortcut {
+        objectName: "persistedRecoveryShortcut"
+        sequence: "Ctrl+Shift+R"
+        context: Qt.ApplicationShortcut
+        onActivated: {
+            navigation.currentIndex = 0
+            if (typeof persistedRecoveryRuns !== "undefined" && persistedRecoveryRuns.enabled)
+                persistedRecoveryRuns.forceActiveFocus()
+            window.announceVisualizationRecovery("Persisted recovery selector focused; choose a saved run to retry or discard.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationWaveformShortcut"
         sequence: "Ctrl+1"
         context: Qt.ApplicationShortcut
