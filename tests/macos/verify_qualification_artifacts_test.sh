@@ -46,6 +46,12 @@ menubar_dock_reopen	UNRUN	-
 EOF
 (cd "$out_dir" && shasum -a 256 build/beatglass-desktop.app/Contents/MacOS/beatglass-desktop build/beatglass-coreaudio-smoke.app/Contents/MacOS/beatglass-coreaudio-smoke build/beatglass-coreaudio-recovery.app/Contents/MacOS/beatglass-coreaudio-recovery) > "$out_dir/qualification-artifacts.sha256"
 "$verifier" "$out_dir"
+sed -i '' '2s/UNRUN/-FAIL-/' "$out_dir/qualification-cases.tsv"
+if "$verifier" "$out_dir"; then
+  echo "failed case without evidence unexpectedly passed" >&2
+  exit 1
+fi
+sed -i '' '2s/-FAIL-/UNRUN/' "$out_dir/qualification-cases.tsv"
 sed -i '1s/../00/' "$out_dir/qualification-artifacts.sha256"
 if "$verifier" "$out_dir"; then
   echo "tampered hash unexpectedly passed" >&2
