@@ -11,6 +11,15 @@ REQUIRED = (
     "docs/macos-qualification.md",
 )
 
+# A generic "native qualification" claim is not enough: each matrix row must
+# name the backend and desktop/overlay observations that still require a real
+# host run. Keep this contract close to the checker so omissions fail locally.
+PLATFORM_NATIVE_EVIDENCE = {
+    "Windows": ("WASAPI", "fullscreen", "overlay"),
+    "macOS": ("Core Audio", "Spaces/fullscreen", "menu-bar recovery"),
+    "Linux": ("PipeWire", "Wayland", "overlay"),
+}
+
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
@@ -61,6 +70,10 @@ def main() -> int:
         cells = [cell.strip() for cell in row.strip("|").split("|")]
         if len(cells) != 3 or not all(cells):
             unlinked.append(f"malformed status row: {row}")
+        elif cells[0] in PLATFORM_NATIVE_EVIDENCE:
+            for evidence in PLATFORM_NATIVE_EVIDENCE[cells[0]]:
+                if evidence.lower() not in row.lower():
+                    unlinked.append(f"{cells[0]} native evidence: {evidence}")
     unlinked.extend(f"status section: {section}" for section in required_sections if section not in docs)
     unlinked.extend(f"status disclaimer: {phrase}" for phrase in required_disclaimers if phrase not in docs)
     if missing or unlinked:
