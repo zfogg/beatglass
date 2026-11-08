@@ -13,6 +13,16 @@ TEST_CASE("analysis admission rejects incompatible decoder snapshots") {
   CHECK_FALSE(rejected.analysis_reserved);
   CHECK_FALSE(rejected.cached.has_value());
 }
+TEST_CASE("analysis admission accepts a compatible snapshot cache hit") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  cache.begin("seed", {"hash", "engine", "config", "offline"}, "/music/a.flac", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("seed", {"hash", "engine", "config", "offline"}, "cached", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  const auto hit = beatglass::library::admit_analysis(cache, "unused", identity, "/music/a.flac", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(hit.decoder_compatible);
+  CHECK(hit.cached == std::optional<std::string>{"cached"});
+  CHECK_FALSE(hit.analysis_reserved);
+}
 TEST_CASE("analysis operation retains source identity and bounded callback contract") { beatglass::library::AnalysisOperation op; op.source.size_bytes=12; op.identity.mode="offline"; op.serialize=[] { return std::string("result"); }; REQUIRE(op.serialize()=="result"); REQUIRE(op.identity.mode=="offline"); }
 TEST_CASE("analysis source identity includes a selected catalog path") {
   beatglass::library::AnalysisOperation op;
