@@ -220,9 +220,16 @@ ApplicationWindow {
         return true
     }
     function syncOverlaySettingsFromBridge() {
-        if (!window.overlayBridge)
+        if (!window.overlayBridge) {
+            window.overlayDisplayRecoveryPending = true
             return false
+        }
         window.restoreOverlayDisplaySelectionFromBridge()
+        if (!window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.overlayDisplayRecoveryPending = true
+            window.announceCaptureRecoveryState("Overlay startup state is unavailable; control-window fallback remains active until a display recovers.")
+            return false
+        }
         const geometry = window.overlayBridge.geometry
         const visualStateReady = window.restoreOverlayVisualStateFromBridge()
         if (visualStateReady)
