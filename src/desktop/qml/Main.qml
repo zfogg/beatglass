@@ -379,10 +379,18 @@ ApplicationWindow {
         window.announceCaptureRecoveryState("Saved overlay display cleared; choose an available display to restore monitoring.")
     }
     function persistOverlayDisplaySelection(index, name) {
-        if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length)
+        if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
+            window.overlayDisplayRecoveryPending = true
             return false
-        if (!window.overlayBridge.moveToScreen(index))
+        }
+        if (!window.overlayBridge.moveToScreen(index)) {
+            window.overlayDisplayRecoveryPending = true
+            window.announceCaptureRecoveryState("Overlay display selection could not be applied; control-window fallback remains active.")
+            window.show()
+            window.raise()
+            window.requestActivate()
             return false
+        }
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
         window.overlayDisplaySelectionRequired = false
