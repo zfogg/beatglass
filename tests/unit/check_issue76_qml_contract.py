@@ -442,7 +442,16 @@ def main() -> int:
     matrix_missing = [name for name, marker in interaction_matrix.items() if marker not in qml]
     if matrix_missing:
         raise SystemExit("Missing issue #76 interaction matrix markers: " + ", ".join(matrix_missing))
-    print(f"Issue #76 QML contract markers verified ({len(required) + len(interaction_matrix)} checks)")
+    runtime_states = {
+        "error state": "window.liveBridge.status === \"Error\" ? \"capture error\"",
+        "starting state": "window.liveBridge.status === \"Starting\" || window.liveBridge.status === \"Reacquiring\"",
+        "ready state": "visualizationCanvas.modeHasData ? \"ready\"",
+        "waiting state": ": \"waiting\"))",
+    }
+    state_missing = [name for name, marker in runtime_states.items() if marker not in qml]
+    if state_missing:
+        raise SystemExit("Missing issue #76 runtime state markers: " + ", ".join(state_missing))
+    print(f"Issue #76 QML contract markers verified ({len(required) + len(interaction_matrix) + len(runtime_states)} checks)")
     return 0
 
 

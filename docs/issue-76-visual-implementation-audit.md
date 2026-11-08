@@ -414,6 +414,8 @@ Starting and Reacquiring states now render a dedicated recovery-feedback label b
 
 The grouped visualization status surface now reports capture error, Starting, Reacquiring, ready, or waiting as its live value, and its tooltip reflects the same state. Assistive users can therefore distinguish data absence from an active recovery transition at the group boundary.
 
+The issue-76 contract suite now checks each runtime status branch explicitly—Error, Starting/Reacquiring, ready data, and waiting for data—so future state changes cannot silently drop a visible or accessible transition.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
