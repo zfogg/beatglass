@@ -420,6 +420,8 @@ def main() -> int:
         "visualization waveform snapshot": "visualizationCanvas.renderedWaveform = visualizationPresentation.waveform.slice()",
         "visualization spectrum snapshot": "visualizationCanvas.renderedSpectrum = visualizationPresentation.spectrum.slice()",
         "visualization stale arrays clear": "visualizationCanvas.renderedWaveform = []; visualizationCanvas.renderedSpectrum = []",
+        "visualization playback snapshot sync": "syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationCanvas.renderedWaveform.length)",
+        "visualization seek snapshot": "seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationCanvas.renderedWaveform.length)",
         "visualization source transition clear": 'Selection cleared because the playback source changed.',
         "visualization epoch transition clear": 'Selection cleared because the playback epoch changed.',
         "visualization handoff stale status": '"Waiting for replacement analysis result; " + window.visualizationSelectionResetReason',
