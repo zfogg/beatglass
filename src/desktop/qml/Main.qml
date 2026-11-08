@@ -845,7 +845,6 @@ ApplicationWindow {
                     ToolTip.text: "Live monitoring controls; current state is announced when available"
                     Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: window.captureMonitorBridge !== null && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; ToolTip.text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring" : window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry live output monitoring" : "Start live output monitoring"; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
                     Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current capture monitor status and recovery state" }
-                }
                 ColumnLayout {
                     objectName: "monitoringStatusGroup"
                     Layout.fillWidth: true
@@ -972,6 +971,14 @@ ApplicationWindow {
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
+                ColumnLayout {
+                    objectName: "visualizationStatusGroup"
+                    Layout.fillWidth: true
+                    Accessible.name: "Visualization data and capture status"
+                    Accessible.value: visualizationCanvas.modeHasData ? "ready" : "waiting"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Current waveform or FFT availability, generation, and capture state."
+                    ToolTip.text: "Visualization data, generation, and capture status"
                 Label {
                     objectName: "visualizationEmptyState"
                     visible: !visualizationCanvas.modeHasData
@@ -1073,6 +1080,8 @@ ApplicationWindow {
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
                     Layout.fillWidth: true; wrapMode: Text.WordWrap
+                }
+                }
                 }
                 ColumnLayout {
                     objectName: "djEvidenceGroup"
