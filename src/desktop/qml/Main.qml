@@ -325,6 +325,7 @@ ApplicationWindow {
                 text: "Reset appearance"
                 Accessible.name: "Reset appearance settings"
                 Accessible.description: "Restore the default Light theme and turn off reduced motion."
+                ToolTip.text: "Restore Light theme and full motion"
                 ToolTip.text: "Restore the default theme and motion setting"
                 onClicked: {
                     if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
