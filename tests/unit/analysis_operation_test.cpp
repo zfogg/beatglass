@@ -17,6 +17,18 @@ TEST_CASE("analysis publication requires source and cache identities to match") 
   op.identity.mode = "offline";
   REQUIRE(op.source.content_hash != op.identity.content_hash);
 }
+TEST_CASE("analysis cache reuse checks identity before running work") {
+    beatglass::library_detail::SqliteCache cache(":memory:");
+    beatglass::library::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
+    beatglass::library_detail::CacheKey key{identity.content_hash, identity.engine_version, identity.configuration_id, identity.mode};
+    cache.begin("cached-run", key);
+    REQUIRE(cache.publish("cached-run", key, "cached-result", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+    std::string result;
+    REQUIRE(beatglass::library::reuse_cached_operation(cache, identity, result));
+    CHECK(result == "cached-result");
+    auto changed = identity; changed.configuration_id = "new-config";
+    CHECK_FALSE(beatglass::library::reuse_cached_operation(cache, changed, result));
+}
 TEST_CASE("analysis publication rejects invalid operations before callbacks") {
   beatglass::library_detail::SqliteCache cache(":memory:");
   beatglass::library::AnalysisOperation op;

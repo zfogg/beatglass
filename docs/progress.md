@@ -274,3 +274,6 @@ The readiness report contract is versioned as `readiness_report_schema: 1`; `exi
 
 ## Cache acceptance integration
 A cache acceptance regression demonstrates that a committed unchanged identity is found on the next analysis request and the analysis callback is not rerun. Changed identity and configuration invalidation remain covered by lifecycle tests; decoder/UI integration and native qualification remain pending.
+
+## Analysis cache handoff
+The library now exposes `reuse_cached_operation`, a worker-owned identity lookup that returns a completed cached result before analysis serialization/DSP begins. Configuration/content identity changes miss independently. The caller still owns fingerprinting, source revalidation and scheduling; decoder/UI wiring and native qualification remain open.
