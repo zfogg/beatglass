@@ -83,6 +83,18 @@ try {
   }
   $hashLines | Set-Content -LiteralPath $manifestPath -Encoding utf8
   "Artifact SHA-256 manifest: $manifestPath"
+  $identityManifest = Join-Path $OutputDirectory "qualification-manifest.txt"
+  @(
+    "commit=$(git -C $repoRoot rev-parse HEAD)"
+    "windows_version=$([Environment]::OSVersion.VersionString)"
+    "architecture=$([Environment]::Is64BitOperatingSystem)"
+    "cmake_version=$((cmake --version | Select-Object -First 1).Trim())"
+    "vcpkg_root=$($env:VCPKG_ROOT)"
+    "artifact_sha256=qualification-artifacts.sha256"
+    "playback_evidence=native-playback-evidence.json"
+    "overlay_evidence=native-overlay-evidence.json"
+  ) | Set-Content -LiteralPath $identityManifest -Encoding utf8
+  "Qualification identity manifest: $identityManifest"
   $evidencePath = Join-Path $OutputDirectory "native-playback-evidence.json"
   $evidence = @(
     @{ case = "endpoint-selection-start"; status = "UNRUN"; device = ""; observed = ""; log = ""; screenshot = "" },

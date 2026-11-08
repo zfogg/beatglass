@@ -7,9 +7,15 @@ param(
 $ErrorActionPreference = "Stop"
 $OutputDirectory = (Resolve-Path -LiteralPath $OutputDirectory).Path
 $manifestPath = Join-Path $OutputDirectory "qualification-artifacts.sha256"
+$identityManifest = Join-Path $OutputDirectory "qualification-manifest.txt"
 $evidencePath = Join-Path $OutputDirectory "native-playback-evidence.json"
 $overlayEvidencePath = Join-Path $OutputDirectory "native-overlay-evidence.json"
 if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw "Missing artifact hash manifest: $manifestPath" }
+if (-not (Test-Path -LiteralPath $identityManifest -PathType Leaf)) { throw "Missing qualification identity manifest: $identityManifest" }
+$identity = @{}
+foreach ($line in Get-Content -LiteralPath $identityManifest) { if ($line -notmatch '^([^=]+)=(.*)$' -or $identity.ContainsKey($Matches[1])) { throw "Malformed or duplicate identity manifest key: $line" }; $identity[$Matches[1]] = $Matches[2] }
+foreach ($key in @("commit", "windows_version", "architecture", "cmake_version", "artifact_sha256", "playback_evidence", "overlay_evidence")) { if (-not $identity.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($identity[$key])) { throw "Identity manifest missing $key" } }
+if ($identity.artifact_sha256 -ne "qualification-artifacts.sha256" -or $identity.playback_evidence -ne "native-playback-evidence.json" -or $identity.overlay_evidence -ne "native-overlay-evidence.json") { throw "Identity manifest contains unexpected evidence links" }
 if (-not (Test-Path -LiteralPath $evidencePath -PathType Leaf)) { throw "Missing native playback evidence template: $evidencePath" }
 if (-not (Test-Path -LiteralPath $overlayEvidencePath -PathType Leaf)) { throw "Missing native overlay evidence template: $overlayEvidencePath" }
 $lines = @(Get-Content -LiteralPath $manifestPath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
