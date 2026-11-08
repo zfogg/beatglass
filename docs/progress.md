@@ -332,7 +332,7 @@ Batch status also reports accepted operations that reached completion, completin
 
 The derived queued count identifies accepted operations that have not yet completed, failed, or cancelled; publication is intentionally not subtracted separately because successful publication and completion describe the same terminal operation.
 
-A provisional `make_file_decode_operation` now supplies the worker-side decoder seam: it opens a path with `FileReader`, drains normalized PCM off the GUI/audio threads, checks cancellation and emits a deterministic decoded-frame serialization. It is not yet musical analysis, cache publication, or native codec qualification.
+A provisional `make_file_decode_operation` now supplies the worker-side decoder seam: it opens a path with `FileReader`, drains normalized PCM off the GUI/audio threads, checks cancellation and emits a deterministic decoded-frame serialization. Decoder-only operations now pass runner admission and publish through the observable analysis result path; this is still not musical analysis, cache publication, or native codec qualification.
 
 `AnalysisJobBridge::submitFile` now connects that provisional operation to the desktop worker queue with explicit content hash, engine, configuration, and mode identity. Decoder I/O remains off the GUI thread; source hashing, cache admission, musical analysis, and native codec qualification remain open.
 

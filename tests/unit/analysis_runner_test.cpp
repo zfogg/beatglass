@@ -76,3 +76,15 @@ TEST_CASE("retryable analysis reuses source identity after a failed attempt") {
   CHECK(retryable->state() == TrackedState::completed); CHECK(attempts == 2); CHECK(retryable->frames() == 12);
   executor.shutdown();
 }
+TEST_CASE("decoder-only analysis publishes its decoded result") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); std::string published;
+  AnalysisOperation operation; operation.source.path = "track.wav"; operation.source.content_hash = "sha256:test";
+  operation.identity.content_hash = "sha256:test"; operation.identity.engine_version = "engine";
+  operation.identity.configuration_id = "config"; operation.identity.mode = "offline"; operation.source.size_bytes = 12;
+  operation.decode = [](std::stop_token stop, const auto& progress) { if (stop.stop_requested()) return std::string{}; progress(12); return std::string("decoded_frames=12"); };
+  operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  operation.publish = [&](const std::string& result) { published = result; };
+  auto handle = runner.submit(std::move(operation)); REQUIRE(handle); wait_for_terminal(handle);
+  CHECK(handle->state() == TrackedState::completed); CHECK(published == "decoded_frames=12"); CHECK(handle->frames() == 12);
+  executor.shutdown();
+}
