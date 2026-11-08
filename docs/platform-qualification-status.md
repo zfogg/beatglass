@@ -261,6 +261,8 @@ The handoff command can emit the same packet directly with `--review-json <revie
 
 Add `--consume-review` to validate that emitted packet immediately; pending native evidence intentionally makes this integrated command nonzero.
 
+When `--require-ready` is supplied with `--review-json`, packet consumption is automatic; strict release review cannot accidentally omit the versioned consumer step.
+
 The release/review workflow should use both `--review-json` and `--consume-review`; this keeps the machine packet versioned and ensures its consumer—not only the producer—approves the handoff.
 
 The equivalent end-to-end invocation is `run_readiness_handoff.py ... --review-output review.md --require-ready`; it writes the checklist and fails the same handoff run when native acceptance has not been reached.
