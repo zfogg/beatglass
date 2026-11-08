@@ -32,6 +32,16 @@ def manifest(artifact):
 
 
 class EvidenceBundleNegativeTest(unittest.TestCase):
+    def test_completed_scenario_requires_artifact_role(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
+            digest = __import__("hashlib").sha256(b"actual\n").hexdigest()
+            data = manifest({"path": "capture.txt", "sha256": digest})
+            data["artifacts"][0].pop("role", None)
+            data["scenarios"] = [{"id": "capture", "status": "PASS", "evidence": "capture.txt"}]
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("role is missing" in error for error in module.verify(root, path)))
+
     def test_completed_scenario_requires_matching_artifact_role(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
@@ -69,7 +79,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "evidence.json").write_text("{}", encoding="utf-8")
             data = manifest({"path": "evidence.json", "sha256": __import__("hashlib").sha256(b"{}").hexdigest()})
-            data["artifacts"][0].pop("role", None)
+            data["artifacts"][0]["role"] = "capture"
             data["scenarios"] = [
                 {"id": "capture", "status": "PASS", "evidence": "evidence.json"},
                 {"id": "recovery", "status": "PASS", "evidence": "evidence.json"},

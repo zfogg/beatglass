@@ -62,10 +62,12 @@ def verify(root: Path, manifest: Path) -> list[str]:
             evidence = scenario.get("evidence")
             if not evidence or evidence not in seen:
                 errors.append(f"scenario evidence is not retained: {scenario.get('id')}")
-            elif "role" in next((entry for entry in artifacts if isinstance(entry, dict) and entry.get("path") == evidence), {} ) and artifact_roles.get(evidence) != scenario.get("id"):
-                errors.append(f"scenario evidence role mismatch: {scenario.get('id')} -> {evidence}")
             elif evidence in evidence_owners:
                 errors.append(f"scenario evidence is shared: {evidence} ({evidence_owners[evidence]}, {scenario.get('id')})")
+            elif not artifact_roles.get(evidence):
+                errors.append(f"scenario evidence role is missing: {scenario.get('id')}")
+            elif artifact_roles.get(evidence) != scenario.get("id"):
+                errors.append(f"scenario evidence role mismatch: {scenario.get('id')} -> {evidence}")
             else:
                 evidence_owners[evidence] = scenario.get("id")
     return errors
