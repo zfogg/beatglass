@@ -1,0 +1,23 @@
+{
+  "platforms": [
+    {
+      "platform": "windows",
+      "manifest": "tests\\platform\\fixtures\\readiness-bundles\\windows\\manifest.json",
+      "retained_artifacts": 1,
+      "errors": []
+    },
+    {
+      "platform": "macos",
+      "manifest": "tests\\platform\\fixtures\\readiness-bundles\\macos\\manifest.json",
+      "retained_artifacts": 1,
+      "errors": []
+    },
+    {
+      "platform": "linux",
+      "manifest": "tests\\platform\\fixtures\\readiness-bundles\\linux\\manifest.json",
+      "retained_artifacts": 1,
+      "errors": []
+    }
+  ],
+  "ready": true
+}

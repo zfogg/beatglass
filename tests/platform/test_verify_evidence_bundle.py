@@ -58,6 +58,16 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             (bundles / "windows" / "manifest.json").write_text(json.dumps(manifest({"path": "capture.txt", "sha256": "0" * 64})), encoding="utf-8")
             self.assertIn("platform does not match", "\n".join(readiness.check(status, bundles)))
 
+    def test_readiness_report_records_retention_and_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(manifest({"path": "capture.txt", "sha256": "0" * 64})), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertFalse(result["ready"])
+            self.assertEqual(result["platforms"][0]["retained_artifacts"], 1)
+            self.assertTrue(result["platforms"][0]["errors"])
+
 
 if __name__ == "__main__":
     unittest.main()
