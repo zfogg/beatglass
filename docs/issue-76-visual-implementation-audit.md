@@ -692,6 +692,8 @@ Display enumeration changes now follow the same focus contract: unplugging or lo
 
 Native geometry changes (including DPI/layout updates and monitor replacement) now resynchronize the preferred size and can complete a pending recovery when the saved display target is valid. Focus returns to Retry after the geometry path succeeds; native compositor timing still requires platform qualification.
 
+Geometry callbacks now update the preferred display, native position/size-derived preference, and an accessible geometry revision through one synchronization helper. The settings summary therefore reflects a coherent post-layout state rather than mixing values from different monitor/DPI events.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
