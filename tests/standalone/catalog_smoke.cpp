@@ -59,6 +59,9 @@ int main() {
   const auto missing = beatglass::library::browse(dir.path / "missing");
   require(missing.entries.empty() && !missing.diagnostic.empty(),
           "missing directory was not reported atomically");
+  const auto file_as_directory = beatglass::library::browse(dir.path / "notes.txt");
+  require(file_as_directory.entries.empty() && !file_as_directory.diagnostic.empty(),
+          "file path was not rejected as a catalog directory");
   require(beatglass::library::browse(dir.path, "ambient").entries.size() == 1,
           "FLAC extension was not discovered case-insensitively");
   require(beatglass::library::browse(dir.path, "live").entries.size() == 1,

@@ -35,6 +35,8 @@ def main() -> int:
         "playback frame actions accessible names": "Accessible.name: \"Seek to entered frame\"",
         "folder picker accessible name": "Accessible.name: \"Choose audio folder\"",
         "capture endpoint refresh accessible name": "Accessible.name: \"Refresh capture endpoints\"",
+        "overlay opacity status": "objectName: \"overlayOpacityValue\"",
+        "overlay display status": "objectName: \"overlayDisplayStatus\"",
         "visualization empty state": "objectName: \"visualizationEmptyState\"",
         "visualization data status": "objectName: \"visualizationDataStatus\"",
         "visualization capture status": "objectName: \"visualizationCaptureStatus\"",

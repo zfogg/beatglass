@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Overlay opacity and display status surfaces are now explicitly included in the static visual contract for display-routing recovery and state reporting.
+
 The visualization empty, data-availability, and capture-status surfaces are now explicitly covered by the static visual contract for waveform/FFT recovery and loading states.
 
 Playback error, position, seek-limitation, source-selection, and unavailable-build states are now explicitly asserted in the visual accessibility contract.
