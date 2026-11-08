@@ -556,6 +556,7 @@ ApplicationWindow {
                             text: window.selectedName || "No file selected"
                             font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio file: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -564,6 +565,7 @@ ApplicationWindow {
                             text: window.selectedAudioUrl.toString() !== "" ? "Source: " + window.selectedAudioUrl : "Source unavailable"
                             elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio source: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -571,6 +573,7 @@ ApplicationWindow {
                             objectName: "selectedAudioDuration"
                             text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
                             Accessible.name: "Selected audio duration: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap
