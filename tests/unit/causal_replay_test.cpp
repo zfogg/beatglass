@@ -64,6 +64,9 @@ TEST_CASE("causal tempo replay rejects invalid blocks and fails closed") {
   CausalTempoReplay invalid; std::vector<float> bad{std::numeric_limits<float>::quiet_NaN()};
   CHECK_THROWS(invalid.process(block(bad, 1, 0))); CHECK(invalid.state().state == TrackingState::error);
   CausalTempoReplay overflow; CHECK_THROWS(overflow.process(block(audio, 1, std::numeric_limits<std::uint64_t>::max()-1)));
+  CausalTempoReplay zero_epoch;
+  CHECK_THROWS_AS(zero_epoch.process(block(audio, 0, 0)), std::invalid_argument);
+  CHECK(zero_epoch.state().state == TrackingState::error);
 }
 TEST_CASE("causal tempo replay rejects old epochs and overlapping blocks") {
   auto audio = click_pcm(44100, 1);
