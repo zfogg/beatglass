@@ -1529,10 +1529,12 @@ ApplicationWindow {
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
                                 id: persistedRecoveryRuns
+                                activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
                                 model: visible ? storageRecovery.retryableRunIds : []
                                 enabled: visible && count > 0
                                 Accessible.name: "Persisted retryable analysis runs"
+                                Accessible.role: Accessible.ComboBox
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
                                 Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable."
