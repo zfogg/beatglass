@@ -494,6 +494,8 @@ The live data-status message reserves responsive line height, keeping populated 
 
 The stacked visualization status group stays top-aligned as labels wrap, keeping the evidence hierarchy anchored while the surrounding responsive layout changes height.
 
+The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
+
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
 
 The selection status/action row now uses vertical-center alignment, keeping wrapped status text and its clear button visually balanced as the compact layout changes height.
