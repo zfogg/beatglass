@@ -67,8 +67,13 @@ int main() {
     const auto reseeked = reader.read(samples);
     assert(reseeked.status == FileReadStatus::data && reseeked.block.first_frame == 1 && reseeked.block.epoch == 13);
   }
-  { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
-  { FileReader reader(wav, 8); assert(reader.source_changed()); }
+  {
+    FileReader reader(wav, 8);
+    assert(!reader.source_changed());
+    { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
+    { std::ofstream append(wav, std::ios::binary | std::ios::app); append.put('\2'); }
+    assert(reader.source_changed());
+  }
   const auto moved = wav.string() + ".moved";
   std::filesystem::rename(wav, moved);
   bool rename_failed = false;
