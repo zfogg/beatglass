@@ -140,6 +140,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             missing_artifacts = []
             mismatched_artifacts = []
             invalid_scenarios = []
+            missing_scenarios = sorted(verifier.REQUIRED_SCENARIOS)
             errors = [f"{platform}: missing manifest: {manifest}"]
         row_categories = Counter()
         for error in matrix_errors + errors:
@@ -171,7 +172,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         elif "stale" in error or "future" in error: categories["freshness"] += 1
         elif "missing artifact" in error or "missing manifest" in error: categories["retention"] += 1
         else: categories["manifest"] += 1
-    return {"platforms": rows, "error_count": len(errors), "failure_categories": dict(sorted(categories.items())), "errors": errors,
+    required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
+    return {"platforms": rows, "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
+            "required_scenario_summary": required, "errors": errors,
             "ready": not errors}
 
 
