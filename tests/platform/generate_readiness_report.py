@@ -33,6 +33,9 @@ def build_report(root: Path) -> dict:
         scenarios = {str(item.get("id")): item for item in manifest.get("scenarios", [])}
         scenario_inventory = [{"id": name, "status": scenarios.get(name, {}).get("status", "UNRUN"),
                                "evidence": scenarios.get(name, {}).get("evidence")} for name in SCENARIOS]
+        output_name = manifest.get("qualification_output", "")
+        output_path = bundle / output_name
+        output_hash = _sha(output_path) if output_path.is_file() else ""
         rows.append({"platform": platform,
                      "manifest": str(manifest_path),
                      "manifest_sha256": _sha(manifest_path),
@@ -42,6 +45,7 @@ def build_report(root: Path) -> dict:
                      "scenario_inventory": scenario_inventory,
                      "qualification_command": manifest.get("qualification_command", ""),
                      "qualification_output": manifest.get("qualification_output", ""),
+                     "qualification_output_sha256": output_hash,
                      "manifest_platform": manifest.get("platform"),
                      "provenance_complete": all(manifest.get(k) for k in ("platform", "commit", "captured_at", "environment")),
                      "errors": []})
