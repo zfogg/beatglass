@@ -310,6 +310,16 @@ TestCase {
         compare(state.Accessible.name, "Overlay availability")
         app.destroy()
     }
+    function test_overlayUnavailableOffersRetry() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        verify(retry !== null)
+        verify(retry.visible)
+        compare(retry.Accessible.description, "Retry showing the native DJ overlay")
+        app.destroy()
+        fakeOverlay.available = true
+    }
 
     function test_visualizationCanvasIsAccessible() {
         let app = shell.createObject(null)
