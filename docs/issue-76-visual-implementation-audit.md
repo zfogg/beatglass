@@ -251,3 +251,5 @@ Metadata recovery, source clearing, and waveform/FFT mode controls now explicitl
 Appearance reset and theme-preview choices now explicitly participate in keyboard traversal as well. Settings recovery and palette selection therefore share the same focus contract as the primary navigation and analysis controls.
 
 The settings output-device surface now exposes a contextual tooltip that mirrors its accessible value, keeping unavailable/default-device guidance discoverable for keyboard, assistive-technology, and pointer users.
+
+Appearance-state and settings-persistence summaries now expose contextual tooltips as well, making theme/motion state and the user-audio safety promise discoverable through the same visual and semantic channel.

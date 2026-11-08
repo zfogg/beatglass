@@ -1229,6 +1229,7 @@ ApplicationWindow {
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
+                            ToolTip.text: "Current theme and motion settings"
                             Layout.fillWidth: true
                         }
                     }
@@ -1239,6 +1240,7 @@ ApplicationWindow {
                     Accessible.name: "Settings status: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
+                    ToolTip.text: "Settings persistence and source-file safety"
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 Item { Layout.fillHeight: true }
