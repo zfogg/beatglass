@@ -297,8 +297,11 @@ ApplicationWindow {
                         }
                         Label {
                             anchors.centerIn: parent
+                            objectName: "browserEmptyState"
                             visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)
                             text: window.browseFolder.toString() ? "No matching audio files or folders, or this folder cannot be read." : "Choose a folder to browse."
+                            Accessible.name: "Library browser empty state"
+                            Accessible.description: text
                         }
                         RowLayout {
                             Layout.fillWidth: true
