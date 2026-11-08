@@ -291,16 +291,16 @@ printf 'artifact_sha256=%s\n' "$artifact_manifest" >> "$manifest"
 case_matrix="$out_dir/qualification-cases.tsv"
 cat > "$case_matrix" <<'CASES'
 case_id	status	evidence
-permission_prompt	UNRUN	
-capture_nonzero_timestamp	UNRUN	
-permission_revoke_recovery	UNRUN	
-output_switch_uid	UNRUN	
-fifo_exhaustion_recovery	UNRUN	
-overlay_visibility	UNRUN	
-overlay_click_through_recovery	UNRUN	
-overlay_display_change	UNRUN	
-overlay_fullscreen_spaces	UNRUN	
-menubar_dock_reopen	UNRUN	
+permission_prompt	UNRUN	-
+capture_nonzero_timestamp	UNRUN	-
+permission_revoke_recovery	UNRUN	-
+output_switch_uid	UNRUN	-
+fifo_exhaustion_recovery	UNRUN	-
+overlay_visibility	UNRUN	-
+overlay_click_through_recovery	UNRUN	-
+overlay_display_change	UNRUN	-
+overlay_fullscreen_spaces	UNRUN	-
+menubar_dock_reopen	UNRUN	-
 CASES
 printf 'case_matrix=%s\n' "$case_matrix" >> "$manifest"
 if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest" || ! grep -q '^sdk_path=.' "$manifest" || ! grep -q '^developer_dir=.' "$manifest" || ! grep -q '^desktop_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^tap_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^recovery_signing=\(verified\|unverified\)$' "$manifest" || [[ ! -s "$signing_log" || ! -s "$tap_signing_log" || ! -s "$recovery_signing_log" ]]; then
