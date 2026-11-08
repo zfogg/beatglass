@@ -28,8 +28,7 @@ class SourcePresentationGate {
 public:
   /** Apply a valid newer update; return false for malformed or stale input. */
   bool apply(SourcePresentationUpdate update) noexcept {
-    if (!update.session || !update.revision ||
-        (update.snapshot && !update.generation) ||
+    if (!update.session || !update.generation || !update.revision ||
         (seen_ && (update.session < session_ ||
                    (update.session == session_ && update.revision <= revision_) ||
                    (update.session == session_ && update.generation < generation_))))
