@@ -361,3 +361,5 @@ StorageOwner now exposes the same completed-result lookup at the storage lifetim
 Coordinator admission now returns cache hits without queueing decoder work and reserves a run before submitting misses. The explicit `Submission` result distinguishes cached, reserved, and rejected paths for the desktop lifecycle; retryable persistence remains worker-owned.
 Submission now uses coordinator admission: cache hits publish directly to the recovery result without creating a decoder handle, while misses reserve a run and enter the queued lifecycle.
 The Library UI now consumes the coordinator admission status and admitted result properties from the recovery bridge, keeping cache-hit and queued-miss identity visible separately.
+
+Library controls now expose coordinator completion status with explicit cancel and retry actions, distinct from cache lookup controls.
