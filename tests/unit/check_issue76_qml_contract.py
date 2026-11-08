@@ -20,6 +20,7 @@ def main() -> int:
         "visualization keyboard guidance": "Use Left and Right arrows to switch views",
         "capture control accessible name": "Accessible.name: text; Accessible.description: window.captureMonitorBridge",
         "playback pause accessible name": "Accessible.name: text + \" playback\"",
+        "playback stop accessible name": "Accessible.name: \"Stop playback\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
