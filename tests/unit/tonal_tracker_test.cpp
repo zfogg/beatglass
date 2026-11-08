@@ -29,6 +29,8 @@ TEST_CASE("tonal tracker detects generated triads and is independent of chunk si
   const auto a = whole.estimate(), b = arbitrary.estimate();
   REQUIRE(a.chord); CHECK(*a.chord == "C major"); CHECK(a.key); CHECK(a.chord == b.chord);
   CHECK(a.key_strength > 0.0f); CHECK(a.chord_strength > 0.0f);
+  CHECK(a.key.has_value() == a.key_strength.has_value());
+  CHECK(a.chord.has_value() == a.chord_strength.has_value());
   CHECK(a.key == b.key); CHECK(a.observed_through == b.observed_through); CHECK(a.observed_through <= pcm.size());
   auto minor = triad(220, 261.625565, 329.627557, 4096);
   chunks.process(minor, 4, 0); REQUIRE(chunks.estimate().chord); CHECK(*chunks.estimate().chord == "A minor");

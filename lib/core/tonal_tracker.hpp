@@ -50,7 +50,11 @@ public:
    * Invalid PCM, position overflow and DSP failures clear estimates; discard the object after a DSP failure.
    */
   void process(std::span<const float> samples, std::uint64_t epoch, std::uint64_t first, bool discontinuity = false);
-  /** Return an owned copy of the last completed analysis window, or unknown. */
+  /**
+   * Return an owned copy of the last completed analysis window, or unknown.
+   * Key and chord evidence are independent: one may be present while the
+   * other is unavailable or rejected as ambiguous.
+   */
   TonalEstimate estimate() const;
 private:
   struct Impl;
