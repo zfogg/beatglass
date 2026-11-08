@@ -58,7 +58,10 @@ Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
   if (stop.stop_requested()) return Publish::cancelled;
   cache.begin(run_id, key);
   return cache.publish(run_id, key, result, stop, [&] {
-    return revalidate_file_identity(path, key.content, stop) == FingerprintStatus::ok;
+    if (stop.stop_requested()) { cache.invalidate(key); return false; }
+    const auto status = revalidate_file_identity(path, key.content, stop);
+    if (status == FingerprintStatus::changed) cache.invalidate(key);
+    return status == FingerprintStatus::ok;
   });
 }
 
