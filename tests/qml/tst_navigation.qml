@@ -834,6 +834,18 @@ TestCase {
         compare(app.selectedThemeIndex, 5)
         app.destroy()
     }
+    function test_themePreviewStripHidesInCompactHeader() {
+        let app = shell.createObject(null)
+        let previews = findChild(app, "themePreviews")
+        verify(previews !== null)
+        app.width = 700
+        tryCompare(app, "compactHeader", true)
+        verify(!previews.visible)
+        app.width = 900
+        tryCompare(app, "compactHeader", false)
+        verify(previews.visible)
+        app.destroy()
+    }
     function test_themePreviewKeyboardFocusHasVisibleRing() {
         let app = shell.createObject(null)
         let preview = findChild(app, "themePreview4")

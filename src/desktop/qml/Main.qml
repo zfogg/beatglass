@@ -59,6 +59,7 @@ ApplicationWindow {
         onActivated: visualizationCanvas.viewMode = "spectrum"
     }
     property string selectedTheme: "Light"
+    readonly property bool compactHeader: width < 760
     readonly property var themeNames: ["Light", "Dark", "High contrast", "Purple", "Blue", "Yellow"]
     readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]
     readonly property var themeForegrounds: ["#20242b", "#f4f6fb", "#ffffff", "#f4eaff", "#eaf4ff", "#fffbe6"]
@@ -335,6 +336,7 @@ ApplicationWindow {
             Row {
                 id: themePreviews
                 objectName: "themePreviews"
+                visible: !window.compactHeader
                 spacing: 3
                 Repeater {
                     model: window.themeNames.length
