@@ -53,6 +53,25 @@ TEST_CASE("SQLite cache acceptance reuses unchanged identity without rerunning a
   REQUIRE(analyze_if_missing() == "result");
   CHECK(analysis_runs == 1);
 }
+TEST_CASE("SQLite cache acceptance reruns changed content and configuration identities") {
+  SqliteCache cache(":memory:");
+  const CacheKey original{"sha256:original", "engine", "config-v1", "offline"};
+  int analysis_runs = 0;
+  auto analyze_if_missing = [&](const CacheKey& key, const std::string& run_id) {
+    std::string cached;
+    if (cache.find(key, cached)) return cached;
+    ++analysis_runs;
+    cache.begin(run_id, key);
+    REQUIRE(cache.publish(run_id, key, "result-" + std::to_string(analysis_runs), {}, [] { return true; }) == Publish::committed);
+    return std::string("result-") + std::to_string(analysis_runs);
+  };
+  REQUIRE(analyze_if_missing(original, "original") == "result-1");
+  auto changed_content = original; changed_content.content = "sha256:changed";
+  REQUIRE(analyze_if_missing(changed_content, "changed-content") == "result-2");
+  auto changed_config = original; changed_config.config = "config-v2";
+  REQUIRE(analyze_if_missing(changed_config, "changed-config") == "result-3");
+  CHECK(analysis_runs == 3);
+}
 TEST_CASE("SQLite cache rejects incomplete identities before creating runs") {
   SqliteCache cache(":memory:");
   REQUIRE_THROWS_AS(cache.begin("run", {"", "engine", "config", "offline"}), std::invalid_argument);
