@@ -77,6 +77,10 @@ and batch `discardBatch()` clear the retained handles, displayed result,
 diagnostic, progress, counters and terminal status, returning the bridge to
 `Idle`. They never remove source audio or mutate persisted library records;
 discarding a persisted retry remains a storage-owner operation.
+The bridge exposes a status announcement (`Single analysis recovery discarded`
+or `Batch analysis recovery discarded`) after reset so single and batch UI
+surfaces remain synchronized and assistive technology can distinguish a clean
+reset from an unreported failure.
 
 The focused CTest remains the authoritative executable regression. On the
 current Windows development host it is not claimed here because rebuilding
