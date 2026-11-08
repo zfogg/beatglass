@@ -20,6 +20,13 @@ TEST_CASE("Render endpoint discovery returns owned unique identities") {
   }
   REQUIRE(defaults <= 1);
 }
+TEST_CASE("Endpoint selection validates snapshot and reports discovery state") {
+  using namespace beatglass::windows;
+  EndpointResult snapshot{{{"id-1", "Speakers", true}}, {}};
+  REQUIRE(select_render_endpoint(snapshot, "id-1") == SelectionResult::accepted);
+  REQUIRE(select_render_endpoint(snapshot, "stale") == SelectionResult::invalid_id);
+  REQUIRE(select_render_endpoint({{}, "device change"}, "id-1") == SelectionResult::discovery_failed);
+}
 
 TEST_CASE("Discovery works in an existing STA without uninitializing it") {
   const auto initialized = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
