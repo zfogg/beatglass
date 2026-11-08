@@ -21,6 +21,14 @@ class ReadinessReportContractTest(unittest.TestCase):
                   "platform_support_status": [{"platform": p} for p in ("windows", "macos", "linux")]}
         self.assertIn("READY report cannot contain", "\n".join(module.validate(report)))
 
+    def test_report_rejects_non_object_platform_rows(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"].append("windows")
+        report["platform_support_status"].append("linux")
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("platforms must contain exactly", errors)
+        self.assertIn("platform_support_status must contain exactly", errors)
+
     def test_report_requires_platform_manifest_and_provenance_linkage(self):
         report = __import__("json").loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
         report["platforms"][0].pop("manifest_sha256")
