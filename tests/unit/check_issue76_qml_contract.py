@@ -26,7 +26,7 @@ def main() -> int:
         "playback device current selection": "Current output device: \" + currentText",
         "native playback selected format": "Start native playback at \" + playbackSampleRate.value",
         "overlay action accessible names": "Accessible.name: \"Show DJ overlay\"",
-        "playback status static role": "objectName: \"playbackState\"; Accessible.name: \"Playback state\"; Accessible.role: Accessible.StaticText",
+        "playback status static role": "objectName: \"playbackState\"; Accessible.name: \"Playback state: \" + text; Accessible.role: Accessible.StaticText",
         "overlay retry accessible name": "Accessible.name: \"Retry DJ overlay\"",
         "overlay unlock accessible name": "Accessible.name: \"Unlock DJ overlay\"",
         "click-through action accessible name": "Accessible.name: checked ? \"Disable click-through\"",
@@ -60,6 +60,7 @@ def main() -> int:
         "generation status role": "objectName: \"visualizationRevisionStatus\"",
         "canvas selection announcement": "Selected position \" + Math.round(visualizationCanvas.selectedPosition * 100)",
         "dynamic sort and output descriptions": "Current order: \" + (window.sortDescending ? \"descending\"",
+        "dynamic visualization and playback names": "Accessible.name: \"Live \" + (visualizationCanvas.viewMode",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
