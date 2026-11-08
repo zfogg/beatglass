@@ -164,6 +164,15 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles)
             self.assertEqual(result["platforms"][0]["missing_provenance"], ["environment"])
 
+    def test_readiness_reports_missing_scenarios(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platforms"][0]["missing_scenarios"], ["display", "output", "overlay", "playback", "recovery"])
+
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
