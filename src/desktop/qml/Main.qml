@@ -183,7 +183,7 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 14; spacing: 4
                 RowLayout {
                     Layout.fillWidth: true
-                    Label { text: "Beatglass · " + window.liveBridge.status; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight }
+                    Label { text: "Beatglass · " + window.liveBridge.status; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                     Button {
                         text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.description: "Hide the overlay window and restore the control window"
                         visible: window.overlayBridge && !window.overlayBridge.clickThrough
@@ -505,7 +505,7 @@ ApplicationWindow {
                             SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
                             SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
                             Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096) }
-                            Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state"; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                            Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                             Label { text: window.playbackBridge ? window.playbackBridge.nativeError : ""; objectName: "nativePlaybackError"; Accessible.name: "Native playback error"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native playback error details"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                             Button { text: "Retry native"; objectName: "retryNativePlayback"; enabled: window.playbackBridge && window.playbackBridge.nativeError !== ""; Accessible.name: "Retry native playback"; Accessible.role: Accessible.Button; Accessible.description: "Retry starting native playback after an output error"; ToolTip.text: "Retry native playback after the output error"; onClicked: window.playbackBridge.retryNative() }
                             Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.name: "Reopen selected playback source"; Accessible.description: "Replace the current playback source with the selected audio source"; ToolTip.text: "Replace playback with the selected audio source"; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1) }
@@ -1093,6 +1093,7 @@ ApplicationWindow {
                                 visible: window.endpointSelectionBridge && window.endpointSelectionBridge.endpoints.length === 0
                                 text: "No output endpoints detected. Refresh after connecting an output device."
                                 Accessible.name: "Output endpoint empty state"
+                                Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 wrapMode: Text.WordWrap
@@ -1142,6 +1143,7 @@ ApplicationWindow {
                             Accessible.name: "Audio capture permission guidance"
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
+                            Accessible.description: text
                         }
                     }
                 }
