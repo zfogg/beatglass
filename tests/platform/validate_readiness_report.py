@@ -177,6 +177,16 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         manifest_paths = [item.get("path") for item in manifest_data.get("artifacts", []) if isinstance(item, dict)]
         if set(report_paths) != set(manifest_paths):
             errors.append(f"{platform}: report artifact inventory does not match manifest")
+        if "retained_artifacts" in row and row.get("retained_artifacts") != len(manifest_paths):
+            errors.append(f"{platform}: retained artifact count does not match manifest")
+        if "retained_bytes" in row:
+            actual_retained_bytes = sum(
+                (bundles / platform / path).stat().st_size
+                for path in manifest_paths
+                if isinstance(path, str) and (bundles / platform / path).is_file()
+            )
+            if row.get("retained_bytes") != actual_retained_bytes:
+                errors.append(f"{platform}: retained byte count does not match manifest")
         report_roles = {item.get("path"): item.get("role") for item in report_inventory if isinstance(item, dict) and item.get("role")}
         manifest_roles = {item.get("path"): item.get("role") for item in manifest_data.get("artifacts", []) if isinstance(item, dict)}
         if report_roles and report_roles != manifest_roles:
