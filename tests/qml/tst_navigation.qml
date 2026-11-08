@@ -114,6 +114,17 @@ TestCase {
         app.destroy()
     }
 
+    function test_themePreviewsExposeAccessibleChoices() {
+        let app = shell.createObject(null)
+        for (let i = 0; i < 6; ++i) {
+            let preview = findChild(app, "themePreview" + i)
+            verify(preview !== null)
+            verify(preview.Accessible.name.length > 0)
+            compare(preview.Accessible.description, "Select " + app.themeNames[i] + " theme")
+        }
+        app.destroy()
+    }
+
     function test_djStatusAndEstimatesAreAccessible() {
         let app = shell.createObject(null)
         let status = findChild(app, "djStatus")
