@@ -28,7 +28,16 @@ int main() {
     bool invalid_mode_rejected = false;
     try { cache.begin("invalid-mode", CacheKey{key.content, key.engine, key.config, "unknown"}); }
     catch (const std::invalid_argument&) { invalid_mode_rejected = true; }
-    assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected && invalid_mode_rejected);
+    bool empty_engine_rejected = false;
+    try { cache.begin("empty-engine", CacheKey{key.content, "", key.config, key.mode}); }
+    catch (const std::invalid_argument&) { empty_engine_rejected = true; }
+    bool empty_config_rejected = false;
+    try { cache.begin("empty-config", CacheKey{key.content, key.engine, "", key.mode}); }
+    catch (const std::invalid_argument&) { empty_config_rejected = true; }
+    bool empty_mode_rejected = false;
+    try { cache.begin("empty-mode", CacheKey{key.content, key.engine, key.config, ""}); }
+    catch (const std::invalid_argument&) { empty_mode_rejected = true; }
+    assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected && invalid_mode_rejected && empty_engine_rejected && empty_config_rejected && empty_mode_rejected);
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
