@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$OutputDir = "", [string]$Compiler = "g++", [switch]$ContinueOnFailure)
+param([string]$OutputDir = "", [string]$Compiler = "g++", [string[]]$SelectedCases = @(), [string]$OpenSSLRoot = "", [switch]$ListCases, [switch]$ContinueOnFailure)
 
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
@@ -34,20 +34,29 @@ $cases = @(
   @{ Name = "job_lifecycle"; Sources = @("tests/standalone/job_lifecycle_smoke.cpp") },
   @{ Name = "retryable_analysis"; Sources = @($runnerSources + "tests/standalone/retryable_analysis_smoke.cpp") }
 )
+if (-not [string]::IsNullOrWhiteSpace($OpenSSLRoot)) { $cases += @{ Name = "file_fingerprint"; Sources = @("lib/library/file_fingerprint.cpp", "tests/standalone/file_fingerprint_smoke.cpp"); Extra = @("-I$OpenSSLRoot/include", "-L$OpenSSLRoot/lib", "-lcrypto") } }
+if ($ListCases) { $cases | ForEach-Object { $_.Name }; exit 0 }
+if ($SelectedCases.Count -gt 0) { $cases = @($cases | Where-Object { $SelectedCases -contains $_.Name }) }
+if ($cases.Count -eq 0) { throw "No smoke cases selected" }
 
 $passed = [System.Collections.Generic.List[string]]::new()
 $failed = [System.Collections.Generic.List[string]]::new()
+$log = [System.Collections.Generic.List[string]]::new()
 Push-Location $repo
 try {
   foreach ($case in $cases) {
     $binary = Join-Path $OutputDir "$($case.Name).exe"
     try {
-      & $Compiler @common $case.Sources -o $binary
+      $extra = if ($null -ne $case.Extra) { $case.Extra } else { @() }
+      $compilerArgs = @($common + $case.Sources + $extra + @("-o", $binary))
+      $log.Add("$Compiler $($compilerArgs -join ' ')")
+      $started = [DateTime]::UtcNow
+      & $Compiler @compilerArgs
       if ($LASTEXITCODE -ne 0) { throw "compile failed" }
       & $binary
       if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
       $passed.Add($case.Name)
-      Write-Output "PASS $($case.Name)"
+      Write-Output ("PASS {0} ({1:n2}s)" -f $case.Name, ([DateTime]::UtcNow - $started).TotalSeconds)
     } catch {
       $failed.Add($case.Name)
       Write-Error "FAIL $($case.Name): $_"
@@ -57,5 +66,6 @@ try {
 } finally { Pop-Location }
 $summary = "passed=$($passed.Count); failed=$($failed.Count); total=$($cases.Count)"
 $summary | Set-Content -Path (Join-Path $OutputDir "summary.txt")
+$log | Set-Content -Path (Join-Path $OutputDir "commands.log")
 if ($failed.Count -gt 0) { throw "Standalone library smokes failed: $($failed -join ', ')" }
 Write-Output "Standalone library smokes $summary"
