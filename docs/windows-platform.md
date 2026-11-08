@@ -22,6 +22,15 @@ integration remain outstanding. WASAPI loopback captures the shared endpoint
 mix; exclusive-mode, ASIO and other paths that bypass that mix are not guaranteed
 to be captured. Playback is not rerouted.
 
+The Qt endpoint bridge exposes `selectionLost` alongside the selected endpoint.
+A refresh that discovers the selected render endpoint has vanished, or that
+endpoint discovery failed, clears the selection and raises this flag; selecting
+a currently enumerated endpoint clears it. The desktop can show an explicit
+recovery state and require a deliberate replacement instead of silently
+retaining a dead device identity. This is control-thread state and does not
+claim that a new endpoint has been opened or that WASAPI capture has recovered;
+the capture session still needs a fresh start and epoch.
+
 On Windows 11 Home 10.0.26300 x64, base commit `6f927cb` plus this increment,
 GCC 15.2.0 and Ninja, the following configured and built the core and Windows
 endpoint tests outside the source tree, and CTest passed 24/24:
