@@ -273,4 +273,4 @@ The remaining Issue #1 exit gate is explicit: perform supported Windows WASAPI, 
 The readiness report contract is versioned as `readiness_report_schema: 1`; `exit_gate_status` and `exit_gate_reason_codes` are the stable handoff fields. Product support language remains experimental while native qualification is open.
 
 ## Cache acceptance integration
-A cache acceptance regression now demonstrates that a committed unchanged identity is found on the next analysis request and the analysis callback is not rerun. Changed identity and configuration invalidation remain covered by the existing cache lifecycle tests; end-to-end decoder/UI integration and native qualification remain pending.
+A cache acceptance regression demonstrates that a committed unchanged identity is found on the next analysis request and the analysis callback is not rerun. Changed identity and configuration invalidation remain covered by lifecycle tests; decoder/UI integration and native qualification remain pending.
