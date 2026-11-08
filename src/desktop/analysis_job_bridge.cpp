@@ -1,0 +1,3 @@
+#include "analysis_job_bridge.hpp"
+QString AnalysisJobBridge::status()const{switch(job_.snapshot().status){case beatglass::JobStatus::running:return "Running";case beatglass::JobStatus::cancelled:return "Cancelled";case beatglass::JobStatus::failed:return "Failed";case beatglass::JobStatus::complete:return "Complete";default:return "Queued";}}
+bool AnalysisJobBridge::start(){auto ok=job_.start();if(ok)emit changed();return ok;} bool AnalysisJobBridge::cancel(){auto ok=job_.cancel();if(ok)emit changed();return ok;} bool AnalysisJobBridge::retry(){auto ok=job_.retry();if(ok)emit changed();return ok;} bool AnalysisJobBridge::complete(){auto ok=job_.progress(100)&&job_.complete();if(ok)emit changed();return ok;}
