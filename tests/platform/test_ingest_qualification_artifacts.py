@@ -22,3 +22,18 @@ class QualificationIngestTest(unittest.TestCase):
             data = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(data["artifacts"][0]["path"], "build/app.bin")
             self.assertTrue(all(item["status"] == "PENDING" for item in data["scenarios"]))
+
+    def test_rejects_tampered_retained_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "build" / "app.bin"; artifact.parent.mkdir(); artifact.write_bytes(b"changed")
+            (root / "qualification-artifacts.sha256").write_text("0" * 64 + "  build/app.bin\n", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text("platform=windows\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("hash mismatch" in error for error in errors))
+
+    def test_rejects_escaping_artifact_entry(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "qualification-artifacts.sha256").write_text("0" * 64 + "  ../escape.bin\n", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text("platform=windows\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("missing or escaping artifact" in error for error in errors))

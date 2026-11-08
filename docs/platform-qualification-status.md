@@ -202,3 +202,5 @@ The report consumer is `python tests/platform/consume_readiness_handoff.py <repo
 Portable regression coverage executes the cross-platform qualification script syntax/required-artifact dry run when PowerShell is available and checks the macOS verifier shell syntax when Bash is available. These dry runs exercise script wiring and artifact-tool presence only; they do not establish native device, desktop, audio, or overlay qualification.
 
 Native script output can be ingested with `python tests/platform/ingest_qualification_artifacts.py <qualification-output> <bundle>/manifest.json`. The ingester verifies listed hashes and path containment, carries forward identity metadata, and emits all native scenarios as `PENDING`; it never upgrades script output to qualification by itself.
+
+Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.
