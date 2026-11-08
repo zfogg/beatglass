@@ -1024,7 +1024,7 @@ ApplicationWindow {
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
                                     Accessible.name: "Output capture endpoint"
-                                    Accessible.description: "Choose the output endpoint used for live capture."
+                                    Accessible.description: currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture."
                                     onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
                                 }
                                 Button { text: "Refresh"; objectName: "refreshEndpoints"; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.description: "Refresh the available output capture endpoints."; onClicked: window.endpointSelectionBridge.refresh() }
