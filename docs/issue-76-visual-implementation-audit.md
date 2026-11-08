@@ -650,4 +650,6 @@ Overlay relaunch now reports when persisted geometry was restored and keeps the 
 
 Settings now exposes a dedicated Restore overlay affordance. It follows the production relaunch path, which reuses persisted display, position, size, and opacity state, while retaining the visible control-window fallback if the native overlay cannot be restored.
 
+The restore status now surfaces the native bridge's persisted display and opacity alongside geometry. If the bridge cannot provide those values, the UI labels the restore state unavailable and keeps the control-window fallback explicit.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
