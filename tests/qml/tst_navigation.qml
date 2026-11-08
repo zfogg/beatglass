@@ -24,6 +24,17 @@ TestCase {
         function seek(frame, nextEpoch) { currentFrame = frame; epoch = nextEpoch; return true }
     }
     QtObject {
+        id: fakeAnalysis
+        property string status: "Queued"
+        property int frames: 0
+        property bool canCancel: false
+        property bool canRetry: false
+        property int cancels: 0
+        property int retries: 0
+        function cancel() { cancels++ ; status = "Cancelled"; canCancel = false; canRetry = true }
+        function retry() { retries++; status = "Queued"; canRetry = false; canCancel = true }
+    }
+    QtObject {
         id: fakeThemePreferences
         property int themeIndex: 0
         property bool reduceMotion: false
@@ -50,6 +61,7 @@ TestCase {
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
     Component { id: shellWithPlayback; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackBridge: fakePlayback } }
+    Component { id: shellWithAnalysis; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; analysisJobBridge: fakeAnalysis } }
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
@@ -343,6 +355,18 @@ TestCase {
         verify(indicator.visible)
         verify(indicator.running)
         compare(indicator.Accessible.name, "Analysis waiting indicator")
+        app.destroy()
+    }
+    function test_analysisLifecycleControlsUseBridge() {
+        fakeAnalysis.status = "Running"; fakeAnalysis.frames = 42; fakeAnalysis.canCancel = true; fakeAnalysis.canRetry = false; fakeAnalysis.cancels = 0; fakeAnalysis.retries = 0
+        let app = shellWithAnalysis.createObject(null)
+        app.selectedName = "source.wav"
+        let progress = findChild(app, "analysisProgress")
+        compare(progress.text, "Running · observed 42 frames.")
+        let cancel = findChild(app, "cancelAnalysis")
+        verify(cancel.visible); verify(cancel.enabled); cancel.clicked(); compare(fakeAnalysis.cancels, 1)
+        let retry = findChild(app, "retryAnalysis")
+        verify(retry.enabled); retry.clicked(); compare(fakeAnalysis.retries, 1)
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
