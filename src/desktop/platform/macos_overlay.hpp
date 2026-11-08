@@ -45,7 +45,7 @@ public:
   Q_INVOKABLE bool showOverlay();
   /** Hide and attempt to unlock the overlay. */
   Q_INVOKABLE void hideOverlay();
-  /** Set whole-window opacity, clamped to [0,1]; ignore non-finite input. */
+  /** Set whole-window opacity, clamped to the visible range [0.2,1]; ignore non-finite input. */
   Q_INVOKABLE void setOpacity(qreal value);
   /** Return the current overlay opacity or the default before attachment. */
   qreal opacity() const;
