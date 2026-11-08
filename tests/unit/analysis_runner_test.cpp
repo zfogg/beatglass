@@ -30,3 +30,15 @@ TEST_CASE("analysis runner submits bounded batches in source order") {
 }
 TEST_CASE("analysis operation validity bounds cache identity fields") { auto invalid=op(true); invalid.identity.mode="unknown"; CHECK_FALSE(invalid.valid()); invalid=op(true); invalid.identity.configuration_id.assign(4097, 'x'); CHECK_FALSE(invalid.valid()); }
 TEST_CASE("analysis operation validity requires serialization and verification callbacks") { auto missing=op(true); missing.serialize={}; CHECK_FALSE(missing.valid()); missing=op(true); missing.verify={}; CHECK_FALSE(missing.valid()); }
+TEST_CASE("retryable analysis reuses source identity after a failed attempt") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); int attempts = 0;
+  auto operation = op(true);
+  operation.verify = [&](std::stop_token) { ++attempts; return beatglass::FileVerificationResult{attempts == 1 ? beatglass::FileVerificationOutcome::changed : beatglass::FileVerificationOutcome::match}; };
+  auto retryable = runner.submit_retryable(std::move(operation)); REQUIRE(retryable);
+  for (int i = 0; i < 1000 && (retryable->state() == TrackedState::queued || retryable->state() == TrackedState::running); ++i) std::this_thread::yield();
+  REQUIRE(retryable->state() == TrackedState::failed);
+  REQUIRE(retryable->retry(1));
+  for (int i = 0; i < 1000 && (retryable->state() == TrackedState::queued || retryable->state() == TrackedState::running); ++i) std::this_thread::yield();
+  CHECK(retryable->state() == TrackedState::completed); CHECK(attempts == 2); CHECK(retryable->frames() == 12);
+  executor.shutdown();
+}
