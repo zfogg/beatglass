@@ -89,6 +89,10 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: invalid retained artifact count")
             if not isinstance(item.get("retained_bytes"), int) or item["retained_bytes"] < 0:
                 errors.append(f"{item.get('platform')}: invalid retained byte count")
+            scenario_inventory = item.get("scenario_inventory")
+            scenario_ids = {str(entry.get("id")) for entry in scenario_inventory if isinstance(entry, dict)} if isinstance(scenario_inventory, list) else set()
+            if not isinstance(scenario_inventory, list) or len(scenario_inventory) != len(REQUIRED_SCENARIOS) or scenario_ids != REQUIRED_SCENARIOS:
+                errors.append(f"{item.get('platform')}: scenario inventory must contain exactly the required scenario set")
             evidence_hashes = item.get("scenario_evidence_sha256")
             if not isinstance(evidence_hashes, dict):
                 errors.append(f"{item.get('platform')}: missing scenario evidence hashes")

@@ -86,6 +86,12 @@ class ReadinessReportContractTest(unittest.TestCase):
         self.assertIn("invalid retained artifact count", errors)
         self.assertIn("invalid retained byte count", errors)
 
+    def test_report_requires_complete_scenario_inventory(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0]["scenario_inventory"] = report["platforms"][0]["scenario_inventory"][:-1]
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("scenario inventory must contain exactly the required scenario set", errors)
+
     def test_report_rejects_non_hex_digests(self):
         report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
         report["platforms"][0]["manifest_sha256"] = "z" * 64
