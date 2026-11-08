@@ -45,11 +45,12 @@ int main() {
     const auto partial_second = reader.read(partial_samples);
     assert(partial_second.status == FileReadStatus::data && partial_second.block.samples.size() == 2 && partial_second.block.first_frame == 2);
     std::vector<float> samples(4);
+    reader.seek(0);
     const auto first = reader.read(samples);
-    assert(first.status == FileReadStatus::data && first.block.start_frame == 0 && first.block.epoch == 7);
+    assert(first.status == FileReadStatus::data && first.block.first_frame == 0 && first.block.epoch == 8);
     reader.seek(2, 9);
     const auto seeked = reader.read(samples);
-    assert(seeked.status == FileReadStatus::data && seeked.block.start_frame == 2 && seeked.block.epoch == 9);
+    assert(seeked.status == FileReadStatus::data && seeked.block.first_frame == 2 && seeked.block.epoch == 9);
     bool stale_epoch = false;
     try { reader.seek(0, 9); } catch (const std::invalid_argument&) { stale_epoch = true; }
     assert(stale_epoch);

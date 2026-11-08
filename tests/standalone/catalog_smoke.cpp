@@ -37,19 +37,23 @@ int main() {
   dir.file("notes.txt");
   dir.file("stream.ogg");
   std::filesystem::create_directory(dir.path / "Mixes");
+  std::filesystem::create_directory(dir.path / "Folder.WAV");
 
   const auto result = beatglass::library::browse(dir.path);
   require(result.diagnostic.empty(), "unexpected browse diagnostic");
-  require(result.entries.size() == 7, "supported files were not advertised");
+  require(result.entries.size() == 8, "supported files were not advertised");
   require(result.entries[0].name == "Alpha.mp3", "case-folded ordering changed");
-  require(result.entries[4].name == "Mixes", "directory navigation entry missing");
-  require(result.entries[6].name == "zeta.WAV", "supported audio entry missing");
+  require(result.entries[5].name == "Mixes", "directory navigation entry missing");
+  require(result.entries[7].name == "zeta.WAV", "supported audio entry missing");
   require(result.entries[0].title == "Alpha" && result.entries[0].format == "MP3",
           "audio display metadata was not derived from the filename");
   require(result.entries[0].bytes == 5 && result.entries[0].duration_seconds < 0.0,
           "filesystem-only catalog metadata contract changed");
-  require(result.entries[4].directory && result.entries[4].bytes == 0,
+  require(result.entries[5].directory && result.entries[5].bytes == 0,
           "directory entry metadata was not normalized");
+  const auto extension_named_directory = beatglass::library::browse(dir.path, "folder");
+  require(extension_named_directory.entries.size() == 1 && extension_named_directory.entries[0].directory,
+          "directory with an audio-like extension was filtered as a file");
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
   require(filtered.entries.empty(), "filter returned an unexpected entry");
@@ -118,6 +122,7 @@ int main() {
           "directory-to-file replacement was not classified as audio");
   std::filesystem::remove(dir.path / "Gamma.mp3");
   std::filesystem::remove_all(dir.path / "Mixes");
+  std::filesystem::remove_all(dir.path / "Folder.WAV");
   const auto after_directory_remove = beatglass::library::browse(dir.path, "mix");
   require(after_directory_remove.entries.empty() && after_directory_remove.diagnostic.empty(),
           "removed navigation directory remained visible");
