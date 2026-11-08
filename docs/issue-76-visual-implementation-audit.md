@@ -556,6 +556,8 @@ Shortcut and pointer recovery actions now publish the same live accessible statu
 
 The announcement lifecycle now also updates on analysis cancellation, endpoint changes, and capture/source resets. Each transition explains that the current snapshot is stale or awaiting replacement, so recovery feedback cannot remain stuck on an earlier playback action.
 
+Recovery announcements now share a helper that restores focus to the visualization canvas. Cancellation, endpoint transitions, source/discontinuity clears, and playback recovery therefore leave keyboard users at the next actionable visualization target while preserving the same status wording.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
