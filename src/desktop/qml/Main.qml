@@ -516,9 +516,9 @@ ApplicationWindow {
                             Button { text: "Seek"; objectName: "seekToFrame"; enabled: seekFrame.enabled; Accessible.name: "Seek to entered frame"; Accessible.description: "Seek playback to the entered audio frame"; ToolTip.text: "Seek playback to the entered source frame"; onClicked: window.playbackBridge.seek(seekFrame.value, window.playbackBridge.epoch + 1) }
                             ComboBox { objectName: "playbackDevice"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Playback output device"; Accessible.role: Accessible.ComboBox; Accessible.value: currentText; Accessible.description: currentText !== "" ? "Current output device: " + currentText + ". Choose the native playback output device." : "No output device selected. Choose the native playback output device."; ToolTip.text: "Choose the output device used for native playback"; onActivated: if (window.playbackBridge) window.playbackBridge.deviceId = currentIndex >= 0 ? currentIndex : -1 }
                             Button { text: "Refresh outputs"; objectName: "refreshPlaybackDevices"; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Refresh playback outputs"; Accessible.description: "Refresh native playback output devices"; ToolTip.text: "Refresh the available playback output devices"; onClicked: window.playbackBridge.refreshDevices() }
-                            Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState"; Accessible.name: "Playback state: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current native playback state" }
+                            Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState"; Accessible.name: "Playback state: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.state : "unavailable"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current native playback state" }
                             Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current playback source"; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                            Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
+                            Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.currentFrame : 0; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
                             Label { text: window.playbackBridge && window.playbackBridge.state !== "Stopped" ? "Seek uses audio frames; track duration is not available yet." : ""; objectName: "playbackSeekLimitation"; Accessible.name: "Playback seek limitation"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Playback seek currently uses source audio frames"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                             Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
                         }
@@ -784,7 +784,8 @@ ApplicationWindow {
                     Label {
                         text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"
                         objectName: "visualizationModeStatus"
-                        Accessible.name: "Visualization mode: " + text
+                    Accessible.name: "Visualization mode: " + text
+                    Accessible.value: visualizationCanvas.viewMode
                         Accessible.role: Accessible.StaticText
                         Accessible.description: text + ". Use Left and Right arrows to switch views, or Ctrl+1 and Ctrl+2."
                     }
@@ -1136,6 +1137,7 @@ ApplicationWindow {
                             objectName: "appearanceState"
                             text: "Theme: " + window.selectedTheme + " · Motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Accessible.name: "Current appearance settings: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             Layout.fillWidth: true

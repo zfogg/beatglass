@@ -66,6 +66,8 @@ Reduced-motion and click-through state plus playback format and overlay opacity 
 
 Seek target, playback device, overlay size, and waveform/FFT selected-state values are now explicit accessibility values as well.
 
+Playback state/frame, visualization mode, and current appearance settings now expose explicit accessibility values for state-aware assistive technology output.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
