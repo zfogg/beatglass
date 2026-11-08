@@ -23,6 +23,8 @@ public:
   library_detail::SqliteCache* cache() noexcept { return cache_.get(); }
   /** Find a completed cached result by identity on the storage worker. Returns false while closed or on a miss. */
   bool find_cached(const AnalysisIdentity& identity, std::string& result) const;
+  /** Invalidate one completed identity on the storage worker; never removes source files or retry records. */
+  bool invalidate_cached(const AnalysisIdentity& identity);
   /** Publish a verified decoder/analysis result through the open cache, or return an error while closed. */
   library_detail::Publish publish_analysis(const std::string& run_id, const AnalysisOperation& operation,
                                            std::stop_token stop = {});

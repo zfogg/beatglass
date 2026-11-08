@@ -69,6 +69,21 @@ TEST_CASE("storage owner exposes cache admission boundary") {
     auto admission = owner.admit_analysis("closed-admission", {"sha256:closed", "engine", "config", "offline"});
     CHECK_FALSE(admission.cached.has_value()); CHECK_FALSE(admission.analysis_reserved);
 }
+TEST_CASE("storage owner invalidates one cached identity without affecting another") {
+  beatglass::library::StorageOwner owner;
+  REQUIRE(owner.open_storage({":memory:"}));
+  const beatglass::library::AnalysisIdentity first{"first", "engine", "config", "offline"};
+  const beatglass::library::AnalysisIdentity second{"second", "engine", "config", "offline"};
+  owner.cache()->begin("first-run", {"first", "engine", "config", "offline"});
+  REQUIRE(owner.cache()->publish("first-run", {"first", "engine", "config", "offline"}, "first-result", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  owner.cache()->begin("second-run", {"second", "engine", "config", "offline"});
+  REQUIRE(owner.cache()->publish("second-run", {"second", "engine", "config", "offline"}, "second-result", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  REQUIRE(owner.invalidate_cached(first));
+  std::string result;
+  CHECK_FALSE(owner.find_cached(first, result));
+  REQUIRE(owner.find_cached(second, result));
+  CHECK(result == "second-result");
+}
 
 TEST_CASE("coordinator admission replaces decoder on cache hit") {
   beatglass::library::AnalysisCoordinator coordinator;
