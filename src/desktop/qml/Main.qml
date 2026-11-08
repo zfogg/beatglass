@@ -604,7 +604,7 @@ ApplicationWindow {
                             enabled: visible
                             Accessible.name: "Retry metadata"
                             Accessible.role: Accessible.Button
-                            Accessible.description: "Retry reading metadata for the selected audio source after an error."
+                            Accessible.description: "Retry reading metadata for the selected audio source after an error. Current status: " + window.metadataStatus
                             onClicked: window.metadataBridge.inspect(window.selectedAudioUrl)
                         }
                         Label {
