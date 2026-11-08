@@ -31,6 +31,8 @@ int main() {
   dir.file("ambient.FLAC");
   dir.file("live.AIFF");
   dir.file("take.aif");
+  dir.file("podcast.m4a");
+  dir.file("voice.AAC");
   dir.file("notes.txt");
   dir.file("stream.ogg");
   std::filesystem::create_directory(dir.path / "Mixes");
@@ -62,6 +64,10 @@ int main() {
           "AIFF extension was not discovered case-insensitively");
   require(beatglass::library::browse(dir.path, "take").entries.size() == 1,
           "AIF extension was not discovered case-insensitively");
+  require(beatglass::library::browse(dir.path, "podcast").entries.empty(),
+          "M4A extension was incorrectly advertised");
+  require(beatglass::library::browse(dir.path, "voice").entries.empty(),
+          "AAC extension was incorrectly advertised");
   std::filesystem::remove(dir.path / "Alpha.mp3");
   const auto after_remove = beatglass::library::browse(dir.path, "alpha");
   require(after_remove.entries.empty() && after_remove.diagnostic.empty(),
