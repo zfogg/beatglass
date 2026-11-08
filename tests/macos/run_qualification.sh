@@ -107,6 +107,7 @@ else
 fi
 test_filter='^(macos_overlay_|macos_native_overlay$)'
 registered_tests="$(ctest --test-dir "$out_dir/build" -N -R "$test_filter")"
+printf '%s\n' "$registered_tests" > "$out_dir/overlay-ctest-discovery.log"
 if ! grep -Eq 'Total Tests: [1-9][0-9]*' <<<"$registered_tests"; then
   echo "No macOS overlay tests are registered for qualification" >&2
   exit 1
