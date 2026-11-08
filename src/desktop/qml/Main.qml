@@ -475,7 +475,12 @@ ApplicationWindow {
                     ToolTip.text: "Current filtered catalog result count"
                 }
                 Frame {
+                    objectName: "browserFrame"
                     Layout.fillWidth: true; Layout.fillHeight: true
+                    Accessible.name: "Library folder browser"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Browse folders and audio files in the current location."
+                    ToolTip.text: "Library folder and audio-file browser"
                     ListView {
                         id: browser
                         objectName: "browser"
@@ -516,6 +521,10 @@ ApplicationWindow {
                             objectName: "browserEmptyState"
                             visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)
                             spacing: 8
+                            Accessible.name: "Library browser empty state"
+                            Accessible.role: Accessible.Grouping
+                            Accessible.description: "No folder entries are available; choose a folder to recover browsing."
+                            ToolTip.text: "Library browser empty or unavailable state"
                             Label {
                                 objectName: "browserEmptyMessage"
                                 text: window.browserEmptyMessage()
@@ -1070,7 +1079,12 @@ ApplicationWindow {
                      wrapMode: Text.WordWrap; Layout.fillWidth: true
                  }
                 RowLayout {
+                    objectName: "overlayActions"
                     visible: window.overlayBridge !== null
+                    Accessible.name: "Overlay actions"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Show, unlock, or hide the DJ overlay window."
+                    ToolTip.text: "Overlay window actions"
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Show the DJ overlay window"; ToolTip.text: "Show the DJ overlay and hide the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
                     Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }

@@ -302,6 +302,10 @@ The separate filtered-result count now has a distinct `catalogResultCount` objec
 
 Redundant text labels inside each folder-list delegate are now excluded from the accessibility tree; the delegate’s richer list-item name, value, and action description remain the single announcement surface.
 
+The browser empty-state container now exposes grouping semantics and recovery guidance, so its message and chooser action are announced as one coherent unavailable-state surface.
+
+The folder browser frame and overlay action row now expose grouping semantics with concise entry tooltips, giving users context before navigating list items or show/unlock/hide actions.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
