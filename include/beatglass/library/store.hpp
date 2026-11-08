@@ -73,7 +73,11 @@ struct RecoveryResult { RecoveryOutcome outcome{RecoveryOutcome::error}; std::st
 class AnalysisStore {
 public:
   virtual ~AnalysisStore() = default;
-  /** Find a validated cached result, miss, cancellation or error. */
+  /**
+   * Find a validated cached result, miss, cancellation or error. The returned
+   * snapshot owns its value; the caller retains the source evidence only for
+   * the duration of this worker call.
+   */
   virtual FindResult find(const FileVersion&, const AnalysisIdentity&, std::stop_token) = 0;
   /** Stage, invoke verifier on this worker, then publish at the serialized commit point.
    * Pass the token to verification. Changed or unverifiable evidence returns
@@ -84,7 +88,11 @@ public:
   virtual PublishResult publish(const FileVersion& before, const CachedAnalysis&,
                                 const std::string& run_id, FileVersionVerifier& verifier,
                                 std::stop_token) = 0;
-  /** Query a unique run ID after reopening; not_found means no committed run with that ID. */
+  /**
+   * Query a unique run ID after reopening; `not_found` means no committed run
+   * with that ID. Recovery is a worker operation and does not alter source
+   * files or silently convert an indeterminate commit into success.
+   */
   virtual RecoveryResult recover(const std::string& run_id) = 0;
 };
 /** Worker-local commit decision; neither a transaction nor a cross-thread arbiter.
@@ -92,7 +100,11 @@ public:
  */
 class CommitDecision {
 public:
-  /** Choose cancellation if requested before commit; otherwise enter commit. Only the first decision succeeds. */
+  /**
+   * Choose cancellation if requested before commit; otherwise enter commit.
+   * Only the first decision succeeds; this object is worker-local and is not
+   * safe for concurrent calls.
+   */
   bool begin_commit(bool cancellation_requested) noexcept {
     if (state_ != State::pending) return false;
     state_ = cancellation_requested ? State::cancelled : State::committing;
