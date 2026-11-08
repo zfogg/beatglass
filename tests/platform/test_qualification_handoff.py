@@ -46,6 +46,12 @@ class QualificationHandoffTest(unittest.TestCase):
         for phrase in ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes"):
             self.assertIn(phrase, docs)
 
+    def test_current_status_has_one_row_per_platform(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        rows = [line for line in (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8").splitlines()
+                if line.startswith(("| Windows |", "| macOS |", "| Linux |"))]
+        self.assertEqual(len(rows), len({row.split("|")[1].strip() for row in rows}))
+
 
 if __name__ == "__main__":
     unittest.main()
