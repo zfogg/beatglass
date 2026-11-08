@@ -12,6 +12,8 @@ class WindowsPlaybackSession final {
 public:
   /** Open output and start a stopped session using a coordinator epoch. */
   bool start(std::uint32_t rate, std::uint16_t channels, std::size_t max_samples, std::uint64_t epoch, std::string& error);
+  /** Start on an explicit waveOut device id; WAVE_MAPPER selects default. */
+  bool start_device(UINT device_id, std::uint32_t rate, std::uint16_t channels, std::size_t max_samples, std::uint64_t epoch, std::string& error);
   /** Pause/stop the control session; pause leaves the native device open. */
   bool pause() noexcept;
   /** Stop and close native output. */
