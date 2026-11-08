@@ -99,6 +99,7 @@ TestCase {
         compare(display.Accessible.description, "Choose the display where the overlay is shown; current display unavailable")
         compare(display.ToolTip.text, "Choose the display where the overlay is shown")
         compare(size.Accessible.description, "Choose the overlay window size; current size Medium")
+        compare(size.ToolTip.text, "Choose Compact, Medium, or Large overlay size")
         compare(findChild(app, "overlayOpacityValue").Accessible.name, "Current overlay opacity")
         compare(findChild(app, "overlayInteractionMode").Accessible.name, "Overlay interaction mode")
         compare(findChild(app, "overlayDisplayStatus").Accessible.name, "Current overlay display")
