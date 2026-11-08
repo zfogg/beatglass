@@ -383,6 +383,15 @@ ApplicationWindow {
                             Accessible.name: "Audio metadata status"
                             Accessible.description: text
                         }
+                        Button {
+                            objectName: "retryMetadata"
+                            text: "Retry metadata"
+                            visible: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0
+                            enabled: visible
+                            Accessible.name: "Retry metadata"
+                            Accessible.description: "Retry reading metadata for the selected audio source after an error."
+                            onClicked: window.metadataBridge.inspect(window.selectedAudioUrl)
+                        }
                         Label {
                             objectName: "detailsAvailability"
                             text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
