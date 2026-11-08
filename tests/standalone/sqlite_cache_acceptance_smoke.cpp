@@ -18,6 +18,11 @@ int main() {
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
     assert(cache.find(key, result) && result == "result-a");
+    assert(cache.invalidate(key));
+    assert(!cache.find(key, result));
+    cache.begin("republish", key);
+    assert(cache.publish("republish", key, "result-b", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(key, result) && result == "result-b");
     assert(!cache.find(CacheKey{key.content, key.engine, "config-b", key.mode}, result));
     assert(!cache.find(CacheKey{"sha256:two", key.engine, key.config, key.mode}, result));
     cache.begin("z-retry", key);
