@@ -243,14 +243,14 @@ ApplicationWindow {
         window.selectedAudioUrl = ""
         window.metadataStatus = "Choose an audio file to inspect its metadata."
     }
-    function clearVisualizationForCaptureState() {
-        window.visualizationSelectionResetReason = window.liveBridge.status === "Error"
+    function clearVisualizationForCaptureState(reason) {
+        window.visualizationSelectionResetReason = reason !== undefined ? reason : (window.liveBridge.status === "Error"
             ? "Selection cleared after a capture error."
             : window.liveBridge.status === "Reacquiring"
             ? "Selection cleared while capture is reacquiring."
             : window.liveBridge.status === "Starting"
             ? "Selection cleared while capture is starting."
-            : "Selection cleared because capture stopped."
+            : "Selection cleared because capture stopped.")
         if (typeof visualizationCanvas !== "undefined") {
             visualizationCanvas.selectedPosition = -1
             visualizationCanvas.renderedRevision = -1
@@ -295,8 +295,8 @@ ApplicationWindow {
     }
     Connections {
         target: window.playbackBridge
-        function onSourceChanged() { window.clearVisualizationForCaptureState() }
-        function onEpochChanged() { window.clearVisualizationForCaptureState() }
+        function onSourceChanged() { window.clearVisualizationForCaptureState("Selection cleared because the playback source changed.") }
+        function onEpochChanged() { window.clearVisualizationForCaptureState("Selection cleared because the playback epoch changed.") }
         function onStateChanged() {
             if (window.playbackBridge.state === "Stopped")
                 window.clearVisualizationForCaptureState()
