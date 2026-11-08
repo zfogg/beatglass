@@ -310,13 +310,23 @@ ApplicationWindow {
                                 Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100 }
                             }
                         }
-                        Label {
+                        Column {
                             anchors.centerIn: parent
                             objectName: "browserEmptyState"
                             visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)
-                            text: window.browseFolder.toString() ? "No matching audio files or folders, or this folder cannot be read." : "Choose a folder to browse."
-                            Accessible.name: "Library browser empty state"
-                            Accessible.description: text
+                            spacing: 8
+                            Label {
+                                text: window.browseFolder.toString() ? "No matching audio files or folders, or this folder cannot be read." : "Choose a folder to browse."
+                                Accessible.name: "Library browser empty state"
+                                Accessible.description: text
+                            }
+                            Button {
+                                objectName: "chooseFolderEmpty"
+                                text: "Choose folder…"
+                                Accessible.name: "Choose a folder"
+                                Accessible.description: "Choose a local folder to populate the Library."
+                                onClicked: folderPicker.open()
+                            }
                         }
                         RowLayout {
                             Layout.fillWidth: true

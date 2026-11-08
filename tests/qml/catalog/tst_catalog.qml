@@ -32,4 +32,16 @@ TestCase {
         compare(status.text, "Catalog: 1 matching entries")
         app.destroy()
     }
+
+    function test_emptyStateOffersFolderSelection() {
+        let app = shell.createObject(null)
+        let empty = findChild(app, "browserEmptyState")
+        let choose = findChild(app, "chooseFolderEmpty")
+        verify(empty.visible)
+        verify(choose.visible)
+        verify(choose.enabled)
+        compare(choose.Accessible.name, "Choose a folder")
+        compare(choose.Accessible.description, "Choose a local folder to populate the Library.")
+        app.destroy()
+    }
 }
