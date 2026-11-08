@@ -31,6 +31,7 @@ public slots:
     emit runsChanged(ids, details);
   }
   void discard(QString id) { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
+  void discardBatch(QStringList ids) { std::vector<std::string> values; for (const auto& id : ids) values.push_back(id.toStdString()); const auto removed = coordinator_.storage().discard_retryable(values); emit result(removed == values.size(), QStringLiteral("Retryable recovery batch discarded")); if (removed) refresh(); }
   void retry(QString runId) {
     const auto found = coordinator_.storage().retryable_run(runId.toStdString());
     if (!found || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::missing_source_snapshot))); return; }
@@ -167,6 +168,7 @@ void StorageRecoveryBridge::close() {
 }
 void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
 void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ == id) return; selectedRunId_ = id; emit selectedRunChanged(); }
+void StorageRecoveryBridge::discardRuns(const QStringList& ids) { if (!ids.isEmpty()) QMetaObject::invokeMethod(worker_, "discardBatch", Qt::QueuedConnection, Q_ARG(QStringList, ids)); }
 void StorageRecoveryBridge::discardSelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::retrySelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::findCached(QString content, QString engine, QString configuration, QString mode) {
