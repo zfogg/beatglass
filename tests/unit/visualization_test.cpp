@@ -108,3 +108,19 @@ TEST_CASE("sample rate cannot change within an epoch even after reset") {
   p.reset(); CHECK_THROWS(p.process(1,512,48000,x));
   REQUIRE_FALSE(p.process(2,0,48000,x)); REQUIRE(p.process(2,512,48000,x));
 }
+
+TEST_CASE("visualization publication gate rejects stale generations and revisions") {
+  VisualizationPublicationGate gate;
+  const auto generation = gate.generation();
+  REQUIRE(gate.accept(generation, 1));
+  CHECK(gate.current(generation, 1));
+  CHECK_FALSE(gate.accept(generation, 1));
+  CHECK(gate.accept(generation, 2));
+  CHECK_FALSE(gate.current(generation, 1));
+  gate.clear();
+  CHECK_FALSE(gate.current(generation, 2));
+  CHECK_FALSE(gate.accept(generation, 3));
+  CHECK(gate.generation() > generation);
+  REQUIRE(gate.accept(gate.generation(), 1));
+  CHECK(gate.current(gate.generation(), 1));
+}
