@@ -73,8 +73,8 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   recovery_log="$out_dir/recovery-smoke.log"
   "$recovery_binary" "$BEATGLASS_MACOS_TAP_UID" | tee "$recovery_log"
   for cycle in 0 1; do
-    if ! grep -Eq "cycle=$cycle .*nonzero_samples=[1-9][0-9]* .*stopped=1" "$recovery_log"; then
-      echo "Recovery smoke did not complete cycle $cycle with nonzero samples" >&2
+    if ! grep -Eq "cycle=$cycle .*frames=[1-9][0-9]* .*nonzero_samples=[1-9][0-9]* .*discontinuities=[0-9]+ .*stopped=1" "$recovery_log"; then
+      echo "Recovery smoke did not complete cycle $cycle with capture and continuity evidence" >&2
       exit 1
     fi
   done
