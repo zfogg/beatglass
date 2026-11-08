@@ -865,7 +865,7 @@ ApplicationWindow {
                     text: typeof visualizationPresentation === "undefined"
                         ? "Unavailable"
                         : (visualizationCanvas.modeHasData ? "Ready" : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
-                    Accessible.name: "Visualization load state"
+                    Accessible.name: "Visualization load state: " + text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current waveform/FFT presentation load state"
@@ -886,7 +886,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationDataStatus"
                     text: (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " waveform samples · " + (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " spectrum bins"
-                    Accessible.name: "Visualization data status"; Accessible.role: Accessible.StaticText; Accessible.description: text
+                    Accessible.name: "Visualization data status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text
                     Layout.fillWidth: true
                 }
                 Label {
@@ -903,7 +903,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationSelectionStatus"
                     text: visualizationCanvas.selectedPosition < 0 ? "No visualization position selected" : "Selected visualization position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%"
-                    Accessible.name: "Visualization selection status"
+                    Accessible.name: "Visualization selection status: " + text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: "Click the canvas or use Left/Right/Home/End to select a presentation position. " + text
                     ToolTip.text: "Current selected waveform/FFT position"
@@ -925,7 +925,7 @@ ApplicationWindow {
                     text: typeof visualizationPresentation === "undefined"
                         ? "No visualization generation is active"
                         : "Visualization generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
-                    Accessible.name: "Visualization generation status"
+                    Accessible.name: "Visualization generation status: " + text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current accepted visualization generation and revision"
@@ -934,7 +934,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationCaptureStatus"
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
-                    Accessible.name: "Visualization capture status"
+                    Accessible.name: "Visualization capture status: " + text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
