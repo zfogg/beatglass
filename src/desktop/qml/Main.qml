@@ -160,8 +160,15 @@ ApplicationWindow {
     Connections {
         target: window.overlayBridge
         function onAvailableChanged() {
-            if (window.overlayBridge && !window.overlayBridge.available && djOverlay.visible)
-                window.hideOverlayAndRestoreControls()
+            if (!window.overlayBridge)
+                return
+            if (!window.overlayBridge.available) {
+                window.overlayDisplayRecoveryPending = true
+                if (djOverlay.visible)
+                    window.hideOverlayAndRestoreControls()
+            } else {
+                window.syncOverlaySettingsFromBridge()
+            }
         }
     }
     Component.onCompleted: {
