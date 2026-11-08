@@ -805,6 +805,15 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisQueueProgress"
+                                visible: window.analysisJobBridge !== null
+                                text: visible ? ("Queue state: " + window.analysisJobBridge.status + " · frames " + window.analysisJobBridge.frames
+                                      + (window.analysisJobBridge.canRetry ? " · retry available" : "")) : ""
+                                Accessible.name: "Analysis queue progress"
+                                Accessible.description: visible ? text : "Analysis queue progress is unavailable."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "persistedRecoveryStatus"
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""

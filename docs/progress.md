@@ -288,6 +288,8 @@ Cache hits now render the serialized cached result in the Library surface, makin
 
 The Library surface now also renders queue outcome and retry availability beside cached results. This keeps a cache hit distinct from queued/running/failed/cancelled analysis state; the existing worker queue remains the owner of decoder execution and retry semantics.
 
+The queue row now includes observed frame progress alongside state and retry availability, giving the UI a source-attributed progress signal without moving decoder or analysis work onto the GUI thread.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
