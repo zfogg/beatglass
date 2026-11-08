@@ -161,7 +161,9 @@ TestCase {
 
     function test_overlayReportsCaptureRecoveryStatus() {
         let app = shell.createObject(null)
-        verify(findChild(app, "overlayCaptureStatus") !== null)
+        let status = findChild(app, "overlayCaptureStatus")
+        verify(status !== null)
+        compare(status.Accessible.name, "Overlay capture status")
         app.destroy()
     }
 
