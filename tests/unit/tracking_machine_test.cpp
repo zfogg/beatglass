@@ -6,6 +6,9 @@ TEST_CASE("tracking rejects zero source epochs") {
   CHECK(machine.state() == beatglass::TrackingState::stopped);
 }
 using namespace beatglass;
+TEST_CASE("tracking rejects zero discontinuity epochs") {
+ TrackingMachine m; REQUIRE(m.start(1)); CHECK_FALSE(m.discontinuity(0)); CHECK(m.token().epoch == 1);
+}
 TEST_CASE("tracking lifecycle rejects old results across silence and resume") {
  TrackingMachine m; CHECK(m.state() == TrackingState::stopped); CHECK_FALSE(m.accept({1,1}));
  REQUIRE(m.start(1)); auto old = m.token(); CHECK_FALSE(m.start(1));
