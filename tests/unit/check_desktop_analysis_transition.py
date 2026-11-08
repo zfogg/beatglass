@@ -22,7 +22,7 @@ required = {
     "retry clears stale result": 'if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }',
     "batch result count": 'Q_PROPERTY(int batchResultsPublished READ batchResultsPublished',
     "batch result handoff": '++weak_self->batchResultsPublished_',
-    "batch retry resets result count": 'batchResultsPublished_ = 0;',
+    "batch retry resets result count": 'batchResultsPublished_ = batchFailedCount_ = 0;',
     "fresh batch clears single result": 'if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }',
     "batch latest result": 'Q_PROPERTY(QString batchLastResult READ batchLastResult',
     "batch result rendering": 'objectName: "analysisBatchLastResult"',
@@ -36,6 +36,7 @@ required = {
     "failure reason property": 'Q_PROPERTY(QString failureReason READ failureReason',
     "failure reason rendering": 'objectName: "analysisFailureReason"',
     "batch failure reason": 'One or more batch operations failed before publishing a verified result.',
+    "batch failed count": 'Q_PROPERTY(int batchFailedCount READ batchFailedCount',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:

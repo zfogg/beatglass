@@ -324,6 +324,8 @@ The desktop bridge now reports a bounded, source-attributed failure reason for i
 
 The same failure explanation is surfaced when any accepted batch operation fails, while successful batch publications continue to report independently.
 
+Batch status now also reports the count of accepted operations that failed, alongside published results and admission counts.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
