@@ -36,6 +36,12 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
         const auto size = savedSize.toSize();
         if (size.width() > 0 && size.height() > 0) overlay_->resize(size);
       }
+      const auto savedDisplay = settings->value(QStringLiteral("overlay/displayName")).toString();
+      if (!savedDisplay.isEmpty()) {
+        for (auto* screen : QGuiApplication::screens()) {
+          if (screen->name() == savedDisplay) { overlay_->setScreen(screen); break; }
+        }
+      }
       bool validOpacity = false;
       const auto opacity = settings->value(QStringLiteral("overlay/opacity")).toDouble(&validOpacity);
       if (validOpacity && std::isfinite(opacity)) setOpacity(opacity);
@@ -44,6 +50,9 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
       connect(overlay_, &QWindow::yChanged, this, [this, settings] { if (overlay_) settings->setValue(QStringLiteral("overlay/position"), overlay_->position()); });
       connect(overlay_, &QWindow::widthChanged, this, [this, settings] { if (overlay_) settings->setValue(QStringLiteral("overlay/size"), overlay_->size()); });
       connect(overlay_, &QWindow::heightChanged, this, [this, settings] { if (overlay_) settings->setValue(QStringLiteral("overlay/size"), overlay_->size()); });
+      connect(overlay_, &QWindow::screenChanged, this, [this, settings](QScreen* screen) {
+        if (screen) settings->setValue(QStringLiteral("overlay/displayName"), screen->name());
+      });
       connect(overlay_, &QWindow::opacityChanged, this, [settings](qreal value) { settings->setValue(QStringLiteral("overlay/opacity"), value); });
     }
   }
@@ -91,6 +100,7 @@ bool OverlayController::moveToScreen(int index) {
   if (bounds.isEmpty()) return false;
   const auto size = overlay_->size().boundedTo(bounds.size());
   overlay_->setScreen(screen);
+  if (settings_) settings_->setValue(QStringLiteral("overlay/displayName"), screen->name());
   overlay_->setGeometry(QRect(bounds.center() - QPoint(size.width() / 2, size.height() / 2), size));
   keepOnScreen();
   emit screensChanged();

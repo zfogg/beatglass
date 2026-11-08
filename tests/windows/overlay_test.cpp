@@ -223,6 +223,23 @@ private slots:
     QVERIFY(screensChanged.count() > 0);
     QVERIFY(screens.at(0)->availableGeometry().contains(overlay.geometry().center()));
   }
+  void restoresSavedDisplayWhenNameMatches() {
+    const auto screens = QGuiApplication::screens();
+    if (screens.isEmpty() || screens.at(0)->name().isEmpty()) QSKIP("No named display is available");
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto path = directory.filePath("overlay.ini");
+    {
+      QSettings settings(path, QSettings::IniFormat);
+      QQuickWindow overlay;
+      QWindow control;
+      beatglass::windows::OverlayController adapter(&overlay, &control, nullptr, &settings);
+      QVERIFY(adapter.moveToScreen(0));
+      settings.sync();
+    }
+    QSettings restored(path, QSettings::IniFormat);
+    QCOMPARE(restored.value(QStringLiteral("overlay/displayName")).toString(), screens.at(0)->name());
+  }
   void nativePointerPassThrough() {
     if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_OVERLAY_TEST")) QSKIP("Set BEATGLASS_NATIVE_OVERLAY_TEST to run the interactive pointer test");
     struct RestoreCursor { POINT position{}; RestoreCursor() { GetCursorPos(&position); } ~RestoreCursor() { SetCursorPos(position.x, position.y); } } restore;
