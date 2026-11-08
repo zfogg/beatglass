@@ -487,6 +487,18 @@ TestCase {
         app.destroy()
     }
 
+    function test_playbackFrameMappingClampsAndFloorsPositions() {
+        let app = shell.createObject(null)
+        compare(app.visualizationPositionToFrame(0, 44100), 0)
+        compare(app.visualizationPositionToFrame(0.5, 44100), 22050)
+        compare(app.visualizationPositionToFrame(1, 44100), 44100)
+        compare(app.visualizationPositionToFrame(-1, 44100), 0)
+        compare(app.visualizationPositionToFrame(2, 44100), 44100)
+        compare(app.visualizationPositionToFrame(Number.NaN, 44100), -1)
+        compare(app.visualizationPositionToFrame(0.5, -1), -1)
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")
