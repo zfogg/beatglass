@@ -158,7 +158,7 @@ ApplicationWindow {
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24; font.bold: true }
                 Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; color: "white" }
-                Label { text: window.captureMonitorBridge ? "Capture " + window.captureMonitorBridge.status : "Capture unavailable"; color: "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status"; Accessible.description: text }
+                Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status"; Accessible.description: text }
             }
         }
     }
@@ -559,7 +559,7 @@ ApplicationWindow {
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 RowLayout {
                     Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : "Start monitoring"); objectName: "toggleMonitoring"; enabled: window.captureMonitorBridge !== null; Accessible.description: "Start monitoring, or retry after a capture error."; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
-                    Label { text: window.captureMonitorBridge ? "Capture: " + window.captureMonitorBridge.status : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status"; Accessible.description: text }
+                    Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status"; Accessible.description: text }
                 }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring"; Accessible.description: text }
                 Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; wrapMode: Text.WordWrap; Layout.fillWidth: true }

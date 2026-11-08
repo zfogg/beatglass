@@ -13,6 +13,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
+    QtObject { id: fakeCapture; property string status: "Monitoring" }
     QtObject {
         id: fakePlayback
         property string state: "Stopped"
@@ -70,7 +71,7 @@ TestCase {
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
     Component { id: shellWithPlayback; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackBridge: fakePlayback } }
     Component { id: shellWithAnalysis; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; analysisJobBridge: fakeAnalysis } }
-    Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
+    Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay; captureMonitorBridge: fakeCapture } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
         fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = -1; fakeOverlay.screenIndex = -1; fakeOverlay.requestedWidth = 0
@@ -121,6 +122,16 @@ TestCase {
         app.close()
         compare(fakeOverlay.hides, 1)
         app.destroy()
+    }
+    function test_captureErrorOffersRecoveryCopy() {
+        fakeCapture.status = "Error"
+        let app = shellWithOverlay.createObject(null)
+        verify(app !== null)
+        compare(findChild(app, "overlayCaptureStatus").text, "Capture error — retry monitoring")
+        findChild(app, "navigation").currentIndex = 1
+        compare(findChild(app, "captureStatus").text, "Capture error — retry monitoring")
+        app.destroy()
+        fakeCapture.status = "Monitoring"
     }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
