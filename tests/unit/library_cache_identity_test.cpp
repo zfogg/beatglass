@@ -100,3 +100,13 @@ TEST_CASE("stale catalog rows are removed only after failed identity validation"
  CHECK(invalidate_collection_if_stale(cache, f.path.string(), identity.key.content) == FingerprintStatus::changed);
  CHECK_FALSE(cache.entry(f.path.string()).has_value());
 }
+
+TEST_CASE("missing catalog sources can be pruned without touching existing files") {
+ Fixture f; SqliteCache cache(":memory:");
+ REQUIRE(refresh_collection_file(cache, f.path) == FingerprintStatus::ok);
+ CHECK_FALSE(prune_missing_collection_entry(cache, f.path));
+ REQUIRE(cache.entry(f.path.string()).has_value());
+ std::filesystem::remove(f.path);
+ CHECK(prune_missing_collection_entry(cache, f.path));
+ CHECK_FALSE(cache.entry(f.path.string()).has_value());
+}

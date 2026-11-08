@@ -60,4 +60,10 @@ FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::
                                                  const std::string& expected_content,
                                                  std::stop_token stop = {},
                                                  std::string* diagnostic = nullptr);
+/** Remove a catalog row when its source path no longer exists.
+ * Returns true only when a row was removed; filesystem errors leave the row
+ * intact so callers can retry or surface the diagnostic.
+ */
+bool prune_missing_collection_entry(SqliteCache& cache, const std::filesystem::path& path,
+                                    std::string* diagnostic = nullptr);
 }
