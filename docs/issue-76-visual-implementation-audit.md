@@ -445,3 +445,5 @@ The mode status label now follows the theme foreground and compact-header typogr
 The empty visualization state now uses the same compact typography and foreground token as the mode status, with an explicit error tint when capture fails, keeping next-step guidance legible across all six themes.
 
 Starting and Reacquiring recovery feedback now uses the active theme accent and compact typography token, visually separating an active transition from the steady empty state while remaining consistent across screen sizes.
+
+The visualization Retry monitoring action now uses the active theme accent as its button surface with the theme background as text, giving the recovery affordance a consistent high-salience treatment across palettes.

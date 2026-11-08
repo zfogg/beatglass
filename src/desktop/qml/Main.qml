@@ -1190,6 +1190,8 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: "Retry output monitoring to restore live waveform and FFT data."
                     ToolTip.text: "Retry output monitoring for visualization data"
+                    contentItem: Text { text: parent.text; color: window.themeBackgrounds[window.selectedThemeIndex]; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    background: Rectangle { color: window.themeAccentColors[window.selectedThemeIndex]; radius: 5 }
                     onClicked: {
                         window.captureMonitorBridge.start()
                         visualizationCanvas.forceActiveFocus()
