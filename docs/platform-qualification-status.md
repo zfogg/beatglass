@@ -10,6 +10,8 @@ This matrix records development evidence and the remaining gates. A build or hea
 
 For every native run, record the OS version, kernel or build number, compiler, Qt version, audio backend/session version, display server or compositor, output device, build identity, exact commands, and observed limitations. Until those records exist for the relevant platform scenarios, support language must remain experimental.
 
+The evidence bundle must record build identity fields explicitly: compiler/toolchain, Qt version, and OS version/build.
+
 Detailed handoff checklists: [Windows](windows-qualification.md), [macOS](macos-qualification.md), and [Linux](linux-qualification-plan.md).
 
 Each native scenario record must retain its capture timestamp, supporting logs, and a screenshot or recording path; a status without that evidence remains unqualified.
