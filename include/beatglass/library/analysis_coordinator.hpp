@@ -3,6 +3,16 @@
 #include "beatglass/library/storage_owner.hpp"
 #include "beatglass/library/analysis_admission.hpp"
 namespace beatglass::library {
+/** Explain why persisted retry reconstruction was rejected before work starts. */
+enum class RetryRejectionReason { none, missing_source_snapshot, incompatible_decoder_snapshot, stale_source_identity };
+inline const char* retry_rejection_message(RetryRejectionReason reason) noexcept {
+  switch (reason) {
+    case RetryRejectionReason::missing_source_snapshot: return "persisted source snapshot unavailable";
+    case RetryRejectionReason::incompatible_decoder_snapshot: return "incompatible decoder snapshot";
+    case RetryRejectionReason::stale_source_identity: return "stale source identity";
+    default: return "";
+  }
+}
 /** Worker-owned coordinator joining analysis execution to transactional storage. */
 class AnalysisCoordinator final { public:
   /** Library-facing lifecycle snapshot; identity remains attached to every queued outcome. */

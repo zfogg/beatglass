@@ -27,8 +27,8 @@ public slots:
   void retry(QString runId) {
     const auto runs = coordinator_.storage().retryable_runs();
     const auto found = std::find_if(runs.begin(), runs.end(), [&](const auto& run) { return run.id == runId.toStdString(); });
-    if (found == runs.end() || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: persisted source snapshot unavailable")); return; }
-    if (!beatglass::library::file_decoder_snapshot_compatible(found->decoder_snapshot)) { emit result(false, QStringLiteral("Retry rejected: incompatible decoder snapshot")); return; }
+    if (found == runs.end() || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::missing_source_snapshot))); return; }
+    if (!beatglass::library::file_decoder_snapshot_compatible(found->decoder_snapshot)) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::incompatible_decoder_snapshot))); return; }
     beatglass::library::AnalysisIdentity identity{found->key.content, found->key.engine, found->key.config, found->key.mode};
     auto operation = beatglass::library::make_file_decode_operation(found->source_path, std::move(identity), found->decoder_snapshot);
     const auto handle = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation));
