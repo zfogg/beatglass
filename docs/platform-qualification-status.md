@@ -120,6 +120,9 @@ The consumer recomputes every manifest artifact hash as well as the report's
 inventory hashes; a manifest that names a file but carries a stale digest is
 rejected even when the report row itself is internally consistent.
 
+Generated rows also echo the manifest platform identity, and the consumer checks
+that echo before accepting any platform-specific evidence.
+
 For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
 
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
