@@ -198,6 +198,11 @@ TestCase {
         compare(findChild(app, "playbackDevice").Accessible.name, "Playback output device")
         compare(findChild(app, "refreshPlaybackDevices").Accessible.description, "Refresh native playback output devices")
     }
+    function test_nativePlaybackStartControlsArePresent() {
+        verify(findChild(app, "startNativePlayback") !== null)
+        compare(findChild(app, "playbackSampleRate").Accessible.name, "Playback sample rate")
+        compare(findChild(app, "playbackChannels").Accessible.name, "Playback channels")
+    }
 
     function test_frameSeekUsesPlaybackBridge() {
         fakePlayback.state = "Playing"; fakePlayback.currentFrame = 0; fakePlayback.epoch = 1
