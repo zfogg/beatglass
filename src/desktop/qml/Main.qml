@@ -280,8 +280,13 @@ ApplicationWindow {
             window.requestActivate()
             return false
         }
-        if (!window.restoreOverlayVisualStateFromBridge())
+        if (!window.restoreOverlayVisualStateFromBridge()) {
+            window.overlayDisplayRecoveryPending = true
+            window.show()
+            window.raise()
+            window.requestActivate()
             return false
+        }
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
         if (!window.overlayBridge.showOverlay()) {
