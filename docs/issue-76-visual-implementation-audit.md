@@ -374,6 +374,8 @@ Enter/Return on a selected canvas position now moves focus directly to the Clear
 
 Space now provides the same focus path as Enter/Return from the selected canvas position, covering the conventional activation key alongside the explicit clear and Escape recovery actions.
 
+Ctrl+Left and Ctrl+Right now jump directly to the visualization boundaries, complementing fine, coarse, and Home/End movement for efficient keyboard scrubbing. The canvas announcement and tooltip include the new shortcuts.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

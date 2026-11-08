@@ -989,6 +989,17 @@ ApplicationWindow {
                     Keys.onEnterPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }
+                    Keys.onPressed: {
+                        if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Left) {
+                            selectedPosition = 0
+                            requestPaint()
+                            event.accepted = true
+                        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Right) {
+                            selectedPosition = 1
+                            requestPaint()
+                            event.accepted = true
+                        }
+                    }
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
@@ -1000,9 +1011,9 @@ ApplicationWindow {
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
                         : "Bounded frequency-domain FFT magnitudes from the current output capture.")
-                        + " Use Left/Right for fine movement, Page Up/Page Down for larger movement, Home/End for boundaries, Enter or Space to reach clear, and Escape to clear. "
+                        + " Use Left/Right for fine movement, Page Up/Page Down for larger movement, Ctrl+Left/Ctrl+Right for boundary jumps, Home/End for boundaries, Enter or Space to reach clear, and Escape to clear. "
                         + (visualizationCanvas.selectedPosition < 0 ? "No position selected." : "Selected position " + Math.round(visualizationCanvas.selectedPosition * 100) + " percent.")
-                    ToolTip.text: "Click to select a position; use Left/Right/Page Up/Page Down/Home/End to navigate, Enter or Space for clear, or Escape to clear"
+                    ToolTip.text: "Click to select a position; use Left/Right/Page Up/Page Down/Ctrl+Left/Ctrl+Right/Home/End to navigate, Enter or Space for clear, or Escape to clear"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
