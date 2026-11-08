@@ -85,6 +85,7 @@ TestCase {
         let app = shell.createObject(null)
         let status = findChild(app, "catalogStatus")
         verify(status !== null)
+        compare(status.Accessible.name, "Library catalog status")
         compare(status.text, "Choose a folder to browse local audio files.")
         app.destroy()
     }
