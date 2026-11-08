@@ -6,8 +6,8 @@ qml = (root / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 required = [
     "function restoreOverlayVisualStateFromBridge()",
     "window.restoreOverlayVisualStateFromBridge()",
-    "window.overlayBridge.resizeOverlay(Number(geometry.width), Number(geometry.height))",
-    "window.overlayBridge.setOpacity(safeOpacity)",
+    "window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)",
+    "window.overlayBridge.setOpacity(savedOpacity)",
     "Persisted overlay geometry unavailable; control-window fallback remains active.",
     "Persisted overlay opacity unavailable; safe 90 percent opacity applied.",
     "if (!window.restoreOverlayVisualStateFromBridge())",

@@ -165,6 +165,9 @@ ApplicationWindow {
         window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
         return true
     }
+    function reapplyOverlayVisualState() {
+        return window.restoreOverlayVisualStateFromBridge()
+    }
     function refreshCatalog() {
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
             ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
@@ -218,12 +221,10 @@ ApplicationWindow {
             window.announceCaptureRecoveryState("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.")
             return false
         }
-        const persistedGeometry = window.overlayBridge.geometry
         if (window.overlayBridge.screenIndex >= 0)
             window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)
-        if (persistedGeometry && persistedGeometry.width > 0 && persistedGeometry.height > 0)
-            window.overlayBridge.resizeOverlay(persistedGeometry.width, persistedGeometry.height)
-        window.overlayBridge.setOpacity(window.overlayBridge.opacity)
+        if (!window.restoreOverlayVisualStateFromBridge())
+            return false
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
         return window.showOverlayAndHideControls()
     }
@@ -244,25 +245,6 @@ ApplicationWindow {
         window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + ".")
         return true
     }
-    function announceCaptureRecoveryState(message) { window.overlayRecoveryAnnouncement = message }
-    function restoreOverlayVisualStateFromBridge() {
-        if (!window.overlayBridge) return false
-        const geometry = window.overlayBridge.geometry
-        if (!geometry || Number(geometry.width) <= 0 || Number(geometry.height) <= 0) {
-            window.overlayVisualStateRecoveryRequired = true
-            window.announceCaptureRecoveryState("Persisted overlay geometry unavailable; control-window fallback remains active.")
-            return false
-        }
-        const opacity = Number(window.overlayBridge.opacity)
-        const safeOpacity = isFinite(opacity) && opacity >= 0.2 && opacity <= 1.0 ? opacity : 0.9
-        window.overlayBridge.resizeOverlay(Number(geometry.width), Number(geometry.height))
-        window.overlayBridge.setOpacity(safeOpacity)
-        window.overlayVisualStateRecoveryRequired = false
-        if (safeOpacity !== opacity)
-            window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe 90 percent opacity applied.")
-        return true
-    }
-    function reapplyOverlayVisualState() { return window.restoreOverlayVisualStateFromBridge() }
     function hideOverlayAndRestoreControls() {
         if (!window.overlayBridge) return
         window.overlayBridge.hideOverlay()
