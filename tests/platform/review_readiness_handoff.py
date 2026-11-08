@@ -2,6 +2,11 @@
 import argparse
 import json
 from pathlib import Path
+import importlib.util
+
+consumer_spec = importlib.util.spec_from_file_location("consume_report", Path(__file__).with_name("consume_readiness_handoff.py"))
+consumer = importlib.util.module_from_spec(consumer_spec); assert consumer_spec.loader
+consumer_spec.loader.exec_module(consumer)
 
 
 def render(report_path: Path) -> str:
@@ -33,6 +38,10 @@ def main() -> int:
     report = json.loads(args.report.read_text(encoding="utf-8"))
     if args.require_ready and report.get("exit_gate_status") != "READY":
         print(f"review gate is not ready: {report.get('exit_gate_status')}"); return 1
+    if args.require_ready:
+        errors = consumer.consume(args.report)
+        if errors:
+            print("\n".join(errors)); return 1
     print(f"wrote native qualification review checklist: {args.output}"); return 0
 
 

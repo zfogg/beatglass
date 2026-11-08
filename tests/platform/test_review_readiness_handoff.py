@@ -29,3 +29,12 @@ class ReadinessReviewTest(unittest.TestCase):
             output = Path(tmp) / "review.md"
             with mock.patch("sys.argv", ["review_readiness_handoff.py", str(source), str(output), "--require-ready"]):
                 self.assertEqual(review.main(), 1)
+
+    def test_strict_review_gate_runs_consumer_validation(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "review.md"
+            report = json.loads(source.read_text(encoding="utf-8")); report["exit_gate_status"] = "READY"
+            report_path = Path(tmp) / "report.json"; report_path.write_text(json.dumps(report), encoding="utf-8")
+            with mock.patch("sys.argv", ["review_readiness_handoff.py", str(report_path), str(output), "--require-ready"]):
+                self.assertEqual(review.main(), 1)
