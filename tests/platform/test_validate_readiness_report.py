@@ -53,6 +53,12 @@ class ReadinessReportContractTest(unittest.TestCase):
         errors = chr(10).join(module.validate(report))
         self.assertIn("duplicate report artifact path", errors)
 
+    def test_report_rejects_non_object_artifact_entries(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0]["artifact_inventory"].append("not-an-artifact")
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("artifact entry must be an object", errors)
+
     def test_retained_files_match_manifest_and_report(self):
         root = Path(__file__).parent / "fixtures/readiness-bundles"
         report = __import__("json").loads((root / "readiness-report.json").read_text(encoding="utf-8"))
