@@ -130,6 +130,7 @@ def main() -> int:
         "analysis progress state": "objectName: \"analysisProgress\"",
         "analysis batch status": "objectName: \"analysisBatchStatus\"",
         "persisted recovery runs": "objectName: \"persistedRecoveryRuns\"",
+        "analysis cache status": "objectName: \"analysisCacheStatus\"",
         "discard persisted recovery": "objectName: \"discardPersistedRecovery\"",
         "retry analysis batch": "objectName: \"retryAnalysisBatch\"",
         "cancel analysis batch": "objectName: \"cancelAnalysisBatch\"",

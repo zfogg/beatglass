@@ -806,6 +806,14 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Label {
+                                objectName: "analysisCacheStatus"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.cachedResult !== undefined
+                                text: visible ? (storageRecovery.cacheHit ? "Cached analysis ready" : "No cached analysis for the requested identity") : ""
+                                Accessible.name: "Analysis cache status"
+                                Accessible.description: visible ? text : "Analysis cache status is unavailable."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
                                 visible: typeof storageRecovery !== "undefined"
