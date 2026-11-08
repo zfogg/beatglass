@@ -5,6 +5,7 @@
 #include "beatglass/library/analysis_commit.hpp"
 #include "beatglass/library/analysis_admission.hpp"
 #include <stop_token>
+#include <optional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -32,6 +33,8 @@ public:
   CacheAdmission admit_analysis(const std::string& run_id, const AnalysisIdentity& identity, const std::string& source_path = {}, const std::string& decoder_snapshot = {});
   /** Read persisted retryable runs on the storage worker; returns empty while closed. */
   std::vector<library_detail::RetryableRun> retryable_runs(std::size_t limit = 100) const;
+  /** Read one persisted retryable run by ID, including source/decoder metadata; empty while closed or absent. */
+  std::optional<library_detail::RetryableRun> retryable_run(const std::string& id) const;
   /** Discard one retryable run on the storage worker; never removes source audio. */
   bool discard_retryable(const std::string& id);
 private:
