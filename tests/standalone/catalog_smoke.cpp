@@ -50,5 +50,9 @@ int main() {
   const auto missing = beatglass::library::browse(dir.path / "missing");
   require(missing.entries.empty() && !missing.diagnostic.empty(),
           "missing directory was not reported atomically");
+  std::filesystem::remove(dir.path / "Alpha.mp3");
+  const auto after_remove = beatglass::library::browse(dir.path, "alpha");
+  require(after_remove.entries.empty() && after_remove.diagnostic.empty(),
+          "removed catalog entry remained visible");
   return EXIT_SUCCESS;
 }

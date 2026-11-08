@@ -32,6 +32,12 @@ int main() {
     std::vector<float> samples(4);
     const auto first = reader.read(samples);
     assert(first.status == FileReadStatus::data && first.block.start_frame == 0 && first.block.epoch == 7);
+    reader.seek(2, 9);
+    const auto seeked = reader.read(samples);
+    assert(seeked.status == FileReadStatus::data && seeked.block.start_frame == 2 && seeked.block.epoch == 9);
+    bool stale_epoch = false;
+    try { reader.seek(0, 9); } catch (const std::invalid_argument&) { stale_epoch = true; }
+    assert(stale_epoch);
     const auto end = reader.read(samples);
     assert(end.status == FileReadStatus::end);
   }
