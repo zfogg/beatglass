@@ -24,6 +24,11 @@ def consume(report_path: Path) -> list[str]:
         if any(isinstance(row, dict) and row.get("status") == "experimental"
                for row in report.get("platform_support_status", [])):
             errors.append("readiness handoff cannot be READY with experimental platform support")
+        unpassed = [f"{row.get('platform')}:{entry.get('id')}" for row in report.get("platforms", [])
+                    if isinstance(row, dict) for entry in row.get("scenario_inventory", [])
+                    if isinstance(entry, dict) and entry.get("status") != "PASS"]
+        if unpassed:
+            errors.append(f"readiness handoff has unpassed scenarios: {unpassed}")
         missing_roles = [entry.get("path") for row in report.get("platforms", [])
                          for entry in row.get("artifact_inventory", [])
                          if not isinstance(entry, dict) or not isinstance(entry.get("role"), str) or not entry["role"]]

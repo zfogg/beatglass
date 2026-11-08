@@ -229,6 +229,8 @@ The consumer additionally rejects `READY` while `native_qualification_required` 
 
 `READY` is also rejected while any platform support row remains `experimental`; native acceptance must update the support matrix consistently with the reviewed evidence.
 
+`READY` additionally requires every platform scenario inventory row to be `PASS`; any `UNRUN`, `PENDING`, or `FAIL` scenario keeps the consumer non-accepting.
+
 The portable consumer tests cover the eventual transition explicitly: clearing `native_qualification_required` removes only that native-state rejection; all remaining report-contract, provenance, and readiness checks still apply. This is a transition contract, not native evidence.
 
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.
