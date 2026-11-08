@@ -253,6 +253,7 @@ ApplicationWindow {
             : "Selection cleared because capture stopped."
         if (typeof visualizationCanvas !== "undefined") {
             visualizationCanvas.selectedPosition = -1
+            visualizationCanvas.renderedRevision = -1
             visualizationCanvas.requestPaint()
         }
         if (typeof visualizationPresentation !== "undefined"
@@ -1213,7 +1214,7 @@ ApplicationWindow {
                         visible: visualizationCanvas.activeFocus
                         z: 2
                     }
-                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.renderedRevision = visualizationPresentation.revision; visualizationCanvas.requestPaint() } }
+                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1; visualizationCanvas.requestPaint() } }
                 }
                 Label {
                     objectName: "visualizationInteractionHint"

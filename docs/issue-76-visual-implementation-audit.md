@@ -506,6 +506,8 @@ The status group now exposes an analysis handoff label that reports the accepted
 
 The canvas now records the revision it last rendered and updates that value on each accepted presentation change before requesting a repaint; assistive canvas state therefore reflects the actual handoff revision driving the visible waveform/FFT.
 
+Capture, source, and epoch resets now clear the rendered revision alongside the presentation arrays, and invalid revisions are represented as -1 until a fresh accepted result arrives. Stale handoff metadata therefore cannot outlive its source data.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
