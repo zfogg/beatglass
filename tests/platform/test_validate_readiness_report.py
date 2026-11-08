@@ -53,6 +53,12 @@ class ReadinessReportContractTest(unittest.TestCase):
         errors = chr(10).join(module.validate(report))
         self.assertIn("exit_gate_reason_codes must be a list", errors)
 
+    def test_report_rejects_unconsumed_generation_errors(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["generation_errors"] = ["windows: missing artifact"]
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("generation_errors must be empty before report consumption", errors)
+
     def test_report_rejects_duplicate_reason_codes(self):
         report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
         report["exit_gate_reason_codes"] = ["native_qualification_required", "native_qualification_required"]

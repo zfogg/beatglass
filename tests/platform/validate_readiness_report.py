@@ -60,6 +60,11 @@ def validate(report: dict) -> list[str]:
         errors.append("READY report must set ready true")
     if report.get("exit_gate_status") == "PENDING" and report.get("ready") is not False:
         errors.append("PENDING report must set ready false")
+    generation_errors = report.get("generation_errors", [])
+    if not isinstance(generation_errors, list) or any(not isinstance(error, str) or not error.strip() for error in generation_errors):
+        errors.append("generation_errors must be a list of strings")
+    elif generation_errors:
+        errors.append("generation_errors must be empty before report consumption")
     platforms = report.get("platforms")
     if not isinstance(platforms, list) or len(platforms) != len(EXPECTED_PLATFORMS) or any(not isinstance(item, dict) for item in platforms) or {item.get("platform") for item in platforms} != EXPECTED_PLATFORMS:
         errors.append("platforms must contain exactly Windows, macOS, and Linux rows")
