@@ -75,6 +75,7 @@ int main() {
     assert(cache.find(live_key, result) && result == "live-data");
     assert(cache.invalidate(live_key));
     assert(!cache.find(live_key, result));
+    assert(!cache.invalidate(live_key));
     assert(cache.find(next_config, result) && result == "config-b-data");
     assert(cache.invalidate(next_config));
     assert(!cache.find(next_config, result));
