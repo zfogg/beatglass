@@ -30,8 +30,9 @@ public slots:
     beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
     operation.publish = [this](const std::string& value) { emit analysisResult(QString::fromStdString(value)); };
-    auto handle = coordinator_.submit(runId.toStdString(), std::move(operation));
-    handle_ = std::move(handle); emit analysis(handle_ ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected"));
+    auto submission = coordinator_.submit_admitted(runId.toStdString(), std::move(operation));
+    if (submission.cached) { emit analysisResult(QString::fromStdString(*submission.cached)); emit analysis(QStringLiteral("Cached analysis ready")); handle_.reset(); return; }
+    handle_ = std::move(submission.handle); emit analysis(handle_ ? (submission.analysis_reserved ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected")) : QStringLiteral("Analysis rejected"));
     if (handle_) QTimer::singleShot(50, this, &Worker::pollAnalysis);
   }
   void cancelAnalysis() { if (handle_) { handle_->cancel(); pollAnalysis(); } }
