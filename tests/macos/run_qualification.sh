@@ -30,6 +30,9 @@ if [[ ! -d "$developer_dir" ]]; then
   echo "Active Xcode developer directory is missing: $developer_dir" >&2
   exit 1
 fi
+record_command "xcrun --sdk macosx --show-sdk-path"
+record_command "xcrun --sdk macosx --show-sdk-version"
+record_command "xcode-select -p"
 
 record_command "cmake -S $repo_root -B $out_dir/build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DBEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON -DBEATGLASS_BUILD_MACOS_TAP_SMOKE=ON"
 cmake -S "$repo_root" -B "$out_dir/build" \
