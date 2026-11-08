@@ -461,3 +461,5 @@ The selected-position status now follows the same foreground and compact typogra
 The inline Clear position action now shares the themed surface, label contrast, and disabled opacity treatment used by the primary visualization clear action.
 
 Generation and revision status now use the theme foreground and compact typography tokens, keeping provenance evidence legible beside the live data state on narrow screens.
+
+Capture-status guidance now uses the theme foreground in normal operation and the existing error tint when capture fails, with compact typography for narrow layouts.
