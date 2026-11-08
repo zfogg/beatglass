@@ -67,3 +67,7 @@ The preparation scripts are executable on their respective hosts, but this Windo
 | Linux PipeWire timing and routing | Not runnable on Windows | Run the Linux qualification plan with a real graph and record clock-domain, queue-delay, drift, and uncertainty measurements. |
 
 This audit intentionally records unavailable evidence as pending rather than treating portable builds, fake backends, or headless tests as native support.
+
+## Documentation reconciliation
+
+The merged handoff tooling and this status page distinguish implemented preparation checks, attributable retained evidence, and native qualification observed on hardware. The first two states are covered by local verifier tests and portable fixtures; none changes the Windows, macOS or Linux rows to `READY`. Support language remains experimental until each row contains real desktop, audio and overlay evidence and the machine-readable report passes the all-platform exit gate.
