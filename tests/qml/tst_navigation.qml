@@ -865,9 +865,11 @@ TestCase {
         app.width = 700
         tryCompare(app, "compactHeader", true)
         verify(!previews.visible)
+        verify(!findChild(app, "resetAppearance").visible)
         app.width = 900
         tryCompare(app, "compactHeader", false)
         verify(previews.visible)
+        verify(findChild(app, "resetAppearance").visible)
         app.destroy()
     }
     function test_themePreviewKeyboardFocusHasVisibleRing() {
