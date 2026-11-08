@@ -124,3 +124,10 @@ TEST_CASE("catalog orders case-fold collisions by original name and preserves pa
  CHECK(result.entries[0].path == dir.path / "Alpha.wav");
  CHECK(result.entries[1].path == dir.path / "alpha.wav");
 }
+
+TEST_CASE("catalog excludes unsupported files from matching searches") {
+ TempDir dir; dir.file("notes.txt"); dir.file("mix.wav");
+ const auto result = beatglass::library::browse(dir.path, "notes");
+ CHECK(result.entries.empty());
+ CHECK(result.diagnostic.empty());
+}
