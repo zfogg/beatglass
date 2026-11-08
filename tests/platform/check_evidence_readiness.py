@@ -204,6 +204,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         {"platform": row["platform"], "unpassed_scenarios": row["unpassed_scenarios"],
          "missing_artifact_roles": row["missing_artifact_roles"], "errors": row["errors"]}
         for row in rows if row["unpassed_scenarios"] or row["missing_artifact_roles"] or row["errors"]]
+    expected_blocker_platforms = {row["platform"] for row in rows if row["unpassed_scenarios"] or row["missing_artifact_roles"] or row["errors"]}
+    native_blockers_consistent = {item["platform"] for item in native_qualification_blockers} == expected_blocker_platforms
     native_summary_consistent = (
         [item["platform"] for item in native_qualification_summary] == [row["platform"] for row in rows]
         and all(item["evidence_complete"] == (not item["unpassed_scenarios"] and not item["missing_artifact_roles"])
@@ -256,6 +258,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "platform_failure_summary": platform_failures,
             "native_qualification_summary": native_qualification_summary,
             "native_qualification_blockers": native_qualification_blockers,
+            "native_blockers_consistent": native_blockers_consistent,
             "native_qualification_ready": bool(native_qualification_summary) and all(item["ready"] and item["evidence_complete"] for item in native_qualification_summary),
             "native_summary_consistent": native_summary_consistent,
             "failure_summary_consistent": failure_summary_consistent,
@@ -280,7 +283,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "required_scenario_summary": required, "artifact_role_summary": artifact_roles, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and native_summary_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows)}
+            "ready": not errors and aggregate_consistent and native_summary_consistent and native_blockers_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:

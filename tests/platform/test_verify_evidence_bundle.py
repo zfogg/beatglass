@@ -307,6 +307,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertTrue(result["native_summary_consistent"])
             self.assertTrue(result["native_qualification_blockers"])
             self.assertEqual(result["native_qualification_blockers"][0]["platform"], "windows")
+            self.assertTrue(result["native_blockers_consistent"])
             self.assertEqual(result["not_ready_platforms"], ["windows"])
             self.assertTrue(result["failure_summary_consistent"])
             self.assertFalse(result["aggregate_consistent"])
