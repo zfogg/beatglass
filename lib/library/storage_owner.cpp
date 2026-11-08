@@ -4,7 +4,12 @@ bool StorageOwner::open(const StorageConfig& config, std::string* diagnostic) {
   close();
   if (!valid_storage_config(config, diagnostic)) return false;
   try { cache_ = std::make_unique<library_detail::SqliteCache>(config.database_path.string()); return true; }
-  catch (const std::exception& e) { if (diagnostic) *diagnostic = e.what(); return false; }
+  catch (const std::exception& e) {
+    // A failed reopen must never leave a partially constructed cache usable.
+    cache_.reset();
+    if (diagnostic) *diagnostic = e.what();
+    return false;
+  }
 }
 void StorageOwner::close() noexcept { cache_.reset(); }
 std::vector<library_detail::RetryableRun> StorageOwner::retryable_runs(std::size_t limit) const {
