@@ -155,3 +155,16 @@ class ReadinessReportContractTest(unittest.TestCase):
             report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("duplicate manifest scenario id", errors)
+
+    def test_duplicate_manifest_artifacts_are_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["artifacts"].append(dict(manifest["artifacts"][0]))
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("duplicate manifest artifact path", errors)
