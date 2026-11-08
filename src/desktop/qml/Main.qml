@@ -14,6 +14,7 @@ ApplicationWindow {
     property var metadataBridge: metadata
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
+    property var analysisJobBridge: typeof analysisJob !== "undefined" ? analysisJob : null
     property var captureMonitorBridge: typeof captureMonitor !== "undefined" ? captureMonitor : null
     property var endpointSelectionBridge: typeof endpointSelection !== "undefined" ? endpointSelection : null
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
@@ -437,7 +438,7 @@ ApplicationWindow {
                         }
                         Label {
                             objectName: "analysisFreshness"
-                            text: window.selectedName && analysisJob && analysisJob.frames > 0 ? "Analysis freshness: observed frames are not source-attributed in this shell; treat them as provisional until a source-linked result is published." : "Analysis freshness: waiting for source-linked analysis evidence."
+                            text: window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? "Analysis freshness: source-linked analysis complete." : "Analysis freshness: waiting for source-linked analysis evidence."
                             Accessible.name: "Analysis freshness"
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -453,7 +454,7 @@ ApplicationWindow {
                         }
                         RowLayout { Layout.fillWidth: true
                             Label {
-                                text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (analysisJob ? (analysisJob.frames > 0 ? "Running · observed " + analysisJob.frames + " frames." : "Queued · waiting for analysis telemetry.") : "Analysis progress unavailable")
+                                text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (window.analysisJobBridge ? (window.analysisJobBridge.status + " · observed " + window.analysisJobBridge.frames + " frames.") : "Analysis progress unavailable")
                                 objectName: "analysisProgress"
                                 Accessible.name: "Analysis progress"
                                 Accessible.description: text
@@ -462,14 +463,25 @@ ApplicationWindow {
                             Button {
                                 text: "Retry analysis"
                                 objectName: "retryAnalysis"
-                                enabled: false
+                                visible: window.analysisJobBridge !== null
+                                enabled: visible && window.analysisJobBridge.canRetry
                                 Accessible.name: "Retry analysis"
-                                Accessible.description: "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations."
+                                Accessible.description: "Retry the last source-attributed analysis operation after cancellation or failure."
+                                onClicked: window.analysisJobBridge.retry()
                                 ToolTip.text: Accessible.description
+                            }
+                            Button {
+                                objectName: "cancelAnalysis"
+                                text: "Cancel analysis"
+                                visible: window.analysisJobBridge !== null
+                                enabled: visible && window.analysisJobBridge.canCancel
+                                Accessible.name: "Cancel analysis"
+                                Accessible.description: "Cancel the active source-attributed analysis operation."
+                                onClicked: window.analysisJobBridge.cancel()
                             }
                             BusyIndicator {
                                 objectName: "analysisWaitingIndicator"
-                                running: window.selectedName !== "" && analysisJob && analysisJob.frames === 0
+                                running: window.selectedName !== "" && window.analysisJobBridge && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running")
                                 visible: running
                                 Accessible.name: "Analysis waiting indicator"
                                 Accessible.description: "Analysis is waiting for the first observed frame; progress percentage is not available yet."
