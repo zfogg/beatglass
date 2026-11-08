@@ -691,6 +691,7 @@ ApplicationWindow {
                                       + " · rejected " + window.analysisJobBridge.batchRejectedCount
                                       + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")) : ""
                                 Accessible.name: "Batch analysis queue status: " + text
+                                ToolTip.text: "Accepted, rejected, and capacity limits for the analysis queue"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? text : "Batch queue status is unavailable until the analysis bridge reports it."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -700,6 +701,7 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
                                 Accessible.name: "Persisted analysis recovery status: " + text
+                                ToolTip.text: "Saved analysis recovery status and retryable runs"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -710,6 +712,7 @@ ApplicationWindow {
                                 model: visible ? storageRecovery.retryableRunIds : []
                                 enabled: visible && count > 0
                                 Accessible.name: "Persisted retryable analysis runs"
+                                ToolTip.text: "Choose a saved analysis run to recover"
                                 onActivated: storageRecovery.selectRun(currentText)
                             }
                             Button {
@@ -718,6 +721,7 @@ ApplicationWindow {
                                 enabled: visible && storageRecovery.selectedRunId !== ""
                                 text: "Discard saved run"
                                 Accessible.name: "Discard saved retryable analysis run"
+                                ToolTip.text: "Discard the selected saved analysis run"
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
                                 onClicked: discardRecoveryDialog.open()
                             }
