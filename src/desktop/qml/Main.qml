@@ -1352,7 +1352,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationAnalysisHandoff"
                     text: typeof visualizationPresentation === "undefined" || !visualizationCanvas.presentationReady
-                        ? "Waiting for an accepted analysis result"
+                        ? (window.visualizationSelectionResetReason !== "" ? "Waiting for replacement analysis result; " + window.visualizationSelectionResetReason : "Waiting for an accepted analysis result")
                         : "Accepted analysis generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
                     Accessible.name: "Visualization analysis handoff: " + text
                     Accessible.value: text
