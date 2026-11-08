@@ -157,6 +157,9 @@ TEST_CASE("coordinator cancellation does not publish a stale result") {
   for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
   CHECK(handle->state() == beatglass::library_detail::TrackedState::cancelled);
   CHECK_FALSE(published.load());
+  const auto recovered = coordinator.storage().retryable_run("cancel-run");
+  REQUIRE(recovered);
+  CHECK(recovered->source_path == "track.wav");
 }
 TEST_CASE("cancelled analysis can be retried with a compatible snapshot") {
   beatglass::library_detail::SqliteCache cache(":memory:");

@@ -9,6 +9,11 @@ std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_i
     const auto cached = *admission.cached;
     operation.decode = [cached](std::stop_token, const std::function<void(std::uint64_t)>&) { return cached; };
   }
+  const auto recovery_id = run_id;
+  const library_detail::CacheKey recovery_key{operation.identity.content_hash, operation.identity.engine_version, operation.identity.configuration_id, operation.identity.mode};
+  operation.recover_cancellation = [cache = storage_.cache(), recovery_id, recovery_key] {
+    if (cache) cache->mark_retryable(recovery_id, recovery_key);
+  };
   operation.publish_transaction = make_transactional_publisher(*storage_.cache(), std::move(run_id), operation.identity, operation.verify);
   return runner_.submit_retryable(std::move(operation), priority);
 }
