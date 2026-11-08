@@ -79,6 +79,9 @@ int main() {
     assert(cache.invalidate(next_config));
     assert(!cache.find(next_config, result));
     assert(cache.find(next_engine, result) && result == "engine-v2-data");
+    cache.begin("config-republish", next_config);
+    assert(cache.publish("config-republish", next_config, "config-b-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_config, result) && result == "config-b-republished");
     assert(cache.invalidate(next_content));
     assert(!cache.find(next_content, result));
     assert(cache.find(next_engine, result) && result == "engine-v2-data");
