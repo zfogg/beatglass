@@ -40,6 +40,7 @@ required = {
     "batch cancelled count": 'Q_PROPERTY(int batchCancelledCount READ batchCancelledCount',
     "batch completed count": 'Q_PROPERTY(int batchCompletedCount READ batchCompletedCount',
     "batch queued count": 'Q_PROPERTY(int batchQueuedCount READ batchQueuedCount',
+    "queued derives terminal states": 'batchAccepted_ - batchCompletedCount_ - batchFailedCount_ - batchCancelledCount_',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:
