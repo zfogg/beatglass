@@ -508,6 +508,8 @@ The canvas now records the revision it last rendered and updates that value on e
 
 Capture, source, and epoch resets now clear the rendered revision alongside the presentation arrays, and invalid revisions are represented as -1 until a fresh accepted result arrives. Stale handoff metadata therefore cannot outlive its source data.
 
+Playback source and epoch transitions now provide explicit stale-clear explanations, connecting the actual playback bridge invalidation path to the visible selection-reset feedback.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
