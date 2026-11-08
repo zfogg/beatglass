@@ -190,3 +190,5 @@ Valid JSON manifests must still have an object root. Non-object roots are report
 Artifact diagnostic inventories sort paths by their string representation, so mixed valid and malformed path values remain deterministically reportable while the bundle stays pending.
 
 The lightweight readiness check also normalizes null or non-list artifact/scenario containers before iteration, matching report generation and preserving verifier contract errors rather than raising.
+
+The end-to-end local handoff command is `python tests/platform/run_readiness_handoff.py <retained-bundle-root> <report.json>`. It generates the conservative report and immediately validates the same JSON contract consumed by readiness tooling; a structurally valid result remains `PENDING` until native desktop/audio/overlay evidence is reviewed.
