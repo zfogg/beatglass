@@ -89,7 +89,7 @@ private:
     const auto status = state == TrackedState::queued ? "Analysis queued" : state == TrackedState::running ? "Analysis running" : state == TrackedState::completed ? "Analysis complete" : state == TrackedState::cancelled ? "Analysis cancelled" : "Analysis failed";
     emit analysis(QString::fromLatin1(status));
     if (state != TrackedState::queued && state != TrackedState::running)
-      emit result(true, QString::fromLatin1(status));
+      emit result(state == TrackedState::completed, QString::fromLatin1(status));
     if (state == TrackedState::failed) emit analysisError(QStringLiteral("Analysis failed; retryable work was preserved for recovery."));
     if (state == TrackedState::queued || state == TrackedState::running) QTimer::singleShot(50, this, &Worker::pollAnalysis); else { refresh(); if (state == TrackedState::completed) handle_.reset(); }
   }
