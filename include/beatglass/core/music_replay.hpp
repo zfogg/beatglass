@@ -106,7 +106,9 @@ public:
  * @param cancel Checked before decoder reads; it cannot interrupt blocking I/O.
  * @param tonal_observer Optional synchronous callback for tonal windows.
  * @param state_observer Optional synchronous callback after each decoded block.
- * @return The latest owned state; an incomplete final hop is not analyzed.
+ * @return The latest owned state; an incomplete final hop is not analyzed. The
+ *         opened source is fingerprinted before and after replay; a changed
+ *         source is rejected instead of returning analysis for an uncertain file.
  * @throws std::invalid_argument for zero epoch before opening the file;
  * MusicReplayCancelled for cancellation; std::exception for I/O,
  * estimator or callback failure. No cached or shared result is published.
