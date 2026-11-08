@@ -38,7 +38,8 @@ public:
   /**
    * Submit one operation to the worker queue. The returned handle is empty
    * when the bounded queue rejects the work; execution and callbacks remain
-   * off the audio and GUI threads.
+   * off the audio and GUI threads. Decoder progress is forwarded to both the
+   * operation callback and the retained handle before publication.
    */
   std::shared_ptr<library_detail::JobHandle> submit(AnalysisOperation operation, int priority = 0);
   /**
