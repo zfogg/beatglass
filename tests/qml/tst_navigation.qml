@@ -93,6 +93,7 @@ TestCase {
         verify(!device.enabled)
         let guidance = findChild(app, "permissionGuidance")
         verify(guidance.text.length > 20)
+         if (Qt.platform.os === "osx") verify(guidance.text.indexOf("14.2") >= 0)
         compare(findChild(app, "settingsStatus").text, "Settings are saved for this desktop profile. User audio files are never modified.")
         app.destroy()
     }
