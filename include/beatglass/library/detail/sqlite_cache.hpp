@@ -25,6 +25,7 @@ struct CollectionEntry {
 /** Case-insensitive name-prefix page; offset is zero-based and limit must be between 1 and 10000. */
 inline constexpr std::size_t kMaxCollectionSearchBytes = 1024;
 inline constexpr std::size_t kMaxCollectionPageSize = 10000;
+inline constexpr std::size_t kMaxCollectionOffset = static_cast<std::size_t>(0x7fffffffffffffffULL);
 struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; }; /** Search prefixes are limited to kMaxCollectionSearchBytes. */
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;

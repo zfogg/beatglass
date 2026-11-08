@@ -129,7 +129,7 @@ public:
   std::vector<CollectionEntry> entries(const CollectionQuery& q, std::stop_token stop) {
     if (q.limit == 0 || q.limit > kMaxCollectionPageSize) throw std::invalid_argument("invalid collection page size");
     if (q.search.size() > kMaxCollectionSearchBytes || q.search.find('\0') != std::string::npos || !sqlite_length_representable(q.search.size()) ||
-        q.offset > static_cast<std::size_t>(std::numeric_limits<sqlite3_int64>::max()))
+        q.offset > kMaxCollectionOffset)
       throw std::invalid_argument("invalid collection query");
     if (stop.stop_requested()) throw CollectionCancelled();
     Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE lower(name) LIKE lower(?) || '%' ORDER BY lower(name),name,path LIMIT ? OFFSET ?"); bind(s.p,1,q.search); check(sqlite3_bind_int64(s.p,2,static_cast<sqlite3_int64>(q.limit))); check(sqlite3_bind_int64(s.p,3,static_cast<sqlite3_int64>(q.offset))); std::vector<CollectionEntry> out; int rc=SQLITE_ROW; while((rc=sqlite3_step(s.p))==SQLITE_ROW){ if(stop.stop_requested()) throw CollectionCancelled(); out.push_back(read_entry(s.p)); } if(rc!=SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_)); return out;
