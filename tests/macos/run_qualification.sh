@@ -172,7 +172,7 @@ if ! grep -Eq '[0-9]+% tests passed' "$overlay_log"; then
   echo "Overlay qualification log has no passing CTest summary" >&2
   exit 1
 fi
-for evidence in "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"; do
+for evidence in "$commands_log" "$output_discovery_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"; do
   if [[ ! -s "$evidence" ]]; then
     echo "Qualification evidence file is missing or empty: $evidence" >&2
     exit 1
