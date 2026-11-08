@@ -967,6 +967,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisRecoveryTransition"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
+                                text: visible && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running") ? "Recovery transition active; previous source labels are not current." : ""
+                                Accessible.name: "Analysis recovery transition"
+                                Accessible.description: visible ? text : "No source or endpoint recovery transition is active."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisCompletionResult"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
                                 text: visible ? ("Completed analysis result: " + storageRecovery.analysisResult) : ""
