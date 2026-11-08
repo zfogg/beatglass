@@ -10,6 +10,8 @@ hawkmoth_compiler = "clang++-18"
 hawkmoth_clang_cpp = ["-std=c++20", "-I" + str(Path(hawkmoth_root) / "include")]
 hawkmoth_clang_cpp += shlex.split(subprocess.check_output(["pkg-config", "--cflags", "Qt6Core"], text=True))
 html_theme = "alabaster"
+templates_path = ["_templates"]
+html_sidebars = {"**": ["searchbox.html", "docsnav.html", "localtoc.html"]}
 exclude_patterns = [".worktree-*", "build", ".git", "tests/fixtures/generated"]
 
 hawkmoth_transform_default = "javadoc"
