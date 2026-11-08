@@ -433,3 +433,5 @@ The canvas also draws a low-contrast, foreground-derived three-row grid and rese
 In compact headers the grid reduces to one center guide, matching the shorter canvas height and preserving data area for waveform/FFT content; full layouts retain the three-row grid.
 
 External theme preference changes now explicitly request a visualization repaint after updating the selected theme token, keeping the canvas synchronized when settings are restored or changed from another surface.
+
+The visualization keyboard focus ring now uses the active theme accent token, keeping focus visibility aligned with the selected palette instead of a fixed blue highlight.
