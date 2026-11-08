@@ -365,3 +365,5 @@ The Library UI now consumes the coordinator admission status and admitted result
 Library controls now expose coordinator completion status with explicit cancel and retry actions, distinct from cache lookup controls.
 
 The completion surface now renders the coordinator’s decoded result payload separately from cached-result lookup, preserving result identity across retry and cancellation diagnostics.
+
+The Library also surfaces persisted retryable-run count alongside active analysis status, making failed publication/recovery outcomes visible without conflating them with cache hits.
