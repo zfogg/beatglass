@@ -371,6 +371,8 @@ TestCase {
         browser.forceActiveFocus()
         keyClick(Qt.Key_Return)
         compare(app.selectedName, "tone.flac")
+        verify(app.selectedAudioUrl.toString().endsWith("/tone.flac"))
+        compare(findChild(app, "selectedAudioSource").Accessible.name, "Selected audio source")
         verify(fakeMetadata.lastFile.toString().endsWith("/tone.flac"))
         app.destroy()
     }

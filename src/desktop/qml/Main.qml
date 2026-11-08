@@ -22,6 +22,7 @@ ApplicationWindow {
     property var catalogRows: []
     property bool sortDescending: false
     property string selectedName: ""
+    property url selectedAudioUrl: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     Shortcut {
         objectName: "overlayEscapeShortcut"
@@ -138,6 +139,7 @@ ApplicationWindow {
             browseFolder = url
         } else {
             selectedName = files.get(index, "fileName")
+            selectedAudioUrl = url
             metadataBridge.inspect(url)
         }
     }
@@ -338,6 +340,13 @@ ApplicationWindow {
                             text: window.selectedName || "No file selected"
                             font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio file"
+                            Accessible.description: text
+                        }
+                        Label {
+                            objectName: "selectedAudioSource"
+                            text: window.selectedAudioUrl.toString() !== "" ? "Source: " + window.selectedAudioUrl : "Source unavailable"
+                            elide: Text.ElideMiddle; Layout.fillWidth: true
+                            Accessible.name: "Selected audio source"
                             Accessible.description: text
                         }
                         Label {
