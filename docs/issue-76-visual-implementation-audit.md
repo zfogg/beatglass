@@ -643,3 +643,5 @@ After display restoration, Retry remains disabled until the user explicitly choo
 When the overlay is unavailable, the recovery panel may show the persisted admission/rejection bridge result only for failed or cancelled analysis, explicitly labeling it historical rather than current visualization data. This prevents retry diagnostics from making stale-result claims.
 
 That historical diagnostic is dismissed when retry or discard is invoked, and restored only when a subsequent admission reports a new failed/cancelled result. Successful recovery therefore cannot leave old persisted rejection text visible.
+
+Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.

@@ -447,6 +447,10 @@ ApplicationWindow {
             if (window.overlayBridge)
                 window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
         }
+        function onGeometryChanged() {
+            if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
+                window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
+        }
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
@@ -2039,6 +2043,19 @@ ApplicationWindow {
                     Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Tray/taskbar fallback keeps controls available while the overlay is unavailable"
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+                Label {
+                    objectName: "overlayGeometryStatus"
+                    text: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
+                        ? "Overlay position/size: " + window.overlayBridge.geometry.x + "," + window.overlayBridge.geometry.y + " · " + window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height
+                        : "Overlay geometry unavailable; control-window fallback remains active."
+                    Accessible.name: "Overlay geometry status: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Persisted overlay position and size, or the fallback state when native geometry is unavailable."
+                    ToolTip.text: "Current persisted overlay position and size"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }

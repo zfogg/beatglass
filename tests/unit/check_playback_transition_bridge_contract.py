@@ -42,6 +42,8 @@ MARKERS = {
     "qml overlay opacity state": "DJ overlay opacity set to ",
     "qml overlay size state": "DJ overlay size set to ",
     "qml overlay fallback": "Control window remains available as the tray/taskbar fallback until the overlay display recovers.",
+    "qml overlay geometry status": 'objectName: "overlayGeometryStatus"',
+    "qml overlay geometry announcement": "DJ overlay geometry restored at ",
 }
 
 
