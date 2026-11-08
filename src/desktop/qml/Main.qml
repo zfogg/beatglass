@@ -717,6 +717,8 @@ ApplicationWindow {
                         selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.01)
                         requestPaint()
                     }
+                    Keys.onHomePressed: { selectedPosition = 0; requestPaint() }
+                    Keys.onEndPressed: { selectedPosition = 1; requestPaint() }
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
