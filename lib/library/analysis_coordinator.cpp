@@ -14,9 +14,11 @@ std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_i
 }
 AnalysisCoordinator::Submission AnalysisCoordinator::submit_admitted(std::string run_id, AnalysisOperation operation, int priority) {
   if (!storage_.cache() || run_id.empty() || !operation.valid()) return {};
+  const auto submitted_run = run_id;
+  const auto submitted_identity = operation.identity;
   auto admission = admit_analysis(*storage_.cache(), run_id, operation.identity);
-  if (admission.cached) return {std::move(admission.cached), {}, false};
+  if (admission.cached) return {submitted_run, submitted_identity, std::move(admission.cached), {}, false};
   if (!admission.analysis_reserved) return {};
-  return {{}, submit(std::move(run_id), std::move(operation), priority), true};
+  return {submitted_run, submitted_identity, {}, submit(std::move(run_id), std::move(operation), priority), true};
 }
 }

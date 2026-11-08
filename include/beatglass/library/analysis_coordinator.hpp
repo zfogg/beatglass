@@ -5,7 +5,17 @@
 namespace beatglass::library {
 /** Worker-owned coordinator joining analysis execution to transactional storage. */
 class AnalysisCoordinator final { public:
-  struct Submission { std::optional<std::string> cached; std::shared_ptr<RetryableAnalysis> handle; bool analysis_reserved{}; };
+  /** Library-facing lifecycle snapshot; identity remains attached to every queued outcome. */
+  struct Submission {
+    std::string run_id;
+    AnalysisIdentity identity;
+    std::optional<std::string> cached;
+    std::shared_ptr<RetryableAnalysis> handle;
+    bool analysis_reserved{};
+    library_detail::TrackedState state() const noexcept {
+      return handle ? handle->state() : (cached ? library_detail::TrackedState::completed : library_detail::TrackedState::failed);
+    }
+  };
   explicit AnalysisCoordinator(std::size_t capacity = 2) : executor_(capacity), runner_(executor_) {}
   AnalysisCoordinator(const AnalysisCoordinator&) = delete;
   bool open_storage(const StorageConfig& config, std::string* diagnostic = nullptr) { return storage_.open(config, diagnostic); }
