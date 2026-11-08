@@ -71,6 +71,7 @@ int main() {
   assert(reopen_failed);
 
   const auto unsupported = std::filesystem::temp_directory_path() / "beatglass-reader.m4a";
+  { std::ofstream out(unsupported, std::ios::binary); out << "not-audio"; }
   bool classified = false;
   try { FileReader reader(unsupported, 1); }
   catch (const FileOpenError& error) {
@@ -78,15 +79,20 @@ int main() {
   }
   assert(classified);
   const auto unsupported_upper = std::filesystem::temp_directory_path() / "beatglass-reader.M4A";
+  { std::ofstream out(unsupported_upper, std::ios::binary); out << "not-audio"; }
   bool upper_classified = false;
   try { FileReader reader(unsupported_upper, 1); }
   catch (const FileOpenError& error) { upper_classified = error.kind() == FileOpenErrorKind::unsupported_format; }
   assert(upper_classified);
   const auto unsupported_aac = std::filesystem::temp_directory_path() / "beatglass-reader.aac";
+  { std::ofstream out(unsupported_aac, std::ios::binary); out << "not-audio"; }
   bool aac_classified = false;
   try { FileReader reader(unsupported_aac, 1); }
   catch (const FileOpenError& error) { aac_classified = error.kind() == FileOpenErrorKind::unsupported_format; }
   assert(aac_classified);
+  std::filesystem::remove(unsupported, cleanup);
+  std::filesystem::remove(unsupported_upper, cleanup);
+  std::filesystem::remove(unsupported_aac, cleanup);
   const auto empty_wav = std::filesystem::temp_directory_path() / "beatglass-reader-empty.wav";
   { std::ofstream empty(empty_wav, std::ios::binary); }
   bool empty_rejected = false;
