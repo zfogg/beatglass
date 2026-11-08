@@ -14,8 +14,7 @@ std::string folded(std::string value) {
 bool supported_audio(const std::filesystem::path& path) {
   const auto extension = folded(path.extension().string());
   return extension == ".wav" || extension == ".flac" || extension == ".mp3" ||
-         extension == ".ogg" || extension == ".aiff" || extension == ".aif" ||
-         extension == ".m4a";
+         extension == ".aiff" || extension == ".aif";
 }
 }
 

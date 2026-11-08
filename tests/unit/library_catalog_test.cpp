@@ -33,3 +33,9 @@ TEST_CASE("catalog applies case-insensitive name filtering and rejects missing f
   CHECK(missing.entries.empty());
   CHECK_FALSE(missing.diagnostic.empty());
 }
+TEST_CASE("catalog does not advertise unqualified codecs") {
+  TempDir dir; dir.file("stream.ogg"); dir.file("album.m4a"); dir.file("track.aiff");
+  const auto result = beatglass::library::browse(dir.path);
+  REQUIRE(result.entries.size() == 1);
+  CHECK(result.entries[0].name == "track.aiff");
+}

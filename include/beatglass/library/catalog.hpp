@@ -9,7 +9,8 @@ namespace beatglass::library {
 /** One visible entry in a local library folder.
  * The path is absolute when the input folder is absolute, and the entry does
  * not own or modify the referenced file. Directories are included so callers
- * can navigate; regular files are included only for supported audio types.
+ * can navigate; regular files are included only for the qualified WAV, FLAC,
+ * MP3, and AIFF v1 formats.
  */
 struct CatalogEntry {
   std::filesystem::path path;
