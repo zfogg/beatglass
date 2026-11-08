@@ -362,6 +362,12 @@ Arrow and Home/End palette navigation now moves focus to the newly selected swat
 
 The contract checks now cover focus movement for both relative arrow navigation and the Home/End boundary jumps, protecting the complete keyboard palette traversal path.
 
+Escape now returns focus from a theme preview swatch to the main theme selector, providing a predictable keyboard exit from the swatch cluster without changing the selected palette.
+
+Escape now also returns focus from either Waveform/FFT mode button to the live visualization canvas, keeping keyboard navigation flowing from mode choice into the interactive rendered surface without pointer input.
+
+The live canvas now supports Page Up/Page Down for coarse ten-percent position movement alongside fine Left/Right steps and Home/End boundaries. The accessible description, tooltip, and contract checks document this complete keyboard navigation vocabulary.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

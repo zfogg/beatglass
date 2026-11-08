@@ -176,3 +176,11 @@ Artifact-role indexing likewise considers only validated string paths. A structu
 Scenario statuses are validated as strings before allowed-state membership checks. Structured status values fail as invalid scenarios and leave the evidence bundle pending rather than raising in the verifier.
 
 The readiness report consumer also stringifies malformed status values when building diagnostic counts, ensuring invalid manifests remain reportable and pending instead of failing while aggregating the inventory.
+
+Readiness retained-file and artifact-role indexes include only validated string paths. Structured paths are surfaced through verifier errors and unlisted-file diagnostics without causing report aggregation to raise.
+
+Readiness artifact-role diagnostics also require each scenario evidence reference to be a string before lookup. Structured evidence references are classified as missing ownership and keep the platform pending instead of raising during report generation.
+
+Readiness report aggregation treats non-list `artifacts` or `scenarios` containers as empty diagnostic inventories while the verifier records the manifest contract error. This preserves a machine-readable pending report for malformed container types.
+
+The lightweight readiness check applies the same validated-string scenario-ID rule as report generation, so malformed IDs cannot crash one consumer path while another reports a conservative pending result.

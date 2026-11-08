@@ -157,6 +157,36 @@ TEST_CASE("SQLite retryable run query exposes its bound") {
   CHECK(kMaxRetryableRuns == 10000);
   CHECK_THROWS_AS(cache.retryable_runs(kMaxRetryableRuns + 1), std::invalid_argument);
 }
+TEST_CASE("SQLite cache run IDs expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCacheRunIdBytes == 4096);
+  CacheKey key{"hash", "engine", "config", "offline"};
+  CHECK_THROWS_AS(cache.begin(std::string(kMaxCacheRunIdBytes + 1, 'x'), key), std::invalid_argument);
+}
+TEST_CASE("SQLite cache content identities expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCacheContentIdentityBytes == 512);
+  CacheKey key{std::string(kMaxCacheContentIdentityBytes + 1, 'x'), "engine", "config", "offline"};
+  CHECK_THROWS_AS(cache.begin("run", key), std::invalid_argument);
+}
+TEST_CASE("SQLite cache engine versions expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCacheEngineVersionBytes == 4096);
+  CacheKey key{"hash", std::string(kMaxCacheEngineVersionBytes + 1, 'x'), "config", "offline"};
+  CHECK_THROWS_AS(cache.begin("run", key), std::invalid_argument);
+}
+TEST_CASE("SQLite cache configurations expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCacheConfigurationBytes == 4096);
+  CacheKey key{"hash", "engine", std::string(kMaxCacheConfigurationBytes + 1, 'x'), "offline"};
+  CHECK_THROWS_AS(cache.begin("run", key), std::invalid_argument);
+}
+TEST_CASE("SQLite cache modes expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCacheModeBytes == 128);
+  CacheKey key{"hash", "engine", "config", std::string(kMaxCacheModeBytes + 1, 'x')};
+  CHECK_THROWS_AS(cache.begin("run", key), std::invalid_argument);
+}
 TEST_CASE("SQLite binding lengths are checked before narrowing") {
   auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
   REQUIRE(sqlite_length_representable(maximum));
@@ -218,6 +248,12 @@ TEST_CASE("SQLite collection sizes are checked before signed binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "hash",
     std::numeric_limits<std::uint64_t>::max(), 1}), std::invalid_argument);
+}
+TEST_CASE("SQLite collection fingerprints expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCollectionFingerprintBytes == 4096);
+  CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio",
+    std::string(kMaxCollectionFingerprintBytes + 1, 'x'), 1, 1}), std::invalid_argument);
 }
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");

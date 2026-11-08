@@ -378,7 +378,8 @@ def main() -> int:
         "visualization canvas graphic role": "Accessible.value: visualizationCanvas.viewMode + \", \" + (visualizationCanvas.selectedPosition < 0 ? \"no position selected\" : \"position \" + Math.round(visualizationCanvas.selectedPosition * 100) + \"%\")\n                    Accessible.role: Accessible.Graphic",
         "visualization empty state tooltip": "Accessible.role: Accessible.StaticText\n                    Accessible.description: text\n                    ToolTip.text: \"Visualization data availability and next action\"",
         "visualization escape clear": "Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }",
-        "visualization keyboard recovery tooltip": "ToolTip.text: \"Click to select a position; use Left/Right/Home/End to navigate or Escape to clear\"",
+        "visualization keyboard recovery tooltip": "ToolTip.text: \"Click to select a position; use Left/Right/Page Up/Page Down/Home/End to navigate or Escape to clear\"",
+        "visualization coarse keyboard navigation": "Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint() }",
         "visualization mode radio roles": "objectName: \"waveformView\"; checkable: true; checked: visualizationCanvas.viewMode === \"waveform\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.role: Accessible.RadioButton",
         "visualization clear button state": "Accessible.name: \"Clear visualization position\"\n                    Accessible.value: enabled ? \"available\" : \"no position selected\"\n                    Accessible.role: Accessible.Button",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
@@ -397,6 +398,8 @@ def main() -> int:
         "theme preview focus follows navigation": "themePreviews.children[nextIndex].forceActiveFocus()",
         "theme preview home focus": "themePreviews.children[0].forceActiveFocus()",
         "theme preview end focus": "themePreviews.children[lastIndex].forceActiveFocus()",
+        "theme preview escape focus recovery": "Keys.onEscapePressed: {\n                            themeSelector.forceActiveFocus()",
+        "visualization mode escape focus recovery": "Keys.onEscapePressed: { visualizationCanvas.forceActiveFocus(); event.accepted = true }",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
