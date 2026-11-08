@@ -114,9 +114,9 @@ ApplicationWindow {
                 id: navigation
                 objectName: "navigation"
                 Layout.fillWidth: true
-                TabButton { text: "Library"; objectName: "libraryTab" }
-                TabButton { text: "DJ"; objectName: "djTab" }
-                TabButton { text: "Settings"; objectName: "settingsTab" }
+                TabButton { text: "Library"; objectName: "libraryTab"; Accessible.name: "Library"; Accessible.description: "Browse local audio files." }
+                TabButton { text: "DJ"; objectName: "djTab"; Accessible.name: "DJ"; Accessible.description: "View live DJ controls and overlay settings." }
+                TabButton { text: "Settings"; objectName: "settingsTab"; Accessible.name: "Settings"; Accessible.description: "Configure appearance, audio and overlay settings." }
             }
             ComboBox {
                 id: themeSelector
