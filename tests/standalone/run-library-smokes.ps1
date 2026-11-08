@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$OutputDir = "")
+param([string]$OutputDir = "", [string]$Compiler = "g++")
 
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
@@ -17,14 +17,19 @@ $cases = @(
   @{ Name = "executor_shutdown"; Sources = @($executorSource, "tests/standalone/job_executor_shutdown_smoke.cpp") },
   @{ Name = "analysis_runner"; Sources = @($runnerSources + "tests/standalone/analysis_runner_smoke.cpp") },
   @{ Name = "analysis_progress"; Sources = @($runnerSources + "tests/standalone/analysis_progress_smoke.cpp") },
-  @{ Name = "analysis_cancellation"; Sources = @($runnerSources + "tests/standalone/analysis_postverify_cancel_smoke.cpp") }
+  @{ Name = "analysis_cancellation"; Sources = @($runnerSources + "tests/standalone/analysis_postverify_cancel_smoke.cpp") },
+  @{ Name = "analysis_operation"; Sources = @("tests/standalone/analysis_operation_smoke.cpp") },
+  @{ Name = "analysis_verifier_error"; Sources = @($runnerSources + "tests/standalone/analysis_verifier_error_smoke.cpp") },
+  @{ Name = "analysis_empty_cancel"; Sources = @($runnerSources + "tests/standalone/analysis_empty_cancel_smoke.cpp") },
+  @{ Name = "analysis_serialize_exception"; Sources = @($runnerSources + "tests/standalone/analysis_serialize_exception_smoke.cpp") },
+  @{ Name = "storage_config"; Sources = @("tests/standalone/storage_config_smoke.cpp") }
 )
 
 Push-Location $repo
 try {
   foreach ($case in $cases) {
     $binary = Join-Path $OutputDir "$($case.Name).exe"
-    & g++ @common $case.Sources -o $binary
+    & $Compiler @common $case.Sources -o $binary
     if ($LASTEXITCODE -ne 0) { throw "compile failed: $($case.Name)" }
     & $binary
     if ($LASTEXITCODE -ne 0) { throw "smoke failed: $($case.Name)" }
