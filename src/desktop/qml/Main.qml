@@ -1249,6 +1249,8 @@ ApplicationWindow {
                         : window.liveBridge.status === "Stopped"
                         ? "Start monitoring to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
                         : "Waiting for captured audio data to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
+                    color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     Accessible.name: "Visualization empty state"

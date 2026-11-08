@@ -441,3 +441,5 @@ Waveform and FFT mode controls now use the same theme accent for active focus an
 Selected waveform and FFT controls now use a derived darker accent fill, while unselected controls use the active theme surface. This preserves mode hierarchy and contrast as the user changes palettes.
 
 The mode status label now follows the theme foreground and compact-header typography tokens, keeping the current waveform/FFT context legible in both full and narrow layouts.
+
+The empty visualization state now uses the same compact typography and foreground token as the mode status, with an explicit error tint when capture fails, keeping next-step guidance legible across all six themes.
