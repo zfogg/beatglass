@@ -19,14 +19,22 @@ bool PlaybackSessionBridge::replaceSource(const QUrl& source, qulonglong epoch) 
   if (!source.isValid() || source.isEmpty() || !session_.replace(epoch)) return false;
   source_ = source; emit changed(); return true;
 }
-bool PlaybackSessionBridge::pause() { const bool ok = session_.pause(); if (ok) emit changed(); return ok; }
+bool PlaybackSessionBridge::pause() { const bool ok = session_.pause();
+#ifdef _WIN32
+  if (ok && native_) native_->pause();
+#endif
+  if (ok) emit changed(); return ok; }
 void PlaybackSessionBridge::stop() { session_.stop();
 #ifdef _WIN32
   if (native_) native_->stop();
 #endif
   native_running_ = false;
   source_ = QUrl{}; emit changed(); }
-bool PlaybackSessionBridge::seek(qulonglong frame, qulonglong epoch) { const bool ok = session_.seek(frame, epoch); if (ok) emit changed(); return ok; }
+bool PlaybackSessionBridge::seek(qulonglong frame, qulonglong epoch) { const bool ok = session_.seek(frame, epoch);
+#ifdef _WIN32
+  if (ok && native_) { native_->stop(); native_running_ = false; }
+#endif
+  if (ok) emit changed(); return ok; }
 void PlaybackSessionBridge::refreshDevices() {
 #ifdef _WIN32
   devices_.clear(); for (const auto& device : beatglass::windows::enumerate_waveout_devices()) devices_.append(QString::number(device.id) + QStringLiteral(": ") + QString::fromStdString(device.name));
