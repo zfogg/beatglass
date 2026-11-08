@@ -237,6 +237,8 @@ The same checklist can be exported during handoff with `--review-output <review.
 
 The exported checklist includes all four audit-error channels (`generation_errors`, `handoff_check_errors`, `documentation_check_errors`, and `ingestion_errors`) before the platform scenario/artifact sections, giving reviewers an actionable reason for every pending handoff.
 
+Use `--require-ready` when the checklist is an acceptance gate; it exits nonzero for `PENDING`. Without that flag, checklist export remains informational and never changes the report state.
+
 The portable consumer tests cover the eventual transition explicitly: clearing `native_qualification_required` removes only that native-state rejection; all remaining report-contract, provenance, and readiness checks still apply. This is a transition contract, not native evidence.
 
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.
