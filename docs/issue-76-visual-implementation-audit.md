@@ -325,3 +325,5 @@ Visualization empty, load, data-count, selection, generation, and capture messag
 The visualization position status and clear action now share a selection group with a live percentage-or-none value and reset tooltip, making the keyboard/canvas selection lifecycle discoverable as one control cluster.
 
 The Library’s selected-audio panel now exposes one grouped details surface covering source identity, metadata status, recovery actions, analysis, and playback context. Its value follows the selected file and metadata state, giving assistive technology users a stable entry point for the whole source workflow.
+
+Selected-audio recovery actions now expose live values: clearing reports the selected filename or “no selection,” and metadata retry reports the current metadata error/status. This makes action availability and recovery context explicit before activation.
