@@ -211,6 +211,8 @@ When ingestion is invoked through the handoff command, the manifest platform mus
 
 Ingestion also requires a 40-hex source commit and nonempty capture time in the native identity manifest. Missing or malformed provenance is retained as an explicit ingestion error and cannot be promoted to readiness.
 
+Capture times are parsed as ISO-8601 during ingestion; a malformed timestamp is rejected before the artifact can participate in a readiness handoff.
+
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
