@@ -389,6 +389,7 @@ def main() -> int:
         "appearance group live value": "Accessible.name: \"Appearance settings\"\n                    Accessible.value: window.selectedTheme + \", \"",
         "theme preview group live value": "Accessible.name: \"Theme previews\"\n                Accessible.value: window.selectedTheme",
         "theme preview selected tooltip": "ToolTip.text: checked ? window.themeNames[index] + \" theme is selected\" : \"Select \" + window.themeNames[index] + \" theme\"",
+        "appearance group dynamic tooltip": "ToolTip.text: \"Configure theme and motion preferences; current: \" + window.selectedTheme",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }

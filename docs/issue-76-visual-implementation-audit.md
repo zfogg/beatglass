@@ -350,6 +350,8 @@ Each primary navigation tab now updates its tooltip to identify the selected des
 
 The Settings Appearance group now reports its current theme and motion mode as a live group value, keeping the visual preference cluster’s state available before users navigate its individual controls.
 
+The Appearance group tooltip now includes the current theme and motion mode, keeping the grouped settings context synchronized for pointer and keyboard users.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
