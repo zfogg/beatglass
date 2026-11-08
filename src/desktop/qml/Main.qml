@@ -197,7 +197,7 @@ ApplicationWindow {
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24; font.bold: true }
                 Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; color: "white" }
-                Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status"; Accessible.description: text; ToolTip.text: "Current output capture status" }
+                Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output capture status" }
                 Button {
                     objectName: "overlayRetryCapture"
                     visible: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" && window.captureMonitorBridge.start
@@ -967,14 +967,14 @@ ApplicationWindow {
                             function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
                         }
                     }
-                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode"; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
+                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
                     Label { text: "Opacity" }
                     Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                     Connections {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge) overlayOpacityControl.value = window.overlayBridge.opacity }
                     }
-                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity"; Accessible.description: text }
+                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity"; Accessible.role: Accessible.StaticText; Accessible.description: text }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
@@ -988,7 +988,7 @@ ApplicationWindow {
                         onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
                         Layout.fillWidth: true
                     }
-                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display"; Accessible.description: text }
+                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display"; Accessible.role: Accessible.StaticText; Accessible.description: text }
                     Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
@@ -1008,7 +1008,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability"; Accessible.description: text; wrapMode: Text.WordWrap }
+                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability"; Accessible.role: Accessible.StaticText; Accessible.description: text; wrapMode: Text.WordWrap }
                 Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; Accessible.name: "Retry DJ overlay"; Accessible.description: "Retry showing the native DJ overlay"; ToolTip.text: "Retry showing the native DJ overlay on the selected display"; onClicked: window.showOverlayAndHideControls() }
                 Item { Layout.fillHeight: true }
             }
