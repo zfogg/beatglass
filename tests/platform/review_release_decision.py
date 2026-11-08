@@ -24,6 +24,11 @@ def decide(bundle_root: Path, report_name: str = "readiness-report.json", packet
         result["report_sha256"] = hashlib.sha256(report_path.read_bytes()).hexdigest()
     except OSError:
         result["report_sha256"] = None
+    packet_path = bundle_root / packet_name
+    try:
+        result["review_packet_sha256"] = hashlib.sha256(packet_path.read_bytes()).hexdigest()
+    except OSError:
+        result["review_packet_sha256"] = None
     return result
 
 
