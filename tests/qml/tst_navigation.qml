@@ -208,6 +208,11 @@ TestCase {
         compare(details.text, "Select an audio file to inspect its read-only details.")
         app.destroy()
     }
+    function test_sourceWorkflowStatusIsAccessible() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "sourceWorkflowStatus").Accessible.name, "Selected source workflow status")
+        app.destroy()
+    }
     function test_libraryBrowserIsAccessible() {
         let app = shell.createObject(null)
         compare(findChild(app, "browser").Accessible.name, "Folder contents")

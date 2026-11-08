@@ -340,6 +340,15 @@ ApplicationWindow {
                             Accessible.name: "Analysis and playback status"
                             Accessible.description: text
                         }
+                        Label {
+                            objectName: "sourceWorkflowStatus"
+                            text: window.selectedAudioUrl.toString() === ""
+                                  ? "Select an audio source to inspect and play it."
+                                  : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · " + window.metadataStatus
+                            Accessible.name: "Selected source workflow status"
+                            Accessible.description: text
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
                         RowLayout { Layout.fillWidth: true
                             Label { text: analysisJob ? (analysisJob.frames > 0 ? "Analysis observed " + analysisJob.frames + " frames." : "No analysis frames observed yet.") : "Analysis progress unavailable"; objectName: "analysisProgress"; Accessible.name: "Analysis progress"; Accessible.description: text; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                         }
