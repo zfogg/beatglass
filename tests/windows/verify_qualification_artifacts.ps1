@@ -8,10 +8,14 @@ $ErrorActionPreference = "Stop"
 $OutputDirectory = (Resolve-Path -LiteralPath $OutputDirectory).Path
 $manifestPath = Join-Path $OutputDirectory "qualification-artifacts.sha256"
 $identityManifest = Join-Path $OutputDirectory "qualification-manifest.txt"
+$topologyPath = Join-Path $OutputDirectory "display-topology.json"
 $evidencePath = Join-Path $OutputDirectory "native-playback-evidence.json"
 $overlayEvidencePath = Join-Path $OutputDirectory "native-overlay-evidence.json"
 if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw "Missing artifact hash manifest: $manifestPath" }
 if (-not (Test-Path -LiteralPath $identityManifest -PathType Leaf)) { throw "Missing qualification identity manifest: $identityManifest" }
+if (-not (Test-Path -LiteralPath $topologyPath -PathType Leaf) -or (Get-Item -LiteralPath $topologyPath).Length -eq 0) { throw "Missing or empty display topology evidence: $topologyPath" }
+try { $topology = Get-Content -LiteralPath $topologyPath -Raw | ConvertFrom-Json } catch { throw "Invalid display topology evidence: $topologyPath" }
+if ($null -eq $topology.captured_at -or $null -eq $topology.monitors -or $null -eq $topology.adapters) { throw "Display topology evidence is missing required fields" }
 $identity = @{}
 foreach ($line in Get-Content -LiteralPath $identityManifest) { if ($line -notmatch '^([^=]+)=(.*)$' -or $identity.ContainsKey($Matches[1])) { throw "Malformed or duplicate identity manifest key: $line" }; $identity[$Matches[1]] = $Matches[2] }
 foreach ($key in @("commit", "windows_version", "architecture", "cmake_version", "artifact_sha256", "playback_evidence", "overlay_evidence")) { if (-not $identity.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($identity[$key])) { throw "Identity manifest missing $key" } }

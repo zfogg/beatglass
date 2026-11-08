@@ -24,6 +24,15 @@ try {
   "Output directory: $OutputDirectory"
   "Windows: $([Environment]::OSVersion.VersionString)"
   "Architecture: $([Environment]::Is64BitOperatingSystem)"
+  $topologyPath = Join-Path $OutputDirectory "display-topology.json"
+  $topology = @{
+    captured_at = (Get-Date -AsUTC -Format o)
+    monitors = @(Get-CimInstance Win32_DesktopMonitor | Select-Object Name, MonitorType, ScreenHeight, ScreenWidth, PNPDeviceID)
+    adapters = @(Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion, VideoModeDescription)
+  }
+  $topology | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $topologyPath -Encoding utf8
+  if ((Get-Item -LiteralPath $topologyPath).Length -eq 0) { throw "Display topology evidence is empty" }
+  "Display topology evidence: $topologyPath"
   Get-Command cmake | Select-Object -ExpandProperty Source
   cmake --version | Select-Object -First 1
   if ($env:VCPKG_ROOT) { "VCPKG_ROOT: $env:VCPKG_ROOT" } else { "VCPKG_ROOT: UNSET" }
