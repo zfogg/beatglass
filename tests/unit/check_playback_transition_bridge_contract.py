@@ -44,6 +44,8 @@ MARKERS = {
     "qml overlay fallback": "Control window remains available as the tray/taskbar fallback until the overlay display recovers.",
     "qml overlay geometry status": 'objectName: "overlayGeometryStatus"',
     "qml overlay geometry announcement": "DJ overlay geometry restored at ",
+    "qml overlay quit control": 'objectName: "quitBeatglass"',
+    "qml overlay quit lifecycle": "Beatglass is quitting; overlay hidden and persisted settings retained.",
 }
 
 

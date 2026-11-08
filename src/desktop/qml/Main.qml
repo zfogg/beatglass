@@ -158,6 +158,12 @@ ApplicationWindow {
         window.raise()
         window.requestActivate()
     }
+    function quitApplication() {
+        if (window.overlayBridge)
+            window.overlayBridge.hideOverlay()
+        window.announceCaptureRecoveryState("Beatglass is quitting; overlay hidden and persisted settings retained.")
+        Qt.quit()
+    }
     property var libraryCatalogBridge: typeof libraryCatalog !== "undefined" ? libraryCatalog : null
     onBrowseFolderChanged: refreshCatalog()
 
@@ -232,7 +238,7 @@ ApplicationWindow {
                     Button {
                         text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the overlay window and restore the control window"; ToolTip.text: "Hide the overlay and restore the control window"
                         visible: window.overlayBridge && !window.overlayBridge.clickThrough
-                        onClicked: window.overlayBridge.hideOverlay()
+                        onClicked: window.hideOverlayAndRestoreControls()
                     }
                 }
                 Label {
@@ -1962,6 +1968,7 @@ ApplicationWindow {
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Show the DJ overlay window"; ToolTip.text: "Show the DJ overlay and hide the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: { window.overlayBridge.setClickThrough(false); window.announceCaptureRecoveryState("DJ overlay unlocked; visualization recovery focus restored.") } }
                     Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
+                    Button { text: "Quit Beatglass"; objectName: "quitBeatglass"; Accessible.name: "Quit Beatglass"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay and quit Beatglass while retaining persisted settings"; ToolTip.text: "Quit Beatglass and retain overlay settings"; onClicked: window.quitApplication() }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
