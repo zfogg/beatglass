@@ -2,6 +2,7 @@
 #include <cassert>
 #include <filesystem>
 #include <string>
+#include <stop_token>
 
 using beatglass::library_detail::CacheKey;
 using beatglass::library_detail::Publish;
@@ -30,6 +31,15 @@ int main() {
     const auto stale_runs = cache.retryable_runs();
     assert(stale_runs.size() == 1 && stale_runs.front().id == "stale");
     assert(cache.discard_retryable("stale"));
+    const CacheKey cancelled_key{"sha256:cancelled", key.engine, key.config, key.mode};
+    cache.begin("cancelled", cancelled_key);
+    std::stop_source stop;
+    stop.request_stop();
+    assert(cache.publish("cancelled", cancelled_key, "cancelled-result", stop.get_token(), [] { return true; }) == Publish::cancelled);
+    assert(!cache.find(cancelled_key, result));
+    const auto cancelled_runs = cache.retryable_runs();
+    assert(cancelled_runs.size() == 1 && cancelled_runs.front().id == "cancelled");
+    assert(cache.discard_retryable("cancelled"));
     assert(!cache.find(CacheKey{key.content, key.engine, "config-b", key.mode}, result));
     assert(!cache.find(CacheKey{"sha256:two", key.engine, key.config, key.mode}, result));
     cache.begin("z-retry", key);
