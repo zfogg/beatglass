@@ -351,7 +351,7 @@ ApplicationWindow {
                         Label {
                             objectName: "permissionGuidance"
                             text: Qt.platform.os === "osx"
-                                  ? "Allow Beatglass in System Settings → Privacy & Security → Screen & System Audio Recording, then restart monitoring."
+                                  ? "On macOS 14.2 or later, allow Beatglass in System Settings → Privacy & Security → Screen & System Audio Recording, then relaunch Beatglass before monitoring."
                                   : "System audio capture permission is not available yet; monitoring will remain stopped until a device is detected."
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio capture permission guidance"
