@@ -64,6 +64,7 @@ CausalTempoState CausalTempoReplay::process(const AudioBlock& block, const HopOb
   struct ProcessingGuard { bool& flag; ~ProcessingGuard() { flag = false; } } guard{s.processing};
   s.processing = true;
   try {
+    if (block.epoch == 0) throw std::invalid_argument("Audio block requires a nonzero epoch");
     if (!std::all_of(block.samples.begin(), block.samples.end(), [](float x) { return std::isfinite(x); })) throw std::invalid_argument("Audio contains invalid samples");
     if (s.tracker && (block.epoch < s.result.epoch ||
         (block.epoch == s.result.epoch && block.first_frame < s.result.observed_through)))
