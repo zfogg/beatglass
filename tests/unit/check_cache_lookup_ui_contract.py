@@ -21,6 +21,8 @@ required = [
     'objectName: "retryAdmittedAnalysis"',
     'objectName: "analysisCompletionResult"',
     'objectName: "analysisRetryOutcome"',
+    'objectName: "analysisRecoveryGuidance"',
+    'Analysis recovery unavailable: check storage configuration.',
 ]
 missing = [marker for marker in required if marker not in qml]
 if missing:
