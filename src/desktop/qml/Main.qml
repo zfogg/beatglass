@@ -803,6 +803,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideMiddle
                             }
                             Label {
+                                objectName: "analysisFailureReason"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.failureReason !== ""
+                                text: visible ? ("Analysis issue: " + window.analysisJobBridge.failureReason) : ""
+                                Accessible.name: "Analysis failure reason"
+                                Accessible.description: visible ? text : "No analysis failure has been reported."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisBatchStatus"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount !== undefined
                                 text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount

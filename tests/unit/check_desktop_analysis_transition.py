@@ -33,6 +33,8 @@ required = {
     "source attribution property": 'Q_PROPERTY(QString sourcePath READ sourcePath',
     "source attribution rendering": 'objectName: "analysisSourcePath"',
     "batch clears single source": 'if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }',
+    "failure reason property": 'Q_PROPERTY(QString failureReason READ failureReason',
+    "failure reason rendering": 'objectName: "analysisFailureReason"',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:

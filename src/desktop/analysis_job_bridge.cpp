@@ -32,6 +32,8 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   const auto sourcePath = QString::fromStdString(op.source.path.string());
   if (sourcePath_ != sourcePath) { sourcePath_ = sourcePath; emit sourceChanged(); }
   if (!op.valid()) {
+    failureReason_ = QStringLiteral("Analysis request is missing valid source identity or worker callbacks.");
+    emit failureChanged();
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     status_ = QStringLiteral("Failed");
@@ -39,6 +41,7 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
     retryable_.reset(); return {};
   }
   frames_ = 0;
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   result_.clear();
   emit resultChanged();
   batch_.clear(); batchAccepted_ = batchRejected_ = 0; emit batchChanged();
@@ -92,6 +95,7 @@ void AnalysisJobBridge::cancel() {
 void AnalysisJobBridge::retry() {
   if (!canRetry()) return;
   if (retryable_->retry()) {
+    if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
     frames_ = retryable_->frames();
     emit progressChanged();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
@@ -137,6 +141,7 @@ void AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
   if (accepted) {
+    if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
     batchResultsPublished_ = 0; batchLastResult_.clear();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
@@ -165,6 +170,7 @@ void AnalysisJobBridge::poll() {
   const auto next = stateText(retryable_->state());
   if (frames_ != retryable_->frames()) { frames_ = retryable_->frames(); emit progressChanged(); }
   if (status_ != next) { status_ = next; emit statusChanged(); }
+  if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Worker analysis failed before publishing a verified result."); emit failureChanged(); }
   if (!canCancel()) poll_timer_.stop();
 }
 

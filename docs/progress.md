@@ -320,6 +320,8 @@ The desktop bridge now carries the submitted operation source path alongside sta
 
 Starting a batch clears the prior single-operation source attribution; batch admission remains a multi-source operation and is represented by its batch counters rather than a misleading single path.
 
+The desktop bridge now reports a bounded, source-attributed failure reason for invalid requests and worker failures, and clears it when a new attempt is accepted.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
