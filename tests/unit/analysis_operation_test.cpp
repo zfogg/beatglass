@@ -4,6 +4,7 @@
 #include <thread>
 #include <filesystem>
 #include <chrono>
+#include <fstream>
 #include "beatglass/library/analysis_operation.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
 #include "beatglass/library/analysis_commit.hpp"
@@ -204,6 +205,40 @@ TEST_CASE("endpoint replacement retry state survives cache restart") {
     CHECK(retryable.front().key.content == "endpoint-a-epoch-1");
   }
   REQUIRE(std::filesystem::remove(path));
+}
+TEST_CASE("coordinator resubmits persisted endpoint retry after restart") {
+  const auto db = std::filesystem::temp_directory_path() / ("beatglass-coordinator-retry-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  const auto source = std::filesystem::temp_directory_path() / ("beatglass-endpoint-source-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".wav");
+  { std::ofstream out(source, std::ios::binary); out << "fixture"; }
+  beatglass::library_detail::CacheKey key{"restart-endpoint", "engine", "config", "offline"};
+  {
+    beatglass::library_detail::SqliteCache cache(db.string());
+    cache.begin("restart-run", key, source.string(), beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("restart-run", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  }
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({db.string()}));
+  const auto pending = coordinator.storage().retryable_runs();
+  REQUIRE(pending.size() == 1);
+  REQUIRE(pending.front().source_path == source.string());
+  REQUIRE(pending.front().decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
+  beatglass::library::AnalysisOperation operation;
+  operation.source.path = pending.front().source_path; operation.source.content_hash = pending.front().key.content;
+  operation.identity = {pending.front().key.content, pending.front().key.engine, pending.front().key.config, pending.front().key.mode};
+  operation.decoder_snapshot = pending.front().decoder_snapshot;
+  operation.serialize = [] { return std::string("recovered"); };
+  operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  const auto handle = coordinator.resubmit_retryable(pending.front().id, std::move(operation));
+  REQUIRE(handle);
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  REQUIRE(handle->state() == beatglass::library_detail::TrackedState::completed);
+  std::string result;
+  REQUIRE(coordinator.storage().cache()->find(key, result));
+  CHECK(result == "recovered");
+  CHECK(coordinator.storage().retryable_runs().empty());
+  coordinator.close_storage();
+  REQUIRE(std::filesystem::remove(db));
+  REQUIRE(std::filesystem::remove(source));
 }
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
