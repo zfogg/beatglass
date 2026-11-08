@@ -344,6 +344,7 @@ def main() -> int:
         "reset appearance dynamic guidance": "Accessible.value: window.selectedTheme + \", \" + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? \"reduced motion\" : \"full motion\")",
         "library heading guidance": "Accessible.name: \"Library\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Browse local audio files and folders\"",
         "library name column guidance": "Accessible.name: \"File name column\"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: \"Audio file or folder name\"",
+        "theme preview grouping": "objectName: \"themePreviews\"\n                visible: !window.compactHeader\n                spacing: 3\n                Accessible.name: \"Theme previews\"",
         "library type column guidance": "Accessible.name: \"File type column\"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: \"Audio format or folder type\"",
         "catalog filtered results guidance": "Accessible.name: \"Catalog results: \" + text\n                    Accessible.value: text\n                    Accessible.role: Accessible.StaticText\n                    Accessible.description: text\n                    ToolTip.text: \"Current filtered catalog result count\"",
         "playback controls grouping": "objectName: \"playbackControls\"\n                            Layout.fillWidth: true\n                            Accessible.name: \"Playback controls\"",
