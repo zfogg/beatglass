@@ -141,7 +141,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 missing_artifact_roles = sorted(
                     item.get("id") for item in data.get("scenarios", [])
                     if isinstance(item, dict) and item.get("status") != "UNRUN"
-                    and not artifact_roles.get(item.get("evidence")))
+                    and (not isinstance(item.get("evidence"), str)
+                         or not artifact_roles.get(item.get("evidence"))))
             except (OSError, json.JSONDecodeError) as exc:
                 errors = [f"{platform}: invalid manifest: {exc}"]
                 retained = 0
