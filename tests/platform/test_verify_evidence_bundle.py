@@ -92,6 +92,8 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(first, second)
             self.assertEqual(first["platforms"][0]["retained_bytes"], artifact.stat().st_size)
             self.assertTrue(first["platforms"][0]["manifest_sha256"])
+            self.assertEqual(first["platforms"][0]["artifact_inventory"][0]["path"], "capture.txt")
+            self.assertEqual(first["platforms"][0]["artifact_inventory"][0]["bytes"], artifact.stat().st_size)
 
 
 if __name__ == "__main__":

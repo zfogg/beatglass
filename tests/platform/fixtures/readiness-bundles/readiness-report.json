@@ -6,6 +6,13 @@
       "manifest_sha256": "c3e2ee3672d185828938c7a0767ffa82dc09a9091878185cc6dc30efe0b31d24",
       "retained_artifacts": 1,
       "retained_bytes": 26,
+      "artifact_inventory": [
+        {
+          "path": "capture.txt",
+          "sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
+          "bytes": 26
+        }
+      ],
       "errors": []
     },
     {
@@ -14,6 +21,13 @@
       "manifest_sha256": "8486c14d40802f1d5c0967b4f69d5be16a4e39f80cb0df95b098632b4ff917fc",
       "retained_artifacts": 1,
       "retained_bytes": 26,
+      "artifact_inventory": [
+        {
+          "path": "capture.txt",
+          "sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
+          "bytes": 26
+        }
+      ],
       "errors": []
     },
     {
@@ -22,6 +36,13 @@
       "manifest_sha256": "6dd90cf83995a5fa737b35b177bd223a5c91f7818bf3e7e5d72e70570c6a96ed",
       "retained_artifacts": 1,
       "retained_bytes": 26,
+      "artifact_inventory": [
+        {
+          "path": "capture.txt",
+          "sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901",
+          "bytes": 26
+        }
+      ],
       "errors": []
     }
   ],

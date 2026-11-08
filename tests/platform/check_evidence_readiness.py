@@ -73,18 +73,26 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                                      if isinstance(entry, dict) and isinstance(entry.get("path"), str)
                                      and (bundle / entry["path"]).is_file())
                 manifest_sha256 = hashlib.sha256(manifest.read_bytes()).hexdigest()
+                inventory = []
+                for entry in sorted(data.get("artifacts", []), key=lambda item: str(item.get("path", ""))):
+                    path = bundle / entry.get("path", "")
+                    inventory.append({"path": entry.get("path"), "sha256": entry.get("sha256"),
+                                      "bytes": path.stat().st_size if path.is_file() else None})
             except (OSError, json.JSONDecodeError) as exc:
                 errors = [f"{platform}: invalid manifest: {exc}"]
                 retained = 0
                 artifact_bytes = 0
                 manifest_sha256 = None
+                inventory = []
         else:
             retained = 0
             artifact_bytes = 0
             manifest_sha256 = None
+            inventory = []
             errors = [f"{platform}: missing manifest: {manifest}"]
         rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
-                     "retained_artifacts": retained, "retained_bytes": artifact_bytes, "errors": errors})
+                     "retained_artifacts": retained, "retained_bytes": artifact_bytes,
+                     "artifact_inventory": inventory, "errors": errors})
     return {"platforms": rows, "ready": not any(row["errors"] for row in rows)}
 
 
