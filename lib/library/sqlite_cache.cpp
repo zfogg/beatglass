@@ -20,7 +20,7 @@ void validate_collection_entry(const CollectionEntry& e) {
   validate_text(e.path, "path", 4096);
   validate_text(e.name, "name", 1024);
   validate_text(e.kind, "kind", 128);
-  validate_text(e.fingerprint, "fingerprint", 4096);
+  validate_text(e.fingerprint, "fingerprint", kMaxCollectionFingerprintBytes);
 }
 void validate_key(const CacheKey& key) {
   if (key.content.empty() || key.content.size() > kMaxCacheContentIdentityBytes || key.engine.empty() || key.engine.size() > kMaxCacheEngineVersionBytes ||

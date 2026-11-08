@@ -37,6 +37,7 @@ inline constexpr std::size_t kMaxCacheContentIdentityBytes = 512;
 inline constexpr std::size_t kMaxCacheEngineVersionBytes = 4096;
 inline constexpr std::size_t kMaxCacheConfigurationBytes = 4096;
 inline constexpr std::size_t kMaxCacheModeBytes = 128;
+inline constexpr std::size_t kMaxCollectionFingerprintBytes = 4096;
 /** Provisional caller-supplied cache identity. The caller must establish a validated content hash and stable algorithm/configuration versions. */
 struct CacheKey {
   /** Validated content identity. */ std::string content;
