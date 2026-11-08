@@ -69,7 +69,10 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
         review_json.parent.mkdir(parents=True, exist_ok=True)
         review_json.write_text(json.dumps(reviewer.review_packet(output), indent=2, sort_keys=True) + "\n", encoding="utf-8")
         if consume_review or require_ready:
-            errors.extend(packet_consumer.consume(review_json))
+            # Bind packet consumption to the exact report retained beside it.
+            # This prevents a copied/replaced report from being accepted with
+            # an otherwise valid review packet.
+            errors.extend(packet_consumer.consume(review_json, output))
     if consume_report:
         errors.extend(consumer.consume(output))
     return errors
