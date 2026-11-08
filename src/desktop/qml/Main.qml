@@ -25,6 +25,7 @@ ApplicationWindow {
     property string selectedName: ""
     property url selectedAudioUrl: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    property string catalogDiagnostic: ""
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     Shortcut {
@@ -59,6 +60,8 @@ ApplicationWindow {
     function refreshCatalog() {
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
             ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
+        window.catalogDiagnostic = window.libraryCatalogBridge && window.libraryCatalogBridge.lastDiagnostic !== undefined
+                ? window.libraryCatalogBridge.lastDiagnostic : ""
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
@@ -66,6 +69,7 @@ ApplicationWindow {
             return "This folder could not be read. Choose another folder or check its permissions."
         if (files.status === FolderListModel.Loading)
             return "Loading folder contents…"
+        if (window.catalogDiagnostic !== "") return "This folder could not be read: " + window.catalogDiagnostic
         return "No matching audio files or folders. Try a different search or choose another folder."
     }
     function showOverlayAndHideControls() {
