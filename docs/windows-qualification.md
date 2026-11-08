@@ -50,3 +50,5 @@ those observations still require a logged-in Windows session and evidence.
    failed-start diagnostics.
 
 For every case record timestamp, device, expected/observed result, logs, and a screenshot or recording. Do not claim qualification when any case is unrun or only simulated.
+
+The runner creates `native-playback-evidence.json` with one `UNRUN` record per case. Complete that template during a logged-in Windows session by recording the selected device, observed result, log evidence, and screenshot path; retain it with the artifact hash manifest. The template is evidence collection only and never marks a case passed automatically.
