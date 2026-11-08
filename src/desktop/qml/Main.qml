@@ -498,6 +498,7 @@ ApplicationWindow {
                                 objectName: "browserEmptyMessage"
                                 text: window.browserEmptyMessage()
                                 Accessible.name: "Library browser empty state"
+                                Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                             }
@@ -611,6 +612,7 @@ ApplicationWindow {
                             text: "Metadata could not be read. Retry this file or clear the selection and choose another source."
                             visible: window.metadataStatus.indexOf("Error:") === 0
                             Accessible.name: "Metadata error recovery guidance"
+                            Accessible.value: text
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text

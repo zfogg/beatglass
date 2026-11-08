@@ -84,6 +84,8 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "library browser empty value": "objectName: \"browserEmptyMessage\"",
+        "metadata error guidance value": "objectName: \"metadataErrorGuidance\"",
         "selected metadata values": "objectName: \"selectedAudioName\"",
         "selected source value": "objectName: \"selectedAudioSource\"",
         "selected duration value": "objectName: \"selectedAudioDuration\"",
