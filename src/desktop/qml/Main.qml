@@ -1021,9 +1021,9 @@ ApplicationWindow {
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
                         : "Bounded frequency-domain FFT magnitudes from the current output capture.")
-                        + " Click or scroll to select and scrub; hold Shift while scrolling for larger steps. Use Left/Right for fine movement, Shift+Left/Shift+Right for five-percent movement, Page Up/Page Down for larger movement, Ctrl+Left/Ctrl+Right for boundary jumps, Ctrl+Up/Ctrl+Down to change mode, Home/End for boundaries, Enter or Space to reach clear, and Escape to clear. "
+                        + " Click or scroll to select and scrub; right-click to clear; hold Shift while scrolling for larger steps. Use Left/Right for fine movement, Shift+Left/Shift+Right for five-percent movement, Page Up/Page Down for larger movement, Ctrl+Left/Ctrl+Right for boundary jumps, Ctrl+Up/Ctrl+Down to change mode, Home/End for boundaries, Enter or Space to reach clear, and Escape to clear. "
                         + (visualizationCanvas.selectedPosition < 0 ? "No position selected." : "Selected position " + Math.round(visualizationCanvas.selectedPosition * 100) + " percent.")
-                    ToolTip.text: "Click or scroll to select a position; hold Shift while scrolling for larger steps. Use Left/Right/Shift+Left/Shift+Right/Page Up/Page Down/Ctrl+Left/Ctrl+Right/Ctrl+Up/Ctrl+Down/Home/End to navigate, Enter or Space for clear, or Escape to clear"
+                    ToolTip.text: "Click or scroll to select a position; right-click to clear; hold Shift while scrolling for larger steps. Use Left/Right/Shift+Left/Shift+Right/Page Up/Page Down/Ctrl+Left/Ctrl+Right/Ctrl+Up/Ctrl+Down/Home/End to navigate, Enter or Space for clear, or Escape to clear"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
@@ -1048,6 +1048,14 @@ ApplicationWindow {
                     }
                     MouseArea {
                         anchors.fill: parent
+                        onPressed: {
+                            if (mouse.button === Qt.RightButton) {
+                                visualizationCanvas.selectedPosition = -1
+                                visualizationCanvas.forceActiveFocus()
+                                visualizationCanvas.requestPaint()
+                                mouse.accepted = true
+                            }
+                        }
                         onClicked: {
                             visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, mouse.x / visualizationCanvas.width))
                             visualizationCanvas.forceActiveFocus()

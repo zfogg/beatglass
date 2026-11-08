@@ -384,6 +384,8 @@ Pointer interaction now restores canvas focus after clicking, and the canvas sup
 
 Holding Shift while scrolling now increases wheel scrubbing to five-percent steps, matching the keyboard’s medium-step interaction and giving pointer users the same fine/coarse control range.
 
+Right-clicking the canvas now clears the selected position and restores canvas focus, providing a direct pointer recovery action that is documented alongside the keyboard clear paths.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
