@@ -248,7 +248,7 @@ ApplicationWindow {
                 model: window.themeNames
                 currentIndex: window.selectedThemeIndex
                 Accessible.name: "Color theme"
-                Accessible.description: "Choose one of six color themes for the Beatglass desktop."
+                Accessible.description: "Choose one of six color themes for the Beatglass desktop; current theme " + currentText
                 ToolTip.text: "Choose a color theme"
                 onActivated: {
                     window.selectedThemeIndex = currentIndex

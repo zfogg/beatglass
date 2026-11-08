@@ -614,7 +614,7 @@ TestCase {
         verify(selector !== null)
         compare(selector.count, 6)
         compare(selector.Accessible.name, "Color theme")
-        compare(selector.Accessible.description, "Choose one of six color themes for the Beatglass desktop.")
+        compare(selector.Accessible.description, "Choose one of six color themes for the Beatglass desktop; current theme Light")
         compare(selector.currentText, "Light")
         selector.currentIndex = 4; selector.activated(4)
         compare(app.selectedTheme, "Blue")
