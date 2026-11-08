@@ -23,6 +23,8 @@ for key in captured_at commit macos_version architecture hardware_model xcode_ve
   grep -q "^${key}=." "$manifest" || { echo "manifest missing ${key}" >&2; exit 1; }
 done
 grep -Eq '^captured_at=[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$' "$manifest" || { echo "manifest captured_at is not UTC ISO-8601" >&2; exit 1; }
+commit_value=$(sed -n 's/^commit=//p' "$manifest")
+[[ "$commit_value" =~ ^[0-9a-fA-F]{40}$ ]] || { echo "manifest commit is not a full SHA-1" >&2; exit 1; }
 manifest_hash_ref=$(sed -n 's/^artifact_sha256=//p' "$manifest")
 [[ "$manifest_hash_ref" == "qualification-artifacts.sha256" ]] || { echo "manifest artifact_sha256 must point to qualification-artifacts.sha256" >&2; exit 1; }
 manifest_case_ref=$(sed -n 's/^case_matrix=//p' "$manifest")
