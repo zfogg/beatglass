@@ -169,6 +169,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_visualizationDataStatusIsAccessible() {
+        let app = shell.createObject(null)
+        let status = findChild(app, "visualizationDataStatus")
+        verify(status !== null)
+        compare(status.Accessible.name, "Visualization data status")
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")

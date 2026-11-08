@@ -376,6 +376,12 @@ ApplicationWindow {
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
                 Label {
+                    objectName: "visualizationDataStatus"
+                    text: (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " waveform samples · " + (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " spectrum bins"
+                    Accessible.name: "Visualization data status"; Accessible.description: text
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "djStatus"; text: "Status: " + window.liveBridge.status
                     Accessible.name: "DJ monitoring status"; Accessible.description: text
                 }
