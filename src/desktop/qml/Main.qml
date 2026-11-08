@@ -1350,7 +1350,7 @@ ApplicationWindow {
                     Accessible.name: "Appearance settings"
                     Accessible.value: window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Choose the color theme and motion preference for the desktop."
+                    Accessible.description: "Choose the color theme and motion preference for the desktop. Current settings: " + window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion") + "."
                     ToolTip.text: "Configure theme and motion preferences; current: " + window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
                     Layout.fillWidth: true
                     ColumnLayout {
