@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Endpoint recovery status is consistent across Settings, DJ monitoring, and overlay: endpoint changes announce stale-selection clearing, retry/reacquisition, and fresh accepted snapshots through one helper. Reduced-motion mode suppresses transition animation while preserving the same text and focus semantics; native cross-screen timing remains open.
+
 The complete Settings output-device flow is now traceable across design states: selection announces the chosen endpoint, refresh restores focus to the endpoint selector, permission failure exposes recovery guidance, replacement clears the stale selection, and reacquisition announces the new endpoint. Native device/permission timing remains a qualification gap.
 
 Settings endpoint controls are tied to the real endpoint bridge: Refresh requests a fresh enumeration, permission guidance reflects the bridge status, and device replacement clears the selected endpoint until reacquisition succeeds. Each control remains keyboard reachable and exposes its current state accessibly; native permission/device timing remains open.
