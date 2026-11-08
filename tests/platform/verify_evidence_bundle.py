@@ -70,7 +70,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
     evidence_owners = {}
-    artifact_roles = {entry.get("path"): entry.get("role") for entry in artifacts or [] if isinstance(entry, dict)}
+    artifact_roles = {
+        entry.get("path"): entry.get("role") for entry in artifacts or []
+        if isinstance(entry, dict) and isinstance(entry.get("path"), str)
+    }
     for scenario in scenarios or []:
         if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
                 or not scenario.get("id") or scenario.get("status") not in {"PASS", "FAIL", "UNRUN", "PENDING"}):
