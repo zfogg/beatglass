@@ -126,3 +126,12 @@ class ReadinessHandoffTest(unittest.TestCase):
             errors = handoff.run(bundles, output, review_json=packet, require_ready=True)
             self.assertTrue(any("review packet" in error for error in errors))
 
+    def test_strict_gate_consumes_report_and_packet_as_retained_bundle(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            handoff.run(bundles, output, review_json=packet)
+            output.write_text("{}", encoding="utf-8")
+            errors = handoff.bundle_consumer.consume(root, output.name, packet.name)
+            self.assertTrue(any("source report hash mismatch" in error for error in errors))
+
