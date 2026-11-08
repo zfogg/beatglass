@@ -20,6 +20,13 @@ ApplicationWindow {
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    Shortcut {
+        objectName: "overlayEscapeShortcut"
+        sequence: "Escape"
+        context: Qt.ApplicationShortcut
+        onActivated: if (window.overlayBridge && window.overlayBridge.clickThrough)
+                         window.overlayBridge.setClickThrough(false)
+    }
     property string selectedTheme: "Light"
     readonly property var themeNames: ["Light", "Dark", "High contrast", "Purple", "Blue", "Yellow"]
     readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]

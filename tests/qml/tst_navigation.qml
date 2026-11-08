@@ -142,6 +142,15 @@ TestCase {
         compare(findChild(app, "hideOverlay").Accessible.description, "Hide the DJ overlay window")
         app.destroy()
     }
+
+    function test_escapeShortcutProvidesOverlayRecovery() {
+        let app = shell.createObject(null)
+        let shortcut = findChild(app, "overlayEscapeShortcut")
+        verify(shortcut !== null)
+        compare(shortcut.sequence, "Escape")
+        compare(shortcut.context, Qt.ApplicationShortcut)
+        app.destroy()
+    }
     function test_themePreviewsSelectTheirPalette() {
         let app = shell.createObject(null)
         let previews = findChild(app, "themePreviews")
