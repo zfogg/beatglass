@@ -1229,6 +1229,8 @@ ApplicationWindow {
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current visualization capture recovery transition"
+                    color: window.themeAccentColors[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
