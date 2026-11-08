@@ -12,6 +12,8 @@ For every native run, record the OS version, kernel or build number, compiler, Q
 
 The platform status row and retained manifest must agree on source commit, capture time, and environment/toolchain; otherwise the run is not attributable to the documented build. Readiness reports also verify that aggregate failure-category counts, retained-artifact counts, and retained-artifact bytes equal the sum of their per-platform counts, expose retained artifact counts/bytes by platform, and require each retained count/byte total to match its artifact inventory.
 
+The handoff matrix must contain exactly one Windows, one macOS, and one Linux row. Duplicate platform rows are a documentation error and fail the executable handoff check before retained evidence is considered.
+
 Each retained evidence bundle must include `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-playback-evidence.json`, and `native-overlay-evidence.json` where those scenarios apply.
 
 Every manifest must also identify its platform, source commit, UTC capture time, and environment/toolchain identity so evidence cannot be detached from the build that produced it.

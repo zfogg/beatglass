@@ -47,6 +47,7 @@ def main() -> int:
         "Do not claim issue #1 or v1 completion",
     )
     platform_rows = tuple(line for line in docs.splitlines() if line.startswith(("| Windows |", "| macOS |", "| Linux |")))
+    platform_names = tuple(row.strip("|").split("|")[0].strip() for row in platform_rows)
     required_sections = ("## Issue #76 UI gate", "Linux capture gate")
     missing = [path for path in REQUIRED if not (root / path).is_file()]
     unlinked = [path for path in REQUIRED if path not in docs and path not in ("docs/linux-qualification-plan.md", "docs/windows-qualification.md", "docs/macos-qualification.md")]
@@ -76,6 +77,8 @@ def main() -> int:
             for evidence in PLATFORM_NATIVE_EVIDENCE[cells[0]]:
                 if evidence.lower() not in row.lower():
                     unlinked.append(f"{cells[0]} native evidence: {evidence}")
+    if len(platform_names) != len(set(platform_names)):
+        unlinked.append("duplicate platform status row")
     unlinked.extend(f"status section: {section}" for section in required_sections if section not in docs)
     unlinked.extend(f"status disclaimer: {phrase}" for phrase in required_disclaimers if phrase not in docs)
     if missing or unlinked:
