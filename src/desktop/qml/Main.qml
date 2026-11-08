@@ -708,6 +708,15 @@ ApplicationWindow {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
                     property string viewMode: "waveform"
                     property real selectedPosition: -1
+                    activeFocusOnTab: true
+                    Keys.onLeftPressed: {
+                        selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.01)
+                        requestPaint()
+                    }
+                    Keys.onRightPressed: {
+                        selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.01)
+                        requestPaint()
+                    }
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
