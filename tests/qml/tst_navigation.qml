@@ -143,6 +143,16 @@ TestCase {
         app.destroy()
         fakeCapture.status = "Monitoring"
     }
+    function test_captureReacquiringDisablesDuplicateRequests() {
+        fakeCapture.status = "Reacquiring"
+        let app = shellWithOverlay.createObject(null)
+        verify(app !== null)
+        let toggle = findChild(app, "toggleMonitoring")
+        compare(toggle.text, "Reacquiring…")
+        verify(!toggle.enabled)
+        app.destroy()
+        fakeCapture.status = "Monitoring"
+    }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)
