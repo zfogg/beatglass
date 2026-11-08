@@ -200,8 +200,8 @@ ApplicationWindow {
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                 }
-                Label { text: "BPM " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24; font.bold: true }
-                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; color: "white" }
+                Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: "white"; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: "white"; Accessible.name: "Overlay harmony: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                 Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output capture status" }
                 Button {
                     objectName: "overlayRetryCapture"
@@ -1024,7 +1024,7 @@ ApplicationWindow {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge) overlayOpacityControl.value = window.overlayBridge.opacity }
                     }
-                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
