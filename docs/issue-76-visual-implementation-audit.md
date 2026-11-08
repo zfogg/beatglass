@@ -26,4 +26,6 @@ This is the current implementation audit against `design/v1/DESIGN.md` and `desi
 
 This audit is intentionally a completion aid, not a claim that issue #76 or issue #1 is closed.
 
+The remaining library detail and analysis status labels now use explicit static-text roles while retaining source-attributed dynamic descriptions.
+
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.

@@ -531,6 +531,7 @@ ApplicationWindow {
                             text: window.selectedName || "No file selected"
                             font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio file"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
                         Label {
@@ -538,12 +539,14 @@ ApplicationWindow {
                             text: window.selectedAudioUrl.toString() !== "" ? "Source: " + window.selectedAudioUrl : "Source unavailable"
                             elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio source"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
                         Label {
                             objectName: "selectedAudioDuration"
                             text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
                             Accessible.name: "Selected audio duration"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
@@ -577,6 +580,7 @@ ApplicationWindow {
                             text: "Metadata could not be read. Retry this file or clear the selection and choose another source."
                             visible: window.metadataStatus.indexOf("Error:") === 0
                             Accessible.name: "Metadata error recovery guidance"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
@@ -585,6 +589,7 @@ ApplicationWindow {
                             text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
                         Label {
@@ -593,6 +598,7 @@ ApplicationWindow {
                                   ? "Track key: Unknown · No validated track-level key. Window evidence is provisional and source-attributed."
                                   : "Track key: Unknown until a source is selected."
                             Accessible.name: "Analysis uncertainty"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
@@ -600,6 +606,7 @@ ApplicationWindow {
                             objectName: "analysisFreshness"
                             text: window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? "Analysis freshness: source-linked analysis complete." : "Analysis freshness: waiting for source-linked analysis evidence."
                             Accessible.name: "Analysis freshness"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
@@ -609,6 +616,7 @@ ApplicationWindow {
                                   ? "Select an audio source to inspect and play it."
                                   : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · " + window.metadataStatus
                             Accessible.name: "Selected source workflow status"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
