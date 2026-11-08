@@ -34,8 +34,9 @@ public slots:
     const auto rejection = coordinator_.retry_rejection_reason(runId.toStdString(), operation);
     // Includes RetryRejectionReason::stale_source_identity for an epoch mismatch.
     if (rejection != beatglass::library::RetryRejectionReason::none) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(rejection))); return; }
-    const auto handle = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation));
-    emit result(static_cast<bool>(handle), handle ? QStringLiteral("Retry queued") : QStringLiteral("Retry rejected: source identity or metadata unavailable"));
+    handle_ = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation));
+    emit result(static_cast<bool>(handle_), handle_ ? QStringLiteral("Retry queued") : QStringLiteral("Retry rejected: source identity or metadata unavailable"));
+    if (handle_) { emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); }
   }
   void findCached(QString content, QString engine, QString configuration, QString mode) {
     beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
