@@ -28,6 +28,12 @@ TEST_CASE("SQLite cache rejects oversized results before they become active") {
   REQUIRE(cache.publish("oversized", key, result, {}, [] { return true; }) == Publish::error);
   std::string found; REQUIRE_FALSE(cache.find(key, found));
 }
+TEST_CASE("SQLite cache rejects empty results before publication") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("empty", key);
+  REQUIRE(cache.publish("empty", key, {}, {}, [] { return true; }) == Publish::error);
+  std::string found; REQUIRE_FALSE(cache.find(key, found));
+}
 TEST_CASE("SQLite cache rejects incomplete identities before creating runs") {
   SqliteCache cache(":memory:");
   REQUIRE_THROWS_AS(cache.begin("run", {"", "engine", "config", "offline"}), std::invalid_argument);

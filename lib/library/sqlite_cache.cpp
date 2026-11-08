@@ -91,7 +91,7 @@ public:
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
                   std::stop_token stop, const std::function<bool()>& revalidate) {
     try {
-      if (!sqlite_length_representable(result.size())) return Publish::error;
+      if (result.empty() || !sqlite_length_representable(result.size())) return Publish::error;
       exec("BEGIN IMMEDIATE");
       if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
       if (!revalidate()) { rollback(); return Publish::stale_input; }
