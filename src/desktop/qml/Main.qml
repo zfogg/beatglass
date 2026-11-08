@@ -972,6 +972,15 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "persistedRecoveryRejectionReason"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.status.indexOf("Retry rejected:") >= 0
+                                text: visible ? ("Persisted retry decision: " + storageRecovery.status) : ""
+                                Accessible.name: "Persisted retry rejection reason"
+                                Accessible.description: visible ? text : "No persisted retry rejection has been reported."
+                                ToolTip.text: "Why persisted analysis was kept retryable instead of being started"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisAdmissionStatus"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 text: visible ? ("Analysis admission: " + storageRecovery.analysisStatus) : ""
