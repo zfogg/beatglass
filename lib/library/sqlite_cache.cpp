@@ -119,6 +119,8 @@ public:
   }
   bool remove_entry(const std::string& path) { validate_text(path, "path", 4096); Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
   std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop) {
+    if (path.empty() || path.size() > 4096 || path.find('\0') != std::string::npos ||
+        !sqlite_length_representable(path.size())) throw std::invalid_argument("invalid collection path");
     if (stop.stop_requested()) throw CollectionCancelled();
     Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE path=?"); bind(s.p,1,path); const int rc=sqlite3_step(s.p); if(rc==SQLITE_DONE)return std::nullopt; if(rc!=SQLITE_ROW)throw std::runtime_error(sqlite3_errmsg(db_)); return read_entry(s.p);
   }

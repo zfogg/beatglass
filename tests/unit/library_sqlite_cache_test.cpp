@@ -190,6 +190,11 @@ TEST_CASE("SQLite collection reads expose typed cancellation") {
   CHECK_THROWS_AS(cache.entry("/music/a.flac", stop.get_token()), CollectionCancelled);
   CHECK_THROWS_AS(cache.entries({"", 0, 10}, stop.get_token()), CollectionCancelled);
 }
+TEST_CASE("SQLite exact catalog lookup rejects unsafe paths") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.entry(""), std::invalid_argument);
+  CHECK_THROWS_AS(cache.entry("/music/a\0.flac"), std::invalid_argument);
+}
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);

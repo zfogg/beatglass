@@ -56,7 +56,7 @@ public:
   void put_entry(const CollectionEntry& entry);
   /** Remove only the index row; rejects an empty or embedded-NUL path and returns whether a row existed. Never removes a source file. */
   bool remove_entry(const std::string& path);
-  /** Return an owned exact-path entry or absence; throws CollectionCancelled on observed stop and throws on storage errors. The source file is not opened. */
+  /** Return an owned exact-path entry or absence; rejects empty, embedded-NUL, or oversized paths, throws CollectionCancelled on observed stop, and throws on storage errors. The source file is not opened. */
   std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop = {});
   /** Return up to the requested bounded page of owned entries; throws CollectionCancelled on observed stop and throws on invalid query or storage errors. */
   std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});
