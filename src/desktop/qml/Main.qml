@@ -908,6 +908,14 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "Analysis queue outcome is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Label {
+                                objectName: "analysisCompletionResult"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
+                                text: visible ? ("Completed analysis result: " + storageRecovery.analysisResult) : ""
+                                Accessible.name: "Completed analysis result"
+                                Accessible.description: visible ? text : "No completed analysis result is available."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
+                            }
                             RowLayout {
                                 objectName: "analysisLifecycleControls"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
