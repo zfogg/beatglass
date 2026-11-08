@@ -349,6 +349,7 @@ def main() -> int:
         "theme preview selected value": "Accessible.role: Accessible.RadioButton\n                        Accessible.value: checked ? \"selected\" : \"not selected\"",
         "library type column guidance": "Accessible.name: \"File type column\"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: \"Audio format or folder type\"",
         "catalog filtered results guidance": "Accessible.name: \"Catalog results: \" + text\n                    Accessible.value: text\n                    Accessible.role: Accessible.StaticText\n                    Accessible.description: text\n                    ToolTip.text: \"Current filtered catalog result count\"",
+        "catalog result count identity": "objectName: \"catalogResultCount\"",
         "playback controls grouping": "objectName: \"playbackControls\"\n                            Layout.fillWidth: true\n                            Accessible.name: \"Playback controls\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",

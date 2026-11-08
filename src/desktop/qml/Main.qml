@@ -466,7 +466,7 @@ ApplicationWindow {
                     Label { text: "Type"; font.bold: true; Layout.preferredWidth: 100; Accessible.name: "File type column"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: "Audio format or folder type" }
                 }
                 Label {
-                    objectName: "catalogStatus"
+                    objectName: "catalogResultCount"
                     text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : "Catalog: " + window.catalogRows.length + " matching entries"
                     Accessible.name: "Catalog results: " + text
                     Accessible.value: text
