@@ -1027,6 +1027,8 @@ ApplicationWindow {
                     Label {
                         text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"
                         objectName: "visualizationModeStatus"
+                        color: window.themeForegrounds[window.selectedThemeIndex]
+                        font.pixelSize: window.compactHeader ? 12 : 14
                     Accessible.name: "Visualization mode: " + text
                     Accessible.value: visualizationCanvas.viewMode
                         Accessible.role: Accessible.StaticText

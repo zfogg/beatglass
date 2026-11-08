@@ -439,3 +439,5 @@ The visualization keyboard focus ring now uses the active theme accent token, ke
 Waveform and FFT mode controls now use the same theme accent for active focus and the theme foreground for their resting border, keeping keyboard mode navigation visually consistent with the canvas focus ring across all six palettes.
 
 Selected waveform and FFT controls now use a derived darker accent fill, while unselected controls use the active theme surface. This preserves mode hierarchy and contrast as the user changes palettes.
+
+The mode status label now follows the theme foreground and compact-header typography tokens, keeping the current waveform/FFT context legible in both full and narrow layouts.
