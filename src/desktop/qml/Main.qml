@@ -126,6 +126,7 @@ ApplicationWindow {
                 text: "Reduce motion"
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
                 Accessible.name: "Reduce motion"
+                Accessible.description: "Reduce animation and transition effects in the desktop presentation."
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
             }
             Button {
