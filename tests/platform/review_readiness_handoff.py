@@ -8,6 +8,11 @@ def render(report_path: Path) -> str:
     report = json.loads(report_path.read_text(encoding="utf-8"))
     lines = ["# Native qualification review", "", f"Gate status: **{report.get('exit_gate_status', 'UNKNOWN')}**", "",
              "This checklist is review evidence only; it does not promote native qualification.", ""]
+    for field in ("generation_errors", "handoff_check_errors", "documentation_check_errors", "ingestion_errors"):
+        values = report.get(field, [])
+        lines.append(f"## {field}")
+        lines.extend([f"- {value}" for value in values] or ["- none recorded"])
+        lines.append("")
     for row in report.get("platforms", []):
         lines.extend([f"## {row.get('platform', 'unknown')}", ""])
         for scenario in row.get("scenario_inventory", []):

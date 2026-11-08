@@ -20,3 +20,4 @@ class ReadinessReviewTest(unittest.TestCase):
             self.assertIn("Gate status: **PENDING**", text)
             self.assertIn("capture", text)
             self.assertIn("Artifacts:", text)
+            self.assertIn("## ingestion_errors", text)
