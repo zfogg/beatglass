@@ -89,3 +89,10 @@ TEST_CASE("byte cursor rejects a source that shrinks after opening") {
  CHECK(cursor.read(out).status == ByteReadStatus::error);
  CHECK(cursor.position() == 2);
 }
+
+TEST_CASE("byte cursor rejects relative seeks after source mutation") {
+ MemorySource source; ByteCursor cursor(source);
+ source.reported_size = 4;
+ CHECK_FALSE(cursor.seek_relative(1, ByteSeekOrigin::current));
+ CHECK(cursor.position() == 0);
+}
