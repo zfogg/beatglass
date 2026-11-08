@@ -57,6 +57,20 @@ TEST_CASE("empty and zero-channel blocks fail closed and mark reacquisition") {
   CHECK(out.monotonic_ns == 1234);
 }
 
+TEST_CASE("explicit producer discontinuity is preserved on accepted blocks") {
+  AudioQueue<3, 4> q;
+  AudioQueue<3, 4>::Block out;
+  AudioBlock discontinuous{{48000, 1}, 12, 44, 9876, true,
+                           std::array<float, 1>{0.5F}};
+
+  REQUIRE(q.push(discontinuous));
+  REQUIRE(q.pop(out));
+  CHECK(out.discontinuity);
+  CHECK(out.epoch == 12);
+  CHECK(out.first_frame == 44);
+  CHECK(out.monotonic_ns == 9876);
+}
+
 TEST_CASE("a valid oversized block is dropped as complete frames") {
   AudioQueue<2, 2> q; AudioQueue<2, 2>::Block out;
   std::array<float, 4> oversized{1, 2, 3, 4};
