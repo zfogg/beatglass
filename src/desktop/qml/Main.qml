@@ -429,7 +429,6 @@ ApplicationWindow {
                     ToolTip.text: "Library catalog status"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
-                    ToolTip.text: "Current catalog result count"
                     Accessible.description: text
                 }
                 RowLayout {
