@@ -1277,6 +1277,7 @@ ApplicationWindow {
                             }
                             Button {
                                 objectName: "discardPersistedRecovery"
+                                id: discardPersistedRecoveryButton
                                 activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
                                 enabled: visible && storageRecovery.selectedRunId !== ""
@@ -1286,7 +1287,7 @@ ApplicationWindow {
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
                                 onClicked: discardRecoveryDialog.open()
                             }
-                            Button { objectName: "retryPersistedRecovery"; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun() }; Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work." }
+                            Button { objectName: "retryPersistedRecovery"; activeFocusOnTab: true; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); forceActiveFocus() }; Accessible.name: "Retry selected persisted analysis run"; Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work." }
                             Dialog {
                                 id: discardRecoveryDialog
                                 title: "Discard saved analysis run?"
@@ -1298,7 +1299,7 @@ ApplicationWindow {
                                     Accessible.name: "Discard retryable run confirmation"
                                     Accessible.role: Accessible.StaticText
                                 }
-                                onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun() }
+                                onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); discardPersistedRecoveryButton.forceActiveFocus() }
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
