@@ -169,7 +169,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     platform_summary_consistent = sorted(platforms) == expected_platforms
     platform_failures = [{"platform": row["platform"], "errors": row["error_count"],
                           "fresh": row["fresh"], "retention_ok": row["retention_ok"],
-                          "invalidated": row["invalidated"]} for row in rows]
+                          "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
+                         for row in rows]
     errors = [error for row in rows for error in row["errors"]]
     if not platform_summary_consistent:
         errors.append("status matrix must contain exactly Windows, macOS, and Linux rows")
