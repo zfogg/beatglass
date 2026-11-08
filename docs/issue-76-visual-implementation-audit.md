@@ -34,6 +34,8 @@ Generation/revision status is now explicitly identified as static text, keeping 
 
 Library sorting and the system output-device selector now announce their current values alongside the action guidance.
 
+Playback state/source/position and the active waveform-versus-FFT canvas now include their current values in accessible names, keeping navigation context synchronized with the visual surface.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
