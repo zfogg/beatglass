@@ -349,3 +349,5 @@ The primary navigation group now documents all three page-switch shortcuts in it
 Each primary navigation tab now updates its tooltip to identify the selected destination when active, keeping pointer and keyboard hover/focus feedback aligned with the live selected/not-selected values.
 
 The Settings Appearance group now reports its current theme and motion mode as a live group value, keeping the visual preference cluster’s state available before users navigate its individual controls.
+
+The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.

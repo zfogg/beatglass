@@ -367,9 +367,10 @@ ApplicationWindow {
                 visible: !window.compactHeader
                 spacing: 3
                 Accessible.name: "Theme previews"
+                Accessible.value: window.selectedTheme
                 Accessible.role: Accessible.Grouping
                 Accessible.description: "Choose a color theme preview; the selected swatch is marked as selected."
-                ToolTip.text: "Theme preview choices"
+                ToolTip.text: "Theme preview choices; current theme: " + window.selectedTheme
                 Repeater {
                     model: window.themeNames.length
                     delegate: Button {
