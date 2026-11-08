@@ -66,7 +66,21 @@ ApplicationWindow {
         minimumWidth: 230; minimumHeight: 100
         color: "transparent"
         Rectangle {
+            id: overlaySurface
             anchors.fill: parent; radius: 12; color: "#e51b2028"; border.color: "#667788"
+            property real pulseOpacity: 0.0
+            border.width: 1 + pulseOpacity * 3
+            Behavior on border.width { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 100 } }
+            Timer {
+                id: beatPulse
+                objectName: "beatPulse"
+                repeat: true
+                interval: { var bpm = Number(window.liveBridge.tempo); return isFinite(bpm) && bpm > 0 ? Math.max(120, 60000 / bpm) : 1000 }
+                running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && window.liveBridge.status === "Tracking"
+                onTriggered: { overlaySurface.pulseOpacity = 1.0; pulseFade.restart() }
+            }
+            Timer { id: pulseFade; interval: 120; onTriggered: overlaySurface.pulseOpacity = 0.0 }
+            Connections { target: window.liveBridge; function onChanged() { beatPulse.restart() } }
             MouseArea {
                 anchors.fill: parent
                 property bool fallbackMove: false
