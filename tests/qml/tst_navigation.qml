@@ -409,6 +409,7 @@ TestCase {
         fakeLive.status = "Error"
         fakeLive.status = "Stopped"
         fakeLive.status = "Reacquiring"
+        fakeLive.status = "Starting"
         verify(findChild(app, "visualizationEmptyState").visible)
         app.destroy()
     }
