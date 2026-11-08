@@ -11,7 +11,7 @@ if(BEATGLASS_BUILD_LIBRARY_FINGERPRINT AND NOT BEATGLASS_BUILD_LIBRARY_PROTOTYPE
 endif()
 if(BEATGLASS_BUILD_LIBRARY_PROTOTYPE)
   find_package(SQLite3 REQUIRED)
-  add_library(beatglass_library_prototype STATIC lib/library/job_executor.cpp lib/library/sqlite_cache.cpp lib/library/catalog.cpp lib/library/details.cpp lib/library/analysis_runner.cpp)
+  add_library(beatglass_library_prototype STATIC lib/library/job_executor.cpp lib/library/sqlite_cache.cpp lib/library/catalog.cpp lib/library/details.cpp lib/library/analysis_runner.cpp lib/library/analysis_commit.cpp)
   target_compile_features(beatglass_library_prototype PUBLIC cxx_std_20)
   target_include_directories(beatglass_library_prototype PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
   target_link_libraries(beatglass_library_prototype PRIVATE SQLite::SQLite3)
