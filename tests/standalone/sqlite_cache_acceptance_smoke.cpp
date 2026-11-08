@@ -15,6 +15,12 @@ int main() {
   const CacheKey key{"sha256:one", "engine-v1", "config-a", "offline"};
   {
     SqliteCache cache(path.string());
+    bool empty_run_rejected = false;
+    try { cache.begin("", key); } catch (const std::invalid_argument&) { empty_run_rejected = true; }
+    bool empty_content_rejected = false;
+    try { cache.begin("invalid-key", CacheKey{"", key.engine, key.config, key.mode}); }
+    catch (const std::invalid_argument&) { empty_content_rejected = true; }
+    assert(empty_run_rejected && empty_content_rejected);
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
