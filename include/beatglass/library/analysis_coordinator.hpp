@@ -36,6 +36,7 @@ class AnalysisCoordinator final { public:
   /** Re-submit a persisted retryable run with a freshly reconstructed source operation. */
   std::shared_ptr<RetryableAnalysis> resubmit_retryable(std::string run_id, AnalysisOperation operation, int priority = 0) {
     if (!storage_.retryable_run(run_id)) return {};
+    if (retry_rejection_reason(run_id, operation) != RetryRejectionReason::none) return {};
     return submit(std::move(run_id), std::move(operation), priority);
   }
   /** Classify persisted retry compatibility before reconstructing decoder work. */
