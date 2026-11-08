@@ -611,3 +611,5 @@ Settings endpoint, DJ monitoring, and overlay availability now share the same ca
 Overlay hide, unlock, and display changes now use that same helper. Their announcements and focus restoration remain immediate even with reduced motion enabled, while any output reacquisition still requires a fresh accepted snapshot.
 
 Overlay show and screen-list transitions use the same fallback contract: a missing display restores control-window guidance, while a restored display announces that a target must be chosen before overlay monitoring resumes.
+
+Retry overlay is now disabled until a display target exists. Once a display returns, the explicit retry action announces its attempt and keeps the control window available until the native overlay actually restores.
