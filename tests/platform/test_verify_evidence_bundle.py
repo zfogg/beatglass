@@ -311,6 +311,8 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertTrue(result["inventory_bytes_consistent"])
             self.assertTrue(result["inventory_count_consistent"])
             self.assertFalse(result["all_platforms_ready"])
+            self.assertEqual(result["exit_gate_status"], "PENDING")
+            self.assertTrue(result["exit_gate_reasons"])
             self.assertIn("native_qualification_summary", result)
             self.assertFalse(result["native_qualification_ready"])
             self.assertTrue(result["native_summary_consistent"])
