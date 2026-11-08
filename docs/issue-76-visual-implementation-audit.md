@@ -645,3 +645,5 @@ When the overlay is unavailable, the recovery panel may show the persisted admis
 That historical diagnostic is dismissed when retry or discard is invoked, and restored only when a subsequent admission reports a new failed/cancelled result. Successful recovery therefore cannot leave old persisted rejection text visible.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.
+
+Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
