@@ -218,6 +218,14 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertIn("platform", result["provenance_summary"][0]["missing"])
             self.assertTrue(result["summary_consistent"])
 
+    def test_readiness_reports_platform_summary_consistency(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platform_count"], 1)
+            self.assertFalse(result["platform_summary_consistent"])
+
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
