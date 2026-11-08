@@ -9,7 +9,10 @@
 #ifdef Q_OS_WINDOWS
 #include "platform/windows_endpoint_bridge.hpp"
 #endif
+#ifdef BEATGLASS_BUILD_DESKTOP_ANALYSIS
 #include "analysis_job_bridge.hpp"
+#include "beatglass/library/detail/job_executor.hpp"
+#endif
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -21,21 +24,27 @@ int main(int argc, char** argv) {
 #ifdef Q_OS_WINDOWS
   beatglass::windows::EndpointBridge endpointSelection;
 #endif
-  QGuiApplication app(argc, argv); Metadata metadata; AnalysisPresentation analysis; AnalysisJobBridge analysisJob; CaptureMonitorBridge captureMonitor; LivePresentation livePresentation; VisualizationPresentationBridge visualization; ThemePreferences themePreferences; LibraryCatalogBridge libraryCatalog; PlaybackSessionBridge playbackSession;
+  QGuiApplication app(argc, argv); Metadata metadata; AnalysisPresentation analysis;
+#ifdef BEATGLASS_BUILD_DESKTOP_ANALYSIS
+  beatglass::library_detail::JobExecutor analysisExecutor(2); AnalysisJobBridge analysisJob(analysisExecutor);
+#endif
+  CaptureMonitorBridge captureMonitor; LivePresentation livePresentation; VisualizationPresentationBridge visualization; ThemePreferences themePreferences; LibraryCatalogBridge libraryCatalog; PlaybackSessionBridge playbackSession;
 #ifdef Q_OS_MACOS
   beatglass::macos::OverlayController macOverlayController(
       beatglass::macos::makeOverlayNative(), nullptr,
       std::make_unique<QSettings>(QSettings::NativeFormat, QSettings::UserScope, QStringLiteral("Beatglass"), QStringLiteral("Beatglass")));
 #endif
+  QQmlApplicationEngine engine;
 #ifdef Q_OS_WINDOWS
   engine.rootContext()->setContextProperty("endpointSelection", &endpointSelection);
 #endif
-  QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
   engine.rootContext()->setContextProperty("captureMonitor", &captureMonitor);
   engine.rootContext()->setContextProperty("analysisPresentation", &analysis);
+#ifdef BEATGLASS_BUILD_DESKTOP_ANALYSIS
   engine.rootContext()->setContextProperty("analysisJob", &analysisJob);
+#endif
   engine.rootContext()->setContextProperty("themePreferences", &themePreferences);
   engine.rootContext()->setContextProperty("visualizationPresentation", &visualization);
   engine.rootContext()->setContextProperty("libraryCatalog", &libraryCatalog);
