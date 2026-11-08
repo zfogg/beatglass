@@ -731,6 +731,7 @@ ApplicationWindow {
                     }
                 }
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability"; Accessible.description: text; wrapMode: Text.WordWrap }
+                Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; Accessible.description: "Retry showing the native DJ overlay"; onClicked: window.showOverlayAndHideControls() }
                 Item { Layout.fillHeight: true }
             }
         }
