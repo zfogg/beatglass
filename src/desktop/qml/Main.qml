@@ -288,6 +288,7 @@ ApplicationWindow {
                             Button { text: "−5 s"; objectName: "seekBackPlayback"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - 5 * 44100), window.playbackBridge.epoch + 1) }
                             Button { text: "+5 s"; objectName: "seekForwardPlayback"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * 44100, window.playbackBridge.epoch + 1) }
                             Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState" }
+                            Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source : "Source: none"; objectName: "playbackSource"; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.name: text }
                         }
                     }
                 }

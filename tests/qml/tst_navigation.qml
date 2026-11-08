@@ -93,6 +93,7 @@ TestCase {
         let app = shell.createObject(null)
         verify(findChild(app, "seekBackPlayback") !== null)
         verify(findChild(app, "seekForwardPlayback") !== null)
+        compare(findChild(app, "playbackSource").text, "Source: none")
         app.destroy()
     }
 
