@@ -471,3 +471,5 @@ Generation/revision evidence now wraps within the available width, keeping long 
 Selected-position status now fills the available row width and wraps in compact layouts, preserving the status/action relationship without clipping the current selection announcement.
 
 Waveform sample and FFT-bin counts now wrap within their responsive status width, preventing long runtime evidence from forcing horizontal crowding in compact headers.
+
+Selected-view sample/bin summaries now wrap as well, preserving mode-specific evidence when compact layouts narrow the visualization column.
