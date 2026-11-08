@@ -1136,6 +1136,14 @@ ApplicationWindow {
                                     Accessible.description: "Look up a completed result without starting decoder or analysis work."
                                     onClicked: storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
                                 }
+                                Button {
+                                    objectName: "invalidateAnalysisCache"
+                                    text: "Forget cached result"
+                                    enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== ""
+                                    Accessible.name: "Forget cached analysis"
+                                    Accessible.description: "Remove this completed cache identity so the next analysis runs again. Source files are not changed."
+                                    onClicked: storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
+                                }
                             }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
