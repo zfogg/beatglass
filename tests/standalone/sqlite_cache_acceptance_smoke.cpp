@@ -25,7 +25,10 @@ int main() {
     bool long_config_rejected = false;
     try { cache.begin("long-config", CacheKey{key.content, key.engine, std::string(4097, 'c'), key.mode}); }
     catch (const std::invalid_argument&) { long_config_rejected = true; }
-    assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected);
+    bool invalid_mode_rejected = false;
+    try { cache.begin("invalid-mode", CacheKey{key.content, key.engine, key.config, "unknown"}); }
+    catch (const std::invalid_argument&) { invalid_mode_rejected = true; }
+    assert(empty_run_rejected && empty_content_rejected && long_run_rejected && long_config_rejected && invalid_mode_rejected);
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
