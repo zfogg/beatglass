@@ -1135,6 +1135,10 @@ ApplicationWindow {
                 Label { text: "Settings"; font.pixelSize: 28; font.bold: true; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Settings"; Accessible.role: Accessible.Heading; ToolTip.text: "Audio capture, appearance, and overlay settings" }
                 GroupBox {
                     title: "Audio capture"
+                    Accessible.name: "Audio capture settings"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose the output endpoint and device used for live monitoring."
+                    ToolTip.text: "Configure live audio capture sources"
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
@@ -1224,10 +1228,14 @@ ApplicationWindow {
                 }
                 GroupBox {
                     title: "Appearance"
+                    Accessible.name: "Appearance settings"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose the color theme and motion preference for the desktop."
+                    ToolTip.text: "Configure theme and motion preferences"
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
-                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Appearance guidance"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Theme and reduced-motion guidance" }
                         Label {
                             objectName: "appearanceState"
                             text: "Theme: " + window.selectedTheme + " · Motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
