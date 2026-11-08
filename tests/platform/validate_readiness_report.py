@@ -23,7 +23,7 @@ def validate(report: dict) -> list[str]:
     if not isinstance(report.get("exit_gate_reason_codes"), list):
         errors.append("exit_gate_reason_codes must be a list")
     statuses = report.get("platform_support_status")
-    if not isinstance(statuses, list) or any(not isinstance(item, dict) for item in statuses) or {item.get("platform") for item in statuses} != EXPECTED_PLATFORMS:
+    if not isinstance(statuses, list) or len(statuses) != len(EXPECTED_PLATFORMS) or any(not isinstance(item, dict) for item in statuses) or {item.get("platform") for item in statuses} != EXPECTED_PLATFORMS:
         errors.append("platform_support_status must contain exactly Windows, macOS, and Linux rows")
     if report.get("exit_gate_status") == "READY" and report.get("exit_gate_reason_codes"):
         errors.append("READY report cannot contain exit_gate_reason_codes")
@@ -34,7 +34,7 @@ def validate(report: dict) -> list[str]:
     if report.get("exit_gate_status") == "PENDING" and report.get("ready") is not False:
         errors.append("PENDING report must set ready false")
     platforms = report.get("platforms")
-    if not isinstance(platforms, list) or any(not isinstance(item, dict) for item in platforms) or {item.get("platform") for item in platforms} != EXPECTED_PLATFORMS:
+    if not isinstance(platforms, list) or len(platforms) != len(EXPECTED_PLATFORMS) or any(not isinstance(item, dict) for item in platforms) or {item.get("platform") for item in platforms} != EXPECTED_PLATFORMS:
         errors.append("platforms must contain exactly Windows, macOS, and Linux rows")
     else:
         for item in platforms:

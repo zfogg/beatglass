@@ -29,6 +29,14 @@ class ReadinessReportContractTest(unittest.TestCase):
         self.assertIn("platforms must contain exactly", errors)
         self.assertIn("platform_support_status must contain exactly", errors)
 
+    def test_report_rejects_duplicate_platform_rows(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"].append(dict(report["platforms"][0]))
+        report["platform_support_status"].append(dict(report["platform_support_status"][0]))
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("platforms must contain exactly", errors)
+        self.assertIn("platform_support_status must contain exactly", errors)
+
     def test_report_root_must_be_object(self):
         self.assertEqual(module.validate([]), ["readiness report must be a JSON object"])
         self.assertEqual(module.validate_retained_files([], Path(".")), ["readiness report must be a JSON object"])
