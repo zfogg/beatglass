@@ -35,6 +35,8 @@ def main() -> int:
         "playback frame actions accessible names": "Accessible.name: \"Seek to entered frame\"",
         "folder picker accessible name": "Accessible.name: \"Choose audio folder\"",
         "capture endpoint refresh accessible name": "Accessible.name: \"Refresh capture endpoints\"",
+        "dj navigation description": "Accessible.name: \"DJ\"; Accessible.description: \"View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2; focus returns to this tab.\"",
+        "settings navigation description": "Accessible.name: \"Settings\"; Accessible.description: \"Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab.\"",
         "library navigation tab semantics": "objectName: \"libraryTab\"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: \"Browse local audio files\"",
         "reset appearance button role": "Accessible.name: \"Reset appearance settings\"\n                Accessible.role: Accessible.Button",
         "overlay tempo tooltip": "ToolTip.text: \"Current live tempo estimate\"",

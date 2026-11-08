@@ -168,6 +168,8 @@ The primary Library navigation tab now exposes explicit keyboard focus, PageTab 
 
 The appearance reset control now declares an explicit button role, completing semantic coverage for the settings recovery action.
 
+The DJ and Settings navigation tabs retain explicit shortcut/focus-return descriptions in the static contract, ensuring keyboard navigation guidance remains part of the visual accessibility audit.
+
 Live overlay tempo and harmony estimates now expose contextual tooltips, while overlay hide and retry-capture actions explicitly declare button roles for assistive technology.
 
 Overlay unlock guidance and capture status now expose contextual recovery tooltips, while platform permission guidance includes explicit value, role, and description semantics.
