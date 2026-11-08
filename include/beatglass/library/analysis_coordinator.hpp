@@ -31,7 +31,7 @@ class AnalysisCoordinator final { public:
   AnalysisCoordinator(const AnalysisCoordinator&) = delete;
   bool open_storage(const StorageConfig& config, std::string* diagnostic = nullptr) { return storage_.open(config, diagnostic); }
   void close_storage() noexcept { storage_.close(); }
-  /** Submit an operation; publication and revalidation stay on this worker boundary. */
+  /** Submit an operation; admission persists source path/decoder snapshot and publication/revalidation stay on this worker boundary. */
   std::shared_ptr<RetryableAnalysis> submit(std::string run_id, AnalysisOperation operation, int priority = 0);
   /** Re-submit a persisted retryable run with a freshly reconstructed source operation. */
   std::shared_ptr<RetryableAnalysis> resubmit_retryable(std::string run_id, AnalysisOperation operation, int priority = 0) {
