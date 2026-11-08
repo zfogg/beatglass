@@ -171,6 +171,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           "fresh": row["fresh"], "retention_ok": row["retention_ok"],
                           "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
                          for row in rows]
+    ready_platforms = sum(item["ready"] for item in platform_failures)
     errors = [error for row in rows for error in row["errors"]]
     if not platform_summary_consistent:
         errors.append("status matrix must contain exactly Windows, macOS, and Linux rows")
@@ -189,10 +190,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
+            "ready_platform_count": ready_platforms,
+            "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
-            "ready": not errors}
+            "ready": not errors and platform_summary_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:
