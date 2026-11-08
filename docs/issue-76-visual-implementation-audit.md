@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Display-loss evidence must show the overlay disappearing, the control window remaining available, an accessible display-unavailable announcement, and Retry succeeding after restoration. The QML fallback restores controls automatically; native monitor loss/recovery, click-through, and multi-display timing still require retained evidence.
+
 Overlay design states are covered by explicit Show, Unlock, Hide, display-change, unavailable-display, empty-display, and Retry controls. Each state keeps recovery guidance accessible and routes display changes through the native overlay bridge; native multi-monitor, click-through, and display-loss evidence remains required.
 
 Overlay hide, unlock, display replacement, and retry preserve the reduced-motion contract: announcements and accessible state text remain, while motion is suppressed. Focus returns to a recoverable control after overlay/display changes; native multi-monitor and assistive-technology timing remain qualification gaps.
