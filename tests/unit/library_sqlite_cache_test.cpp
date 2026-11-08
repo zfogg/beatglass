@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <chrono>
 #include <limits>
+#include <stdexcept>
 #include "beatglass/library/detail/sqlite_cache.hpp"
 using namespace beatglass::library_detail;
 TEST_CASE("SQLite cache replaces only completed revalidated runs") {
@@ -45,6 +46,14 @@ TEST_CASE("SQLite cache rolls back failed publication") {
   REQUIRE(cache.publish("one", key, "old", {}, [] { return true; }) == Publish::committed);
   REQUIRE(cache.publish("missing", key, "new", {}, [] { return true; }) == Publish::error);
   std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "old");
+}
+TEST_CASE("SQLite cache rolls back when revalidation throws") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("old", key);
+  REQUIRE(cache.publish("old", key, "stable", {}, [] { return true; }) == Publish::committed);
+  cache.begin("new", key);
+  REQUIRE(cache.publish("new", key, "discard", {}, []() -> bool { throw std::runtime_error("verification failed"); }) == Publish::error);
+  std::string result; REQUIRE(cache.find(key, result)); REQUIRE(result == "stable");
 }
 
 TEST_CASE("SQLite cache persists completed work and recovers interrupted runs") {
