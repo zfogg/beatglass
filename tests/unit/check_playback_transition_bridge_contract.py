@@ -29,6 +29,8 @@ MARKERS = {
     "qml overlay recovery": "DJ overlay unavailable; output monitoring remains unavailable until the display recovers.",
     "qml overlay hide recovery": "DJ overlay hidden; output monitoring remains available in the control window.",
     "qml overlay display recovery": "DJ overlay display changed; output monitoring may reacquire.",
+    "qml overlay display disappeared": "DJ overlay display disappeared; controls restored until a display is available.",
+    "qml overlay display restored": "DJ overlay display restored; choose a display to resume overlay monitoring.",
 }
 
 

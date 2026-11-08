@@ -607,3 +607,5 @@ Endpoint bridge transitions now actively clear source-bound visualization select
 Settings endpoint, DJ monitoring, and overlay availability now share the same capture-recovery reset path and no-device/reacquisition language. A failed monitor or unavailable overlay clears stale visualization selection and returns focus to the recovery target.
 
 Overlay hide, unlock, and display changes now use that same helper. Their announcements and focus restoration remain immediate even with reduced motion enabled, while any output reacquisition still requires a fresh accepted snapshot.
+
+Overlay show and screen-list transitions use the same fallback contract: a missing display restores control-window guidance, while a restored display announces that a target must be chosen before overlay monitoring resumes.
