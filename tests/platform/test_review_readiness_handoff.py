@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 spec = importlib.util.spec_from_file_location("review", Path(__file__).with_name("review_readiness_handoff.py"))
 review = importlib.util.module_from_spec(spec); assert spec.loader
@@ -21,3 +22,10 @@ class ReadinessReviewTest(unittest.TestCase):
             self.assertIn("capture", text)
             self.assertIn("Artifacts:", text)
             self.assertIn("## ingestion_errors", text)
+
+    def test_strict_review_gate_rejects_pending_report(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "review.md"
+            with mock.patch("sys.argv", ["review_readiness_handoff.py", str(source), str(output), "--require-ready"]):
+                self.assertEqual(review.main(), 1)

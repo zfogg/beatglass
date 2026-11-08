@@ -28,7 +28,11 @@ def render(report_path: Path) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("report", type=Path); parser.add_argument("output", type=Path)
+    parser.add_argument("--require-ready", action="store_true")
     args = parser.parse_args(); args.output.write_text(render(args.report), encoding="utf-8")
+    report = json.loads(args.report.read_text(encoding="utf-8"))
+    if args.require_ready and report.get("exit_gate_status") != "READY":
+        print(f"review gate is not ready: {report.get('exit_gate_status')}"); return 1
     print(f"wrote native qualification review checklist: {args.output}"); return 0
 
 
