@@ -102,6 +102,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             if output_path.is_file() and output_path.stat().st_size != row.get("qualification_output_bytes"):
                 errors.append(f"{platform}: qualification output byte count does not match report")
         evidence_hashes = row.get("scenario_evidence_sha256", {})
+        if not isinstance(evidence_hashes, dict):
+            errors.append(f"{platform}: scenario evidence hashes must be an object")
+            evidence_hashes = {}
         for scenario in manifest_data.get("scenarios", []):
             evidence = scenario.get("evidence")
             if not evidence:
