@@ -531,7 +531,7 @@ ApplicationWindow {
                             objectName: "selectedAudioName"
                             text: window.selectedName || "No file selected"
                             font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true
-                            Accessible.name: "Selected audio file"
+                            Accessible.name: "Selected audio file: " + text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -539,14 +539,14 @@ ApplicationWindow {
                             objectName: "selectedAudioSource"
                             text: window.selectedAudioUrl.toString() !== "" ? "Source: " + window.selectedAudioUrl : "Source unavailable"
                             elide: Text.ElideMiddle; Layout.fillWidth: true
-                            Accessible.name: "Selected audio source"
+                            Accessible.name: "Selected audio source: " + text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
                         Label {
                             objectName: "selectedAudioDuration"
                             text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
-                            Accessible.name: "Selected audio duration"
+                            Accessible.name: "Selected audio duration: " + text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap
@@ -563,7 +563,7 @@ ApplicationWindow {
                         Label {
                             objectName: "metadataStatus"; text: window.metadataStatus
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
-                            Accessible.name: "Audio metadata status"
+                            Accessible.name: "Audio metadata status: " + text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -589,7 +589,7 @@ ApplicationWindow {
                             objectName: "detailsAvailability"
                             text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
-                            Accessible.name: "Analysis and playback status"
+                            Accessible.name: "Analysis and playback status: " + text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
