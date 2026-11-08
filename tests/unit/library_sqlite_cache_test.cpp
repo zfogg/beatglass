@@ -181,6 +181,12 @@ TEST_CASE("SQLite cache configurations expose their API bound") {
   CacheKey key{"hash", "engine", std::string(kMaxCacheConfigurationBytes + 1, 'x'), "offline"};
   CHECK_THROWS_AS(cache.begin("run", key), std::invalid_argument);
 }
+TEST_CASE("SQLite cache modes expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCacheModeBytes == 128);
+  CacheKey key{"hash", "engine", "config", std::string(kMaxCacheModeBytes + 1, 'x')};
+  CHECK_THROWS_AS(cache.begin("run", key), std::invalid_argument);
+}
 TEST_CASE("SQLite binding lengths are checked before narrowing") {
   auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
   REQUIRE(sqlite_length_representable(maximum));
