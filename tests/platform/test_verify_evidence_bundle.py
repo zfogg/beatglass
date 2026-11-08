@@ -371,6 +371,16 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles)
             self.assertEqual(result["platforms"][0]["invalid_scenarios"], ["capture"])
 
+    def test_readiness_malformed_scenario_inventory_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            data["scenarios"] = [{"id": ["capture"], "status": ["PASS"]}]
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertTrue(result["platforms"][0]["invalid_scenarios"])
+
     def test_readiness_aggregates_required_scenario_summary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
