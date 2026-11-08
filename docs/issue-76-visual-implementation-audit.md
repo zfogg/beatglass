@@ -686,6 +686,8 @@ Bridge availability and display-list transitions now announce action enablement 
 
 Show, Restore, and Reapply now share that display-target gate in their actual enabled state. When a saved monitor is missing, each control reports “choose a display first” and the display selector remains the recovery focus; no action claims success before a native target exists.
 
+Activating a valid replacement display now announces that Show, Restore, and Reapply are enabled and moves focus to the retry/recovery control. Failed native selection returns focus to the display selector, preserving a keyboard-complete recovery path.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.

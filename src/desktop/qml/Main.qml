@@ -466,7 +466,7 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = name
         window.overlayDisplaySelectionRequired = false
         window.overlayDisplayRecoveryPending = false
-        window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + ".")
+        window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.")
         return true
     }
     function hideOverlayAndRestoreControls() {
@@ -2588,7 +2588,12 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
-                        onActivated: if (window.persistOverlayDisplaySelection(currentIndex, currentText)) { retryOverlay.forceActiveFocus() }
+                        onActivated: {
+                            if (window.persistOverlayDisplaySelection(currentIndex, currentText))
+                                retryOverlay.forceActiveFocus()
+                            else
+                                forceActiveFocus()
+                        }
                         Layout.fillWidth: true
                     }
                     Button {
