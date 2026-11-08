@@ -19,6 +19,7 @@ required = {
     "worker result property": 'Q_PROPERTY(QString result READ result',
     "worker result handoff": 'op.publish = [weak_self = weak_self_, publish]',
     "worker result rendering": 'objectName: "analysisWorkerResult"',
+    "retry clears stale result": 'if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:
