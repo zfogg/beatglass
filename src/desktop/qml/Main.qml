@@ -229,8 +229,12 @@ ApplicationWindow {
                         objectName: "themePreview" + index
                         width: 18; height: 18
                         padding: 0
+                        checkable: true
+                        checked: window.selectedThemeIndex === index
                         Accessible.name: window.themeNames[index] + " theme preview"
-                        Accessible.role: Accessible.Button
+                        Accessible.description: "Select " + window.themeNames[index] + " theme; "
+                                              + (checked ? "selected" : "not selected")
+                        Accessible.role: Accessible.RadioButton
                         ToolTip.text: "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
                             radius: 3
