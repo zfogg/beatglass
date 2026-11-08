@@ -12,6 +12,8 @@ For every native run, record the OS version, kernel or build number, compiler, Q
 
 Each retained evidence bundle must include `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-playback-evidence.json`, and `native-overlay-evidence.json` where those scenarios apply.
 
+Every bundle manifest must enumerate the categories `capture`, `recovery`, `output`, `display`, `playback`, and `overlay`; categories not run remain explicitly `UNRUN`.
+
 Output and display scenarios must additionally retain `native-output-evidence.json` and `native-display-evidence.json` for endpoint selection/loss, overlay visibility, fullscreen, DPI, and monitor observations.
 
 Capture and lifecycle scenarios must additionally retain `native-capture-evidence.json` and `native-recovery-evidence.json` for permission, endpoint-loss, reacquisition, and source-epoch observations.

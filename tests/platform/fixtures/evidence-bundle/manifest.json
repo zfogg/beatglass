@@ -1,4 +1,9 @@
 {
   "artifacts": [{"path": "capture.txt", "sha256": "aa6ad8da51e20d8e37ff75fd8a54d27cab7cdb789734b801b61b45ced2c8a901"}],
-  "scenarios": [{"id": "capture", "status": "PASS", "evidence": "capture.txt"}, {"id": "overlay", "status": "UNRUN"}]
+  "scenarios": [
+    {"id": "capture", "status": "PASS", "evidence": "capture.txt"},
+    {"id": "recovery", "status": "UNRUN"}, {"id": "output", "status": "UNRUN"},
+    {"id": "display", "status": "UNRUN"}, {"id": "playback", "status": "UNRUN"},
+    {"id": "overlay", "status": "UNRUN"}
+  ]
 }
