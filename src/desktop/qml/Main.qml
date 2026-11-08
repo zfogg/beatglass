@@ -336,6 +336,7 @@ ApplicationWindow {
                 objectName: "resetAppearance"
                 text: "Reset appearance"
                 visible: !window.compactHeader
+                activeFocusOnTab: true
                 Accessible.name: "Reset appearance settings"
                 Accessible.role: Accessible.Button
                 Accessible.description: "Restore the default Light theme and turn off reduced motion."
@@ -362,6 +363,7 @@ ApplicationWindow {
                         width: 18; height: 18
                         padding: 0
                         checkable: true
+                        activeFocusOnTab: true
                         checked: window.selectedThemeIndex === index
                         Accessible.name: window.themeNames[index] + " theme preview"
                         Accessible.description: "Select " + window.themeNames[index] + " theme; "
