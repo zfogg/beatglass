@@ -105,9 +105,14 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             errors.append(f"{platform}: qualification output does not match report")
         elif not isinstance(manifest_data.get("artifacts"), list):
             errors.append(f"{platform}: manifest artifacts must be an array")
-        elif not any(isinstance(item, dict) and item.get("path") == output for item in manifest_data["artifacts"]):
-            errors.append(f"{platform}: qualification output is not retained as an artifact")
-        elif output_path := (bundles / platform / output):
+        else:
+            artifact_paths = [item.get("path") for item in manifest_data["artifacts"] if isinstance(item, dict)]
+            if len(artifact_paths) != len(set(artifact_paths)):
+                errors.append(f"{platform}: duplicate manifest artifact path")
+            if not any(path == output for path in artifact_paths):
+                errors.append(f"{platform}: qualification output is not retained as an artifact")
+        if isinstance(output, str) and output.strip() and row.get("qualification_output") == output:
+            output_path = bundles / platform / output
             if not output_path.resolve().is_relative_to(platform_root):
                 errors.append(f"{platform}: qualification output escapes retained bundle")
                 continue
