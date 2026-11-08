@@ -532,7 +532,19 @@ ApplicationWindow {
                                 text: "Discard saved run"
                                 Accessible.name: "Discard saved retryable analysis run"
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
-                                onClicked: storageRecovery.discardSelectedRun()
+                                onClicked: discardRecoveryDialog.open()
+                            }
+                            Dialog {
+                                id: discardRecoveryDialog
+                                title: "Discard saved analysis run?"
+                                modal: true
+                                standardButtons: Dialog.Ok | Dialog.Cancel
+                                contentItem: Label {
+                                    text: "This removes only the retry record. The source audio file is not changed."
+                                    wrapMode: Text.WordWrap
+                                    Accessible.name: "Discard retryable run confirmation"
+                                }
+                                onAccepted: storageRecovery.discardSelectedRun()
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
