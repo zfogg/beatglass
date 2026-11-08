@@ -671,6 +671,8 @@ def main() -> int:
         "starting state": "window.liveBridge.status === \"Starting\" || window.liveBridge.status === \"Reacquiring\"",
         "ready state": "visualizationCanvas.modeHasData ? \"ready\"",
         "waiting state": ": \"waiting\"))",
+        "clear selection control": 'objectName: "visualizationClearSelection"',
+        "clear selection state": 'text: enabled ? "Clear selection" : "No selection"',
     }
     state_missing = [name for name, marker in runtime_states.items() if marker not in qml]
     if state_missing:
