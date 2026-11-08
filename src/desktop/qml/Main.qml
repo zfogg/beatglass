@@ -102,7 +102,9 @@ ApplicationWindow {
         objectName: "persistedRecoveryRetryShortcut"
         sequence: "Ctrl+Shift+Y"
         context: Qt.ApplicationShortcut
-        enabled: typeof storageRecovery !== "undefined"
+        enabled: typeof persistedRecoveryRuns !== "undefined"
+            && persistedRecoveryRuns.enabled
+            && typeof storageRecovery !== "undefined"
             && storageRecovery.selectedRunId !== ""
             && storageRecovery.analysisRetryable
         onActivated: {
@@ -116,7 +118,9 @@ ApplicationWindow {
         objectName: "persistedRecoveryDiscardShortcut"
         sequence: "Ctrl+Shift+D"
         context: Qt.ApplicationShortcut
-        enabled: typeof storageRecovery !== "undefined"
+        enabled: typeof persistedRecoveryRuns !== "undefined"
+            && persistedRecoveryRuns.enabled
+            && typeof storageRecovery !== "undefined"
             && storageRecovery.selectedRunId !== ""
         onActivated: {
             const runId = storageRecovery.selectedRunId
