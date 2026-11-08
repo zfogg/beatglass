@@ -700,6 +700,8 @@ Direct display and size edits flow through native geometry callbacks to advance 
 
 Opacity edits now carry an in-flight marker: the originating control edit advances the revision once, while its native bridge echo only clears the marker; unrelated native opacity changes still advance the revision. This keeps concurrent local/native updates visible without duplicate counts.
 
+Rapid opacity edits now retain the latest pending value and match native echoes by value, not arrival order. An older/out-of-order echo cannot overwrite the slider or clear the newer edit’s pending state; the revision remains one increment per user edit.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
