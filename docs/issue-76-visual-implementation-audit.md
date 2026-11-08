@@ -430,6 +430,8 @@ Retry monitoring now reserves a compact/full minimum width, keeping its recovery
 
 Starting/Reacquiring feedback explicitly permits zero minimum width, allowing its guidance to wrap within the responsive status column rather than expanding the surrounding layout.
 
+Capture-status guidance now also permits zero minimum width, keeping stopped/error instructions inside the responsive visualization column.
+
 Capture transitions now expose a visible and accessible reset explanation when selection is cleared: stopped, starting, reacquiring, and error states each identify why the previous visualization position is no longer available.
 
 The waveform and FFT canvas now consumes the active six-theme palette at render time: the background follows the theme surface, plotted data uses the theme accent, and the selection cursor uses the theme foreground for contrast. Theme changes therefore affect the live visualization rather than only surrounding controls.

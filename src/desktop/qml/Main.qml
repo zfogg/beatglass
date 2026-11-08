@@ -1431,7 +1431,7 @@ ApplicationWindow {
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
                     color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
-                    Layout.fillWidth: true; wrapMode: Text.WordWrap
+                    Layout.fillWidth: true; Layout.minimumWidth: 0; wrapMode: Text.WordWrap
                 }
                 }
                 }
