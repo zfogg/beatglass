@@ -40,6 +40,7 @@ def main() -> int:
         "library empty state role": "Accessible.role: Accessible.StaticText",
         "visualization status role": "Accessible.name: \"Visualization data status\"",
         "selected visualization status role": "Accessible.name: \"Selected visualization data status\"",
+        "capture status role": "Accessible.name: \"Capture monitor status\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
