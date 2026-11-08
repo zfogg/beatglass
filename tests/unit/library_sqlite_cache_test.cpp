@@ -157,6 +157,16 @@ TEST_CASE("SQLite retryable run query exposes its bound") {
   CHECK(kMaxRetryableRuns == 10000);
   CHECK_THROWS_AS(cache.retryable_runs(kMaxRetryableRuns + 1), std::invalid_argument);
 }
+TEST_CASE("SQLite retryable runs preserve source and decoder snapshots") {
+  SqliteCache cache(":memory:");
+  CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("snapshot", key, "/music/example.flac", "decoder-v3;pcm-f32;44100");
+  REQUIRE(cache.publish("snapshot", key, "discard", {}, [] { return false; }) == Publish::stale_input);
+  const auto runs = cache.retryable_runs();
+  REQUIRE(runs.size() == 1);
+  CHECK(runs.front().source_path == "/music/example.flac");
+  CHECK(runs.front().decoder_snapshot == "decoder-v3;pcm-f32;44100");
+}
 TEST_CASE("SQLite cache run IDs expose their API bound") {
   SqliteCache cache(":memory:");
   CHECK(kMaxCacheRunIdBytes == 4096);
@@ -193,7 +203,7 @@ TEST_CASE("SQLite binding lengths are checked before narrowing") {
   REQUIRE_FALSE(sqlite_length_representable(maximum + 1));
 }
 TEST_CASE("SQLite cache exposes its on-disk schema version") {
-  REQUIRE(kCacheSchemaVersion == 1);
+  REQUIRE(kCacheSchemaVersion == 2);
 }
 TEST_CASE("SQLite cache holds exclusive ownership during recovery and use") {
   auto path = std::filesystem::temp_directory_path() /

@@ -14,7 +14,7 @@ public:
   CollectionCancelled() : std::runtime_error("collection query cancelled") {}
 };
 /** On-disk schema version for the provisional analysis cache. */
-inline constexpr int kCacheSchemaVersion = 1;
+inline constexpr int kCacheSchemaVersion = 2;
 /** Metadata for one indexed local-library item; the source file is never owned or modified. */
 struct CollectionEntry {
   std::string path, name, kind, fingerprint;
@@ -49,7 +49,8 @@ struct CacheKey {
   /** Analysis mode. */ std::string mode;
 };
 /** Persisted analysis run that can be resumed after a process restart. */
-struct RetryableRun { std::string id; CacheKey key; };
+/** Persisted retry input snapshot; empty decoder_snapshot denotes legacy/default decoding. */
+struct RetryableRun { std::string id; CacheKey key; std::string source_path; std::string decoder_snapshot; };
 /** Provisional publication outcome; error may include an indeterminate commit. */
 enum class Publish {
   /** Active result was replaced. */ committed,
@@ -74,7 +75,9 @@ public:
   /** Return up to the requested bounded page of owned entries; throws CollectionCancelled on observed stop and throws on invalid query or storage errors. */
   std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});
   /** Insert a uniquely identified running job; throws on invalid identity, invalid run ID, SQLite error, or duplicate ID. */
-  void begin(const std::string& id, const CacheKey& key);
+  /** Begin a run and persist the immutable source/decoder snapshot used for safe retry. */
+  void begin(const std::string& id, const CacheKey& key, const std::string& source_path = {},
+             const std::string& decoder_snapshot = {});
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */
   bool find(const CacheKey& key, std::string& result);
   /** Return 1–10000 persisted runs left retryable by cancellation, stale input, or restart. */
