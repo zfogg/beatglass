@@ -54,6 +54,13 @@ TEST_CASE("catalog normalizes the short AIFF extension") {
   CHECK(result.entries[0].title == "voice");
 }
 
+TEST_CASE("catalog normalizes uppercase short AIFF extension") {
+  TempDir dir; dir.file("VOICE.AIF");
+  const auto result = beatglass::library::browse(dir.path);
+  REQUIRE(result.entries.size() == 1);
+  CHECK(result.entries[0].format == "AIFF");
+}
+
 TEST_CASE("catalog filters directories and files case-insensitively") {
   TempDir dir; dir.file("Track.WAV"); std::filesystem::create_directory(dir.path / "Samples");
   const auto result = beatglass::library::browse(dir.path, "SAMP");
