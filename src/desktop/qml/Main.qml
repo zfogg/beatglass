@@ -1362,13 +1362,14 @@ ApplicationWindow {
                             }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
+                                id: persistedRecoveryRuns
                                 visible: typeof storageRecovery !== "undefined"
                                 model: visible ? storageRecovery.retryableRunIds : []
                                 enabled: visible && count > 0
                                 Accessible.name: "Persisted retryable analysis runs"
                                 Accessible.description: visible && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Selected persisted recovery status: " + storageRecovery.resetStatus : "Choose a saved analysis run to recover."
                                 ToolTip.text: "Choose a saved analysis run to recover"
-                                onActivated: storageRecovery.selectRun(currentText)
+                                onActivated: { storageRecovery.selectRun(currentText); window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Retry and discard controls are now available when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
                             }
                             Label {
                                 objectName: "persistedRecoveryRunDetails"
