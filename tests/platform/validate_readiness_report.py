@@ -85,6 +85,10 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: invalid qualification output hash")
             if not isinstance(item.get("qualification_output_bytes"), int) or item["qualification_output_bytes"] < 0:
                 errors.append(f"{item.get('platform')}: invalid qualification output byte count")
+            if not isinstance(item.get("retained_artifacts"), int) or item["retained_artifacts"] < 0:
+                errors.append(f"{item.get('platform')}: invalid retained artifact count")
+            if not isinstance(item.get("retained_bytes"), int) or item["retained_bytes"] < 0:
+                errors.append(f"{item.get('platform')}: invalid retained byte count")
             evidence_hashes = item.get("scenario_evidence_sha256")
             if not isinstance(evidence_hashes, dict):
                 errors.append(f"{item.get('platform')}: missing scenario evidence hashes")
