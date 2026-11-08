@@ -1,6 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/capture/detail/pipewire_graph.hpp"
+#include "beatglass/capture/detail/pipewire_status.hpp"
 using namespace beatglass::pipewire;
+TEST_CASE("provisional PipeWire diagnostic values remain stable") {
+ CHECK(diagnostic_code(Diagnostic::startup_timeout) == 12);
+ CHECK(diagnostic_code(Diagnostic::watched_object_invalid) == 13);
+}
 TEST_CASE("graph evidence requires both selected sink monitor channels") {
  MonitorGraph graph("serial", "sink");
  graph.node(3, "serial", "sink", true);

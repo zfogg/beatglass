@@ -2,6 +2,7 @@
 // The control thread owns this object; one worker may consume its queue.
 #include "beatglass/capture/detail/pipewire_monitor.hpp"
 #include "beatglass/capture/detail/pipewire_graph.hpp"
+#include "beatglass/capture/detail/pipewire_status.hpp"
 #include <pipewire/pipewire.h>
 #include <spa/buffer/meta.h>
 #include <spa/param/audio/format-utils.h>
@@ -107,7 +108,7 @@ public:
       const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
       while (!stop_requested_.load(std::memory_order_acquire)) {
         if (state() == MonitorState::starting && std::chrono::steady_clock::now() >= deadline) {
-          diagnostic_.store(12); transition(MonitorState::error); break;
+          diagnostic_.store(diagnostic_code(Diagnostic::startup_timeout)); transition(MonitorState::error); break;
         }
         const int result = pw_loop_iterate(loop, 50);
         if (result < 0 && result != -EINTR) { transition(MonitorState::error); break; }
@@ -210,7 +211,7 @@ private:
   }
   static bool equals(const char* a, const char* b) noexcept { return a && b && !std::strcmp(a, b); }
   void watch_failure() noexcept {
-    diagnostic_.store(13);
+    diagnostic_.store(diagnostic_code(Diagnostic::watched_object_invalid));
     transition(state() == MonitorState::streaming ? MonitorState::interrupted : MonitorState::error);
   }
   static void node_info(void* data, const pw_node_info* info) {
