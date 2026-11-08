@@ -1,5 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/core/tracking_machine.hpp"
+TEST_CASE("tracking rejects zero source epochs") {
+  beatglass::TrackingMachine machine;
+  CHECK_FALSE(machine.start(0));
+  CHECK(machine.state() == beatglass::TrackingState::stopped);
+}
 using namespace beatglass;
 TEST_CASE("tracking lifecycle rejects old results across silence and resume") {
  TrackingMachine m; CHECK(m.state() == TrackingState::stopped); CHECK_FALSE(m.accept({1,1}));

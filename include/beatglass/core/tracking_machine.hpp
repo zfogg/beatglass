@@ -31,7 +31,7 @@ public:
    * @return False if already active or generation space is exhausted.
    */
   bool start(std::uint64_t epoch) noexcept {
-    if (state_ != TrackingState::stopped && state_ != TrackingState::error) return false;
+    if (state_ != TrackingState::stopped && state_ != TrackingState::error || !epoch) return false;
     if (!advance()) return false;
     epoch_ = epoch; state_ = TrackingState::acquiring; return true;
   }
