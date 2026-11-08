@@ -511,6 +511,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_playbackFrameCanSynchronizeVisualizationSelection() {
+        let app = shell.createObject(null)
+        verify(app.syncVisualizationSelectionFromPlayback(22050, 44100))
+        compare(findChild(app, "visualizationSelectionStatus").text, "Selected visualization position 50%")
+        verify(!app.syncVisualizationSelectionFromPlayback(1, 0))
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")

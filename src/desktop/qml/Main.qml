@@ -238,6 +238,13 @@ ApplicationWindow {
             return false
         return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
     }
+    function syncVisualizationSelectionFromPlayback(frame, durationFrames) {
+        if (!isFinite(frame) || !isFinite(durationFrames) || durationFrames <= 0)
+            return false
+        visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, frame / durationFrames))
+        visualizationCanvas.requestPaint()
+        return true
+    }
     Connections {
         target: window.liveBridge
         function onStatusChanged() {
