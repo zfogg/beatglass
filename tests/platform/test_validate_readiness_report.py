@@ -37,6 +37,12 @@ class ReadinessReportContractTest(unittest.TestCase):
         self.assertIn("platforms must contain exactly", errors)
         self.assertIn("platform_support_status must contain exactly", errors)
 
+    def test_report_rejects_non_experimental_platform_status(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platform_support_status"][0]["status"] = "ready"
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("platform_support_status rows must remain experimental", errors)
+
     def test_report_root_must_be_object(self):
         self.assertEqual(module.validate([]), ["readiness report must be a JSON object"])
         self.assertEqual(module.validate_retained_files([], Path(".")), ["readiness report must be a JSON object"])

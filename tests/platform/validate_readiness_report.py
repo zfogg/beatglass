@@ -38,6 +38,8 @@ def validate(report: dict) -> list[str]:
     statuses = report.get("platform_support_status")
     if not isinstance(statuses, list) or len(statuses) != len(EXPECTED_PLATFORMS) or any(not isinstance(item, dict) for item in statuses) or {item.get("platform") for item in statuses} != EXPECTED_PLATFORMS:
         errors.append("platform_support_status must contain exactly Windows, macOS, and Linux rows")
+    elif any(item.get("status") != "experimental" for item in statuses):
+        errors.append("platform_support_status rows must remain experimental")
     if report.get("exit_gate_status") == "READY" and report.get("exit_gate_reason_codes"):
         errors.append("READY report cannot contain exit_gate_reason_codes")
     if report.get("exit_gate_status") == "PENDING" and not report.get("exit_gate_reason_codes"):
