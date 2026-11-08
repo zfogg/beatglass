@@ -28,8 +28,21 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
     retryable_.reset(); return {};
   }
   frames_ = 0;
+  result_.clear();
+  emit resultChanged();
   batch_.clear(); batchAccepted_ = batchRejected_ = 0; emit batchChanged();
   auto progress = op.progress;
+  auto publish = op.publish;
+  op.publish = [weak_self = weak_self_, publish](const std::string& value) {
+    if (publish) publish(value);
+    if (!weak_self) return;
+    const auto result = QString::fromUtf8(value.data(), static_cast<int>(value.size()));
+    QMetaObject::invokeMethod(weak_self, [weak_self, result] {
+      if (!weak_self) return;
+      weak_self->result_ = result;
+      emit weak_self->resultChanged();
+    }, Qt::QueuedConnection);
+  };
   op.progress = [weak_self = weak_self_, progress](auto done, auto total) {
     if (progress) progress(done, total);
     if (!weak_self) return;
