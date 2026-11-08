@@ -56,6 +56,19 @@ ApplicationWindow {
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
             ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
     }
+    function showOverlayAndHideControls() {
+        if (!window.overlayBridge || !window.overlayBridge.available) return false
+        if (!window.overlayBridge.showOverlay()) return false
+        window.hide()
+        return true
+    }
+    function hideOverlayAndRestoreControls() {
+        if (!window.overlayBridge) return
+        window.overlayBridge.hideOverlay()
+        window.show()
+        window.raise()
+        window.requestActivate()
+    }
     property var libraryCatalogBridge: typeof libraryCatalog !== "undefined" ? libraryCatalog : null
     onBrowseFolderChanged: refreshCatalog()
 
@@ -386,9 +399,9 @@ ApplicationWindow {
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
-                    Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.description: "Show the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.showOverlay() }
+                    Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.description: "Show the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.description: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
-                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.description: "Hide the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.overlayBridge.hideOverlay() }
+                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.description: "Hide the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null

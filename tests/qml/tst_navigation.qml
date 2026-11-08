@@ -51,7 +51,7 @@ TestCase {
         let unlock = findChild(app, "unlockOverlay")
         let hide = findChild(app, "hideOverlay")
         tryVerify(() => show.visible && show.enabled)
-        show.clicked(); compare(fakeOverlay.shows, 1)
+        show.clicked(); compare(fakeOverlay.shows, 1); tryCompare(app, "visible", false)
         toggle.checked = true; toggle.clicked(); verify(fakeOverlay.clickThrough); verify(unlock.enabled)
         unlock.clicked(); verify(!fakeOverlay.clickThrough); verify(!toggle.checked)
         fakeOverlay.refuseClickThrough = true
@@ -64,7 +64,7 @@ TestCase {
         compare(size.Accessible.description, "Choose the overlay window size")
         display.activated(0); compare(fakeOverlay.selectedScreen, 0)
         size.currentIndex = 2; size.activated(2); compare(fakeOverlay.requestedWidth, 430)
-        hide.clicked(); compare(fakeOverlay.hides, 1)
+        hide.clicked(); compare(fakeOverlay.hides, 1); tryCompare(app, "visible", true)
         app.destroy()
     }
     function test_destinationsAndMetadata() {
