@@ -99,7 +99,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             errors.append(f"{platform}: manifest qualification output is missing")
         elif row.get("qualification_output") != output:
             errors.append(f"{platform}: qualification output does not match report")
-        elif not any(item.get("path") == output for item in manifest_data.get("artifacts", [])):
+        elif not isinstance(manifest_data.get("artifacts"), list):
+            errors.append(f"{platform}: manifest artifacts must be an array")
+        elif not any(isinstance(item, dict) and item.get("path") == output for item in manifest_data["artifacts"]):
             errors.append(f"{platform}: qualification output is not retained as an artifact")
         elif output_path := (bundles / platform / output):
             if not output_path.resolve().is_relative_to(platform_root):
@@ -113,7 +115,14 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         if not isinstance(evidence_hashes, dict):
             errors.append(f"{platform}: scenario evidence hashes must be an object")
             evidence_hashes = {}
-        for scenario in manifest_data.get("scenarios", []):
+        scenarios = manifest_data.get("scenarios", [])
+        if not isinstance(scenarios, list):
+            errors.append(f"{platform}: manifest scenarios must be an array")
+            scenarios = []
+        for scenario in scenarios:
+            if not isinstance(scenario, dict):
+                errors.append(f"{platform}: manifest scenario entry must be an object")
+                continue
             evidence = scenario.get("evidence")
             if not evidence:
                 continue
