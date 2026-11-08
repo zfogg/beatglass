@@ -334,6 +334,9 @@ TestCase {
         let status = findChild(app, "overlayCaptureStatus")
         verify(status !== null)
         compare(status.Accessible.name, "Overlay capture status")
+        let retry = findChild(app, "overlayRetryCapture")
+        verify(retry !== null)
+        verify(!retry.visible)
         app.destroy()
     }
     function test_overlayUnavailableStateIsAccessible() {
