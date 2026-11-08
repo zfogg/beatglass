@@ -20,6 +20,11 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
         self.assertGreaterEqual(source.count('if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }'), 3)
 
+    def test_cancellation_api_documents_clear_behavior(self):
+        header = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.hpp").read_text(encoding="utf-8")
+        self.assertIn('Cancel the active job and clear stale result presentation.', header)
+        self.assertIn('Cancel active batch jobs and clear stale result/batch presentation.', header)
+
 
 if __name__ == "__main__":
     unittest.main()
