@@ -128,6 +128,36 @@ TEST_CASE("Core Audio control drops PCM when the device changes during dequeue",
   CHECK(event->status.error == SourceError::device_lost);
 }
 
+TEST_CASE("Core Audio control rejects a queued block from a prior epoch", "[coreaudio]") {
+  SourceEpochAllocator epochs;
+  auto fake = std::make_unique<FakeBackend>();
+  auto* backend = fake.get();
+  SourceAdapter source(epochs, std::move(fake));
+  auto consumer = [](const AudioBlock&) {};
+
+  const auto first = source.start("output", consumer);
+  REQUIRE(first.attempt);
+  REQUIRE(source.take_event());
+  REQUIRE(source.acknowledge_running(*first.attempt, 1));
+  REQUIRE(source.stop());
+
+  const auto second = source.start("output", consumer);
+  REQUIRE(second.attempt);
+  const auto running = source.take_event();
+  REQUIRE(running);
+  REQUIRE(running->epoch);
+  REQUIRE(source.acknowledge_running(*second.attempt, running->sequence));
+
+  backend->prepare();
+  REQUIRE(first.attempt->generation != second.attempt->generation);
+  backend->block.epoch = *running->epoch - 1;
+  CHECK_FALSE(source.pump());
+  const auto interrupted = source.take_event();
+  REQUIRE(interrupted);
+  CHECK(interrupted->state == SourceState::interrupted);
+  CHECK(interrupted->status.error == SourceError::backend_error);
+}
+
 TEST_CASE("Core Audio control fails closed on backend exceptions", "[coreaudio]") {
   SourceEpochAllocator epochs;
   auto fake = std::make_unique<FakeBackend>(); auto* backend = fake.get();
