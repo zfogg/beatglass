@@ -548,9 +548,10 @@ ApplicationWindow {
                             objectName: "playbackControls"
                             Layout.fillWidth: true
                             Accessible.name: "Playback controls"
+                            Accessible.value: window.playbackBridge ? window.playbackBridge.state : "unavailable"
                             Accessible.role: Accessible.Grouping
                             Accessible.description: "Open, configure, and control playback for the selected audio source."
-                            ToolTip.text: "Playback controls for the selected audio source"
+                            ToolTip.text: window.playbackBridge ? "Playback controls; current state: " + window.playbackBridge.state : "Playback controls are unavailable"
                             Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; ToolTip.text: "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
                             SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
                             SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
@@ -1082,9 +1083,10 @@ ApplicationWindow {
                     objectName: "overlayActions"
                     visible: window.overlayBridge !== null
                     Accessible.name: "Overlay actions"
+                    Accessible.value: window.overlayBridge && window.overlayBridge.available ? "available" : "unavailable"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Show, unlock, or hide the DJ overlay window."
-                    ToolTip.text: "Overlay window actions"
+                    ToolTip.text: window.overlayBridge && window.overlayBridge.available ? "Overlay window actions are available" : "Overlay window actions are unavailable"
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Show the DJ overlay window"; ToolTip.text: "Show the DJ overlay and hide the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
                     Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
@@ -1093,9 +1095,10 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     objectName: "overlayRoutingControls"
                     Accessible.name: "Overlay interaction and opacity controls"
+                    Accessible.value: window.overlayBridge ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" : "unavailable"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Configure pointer click-through and overlay opacity."
-                    ToolTip.text: "Overlay interaction and opacity controls"
+                    ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
@@ -1128,9 +1131,10 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     objectName: "overlayDisplayControls"
                     Accessible.name: "Overlay display and size controls"
+                    Accessible.value: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "unavailable"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Choose the overlay destination display and window size."
-                    ToolTip.text: "Overlay display and size controls"
+                    ToolTip.text: "Overlay destination display and window size; current display is announced when available"
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"
