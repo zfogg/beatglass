@@ -120,6 +120,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
                     key=lambda item: str(item.get("id", "")))
                 scenario_status_counts = dict(sorted(Counter(item["status"] for item in scenario_inventory).items()))
+                artifact_roles = {entry.get("path"): entry.get("role") for entry in data.get("artifacts", [])
+                                  if isinstance(entry, dict)}
+                missing_artifact_roles = sorted(
+                    item.get("id") for item in data.get("scenarios", [])
+                    if isinstance(item, dict) and item.get("status") != "UNRUN"
+                    and not artifact_roles.get(item.get("evidence")))
             except (OSError, json.JSONDecodeError) as exc:
                 errors = [f"{platform}: invalid manifest: {exc}"]
                 retained = 0
@@ -131,6 +137,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 missing_artifacts = []
                 mismatched_artifacts = []
                 invalid_scenarios = []
+                artifact_roles = {}
+                missing_artifact_roles = []
         else:
             retained = 0
             artifact_bytes = 0
@@ -141,6 +149,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             missing_artifacts = []
             mismatched_artifacts = []
             invalid_scenarios = []
+            artifact_roles = {}
+            missing_artifact_roles = []
             missing_scenarios = sorted(verifier.REQUIRED_SCENARIOS)
             missing_provenance = list(verifier.REQUIRED_PROVENANCE)
             errors = [f"{platform}: missing manifest: {manifest}"]
@@ -156,6 +166,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "missing_artifacts": missing_artifacts, "mismatched_artifacts": mismatched_artifacts,
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "scenario_status_counts": scenario_status_counts,
+                     "artifact_roles": artifact_roles, "missing_artifact_roles": missing_artifact_roles,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "freshness_errors": [error for error in identity_failures if "stale" in error or "future" in error or "timestamp" in error],
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
@@ -204,6 +215,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                                 for category in sorted(categories)}
     category_counts_consistent = category_platform_counts == dict(categories)
     required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
+    artifact_roles = [{"platform": row["platform"], "missing": row["missing_artifact_roles"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
     summary_consistent = (len(required) == len(rows) == len(provenance)
                           and [item["platform"] for item in required] == [row["platform"] for row in rows]
@@ -232,7 +244,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "category_platform_lists_consistent": category_platform_lists_consistent,
             "category_platform_counts": category_platform_counts,
             "category_counts_consistent": category_counts_consistent,
-            "required_scenario_summary": required, "provenance_summary": provenance,
+            "required_scenario_summary": required, "artifact_role_summary": artifact_roles, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
             "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows)}

@@ -123,6 +123,8 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertFalse(result["ready"])
             self.assertEqual(result["platforms"][0]["retained_artifacts"], 1)
             self.assertTrue(result["platforms"][0]["errors"])
+            self.assertIn("artifact_role_summary", result)
+            self.assertEqual(result["artifact_role_summary"][0]["missing"], [])
 
     def test_readiness_rejects_bad_identity_and_stale_capture(self):
         with tempfile.TemporaryDirectory() as tmp:
