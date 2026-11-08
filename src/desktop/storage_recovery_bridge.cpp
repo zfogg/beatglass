@@ -15,7 +15,12 @@ public slots:
     emit result(ok, QString::fromStdString(ok ? "Storage open" : diagnostic));
     if (ok) refresh();
   }
-  void close() { coordinator_.close_storage(); emit result(true, QStringLiteral("Storage closed")); }
+  void close() {
+    coordinator_.close_storage();
+    emit runsChanged({}, {});
+    emit analysis(QStringLiteral("Analysis idle"));
+    emit result(true, QStringLiteral("Storage closed"));
+  }
   void refresh() {
     const auto runs = coordinator_.storage().retryable_runs();
     QStringList ids;
