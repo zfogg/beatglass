@@ -101,6 +101,11 @@ int main() {
     assert(cache.invalidate(reciprocal_engine));
     assert(!cache.find(reciprocal_engine, live_result));
     assert(cache.find(reciprocal_engine_live, live_result) && live_result == "live-engine");
+    cache.begin("reciprocal-engine-republish", reciprocal_engine);
+    assert(cache.publish("reciprocal-engine-republish", reciprocal_engine, "offline-engine-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.invalidate(reciprocal_engine_live));
+    assert(!cache.find(reciprocal_engine_live, live_result));
+    assert(cache.find(reciprocal_engine, live_result) && live_result == "offline-engine-republished");
     const CacheKey reciprocal_config{"sha256:reciprocal-config", key.engine, "config-c", key.mode};
     const CacheKey reciprocal_config_live{"sha256:reciprocal-config", key.engine, "config-c", "live"};
     cache.begin("reciprocal-config", reciprocal_config);
@@ -110,6 +115,11 @@ int main() {
     assert(cache.invalidate(reciprocal_config));
     assert(!cache.find(reciprocal_config, live_result));
     assert(cache.find(reciprocal_config_live, live_result) && live_result == "live-config");
+    cache.begin("reciprocal-config-republish", reciprocal_config);
+    assert(cache.publish("reciprocal-config-republish", reciprocal_config, "offline-config-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.invalidate(reciprocal_config_live));
+    assert(!cache.find(reciprocal_config_live, live_result));
+    assert(cache.find(reciprocal_config, live_result) && live_result == "offline-config-republished");
     const CacheKey reciprocal_content{"sha256:reciprocal-content", key.engine, key.config, key.mode};
     const CacheKey reciprocal_content_live{"sha256:reciprocal-content", key.engine, key.config, "live"};
     cache.begin("reciprocal-content", reciprocal_content);
@@ -119,6 +129,11 @@ int main() {
     assert(cache.invalidate(reciprocal_content));
     assert(!cache.find(reciprocal_content, live_result));
     assert(cache.find(reciprocal_content_live, live_result) && live_result == "live-content");
+    cache.begin("reciprocal-content-republish", reciprocal_content);
+    assert(cache.publish("reciprocal-content-republish", reciprocal_content, "offline-content-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.invalidate(reciprocal_content_live));
+    assert(!cache.find(reciprocal_content_live, live_result));
+    assert(cache.find(reciprocal_content, live_result) && live_result == "offline-content-republished");
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
