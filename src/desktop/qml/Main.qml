@@ -1094,8 +1094,9 @@ ApplicationWindow {
                         ctx.fillStyle = window.themeBackgrounds[window.selectedThemeIndex]; ctx.fillRect(0, 0, width, height)
                         ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]
                         ctx.globalAlpha = 0.18; ctx.lineWidth = 1; ctx.beginPath()
-                        for (var grid = 1; grid < 4; ++grid) {
-                            var gridY = grid * height / 4
+                        const gridDivisions = window.compactHeader ? 2 : 4
+                        for (var grid = 1; grid < gridDivisions; ++grid) {
+                            var gridY = grid * height / gridDivisions
                             ctx.moveTo(0, gridY); ctx.lineTo(width, gridY)
                         }
                         ctx.stroke(); ctx.globalAlpha = 1.0
