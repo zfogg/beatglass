@@ -29,3 +29,11 @@ class ReadinessHandoffTest(unittest.TestCase):
             report = json.loads(output.read_text(encoding="utf-8"))
             self.assertTrue(report["handoff_check_errors"])
 
+    def test_documentation_checker_is_recorded_in_handoff(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "readiness.json"
+            self.assertEqual(handoff.run(bundles, output, check_docs=True), [])
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(report["documentation_check_errors"], [])
+

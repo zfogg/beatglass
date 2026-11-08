@@ -16,9 +16,11 @@ def _load(name: str):
 generator = _load("generate_readiness_report")
 validator = _load("validate_readiness_report")
 readiness = _load("check_evidence_readiness")
+handoff_docs = _load("check_qualification_handoff")
 
 
-def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168) -> list[str]:
+def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
+        check_docs: bool = False) -> list[str]:
     report = generator.build_report(bundles)
     errors = []
     if status is not None:
@@ -27,6 +29,12 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
         errors.extend(readiness_errors)
     else:
         report["handoff_check_errors"] = []
+    documentation_errors = []
+    if check_docs:
+        if handoff_docs.main() != 0:
+            documentation_errors.append("qualification handoff documentation checker failed")
+    report["documentation_check_errors"] = documentation_errors
+    errors.extend(documentation_errors)
     errors.extend(validator.validate(report))
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -39,8 +47,9 @@ def main() -> int:
     parser.add_argument("output", type=Path)
     parser.add_argument("--status", type=Path, help="status matrix to check against retained bundles")
     parser.add_argument("--max-age-hours", type=float, default=168)
+    parser.add_argument("--check-docs", action="store_true", help="run the qualification documentation/tool checker")
     args = parser.parse_args()
-    errors = run(args.bundles, args.output, args.status, args.max_age_hours)
+    errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs)
     if errors:
         print("\n".join(errors))
         return 1
