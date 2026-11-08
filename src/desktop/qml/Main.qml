@@ -1355,6 +1355,8 @@ ApplicationWindow {
                     ToolTip.text: "Current selected waveform/FFT position"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
                 }
                 Button {
                     objectName: "clearVisualizationSelection"
