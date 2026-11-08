@@ -1,4 +1,5 @@
 #include "windows_dj_bridge.hpp"
+#include "windows_endpoint_bridge.hpp"
 #include "beatglass/capture/file_reader.hpp"
 #include <QtTest>
 #include <QThread>
@@ -22,6 +23,31 @@
 class DjBridgeTest : public QObject {
   Q_OBJECT
 private slots:
+  void endpointSnapshotExposesOwnedMetadataAndValidatesSelection() {
+    beatglass::windows::EndpointBridge bridge(nullptr, [] {
+      return beatglass::windows::EndpointResult{{{"id-1", "Speakers", true}, {"id-2", "Headphones", false}}, {}};
+    });
+    bridge.refresh();
+    QCOMPARE(bridge.error(), QString());
+    QCOMPARE(bridge.endpoints().size(), 2);
+    QVERIFY(bridge.select(QStringLiteral("id-2")));
+    QCOMPARE(bridge.selectedEndpoint(), QStringLiteral("id-2"));
+    QVERIFY(!bridge.select(QStringLiteral("stale")));
+  }
+  void endpointSnapshotClearsSelectionAfterDiscoveryFailure() {
+    bool fail = false;
+    beatglass::windows::EndpointBridge bridge(nullptr, [&] {
+      return fail ? beatglass::windows::EndpointResult{{}, "enumeration failed"}
+                  : beatglass::windows::EndpointResult{{{"id-1", "Speakers", true}}, {}};
+    });
+    bridge.refresh();
+    QVERIFY(bridge.select(QStringLiteral("id-1")));
+    fail = true;
+    bridge.refresh();
+    QCOMPARE(bridge.endpoints().size(), 0);
+    QCOMPARE(bridge.selectedEndpoint(), QString());
+    QCOMPARE(bridge.error(), QStringLiteral("enumeration failed"));
+  }
   void blockedDiscoveryCannotStartAfterStop() {
     beatglass::SourceEpochAllocator epochs;
     std::mutex mutex;
