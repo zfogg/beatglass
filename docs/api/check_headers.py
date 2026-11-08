@@ -6,11 +6,11 @@ import sys
 
 def coverage(root: Path) -> tuple[list[str], list[str]]:
     """Return missing and stale index entries, including private lib headers."""
-    index = (root / "docs/api/index.rst").read_text(encoding="utf-8")
     patterns = []
-    for line in index.splitlines():
-        if line.startswith(".. cpp:autodoc:: "):
-            patterns.extend(line.split("::", 1)[1].split())
+    for index in sorted((root / "docs/api").glob("*.rst")):
+        for line in index.read_text(encoding="utf-8").splitlines():
+            if line.startswith(".. cpp:autodoc:: "):
+                patterns.extend(line.split("::", 1)[1].split())
     listed = set()
     unmatched = set()
     for pattern in patterns:
@@ -28,8 +28,9 @@ def coverage(root: Path) -> tuple[list[str], list[str]]:
 
 def duplicates(root: Path) -> list[str]:
     """Return headers indexed more than once."""
-    index = (root / "docs/api/index.rst").read_text(encoding="utf-8")
-    entries = [item for line in index.splitlines() if line.startswith(".. cpp:autodoc:: ")
+    entries = [item for page in sorted((root / "docs/api").glob("*.rst"))
+               for line in page.read_text(encoding="utf-8").splitlines()
+               if line.startswith(".. cpp:autodoc:: ")
                for item in line.split("::", 1)[1].split()]
     return sorted({item for item in entries if entries.count(item) > 1})
 
