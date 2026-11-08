@@ -10,6 +10,14 @@ QString PlaybackSessionBridge::state() const {
     default: return QStringLiteral("Stopped");
   }
 }
+void PlaybackSessionBridge::setDeviceId(int id) noexcept {
+  if (device_id_ == id) return;
+  device_id_ = id;
+#ifdef _WIN32
+  if (native_running_ && native_) { native_->stop(); native_running_ = false; native_error_ = QStringLiteral("Output device changed; restart native playback"); }
+#endif
+  emit changed();
+}
 bool PlaybackSessionBridge::open(qulonglong epoch) { const bool ok = session_.start(epoch); if (ok) emit changed(); return ok; }
 bool PlaybackSessionBridge::openSource(const QUrl& source, qulonglong epoch) {
   if (!source.isValid() || source.isEmpty()) return false;
