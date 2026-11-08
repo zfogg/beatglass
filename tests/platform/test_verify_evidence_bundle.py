@@ -143,6 +143,16 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["platforms"][0]["missing_artifacts"], ["missing.json"])
             self.assertTrue(result["platforms"][0]["invalidated"])
 
+    def test_readiness_reports_hash_mismatch_inventory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            (bundles / "windows" / "capture.txt").write_text("actual", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertEqual(result["platforms"][0]["mismatched_artifacts"], ["capture.txt"])
+
 
 if __name__ == "__main__":
     unittest.main()
