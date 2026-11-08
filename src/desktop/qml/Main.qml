@@ -3905,16 +3905,17 @@ ApplicationWindow {
                 Button {
                     objectName: "visualizationClearSelection"
                     enabled: visualizationCanvas.selectedPosition >= 0
-                    text: enabled ? "Clear selection" : "No selection"
+                    text: enabled ? (window.compactHeader ? "Clear" : "Clear selection") : "No selection"
                     Accessible.name: "Clear visualization selection, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: enabled ? "available" : "unavailable"
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled
                         ? "Clear the selected waveform or FFT position; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                         : "There is no selected waveform or FFT position to clear; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
-                    ToolTip.text: (enabled ? "Clear the selected visualization position" : "No visualization position is selected") + "; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
+                    ToolTip.text: (enabled ? "Clear the selected visualization position" : "No visualization position is selected") + "; capture: " + window.liveBridge.status + "; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     contentItem: Text { text: parent.text; color: window.themeBackgrounds[window.selectedThemeIndex]; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; opacity: parent.enabled ? 1 : 0.65 }
                     background: Rectangle { color: window.themeForegrounds[window.selectedThemeIndex]; radius: 5; opacity: parent.enabled ? 1 : 0.35 }
+                    Layout.preferredWidth: window.compactHeader ? 120 : 180
                     onClicked: window.clearVisualizationPositionAndFocus()
                 }
                 Label {

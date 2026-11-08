@@ -672,7 +672,9 @@ def main() -> int:
         "ready state": "visualizationCanvas.modeHasData ? \"ready\"",
         "waiting state": ": \"waiting\"))",
         "clear selection control": 'objectName: "visualizationClearSelection"',
-        "clear selection state": 'text: enabled ? "Clear selection" : "No selection"',
+        "clear selection state": 'text: enabled ? (window.compactHeader ? "Clear" : "Clear selection") : "No selection"',
+        "clear selection compact layout": 'Layout.preferredWidth: window.compactHeader ? 120 : 180',
+        "clear selection capture context": 'capture status is " + window.liveBridge.status',
     }
     state_missing = [name for name, marker in runtime_states.items() if marker not in qml]
     if state_missing:
