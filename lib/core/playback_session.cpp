@@ -15,7 +15,11 @@ bool PlaybackSession::replace(std::uint64_t new_epoch) noexcept {
   epoch_ = new_epoch; next_frame_ = 0; state_ = PlaybackState::playing; return true;
 }
 bool PlaybackSession::accept(std::uint64_t epoch, std::uint64_t first_frame) noexcept {
-  if (state_ != PlaybackState::playing || epoch != epoch_ || first_frame != next_frame_) return false;
-  ++next_frame_; return true;
+  return accept(epoch, first_frame, 1);
+}
+bool PlaybackSession::accept(std::uint64_t epoch, std::uint64_t first_frame,
+                             std::uint64_t frame_count) noexcept {
+  if (state_ != PlaybackState::playing || epoch != epoch_ || first_frame != next_frame_ || !frame_count) return false;
+  next_frame_ += frame_count; return true;
 }
 }

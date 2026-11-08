@@ -25,3 +25,9 @@ TEST_CASE("source replacement reacquires a paused session for the new source") {
   CHECK(session.state() == PlaybackState::playing);
   CHECK_FALSE(session.accept(9, 0)); REQUIRE(session.accept(10, 0));
 }
+TEST_CASE("playback advances by decoded block frame count") {
+  PlaybackSession session; REQUIRE(session.start(11));
+  REQUIRE(session.accept(11, 0, 512)); CHECK(session.next_frame() == 512);
+  REQUIRE(session.accept(11, 512, 256)); CHECK(session.next_frame() == 768);
+  CHECK_FALSE(session.accept(11, 768, 0));
+}
