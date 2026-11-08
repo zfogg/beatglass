@@ -19,6 +19,10 @@ if(BUILD_TESTING)
         COMMAND "${BEATGLASS_PWSH}" -NoProfile -File
           "${CMAKE_CURRENT_SOURCE_DIR}/tests/windows/verify_artifact_manifest.ps1"
           -Manifest "${CMAKE_CURRENT_SOURCE_DIR}/tests/windows/fixtures/manifest-smoke/qualification-artifacts.sha256")
+      add_test(NAME windows_qualification_script_syntax
+        COMMAND "${BEATGLASS_PWSH}" -NoProfile -File
+          "${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/qualification_script_syntax.ps1"
+          -Root "${CMAKE_CURRENT_SOURCE_DIR}")
     endif()
   endif()
   find_package(Python3 QUIET COMPONENTS Interpreter)
