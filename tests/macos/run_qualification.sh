@@ -65,8 +65,8 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   echo "Running Core Audio tap smoke for supplied UID"
   tap_log="$out_dir/tap-smoke.log"
   "$tap_binary" "$BEATGLASS_MACOS_TAP_UID" | tee "$tap_log"
-  if ! grep -Eq 'frames=[1-9][0-9]* nonzero_samples=[1-9][0-9]* .*discontinuities=[0-9]+ dropped_frames=[0-9]+ timestamp_valid=[01]' "$tap_log"; then
-    echo "Tap smoke did not report complete capture, loss, and timestamp counters" >&2
+  if ! grep -Eq 'frames=[1-9][0-9]* nonzero_samples=[1-9][0-9]* .*discontinuities=[0-9]+ dropped_frames=[0-9]+ timestamp_valid=1' "$tap_log"; then
+    echo "Tap smoke did not report complete capture, loss, and valid timestamp counters" >&2
     exit 1
   fi
   echo "Running Core Audio recovery smoke for supplied UID"

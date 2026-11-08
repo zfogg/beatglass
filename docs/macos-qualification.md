@@ -11,7 +11,7 @@ BEATGLASS_MACOS_TAP_UID='CoreAudio-output-UID' \
   tests/macos/run_qualification.sh build/macos-qualification
 ```
 
-The runner invokes both the tap and recovery smoke bundles when this variable is set; when it is absent, the log records capture as `UNRUN`. A supplied-UID run retains `tap-smoke.log` and `recovery-smoke.log` and fails unless tap output includes nonzero frames/samples, discontinuity and dropped-frame counters, and an explicit timestamp-validity field; both recovery cycles must report nonzero frames/samples, discontinuity counts, and successful stops.
+The runner invokes both the tap and recovery smoke bundles when this variable is set; when it is absent, the log records capture as `UNRUN`. A supplied-UID run retains `tap-smoke.log` and `recovery-smoke.log` and fails unless tap output includes nonzero frames/samples, discontinuity and dropped-frame counters, and `timestamp_valid=1`; both recovery cycles must report nonzero frames/samples, discontinuity counts, and successful stops.
 
 ## Build identity
 
