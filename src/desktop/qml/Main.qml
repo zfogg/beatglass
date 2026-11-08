@@ -410,7 +410,8 @@ ApplicationWindow {
                     objectName: "catalogStatus"
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
-                    Accessible.name: "Library catalog status"
+                    Accessible.name: "Library catalog status: " + text
+                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                 }
@@ -423,6 +424,7 @@ ApplicationWindow {
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
                         onClicked: window.browseFolder = files.parentFolder
                         Accessible.name: "Go to parent folder"
+                        Accessible.role: Accessible.Button
                         Accessible.description: "Go to the parent folder"
                     }
                     Label {
@@ -430,13 +432,14 @@ ApplicationWindow {
                         text: window.browseFolder.toString() || "No folder selected"
                         elide: Text.ElideMiddle; Layout.fillWidth: true
                         Accessible.name: "Current folder: " + text
+                        Accessible.value: text
                         Accessible.role: Accessible.StaticText
                     }
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
-                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.role: Accessible.Button; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -446,7 +449,9 @@ ApplicationWindow {
                 Label {
                     objectName: "catalogStatus"
                     text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : "Catalog: " + window.catalogRows.length + " matching entries"
-                    Accessible.name: text
+                    Accessible.name: "Catalog results: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
                 }
                 Frame {
                     Layout.fillWidth: true; Layout.fillHeight: true
@@ -460,6 +465,7 @@ ApplicationWindow {
                         keyNavigationEnabled: true
                         activeFocusOnTab: true
                         Accessible.name: "Folder contents"
+                        Accessible.role: Accessible.List
                         Accessible.description: "Use Up and Down to select an entry, then Enter or Space to open a folder or select an audio file."
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
                         Keys.onEnterPressed: window.activateEntry(currentIndex)
@@ -495,6 +501,7 @@ ApplicationWindow {
                                 objectName: "chooseFolderEmpty"
                                 text: "Choose folder…"
                                 Accessible.name: "Choose a folder"
+                                Accessible.role: Accessible.Button
                                 Accessible.role: Accessible.Button
                                 Accessible.description: "Choose a local folder to populate the Library."
                                 onClicked: folderPicker.open()
