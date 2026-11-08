@@ -26,6 +26,7 @@ def main() -> int:
         "playback device current selection": "Current output device: \" + currentText",
         "native playback selected format": "Start native playback at \" + playbackSampleRate.value",
         "overlay action accessible names": "Accessible.name: \"Show DJ overlay\"",
+        "playback status static role": "objectName: \"playbackState\"; Accessible.name: \"Playback state\"; Accessible.role: Accessible.StaticText",
         "overlay retry accessible name": "Accessible.name: \"Retry DJ overlay\"",
         "overlay unlock accessible name": "Accessible.name: \"Unlock DJ overlay\"",
         "click-through action accessible name": "Accessible.name: checked ? \"Disable click-through\"",

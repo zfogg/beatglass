@@ -8,6 +8,7 @@ This is the current implementation audit against `design/v1/DESIGN.md` and `desi
 - Overlay: show/hide/unlock recovery, click-through state, opacity and size controls, display enumeration, empty-display handling, retry capture/overlay actions, and monitor-dependent control disabling.
 - Visualization: waveform/FFT selection, Ctrl+1/Ctrl+2 shortcuts, pointer and keyboard position selection, Home/End seeking, clear selection, focus ring, bounded frame mapping, generation/revision status, empty/loading/error states, and stale-frame clearing on capture/playback discontinuities.
 - Playback: source/epoch-aware presentation clearing, bounded frame seek helpers, state/source/position affordances, and recovery/error presentation.
+- Playback accessibility: native state, source, and position status are exposed as static text with explicit names while controls retain state-specific action guidance.
 
 ## Explicitly provisional
 
