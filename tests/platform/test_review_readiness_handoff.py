@@ -51,6 +51,7 @@ class ReadinessReviewTest(unittest.TestCase):
         source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
         packet = review.review_packet(source)
         self.assertEqual(packet["review_packet_schema"], 1)
+        self.assertEqual(len(packet["report_sha256"]), 64)
         self.assertEqual(packet["gate_status"], "PENDING")
         self.assertTrue(packet["acceptance_errors"])
         self.assertEqual(len(packet["platforms"]), 3)

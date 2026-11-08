@@ -3,6 +3,7 @@ import argparse
 import json
 from pathlib import Path
 import importlib.util
+import hashlib
 
 consumer_spec = importlib.util.spec_from_file_location("consume_report", Path(__file__).with_name("consume_readiness_handoff.py"))
 consumer = importlib.util.module_from_spec(consumer_spec); assert consumer_spec.loader
@@ -44,7 +45,8 @@ def render(report_path: Path) -> str:
 
 def review_packet(report_path: Path) -> dict:
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    return {"review_packet_schema": 1, "gate_status": report.get("exit_gate_status"),
+    return {"review_packet_schema": 1, "report_sha256": hashlib.sha256(report_path.read_bytes()).hexdigest(),
+            "gate_status": report.get("exit_gate_status"),
             "native_qualification_required": report.get("native_qualification_required"),
             "acceptance_errors": consumer.consume(report_path),
             "platform_support_status": report.get("platform_support_status", []),

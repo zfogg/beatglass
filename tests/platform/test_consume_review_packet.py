@@ -24,6 +24,11 @@ class ReviewPacketConsumerTest(unittest.TestCase):
             path = Path(tmp) / "review.json"; path.write_text(json.dumps({"review_packet_schema": 99}), encoding="utf-8")
             self.assertTrue(consumer.consume(path))
 
+    def test_packet_without_report_hash_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "review.json"; path.write_text(json.dumps({"review_packet_schema": 1}), encoding="utf-8")
+            self.assertTrue(any("invalid report hash anchor" in error for error in consumer.consume(path)))
+
     def test_tampered_ready_packet_is_rejected(self):
         report = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
         review_spec = importlib.util.spec_from_file_location("review", Path(__file__).with_name("review_readiness_handoff.py"))
