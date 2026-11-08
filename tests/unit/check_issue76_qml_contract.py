@@ -359,6 +359,8 @@ def main() -> int:
         "playback grouping value": "Accessible.name: \"Playback controls\"\n                            Accessible.value: window.playbackBridge ? window.playbackBridge.state : \"unavailable\"",
         "overlay routing value": "Accessible.name: \"Overlay interaction and opacity controls\"\n                    Accessible.value: window.overlayBridge ?",
         "overlay display value": "Accessible.name: \"Overlay display and size controls\"\n                    Accessible.value: window.overlayBridge && window.overlayBridge.screenIndex >= 0",
+        "monitoring controls grouping": "objectName: \"monitoringControls\"\n                    Accessible.name: \"Live monitoring controls\"",
+        "visualization controls grouping": "objectName: \"visualizationModeControls\"\n                    Accessible.name: \"Visualization mode controls\"",
         "playback controls grouping": "objectName: \"playbackControls\"\n                            Layout.fillWidth: true\n                            Accessible.name: \"Playback controls\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
