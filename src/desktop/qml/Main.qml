@@ -3418,6 +3418,15 @@ ApplicationWindow {
                                 Accessible.description: "Remove every persisted retry record currently shown. Source audio files are never changed."
                                 onClicked: { discardAllRecoveryDialog.open(); window.announceVisualizationRecovery("Confirm discarding all saved recovery runs; source audio remains unchanged.") }
                             }
+                            Button {
+                                objectName: "retryPersistedRecovery"
+                                visible: typeof storageRecovery !== "undefined"
+                                enabled: visible && storageRecovery.selectedRunId !== ""
+                                text: "Retry selected run"
+                                Accessible.name: "Retry selected persisted analysis run"
+                                Accessible.description: "Request the owning analysis model to re-submit the selected run using its preserved identity."
+                                onClicked: storageRecovery.retrySelectedRun()
+                            }
                             Dialog {
                                 id: discardAllRecoveryDialog
                                 objectName: "discardAllRecoveryDialog"
