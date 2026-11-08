@@ -51,6 +51,7 @@ TestCase {
         property int shows: 0
         property int hides: 0
         property var screenNames: ["Display"]
+        property int screenIndex: -1
         property int selectedScreen: -1
         property int requestedWidth: 0
         property bool refuseClickThrough: false
@@ -59,7 +60,7 @@ TestCase {
         function hideOverlay() { hides++; clickThrough = false }
         function setClickThrough(value) { if (value && refuseClickThrough) return false; clickThrough = value; return true }
         function setOpacity(value) { opacity = value }
-        function moveToScreen(index) { selectedScreen = index; return true }
+        function moveToScreen(index) { selectedScreen = index; screenIndex = index; return true }
         function resizeOverlay(width, height) { requestedWidth = width; return true }
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
@@ -68,7 +69,7 @@ TestCase {
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
-        fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = -1; fakeOverlay.requestedWidth = 0
+        fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = -1; fakeOverlay.screenIndex = -1; fakeOverlay.requestedWidth = 0
         let app = shellWithOverlay.createObject(null)
         verify(app !== null); compare(fakeOverlay.attaches, 1)
         findChild(app, "navigation").currentIndex = 1
@@ -91,7 +92,7 @@ TestCase {
         compare(findChild(app, "overlayOpacityValue").Accessible.name, "Current overlay opacity")
         compare(findChild(app, "overlayInteractionMode").Accessible.name, "Overlay interaction mode")
         compare(findChild(app, "overlayDisplayStatus").Accessible.name, "Current overlay display")
-        display.activated(0); compare(fakeOverlay.selectedScreen, 0)
+        display.activated(0); compare(fakeOverlay.selectedScreen, 0); compare(display.currentIndex, 0)
         size.currentIndex = 2; size.activated(2); compare(fakeOverlay.requestedWidth, 430)
         hide.clicked(); compare(fakeOverlay.hides, 1); tryCompare(app, "visible", true)
         app.destroy()

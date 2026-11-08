@@ -654,6 +654,7 @@ ApplicationWindow {
                     Accessible.name: "Overlay display"; Accessible.description: "Choose the display where the overlay is shown"
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
+                        currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
                         onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
                         Layout.fillWidth: true
                     }
