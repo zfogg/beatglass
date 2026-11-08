@@ -94,6 +94,14 @@ try {
   )
   $evidence | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $evidencePath -Encoding utf8
   "Native playback evidence template: $evidencePath"
+  $overlayEvidencePath = Join-Path $OutputDirectory "native-overlay-evidence.json"
+  @(
+    @{ case = "show-hide-recovery"; status = "UNRUN"; log = ""; screenshot = "" },
+    @{ case = "click-through-unlock"; status = "UNRUN"; log = ""; screenshot = "" },
+    @{ case = "display-change-clamp"; status = "UNRUN"; log = ""; screenshot = "" },
+    @{ case = "dpi-fullscreen"; status = "UNRUN"; log = ""; screenshot = "" }
+  ) | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $overlayEvidencePath -Encoding utf8
+  "Native overlay evidence template: $overlayEvidencePath"
   "UNRUN: native WASAPI routing, endpoint removal/recovery, overlay, DPI, and interactive UI cases require a logged-in Windows session."
 }
 finally {
