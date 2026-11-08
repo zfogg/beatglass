@@ -19,3 +19,12 @@ class ReadinessConsumerTest(unittest.TestCase):
             report = Path(tmp) / "report.json"
             report.write_text(json.dumps({"exit_gate_status": "READY"}), encoding="utf-8")
             self.assertTrue(consumer.consume(report))
+
+    def test_ready_report_with_ingestion_error_is_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        report = json.loads(source.read_text(encoding="utf-8"))
+        report["exit_gate_status"] = "READY"
+        report["ingestion_errors"] = ["hash mismatch: app.bin"]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "report.json"; path.write_text(json.dumps(report), encoding="utf-8")
+            self.assertTrue(any("contains ingestion_errors" in error for error in consumer.consume(path)))
