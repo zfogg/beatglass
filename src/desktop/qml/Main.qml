@@ -387,7 +387,7 @@ ApplicationWindow {
                                               + (checked ? "selected" : "not selected")
                         Accessible.role: Accessible.RadioButton
                         Accessible.value: checked ? "selected" : "not selected"
-                        ToolTip.text: "Select " + window.themeNames[index] + " theme"
+                        ToolTip.text: checked ? window.themeNames[index] + " theme is selected" : "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
                             objectName: "themePreviewSurface" + index
                             radius: 3
