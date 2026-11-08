@@ -149,6 +149,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             artifact_paths = [item.get("path") for item in manifest_data["artifacts"] if isinstance(item, dict)]
             if len(artifact_paths) != len(set(artifact_paths)):
                 errors.append(f"{platform}: duplicate manifest artifact path")
+            for artifact in manifest_data["artifacts"]:
+                if not isinstance(artifact, dict) or not isinstance(artifact.get("role"), str) or not artifact["role"].strip():
+                    errors.append(f"{platform}: manifest artifact role is missing")
             if not any(path == output for path in artifact_paths):
                 errors.append(f"{platform}: qualification output is not retained as an artifact")
         if isinstance(output, str) and output.strip() and row.get("qualification_output") == output:

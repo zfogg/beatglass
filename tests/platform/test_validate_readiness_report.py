@@ -242,6 +242,19 @@ class ReadinessReportContractTest(unittest.TestCase):
             self.assertIn("manifest commit must be a 40-character hexadecimal SHA-1", errors)
             self.assertIn("manifest captured_at must be ISO-8601", errors)
 
+    def test_manifest_artifacts_require_roles(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["artifacts"][0].pop("role")
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("manifest artifact role is missing", errors)
+
     def test_report_inventory_must_match_manifest(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as directory:
