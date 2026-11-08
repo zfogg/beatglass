@@ -4,6 +4,7 @@
 namespace beatglass {
 void VisualizationPresentation::clear() noexcept {
   frame_.reset();
+  accepted_revision_ = 0;
   gate_.clear();
 }
 
@@ -20,6 +21,7 @@ bool VisualizationPresentation::accept(std::uint64_t generation,
     if (!std::isfinite(value) || value < 0.0f) return false;
   if (!gate_.accept(generation, revision)) return false;
   frame_ = frame;
+  accepted_revision_ = revision;
   return true;
 }
 }

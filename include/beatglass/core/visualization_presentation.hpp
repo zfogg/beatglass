@@ -25,9 +25,12 @@ public:
               const VisualizationFrame& frame) noexcept;
   /** Return the currently painted frame, if any. */
   const std::optional<VisualizationFrame>& current() const noexcept { return frame_; }
+  /** Revision of the currently painted frame, or zero after clear. */
+  std::uint64_t acceptedRevision() const noexcept { return accepted_revision_; }
 
 private:
   VisualizationPublicationGate gate_;
   std::optional<VisualizationFrame> frame_;
+  std::uint64_t accepted_revision_{};
 };
 }
