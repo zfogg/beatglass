@@ -49,6 +49,7 @@ ApplicationWindow {
     property bool persistedRecoverySelectionActivated: false
     property string activeAnalysisOutcomeAnnouncementKey: ""
     property string activeWorkerOutcomeAnnouncementKey: ""
+    property bool storageReopenPending: false
     property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
@@ -141,13 +142,35 @@ ApplicationWindow {
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
+            if (storageRecovery.status === "Opening storage") {
+                window.storageReopenPending = true
+                window.activeWorkerOutcomeAnnouncementKey = ""
+                window.persistedRecoveryOutcomeAnnouncementKey = ""
+                window.persistedRecoverySelectionActivated = false
+                return
+            }
             if (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0) {
+                window.storageReopenPending = false
                 window.activeWorkerOutcomeAnnouncementKey = ""
                 window.persistedRecoveryOutcomeAnnouncementKey = ""
                 window.persistedRecoverySelectionActivated = false
                 if (typeof reopenStorage !== "undefined")
                     reopenStorage.forceActiveFocus()
                 window.announceVisualizationRecovery("Storage is unavailable; reopen storage before retrying analysis recovery.")
+            }
+        }
+        function onRetryableRunsChanged() {
+            if (!window.storageReopenPending || storageRecovery.status !== "Storage open")
+                return
+            window.storageReopenPending = false
+            window.persistedRecoverySelectionActivated = false
+            if (storageRecovery.retryableRunIds.length > 0) {
+                window.announceVisualizationRecovery("Storage reopened; " + storageRecovery.retryableRunIds.length + " persisted recovery runs are available.")
+                if (typeof persistedRecoveryRuns !== "undefined")
+                    persistedRecoveryRuns.forceActiveFocus()
+            } else {
+                window.announceVisualizationRecovery("Storage reopened; no persisted recovery runs are available.")
+                libraryTab.forceActiveFocus()
             }
         }
         function onSelectedRunIdChanged() {
