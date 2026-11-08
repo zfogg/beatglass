@@ -237,6 +237,11 @@
   "ready_platform_count": 3,
   "retained_artifact_count": 3,
   "retained_artifact_bytes": 78,
+  "retained_artifacts_by_platform": {
+    "windows": 1,
+    "macos": 1,
+    "linux": 1
+  },
   "retained_bytes_consistent": true,
   "inventory_bytes_consistent": true,
   "inventory_count_consistent": true,
