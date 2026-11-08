@@ -1463,7 +1463,9 @@ ApplicationWindow {
                             Dialog {
                                 id: discardRecoveryDialog
                                 objectName: "discardRecoveryDialog"
-                                title: "Discard saved analysis run?"
+                                title: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                    ? "Discard saved analysis run " + storageRecovery.selectedRunId + "?"
+                                    : "Discard saved analysis run?"
                                 modal: true
                                 standardButtons: Dialog.Ok | Dialog.Cancel
                                 Accessible.name: "Discard saved analysis run confirmation"
@@ -1475,6 +1477,7 @@ ApplicationWindow {
                                     Accessible.description: "The selected retry record will be removed; source audio remains unchanged."
                                     Accessible.role: Accessible.StaticText
                                 }
+                                onOpened: window.announceVisualizationRecovery("Confirm discard for persisted recovery run " + storageRecovery.selectedRunId + ". Source audio will remain unchanged.")
                                 onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discarded; selected retry state cleared."); discardPersistedRecoveryButton.forceActiveFocus() }
                                 onRejected: { window.announceVisualizationRecovery("Persisted recovery discard canceled; selected run was kept."); discardPersistedRecoveryButton.forceActiveFocus() }
                             }
