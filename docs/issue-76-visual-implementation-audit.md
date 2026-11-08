@@ -487,3 +487,5 @@ The selected-position cursor similarly reduces from two to one pixel in compact 
 The canvas now also has explicit compact/full minimum heights, preserving a usable pointer and keyboard interaction target when the surrounding screen is constrained.
 
 The visualization status group explicitly permits zero minimum width, allowing its evidence labels to wrap instead of forcing the surrounding screen wider under responsive pressure.
+
+The interaction hint reserves a taller compact-layout line box for wrapped guidance, preventing keyboard/pointer instructions from colliding with adjacent recovery controls.
