@@ -22,6 +22,7 @@ def signoff(decision_path: Path, reviewer: str, output: Path) -> list[str]:
         "reviewer": reviewer.strip(),
         "signed_at": datetime.now(timezone.utc).isoformat(),
         "report_sha256": decision.get("report_sha256"),
+        "review_packet_sha256": decision.get("review_packet_sha256"),
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(signoff_record, indent=2, sort_keys=True) + "\n", encoding="utf-8")

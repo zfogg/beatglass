@@ -39,6 +39,8 @@ def verify(root: Path, signoff_path: Path | None = None) -> list[str]:
                 errors.append("release signoff reviewer is required")
             if signoff.get("report_sha256") != manifest.get("report_sha256"):
                 errors.append("release signoff report hash does not match manifest")
+            if signoff.get("review_packet_sha256") != manifest.get("review_packet_sha256"):
+                errors.append("release signoff packet hash does not match manifest")
     return errors
 
 
