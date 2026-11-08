@@ -220,6 +220,7 @@ TestCase {
         verify(findChild(app, "playbackDevice") !== null)
         compare(findChild(app, "playbackDevice").Accessible.name, "Playback output device")
         compare(findChild(app, "refreshPlaybackDevices").Accessible.description, "Refresh native playback output devices")
+        compare(findChild(app, "refreshPlaybackDevices").ToolTip.text, "Refresh the available playback output devices")
     }
     function test_nativePlaybackStartControlsArePresent() {
         verify(findChild(app, "startNativePlayback") !== null)
