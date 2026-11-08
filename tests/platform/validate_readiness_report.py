@@ -180,6 +180,14 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         if report_roles and report_roles != manifest_roles:
             errors.append(f"{platform}: report artifact roles do not match manifest")
         manifest_role_by_path = manifest_roles
+        for artifact in manifest_data.get("artifacts", []):
+            if not isinstance(artifact, dict) or not isinstance(artifact.get("path"), str):
+                continue
+            artifact_path = bundles / platform / artifact["path"]
+            if artifact_path.resolve().is_relative_to(platform_root) and artifact_path.is_file():
+                actual_artifact_hash = hashlib.sha256(artifact_path.read_bytes()).hexdigest()
+                if actual_artifact_hash != str(artifact.get("sha256", "")).lower():
+                    errors.append(f"{platform}: manifest artifact hash mismatch: {artifact['path']}")
         evidence_hashes = row.get("scenario_evidence_sha256", {})
         if not isinstance(evidence_hashes, dict):
             errors.append(f"{platform}: scenario evidence hashes must be an object")
