@@ -16,6 +16,7 @@ ApplicationWindow {
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property url browseFolder: ""
+    property var catalogRows: []
     property bool sortDescending: false
     property string selectedName: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
@@ -39,7 +40,14 @@ ApplicationWindow {
     }
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
+        refreshCatalog()
     }
+    function refreshCatalog() {
+        window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
+            ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
+    }
+    property var libraryCatalogBridge: typeof libraryCatalog !== "undefined" ? libraryCatalog : null
+    onBrowseFolderChanged: refreshCatalog()
 
     Window {
         id: djOverlay
@@ -215,13 +223,18 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
                     Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true
                     Label { text: "Name"; font.bold: true; Layout.fillWidth: true }
                     Label { text: "Type"; font.bold: true; Layout.preferredWidth: 100 }
+                }
+                Label {
+                    objectName: "catalogStatus"
+                    text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : "Catalog: " + window.catalogRows.length + " matching entries"
+                    Accessible.name: text
                 }
                 Frame {
                     Layout.fillWidth: true; Layout.fillHeight: true
