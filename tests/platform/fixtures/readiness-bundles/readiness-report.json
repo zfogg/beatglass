@@ -242,6 +242,11 @@
     "macos": 1,
     "linux": 1
   },
+  "retained_bytes_by_platform": {
+    "windows": 26,
+    "macos": 26,
+    "linux": 26
+  },
   "retained_bytes_consistent": true,
   "inventory_bytes_consistent": true,
   "inventory_count_consistent": true,

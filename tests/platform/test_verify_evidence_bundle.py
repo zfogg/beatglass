@@ -238,6 +238,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["retained_artifact_count"], 0)
             self.assertEqual(result["retained_artifact_bytes"], 0)
             self.assertEqual(result["retained_artifacts_by_platform"], {"windows": 0})
+            self.assertEqual(result["retained_bytes_by_platform"], {"windows": 0})
             self.assertTrue(result["retained_bytes_consistent"])
             self.assertTrue(result["inventory_bytes_consistent"])
             self.assertTrue(result["inventory_count_consistent"])
