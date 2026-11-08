@@ -397,6 +397,7 @@ def main() -> int:
         "theme preview focus follows navigation": "themePreviews.children[nextIndex].forceActiveFocus()",
         "theme preview home focus": "themePreviews.children[0].forceActiveFocus()",
         "theme preview end focus": "themePreviews.children[lastIndex].forceActiveFocus()",
+        "theme preview escape focus recovery": "Keys.onEscapePressed: {\n                            themeSelector.forceActiveFocus()",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }

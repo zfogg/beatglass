@@ -444,6 +444,10 @@ ApplicationWindow {
                             themePreviews.children[lastIndex].forceActiveFocus()
                             event.accepted = true
                         }
+                        Keys.onEscapePressed: {
+                            themeSelector.forceActiveFocus()
+                            event.accepted = true
+                        }
                         onClicked: {
                             window.selectedThemeIndex = index
                             window.selectedTheme = window.themeNames[index]
