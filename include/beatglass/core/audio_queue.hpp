@@ -53,7 +53,9 @@ public:
     return true;
   }
   // Copies into consumer-owned storage; no slot pointer escapes.
-/** Copy the next block into consumer-owned storage; return false if empty. */
+/** Copy the next block into consumer-owned storage; return false if empty.
+ * The destination is fully overwritten only on success; an empty queue leaves
+ * the caller's output object unchanged. */
   bool pop(Block& out) noexcept {
     const auto read = read_.load(std::memory_order_relaxed);
     if (read == write_.load(std::memory_order_acquire)) return false;
