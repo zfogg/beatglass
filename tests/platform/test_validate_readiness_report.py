@@ -105,3 +105,13 @@ class ReadinessReportContractTest(unittest.TestCase):
             report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("scenario evidence escapes retained bundle", errors)
+
+    def test_invalid_manifest_json_is_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            (root / "windows" / "manifest.json").write_text("{not-json", encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("retained manifest is invalid JSON", errors)
