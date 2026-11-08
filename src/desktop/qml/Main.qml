@@ -127,7 +127,21 @@ ApplicationWindow {
     }
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
+        window.restoreOverlayDisplaySelectionFromBridge()
         refreshCatalog()
+    }
+    function restoreOverlayDisplaySelectionFromBridge() {
+        if (!window.overlayBridge)
+            return false
+        if (window.overlayBridge.displayName !== "")
+            window.overlayPreferredDisplayName = window.overlayBridge.displayName
+        if (window.overlayBridge.screenIndex >= 0)
+            window.overlayPreferredScreenIndex = window.overlayBridge.screenIndex
+        const savedIndex = window.overlayPreferredDisplayName !== ""
+            ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName)
+            : window.overlayPreferredScreenIndex
+        window.overlayDisplaySelectionRequired = window.overlayBridge.screenNames.length > 0 && savedIndex < 0
+        return savedIndex >= 0
     }
     function refreshCatalog() {
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
