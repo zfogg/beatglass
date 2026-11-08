@@ -183,7 +183,7 @@ if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_lo
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
 } > "$manifest"
-if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest" || [[ ! -s "$signing_log" || ! -s "$tap_signing_log" || ! -s "$recovery_signing_log" ]]; then
+if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest" || ! grep -q '^desktop_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^tap_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^recovery_signing=\(verified\|unverified\)$' "$manifest" || [[ ! -s "$signing_log" || ! -s "$tap_signing_log" || ! -s "$recovery_signing_log" ]]; then
   echo "Qualification manifest is missing or empty" >&2
   exit 1
 fi
