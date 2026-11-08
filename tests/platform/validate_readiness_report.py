@@ -110,7 +110,11 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             if not evidence:
                 continue
             path = bundles / platform / str(evidence)
-            if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() != evidence_hashes.get(str(scenario.get("id"))):
+            scenario_id = str(scenario.get("id"))
+            if not path.is_file():
+                errors.append(f"{platform}: retained scenario evidence is missing: {evidence}")
+                continue
+            if hashlib.sha256(path.read_bytes()).hexdigest() != evidence_hashes.get(scenario_id):
                 errors.append(f"{platform}: scenario evidence hash does not match report: {scenario.get('id')}")
         if str(manifest_data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match report row")
