@@ -98,6 +98,8 @@ TestCase {
         let app = shell.createObject(null)
         verify(findChild(app, "seekBackPlayback") !== null)
         verify(findChild(app, "seekForwardPlayback") !== null)
+        compare(findChild(app, "playbackState").Accessible.name, "Playback state")
+        compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
         compare(findChild(app, "openPlayback").Accessible.description, "Open the selected audio source for playback")
         compare(findChild(app, "seekForwardPlayback").Accessible.description, "Seek playback forward five seconds")
         app.destroy()
