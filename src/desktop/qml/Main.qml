@@ -203,7 +203,7 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
                 Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true }
                 Label {
-                    text: "Browse local folders. Indexing, analysis, playback and saved results are not available yet."
+                    text: window.browseFolder ? (files.count + " catalog entries. Select an audio file for metadata.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 RowLayout {
@@ -291,7 +291,7 @@ ApplicationWindow {
                             Accessible.description: text
                         }
                         Label {
-                            text: "Analysis details and playback are not available yet."
+                            text: "Metadata inspection is available for the selected file. Playback is not enabled in this build."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status"
                             Accessible.description: text
@@ -305,7 +305,7 @@ ApplicationWindow {
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
-                Label { text: "Live output monitoring is not available yet."; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Label { text: "Capture, live estimates and the overlay are still in development."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 Label {
                     objectName: "djStatus"; text: "Status: " + window.liveBridge.status
