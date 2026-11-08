@@ -303,6 +303,7 @@ ApplicationWindow {
                             Button { text: "+5 s"; objectName: "seekForwardPlayback"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * 44100, window.playbackBridge.epoch + 1) }
                             Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState" }
                             Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; elide: Text.ElideMiddle; Layout.fillWidth: true }
+                            Label { text: window.playbackBridge ? "Position: frame " + window.playbackBridge.currentFrame + " · epoch " + window.playbackBridge.epoch : "Position unavailable"; objectName: "playbackPosition"; Accessible.name: text }
                             Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition" }
                         }
                     }
