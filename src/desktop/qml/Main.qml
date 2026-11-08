@@ -981,6 +981,8 @@ ApplicationWindow {
                     }
                     Keys.onHomePressed: { selectedPosition = 0; requestPaint() }
                     Keys.onEndPressed: { selectedPosition = 1; requestPaint() }
+                    Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint() }
+                    Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint() }
                     Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
@@ -993,9 +995,9 @@ ApplicationWindow {
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
                         : "Bounded frequency-domain FFT magnitudes from the current output capture.")
-                        + " Use Left/Right/Home/End to navigate and Escape to clear. "
+                        + " Use Left/Right for fine movement, Page Up/Page Down for larger movement, Home/End for boundaries, and Escape to clear. "
                         + (visualizationCanvas.selectedPosition < 0 ? "No position selected." : "Selected position " + Math.round(visualizationCanvas.selectedPosition * 100) + " percent.")
-                    ToolTip.text: "Click to select a position; use Left/Right/Home/End to navigate or Escape to clear"
+                    ToolTip.text: "Click to select a position; use Left/Right/Page Up/Page Down/Home/End to navigate or Escape to clear"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
