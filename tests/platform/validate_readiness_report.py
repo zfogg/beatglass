@@ -102,6 +102,12 @@ def validate(report: dict) -> list[str]:
                 for scenario, digest in evidence_hashes.items():
                     if not _valid_digest(digest):
                         errors.append(f"{item.get('platform')}: invalid evidence hash for {scenario}")
+                inventory_evidence_ids = {
+                    str(entry.get("id")) for entry in item.get("scenario_inventory", [])
+                    if isinstance(entry, dict) and entry.get("evidence")
+                }
+                if set(evidence_hashes) != inventory_evidence_ids:
+                    errors.append(f"{item.get('platform')}: scenario evidence hashes do not match inventory")
             inventory = item.get("artifact_inventory")
             if not isinstance(inventory, list) or not inventory:
                 errors.append(f"{item.get('platform')}: missing artifact inventory")

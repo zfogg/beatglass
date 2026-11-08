@@ -98,6 +98,12 @@ class ReadinessReportContractTest(unittest.TestCase):
         errors = chr(10).join(module.validate(report))
         self.assertIn("scenario inventory contains invalid status", errors)
 
+    def test_report_scenario_hashes_must_match_inventory(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0]["scenario_evidence_sha256"]["unexpected"] = "0" * 64
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("scenario evidence hashes do not match inventory", errors)
+
     def test_report_rejects_non_hex_digests(self):
         report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
         report["platforms"][0]["manifest_sha256"] = "z" * 64
