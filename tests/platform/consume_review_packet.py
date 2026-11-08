@@ -4,13 +4,14 @@ import json
 from pathlib import Path
 import importlib.util
 import re
+import hashlib
 
 spec = importlib.util.spec_from_file_location("review", Path(__file__).with_name("review_readiness_handoff.py"))
 review = importlib.util.module_from_spec(spec); assert spec.loader
 spec.loader.exec_module(review)
 
 
-def consume(path: Path) -> list[str]:
+def consume(path: Path, report_path: Path | None = None) -> list[str]:
     try:
         packet = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
@@ -18,6 +19,13 @@ def consume(path: Path) -> list[str]:
     errors = review.validate_packet(packet)
     if not isinstance(packet, dict) or not re.fullmatch(r"[0-9a-fA-F]{64}", packet.get("report_sha256", "")):
         errors.append("review packet has invalid report hash anchor")
+    if report_path is not None:
+        try:
+            actual = hashlib.sha256(report_path.read_bytes()).hexdigest()
+            if actual != packet.get("report_sha256"):
+                errors.append("review packet source report hash mismatch")
+        except OSError as error:
+            errors.append(f"review packet source report unavailable: {error}")
     if not errors and packet.get("acceptance_errors"):
         errors.append("review packet contains acceptance errors")
     if packet.get("gate_status") == "READY" and packet.get("native_qualification_required") is True:
@@ -37,7 +45,8 @@ def consume(path: Path) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("packet", type=Path)
-    args = parser.parse_args(); errors = consume(args.packet)
+    parser.add_argument("--report", type=Path)
+    args = parser.parse_args(); errors = consume(args.packet, args.report)
     if errors: print("\n".join(errors)); return 1
     print("review packet accepted"); return 0
 

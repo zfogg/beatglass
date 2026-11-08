@@ -255,6 +255,8 @@ Machine review packets use `review_packet_schema: 1`; consumers should reject un
 
 Each packet also carries a SHA-256 hash of its source report; packet consumers reject missing or malformed hash anchors so review artifacts remain traceable to the exact report under review.
 
+For retention verification, pass `--report <report.json>` to the packet consumer; it recomputes the source hash and rejects packets detached from the retained report.
+
 The machine consumer is `python tests/platform/consume_review_packet.py <review.json>`. It rejects unsupported packet versions, recorded acceptance errors, and non-`READY` gate state; native qualification remains pending until the packet is backed by reviewed hardware evidence.
 
 The packet consumer independently rechecks native-required state, experimental support rows, and scenario statuses, so clearing `acceptance_errors` in a tampered packet cannot bypass release acceptance.
