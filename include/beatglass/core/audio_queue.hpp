@@ -33,8 +33,9 @@ public:
     const auto write = write_.load(std::memory_order_relaxed);
     const auto next = (write + 1) % Slots;
     if (input.samples.empty() || !input.epoch || !input.format.channels || !input.format.sample_rate || input.samples.size() % input.format.channels ||
-        input.samples.size() > MaxSamples || next == read_.load(std::memory_order_acquire)) {
-      record_dropped(frames);
+        input.samples.size() > MaxSamples || frames > std::numeric_limits<std::uint64_t>::max() - input.first_frame ||
+        next == read_.load(std::memory_order_acquire)) {
+      dropped_.fetch_add(frames, std::memory_order_relaxed);
       discontinuity_ = true;
       return false;
     }
@@ -56,19 +57,9 @@ public:
     read_.store((read + 1) % Slots, std::memory_order_release);
     return true;
   }
-/** Return the cumulative number of complete frames counted in rejected blocks.
- * Saturates at the maximum representable count rather than wrapping. */
+/** Return the cumulative number of complete frames counted in rejected blocks. */
   std::uint64_t dropped_frames() const noexcept { return dropped_.load(std::memory_order_relaxed); }
 private:
-  void record_dropped(std::uint64_t frames) noexcept {
-    auto current = dropped_.load(std::memory_order_relaxed);
-    for (;;) {
-      const auto next = frames > std::numeric_limits<std::uint64_t>::max() - current
-          ? std::numeric_limits<std::uint64_t>::max() : current + frames;
-      if (dropped_.compare_exchange_weak(current, next, std::memory_order_relaxed,
-                                          std::memory_order_relaxed)) return;
-    }
-  }
   std::array<Block, Slots> slots_{};
   std::atomic<std::size_t> read_{0}, write_{0};
   std::atomic<std::uint64_t> dropped_{0};
