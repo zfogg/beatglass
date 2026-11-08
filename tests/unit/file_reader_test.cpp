@@ -111,3 +111,8 @@ TEST_CASE("path reader accepts externally allocated epochs without moving on rej
  const auto unchanged=reader.read(samples); REQUIRE(unchanged.status==FileReadStatus::data); CHECK(unchanged.block.first_frame==1); CHECK(unchanged.block.epoch==7);
  reader.seek(0,42); const auto changed=reader.read(samples); REQUIRE(changed.status==FileReadStatus::data); CHECK(changed.block.epoch==42); CHECK(changed.block.first_frame==0);
 }
+TEST_CASE("path reader reports source metadata changes") {
+ WaveFixture fixture; FileReader reader(fixture.path, 11); CHECK_FALSE(reader.source_changed());
+ { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out << 'x'; }
+ CHECK(reader.source_changed());
+}
