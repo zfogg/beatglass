@@ -664,6 +664,8 @@ Overlay geometry and action groups now expose recovery-pending state through acc
 
 Failed overlay show and visual-restore transitions now share a production fallback helper that shows, raises, and activates the control window, with an explicit tray/taskbar fallback announcement. The native overlay remains hidden until restoration succeeds, so users always have a discoverable recovery surface.
 
+Explicit hide/unhide now tracks user intent separately from monitor-loss recovery: hiding preserves native display/geometry/size/opacity settings and reports “hidden by user,” while a successful restore clears that transient marker. Quit and relaunch reset the marker so stale visibility intent cannot leak between sessions.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.

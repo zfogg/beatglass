@@ -27,6 +27,7 @@ ApplicationWindow {
     property bool overlayDisplaySelectionRequired: false
     property bool overlayDisplayRecoveryPending: false
     property bool overlayWasVisibleBeforeAvailabilityLoss: false
+    property bool overlayHiddenByUser: false
     property int overlayPreferredScreenIndex: -1
     property string overlayPreferredDisplayName: ""
     property int overlayPreferredSizeIndex: 1
@@ -332,6 +333,7 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(restoredGeometry && restoredGeometry.width > 0
             ? "DJ overlay relaunched at its persisted position and size."
             : "DJ overlay shown; output monitoring remains bound to the selected display.")
+        window.overlayHiddenByUser = false
         window.hide()
         return true
     }
@@ -441,6 +443,7 @@ ApplicationWindow {
         if (!window.overlayBridge) return
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
+        window.overlayHiddenByUser = true
         window.overlayBridge.hideOverlay()
         window.announceCaptureRecoveryState("DJ overlay hidden; output monitoring remains available in the control window.")
         window.show()
@@ -450,6 +453,7 @@ ApplicationWindow {
     function quitApplication() {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
+        window.overlayHiddenByUser = false
         if (window.overlayBridge)
             window.overlayBridge.hideOverlay()
         window.announceCaptureRecoveryState("Beatglass is quitting; overlay hidden and persisted settings retained.")
@@ -2635,6 +2639,7 @@ ApplicationWindow {
                         + (window.overlayBridge && window.overlayBridge.displayName !== "" ? window.overlayBridge.displayName : "display unavailable")
                         + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex]
                         + " · " + (window.overlayBridge ? Math.round(window.overlayBridge.opacity * 100) : 90) + "% opacity"
+                        + (window.overlayHiddenByUser ? " · hidden by user" : "")
                         + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
                     Accessible.name: "Overlay settings summary"
                     Accessible.value: text
