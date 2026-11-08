@@ -1587,6 +1587,16 @@ ApplicationWindow {
                                     ? "Retry persisted run " + storageRecovery.selectedRunId + " when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
                                     : "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
                             }
+                            Button {
+                                objectName: "discardAllPersistedRecovery"
+                                activeFocusOnTab: true
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.discardRuns !== undefined
+                                enabled: visible && storageRecovery.retryableRunIds.length > 0
+                                text: "Discard all saved runs"
+                                Accessible.name: "Discard all saved retryable analysis runs"
+                                Accessible.description: "Remove every persisted retry record currently shown. Source audio files are never changed."
+                                onClicked: { storageRecovery.discardRuns(storageRecovery.retryableRunIds); window.announceVisualizationRecovery("All saved recovery runs discarded."); forceActiveFocus() }
+                            }
                             Label { objectName: "selectedPersistedRecoveryResetStatus"; visible: typeof storageRecovery !== "undefined" && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== ""; text: visible ? ("Selected recovery: " + storageRecovery.resetStatus) : ""; Accessible.name: "Selected persisted recovery status"; Accessible.description: visible ? text : "No selected persisted recovery reset has been performed."; Accessible.role: Accessible.Status; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                             Dialog {
                                 id: discardRecoveryDialog
