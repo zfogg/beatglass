@@ -1223,7 +1223,6 @@ ApplicationWindow {
                             enabled: true
                             Accessible.name: "Output device"
                             Accessible.value: currentText
-                            Accessible.value: currentText
                             Accessible.role: Accessible.ComboBox
                             Accessible.description: "Current output device: " + currentText + ". Monitoring follows the operating system default output device."
                             ToolTip.text: "Current system output device used for monitoring"

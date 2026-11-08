@@ -296,6 +296,8 @@ Reset appearance now includes the current theme and motion mode in its accessibl
 
 Each theme preview swatch now exposes an explicit selected/not-selected accessible value in addition to its radio-button description, making palette state unambiguous to assistive technology.
 
+Duplicate catalog-status and output-device value declarations were consolidated so each surface has one authoritative accessible/tooltip value, avoiding conflicting announcements.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
