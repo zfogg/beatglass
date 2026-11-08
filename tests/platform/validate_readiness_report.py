@@ -9,6 +9,8 @@ EXPECTED_PLATFORMS = {"windows", "macos", "linux"}
 
 
 def validate(report: dict) -> list[str]:
+    if not isinstance(report, dict):
+        return ["readiness report must be a JSON object"]
     errors = []
     if report.get("readiness_report_schema") != 1:
         errors.append("unsupported readiness_report_schema")
