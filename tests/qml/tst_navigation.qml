@@ -18,8 +18,10 @@ TestCase {
         property string state: "Stopped"
         property url source: ""
         property int epoch: 1
+        property int currentFrame: 0
         property int opens: 0
         function openSource(url, nextEpoch) { source = url; epoch = nextEpoch; state = "Playing"; opens++; return true }
+        function seek(frame, nextEpoch) { currentFrame = frame; epoch = nextEpoch; return true }
     }
     QtObject {
         id: fakeThemePreferences
@@ -115,6 +117,19 @@ TestCase {
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
         compare(findChild(app, "openPlayback").Accessible.description, "Open the selected audio source for playback")
         compare(findChild(app, "seekForwardPlayback").Accessible.description, "Seek playback forward five seconds")
+        compare(findChild(app, "seekFrame").Accessible.name, "Seek target frame")
+        compare(findChild(app, "seekToFrame").Accessible.description, "Seek playback to the entered audio frame")
+        app.destroy()
+    }
+
+    function test_frameSeekUsesPlaybackBridge() {
+        fakePlayback.state = "Playing"; fakePlayback.currentFrame = 0; fakePlayback.epoch = 1
+        let app = shellWithPlayback.createObject(null)
+        let frame = findChild(app, "seekFrame")
+        frame.value = 12345
+        findChild(app, "seekToFrame").clicked()
+        compare(fakePlayback.currentFrame, 12345)
+        compare(fakePlayback.epoch, 2)
         app.destroy()
     }
 
