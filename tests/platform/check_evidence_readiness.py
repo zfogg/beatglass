@@ -72,6 +72,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 if len(scenario_ids) != len(set(scenario_ids)):
                     errors.append(f"{platform}: duplicate scenario id in manifest")
                 retained = len(data.get("artifacts", []))
+                declared_paths = {entry.get("path") for entry in data.get("artifacts", []) if isinstance(entry, dict)}
+                actual_files = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*") if path.is_file()
+                                and path.name not in {"readiness-report.json", "manifest.json"}}
+                unlisted = sorted(actual_files - declared_paths)
+                if unlisted:
+                    errors.append(f"{platform}: unlisted retained files: {unlisted}")
                 artifact_bytes = sum((bundle / entry["path"]).stat().st_size for entry in data.get("artifacts", [])
                                      if isinstance(entry, dict) and isinstance(entry.get("path"), str)
                                      and (bundle / entry["path"]).is_file())
