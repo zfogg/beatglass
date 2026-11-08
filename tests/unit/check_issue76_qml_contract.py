@@ -59,6 +59,7 @@ def main() -> int:
         "settings status roles": "objectName: \"settingsStatus\"",
         "generation status role": "objectName: \"visualizationRevisionStatus\"",
         "canvas selection announcement": "Selected position \" + Math.round(visualizationCanvas.selectedPosition * 100)",
+        "dynamic sort and output descriptions": "Current order: \" + (window.sortDescending ? \"descending\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

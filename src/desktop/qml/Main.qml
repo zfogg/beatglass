@@ -426,7 +426,7 @@ ApplicationWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
-                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; Accessible.description: "Toggle ascending or descending file-name order"; onClicked: window.sortDescending = !window.sortDescending }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -1097,7 +1097,7 @@ ApplicationWindow {
                             currentIndex: 0
                             enabled: true
                             Accessible.name: "Output device"
-                            Accessible.description: "Monitoring currently follows the operating system default output device."
+                            Accessible.description: "Current output device: " + currentText + ". Monitoring follows the operating system default output device."
                             Layout.fillWidth: true
                         }
                         Label {
