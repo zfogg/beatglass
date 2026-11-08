@@ -158,7 +158,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
                 continue
             if hashlib.sha256(path.read_bytes()).hexdigest() != evidence_hashes.get(scenario_id):
                 errors.append(f"{platform}: scenario evidence hash does not match report: {scenario.get('id')}")
-        if str(manifest_data.get("platform", "")).lower() != platform:
+        manifest_platform = manifest_data.get("platform")
+        if not isinstance(manifest_platform, str) or manifest_platform.lower() != platform:
             errors.append(f"{platform}: manifest platform does not match report row")
         actual_manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()
         if actual_manifest_hash != row.get("manifest_sha256"):
