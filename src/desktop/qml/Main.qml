@@ -451,9 +451,11 @@ ApplicationWindow {
                                     model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
+                                    Accessible.name: "Output capture endpoint"
+                                    Accessible.description: "Choose the output endpoint used for live capture."
                                     onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
                                 }
-                                Button { text: "Refresh"; objectName: "refreshEndpoints"; enabled: window.endpointSelectionBridge !== null; onClicked: window.endpointSelectionBridge.refresh() }
+                                Button { text: "Refresh"; objectName: "refreshEndpoints"; enabled: window.endpointSelectionBridge !== null; Accessible.description: "Refresh the available output capture endpoints."; onClicked: window.endpointSelectionBridge.refresh() }
                             }
                             Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         ComboBox {

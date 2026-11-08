@@ -122,7 +122,10 @@ TestCase {
 
     function test_endpointSelectionControlsAreBound() {
         let app = shell.createObject(null)
-        verify(findChild(app, "endpointSelector") !== null)
+        let selector = findChild(app, "endpointSelector")
+        verify(selector !== null)
+        compare(selector.Accessible.description, "Choose the output endpoint used for live capture.")
+        compare(findChild(app, "refreshEndpoints").Accessible.description, "Refresh the available output capture endpoints.")
         verify(findChild(app, "refreshEndpoints") !== null)
         verify(findChild(app, "endpointStatus") !== null)
         app.destroy()
