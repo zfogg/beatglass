@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+After fresh source and display selection, a successful recovery clears the persisted retry rejection and stale identity message before presenting the new accepted state. If recovery fails, the rejection remains visible and actionable; the cleanup boundary is covered portably, while native recovery timing remains open.
+
 When overlay recovery is unavailable, persisted retry rejection remains announced and keyboard-focusable even with reduced motion enabled. The message names the blocked identity/decoder/source condition and points to fresh source and display selection; restoring a compatible source/display clears the stale rejection before retry.
 
 Persisted retry rejection is visible alongside overlay-unavailable/retry states: stale identity, incompatible decoder snapshot, or missing source metadata is reported as a blocked retry, not a successful overlay recovery. The rejection message remains focusable and the user can choose a fresh source/display target; native timing remains open.
