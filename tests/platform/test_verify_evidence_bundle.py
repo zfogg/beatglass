@@ -421,6 +421,15 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             errors = readiness.check(status, bundles)
             self.assertTrue(any("invalid scenario" in error for error in errors))
 
+    def test_readiness_non_object_manifest_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            (bundles / "windows" / "manifest.json").write_text("[\"malformed\"]", encoding="utf-8")
+            self.assertTrue(any("manifest root must be an object" in error for error in readiness.check(status, bundles)))
+            result = readiness.report(status, bundles)
+            self.assertTrue(any("manifest root must be an object" in error for error in result["platforms"][0]["errors"]))
+
     def test_readiness_aggregates_required_scenario_summary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
