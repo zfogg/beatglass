@@ -27,7 +27,7 @@ public:
   library_detail::Publish publish_analysis(const std::string& run_id, const AnalysisOperation& operation,
                                            std::stop_token stop = {});
   /** Reuse a completed result or reserve run_id before worker decoding; closed storage returns an empty admission. */
-  CacheAdmission admit_analysis(const std::string& run_id, const AnalysisIdentity& identity);
+  CacheAdmission admit_analysis(const std::string& run_id, const AnalysisIdentity& identity, const std::string& source_path = {}, const std::string& decoder_snapshot = {});
   /** Read persisted retryable runs on the storage worker; returns empty while closed. */
   std::vector<library_detail::RetryableRun> retryable_runs(std::size_t limit = 100) const;
   /** Discard one retryable run on the storage worker; never removes source audio. */
