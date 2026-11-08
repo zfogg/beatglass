@@ -271,6 +271,7 @@ if [[ "${BEATGLASS_MACOS_REQUIRE_SIGNING:-0}" == "1" ]]; then
   done
 fi
 {
+  printf 'captured_at=%s\n' "$(date -u +%FT%TZ)"
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'macos_version=%s\n' "$(sw_vers -productVersion)"
   printf 'architecture=%s\n' "$(uname -m)"
