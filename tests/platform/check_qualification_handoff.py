@@ -86,6 +86,7 @@ def main() -> int:
     unlinked.extend(f"evidence schema field: {field}" for field in required_evidence_schema if field.lower() not in docs.lower())
     unlinked.extend(f"readiness report contract: {field}" for field in required_report_contract if field.lower() not in docs.lower())
     unlinked.extend(f"pipeline tool: {tool}" for tool in required_pipeline_tools if tool.lower() not in documentation_contract.lower())
+    unlinked.extend(f"README pipeline tool: {tool}" for tool in required_pipeline_tools if tool.lower() not in readme.lower())
     unlinked.extend(f"cross-document contract: {field}" for field in required_cross_document_contract if field.lower() not in documentation_contract.lower())
     unlinked.extend(f"issue #1 exit-gate contract: {phrase}" for phrase in required_exit_gate if phrase.lower() not in docs.lower())
     for row in platform_rows:
