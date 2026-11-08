@@ -35,7 +35,8 @@ public:
   Q_INVOKABLE void open();
   Q_INVOKABLE void close();
   Q_INVOKABLE void refreshRetryableRuns();
-    Q_INVOKABLE void discardSelectedRun();
+  /** Discard only terminal persisted recovery; active jobs retain selection and report rejection. */
+  Q_INVOKABLE void discardSelectedRun();
   Q_INVOKABLE void discardRuns(const QStringList& ids);
   /** Retry the selected persisted run using its stored source and decoder snapshot. */
   Q_INVOKABLE void retrySelectedRun();
