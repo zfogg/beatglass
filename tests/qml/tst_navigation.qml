@@ -390,6 +390,7 @@ TestCase {
         compare(selection.text, "Selected visualization position 25%")
         let clearSelection = findChild(app, "clearVisualizationSelection")
         verify(clearSelection !== null); verify(clearSelection.enabled)
+        compare(clearSelection.ToolTip.text, "Clear the selected waveform or FFT position")
         clearSelection.clicked()
         compare(selection.text, "No visualization position selected")
         verify(!clearSelection.enabled)

@@ -867,6 +867,7 @@ ApplicationWindow {
                 Button {
                     objectName: "clearVisualizationSelection"
                     text: "Clear position"
+                    ToolTip.text: "Clear the selected waveform or FFT position"
                     enabled: visualizationCanvas.selectedPosition >= 0
                     Accessible.name: "Clear visualization position"
                     Accessible.description: "Remove the selected waveform or FFT position"
