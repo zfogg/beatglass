@@ -197,7 +197,8 @@ TEST_CASE("SQLite exact catalog lookup rejects unsafe paths") {
 }
 TEST_CASE("SQLite catalog prefix queries bound search input") {
   SqliteCache cache(":memory:");
-  CHECK_THROWS_AS(cache.entries({std::string(1025, 'a'), 0, 10}), std::invalid_argument);
+  CHECK(kMaxCollectionSearchBytes == 1024);
+  CHECK_THROWS_AS(cache.entries({std::string(kMaxCollectionSearchBytes + 1, 'a'), 0, 10}), std::invalid_argument);
 }
 TEST_CASE("SQLite collection sizes are checked before signed binding") {
   SqliteCache cache(":memory:");

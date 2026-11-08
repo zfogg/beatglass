@@ -23,7 +23,8 @@ struct CollectionEntry {
 };
 /** Bounded, case-insensitive name query over indexed entries. */
 /** Case-insensitive name-prefix page; offset is zero-based and limit must be between 1 and 10000. */
-struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; }; /** Search prefixes are limited to 1024 bytes. */
+inline constexpr std::size_t kMaxCollectionSearchBytes = 1024;
+struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; }; /** Search prefixes are limited to kMaxCollectionSearchBytes. */
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;
 /** Maximum serialized analysis result accepted by the provisional cache. */

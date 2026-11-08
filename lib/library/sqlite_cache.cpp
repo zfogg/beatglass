@@ -128,7 +128,7 @@ public:
   }
   std::vector<CollectionEntry> entries(const CollectionQuery& q, std::stop_token stop) {
     if (q.limit == 0 || q.limit > 10000) throw std::invalid_argument("invalid collection page size");
-    if (q.search.size() > 1024 || q.search.find('\0') != std::string::npos || !sqlite_length_representable(q.search.size()) ||
+    if (q.search.size() > kMaxCollectionSearchBytes || q.search.find('\0') != std::string::npos || !sqlite_length_representable(q.search.size()) ||
         q.offset > static_cast<std::size_t>(std::numeric_limits<sqlite3_int64>::max()))
       throw std::invalid_argument("invalid collection query");
     if (stop.stop_requested()) throw CollectionCancelled();
