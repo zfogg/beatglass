@@ -65,7 +65,14 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   echo "Running Core Audio tap smoke for supplied UID"
   "$tap_binary" "$BEATGLASS_MACOS_TAP_UID"
   echo "Running Core Audio recovery smoke for supplied UID"
-  "$recovery_binary" "$BEATGLASS_MACOS_TAP_UID"
+  recovery_log="$out_dir/recovery-smoke.log"
+  "$recovery_binary" "$BEATGLASS_MACOS_TAP_UID" | tee "$recovery_log"
+  for cycle in 0 1; do
+    if ! grep -Eq "cycle=$cycle .*nonzero_samples=[1-9][0-9]* .*stopped=1" "$recovery_log"; then
+      echo "Recovery smoke did not complete cycle $cycle with nonzero samples" >&2
+      exit 1
+    fi
+  done
 else
   echo "UNRUN: set BEATGLASS_MACOS_TAP_UID to execute tap and recovery smoke bundles"
 fi
