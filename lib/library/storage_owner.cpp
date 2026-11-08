@@ -7,4 +7,7 @@ bool StorageOwner::open(const StorageConfig& config, std::string* diagnostic) {
   catch (const std::exception& e) { if (diagnostic) *diagnostic = e.what(); return false; }
 }
 void StorageOwner::close() noexcept { cache_.reset(); }
+std::vector<library_detail::RetryableRun> StorageOwner::retryable_runs(std::size_t limit) const {
+  return cache_ ? cache_->retryable_runs(limit) : std::vector<library_detail::RetryableRun>{};
+}
 }
