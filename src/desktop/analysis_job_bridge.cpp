@@ -124,7 +124,10 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
     batch_.push_back(std::move(retained)); ++batchAccepted_;
   }
   emit batchChanged();
-  if (!batch_.empty()) poll_timer_.start();
+  if (!batch_.empty()) {
+    if (status_ != QStringLiteral("Queued")) { status_ = QStringLiteral("Queued"); emit statusChanged(); }
+    poll_timer_.start();
+  }
   return batchAccepted_;
 }
 
