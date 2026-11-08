@@ -2570,7 +2570,7 @@ ApplicationWindow {
                     Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
-                        ? "Persisted overlay position and size: " + text + "."
+                        ? "Persisted overlay position and size: " + text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ".")
                         : "Persisted overlay position and size unavailable; control-window fallback remains active."
                     ToolTip.text: "Current persisted overlay position and size"
                     wrapMode: Text.WordWrap
