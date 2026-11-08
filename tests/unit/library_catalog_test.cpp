@@ -69,3 +69,21 @@ TEST_CASE("catalog filters directories and files case-insensitively") {
   CHECK(result.entries[0].name == "Samples");
   CHECK(result.entries[0].format.empty());
 }
+
+TEST_CASE("catalog preserves multi-dot and spaced source identity") {
+ TempDir dir; dir.file("Live.Set.v2.WAV"); dir.file("Morning Take.mp3");
+ const auto result = beatglass::library::browse(dir.path, "TAKE");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].name == "Morning Take.mp3");
+ CHECK(result.entries[0].title == "Morning Take");
+ CHECK(result.entries[0].format == "MP3");
+}
+
+TEST_CASE("catalog keeps hidden supported sources discoverable") {
+ TempDir dir; dir.file(".hidden.FLAC");
+ const auto result = beatglass::library::browse(dir.path, "HIDDEN");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].name == ".hidden.FLAC");
+ CHECK(result.entries[0].title == ".hidden");
+ CHECK(result.entries[0].format == "FLAC");
+}
