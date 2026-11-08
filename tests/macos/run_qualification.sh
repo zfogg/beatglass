@@ -147,13 +147,14 @@ manifest="$out_dir/qualification-manifest.txt"
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'macos_version=%s\n' "$(sw_vers -productVersion)"
   printf 'architecture=%s\n' "$(uname -m)"
+  printf 'xcode_version=%s\n' "$(xcodebuild -version | tr '\n' ' ')"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'commands=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
   if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
 } > "$manifest"
-if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest"; then
+if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest"; then
   echo "Qualification manifest is missing or empty" >&2
   exit 1
 fi
