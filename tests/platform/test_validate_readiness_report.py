@@ -115,3 +115,18 @@ class ReadinessReportContractTest(unittest.TestCase):
             report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("retained manifest is invalid JSON", errors)
+
+    def test_manifest_collection_shapes_are_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["artifacts"] = {}
+            manifest["scenarios"] = {}
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("manifest artifacts must be an array", errors)
+            self.assertIn("manifest scenarios must be an array", errors)
