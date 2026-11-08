@@ -98,10 +98,12 @@ def build_report(root: Path) -> dict:
                      "provenance_complete": all(manifest.get(k) for k in ("platform", "commit", "captured_at", "environment")),
                      "errors": errors})
     status = [{"platform": p, "status": "experimental"} for p in PLATFORMS]
+    generation_errors = [f"{row['platform']}: {error}" for row in rows for error in row.get("errors", [])]
     return {"readiness_report_schema": 1, "support_language": "experimental",
             "native_qualification_required": True, "exit_gate_status": "PENDING",
             "exit_gate_reason_codes": ["native_qualification_required", "generated_report_pending_review"],
-            "ready": False, "platform_support_status": status, "platforms": rows}
+            "ready": False, "platform_support_status": status, "platforms": rows,
+            "generation_errors": generation_errors}
 
 
 def main() -> int:

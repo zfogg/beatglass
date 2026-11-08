@@ -67,6 +67,7 @@ class GenerateReadinessReportTest(unittest.TestCase):
                 (bundle / "manifest.json").write_text("{not-json", encoding="utf-8")
             report = module.build_report(root)
             self.assertTrue(all(any("invalid manifest JSON" in error for error in row["errors"]) for row in report["platforms"]))
+            self.assertEqual(len(report["generation_errors"]), len(module.PLATFORMS))
 
     def test_generation_surfaces_malformed_manifest_collections(self):
         with tempfile.TemporaryDirectory() as temp:
