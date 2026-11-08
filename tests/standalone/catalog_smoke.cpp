@@ -38,6 +38,12 @@ int main() {
   require(result.entries[0].name == "Alpha.mp3", "case-folded ordering changed");
   require(result.entries[1].name == "Mixes", "directory navigation entry missing");
   require(result.entries[2].name == "zeta.WAV", "supported audio entry missing");
+  require(result.entries[0].title == "Alpha" && result.entries[0].format == "MP3",
+          "audio display metadata was not derived from the filename");
+  require(result.entries[0].bytes == 5 && result.entries[0].duration_seconds < 0.0,
+          "filesystem-only catalog metadata contract changed");
+  require(result.entries[1].directory && result.entries[1].bytes == 0,
+          "directory entry metadata was not normalized");
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
   require(filtered.entries.empty(), "filter returned an unexpected entry");
