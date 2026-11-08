@@ -1048,7 +1048,7 @@ ApplicationWindow {
                         Accessible.name: "Overlay display empty state"
                         Accessible.value: text
                         Accessible.role: Accessible.StaticText
-                        Accessible.description: text
+                        Accessible.description: text + " Connect a display before choosing an overlay destination."
                     }
                     Label { text: "Size" }
                     ComboBox {
