@@ -58,7 +58,7 @@ public:
   void begin(const std::string& id, const CacheKey& key);
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */
   bool find(const CacheKey& key, std::string& result);
-  /** Return bounded persisted runs left retryable by cancellation, stale input, or restart. */
+  /** Return 1–10000 persisted runs left retryable by cancellation, stale input, or restart. */
   std::vector<RetryableRun> retryable_runs(std::size_t limit = 100);
   /** Discard one retryable run record without touching its source file. */
   bool discard_retryable(const std::string& id);
