@@ -28,6 +28,10 @@ path-escaping entries, and recomputes every SHA-256 digest. With `-RunTests` it 
 discovered CTest suite and retains `ctest-run.log`. It deliberately reports the native
 WASAPI, device-recovery, overlay, DPI, and interactive UI cases as `UNRUN`;
 those observations still require a logged-in Windows session and evidence.
+The runner also emits `native-playback-evidence.json`, a fixed six-case matrix
+initialized to `UNRUN`; update statuses and log/screenshot fields only after
+observing each native playback scenario, then rerun the verifier before claiming
+qualification.
 
 - Record commit SHA, compiler/MSVC toolset, Windows version/build, architecture, Qt and vcpkg manifest revisions.
 - Build the pinned desktop preset in Release configuration and archive the exact CMake configure/build output.
