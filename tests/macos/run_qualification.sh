@@ -48,7 +48,8 @@ tap_binary="$tap_bundle/Contents/MacOS/beatglass-coreaudio-smoke"
 recovery_bundle="$out_dir/build/beatglass-coreaudio-recovery.app"
 recovery_binary="$recovery_bundle/Contents/MacOS/beatglass-coreaudio-recovery"
 for required_path in "$desktop_binary" "$tap_bundle" "$tap_binary" "$recovery_bundle" "$recovery_binary"; do
-  if [[ ! -e "$required_path" ]]; then
+  if [[ "$required_path" == *.app && ! -d "$required_path" ]] ||
+     [[ "$required_path" != *.app && ! -x "$required_path" ]]; then
     echo "Required native qualification artifact not found: $required_path" >&2
     exit 1
   fi
