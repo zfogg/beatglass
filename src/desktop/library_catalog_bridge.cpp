@@ -21,6 +21,7 @@ QVariantList LibraryCatalogBridge::browse(const QUrl& folder, const QString& sea
     row.insert(QStringLiteral("folder"), entry.directory);
     row.insert(QStringLiteral("audio"), !entry.directory);
     row.insert(QStringLiteral("bytes"), QVariant::fromValue<qulonglong>(entry.bytes));
+    row.insert(QStringLiteral("format"), QString::fromStdString(entry.format));
     rows.push_back(row);
   }
   return rows;

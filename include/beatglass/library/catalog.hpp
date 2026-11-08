@@ -19,6 +19,8 @@ struct CatalogEntry {
   bool directory{};
   /** Byte size for regular files; zero for directories or stat failures. */
   std::uintmax_t bytes{};
+  /** Supported audio container label derived from the filename extension. */
+  std::string format;
 };
 
 /** Result of a synchronous folder query performed by a non-audio worker.

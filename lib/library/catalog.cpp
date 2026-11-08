@@ -42,7 +42,15 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
       bytes = entry.file_size(size_error);
       if (size_error) bytes = 0;
     }
-    result.entries.push_back({entry.path(), name, directory, bytes});
+    std::string format;
+    if (!directory) {
+      auto extension = folded(entry.path().extension().string());
+      if (extension == ".wav") format = "WAV";
+      else if (extension == ".flac") format = "FLAC";
+      else if (extension == ".mp3") format = "MP3";
+      else if (extension == ".aiff" || extension == ".aif") format = "AIFF";
+    }
+    result.entries.push_back({entry.path(), name, directory, bytes, std::move(format)});
   }
   if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
