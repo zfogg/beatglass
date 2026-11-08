@@ -1,5 +1,7 @@
 # Progress and handoff
 
+Decoder snapshot mismatch handling is explicit: retry provenance requires exact compatibility with the active decoder identity. Empty legacy snapshots and mismatches reject recovery rather than silently decoding with a different runtime; the portable contract does not qualify native codec behavior.
+
 Decoder compatibility is explicit in retry recovery: `decoder_snapshot` travels with the persisted run, and legacy retry rows with an empty snapshot remain rejected rather than silently reusing a changed decoder. Local checks cover this policy; native codec/runtime compatibility is still unqualified.
 
 Retryable storage schema v2 persists `source_path` and `decoder_snapshot` with each run and migrates existing databases by adding empty defaults. Recovery UI and coordinator resubmission consume these fields conservatively; empty legacy metadata remains non-retryable until a source operation is reconstructed. This migration is covered by portable storage contracts, not native qualification.
