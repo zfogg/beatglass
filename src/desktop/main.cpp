@@ -5,6 +5,7 @@
 #include "library_catalog_bridge.hpp"
 #include "playback_session_bridge.hpp"
 #include "analysis_presentation.hpp"
+#include "capture_monitor_bridge.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -13,7 +14,7 @@
 #include <QSettings>
 #endif
 int main(int argc, char** argv) {
-  QGuiApplication app(argc, argv); Metadata metadata; AnalysisPresentation analysis; LivePresentation livePresentation; VisualizationPresentationBridge visualization; ThemePreferences themePreferences; LibraryCatalogBridge libraryCatalog; PlaybackSessionBridge playbackSession;
+  QGuiApplication app(argc, argv); Metadata metadata; AnalysisPresentation analysis; CaptureMonitorBridge captureMonitor; LivePresentation livePresentation; VisualizationPresentationBridge visualization; ThemePreferences themePreferences; LibraryCatalogBridge libraryCatalog; PlaybackSessionBridge playbackSession;
 #ifdef Q_OS_MACOS
   beatglass::macos::OverlayController macOverlayController(
       beatglass::macos::makeOverlayNative(), nullptr,
@@ -22,6 +23,7 @@ int main(int argc, char** argv) {
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);
   engine.rootContext()->setContextProperty("livePresentation", &livePresentation);
+  engine.rootContext()->setContextProperty("captureMonitor", &captureMonitor);
   engine.rootContext()->setContextProperty("analysisPresentation", &analysis);
   engine.rootContext()->setContextProperty("themePreferences", &themePreferences);
   engine.rootContext()->setContextProperty("visualizationPresentation", &visualization);
