@@ -302,6 +302,8 @@ Retrying an analysis attempt clears the prior worker result before the new attem
 
 Batch analysis now reports how many accepted operations have published verified results through the worker handoff, keeping queue admission counts distinct from completed-result counts.
 
+The published-result count is scoped to the current batch attempt and resets when that batch is retried.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff

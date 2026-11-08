@@ -22,6 +22,7 @@ required = {
     "retry clears stale result": 'if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }',
     "batch result count": 'Q_PROPERTY(int batchResultsPublished READ batchResultsPublished',
     "batch result handoff": '++weak_self->batchResultsPublished_',
+    "batch retry resets result count": 'batchResultsPublished_ = 0;',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:
