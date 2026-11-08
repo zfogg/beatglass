@@ -58,6 +58,19 @@ class GenerateReadinessReportTest(unittest.TestCase):
             report = module.build_report(root)
             self.assertTrue(all(any("invalid manifest JSON" in error for error in row["errors"]) for row in report["platforms"]))
 
+    def test_generation_surfaces_malformed_manifest_collections(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for platform in module.PLATFORMS:
+                bundle = root / platform; bundle.mkdir()
+                manifest = {"platform": platform, "artifacts": {}, "scenarios": {}, "qualification_output": 7}
+                (bundle / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            report = module.build_report(root)
+            errors = [error for row in report["platforms"] for error in row["errors"]]
+            self.assertIn("manifest artifacts must be an array", errors)
+            self.assertIn("manifest scenarios must be an array", errors)
+            self.assertIn("qualification output must be a string", errors)
+
 
 if __name__ == "__main__":
     unittest.main()
