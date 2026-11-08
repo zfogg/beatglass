@@ -18,6 +18,7 @@ def main() -> int:
         "visualization mode arrow focus": "spectrumView.forceActiveFocus()",
         "visualization shortcut focus": "waveformView.forceActiveFocus()",
         "visualization keyboard guidance": "Use Left and Right arrows to switch views",
+        "capture control accessible name": "Accessible.name: text; Accessible.description: window.captureMonitorBridge",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
