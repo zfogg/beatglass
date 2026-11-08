@@ -195,6 +195,17 @@ ApplicationWindow {
         window.overlayDisplaySelectionRequired = true
         window.announceCaptureRecoveryState("Saved overlay display cleared; choose an available display to restore monitoring.")
     }
+    function persistOverlayDisplaySelection(index, name) {
+        if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length)
+            return false
+        if (!window.overlayBridge.moveToScreen(index))
+            return false
+        window.overlayPreferredScreenIndex = index
+        window.overlayPreferredDisplayName = name
+        window.overlayDisplaySelectionRequired = false
+        window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + ".")
+        return true
+    }
     function hideOverlayAndRestoreControls() {
         if (!window.overlayBridge) return
         window.overlayBridge.hideOverlay()
@@ -2091,7 +2102,7 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
-                        onActivated: if (window.overlayBridge) { window.overlayBridge.moveToScreen(currentIndex); window.overlayPreferredScreenIndex = currentIndex; window.overlayPreferredDisplayName = currentText; window.overlayDisplaySelectionRequired = false; window.announceCaptureRecoveryState("DJ overlay display selected; retry is now available."); retryOverlay.forceActiveFocus() }
+                        onActivated: if (window.persistOverlayDisplaySelection(currentIndex, currentText)) { retryOverlay.forceActiveFocus() }
                         Layout.fillWidth: true
                     }
                     Button {

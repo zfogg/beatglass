@@ -662,4 +662,6 @@ The QML surface now synchronizes the preferred display identity from the native 
 
 Missing-display recovery now includes an explicit Forget saved display action. It clears the stale preferred identity and session index, announces that replacement selection is ready, and prevents an unavailable monitor from being repeatedly reselected.
 
+Replacement display selection now goes through a shared persistence helper that invokes the native bridge's move-to-screen operation before updating QML fallback state. The selected display is therefore persisted by the platform bridge, not only remembered in the current QML session.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
