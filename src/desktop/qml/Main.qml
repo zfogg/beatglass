@@ -30,6 +30,7 @@ ApplicationWindow {
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     property string visualizationSelectionResetReason: ""
     property string visualizationRecoveryAnnouncement: ""
+    property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
         && analysisJobBridge !== null
@@ -104,8 +105,14 @@ ApplicationWindow {
                                                window.themePreferencesBridge.themeIndex))
             window.selectedThemeIndex = index
             window.selectedTheme = window.themeNames[index]
+            window.themePreferenceAnnouncement = "Theme preference restored: " + window.selectedTheme + "."
             if (typeof visualizationCanvas !== "undefined")
                 visualizationCanvas.requestPaint()
+        }
+        function onReduceMotionChanged() {
+            window.themePreferenceAnnouncement = window.themePreferencesBridge.reduceMotion
+                ? "Reduced motion enabled; static visualization snapshots remain available."
+                : "Reduced motion disabled; standard presentation transitions restored."
         }
     }
     Connections {
@@ -491,6 +498,17 @@ ApplicationWindow {
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
                 ToolTip.text: checked ? "Reduced motion is enabled; disable to restore transitions" : "Enable reduced motion to minimize animation and transitions"
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
+            }
+            Label {
+                objectName: "themePreferenceAnnouncement"
+                text: window.themePreferenceAnnouncement
+                visible: text !== ""
+                Accessible.name: "Theme preference announcement: " + text
+                Accessible.value: text
+                Accessible.role: Accessible.Status
+                Accessible.description: "Live appearance and reduced-motion preference state."
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
             }
             Button {
                 objectName: "resetAppearance"
