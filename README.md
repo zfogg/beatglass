@@ -73,6 +73,8 @@ The executable handoff path is: ingest native script output with `tests/platform
 
 For an acceptance review, add `--review-output review.md --require-ready` to the handoff command. It exports the human checklist and fails closed while any native gate remains pending.
 
+For automated review, pair `--review-json review.json --consume-review` with the same handoff command; the versioned packet consumer then validates the exported review artifact before release automation can proceed.
+
 ## Qt 6.8.3 prebuilt desktop preset
 
 With a clean vcpkg root and the selected Qt 6.8.3 SDK, set `VCPKG_ROOT` to the pinned vcpkg checkout and `BEATGLASS_QT_ROOT` to the SDK's compiler-specific directory (the directory containing `lib/cmake/Qt6`). From a fresh build directory run:
