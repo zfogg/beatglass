@@ -104,6 +104,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 TabButton { text: "Library"; objectName: "libraryTab" }
                 TabButton { text: "DJ"; objectName: "djTab" }
+                TabButton { text: "Settings"; objectName: "settingsTab" }
             }
             ComboBox {
                 id: themeSelector
@@ -297,6 +298,53 @@ ApplicationWindow {
                     }
                 }
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
+                Item { Layout.fillHeight: true }
+            }
+        }
+        Item {
+            objectName: "settingsPage"
+            ColumnLayout {
+                anchors.fill: parent; anchors.margins: 24; spacing: 14
+                Label { text: "Settings"; font.pixelSize: 28; font.bold: true; color: window.themeForegrounds[window.selectedThemeIndex] }
+                GroupBox {
+                    title: "Audio capture"
+                    Layout.fillWidth: true
+                    ColumnLayout {
+                        anchors.fill: parent; spacing: 8
+                        Label { text: "Output device"; font.bold: true }
+                        ComboBox {
+                            id: outputDevice
+                            objectName: "outputDevice"
+                            model: ["No output device detected"]
+                            currentIndex: 0
+                            enabled: false
+                            Accessible.name: "Output device"
+                            Accessible.description: "No output device is currently available for monitoring."
+                            Layout.fillWidth: true
+                        }
+                        Label {
+                            objectName: "permissionGuidance"
+                            text: Qt.platform.os === "osx"
+                                  ? "Allow Beatglass in System Settings → Privacy & Security → Screen & System Audio Recording, then restart monitoring."
+                                  : "System audio capture permission is not available yet; monitoring will remain stopped until a device is detected."
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                            Accessible.name: "Audio capture permission guidance"
+                        }
+                    }
+                }
+                GroupBox {
+                    title: "Appearance"
+                    Layout.fillWidth: true
+                    ColumnLayout {
+                        anchors.fill: parent; spacing: 8
+                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                    }
+                }
+                Label {
+                    objectName: "settingsStatus"
+                    text: "Settings are saved for this desktop profile. User audio files are never modified."
+                    wrapMode: Text.WordWrap; Layout.fillWidth: true
+                }
                 Item { Layout.fillHeight: true }
             }
         }

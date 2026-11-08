@@ -74,6 +74,22 @@ TestCase {
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
         app.destroy()
     }
+    function test_settingsExposeUnavailableAudioStateAndGuidance() {
+        let app = shell.createObject(null)
+        let tabs = findChild(app, "navigation")
+        tabs.currentIndex = 2
+        let settings = findChild(app, "settingsPage")
+        tryCompare(settings, "visible", true)
+        let device = findChild(app, "outputDevice")
+        verify(device !== null)
+        compare(device.count, 1)
+        compare(device.currentText, "No output device detected")
+        verify(!device.enabled)
+        let guidance = findChild(app, "permissionGuidance")
+        verify(guidance.text.length > 20)
+        compare(findChild(app, "settingsStatus").text, "Settings are saved for this desktop profile. User audio files are never modified.")
+        app.destroy()
+    }
     function test_themeSelectorOffersAllSixThemes() {
         let app = shell.createObject(null)
         let selector = findChild(app, "themeSelector")
