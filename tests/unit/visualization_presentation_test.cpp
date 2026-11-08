@@ -26,3 +26,15 @@ TEST_CASE("visualization presentation clear removes stale painted frame") {
   CHECK_FALSE(presentation.accept(old_generation, 2, frame));
   REQUIRE(presentation.accept(presentation.generation(), 1, frame));
 }
+
+TEST_CASE("visualization presentation rejects malformed frames before publication") {
+  VisualizationPresentation presentation;
+  VisualizationFrame frame;
+  const auto generation = presentation.generation();
+  CHECK_FALSE(presentation.accept(generation, 1, frame));
+  frame.epoch = 1; frame.sample_rate = 48000; frame.end_frame = 1024;
+  frame.magnitude[3] = -0.1f;
+  CHECK_FALSE(presentation.accept(generation, 1, frame));
+  frame.magnitude[3] = 0.1f;
+  REQUIRE(presentation.accept(generation, 1, frame));
+}
