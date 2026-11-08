@@ -197,6 +197,7 @@ TestCase {
         compare(findChild(app, "playbackPosition").Accessible.name, "Playback position")
         compare(findChild(app, "playbackState").Accessible.name, "Playback state")
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
+        compare(findChild(app, "playbackState").ToolTip.text, "Current native playback state")
         compare(findChild(app, "reopenSelectedPlayback").ToolTip.text, "Replace playback with the selected audio source")
         compare(findChild(app, "retryNativePlayback").ToolTip.text, "Retry native playback after the output error")
         compare(findChild(app, "playbackSampleRate").ToolTip.text, "Choose the native playback sample rate in hertz")
