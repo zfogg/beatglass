@@ -51,6 +51,8 @@ Open `build/docs/html/index.html`. On Windows PowerShell, use `${PWD}` in the vo
 
 The [Phase 0 gate audit](docs/phase0-gate.md) records the coordinator's acceptance for starting Phase 1 and remaining gaps. The current experimental shell is not the full application.
 
+See the [platform qualification status](docs/platform-qualification-status.md) for executable preparation checks and the native gates that remain open on Windows, macOS, and Linux.
+
 ## Qt 6.8.3 prebuilt desktop preset
 
 With a clean vcpkg root and the selected Qt 6.8.3 SDK, set `VCPKG_ROOT` to the pinned vcpkg checkout and `BEATGLASS_QT_ROOT` to the SDK's compiler-specific directory (the directory containing `lib/cmake/Qt6`). From a fresh build directory run:
