@@ -128,7 +128,16 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
 }
 
 StorageRecoveryBridge::~StorageRecoveryBridge() { close(); workerThread_.quit(); workerThread_.wait(); }
-void StorageRecoveryBridge::setDatabasePath(const QString& path) { if (databasePath_ == path) return; databasePath_ = path; emit databasePathChanged(); }
+void StorageRecoveryBridge::setDatabasePath(const QString& path) {
+  if (databasePath_ == path) return;
+  databasePath_ = path; emit databasePathChanged();
+  if (cacheHit_) { cacheHit_ = false; emit cachedResultChanged(); }
+  if (!cachedResult_.isEmpty()) { cachedResult_.clear(); emit cachedResultChanged(); }
+  if (!analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
+  if (analysisReserved_) { analysisReserved_ = false; emit analysisAdmissionChanged(); }
+  if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
+  analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
+}
 void StorageRecoveryBridge::open() {
   if (databasePath_.isEmpty()) { status_ = QStringLiteral("Storage error: database path is required"); emit statusChanged(); return; }
   if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
