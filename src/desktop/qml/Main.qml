@@ -294,6 +294,10 @@ ApplicationWindow {
         if (typeof visualizationCanvas !== "undefined")
             visualizationCanvas.forceActiveFocus()
     }
+    function announceCaptureRecoveryState(message) {
+        window.clearVisualizationForCaptureState(message)
+        window.announceVisualizationRecovery(message)
+    }
     function retryVisualizationAnalysis() {
         if (window.analysisJobBridge && window.analysisJobBridge.retry !== undefined) {
             window.analysisJobBridge.retry()
@@ -394,9 +398,16 @@ ApplicationWindow {
         target: window.captureMonitorBridge
         function onChanged() {
             if (window.captureMonitorBridge.status === "Error")
-                window.announceVisualizationRecovery("Capture permission or device failure; retry monitoring to acquire a fresh snapshot.")
+                window.announceCaptureRecoveryState("No output device or permission; retry monitoring to acquire a fresh snapshot.")
             else if (window.captureMonitorBridge.status === "Reacquiring")
-                window.announceVisualizationRecovery("Capture is reacquiring; visualization focus restored when fresh audio arrives.")
+                window.announceCaptureRecoveryState("Output device reacquiring; visualization focus restored when fresh audio arrives.")
+        }
+    }
+    Connections {
+        target: window.overlayBridge
+        function onAvailableChanged() {
+            if (window.overlayBridge && !window.overlayBridge.available)
+                window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
         }
     }
 
