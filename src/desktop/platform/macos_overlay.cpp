@@ -16,7 +16,10 @@ OverlayController::OverlayController(std::unique_ptr<OverlayNative> native, QObj
   connect(&save_timer_, &QTimer::timeout, this, [this] { saveSettings(); });
   screen_timer_.setSingleShot(true);
   connect(&screen_timer_, &QTimer::timeout, this, [this] {
-    updating_screens_ = true; keepOnScreen(); updating_screens_ = false; emit screensChanged();
+    updating_screens_ = true; keepOnScreen(); updating_screens_ = false;
+    scheduleSave();
+    emit geometryChanged();
+    emit screensChanged();
   });
   for (auto* screen : QGuiApplication::screens()) observeScreen(screen);
   connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen* screen) {
