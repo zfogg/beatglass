@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/analysis_runner.hpp"
 #include <chrono>
+#include <atomic>
 #include <thread>
 using namespace beatglass::library;
 using namespace beatglass::library_detail;
@@ -21,10 +22,22 @@ TEST_CASE("analysis runner retains cancellable worker operation") {
   auto handle=runner.submit(std::move(op)); REQUIRE(handle); handle->cancel(); REQUIRE((handle->state()==beatglass::library_detail::TrackedState::cancelled || handle->state()==beatglass::library_detail::TrackedState::completed));
 }
 TEST_CASE("analysis runner submits bounded batches in source order") {
-  beatglass::library_detail::JobExecutor executor(2); beatglass::library::AnalysisRunner runner(executor);
-  std::vector<AnalysisOperation> operations; operations.push_back(op(true)); operations.push_back(op(true)); operations.push_back(op(true));
+  beatglass::library_detail::JobExecutor executor(1); beatglass::library::AnalysisRunner runner(executor);
+  std::atomic_bool release{false};
+  auto blocked = op(true);
+  blocked.verify = [&](std::stop_token stop) {
+    while (!release.load(std::memory_order_acquire) && !stop.stop_requested()) std::this_thread::yield();
+    return beatglass::FileVerificationResult{stop.stop_requested() ? beatglass::FileVerificationOutcome::cancelled : beatglass::FileVerificationOutcome::match};
+  };
+  auto active = runner.submit(blocked);
+  REQUIRE(active);
+  for (int i = 0; i < 1000 && active->state() != TrackedState::running; ++i) std::this_thread::yield();
+  REQUIRE(active->state() == TrackedState::running);
+  std::vector<AnalysisOperation> operations{blocked, blocked};
   auto handles = runner.submit_batch(std::move(operations));
-  REQUIRE(handles.size() == 2);
+  REQUIRE(handles.size() == 1);
+  release.store(true, std::memory_order_release);
+  wait_for_terminal(active);
   for (const auto& handle : handles) { REQUIRE(handle); wait_for_terminal(handle); CHECK(handle->state() == TrackedState::completed); }
   executor.shutdown();
 }
