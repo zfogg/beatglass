@@ -566,6 +566,7 @@ ApplicationWindow {
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
+                            ToolTip.text: "Currently selected audio file"
                         }
                         Label {
                             objectName: "selectedAudioSource"
@@ -631,6 +632,7 @@ ApplicationWindow {
                         }
                         Label {
                             objectName: "detailsAvailability"
+                            ToolTip.text: "Current analysis and playback detail status"
                             text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status: " + text
@@ -640,6 +642,7 @@ ApplicationWindow {
                         }
                         Label {
                             objectName: "analysisUncertainty"
+                            ToolTip.text: "Analysis uncertainty and evidence limitations"
                             text: window.selectedName
                                   ? "Track key: Unknown · No validated track-level key. Window evidence is provisional and source-attributed."
                                   : "Track key: Unknown until a source is selected."
@@ -651,6 +654,7 @@ ApplicationWindow {
                         }
                         Label {
                             objectName: "analysisFreshness"
+                            ToolTip.text: "Analysis freshness and source-link status"
                             text: window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? "Analysis freshness: source-linked analysis complete." : "Analysis freshness: waiting for source-linked analysis evidence."
                             Accessible.name: "Analysis freshness: " + text
                             Accessible.value: text
@@ -660,6 +664,7 @@ ApplicationWindow {
                         }
                         Label {
                             objectName: "sourceWorkflowStatus"
+                            ToolTip.text: "Selected source playback and metadata workflow status"
                             text: window.selectedAudioUrl.toString() === ""
                                   ? "Select an audio source to inspect and play it."
                                   : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · " + window.metadataStatus
@@ -674,6 +679,7 @@ ApplicationWindow {
                                 text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (window.analysisJobBridge ? (window.analysisJobBridge.status + " · observed " + window.analysisJobBridge.frames + " frames.") : "Analysis progress unavailable")
                                 objectName: "analysisProgress"
                                 Accessible.name: "Analysis progress: " + text
+                                ToolTip.text: "Current analysis progress and observed frame count"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
