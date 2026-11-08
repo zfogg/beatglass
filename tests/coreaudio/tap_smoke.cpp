@@ -46,5 +46,5 @@ int main(int argc, char** argv) {
   std::cout << "frames=" << frames << " nonzero_samples=" << nonzero << " discontinuities=" << gaps
             << " dropped_frames=" << tap.dropped_frames() << " timestamp_valid=" << (have_sample_time ? 1 : 0) << '\n';
   tap.stop();
-  return frames && nonzero ? 0 : 1;
+  return frames && nonzero && have_sample_time ? 0 : 1;
 }
