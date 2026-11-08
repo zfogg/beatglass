@@ -240,6 +240,50 @@ TEST_CASE("coordinator resubmits persisted endpoint retry after restart") {
   REQUIRE(std::filesystem::remove(db));
   REQUIRE(std::filesystem::remove(source));
 }
+TEST_CASE("coordinator rejects persisted retry with mismatched snapshot and keeps it") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  const beatglass::library_detail::CacheKey key{"mismatch-retry", "engine", "config", "offline"};
+  coordinator.storage().cache()->begin("mismatch-retry", key, "missing.wav", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(coordinator.storage().cache()->publish("mismatch-retry", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  beatglass::library::AnalysisOperation operation;
+  operation.source.path = "missing.wav"; operation.source.content_hash = key.content;
+  operation.identity = {key.content, key.engine, key.config, key.mode}; operation.decoder_snapshot = "file-reader-v0";
+  operation.serialize = [] { return std::string("must-not-run"); };
+  operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  CHECK_FALSE(coordinator.resubmit_retryable("mismatch-retry", std::move(operation)));
+  REQUIRE(coordinator.storage().retryable_runs().size() == 1);
+}
+TEST_CASE("coordinator rejects persisted retry from a stale source epoch") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  const beatglass::library_detail::CacheKey key{"epoch-1", "engine", "config", "offline"};
+  coordinator.storage().cache()->begin("epoch-retry", key, "endpoint://device", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(coordinator.storage().cache()->publish("epoch-retry", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  beatglass::library::AnalysisOperation operation;
+  operation.source.path = "endpoint://device"; operation.source.content_hash = "epoch-2";
+  operation.identity = {"epoch-2", key.engine, key.config, key.mode}; operation.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  operation.serialize = [] { return std::string("must-not-run"); };
+  operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  CHECK_FALSE(coordinator.resubmit_retryable("epoch-retry", std::move(operation)));
+  REQUIRE(coordinator.storage().retryable_runs().size() == 1);
+  CHECK(coordinator.storage().retryable_runs().front().key.content == "epoch-1");
+}
+TEST_CASE("coordinator missing source retry fails closed without a cache result") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  beatglass::library::AnalysisOperation operation;
+  operation.source.path = "missing-source.wav"; operation.source.content_hash = "missing-source";
+  operation.identity = {"missing-source", "engine", "config", "offline"}; operation.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  operation.serialize = [] { return std::string("must-not-publish"); };
+  operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::unverifiable, "source file is unavailable"}; };
+  const auto handle = coordinator.submit("missing-source-run", std::move(operation));
+  REQUIRE(handle);
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  CHECK(handle->state() == beatglass::library_detail::TrackedState::failed);
+  std::string result;
+  CHECK_FALSE(coordinator.storage().cache()->find({"missing-source", "engine", "config", "offline"}, result));
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
