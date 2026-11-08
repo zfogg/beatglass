@@ -7,6 +7,7 @@ required = [
     'text == QStringLiteral("Cached analysis invalidated")',
     "cacheHit_ = false; cachedResult_.clear();",
     "emit cachedResultChanged();",
+    "if (removed) emit cached(false, QString{});",
     'QStringLiteral("No cached analysis found")',
 ]
 missing = [marker for marker in required if marker not in bridge]
