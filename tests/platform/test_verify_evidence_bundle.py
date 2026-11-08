@@ -152,6 +152,8 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
             result = readiness.report(status, bundles)
             self.assertEqual(result["platforms"][0]["mismatched_artifacts"], ["capture.txt"])
+            self.assertEqual(result["platforms"][0]["manifest_platform"], "test")
+            self.assertTrue(result["platforms"][0]["provenance_complete"])
 
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
