@@ -398,6 +398,7 @@ ApplicationWindow {
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
+                        Accessible.description: "Allow pointer input to pass through the overlay window"
                         enabled: window.overlayBridge && window.overlayBridge.available
                         onClicked: if (window.overlayBridge) {
                             window.overlayBridge.setClickThrough(checked)
@@ -409,13 +410,14 @@ ApplicationWindow {
                         }
                     }
                     Label { text: "Opacity" }
-                    Slider { objectName: "overlayOpacity"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
+                    Slider { objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.description: "Adjust the overlay window opacity"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
                     Label { text: "Display" }
                     ComboBox {
                         objectName: "overlayDisplay"
+                    Accessible.name: "Overlay display"; Accessible.description: "Choose the display where the overlay is shown"
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
@@ -424,6 +426,7 @@ ApplicationWindow {
                     Label { text: "Size" }
                     ComboBox {
                         objectName: "overlaySize"
+                    Accessible.name: "Overlay size"; Accessible.description: "Choose the overlay window size"
                         model: ["Compact", "Medium", "Large"]; currentIndex: 1
                         enabled: window.overlayBridge && window.overlayBridge.available
                         onActivated: if (window.overlayBridge) {
