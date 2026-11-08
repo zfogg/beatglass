@@ -94,6 +94,7 @@ TestCase {
         compare(findChild(app, "overlayDisplayStatus").Accessible.name, "Current overlay display")
         display.activated(0); compare(fakeOverlay.selectedScreen, 0); compare(display.currentIndex, 0)
         size.currentIndex = 2; size.activated(2); compare(fakeOverlay.requestedWidth, 430)
+        fakeOverlay.opacity = 0.6; tryCompare(findChild(app, "overlayOpacity"), "value", 0.6)
         hide.clicked(); compare(fakeOverlay.hides, 1); tryCompare(app, "visible", true)
         app.destroy()
     }
