@@ -41,8 +41,8 @@ for i in "${!expected_cases[@]}"; do
   IFS=$'\t' read -r case_id status evidence <<< "${case_lines[$((i + 1))]}"
   [[ "$case_id" == "${expected_cases[$i]}" ]] || { echo "unexpected qualification case: $case_id" >&2; exit 1; }
   [[ "$status" =~ ^(PASS|FAIL|UNRUN)$ ]] || { echo "invalid status for $case_id: $status" >&2; exit 1; }
-  if [[ "$status" == PASS ]]; then
-    [[ -n "$evidence" && "$evidence" != /* ]] || { echo "PASS case lacks relative evidence: $case_id" >&2; exit 1; }
+  if [[ "$status" != UNRUN ]]; then
+    [[ -n "$evidence" && "$evidence" != /* ]] || { echo "$status case lacks relative evidence: $case_id" >&2; exit 1; }
     evidence_path=$(cd "$out_dir" && cd "$(dirname -- "$evidence")" 2>/dev/null && pwd)/$(basename -- "$evidence") || { echo "invalid evidence path: $evidence" >&2; exit 1; }
     case "$evidence_path" in
       "$out_dir"/*) ;;
