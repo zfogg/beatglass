@@ -144,3 +144,12 @@ class ReadinessHandoffTest(unittest.TestCase):
             self.assertEqual(data["decision"], "PENDING")
             self.assertTrue(any("release decision is PENDING" in error for error in errors))
 
+    def test_handoff_writes_native_review_assessment(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; review = root / "native-review.json"
+            errors = handoff.run(bundles, output, native_review_output=review, native_reviewer_name="release-owner")
+            data = json.loads(review.read_text(encoding="utf-8"))
+            self.assertEqual(data["decision"], "PENDING")
+            self.assertTrue(any("native evidence review is PENDING" in error for error in errors))
+

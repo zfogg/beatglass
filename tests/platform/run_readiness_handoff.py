@@ -23,6 +23,7 @@ reviewer = _load("review_readiness_handoff")
 packet_consumer = _load("consume_review_packet")
 bundle_consumer = _load("consume_review_bundle")
 decision_consumer = _load("review_release_decision")
+native_reviewer = _load("review_native_evidence")
 
 
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
@@ -30,7 +31,8 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
         native_output: Path | None = None, native_platform: str | None = None,
         review_output: Path | None = None, require_ready: bool = False,
         review_json: Path | None = None, consume_review: bool = False,
-        decision_output: Path | None = None) -> list[str]:
+        decision_output: Path | None = None, native_review_output: Path | None = None,
+        native_reviewer_name: str | None = None) -> list[str]:
     ingestion_errors = []
     if native_output is not None:
         if native_platform not in {"windows", "macos", "linux"}:
@@ -87,6 +89,12 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
             decision_output.write_text(json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8")
             if decision["decision"] != "ACCEPTED":
                 errors.append(f"release decision is {decision['decision']}")
+    if native_review_output is not None:
+        assessment = native_reviewer.assess(output, native_reviewer_name or "")
+        native_review_output.parent.mkdir(parents=True, exist_ok=True)
+        native_review_output.write_text(json.dumps(assessment, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if assessment["decision"] != "ACCEPTED":
+            errors.append(f"native evidence review is {assessment['decision']}")
     return errors
 
 
@@ -105,10 +113,12 @@ def main() -> int:
     parser.add_argument("--review-json", type=Path, help="write a machine-readable review packet")
     parser.add_argument("--consume-review", action="store_true", help="consume the emitted review JSON packet")
     parser.add_argument("--decision-output", type=Path, help="write a conservative release decision artifact")
+    parser.add_argument("--native-review-output", type=Path, help="write a native evidence assessment artifact")
+    parser.add_argument("--native-reviewer", help="reviewer identity for native evidence assessment")
     args = parser.parse_args()
     errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs, args.consume,
                  args.native_output, args.native_platform, args.review_output, args.require_ready, args.review_json,
-                 args.consume_review, args.decision_output)
+                 args.consume_review, args.decision_output, args.native_review_output, args.native_reviewer)
     if errors:
         print("\n".join(errors))
         return 1
