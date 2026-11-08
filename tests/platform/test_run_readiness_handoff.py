@@ -68,3 +68,11 @@ class ReadinessHandoffTest(unittest.TestCase):
             report = json.loads(output.read_text(encoding="utf-8"))
             self.assertTrue(report["ingestion_errors"])
 
+    def test_native_platform_identity_mismatch_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); native = root / "native"; bundles = root / "bundles"; bundles.mkdir(); native.mkdir()
+            (native / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            (native / "qualification-manifest.txt").write_text("platform=macos\n", encoding="utf-8")
+            errors = handoff.run(bundles, root / "readiness.json", native_output=native, native_platform="windows")
+            self.assertTrue(any("platform mismatch" in error for error in errors))
+

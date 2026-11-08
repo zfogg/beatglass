@@ -207,6 +207,8 @@ The same ingestion is available in the end-to-end handoff via `--native-output <
 
 The handoff report records those failures in `ingestion_errors` as well as returning a nonzero result, making missing or tampered native artifacts auditable after the command exits.
 
+When ingestion is invoked through the handoff command, the manifest platform must match `--native-platform`; mismatched identity is rejected and recorded as an ingestion error rather than attributed to the wrong qualification row.
+
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
