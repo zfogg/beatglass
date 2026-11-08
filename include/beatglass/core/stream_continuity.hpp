@@ -26,7 +26,7 @@ public:
    */
   StreamTransition observe(const AudioBlock& block) noexcept {
     const auto& f = block.format;
-    if (!f.sample_rate || !f.channels || block.samples.empty() || block.samples.size() % f.channels) return StreamTransition::invalid;
+    if (!block.epoch || !f.sample_rate || !f.channels || block.samples.empty() || block.samples.size() % f.channels) return StreamTransition::invalid;
     const auto frames = block.samples.size() / f.channels;
     if (frames > std::numeric_limits<std::uint64_t>::max() - block.first_frame) return StreamTransition::invalid;
     if (started_ && block.epoch == epoch_ && (format_.sample_rate != f.sample_rate || format_.channels != f.channels || format_.layout != f.layout)) return StreamTransition::invalid;

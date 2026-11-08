@@ -3,6 +3,11 @@
 #include <array>
 #include <limits>
 using namespace beatglass;
+TEST_CASE("stream continuity rejects zero source epochs") {
+  StreamContinuity continuity; std::array<float,1> samples{1};
+  AudioBlock block{{44100,1},0,0,0,false,samples};
+  CHECK(continuity.observe(block)==StreamTransition::invalid);
+}
 TEST_CASE("stream transitions reacquire on gaps and epoch changes") {
  StreamContinuity stream; std::array<float,4> samples{};
  AudioBlock block{{48000,2}, 1, 0, 0, false, samples};
