@@ -128,6 +128,7 @@ ApplicationWindow {
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
         window.restoreOverlayDisplaySelectionFromBridge()
+        window.restoreOverlayVisualStateFromBridge()
         refreshCatalog()
     }
     function restoreOverlayDisplaySelectionFromBridge() {
@@ -142,6 +143,20 @@ ApplicationWindow {
             : window.overlayPreferredScreenIndex
         window.overlayDisplaySelectionRequired = window.overlayBridge.screenNames.length > 0 && savedIndex < 0
         return savedIndex >= 0
+    }
+    function restoreOverlayVisualStateFromBridge() {
+        if (!window.overlayBridge)
+            return false
+        const savedGeometry = window.overlayBridge.geometry
+        if (!savedGeometry || savedGeometry.width <= 0 || savedGeometry.height <= 0) {
+            window.announceCaptureRecoveryState("Persisted overlay geometry unavailable; control-window fallback remains active.")
+            return false
+        }
+        window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)
+        if (window.overlayBridge.opacity >= 0.2 && window.overlayBridge.opacity <= 1.0)
+            window.overlayBridge.setOpacity(window.overlayBridge.opacity)
+        window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
+        return true
     }
     function refreshCatalog() {
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
