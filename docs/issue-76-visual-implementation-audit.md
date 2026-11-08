@@ -376,6 +376,8 @@ Space now provides the same focus path as Enter/Return from the selected canvas 
 
 Ctrl+Left and Ctrl+Right now jump directly to the visualization boundaries, complementing fine, coarse, and Home/End movement for efficient keyboard scrubbing. The canvas announcement and tooltip include the new shortcuts.
 
+Ctrl+Up and Ctrl+Down now switch directly between waveform and FFT modes from the focused canvas, returning focus to the selected mode control so the mode change remains visible and reversible through the keyboard.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
