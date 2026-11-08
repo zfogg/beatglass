@@ -16,5 +16,5 @@ bool PlaybackSessionBridge::replaceSource(const QUrl& source, qulonglong epoch) 
   source_ = source; emit changed(); return true;
 }
 bool PlaybackSessionBridge::pause() { const bool ok = session_.pause(); if (ok) emit changed(); return ok; }
-void PlaybackSessionBridge::stop() { session_.stop(); source_ = {}; emit changed(); }
+void PlaybackSessionBridge::stop() { session_.stop(); source_ = QUrl{}; emit changed(); }
 bool PlaybackSessionBridge::seek(qulonglong frame, qulonglong epoch) { const bool ok = session_.seek(frame, epoch); if (ok) emit changed(); return ok; }
