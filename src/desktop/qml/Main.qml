@@ -1304,6 +1304,7 @@ ApplicationWindow {
                     font.pixelSize: window.compactHeader ? 12 : 14
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
+                    Layout.minimumWidth: 0
                     Accessible.name: "Visualization empty state"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText

@@ -424,6 +424,7 @@ def main() -> int:
         "visualization mode status color": "color: window.themeForegrounds[window.selectedThemeIndex]",
         "visualization empty state theme": 'objectName: "visualizationEmptyState"',
         "visualization empty state emphasis": 'color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]',
+        "visualization empty state shrinks": 'objectName: "visualizationEmptyState"',
         "visualization recovery theme": 'objectName: "visualizationRetryFeedback"',
         "visualization recovery accent": "color: window.themeAccentColors[window.selectedThemeIndex]",
         "visualization recovery responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
