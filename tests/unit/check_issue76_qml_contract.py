@@ -37,6 +37,7 @@ def main() -> int:
         "capture endpoint current selection": "Current capture endpoint: \" + currentText",
         "parent folder accessible name": "Accessible.name: \"Go to parent folder\"",
         "browser keyboard guidance": "Use Up and Down to select an entry",
+        "library empty state role": "Accessible.role: Accessible.StaticText",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",

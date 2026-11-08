@@ -475,6 +475,7 @@ ApplicationWindow {
                                 objectName: "browserEmptyMessage"
                                 text: window.browserEmptyMessage()
                                 Accessible.name: "Library browser empty state"
+                                Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                             }
                             Button {
