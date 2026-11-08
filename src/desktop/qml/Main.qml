@@ -11,7 +11,11 @@ ApplicationWindow {
     width: 1000; height: 700
     minimumWidth: 600; minimumHeight: 440
     title: "Beatglass"
-    onClosing: if (overlayBridge) overlayBridge.hideOverlay()
+    onClosing: {
+        window.overlayWasVisibleBeforeAvailabilityLoss = false
+        window.overlayDisplayRecoveryPending = false
+        if (overlayBridge) overlayBridge.hideOverlay()
+    }
     property var metadataBridge: metadata
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
