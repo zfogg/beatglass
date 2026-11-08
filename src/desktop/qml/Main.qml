@@ -1132,13 +1132,13 @@ ApplicationWindow {
             objectName: "settingsPage"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 14
-                Label { text: "Settings"; font.pixelSize: 28; font.bold: true; color: window.themeForegrounds[window.selectedThemeIndex] }
+                Label { text: "Settings"; font.pixelSize: 28; font.bold: true; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Settings"; Accessible.role: Accessible.Heading; ToolTip.text: "Audio capture, appearance, and overlay settings" }
                 GroupBox {
                     title: "Audio capture"
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
-                        Label { text: "Output device"; font.bold: true }
+                        Label { text: "Output device"; font.bold: true; Accessible.name: "Output device settings"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the system output device used for monitoring" }
                             RowLayout {
                                 ComboBox {
                                     objectName: "endpointSelector"
