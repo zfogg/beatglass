@@ -18,32 +18,32 @@ void PlaybackSessionBridge::setDeviceId(int id) noexcept {
 #endif
   emit changed();
 }
-bool PlaybackSessionBridge::open(qulonglong epoch) { const bool ok = session_.start(epoch); if (ok) emit changed(); return ok; }
+bool PlaybackSessionBridge::open(qulonglong epoch) { const bool ok = session_.start(epoch); if (ok) { emit epochChanged(); emit stateChanged(); emit changed(); } return ok; }
 bool PlaybackSessionBridge::openSource(const QUrl& source, qulonglong epoch) {
   if (!source.isValid() || source.isEmpty()) return false;
-  const bool ok = session_.start(epoch); if (ok) { source_ = source; emit changed(); } return ok;
+  const bool ok = session_.start(epoch); if (ok) { source_ = source; emit sourceChanged(); emit epochChanged(); emit stateChanged(); emit changed(); } return ok;
 }
 bool PlaybackSessionBridge::replaceSource(const QUrl& source, qulonglong epoch) {
   if (!source.isValid() || source.isEmpty() || !session_.replace(epoch)) return false;
-  source_ = source; emit changed(); return true;
+  source_ = source; emit sourceChanged(); emit epochChanged(); emit changed(); return true;
 }
 bool PlaybackSessionBridge::pause() { const bool ok = session_.pause();
 #ifdef _WIN32
   if (ok && native_) native_->pause();
 #endif
-  if (ok) emit changed(); return ok; }
+  if (ok) { emit stateChanged(); emit changed(); } return ok; }
 void PlaybackSessionBridge::stop() { session_.stop();
 #ifdef _WIN32
   if (native_) native_->stop();
 #endif
   native_running_ = false;
   native_error_.clear();
-  source_ = QUrl{}; emit changed(); }
+  source_ = QUrl{}; emit sourceChanged(); emit epochChanged(); emit stateChanged(); emit changed(); }
 bool PlaybackSessionBridge::seek(qulonglong frame, qulonglong epoch) { const bool ok = session_.seek(frame, epoch);
 #ifdef _WIN32
   if (ok && native_) { native_->stop(); native_running_ = false; }
 #endif
-  if (ok) emit changed(); return ok; }
+  if (ok) { emit epochChanged(); emit changed(); } return ok; }
 void PlaybackSessionBridge::refreshDevices() {
 #ifdef _WIN32
   devices_.clear(); bool selected_present = device_id_ < 0;
@@ -73,4 +73,4 @@ bool PlaybackSessionBridge::resume() { const bool ok = session_.resume();
 #ifdef _WIN32
   if (ok && native_ && !native_->resume()) return false;
 #endif
-  if (ok) emit changed(); return ok; }
+  if (ok) { emit stateChanged(); emit changed(); } return ok; }
