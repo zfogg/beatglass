@@ -54,6 +54,10 @@ int main() {
   const auto after_remove = beatglass::library::browse(dir.path, "alpha");
   require(after_remove.entries.empty() && after_remove.diagnostic.empty(),
           "removed catalog entry remained visible");
+  std::ofstream(dir.path / "Beta.mp3") << "audio";
+  const auto renamed_replacement = beatglass::library::browse(dir.path, "beta");
+  require(renamed_replacement.entries.size() == 1 && renamed_replacement.entries[0].name == "Beta.mp3",
+          "replacement source was not visible after catalog refresh");
   std::filesystem::remove_all(dir.path / "Mixes");
   const auto after_directory_remove = beatglass::library::browse(dir.path, "mix");
   require(after_directory_remove.entries.empty() && after_directory_remove.diagnostic.empty(),

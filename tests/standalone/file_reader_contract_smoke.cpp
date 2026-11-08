@@ -49,7 +49,13 @@ int main() {
   }
   { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
   { FileReader reader(wav, 8); assert(reader.source_changed()); }
-  std::filesystem::remove(wav, cleanup);
+  const auto moved = wav.string() + ".moved";
+  std::filesystem::rename(wav, moved);
+  bool rename_failed = false;
+  try { FileReader reader(wav, 10); }
+  catch (const FileOpenError& error) { rename_failed = error.kind() == FileOpenErrorKind::unreadable; }
+  assert(rename_failed);
+  std::filesystem::remove(moved, cleanup);
   bool reopen_failed = false;
   try { FileReader reader(wav, 10); }
   catch (const FileOpenError& error) { reopen_failed = error.kind() == FileOpenErrorKind::unreadable; }
