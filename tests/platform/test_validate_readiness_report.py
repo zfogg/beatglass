@@ -142,3 +142,16 @@ class ReadinessReportContractTest(unittest.TestCase):
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("manifest artifacts must be an array", errors)
             self.assertIn("manifest scenarios must be an array", errors)
+
+    def test_duplicate_manifest_scenario_ids_are_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["scenarios"].append(dict(manifest["scenarios"][0]))
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("duplicate manifest scenario id", errors)
