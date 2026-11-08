@@ -82,6 +82,11 @@ public:
   FileReader& operator=(const FileReader&) = delete;
   /** Read-only metadata, borrowed until this reader is destroyed. */
   const FileMetadata& metadata() const noexcept;
+  /** Return whether a path-backed source's size or modification time changed
+   * since open. This is a cheap guard, not a content-identity proof; borrowed
+   * sources always return false.
+   */
+  bool source_changed() const noexcept;
   /** Pull normalized float frames into caller-owned interleaved storage.
    * @param buffer Nonempty storage sized to a whole number of source frames.
    * @param cancel Checked before I/O and during borrowed-source reads; blocking

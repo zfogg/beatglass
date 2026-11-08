@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cctype>
+#include <system_error>
 namespace beatglass {
 namespace {
 bool unsupported_extension(const std::filesystem::path& path) {
@@ -14,9 +15,9 @@ bool unsupported_extension(const std::filesystem::path& path) {
 }
 }
 struct FileReader::Impl {
-  SNDFILE* handle{}; SF_INFO info{}; FileMetadata metadata; std::uint64_t epoch{}, position{}; bool ended{}, failed{};
+  SNDFILE* handle{}; SF_INFO info{}; FileMetadata metadata; std::filesystem::path path; std::filesystem::file_time_type initial_modified{}; std::uintmax_t initial_size{}; std::uint64_t epoch{}, position{}; bool ended{}, failed{};
   std::unique_ptr<detail::VirtualFileReader> virtual_reader;
-  Impl(const std::filesystem::path& path, std::uint64_t initial) : epoch(initial) {
+  Impl(const std::filesystem::path& path, std::uint64_t initial) : path(path), epoch(initial) {
 #ifdef _WIN32
     handle = sf_wchar_open(path.c_str(), SFM_READ, &info);
 #else
@@ -35,6 +36,8 @@ struct FileReader::Impl {
     try {
       metadata = {static_cast<std::uint32_t>(info.samplerate), static_cast<std::uint32_t>(info.channels),
         static_cast<std::uint64_t>(info.frames), (info.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV ? "WAV" : "audio"};
+      std::error_code ec; initial_size = std::filesystem::file_size(path, ec); if (ec) throw std::system_error(ec, "file_size");
+      initial_modified = std::filesystem::last_write_time(path, ec); if (ec) throw std::system_error(ec, "last_write_time");
     } catch (...) { sf_close(handle); handle = nullptr; throw; }
   }
   Impl(ByteSource& source, std::uint64_t initial, std::stop_token cancel) : epoch(initial),
@@ -53,6 +56,11 @@ FileReader::FileReader(ByteSource& source, std::uint64_t epoch, std::stop_token 
 }
 FileReader::~FileReader() = default;
 const FileMetadata& FileReader::metadata() const noexcept { return impl_->metadata; }
+bool FileReader::source_changed() const noexcept {
+  if (impl_->path.empty()) return false;
+  std::error_code ec; const auto size = std::filesystem::file_size(impl_->path, ec); if (ec || size != impl_->initial_size) return true;
+  const auto modified = std::filesystem::last_write_time(impl_->path, ec); return ec || modified != impl_->initial_modified;
+}
 FileReadResult FileReader::read(std::span<float> buffer, std::stop_token cancel) {
   auto& f = *impl_; if (f.failed) throw std::runtime_error("File reader failed");
   if (f.virtual_reader) return f.virtual_reader->read(buffer, cancel);
