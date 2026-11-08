@@ -15,6 +15,8 @@ if(BUILD_TESTING)
     add_test(NAME desktop_analysis_transition_contract
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_desktop_analysis_transition.py)
     set_tests_properties(desktop_analysis_transition_contract PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME cache_lookup_ui_contract COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_cache_lookup_ui_contract.py)
+    set_tests_properties(cache_lookup_ui_contract PROPERTIES LABELS unit TIMEOUT 10)
   endif()
   if(BEATGLASS_BASH)
     add_test(NAME macos_qualification_script_syntax

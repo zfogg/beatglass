@@ -282,6 +282,8 @@ The dependency-light desktop transition contract now verifies that Library queue
 
 The desktop storage bridge now exposes an asynchronous cache lookup (`findCached`) and publishes hit/result state only after the worker responds. This keeps SQLite off the GUI thread and gives the future decoder queue a real UI-owned handoff; no decoder or analysis is started by the lookup, and native UI qualification remains pending.
 
+The Library UI now provides a read-only cache lookup action for content, engine, configuration and mode identities. It enables the worker-backed call only when all fields are present; decoder admission and source revalidation remain queue-owned.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff

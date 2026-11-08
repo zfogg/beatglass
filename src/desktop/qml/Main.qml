@@ -814,6 +814,24 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "Analysis cache status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            RowLayout {
+                                objectName: "analysisCacheLookupControls"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.findCached !== undefined
+                                Layout.fillWidth: true
+                                spacing: 6
+                                TextField { id: cacheContent; objectName: "analysisCacheContent"; placeholderText: "content identity"; Layout.fillWidth: true }
+                                TextField { id: cacheEngine; objectName: "analysisCacheEngine"; placeholderText: "engine"; Layout.fillWidth: true }
+                                TextField { id: cacheConfig; objectName: "analysisCacheConfig"; placeholderText: "configuration"; Layout.fillWidth: true }
+                                TextField { id: cacheMode; objectName: "analysisCacheMode"; placeholderText: "offline/live"; Layout.preferredWidth: 100 }
+                                Button {
+                                    objectName: "lookupAnalysisCache"
+                                    text: "Check cache"
+                                    enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== ""
+                                    Accessible.name: "Check analysis cache"
+                                    Accessible.description: "Look up a completed result without starting decoder or analysis work."
+                                    onClicked: storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
+                                }
+                            }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
                                 visible: typeof storageRecovery !== "undefined"
