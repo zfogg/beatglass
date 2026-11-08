@@ -46,6 +46,12 @@ menubar_dock_reopen	UNRUN	-
 EOF
 (cd "$out_dir" && shasum -a 256 build/beatglass-desktop.app/Contents/MacOS/beatglass-desktop build/beatglass-coreaudio-smoke.app/Contents/MacOS/beatglass-coreaudio-smoke build/beatglass-coreaudio-recovery.app/Contents/MacOS/beatglass-coreaudio-recovery) > "$out_dir/qualification-artifacts.sha256"
 "$verifier" "$out_dir"
+printf 'commit=0123456789abcdef0123456789abcdef01234567\n' >> "$out_dir/qualification-manifest.txt"
+if "$verifier" "$out_dir"; then
+  echo "duplicate manifest key unexpectedly passed" >&2
+  exit 1
+fi
+sed -i '' '$d' "$out_dir/qualification-manifest.txt"
 sed -i '' '2s/UNRUN/-FAIL-/' "$out_dir/qualification-cases.tsv"
 if "$verifier" "$out_dir"; then
   echo "failed case without evidence unexpectedly passed" >&2
