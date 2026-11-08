@@ -18,12 +18,22 @@ validator = _load("validate_readiness_report")
 readiness = _load("check_evidence_readiness")
 handoff_docs = _load("check_qualification_handoff")
 consumer = _load("consume_readiness_handoff")
+ingester = _load("ingest_qualification_artifacts")
 
 
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
-        check_docs: bool = False, consume_report: bool = False) -> list[str]:
+        check_docs: bool = False, consume_report: bool = False,
+        native_output: Path | None = None, native_platform: str | None = None) -> list[str]:
+    ingestion_errors = []
+    if native_output is not None:
+        if native_platform not in {"windows", "macos", "linux"}:
+            ingestion_errors.append(f"unsupported native platform: {native_platform}")
+        else:
+            target = bundles / native_platform / "manifest.json"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            ingestion_errors.extend(ingester.ingest(native_output, target))
     report = generator.build_report(bundles)
-    errors = []
+    errors = list(ingestion_errors)
     if status is not None:
         readiness_errors = readiness.check(status, bundles, max_age_hours)
         report["handoff_check_errors"] = readiness_errors
@@ -52,8 +62,11 @@ def main() -> int:
     parser.add_argument("--max-age-hours", type=float, default=168)
     parser.add_argument("--check-docs", action="store_true", help="run the qualification documentation/tool checker")
     parser.add_argument("--consume", action="store_true", help="run the downstream report consumer after writing")
+    parser.add_argument("--native-output", type=Path, help="native qualification script output to ingest")
+    parser.add_argument("--native-platform", choices=("windows", "macos", "linux"))
     args = parser.parse_args()
-    errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs, args.consume)
+    errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs, args.consume,
+                 args.native_output, args.native_platform)
     if errors:
         print("\n".join(errors))
         return 1
