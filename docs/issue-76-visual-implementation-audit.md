@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+When overlay recovery is unavailable, persisted retry rejection remains announced and keyboard-focusable even with reduced motion enabled. The message names the blocked identity/decoder/source condition and points to fresh source and display selection; restoring a compatible source/display clears the stale rejection before retry.
+
 Persisted retry rejection is visible alongside overlay-unavailable/retry states: stale identity, incompatible decoder snapshot, or missing source metadata is reported as a blocked retry, not a successful overlay recovery. The rejection message remains focusable and the user can choose a fresh source/display target; native timing remains open.
 
 Overlay Retry is readiness-gated by an available selected display. The unavailable/display-loss state keeps Retry disabled while no target exists, preserves reduced-motion behavior, and re-enables the action only after display restoration; the accessible value distinguishes “available” from “waiting for a display.”
