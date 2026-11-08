@@ -27,6 +27,8 @@ MARKERS = {
     "qml endpoint stale clear": "Selection cleared because the capture endpoint changed.",
     "qml endpoint retry failure": "Capture endpoint retry failed; check permission and reacquire a device.",
     "qml overlay recovery": "DJ overlay unavailable; output monitoring remains unavailable until the display recovers.",
+    "qml overlay hide recovery": "DJ overlay hidden; output monitoring remains available in the control window.",
+    "qml overlay display recovery": "DJ overlay display changed; output monitoring may reacquire.",
 }
 
 

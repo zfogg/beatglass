@@ -141,6 +141,7 @@ ApplicationWindow {
     function hideOverlayAndRestoreControls() {
         if (!window.overlayBridge) return
         window.overlayBridge.hideOverlay()
+        window.announceCaptureRecoveryState("DJ overlay hidden; output monitoring remains available in the control window.")
         window.show()
         window.raise()
         window.requestActivate()
@@ -1870,7 +1871,7 @@ ApplicationWindow {
                     Accessible.description: "Show, unlock, or hide the DJ overlay window."
                     ToolTip.text: window.overlayBridge && window.overlayBridge.available ? "Overlay window actions are available" : "Overlay window actions are unavailable"
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Show the DJ overlay window"; ToolTip.text: "Show the DJ overlay and hide the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
-                    Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
+                    Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: { window.overlayBridge.setClickThrough(false); window.announceCaptureRecoveryState("DJ overlay unlocked; visualization recovery focus restored.") } }
                     Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
                 }
                 RowLayout {
@@ -1924,7 +1925,7 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
-                        onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
+                        onActivated: if (window.overlayBridge) { window.overlayBridge.moveToScreen(currentIndex); window.announceCaptureRecoveryState("DJ overlay display changed; output monitoring may reacquire.") }
                         Layout.fillWidth: true
                     }
                     Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay display status" }
