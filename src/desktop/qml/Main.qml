@@ -2552,7 +2552,9 @@ ApplicationWindow {
                     Accessible.name: "Overlay geometry status: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Persisted overlay position and size, or the fallback state when native geometry is unavailable."
+                    Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
+                        ? "Persisted overlay position and size: " + text + "."
+                        : "Persisted overlay position and size unavailable; control-window fallback remains active."
                     ToolTip.text: "Current persisted overlay position and size"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
