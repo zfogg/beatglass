@@ -78,6 +78,10 @@ bool OverlayController::attach(QQuickWindow* overlay, QWindow* control) {
 void OverlayController::detach() {
   save_timer_.stop(); saveSettings();
   if (overlay_) {
+    connect(overlay_, &QWindow::xChanged, this, &OverlayController::geometryChanged);
+    connect(overlay_, &QWindow::yChanged, this, &OverlayController::geometryChanged);
+    connect(overlay_, &QWindow::widthChanged, this, &OverlayController::geometryChanged);
+    connect(overlay_, &QWindow::heightChanged, this, &OverlayController::geometryChanged);
     if (native_ && !native_->apply(overlay_, false)) overlay_->hide();
     overlay_->hide();
     overlay_->removeEventFilter(this);
@@ -108,6 +112,8 @@ void OverlayController::setOpacity(qreal value) {
   if (overlay_ && std::isfinite(value)) overlay_->setOpacity(std::clamp(value, qreal(0), qreal(1)));
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(0.9); }
+QRect OverlayController::geometry() const { return overlay_ ? overlay_->geometry() : QRect{}; }
+QString OverlayController::displayName() const { auto* screen = overlay_ ? QGuiApplication::screenAt(overlay_->geometry().center()) : nullptr; return screen ? screen->name() : QString{}; }
 void OverlayController::scheduleSave() {
   if (!settings_ || !available_ || !overlay_ || restoring_) return;
   saved_geometry_ = overlay_->geometry(); saved_opacity_ = overlay_->opacity(); have_snapshot_ = true;

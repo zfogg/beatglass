@@ -1,6 +1,8 @@
 #pragma once
 #include <QObject>
 #include <QPointer>
+#include <QRect>
+#include <QString>
 
 class QEvent;
 class QQuickWindow;
@@ -15,6 +17,8 @@ class OverlayController final : public QObject {
   Q_OBJECT
   Q_PROPERTY(bool clickThrough READ clickThrough NOTIFY clickThroughChanged)
   Q_PROPERTY(qreal opacity READ opacity NOTIFY opacityChanged)
+  Q_PROPERTY(QRect geometry READ geometry NOTIFY geometryChanged)
+  Q_PROPERTY(QString displayName READ displayName NOTIFY geometryChanged)
 public:
   /** Configure the overlay as transparent, frameless and always on top. The control window is the escape path and must outlive this controller or trigger automatic unlock. Optional settings are caller-owned, must outlive the controller and are read and written only on the GUI thread. Saved position and opacity are restored; visibility remains caller-controlled and click-through starts disabled. */
   OverlayController(QQuickWindow* overlay, QWindow* control, QObject* parent = nullptr, QSettings* settings = nullptr);
@@ -24,6 +28,10 @@ public:
   Q_INVOKABLE void setOpacity(qreal opacity);
   /** Return the current whole-window opacity, or one if the overlay no longer exists. */
   qreal opacity() const;
+  /** Return logical overlay geometry, or an empty rectangle when unavailable. */
+  QRect geometry() const;
+  /** Return the current display name, or empty when unavailable. */
+  QString displayName() const;
   /** Enable click-through only while the distinct control window is visible and not minimized; return whether the requested state was applied. Hiding, minimizing, closing or destroying the control window unlocks the overlay. */
   Q_INVOKABLE bool setClickThrough(bool enabled);
   /** Return the current click-through state. */
@@ -40,6 +48,7 @@ public:
   Q_SIGNAL void clickThroughChanged(bool enabled);
   /** Emitted on the GUI thread when the controller changes opacity. */
   Q_SIGNAL void opacityChanged(qreal opacity);
+  Q_SIGNAL void geometryChanged();
 protected:
   /** Unlock if the control window is hidden, minimized or closed. */
   bool eventFilter(QObject* watched, QEvent* event) override;

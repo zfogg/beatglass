@@ -20,6 +20,10 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     if (!(GetAsyncKeyState(VK_LBUTTON) & 0x8000)) endDrag();
   });
   if (overlay_) {
+    connect(overlay_, &QWindow::xChanged, this, &OverlayController::geometryChanged);
+    connect(overlay_, &QWindow::yChanged, this, &OverlayController::geometryChanged);
+    connect(overlay_, &QWindow::widthChanged, this, &OverlayController::geometryChanged);
+    connect(overlay_, &QWindow::heightChanged, this, &OverlayController::geometryChanged);
     overlay_->setColor(Qt::transparent);
     connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; setClickThrough(false); });
     applyFlags();
@@ -52,6 +56,8 @@ void OverlayController::setOpacity(qreal opacity) {
   }
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(1); }
+QRect OverlayController::geometry() const { return overlay_ ? overlay_->geometry() : QRect{}; }
+QString OverlayController::displayName() const { auto* screen = overlay_ ? QGuiApplication::screenAt(overlay_->geometry().center()) : nullptr; return screen ? screen->name() : QString{}; }
 bool OverlayController::setClickThrough(bool enabled) {
   if (enabled) {
     const auto control_state = !control_ ? OverlayControlState::unavailable :
