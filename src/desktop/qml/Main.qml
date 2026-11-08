@@ -254,6 +254,8 @@ ApplicationWindow {
         if (typeof visualizationCanvas !== "undefined") {
             visualizationCanvas.selectedPosition = -1
             visualizationCanvas.renderedRevision = -1
+            visualizationCanvas.renderedWaveform = []
+            visualizationCanvas.renderedSpectrum = []
             visualizationCanvas.requestPaint()
         }
         if (typeof visualizationPresentation !== "undefined"
@@ -304,8 +306,8 @@ ApplicationWindow {
         function onChanged() {
             if (window.playbackBridge.state !== "Stopped"
                     && typeof visualizationPresentation !== "undefined"
-                    && visualizationPresentation.waveform.length > 0)
-                window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationPresentation.waveform.length)
+                    && visualizationCanvas.renderedWaveform.length > 0)
+                window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationCanvas.renderedWaveform.length)
         }
     }
 
@@ -1458,7 +1460,7 @@ ApplicationWindow {
                         && window.playbackBridge
                         && window.playbackBridge.state !== "Stopped"
                         && typeof visualizationPresentation !== "undefined"
-                        && visualizationPresentation.waveform.length > 0
+                        && visualizationCanvas.renderedWaveform.length > 0
                     Accessible.name: "Seek playback to visualization position"
                     Accessible.value: enabled ? "available" : "unavailable"
                     Accessible.role: Accessible.Button
@@ -1466,7 +1468,7 @@ ApplicationWindow {
                         ? "Seek playback to the selected waveform position using the available waveform sample span."
                         : "Select a waveform position and start playback before seeking."
                     ToolTip.text: enabled ? "Seek playback to the selected waveform position" : "Seeking requires an active playback source and waveform data"
-                    onClicked: window.seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationPresentation.waveform.length)
+                    onClicked: window.seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationCanvas.renderedWaveform.length)
                 }
                 }
                 Label {
