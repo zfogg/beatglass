@@ -27,6 +27,7 @@ required = {
     "batch latest result": 'Q_PROPERTY(QString batchLastResult READ batchLastResult',
     "batch result rendering": 'objectName: "analysisBatchLastResult"',
     "bounded displayed result": 'kMaxDisplayedResultBytes = 4096',
+    "fresh batch resets frames": 'if (frames_ != 0) { frames_ = 0; emit progressChanged(); }',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:

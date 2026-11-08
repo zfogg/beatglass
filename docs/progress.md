@@ -310,6 +310,8 @@ Displayed worker and batch result text is capped at 4096 bytes with an explicit 
 
 Starting a fresh batch also clears any prior single-operation result before queue admission, so the Library surface cannot attribute old output to the new batch.
 
+Fresh batch admission also resets the displayed aggregate frame count, preventing progress from the previous single operation from appearing on the new batch.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
