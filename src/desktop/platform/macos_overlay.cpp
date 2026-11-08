@@ -59,6 +59,12 @@ bool OverlayController::attach(QQuickWindow* overlay, QWindow* control) {
   overlay_->setOpacity(0.9);
   bool restoredGeometry = false;
   if (settings_) {
+    const auto savedDisplay = settings_->value(QStringLiteral("overlay/displayName")).toString();
+    if (!savedDisplay.isEmpty()) {
+      for (auto* screen : QGuiApplication::screens()) {
+        if (screen->name() == savedDisplay) { overlay_->setScreen(screen); break; }
+      }
+    }
     const QRect saved = settings_->value(QStringLiteral("overlay/geometry")).toRect();
     if (saved.isValid() && saved.width() <= 10000 && saved.height() <= 10000) { overlay_->setGeometry(saved); restoredGeometry = true; }
     bool validOpacity = false;
@@ -123,6 +129,10 @@ void OverlayController::saveSettings() {
   if (!settings_ || !have_snapshot_ || restoring_) return;
   settings_->setValue(QStringLiteral("overlay/geometry"), saved_geometry_);
   settings_->setValue(QStringLiteral("overlay/opacity"), saved_opacity_);
+  if (overlay_) {
+    if (auto* screen = QGuiApplication::screenAt(overlay_->geometry().center()))
+      settings_->setValue(QStringLiteral("overlay/displayName"), screen->name());
+  }
 }
 bool OverlayController::setClickThrough(bool enabled) {
   if (!overlay_ || !native_) return !enabled;
