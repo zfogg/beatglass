@@ -63,6 +63,7 @@ void OverlayController::setOpacity(qreal opacity) {
   }
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(1); }
+bool OverlayController::available() const { return overlay_ && control_; }
 QRect OverlayController::geometry() const { return overlay_ ? overlay_->geometry() : QRect{}; }
 QString OverlayController::displayName() const { auto* screen = overlay_ ? QGuiApplication::screenAt(overlay_->geometry().center()) : nullptr; return screen ? screen->name() : QString{}; }
 QStringList OverlayController::screenNames() const {
@@ -86,6 +87,22 @@ bool OverlayController::moveToScreen(int index) {
   overlay_->setGeometry(QRect(bounds.center() - QPoint(size.width() / 2, size.height() / 2), size));
   keepOnScreen();
   emit screensChanged();
+  return true;
+}
+bool OverlayController::showOverlay() {
+  if (!available()) return false;
+  keepOnScreen();
+  overlay_->show();
+  return true;
+}
+void OverlayController::hideOverlay() {
+  setClickThrough(false);
+  if (overlay_) overlay_->hide();
+}
+bool OverlayController::resizeOverlay(int width, int height) {
+  if (!overlay_ || width <= 0 || height <= 0) return false;
+  overlay_->resize(width, height);
+  keepOnScreen();
   return true;
 }
 bool OverlayController::setClickThrough(bool enabled) {

@@ -22,6 +22,7 @@ class OverlayController final : public QObject {
   Q_PROPERTY(QString displayName READ displayName NOTIFY geometryChanged)
   Q_PROPERTY(QStringList screenNames READ screenNames NOTIFY screensChanged)
   Q_PROPERTY(int screenIndex READ screenIndex NOTIFY screensChanged)
+  Q_PROPERTY(bool available READ available CONSTANT)
 public:
   /** Configure the overlay as transparent, frameless and always on top. The control window is the escape path and must outlive this controller or trigger automatic unlock. Optional settings are caller-owned, must outlive the controller and are read and written only on the GUI thread. Saved position and opacity are restored; visibility remains caller-controlled and click-through starts disabled. */
   OverlayController(QQuickWindow* overlay, QWindow* control, QObject* parent = nullptr, QSettings* settings = nullptr);
@@ -31,6 +32,8 @@ public:
   Q_INVOKABLE void setOpacity(qreal opacity);
   /** Return the current whole-window opacity, or one if the overlay no longer exists. */
   qreal opacity() const;
+  /** Return whether both overlay and escape-control windows are available. */
+  bool available() const;
   /** Return logical overlay geometry, or an empty rectangle when unavailable. */
   QRect geometry() const;
   /** Return the current display name, or empty when unavailable. */
@@ -41,6 +44,12 @@ public:
   int screenIndex() const;
   /** Move and center the overlay on the selected display, clamping to its work area. */
   Q_INVOKABLE bool moveToScreen(int index);
+  /** Show the overlay after clamping it to a current display. */
+  Q_INVOKABLE bool showOverlay();
+  /** Hide the overlay and clear click-through state. */
+  Q_INVOKABLE void hideOverlay();
+  /** Resize the overlay to positive logical dimensions, clamped on screen. */
+  Q_INVOKABLE bool resizeOverlay(int width, int height);
   /** Enable click-through only while the distinct control window is visible and not minimized; return whether the requested state was applied. Hiding, minimizing, closing or destroying the control window unlocks the overlay. */
   Q_INVOKABLE bool setClickThrough(bool enabled);
   /** Return the current click-through state. */
