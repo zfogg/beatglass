@@ -96,6 +96,7 @@ TestCase {
         let size = findChild(app, "overlaySize")
         compare(toggle.Accessible.description, "Allow pointer input to pass through the overlay window; currently disabled")
         compare(findChild(app, "overlayOpacity").Accessible.description, "Adjust the overlay window opacity; current value 90%")
+        compare(findChild(app, "overlayOpacity").ToolTip.text, "Adjust overlay opacity from 20% to 100%")
         compare(display.Accessible.description, "Choose the display where the overlay is shown; current display unavailable")
         compare(display.ToolTip.text, "Choose the display where the overlay is shown")
         compare(size.Accessible.description, "Choose the overlay window size; current size Medium")
