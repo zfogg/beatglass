@@ -39,6 +39,8 @@ int main() {
     bool stale_epoch = false;
     try { reader.seek(0, 9); } catch (const std::invalid_argument&) { stale_epoch = true; }
     assert(stale_epoch);
+    reader.seek(4, 11);
+    assert(reader.read(samples).status == FileReadStatus::end);
     bool out_of_range = false;
     try { reader.seek(5, 10); } catch (const std::out_of_range&) { out_of_range = true; }
     assert(out_of_range);

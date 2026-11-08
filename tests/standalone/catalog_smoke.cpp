@@ -54,5 +54,9 @@ int main() {
   const auto after_remove = beatglass::library::browse(dir.path, "alpha");
   require(after_remove.entries.empty() && after_remove.diagnostic.empty(),
           "removed catalog entry remained visible");
+  std::filesystem::remove_all(dir.path / "Mixes");
+  const auto after_directory_remove = beatglass::library::browse(dir.path, "mix");
+  require(after_directory_remove.entries.empty() && after_directory_remove.diagnostic.empty(),
+          "removed navigation directory remained visible");
   return EXIT_SUCCESS;
 }
