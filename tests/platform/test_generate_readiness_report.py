@@ -32,6 +32,21 @@ class GenerateReadinessReportTest(unittest.TestCase):
             report = module.build_report(root)
             self.assertFalse(report["ready"])
             self.assertTrue(any(not a["hash_valid"] for r in report["platforms"] for a in r["artifact_inventory"]))
+            self.assertTrue(any("missing artifact" in error for r in report["platforms"] for error in r["errors"]))
+
+    def test_generation_records_path_safety_errors(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for platform in module.PLATFORMS:
+                bundle = root / platform; bundle.mkdir()
+                manifest = {"platform": platform, "commit": "x", "captured_at": "now", "environment": "test",
+                            "artifacts": [{"path": "../escape.bin", "sha256": "0" * 64}],
+                            "qualification_output": "../output.txt",
+                            "scenarios": [{"id": "capture", "status": "PASS", "evidence": "../evidence.txt"}]}
+                (bundle / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            report = module.build_report(root)
+            errors = [error for row in report["platforms"] for error in row["errors"]]
+            self.assertTrue(any("escapes bundle" in error for error in errors))
 
 
 if __name__ == "__main__":
