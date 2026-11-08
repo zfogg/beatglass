@@ -14,7 +14,7 @@ class AnalysisJobBridge final : public QObject {
   Q_PROPERTY(bool canRetry READ canRetry NOTIFY statusChanged)
 public:
   explicit AnalysisJobBridge(beatglass::library_detail::JobExecutor&, QObject* parent = nullptr);
-  std::shared_ptr<beatglass::library_detail::JobHandle> submit(beatglass::library::AnalysisOperation);
+  std::shared_ptr<beatglass::library::RetryableAnalysis> submit(beatglass::library::AnalysisOperation);
   qulonglong frames() const noexcept { return frames_; }
   QString status() const { return status_; }
   bool canCancel() const noexcept;
@@ -28,9 +28,8 @@ private slots:
   void poll();
 private:
   void setStatus();
-  beatglass::library::AnalysisOperation last_operation_;
   beatglass::library::AnalysisRunner runner_;
-  std::shared_ptr<beatglass::library_detail::JobHandle> handle_;
+  std::shared_ptr<beatglass::library::RetryableAnalysis> retryable_;
   QTimer poll_timer_;
   qulonglong frames_{};
   QString status_{QStringLiteral("Idle")};
