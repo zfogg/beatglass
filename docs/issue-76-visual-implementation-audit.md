@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Overlay hide, unlock, display replacement, and retry preserve the reduced-motion contract: announcements and accessible state text remain, while motion is suppressed. Focus returns to a recoverable control after overlay/display changes; native multi-monitor and assistive-technology timing remain qualification gaps.
+
 Endpoint replacement and reacquisition preserve focus on the endpoint selector and route announcements through the shared recovery helper. Reduced-motion mode changes animation presentation only; stale clearing, status text, and keyboard focus remain identical across Settings, DJ, and overlay surfaces.
 
 Endpoint recovery status is consistent across Settings, DJ monitoring, and overlay: endpoint changes announce stale-selection clearing, retry/reacquisition, and fresh accepted snapshots through one helper. Reduced-motion mode suppresses transition animation while preserving the same text and focus semantics; native cross-screen timing remains open.
