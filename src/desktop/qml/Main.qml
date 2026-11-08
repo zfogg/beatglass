@@ -1128,6 +1128,7 @@ ApplicationWindow {
                     property var renderedWaveform: []
                     property var renderedSpectrum: []
                     readonly property string acceptedResultIdentity: window.acceptedAnalysisIdentity
+                    readonly property bool reducedMotion: window.themePreferencesBridge !== null && window.themePreferencesBridge.reduceMotion
                     activeFocusOnTab: true
                     Keys.onLeftPressed: {
                         const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
@@ -1428,6 +1429,22 @@ ApplicationWindow {
                     Accessible.role: Accessible.StaticText
                     Accessible.description: "Queue and cached-result status adjacent to the generation-gated visualization handoff."
                     ToolTip.text: "Cached, queued, and accepted analysis handoff status"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
+                    objectName: "visualizationMotionState"
+                    text: visualizationCanvas.reducedMotion
+                        ? "Reduced motion · static accepted snapshot"
+                        : "Full motion · static accepted snapshot"
+                    Accessible.name: "Visualization motion state: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "Reduced motion changes presentation animation only; accepted waveform and FFT snapshots remain available for selection and seek."
+                    ToolTip.text: "Motion preference for visualization presentation"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true

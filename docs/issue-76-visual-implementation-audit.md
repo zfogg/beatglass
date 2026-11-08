@@ -522,6 +522,8 @@ The visualization status group now exposes the queued/accepted analysis handoff 
 
 That identity is now withheld until the selected Library analysis reports a completed/result-ready handoff. Canvas pointer and wheel selection are gated by the same completion contract, so an in-flight or unrelated presentation cannot create a seek target before the selected source has a usable result.
 
+The visualization now reports its reduced-motion state next to the accepted snapshot. Reduced motion affects animated presentation surfaces only; the accepted waveform and FFT arrays remain static, source-backed selection targets and continue to support playback seek.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
