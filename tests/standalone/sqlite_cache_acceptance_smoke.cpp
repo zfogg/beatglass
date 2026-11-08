@@ -175,6 +175,9 @@ int main() {
     assert(cache.invalidate(key));
     assert(!cache.find(key, result));
     assert(cache.find(next_config, result) && result == "config-b-republished");
+    cache.begin("republish", key);
+    assert(cache.publish("republish", key, "duplicate-result", {}, [] { return true; }) == Publish::error);
+    assert(!cache.find(key, result));
     const CacheKey unknown{"sha256:unknown", key.engine, key.config, key.mode};
     assert(!cache.invalidate(unknown));
     cache.begin("stale", unknown);
