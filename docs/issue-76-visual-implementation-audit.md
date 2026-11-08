@@ -512,6 +512,8 @@ Playback source and epoch transitions now provide explicit stale-clear explanati
 
 The analysis-handoff label now carries that stale-clear reason while waiting for replacement analysis, so source/epoch invalidation cannot silently appear as an ordinary empty state or allow old handoff context to look current.
 
+When a valid replacement revision arrives, the presentation change handler clears the stale-replacement message, updates the rendered revision, and requests the repaint in the same accepted-result callback.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

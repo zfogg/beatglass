@@ -416,6 +416,7 @@ def main() -> int:
         "visualization handoff repaint": "visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1",
         "visualization stale revision clear": "visualizationCanvas.renderedRevision = -1",
         "visualization invalid revision gate": "visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1",
+        "visualization accepted clears stale status": 'if (visualizationPresentation.revision >= 0) window.visualizationSelectionResetReason = ""',
         "visualization source transition clear": 'Selection cleared because the playback source changed.',
         "visualization epoch transition clear": 'Selection cleared because the playback epoch changed.',
         "visualization handoff stale status": '"Waiting for replacement analysis result; " + window.visualizationSelectionResetReason',
