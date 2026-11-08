@@ -17,13 +17,16 @@ required = {
     "coordinator storage lookup": 'coordinator_.storage().find_cached',
     "coordinator analysis submit": 'Q_INVOKABLE void submitAnalysis',
     "analysis status property": 'Q_PROPERTY(QString analysisStatus READ analysisStatus',
+<<<<<<< HEAD
     "analysis result property": 'Q_PROPERTY(QString analysisResult READ analysisResult',
     "analysis cancel": 'Q_INVOKABLE void cancelAnalysis()',
     "analysis retry": 'Q_INVOKABLE void retryAnalysis()',
+=======
     "admission properties": 'Q_PROPERTY(bool analysisReserved READ analysisReserved NOTIFY analysisAdmissionChanged)',
     "admission invokable": 'Q_INVOKABLE void admitAnalysis',
     "worker admission": 'coordinator_.storage().admit_analysis',
     "admission signal": 'void admitted(bool reserved, QString cachedResult);',
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
 }
 haystack = header + source + qml
 missing = [name for name, marker in required.items() if marker not in haystack]

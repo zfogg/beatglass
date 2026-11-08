@@ -16,9 +16,12 @@ class StorageRecoveryBridge final : public QObject {
   Q_PROPERTY(bool cacheHit READ cacheHit NOTIFY cachedResultChanged)
   Q_PROPERTY(QString cachedResult READ cachedResult NOTIFY cachedResultChanged)
   Q_PROPERTY(QString analysisStatus READ analysisStatus NOTIFY analysisStatusChanged)
+<<<<<<< HEAD
   Q_PROPERTY(QString analysisResult READ analysisResult NOTIFY analysisResultChanged)
+=======
   Q_PROPERTY(bool analysisReserved READ analysisReserved NOTIFY analysisAdmissionChanged)
   Q_PROPERTY(QString analysisAdmissionResult READ analysisAdmissionResult NOTIFY analysisAdmissionChanged)
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
 public:
   explicit StorageRecoveryBridge(QObject* parent = nullptr);
   ~StorageRecoveryBridge() override;
@@ -34,18 +37,21 @@ public:
   Q_INVOKABLE void findCached(QString content, QString engine, QString configuration, QString mode);
   /** Submit a path-backed analysis through the worker-owned coordinator. */
   Q_INVOKABLE void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode);
+<<<<<<< HEAD
   Q_INVOKABLE void cancelAnalysis();
   Q_INVOKABLE void retryAnalysis();
   bool cacheHit() const { return cacheHit_; }
   QString cachedResult() const { return cachedResult_; }
   QString analysisStatus() const { return analysisStatus_; }
   QString analysisResult() const { return analysisResult_; }
+=======
   Q_INVOKABLE void admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode);
   bool cacheHit() const { return cacheHit_; }
   QString cachedResult() const { return cachedResult_; }
   QString analysisStatus() const { return analysisStatus_; }
   bool analysisReserved() const { return analysisReserved_; }
   QString analysisAdmissionResult() const { return analysisAdmissionResult_; }
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
 public slots:
   void setDatabasePath(const QString& path);
   void selectRun(const QString& id);
@@ -56,8 +62,11 @@ signals:
   void selectedRunChanged();
   void cachedResultChanged();
   void analysisStatusChanged();
+<<<<<<< HEAD
   void analysisResultChanged();
+=======
   void analysisAdmissionChanged();
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
 private:
   class Worker;
   QThread workerThread_;
@@ -69,7 +78,10 @@ private:
   bool cacheHit_{};
   QString cachedResult_;
   QString analysisStatus_{QStringLiteral("Analysis idle")};
+<<<<<<< HEAD
   QString analysisResult_;
+=======
   bool analysisReserved_{};
   QString analysisAdmissionResult_;
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
 };
