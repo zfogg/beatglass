@@ -666,4 +666,6 @@ Replacement display selection now goes through a shared persistence helper that 
 
 On relaunch, the control window hydrates its preferred display identity and index from the native bridge after attachment. If the persisted identity is stale or absent from the current monitor list, selection-required state is raised immediately so the user can reconnect, forget, or replace the target.
 
+Relaunch hydration now validates native geometry and opacity as well. Valid persisted geometry is reapplied through the bridge and announced; missing or invalid geometry explicitly keeps the control-window fallback active rather than presenting an unpositioned overlay.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
