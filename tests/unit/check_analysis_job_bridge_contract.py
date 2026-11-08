@@ -25,6 +25,10 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
         self.assertIn('Cancel the active job and clear stale result presentation.', header)
         self.assertIn('Cancel active batch jobs and clear stale result/batch presentation.', header)
 
+    def test_cancellation_publishes_terminal_state_immediately(self):
+        source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
+        self.assertGreaterEqual(source.count('status_ = QStringLiteral("Cancelled"); emit statusChanged();'), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
