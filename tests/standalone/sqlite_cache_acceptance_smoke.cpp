@@ -62,6 +62,10 @@ int main() {
     cache.begin("next-config", next_config);
     assert(cache.publish("next-config", next_config, "config-b-data", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(next_config, live_result) && live_result == "config-b-data");
+    const CacheKey next_content{"sha256:two", key.engine, key.config, key.mode};
+    cache.begin("next-content", next_content);
+    assert(cache.publish("next-content", next_content, "content-two-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_content, live_result) && live_result == "content-two-data");
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
