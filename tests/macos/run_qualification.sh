@@ -231,6 +231,8 @@ fi
 
 manifest="$out_dir/qualification-manifest.txt"
 artifact_manifest="$out_dir/qualification-artifacts.sha256"
+qt_version="UNAVAILABLE"
+if command -v qmake >/dev/null 2>&1; then qt_version="$(qmake --version | tail -n 1)"; fi
 permission_result="${BEATGLASS_MACOS_PERMISSION_RESULT:-UNRUN}"
 if [[ "$permission_result" != "allowed" && "$permission_result" != "denied" && "$permission_result" != "UNRUN" ]]; then
   echo "BEATGLASS_MACOS_PERMISSION_RESULT must be allowed, denied, or UNRUN" >&2
@@ -276,6 +278,7 @@ fi
   printf 'sdk_version=%s\n' "$(xcrun --sdk macosx --show-sdk-version)"
   printf 'sdk_path=%s\n' "$sdk_path"
   printf 'developer_dir=%s\n' "$developer_dir"
+  printf 'qt_version=%s\n' "$qt_version"
   printf 'desktop_signing=%s\ntap_signing=%s\nrecovery_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$tap_signing" "$recovery_signing" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'permission_result=%s\n' "$permission_result"

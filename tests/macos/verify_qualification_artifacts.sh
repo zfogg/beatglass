@@ -19,7 +19,7 @@ command -v plutil >/dev/null 2>&1 || { echo "plutil is required" >&2; exit 1; }
 plutil -lint "$topology" >/dev/null || { echo "invalid display topology evidence: $topology" >&2; exit 1; }
 [[ -s "$audio_inventory" ]] || { echo "missing or empty audio endpoint inventory: $audio_inventory" >&2; exit 1; }
 plutil -lint "$audio_inventory" >/dev/null || { echo "invalid audio endpoint inventory: $audio_inventory" >&2; exit 1; }
-for key in commit macos_version architecture xcode_version sdk_version sdk_path developer_dir artifact_sha256; do
+for key in commit macos_version architecture xcode_version sdk_version sdk_path developer_dir qt_version artifact_sha256; do
   grep -q "^${key}=." "$manifest" || { echo "manifest missing ${key}" >&2; exit 1; }
 done
 manifest_hash_ref=$(sed -n 's/^artifact_sha256=//p' "$manifest")

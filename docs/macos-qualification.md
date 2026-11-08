@@ -75,6 +75,10 @@ The verifier also requires the three expected desktop, tap-smoke, and recovery e
 
 ## Build identity
 
+The qualification manifest records the detected Qt version (or explicit
+`UNAVAILABLE`) so overlay and desktop evidence is tied to an identified Qt
+deployment.
+
 Record the commit, macOS version, hardware model, Xcode and SDK versions, Qt version, signing state, selected output UID and display arrangement. Record whether the run used the production desktop bundle or a smoke bundle, plus the exact configure, build and CTest commands.
 
 ## Permission and capture
