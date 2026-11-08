@@ -261,6 +261,13 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           and [item["platform"] for item in provenance] == [row["platform"] for row in rows])
     aggregate_consistent = (summary_consistent and platform_summary_consistent and failure_summary_consistent
                             and len(required) == len(platform_failures))
+    exit_gate_reason_codes = sorted(categories)
+    if not platform_summary_consistent:
+        exit_gate_reason_codes.append("platform-matrix")
+    for name, valid in (("summary-consistency", summary_consistent), ("native-summary-consistency", native_summary_consistent),
+                        ("native-blocker-consistency", native_blockers_consistent), ("aggregate-consistency", aggregate_consistent)):
+        if not valid and name not in exit_gate_reason_codes:
+            exit_gate_reason_codes.append(name)
     return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
@@ -293,6 +300,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "aggregate_consistent": aggregate_consistent,
             "exit_gate_status": "READY" if readiness_ready else "PENDING",
             "exit_gate_reasons": [] if readiness_ready else errors,
+            "exit_gate_reason_codes": [] if readiness_ready else sorted(exit_gate_reason_codes),
             "ready": readiness_ready}
 
 
