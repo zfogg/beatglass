@@ -30,6 +30,8 @@ required = {
     "fresh batch resets frames": 'if (frames_ != 0) { frames_ = 0; emit progressChanged(); }',
     "single retry emits progress": 'frames_ = retryable_->frames();\n    emit progressChanged();',
     "invalid submit clears frames": 'if (frames_ != 0) { frames_ = 0; emit progressChanged(); }',
+    "source attribution property": 'Q_PROPERTY(QString sourcePath READ sourcePath',
+    "source attribution rendering": 'objectName: "analysisSourcePath"',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:

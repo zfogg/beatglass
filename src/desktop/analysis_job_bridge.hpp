@@ -13,6 +13,7 @@ class AnalysisJobBridge final : public QObject {
   Q_PROPERTY(qulonglong frames READ frames NOTIFY progressChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
   Q_PROPERTY(QString result READ result NOTIFY resultChanged)
+  Q_PROPERTY(QString sourcePath READ sourcePath NOTIFY sourceChanged)
   Q_PROPERTY(bool canCancel READ canCancel NOTIFY statusChanged)
   Q_PROPERTY(bool canRetry READ canRetry NOTIFY statusChanged)
   Q_PROPERTY(int batchAcceptedCount READ batchAcceptedCount NOTIFY batchChanged)
@@ -26,6 +27,7 @@ public:
   qulonglong frames() const noexcept { return frames_; }
   QString status() const { return status_; }
   QString result() const { return result_; }
+  QString sourcePath() const { return sourcePath_; }
   bool canCancel() const noexcept;
   bool canRetry() const noexcept;
   Q_INVOKABLE void cancel();
@@ -43,6 +45,7 @@ signals:
   void progressChanged();
   void statusChanged();
   void resultChanged();
+  void sourceChanged();
   void batchChanged();
 private slots:
   void poll();
@@ -61,4 +64,5 @@ private:
   qulonglong frames_{};
   QString status_{QStringLiteral("Idle")};
   QString result_;
+  QString sourcePath_;
 };

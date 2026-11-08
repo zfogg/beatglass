@@ -29,6 +29,8 @@ AnalysisJobBridge::AnalysisJobBridge(beatglass::library_detail::JobExecutor& exe
 }
 
 std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit(beatglass::library::AnalysisOperation op) {
+  const auto sourcePath = QString::fromStdString(op.source.path.string());
+  if (sourcePath_ != sourcePath) { sourcePath_ = sourcePath; emit sourceChanged(); }
   if (!op.valid()) {
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
