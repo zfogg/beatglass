@@ -34,6 +34,29 @@ TEST_CASE("malformed blocks cannot enter queue") {
   REQUIRE(q.push(in)); REQUIRE(q.pop(out)); CHECK(out.discontinuity);
 }
 
+TEST_CASE("empty and zero-channel blocks fail closed and mark reacquisition") {
+  AudioQueue<3, 4> q;
+  AudioQueue<3, 4>::Block out;
+
+  AudioBlock empty{{48000, 2}, 9, 100, 1234, false, std::array<float, 0>{}};
+  CHECK_FALSE(q.push(empty));
+  CHECK(q.dropped_frames() == 0);
+
+  AudioBlock zero_channels{{48000, 0}, 9, 100, 1234, false,
+                           std::array<float, 2>{1.0F, 2.0F}};
+  CHECK_FALSE(q.push(zero_channels));
+  CHECK(q.dropped_frames() == 0);
+
+  AudioBlock valid{{48000, 2}, 9, 100, 1234, false,
+                   std::array<float, 2>{3.0F, 4.0F}};
+  REQUIRE(q.push(valid));
+  REQUIRE(q.pop(out));
+  CHECK(out.discontinuity);
+  CHECK(out.epoch == 9);
+  CHECK(out.first_frame == 100);
+  CHECK(out.monotonic_ns == 1234);
+}
+
 TEST_CASE("a valid oversized block is dropped as complete frames") {
   AudioQueue<2, 2> q; AudioQueue<2, 2>::Block out;
   std::array<float, 4> oversized{1, 2, 3, 4};
