@@ -89,3 +89,10 @@ class ReadinessHandoffTest(unittest.TestCase):
             self.assertIn("documentation_check_errors", report)
             self.assertIn("ingestion_errors", report)
 
+    def test_handoff_exports_human_review_checklist(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; review = root / "review.md"
+            handoff.run(bundles, output, review_output=review)
+            self.assertIn("Gate status: **PENDING**", review.read_text(encoding="utf-8"))
+
