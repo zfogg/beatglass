@@ -92,3 +92,16 @@ class ReadinessReportContractTest(unittest.TestCase):
             report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("retained scenario evidence is missing", errors)
+
+    def test_scenario_evidence_cannot_escape_bundle(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["scenarios"][0]["evidence"] = "../manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("scenario evidence escapes retained bundle", errors)
