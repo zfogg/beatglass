@@ -17,6 +17,7 @@ class StorageRecoveryBridge final : public QObject {
   Q_PROPERTY(bool cacheHit READ cacheHit NOTIFY cachedResultChanged)
   Q_PROPERTY(QString cachedResult READ cachedResult NOTIFY cachedResultChanged)
   Q_PROPERTY(QString analysisStatus READ analysisStatus NOTIFY analysisStatusChanged)
+  Q_PROPERTY(bool analysisRetryable READ analysisRetryable NOTIFY analysisRetryableChanged)
   Q_PROPERTY(qulonglong analysisFrames READ analysisFrames NOTIFY analysisProgressChanged)
   Q_PROPERTY(QString analysisResult READ analysisResult NOTIFY analysisResultChanged)
   Q_PROPERTY(bool analysisReserved READ analysisReserved NOTIFY analysisAdmissionChanged)
@@ -48,6 +49,7 @@ public:
   bool cacheHit() const { return cacheHit_; }
   QString cachedResult() const { return cachedResult_; }
   QString analysisStatus() const { return analysisStatus_; }
+  bool analysisRetryable() const { return analysisRetryable_; }
   qulonglong analysisFrames() const { return analysisFrames_; }
   QString analysisResult() const { return analysisResult_; }
   Q_INVOKABLE void admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode);
@@ -66,6 +68,7 @@ signals:
   void selectedRunChanged();
   void cachedResultChanged();
   void analysisStatusChanged();
+  void analysisRetryableChanged();
   void analysisProgressChanged();
   void analysisResultChanged();
   void analysisAdmissionChanged();
@@ -81,6 +84,7 @@ private:
   bool cacheHit_{};
   QString cachedResult_;
   QString analysisStatus_{QStringLiteral("Analysis idle")};
+  bool analysisRetryable_{};
   qulonglong analysisFrames_{};
   QString analysisResult_;
   bool analysisReserved_{};
