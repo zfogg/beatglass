@@ -729,6 +729,8 @@ ApplicationWindow {
                         Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."
                         ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
                         onClicked: visualizationCanvas.viewMode = "waveform"
+                        Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; spectrumView.forceActiveFocus(); event.accepted = true }
+                        Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; event.accepted = true }
                         background: Rectangle {
                             color: waveformView.checked ? "#273b5d" : "#182231"
                             border.width: waveformView.activeFocus ? 3 : 1
@@ -742,6 +744,8 @@ ApplicationWindow {
                         Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."
                         ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
                         onClicked: visualizationCanvas.viewMode = "spectrum"
+                        Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; waveformView.forceActiveFocus(); event.accepted = true }
+                        Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; event.accepted = true }
                         background: Rectangle {
                             color: spectrumView.checked ? "#432c56" : "#182231"
                             border.width: spectrumView.activeFocus ? 3 : 1
