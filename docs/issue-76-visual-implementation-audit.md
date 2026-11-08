@@ -292,6 +292,8 @@ The playback control row is now exposed as one grouped accessible surface with a
 
 Theme preview swatches now expose a grouped semantic surface and entry tooltip, clarifying that the individual radio-style controls are one coordinated palette choice.
 
+Reset appearance now includes the current theme and motion mode in its accessible description as well as its tooltip, keeping recovery context consistent across assistive and pointer interfaces.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
