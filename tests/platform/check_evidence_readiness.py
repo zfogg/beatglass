@@ -134,6 +134,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "failure_categories": dict(sorted(row_categories.items())),
+                     "error_count": len(matrix_errors + errors),
+                     "retention_ok": not missing_artifacts and not mismatched_artifacts,
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
     errors = [error for row in rows for error in row["errors"]]
     categories = Counter()

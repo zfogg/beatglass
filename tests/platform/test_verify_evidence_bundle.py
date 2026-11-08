@@ -164,6 +164,8 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertGreater(result["failure_categories"]["retention"], 0)
             self.assertGreater(result["failure_categories"]["freshness"], 0)
             self.assertGreater(result["platforms"][0]["failure_categories"]["freshness"], 0)
+            self.assertFalse(result["platforms"][0]["retention_ok"])
+            self.assertEqual(result["platforms"][0]["error_count"], len(result["platforms"][0]["errors"]))
 
 
 if __name__ == "__main__":
