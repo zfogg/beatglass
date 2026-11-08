@@ -4,6 +4,16 @@ Beatglass does not currently claim a distributable installer. A native
 qualification build must nevertheless retain enough evidence to distinguish a
 working development tree from a package candidate.
 
+## Opt-in package metadata
+
+Release candidates can generate a package archive with CPack by configuring
+with `-DBEATGLASS_ENABLE_PACKAGING=ON` and running `cpack` from the build
+directory. The project supplies reproducible package identity and platform
+defaults (ZIP on Windows, DragNDrop on macOS, TGZ elsewhere). This is package
+metadata and archive generation only: installer signing, notarization,
+dependency bundling, update/rollback, and clean-machine installation remain
+separate release gates and must not be marked `PASS` from a local CPack run.
+
 ## Windows
 
 Run `tests/windows/run_qualification.ps1 -Build -RunTests -OutputDirectory

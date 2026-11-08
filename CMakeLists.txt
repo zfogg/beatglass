@@ -1,6 +1,27 @@
 cmake_minimum_required(VERSION 3.24)
 project(beatglass VERSION 0.1.0 LANGUAGES CXX)
 include(CTest)
+option(BEATGLASS_ENABLE_PACKAGING "Enable CPack package metadata for release candidates" OFF)
+
+# Packaging is opt-in: normal development builds never claim to produce an
+# installer.  When enabled, CPack receives reproducible package identity and
+# platform-appropriate generator defaults; signing/notarization remain
+# explicit native release gates documented in docs/packaging-qualification.md.
+if(BEATGLASS_ENABLE_PACKAGING)
+  set(CPACK_PACKAGE_NAME "beatglass")
+  set(CPACK_PACKAGE_VENDOR "Beatglass")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Beatglass desktop audio analysis")
+  set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+  set(CPACK_PACKAGE_CONTACT "beatglass maintainers")
+  if(WIN32)
+    set(CPACK_GENERATOR "ZIP")
+  elseif(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+  else()
+    set(CPACK_GENERATOR "TGZ")
+  endif()
+  include(CPack)
+endif()
 add_library(beatglass_core STATIC lib/core/snapshot_publisher.cpp lib/core/offline_analysis.cpp lib/core/visualization.cpp lib/core/visualization_presentation.cpp lib/core/playback_session.cpp)
 target_compile_features(beatglass_core PUBLIC cxx_std_20)
 target_include_directories(beatglass_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
@@ -186,6 +207,11 @@ if(BEATGLASS_BUILD_DESKTOP)
       COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:beatglass-desktop> $<TARGET_FILE_DIR:beatglass-desktop>
       COMMAND $<TARGET_FILE:Qt6::windeployqt> --no-translations --qmldir ${CMAKE_CURRENT_SOURCE_DIR}/src/desktop/qml $<TARGET_FILE:beatglass-desktop>
       COMMAND_EXPAND_LISTS VERBATIM)
+  endif()
+  if(BEATGLASS_ENABLE_PACKAGING)
+    install(TARGETS beatglass-desktop
+      BUNDLE DESTINATION .
+      RUNTIME DESTINATION bin)
   endif()
 endif()
 if((APPLE AND BEATGLASS_BUILD_DESKTOP) OR BEATGLASS_BUILD_MACOS_OVERLAY_TESTS)
