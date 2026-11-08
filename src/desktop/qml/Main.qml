@@ -1431,6 +1431,7 @@ ApplicationWindow {
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
                                 + (visible && storageRecovery.status.indexOf("retryable recovery runs discarded") >= 0 ? " · " + storageRecovery.status : "")
                                 Accessible.name: "Persisted analysis recovery status: " + text
+                                Accessible.description: visible && storageRecovery.status === "Retryable run is active" && storageRecovery.selectedRunId !== "" ? "Selected run " + storageRecovery.selectedRunId + " is active; discard remains unavailable until it reaches a terminal state." : "Recovery status and persisted retryable runs."
                                 ToolTip.text: "Saved analysis recovery status and retryable runs"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
