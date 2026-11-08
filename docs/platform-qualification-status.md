@@ -215,6 +215,8 @@ Capture times are parsed as ISO-8601 during ingestion; a malformed timestamp is 
 
 Ingestion also imports the native script’s referenced playback, overlay, display-topology, and audio-inventory files into the artifact inventory, so those handoff inputs cannot be silently omitted from provenance review.
 
+The readiness report preserves each artifact’s role through generation, allowing downstream review to distinguish topology/audio/playback/overlay evidence from generic qualification outputs.
+
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
