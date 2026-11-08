@@ -17,3 +17,8 @@ Run the platform verifier after transferring a bundle. It validates paths,
 hashes, identity fields, machine inventories and that `PASS` rows point to
 non-empty evidence inside the bundle. `UNRUN` is the correct state when a
 logged-in native session, permission, device or display is unavailable.
+
+Run the Windows-host regression coordinator with
+`pwsh -File tests/qualification/run_verifier_regressions.ps1`; it always runs
+the Windows fixture and runs the macOS fixture when `bash`/`shasum` is present,
+otherwise reporting an explicit skip.
