@@ -118,6 +118,12 @@ TestCase {
         app.destroy()
     }
 
+    function test_overlayReportsCaptureRecoveryStatus() {
+        let app = shell.createObject(null)
+        verify(findChild(app, "overlayCaptureStatus") !== null)
+        app.destroy()
+    }
+
     function test_visualizationCanvasIsAccessible() {
         let app = shell.createObject(null)
         let canvas = findChild(app, "visualizationCanvas")
