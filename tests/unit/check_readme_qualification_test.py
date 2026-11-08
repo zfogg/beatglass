@@ -16,7 +16,7 @@ class ReadmeQualificationTest(unittest.TestCase):
         text = (ROOT / "docs" / "linux-native-evidence-template.md").read_text(encoding="utf-8")
         for heading in ("## Build identity", "## Capture observations", "## Overlay observations", "## Result"):
             self.assertIn(heading, text)
-        self.assertIn("exact configure, build, and test commands", text)
+        self.assertIn("Exact configure, build, and test commands", text)
         self.assertIn("Linux support remains experimental and unsupported", text)
 
 
