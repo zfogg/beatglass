@@ -466,6 +466,8 @@ ApplicationWindow {
                     Accessible.name: "Catalog results: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
+                    Accessible.description: text
+                    ToolTip.text: "Current filtered catalog result count"
                 }
                 Frame {
                     Layout.fillWidth: true; Layout.fillHeight: true

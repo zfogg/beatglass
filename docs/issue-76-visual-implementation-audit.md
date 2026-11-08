@@ -286,6 +286,8 @@ The Library page heading now exposes explicit heading semantics and a concise br
 
 Library browser column headers now expose column-header semantics and concise name/type tooltips, making the folder listing structure discoverable before users navigate individual entries.
 
+The filtered catalog result summary now exposes an explicit description and current-count tooltip, keeping result-state context available independently of the browser list.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
