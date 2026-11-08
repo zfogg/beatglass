@@ -404,6 +404,8 @@ The Waveform and FFT controls now expose selected-state descriptions directly, s
 
 The visualization canvas and interaction hint now adapt to compact-header layout: the canvas reduces its preferred height and the hint scales its text while retaining wrapping. This keeps the runtime guidance usable in narrow desktop layouts without hiding the interaction contract.
 
+The interaction hint now adopts the error color when capture is in an Error state and the active theme foreground otherwise; the status stack also tightens spacing in compact layouts. Runtime recovery state and responsive density therefore remain visually legible together.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

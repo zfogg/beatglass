@@ -1106,6 +1106,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current visualization selection and recovery hint"
+                    color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
@@ -1113,6 +1114,7 @@ ApplicationWindow {
                 ColumnLayout {
                     objectName: "visualizationStatusGroup"
                     Layout.fillWidth: true
+                    spacing: window.compactHeader ? 4 : 8
                     Accessible.name: "Visualization data and capture status"
                     Accessible.value: visualizationCanvas.modeHasData ? "ready" : "waiting"
                     Accessible.role: Accessible.Grouping
