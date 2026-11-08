@@ -98,11 +98,13 @@ try {
   $hashLines | Set-Content -LiteralPath $manifestPath -Encoding utf8
   "Artifact SHA-256 manifest: $manifestPath"
   $identityManifest = Join-Path $OutputDirectory "qualification-manifest.txt"
+  $qtVersion = if (Get-Command qmake -ErrorAction SilentlyContinue) { (& qmake --version | Select-Object -Last 1).Trim() } else { "UNAVAILABLE" }
   @(
     "commit=$(git -C $repoRoot rev-parse HEAD)"
     "windows_version=$([Environment]::OSVersion.VersionString)"
     "architecture=$([Environment]::Is64BitOperatingSystem)"
     "cmake_version=$((cmake --version | Select-Object -First 1).Trim())"
+    "qt_version=$qtVersion"
     "vcpkg_root=$($env:VCPKG_ROOT)"
     "artifact_sha256=qualification-artifacts.sha256"
     "playback_evidence=native-playback-evidence.json"

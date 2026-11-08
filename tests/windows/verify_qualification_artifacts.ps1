@@ -22,7 +22,7 @@ try { $audioInventory = Get-Content -LiteralPath $audioInventoryPath -Raw | Conv
 if ($null -eq $audioInventory.captured_at -or $null -eq $audioInventory.endpoints) { throw "Audio endpoint inventory is missing required fields" }
 $identity = @{}
 foreach ($line in Get-Content -LiteralPath $identityManifest) { if ($line -notmatch '^([^=]+)=(.*)$' -or $identity.ContainsKey($Matches[1])) { throw "Malformed or duplicate identity manifest key: $line" }; $identity[$Matches[1]] = $Matches[2] }
-foreach ($key in @("commit", "windows_version", "architecture", "cmake_version", "artifact_sha256", "playback_evidence", "overlay_evidence")) { if (-not $identity.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($identity[$key])) { throw "Identity manifest missing $key" } }
+foreach ($key in @("commit", "windows_version", "architecture", "cmake_version", "qt_version", "artifact_sha256", "playback_evidence", "overlay_evidence")) { if (-not $identity.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($identity[$key])) { throw "Identity manifest missing $key" } }
 if ($identity.artifact_sha256 -ne "qualification-artifacts.sha256" -or $identity.playback_evidence -ne "native-playback-evidence.json" -or $identity.overlay_evidence -ne "native-overlay-evidence.json") { throw "Identity manifest contains unexpected evidence links" }
 if (-not (Test-Path -LiteralPath $evidencePath -PathType Leaf)) { throw "Missing native playback evidence template: $evidencePath" }
 if (-not (Test-Path -LiteralPath $overlayEvidencePath -PathType Leaf)) { throw "Missing native overlay evidence template: $overlayEvidencePath" }
