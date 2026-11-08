@@ -1533,7 +1533,9 @@ ApplicationWindow {
                                     ? "Retry selected persisted analysis run " + storageRecovery.selectedRunId
                                     : "Retry selected persisted analysis run"
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
-                                Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
+                                Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                    ? "Retry persisted run " + storageRecovery.selectedRunId + " when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
+                                    : "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
                             }
                             Label { objectName: "selectedPersistedRecoveryResetStatus"; visible: typeof storageRecovery !== "undefined" && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== ""; text: visible ? ("Selected recovery: " + storageRecovery.resetStatus) : ""; Accessible.name: "Selected persisted recovery status"; Accessible.description: visible ? text : "No selected persisted recovery reset has been performed."; Accessible.role: Accessible.Status; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                             Dialog {
