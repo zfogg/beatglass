@@ -10,10 +10,18 @@ public slots:
     std::string diagnostic;
     const bool ok = owner_.open(config, &diagnostic);
     emit result(ok, QString::fromStdString(ok ? "Storage open" : diagnostic));
+    if (ok) refresh();
   }
   void close() { owner_.close(); emit result(true, QStringLiteral("Storage closed")); }
+  void refresh() {
+    const auto runs = owner_.retryable_runs();
+    QStringList ids;
+    for (const auto& run : runs) ids.push_back(QString::fromStdString(run.id));
+    emit runsChanged(ids);
+  }
 signals:
   void result(bool ok, QString status);
+  void runsChanged(QStringList ids);
 private:
   beatglass::library::StorageOwner owner_;
 };
@@ -24,6 +32,9 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(worker_, &Worker::result, this, [this](bool ok, const QString& text) {
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
     emit statusChanged();
+  }, Qt::QueuedConnection);
+  connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids) {
+    retryableRunIds_ = ids; emit retryableRunsChanged();
   }, Qt::QueuedConnection);
   workerThread_.start();
 }
@@ -36,3 +47,4 @@ void StorageRecoveryBridge::open() {
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
 void StorageRecoveryBridge::close() { if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection); }
+void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
