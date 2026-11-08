@@ -1517,7 +1517,10 @@ ApplicationWindow {
                                 model: visible ? storageRecovery.retryableRunIds : []
                                 enabled: visible && count > 0
                                 Accessible.name: "Persisted retryable analysis runs"
-                                Accessible.description: visible && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Selected persisted recovery status: " + storageRecovery.resetStatus : "Choose a saved analysis run to recover."
+                                Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
+                                Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                    ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable."
+                                    : "Choose a saved analysis run to recover."
                                 ToolTip.text: "Choose a saved analysis run to recover"
                                 onActivated: { storageRecovery.selectRun(currentText); window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Retry and discard controls are now available when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
                             }
