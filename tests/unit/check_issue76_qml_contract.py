@@ -41,7 +41,7 @@ def main() -> int:
         "library empty state role": "Accessible.role: Accessible.StaticText",
         "visualization status role": "Accessible.name: \"Visualization data status\"",
         "selected visualization status role": "Accessible.name: \"Selected visualization data status\"",
-        "capture status role": "Accessible.name: \"Capture monitor status\"",
+        "capture status role": "Accessible.name: \"Capture monitor status: \" + text",
         "live monitoring status role": "Accessible.name: \"Live output monitoring\"",
         "metadata status role": "Accessible.name: \"Audio metadata status\"",
         "current folder role": "Accessible.name: \"Current folder: \" + text",
@@ -50,7 +50,7 @@ def main() -> int:
         "playback discontinuity clear": "onEpochChanged()",
         "overlay empty display state": "overlayDisplayEmptyState",
         "overlay status static roles": "objectName: \"overlayInteractionMode\"; text: window.overlayBridge",
-        "library capture status roles": "objectName: \"endpointStatus\"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: \"Output endpoint status\"; Accessible.role: Accessible.StaticText",
+        "library capture status roles": "objectName: \"endpointStatus\"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: \"Output endpoint status: \" + text; Accessible.role: Accessible.StaticText",
         "library detail status roles": "objectName: \"selectedAudioName\"",
         "analysis status roles": "objectName: \"analysisProgress\"",
         "visual status roles": "objectName: \"visualizationLoadState\"",
@@ -62,6 +62,7 @@ def main() -> int:
         "dynamic sort and output descriptions": "Current order: \" + (window.sortDescending ? \"descending\"",
         "dynamic visualization and playback names": "Accessible.name: \"Live \" + (visualizationCanvas.viewMode",
         "dynamic overlay status names": "Accessible.name: \"Overlay interaction mode: \" + text",
+        "dynamic capture and settings names": "Accessible.name: \"Capture monitor status: \" + text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
