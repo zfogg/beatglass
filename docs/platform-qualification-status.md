@@ -188,3 +188,5 @@ The lightweight readiness check applies the same validated-string scenario-ID ru
 Valid JSON manifests must still have an object root. Non-object roots are reported explicitly by both readiness consumers and remain pending rather than causing `.get()` aggregation failures.
 
 Artifact diagnostic inventories sort paths by their string representation, so mixed valid and malformed path values remain deterministically reportable while the bundle stays pending.
+
+The lightweight readiness check also normalizes null or non-list artifact/scenario containers before iteration, matching report generation and preserving verifier contract errors rather than raising.

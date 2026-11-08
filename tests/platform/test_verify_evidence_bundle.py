@@ -440,6 +440,16 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles)
             self.assertTrue(result["platforms"][0]["missing_artifacts"])
 
+    def test_readiness_check_null_manifest_containers_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            data["artifacts"] = None; data["scenarios"] = None
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            errors = readiness.check(status, bundles)
+            self.assertTrue(any("artifacts must be a nonempty list" in error for error in errors))
+
     def test_readiness_aggregates_required_scenario_summary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()

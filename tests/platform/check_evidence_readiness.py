@@ -55,6 +55,10 @@ def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
         if not isinstance(data, dict):
             errors.append(f"{platform}: manifest root must be an object")
             continue
+        if not isinstance(data.get("artifacts"), list):
+            data["artifacts"] = []
+        if not isinstance(data.get("scenarios"), list):
+            data["scenarios"] = []
         if str(data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match status row")
         scenario_status = {item.get("id"): item.get("status") for item in data.get("scenarios", [])
