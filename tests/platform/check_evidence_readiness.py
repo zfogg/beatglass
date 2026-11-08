@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timezone
 import re
+from collections import Counter
 
 spec = importlib.util.spec_from_file_location("verify_bundle", Path(__file__).with_name("verify_evidence_bundle.py"))
 verifier = importlib.util.module_from_spec(spec); assert spec.loader
@@ -127,7 +128,14 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
     errors = [error for row in rows for error in row["errors"]]
-    return {"platforms": rows, "error_count": len(errors), "errors": errors,
+    categories = Counter()
+    for error in errors:
+        if "hash mismatch" in error: categories["hash"] += 1
+        elif "escapes bundle" in error or "path" in error: categories["path"] += 1
+        elif "stale" in error or "future" in error: categories["freshness"] += 1
+        elif "missing artifact" in error or "missing manifest" in error: categories["retention"] += 1
+        else: categories["manifest"] += 1
+    return {"platforms": rows, "error_count": len(errors), "failure_categories": dict(sorted(categories.items())), "errors": errors,
             "ready": not errors}
 
 
