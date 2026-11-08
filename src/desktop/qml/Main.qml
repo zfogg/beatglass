@@ -435,6 +435,7 @@ ApplicationWindow {
                         Accessible.name: "Current folder: " + text
                         Accessible.value: text
                         Accessible.role: Accessible.StaticText
+                        ToolTip.text: "Current folder path"
                     }
                 }
                 RowLayout {
@@ -510,6 +511,7 @@ ApplicationWindow {
                                 Accessible.name: "Choose a folder"
                                 Accessible.role: Accessible.Button
                                 Accessible.description: "Choose a local folder to populate the Library. Current state: " + window.browserEmptyMessage()
+                                ToolTip.text: "Choose a local folder to recover the library"
                                 onClicked: folderPicker.open()
                             }
                         }

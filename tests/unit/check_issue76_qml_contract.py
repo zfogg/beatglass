@@ -84,6 +84,8 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "current folder tooltip": "ToolTip.text: \"Current folder path\"",
+        "empty chooser tooltip": "ToolTip.text: \"Choose a local folder to recover the library\"",
         "parent folder tooltip": "ToolTip.text: \"Go to the parent folder\"",
         "search field tooltip": "ToolTip.text: \"Filter the current folder by audio or folder name\"",
         "sort order tooltip": "ToolTip.text: \"Reverse file-name sort order\"",
