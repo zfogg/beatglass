@@ -94,6 +94,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                     path = bundle / entry.get("path", "")
                     inventory.append({"path": entry.get("path"), "sha256": entry.get("sha256"),
                                       "bytes": path.stat().st_size if path.is_file() else None})
+                missing_artifacts = sorted(item["path"] for item in inventory if item["bytes"] is None)
                 scenario_inventory = sorted(
                     [{"id": item.get("id"), "status": item.get("status"), "evidence": item.get("evidence")}
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
@@ -105,16 +106,18 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 manifest_sha256 = None
                 inventory = []
                 scenario_inventory = []
+                missing_artifacts = []
         else:
             retained = 0
             artifact_bytes = 0
             manifest_sha256 = None
             inventory = []
             scenario_inventory = []
+            missing_artifacts = []
             errors = [f"{platform}: missing manifest: {manifest}"]
         rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
-                     "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
+                     "missing_artifacts": missing_artifacts, "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
     errors = [error for row in rows for error in row["errors"]]
