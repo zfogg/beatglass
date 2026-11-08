@@ -100,3 +100,13 @@ remain subject to integration review and are not implemented by this value type.
 A build manifest may record pinned dependency digests and the complete effective analysis configuration, but embedded build metadata alone is not proof of dynamically loaded code. Cache eligibility must be granted only after the actual executable and linked dependency artifacts have been verified under a platform-specific, race-resistant policy, including relevant transitive DSP dependencies. Unknown provenance disables composite cache lookup and publication. The worker may still return bounded in-memory evidence after successful source verification; it must not fill identity fields with invented values. This remains a proposal, not a claim of a verified packaging mechanism.
 
 The provisional [dependency identity proposal](dependency-identity-proposal.md) distinguishes platform loader and code-signature evidence from exact mapped-artifact verification, covers transitive dependencies and effective configuration, and specifies fail-closed tests. It does not enable cache reuse.
+# Analysis job UI contract (issue #76)
+
+The desktop analysis detail panel intentionally reports `Queued`, `Running`,
+and `Analysis progress unavailable` from `AnalysisJobBridge.frames`. The
+`Retry analysis` control remains disabled until the bridge exposes a real
+operation handle with cancellation, retry, and source identity. A future
+implementation must preserve the selected source URL, reject stale results
+after replacement, and publish an explicit terminal error before enabling
+retry. The current UI must not imply that frame counts are source-attributed;
+it labels them provisional until a source-linked result is published.
