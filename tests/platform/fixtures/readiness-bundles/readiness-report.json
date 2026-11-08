@@ -245,6 +245,7 @@
   "failure_category_platforms": {
     "manifest": []
   },
+  "category_platforms_consistent": true,
   "required_scenario_summary": [
     {
       "platform": "windows",
