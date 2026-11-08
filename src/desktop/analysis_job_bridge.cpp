@@ -39,6 +39,7 @@ bool AnalysisJobBridge::submitFile(const QString& path, const QString& contentHa
 }
 
 std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit(beatglass::library::AnalysisOperation op) {
+  if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
   const auto sourcePath = QString::fromStdString(op.source.path.string());
   if (sourcePath_ != sourcePath) { sourcePath_ = sourcePath; emit sourceChanged(); }
   if (!op.valid()) {
@@ -110,6 +111,7 @@ void AnalysisJobBridge::cancel() {
 void AnalysisJobBridge::retry() {
   if (!canRetry()) return;
   if (retryable_->retry()) {
+    if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
     if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
     frames_ = retryable_->frames();
     emit progressChanged();
@@ -126,9 +128,11 @@ void AnalysisJobBridge::discard() {
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
   if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
+  recoveryStatus_ = QStringLiteral("Single analysis recovery discarded"); emit statusChanged();
 }
 
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
+  if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
   if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   if (retryable_ && canCancel()) retryable_->cancel();
@@ -179,6 +183,7 @@ void AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
   if (accepted) {
+    if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
     if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
     batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
@@ -201,6 +206,7 @@ void AnalysisJobBridge::discardBatch() {
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
   if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
+  recoveryStatus_ = QStringLiteral("Batch analysis recovery discarded"); emit statusChanged();
   emit batchChanged();
 }
 

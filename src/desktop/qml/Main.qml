@@ -1083,6 +1083,15 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisRecoveryStatus"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.recoveryStatus !== ""
+                                text: visible ? ("Recovery status: " + window.analysisJobBridge.recoveryStatus) : ""
+                                Accessible.name: "Analysis recovery status"
+                                Accessible.description: visible ? text : "No recovery reset has been performed."
+                                Accessible.role: Accessible.Status
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisBatchStatus"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount !== undefined
                                 text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount
