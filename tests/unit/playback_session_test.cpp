@@ -13,3 +13,9 @@ TEST_CASE("paused playback rejects delivery until resumed by a fresh start") {
   CHECK_FALSE(session.accept(3, 0)); session.stop(); CHECK_FALSE(session.seek(0, 4));
   REQUIRE(session.start(4)); REQUIRE(session.accept(4, 0));
 }
+TEST_CASE("source replacement resets the queue cursor and retires old deliveries") {
+  PlaybackSession session; REQUIRE(session.start(4)); REQUIRE(session.accept(4, 0));
+  REQUIRE(session.replace(5)); CHECK(session.next_frame() == 0);
+  CHECK_FALSE(session.accept(4, 0)); REQUIRE(session.accept(5, 0));
+  CHECK_FALSE(session.replace(5));
+}

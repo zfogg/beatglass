@@ -18,6 +18,7 @@ public:
   QUrl source() const { return source_; }
   Q_INVOKABLE bool open(qulonglong epoch);
   Q_INVOKABLE bool openSource(const QUrl& source, qulonglong epoch);
+  Q_INVOKABLE bool replaceSource(const QUrl& source, qulonglong epoch);
   Q_INVOKABLE bool pause();
   Q_INVOKABLE void stop();
   Q_INVOKABLE bool seek(qulonglong frame, qulonglong epoch);
