@@ -37,3 +37,12 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-manifest.txt").write_text("platform=windows\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertTrue(any("missing or escaping artifact" in error for error in errors))
+
+    def test_rejects_invalid_identity_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text("platform=windows\ncommit=unknown\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("invalid source commit identity", errors)
+            self.assertIn("missing capture time", errors)
