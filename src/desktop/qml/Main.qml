@@ -373,6 +373,15 @@ ApplicationWindow {
                             Accessible.description: text
                         }
                         Label {
+                            objectName: "analysisUncertainty"
+                            text: window.selectedName
+                                  ? "Track key: Unknown · No validated track-level key. Window evidence is provisional and source-attributed."
+                                  : "Track key: Unknown until a source is selected."
+                            Accessible.name: "Analysis uncertainty"
+                            Accessible.description: text
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        Label {
                             objectName: "sourceWorkflowStatus"
                             text: window.selectedAudioUrl.toString() === ""
                                   ? "Select an audio source to inspect and play it."
