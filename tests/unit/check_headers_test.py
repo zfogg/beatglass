@@ -22,6 +22,16 @@ class HeaderCoverageTest(unittest.TestCase):
             index.write_text(".. cpp:autodoc:: lib/library/private.hpp\n", encoding="utf-8")
             self.assertEqual(module.coverage(root), ([], []))
 
+    def test_stale_index_entry_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "docs/api").mkdir(parents=True)
+            for directory in ("include", "lib", "src"):
+                (root / directory).mkdir()
+            (root / "docs/api/index.rst").write_text(
+                ".. cpp:autodoc:: lib/removed.hpp\n", encoding="utf-8")
+            self.assertEqual(module.coverage(root), ([], ["lib/removed.hpp"]))
+
 
 if __name__ == "__main__":
     unittest.main()
