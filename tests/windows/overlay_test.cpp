@@ -134,6 +134,19 @@ private slots:
     }
     QVERIFY(!overlay.flags().testFlag(Qt::WindowTransparentForInput));
   }
+  void hidingOverlayUnlocksInput() {
+    QQuickWindow overlay;
+    QWindow control;
+    control.show();
+    beatglass::windows::OverlayController adapter(&overlay, &control);
+    overlay.show();
+    QVERIFY(adapter.setClickThrough(true));
+    overlay.hide();
+    QTRY_VERIFY(!adapter.clickThrough());
+    QVERIFY(!overlay.flags().testFlag(Qt::WindowTransparentForInput));
+    overlay.show();
+    QVERIFY(adapter.setClickThrough(true));
+  }
   void controlCannotBeOverlay() {
     QQuickWindow window;
     window.show();
