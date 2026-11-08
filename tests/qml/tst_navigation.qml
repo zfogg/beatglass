@@ -217,6 +217,7 @@ TestCase {
         compare(findChild(app, "stopPlayback").ToolTip.text, "Stop playback and clear the current source")
         compare(findChild(app, "seekFrame").Accessible.name, "Seek target frame")
         compare(findChild(app, "seekToFrame").Accessible.description, "Seek playback to the entered audio frame")
+        compare(findChild(app, "seekToFrame").ToolTip.text, "Seek playback to the entered source frame")
         compare(findChild(app, "seekFrame").ToolTip.text, "Enter a source frame, then choose Seek")
         app.destroy()
     }
