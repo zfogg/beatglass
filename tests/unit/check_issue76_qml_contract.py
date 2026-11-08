@@ -33,6 +33,7 @@ def main() -> int:
         "open playback accessible name": "Accessible.name: \"Open selected playback source\"",
         "playback frame actions accessible names": "Accessible.name: \"Seek to entered frame\"",
         "folder picker accessible name": "Accessible.name: \"Choose audio folder\"",
+        "capture endpoint refresh accessible name": "Accessible.name: \"Refresh capture endpoints\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
