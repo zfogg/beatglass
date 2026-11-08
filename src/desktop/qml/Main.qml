@@ -302,20 +302,22 @@ ApplicationWindow {
         if (window.catalogDiagnostic !== "") return "This folder could not be read: " + window.catalogDiagnostic
         return "No matching audio files or folders. Try a different search or choose another folder."
     }
+    function restoreOverlayFallbackControls(reason) {
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (reason !== "")
+            window.announceCaptureRecoveryState(reason)
+    }
     function showOverlayAndHideControls() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
-            window.show()
-            window.raise()
-            window.requestActivate()
+            window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
-            window.show()
-            window.raise()
-            window.requestActivate()
+            window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback.")
             return false
         }
         window.overlayWasVisibleBeforeAvailabilityLoss = false
@@ -323,9 +325,7 @@ ApplicationWindow {
         if (!window.overlayBridge.showOverlay()) {
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
-            window.show()
-            window.raise()
-            window.requestActivate()
+            window.restoreOverlayFallbackControls("")
             return false
         }
         const restoredGeometry = window.overlayBridge.geometry
