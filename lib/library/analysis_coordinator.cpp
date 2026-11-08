@@ -3,6 +3,12 @@
 namespace beatglass::library {
 std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_id, AnalysisOperation operation, int priority) {
   if (!storage_.cache() || run_id.empty() || !operation.valid()) return {};
+  const auto admission = storage_.admit_analysis(run_id, operation.identity);
+  if (!admission.analysis_reserved && !admission.cached) return {};
+  if (admission.cached) {
+    const auto cached = *admission.cached;
+    operation.decode = [cached](std::stop_token, const std::function<void(std::uint64_t)>&) { return cached; };
+  }
   operation.publish_transaction = make_transactional_publisher(*storage_.cache(), std::move(run_id), operation.identity, operation.verify);
   return runner_.submit_retryable(std::move(operation), priority);
 }

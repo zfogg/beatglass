@@ -45,6 +45,22 @@ TEST_CASE("storage owner exposes cache admission boundary") {
     auto admission = owner.admit_analysis("closed-admission", {"sha256:closed", "engine", "config", "offline"});
     CHECK_FALSE(admission.cached.has_value()); CHECK_FALSE(admission.analysis_reserved);
 }
+
+TEST_CASE("coordinator admission replaces decoder on cache hit") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  beatglass::AnalysisIdentity identity{"sha256:coordinator", "engine", "config", "offline"};
+  beatglass::library_detail::CacheKey key{identity.content_hash, identity.engine_version, identity.configuration_id, identity.mode};
+  coordinator.storage().cache()->begin("seed", key);
+  REQUIRE(coordinator.storage().cache()->publish("seed", key, "cached", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  beatglass::library::AnalysisOperation op;
+  op.source.path = "track.wav"; op.source.content_hash = identity.content_hash;
+  op.identity = identity; op.serialize = [] { return std::string("fallback"); };
+  op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match, {}}; };
+  op.decode = [](std::stop_token, const auto&) { throw std::runtime_error("decoder must be skipped"); return std::string{}; };
+  auto handle = coordinator.submit("cache-hit", std::move(op));
+  REQUIRE(handle);
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
