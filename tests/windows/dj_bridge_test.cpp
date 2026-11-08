@@ -46,7 +46,23 @@ private slots:
     bridge.refresh();
     QCOMPARE(bridge.endpoints().size(), 0);
     QCOMPARE(bridge.selectedEndpoint(), QString());
+    QVERIFY(bridge.selectionLost());
     QCOMPARE(bridge.error(), QStringLiteral("enumeration failed"));
+  }
+  void endpointRemovalIsAnExplicitRecoverableSelectionLoss() {
+    bool removed = false;
+    beatglass::windows::EndpointBridge bridge(nullptr, [&] {
+      return removed ? beatglass::windows::EndpointResult{{{"id-2", "Headphones", true}}, {}}
+                     : beatglass::windows::EndpointResult{{{"id-1", "Speakers", true}}, {}};
+    });
+    bridge.refresh();
+    QVERIFY(bridge.select(QStringLiteral("id-1")));
+    removed = true;
+    bridge.refresh();
+    QVERIFY(bridge.selectionLost());
+    QCOMPARE(bridge.selectedEndpoint(), QString());
+    QVERIFY(bridge.select(QStringLiteral("id-2")));
+    QVERIFY(!bridge.selectionLost());
   }
   void blockedDiscoveryCannotStartAfterStop() {
     beatglass::SourceEpochAllocator epochs;
