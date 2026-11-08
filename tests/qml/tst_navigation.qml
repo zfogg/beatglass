@@ -202,6 +202,7 @@ TestCase {
         verify(findChild(app, "startNativePlayback") !== null)
         compare(findChild(app, "playbackSampleRate").Accessible.name, "Playback sample rate")
         compare(findChild(app, "playbackChannels").Accessible.name, "Playback channels")
+        verify(findChild(app, "nativePlaybackState") !== null)
     }
 
     function test_frameSeekUsesPlaybackBridge() {
