@@ -409,8 +409,24 @@ TestCase {
             let preview = findChild(app, "themePreview" + i)
             verify(preview !== null)
             verify(preview.Accessible.name.length > 0)
-            compare(preview.Accessible.description, "Select " + app.themeNames[i] + " theme")
+            verify(preview.Accessible.description.indexOf("Select " + app.themeNames[i] + " theme;") === 0)
+            verify(preview.checkable)
+            compare(preview.Accessible.role, Accessible.RadioButton)
         }
+        app.destroy()
+    }
+
+    function test_themePreviewSelectionIsExposedAsCheckedState() {
+        let app = shell.createObject(null)
+        let light = findChild(app, "themePreview0")
+        let blue = findChild(app, "themePreview4")
+        verify(light.checked)
+        verify(!blue.checked)
+        blue.clicked()
+        compare(app.selectedThemeIndex, 4)
+        verify(!light.checked)
+        verify(blue.checked)
+        verify(blue.Accessible.description.indexOf("selected") >= 0)
         app.destroy()
     }
 
