@@ -62,6 +62,8 @@ public:
   std::vector<RetryableRun> retryable_runs(std::size_t limit = 100);
   /** Discard one retryable run record without touching its source file. */
   bool discard_retryable(const std::string& id);
+  /** Mark a matching running operation retryable after a pre-publication worker failure. */
+  bool mark_retryable(const std::string& id, const CacheKey& key);
   /** Remove the active result for an exact identity; source files and historical runs remain untouched. */
   bool invalidate(const CacheKey& key);
   /** Revalidate and atomically publish. Cancellation before commit rolls back; cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. */

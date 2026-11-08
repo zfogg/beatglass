@@ -50,7 +50,10 @@ TEST_CASE("analysis publication converts serialization failures into errors") {
   op.identity.configuration_id = "config"; op.identity.mode = "offline";
   op.serialize = []() -> std::string { throw std::runtime_error("serialization failed"); };
   op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  cache.begin("run", {"sha256:test", "engine", "config", "offline"});
   REQUIRE(beatglass::library::publish_operation(cache, "run", op, {}) == beatglass::library_detail::Publish::error);
+  REQUIRE(cache.retryable_runs().size() == 1);
+  CHECK(cache.retryable_runs().front().id == "run");
 }
 TEST_CASE("analysis publication contains nonstandard serialization throws") {
   beatglass::library_detail::SqliteCache cache(":memory:");
