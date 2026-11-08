@@ -875,6 +875,7 @@ ApplicationWindow {
                         ? ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " samples in selected waveform view")
                         : ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " bins in selected FFT view")
                     Accessible.name: "Selected visualization data status"
+                    Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Data available in the selected waveform or FFT view"
                     Layout.fillWidth: true
