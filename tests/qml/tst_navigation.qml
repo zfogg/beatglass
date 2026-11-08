@@ -166,6 +166,13 @@ TestCase {
         compare(status.Accessible.name, "Overlay capture status")
         app.destroy()
     }
+    function test_overlayUnavailableStateIsAccessible() {
+        let app = shell.createObject(null)
+        let state = findChild(app, "overlayUnavailable")
+        verify(state !== null)
+        compare(state.Accessible.name, "Overlay availability")
+        app.destroy()
+    }
 
     function test_visualizationCanvasIsAccessible() {
         let app = shell.createObject(null)
