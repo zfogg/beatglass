@@ -35,6 +35,7 @@ required = {
     "batch clears single source": 'if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }',
     "failure reason property": 'Q_PROPERTY(QString failureReason READ failureReason',
     "failure reason rendering": 'objectName: "analysisFailureReason"',
+    "batch failure reason": 'One or more batch operations failed before publishing a verified result.',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:
