@@ -145,6 +145,11 @@ ApplicationWindow {
             metadataBridge.inspect(url)
         }
     }
+    function clearSelectedAudio() {
+        window.selectedName = ""
+        window.selectedAudioUrl = ""
+        window.metadataStatus = "Choose an audio file to inspect its metadata."
+    }
 
     FolderListModel {
         id: files
@@ -363,6 +368,14 @@ ApplicationWindow {
                             elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio source"
                             Accessible.description: text
+                        }
+                        Button {
+                            objectName: "clearSelectedAudio"
+                            text: "Clear selection"
+                            enabled: window.selectedName !== ""
+                            Accessible.name: "Clear selected audio"
+                            Accessible.description: "Clear the selected audio source and return analysis details to the empty state."
+                            onClicked: window.clearSelectedAudio()
                         }
                         Label {
                             objectName: "metadataStatus"; text: window.metadataStatus
