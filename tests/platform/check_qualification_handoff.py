@@ -7,6 +7,8 @@ REQUIRED = (
     "tests/macos/run_qualification.sh",
     "tests/macos/verify_qualification_artifacts.sh",
     "docs/linux-qualification-plan.md",
+    "docs/windows-qualification.md",
+    "docs/macos-qualification.md",
 )
 
 
@@ -14,7 +16,7 @@ def main() -> int:
     root = Path(__file__).resolve().parents[2]
     docs = (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8")
     missing = [path for path in REQUIRED if not (root / path).is_file()]
-    unlinked = [path for path in REQUIRED if path not in docs and path != "docs/linux-qualification-plan.md"]
+    unlinked = [path for path in REQUIRED if path not in docs and path not in ("docs/linux-qualification-plan.md", "docs/windows-qualification.md", "docs/macos-qualification.md")]
     if "docs/linux-qualification-plan.md" not in (root / "README.md").read_text(encoding="utf-8"):
         unlinked.append("docs/linux-qualification-plan.md (README)")
     if missing or unlinked:
