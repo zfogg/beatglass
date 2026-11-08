@@ -42,7 +42,7 @@ def main() -> int:
         "visualization status role": "Accessible.name: \"Visualization data status\"",
         "selected visualization status role": "Accessible.name: \"Selected visualization data status: \" + text",
         "capture status role": "Accessible.name: \"Capture monitor status: \" + text",
-        "live monitoring status role": "Accessible.name: \"Live output monitoring\"",
+        "live monitoring status role": "Accessible.name: \"Live output monitoring: \" + text; Accessible.value: text",
         "metadata status role": "Accessible.name: \"Audio metadata status: \" + text",
         "current folder role": "Accessible.name: \"Current folder: \" + text",
         "visualization empty state": "visualizationEmptyState",
@@ -84,6 +84,9 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "live monitoring status value": "Accessible.name: \"Live output monitoring: \" + text; Accessible.value: text",
+        "monitoring guidance status": "objectName: \"monitoringGuidance\"",
+        "selected endpoint value": "objectName: \"selectedEndpointStatus\"; Accessible.name: \"Selected output endpoint: \" + text; Accessible.value: text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
