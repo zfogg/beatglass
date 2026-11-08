@@ -46,6 +46,9 @@ ApplicationWindow {
             ? window.playbackBridge.resume()
             : window.playbackBridge.pause()
     }
+    Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: navigation.currentIndex = 0 }
+    Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: navigation.currentIndex = 1 }
+    Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: navigation.currentIndex = 2 }
     Shortcut {
         objectName: "visualizationWaveformShortcut"
         sequence: "Ctrl+1"
@@ -293,9 +296,9 @@ ApplicationWindow {
                 id: navigation
                 objectName: "navigation"
                 Layout.fillWidth: true
-                TabButton { text: "Library"; objectName: "libraryTab"; Accessible.name: "Library"; Accessible.description: "Browse local audio files." }
-                TabButton { text: "DJ"; objectName: "djTab"; Accessible.name: "DJ"; Accessible.description: "View live DJ controls and overlay settings." }
-                TabButton { text: "Settings"; objectName: "settingsTab"; Accessible.name: "Settings"; Accessible.description: "Configure appearance, audio and overlay settings." }
+                TabButton { text: "Library"; objectName: "libraryTab"; Accessible.name: "Library"; Accessible.description: "Browse local audio files. Shortcut Ctrl+Shift+1." }
+                TabButton { text: "DJ"; objectName: "djTab"; Accessible.name: "DJ"; Accessible.description: "View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2." }
+                TabButton { text: "Settings"; objectName: "settingsTab"; Accessible.name: "Settings"; Accessible.description: "Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3." }
             }
             ComboBox {
                 id: themeSelector

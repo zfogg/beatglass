@@ -67,6 +67,7 @@ def main() -> int:
         "dynamic analysis status names": "Accessible.name: \"Analysis progress: \" + text",
         "dynamic metadata names": "Accessible.name: \"Selected audio file: \" + text",
         "final dynamic status names": "Accessible.name: \"Visualization mode: \" + text",
+        "screen keyboard shortcuts": "objectName: \"libraryTabShortcut\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
