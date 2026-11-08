@@ -356,6 +356,8 @@ The Appearance group description now carries the same current theme and motion s
 
 Theme preview swatches now support Left/Right keyboard navigation while focused, applying the next palette and synchronizing the toolbar selector and persisted preference. This gives the compact preview control a complete keyboard interaction path in addition to direct activation.
 
+Home and End now jump directly to the first and last theme swatches, completing predictable keyboard traversal for the palette preview group while preserving selector and preference synchronization.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
