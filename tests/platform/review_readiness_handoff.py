@@ -24,6 +24,9 @@ def render(report_path: Path) -> str:
         lines.append("")
     for row in report.get("platforms", []):
         lines.extend([f"## {row.get('platform', 'unknown')}", ""])
+        lines.extend([f"- Manifest: `{row.get('manifest')}`", f"- Manifest SHA-256: `{row.get('manifest_sha256')}`",
+                      f"- Source commit: `{row.get('commit')}`", f"- Captured at: `{row.get('captured_at')}`",
+                      f"- Environment: `{row.get('environment')}`", ""])
         for scenario in row.get("scenario_inventory", []):
             lines.append(f"- [{'x' if scenario.get('status') == 'PASS' else ' '}] {scenario.get('id')}: {scenario.get('status')}")
         lines.append("")
