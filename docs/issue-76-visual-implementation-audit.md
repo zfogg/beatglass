@@ -347,3 +347,5 @@ All three primary navigation tabs now report a selected/not-selected value in ad
 The primary navigation group now documents all three page-switch shortcuts in its accessible description, keeping keyboard-discoverable navigation available even when focus is on the toolbar as a whole.
 
 Each primary navigation tab now updates its tooltip to identify the selected destination when active, keeping pointer and keyboard hover/focus feedback aligned with the live selected/not-selected values.
+
+The Settings Appearance group now reports its current theme and motion mode as a live group value, keeping the visual preference cluster’s state available before users navigate its individual controls.
