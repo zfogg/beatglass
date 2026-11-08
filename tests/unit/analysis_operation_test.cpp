@@ -40,6 +40,11 @@ TEST_CASE("storage owner exposes decoder publication boundary") {
     operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
     CHECK(owner.publish_analysis("closed-run", operation) == beatglass::library_detail::Publish::error);
 }
+TEST_CASE("storage owner exposes cache admission boundary") {
+    beatglass::library::StorageOwner owner;
+    auto admission = owner.admit_analysis("closed-admission", {"sha256:closed", "engine", "config", "offline"});
+    CHECK_FALSE(admission.cached.has_value()); CHECK_FALSE(admission.analysis_reserved);
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
