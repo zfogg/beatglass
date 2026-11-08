@@ -55,6 +55,7 @@ public:
     bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p);
   }
   bool find(const CacheKey& key, std::string& result) {
+    validate_key(key);
     Statement s(db_, "SELECT r.result FROM active a JOIN runs r ON r.id=a.run_id WHERE a.content=? AND a.engine=? AND a.config=? AND a.mode=?");
     bind_key(s.p, 1, key); int rc = sqlite3_step(s.p);
     if (rc == SQLITE_DONE) return false;
