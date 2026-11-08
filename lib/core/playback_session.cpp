@@ -5,6 +5,7 @@ bool PlaybackSession::start(std::uint64_t epoch) noexcept {
   state_ = PlaybackState::playing; epoch_ = epoch; next_frame_ = 0; return true;
 }
 bool PlaybackSession::pause() noexcept { if (state_ != PlaybackState::playing) return false; state_ = PlaybackState::paused; return true; }
+bool PlaybackSession::resume() noexcept { if (state_ != PlaybackState::paused) return false; state_ = PlaybackState::playing; return true; }
 void PlaybackSession::stop() noexcept { state_ = PlaybackState::stopped; epoch_ = next_frame_ = 0; }
 bool PlaybackSession::seek(std::uint64_t frame, std::uint64_t new_epoch) noexcept {
   if (state_ == PlaybackState::stopped || !new_epoch || new_epoch <= epoch_) return false;

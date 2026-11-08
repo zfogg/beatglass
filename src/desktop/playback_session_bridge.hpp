@@ -35,6 +35,7 @@ public:
   Q_INVOKABLE bool openSource(const QUrl& source, qulonglong epoch);
   Q_INVOKABLE bool replaceSource(const QUrl& source, qulonglong epoch);
   Q_INVOKABLE bool pause();
+  Q_INVOKABLE bool resume();
   Q_INVOKABLE void stop();
   Q_INVOKABLE bool seek(qulonglong frame, qulonglong epoch);
 signals:

@@ -54,3 +54,5 @@ bool PlaybackSessionBridge::startNative(qulonglong epoch, int sampleRate, int ch
   Q_UNUSED(epoch); Q_UNUSED(sampleRate); Q_UNUSED(channels); Q_UNUSED(maxSamples); return false;
 #endif
 }
+
+bool PlaybackSessionBridge::resume() { const bool ok = session_.resume(); if (ok) emit changed(); return ok; }
