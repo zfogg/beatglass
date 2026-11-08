@@ -144,3 +144,12 @@ TEST_CASE("catalog search remains deterministic after replacing a filtered entry
  CHECK(replaced.entries[0].name == "Take.mp3");
  CHECK(replaced.entries[0].format == "MP3");
 }
+
+TEST_CASE("catalog returns distinct case-sensitive paths for identical folded names") {
+ TempDir dir; dir.file("Song.WAV"); dir.file("song.WAV");
+ const auto result = beatglass::library::browse(dir.path, "song");
+ REQUIRE(result.entries.size() == 2);
+ CHECK(result.entries[0].path != result.entries[1].path);
+ CHECK(result.entries[0].name == "Song.WAV");
+ CHECK(result.entries[1].name == "song.WAV");
+}
