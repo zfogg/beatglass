@@ -173,6 +173,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
                          for row in rows]
     ready_platforms = sum(item["ready"] for item in platform_failures)
+    retained_artifact_count = sum(row["retained_artifacts"] for row in rows)
     error_count_consistent = sum(item["errors"] for item in platform_failures) == len(errors)
     not_ready_platforms = [item["platform"] for item in platform_failures if not item["ready"]]
     failure_summary_consistent = [item["platform"] for item in platform_failures] == [row["platform"] for row in rows]
@@ -209,6 +210,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "failure_summary_consistent": failure_summary_consistent,
             "error_count_consistent": error_count_consistent,
             "ready_platform_count": ready_platforms,
+            "retained_artifact_count": retained_artifact_count,
             "not_ready_platforms": not_ready_platforms,
             "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
