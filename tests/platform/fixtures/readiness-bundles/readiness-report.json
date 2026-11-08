@@ -235,6 +235,7 @@
   "failure_summary_consistent": true,
   "error_count_consistent": true,
   "ready_platform_count": 3,
+  "retained_artifact_count": 3,
   "not_ready_platforms": [],
   "all_platforms_ready": false,
   "error_count": 1,
