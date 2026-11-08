@@ -22,8 +22,8 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
 
     def test_cancellation_api_documents_clear_behavior(self):
         header = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.hpp").read_text(encoding="utf-8")
-        self.assertIn('Cancel the active job and clear stale result presentation.', header)
-        self.assertIn('Cancel active batch jobs and clear stale result/batch presentation.', header)
+        self.assertIn('publish Cancelled immediately, and clear stale result presentation.', header)
+        self.assertIn('publish Cancelled immediately, and clear stale result/batch presentation.', header)
 
     def test_cancellation_publishes_terminal_state_immediately(self):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
