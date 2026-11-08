@@ -200,6 +200,10 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
          "verifier_errors": row["error_count"],
          "ready": next(item["ready"] for item in platform_failures if item["platform"] == row["platform"])}
         for row in rows]
+    native_qualification_blockers = [
+        {"platform": row["platform"], "unpassed_scenarios": row["unpassed_scenarios"],
+         "missing_artifact_roles": row["missing_artifact_roles"], "errors": row["errors"]}
+        for row in rows if row["unpassed_scenarios"] or row["missing_artifact_roles"] or row["errors"]]
     native_summary_consistent = (
         [item["platform"] for item in native_qualification_summary] == [row["platform"] for row in rows]
         and all(item["evidence_complete"] == (not item["unpassed_scenarios"] and not item["missing_artifact_roles"])
@@ -251,6 +255,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
             "native_qualification_summary": native_qualification_summary,
+            "native_qualification_blockers": native_qualification_blockers,
             "native_qualification_ready": bool(native_qualification_summary) and all(item["ready"] and item["evidence_complete"] for item in native_qualification_summary),
             "native_summary_consistent": native_summary_consistent,
             "failure_summary_consistent": failure_summary_consistent,
