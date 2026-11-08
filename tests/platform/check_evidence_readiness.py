@@ -249,6 +249,10 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     category_platform_counts = {category: sum(row["failure_categories"].get(category, 0) for row in rows)
                                 for category in sorted(categories)}
     category_counts_consistent = category_platform_counts == dict(categories)
+    readiness_ready = (not errors and aggregate_consistent and native_summary_consistent and native_blockers_consistent
+                       and error_count_consistent and failure_category_count_consistent and category_platforms_consistent
+                       and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent
+                       and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows))
     required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "unpassed": row["unpassed_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
     artifact_roles = [{"platform": row["platform"], "missing": row["missing_artifact_roles"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
@@ -287,7 +291,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "required_scenario_summary": required, "artifact_role_summary": artifact_roles, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and native_summary_consistent and native_blockers_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows)}
+            "exit_gate_status": "READY" if readiness_ready else "PENDING",
+            "exit_gate_reasons": [] if readiness_ready else errors,
+            "ready": readiness_ready}
 
 
 def main() -> int:
