@@ -28,6 +28,19 @@ TEST_CASE("visualization presentation clear removes stale painted frame") {
   REQUIRE(presentation.accept(presentation.generation(), 1, frame));
 }
 
+TEST_CASE("visualization presentation exposes the accepted revision for playback handoff") {
+  VisualizationPresentation presentation;
+  VisualizationFrame frame;
+  frame.epoch = 7; frame.sample_rate = 48000; frame.end_frame = 1024;
+  const auto generation = presentation.generation();
+  CHECK(presentation.acceptedRevision() == 0);
+  REQUIRE(presentation.accept(generation, 4, frame));
+  CHECK(presentation.acceptedRevision() == 4);
+  presentation.clear();
+  CHECK(presentation.acceptedRevision() == 0);
+  CHECK(presentation.generation() > generation);
+}
+
 TEST_CASE("visualization presentation rejects malformed frames before publication") {
   VisualizationPresentation presentation;
   VisualizationFrame frame;
