@@ -250,6 +250,7 @@ ApplicationWindow {
                         Accessible.name: "Folder contents"
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
                         Keys.onEnterPressed: window.activateEntry(currentIndex)
+                        Keys.onSpacePressed: window.activateEntry(currentIndex)
                         ScrollBar.vertical: ScrollBar {}
                         delegate: ItemDelegate {
                             required property int index
