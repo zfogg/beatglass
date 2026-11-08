@@ -196,12 +196,13 @@ ApplicationWindow {
                     text: "Press Escape to unlock overlay controls"
                     color: "#dbeafe"
                     Accessible.name: "Overlay recovery hint"
+                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24; font.bold: true }
                 Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; color: "white" }
-                Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output capture status" }
+                Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output capture status" }
                 Button {
                     objectName: "overlayRetryCapture"
                     visible: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" && window.captureMonitorBridge.start
@@ -573,6 +574,7 @@ ApplicationWindow {
                             objectName: "metadataStatus"; text: window.metadataStatus
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio metadata status: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -1093,6 +1095,7 @@ ApplicationWindow {
                                 visible: window.endpointSelectionBridge === null
                                 text: "Output endpoint discovery is unavailable in this build."
                                 Accessible.name: "Output endpoint discovery availability"
+                                Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 wrapMode: Text.WordWrap
@@ -1103,6 +1106,7 @@ ApplicationWindow {
                                 visible: window.endpointSelectionBridge && window.endpointSelectionBridge.status.indexOf("Error") >= 0
                                 text: "Output endpoint recovery is available: connect an output device and refresh the endpoint list."
                                 Accessible.name: "Output endpoint recovery guidance"
+                                Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 wrapMode: Text.WordWrap
