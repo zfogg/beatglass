@@ -483,3 +483,5 @@ The selected-position label explicitly permits zero minimum width, allowing the 
 The canvas focus ring reduces from three to two pixels in compact headers, preserving a clear keyboard-focus cue while reclaiming a small amount of visualization space.
 
 The selected-position cursor similarly reduces from two to one pixel in compact headers, retaining the theme-foreground cue without overpowering the smaller canvas.
+
+The canvas now also has explicit compact/full minimum heights, preserving a usable pointer and keyboard interaction target when the surrounding screen is constrained.

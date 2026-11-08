@@ -397,6 +397,7 @@ def main() -> int:
         "visualization clear recovery description": "Accessible.description: \"Remove the selected waveform or FFT position. Escape, Enter, Space, right-click, and double-click provide equivalent recovery paths.\"",
         "visualization interaction hint": "objectName: \"visualizationInteractionHint\"\n                    text: {\n                        const modeLabel = visualizationCanvas.viewMode === \"waveform\" ? \"waveform\" : \"FFT\"",
         "visualization responsive canvas height": "Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120",
+        "visualization responsive canvas minimum": "Layout.minimumHeight: window.compactHeader ? 72 : 96",
         "visualization responsive hint type": "font.pixelSize: window.compactHeader ? 12 : 14",
         "visualization error hint color": "color: window.liveBridge.status === \"Error\" ? \"#fca5a5\" : window.themeForegrounds[window.selectedThemeIndex]",
         "visualization retry capture action": "objectName: \"visualizationRetryCapture\"\n                    visible: window.liveBridge.status === \"Error\"",
