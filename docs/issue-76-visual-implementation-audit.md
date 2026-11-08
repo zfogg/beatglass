@@ -317,3 +317,5 @@ The live visualization canvas now exposes its current mode and selected-position
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
+
+The live monitoring state and guidance are now exposed as one grouped surface, while the DJ status, estimates, and evidence-quality message share a second grouped surface. Both groups report the current monitoring state and provide entry tooltips, so assistive technology users can understand capture readiness and provisional evidence before navigating individual labels.

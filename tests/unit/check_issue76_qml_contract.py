@@ -368,6 +368,8 @@ def main() -> int:
         "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",
         "live monitoring heading tooltip": "Accessible.name: \"DJ monitoring\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Live output monitoring and visualization\"",
         "live output monitoring tooltip": "ToolTip.text: \"Current live output monitoring state\"",
+        "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
+        "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
