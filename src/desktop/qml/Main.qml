@@ -252,7 +252,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
                     Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; Accessible.name: "Reverse name sort order"; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {

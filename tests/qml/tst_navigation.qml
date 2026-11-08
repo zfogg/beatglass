@@ -213,6 +213,11 @@ TestCase {
         compare(findChild(app, "chooseFolder").Accessible.description, "Choose a local folder to browse")
         app.destroy()
     }
+    function test_librarySearchExplainsFiltering() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "search").Accessible.description, "Filter the current folder by audio or folder name")
+        app.destroy()
+    }
     function test_analysisControlsAreAccessible() {
         let app = shell.createObject(null)
         compare(findChild(app, "analysisProgress").Accessible.name, "Analysis progress")
