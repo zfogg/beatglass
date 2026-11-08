@@ -27,6 +27,11 @@ if(BUILD_TESTING)
   endif()
   find_package(Python3 QUIET COMPONENTS Interpreter)
   if(Python3_Interpreter_FOUND)
+    add_test(NAME evidence_bundle_manifest
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/verify_evidence_bundle.py
+        --root ${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/fixtures/evidence-bundle
+        --manifest ${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/fixtures/evidence-bundle/manifest.json)
+    set_tests_properties(evidence_bundle_manifest PROPERTIES LABELS documentation TIMEOUT 10)
     add_test(NAME api_docs_build_contract
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/check_api_docs_config.py)
     set_tests_properties(api_docs_build_contract PROPERTIES LABELS documentation TIMEOUT 10)
