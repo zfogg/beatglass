@@ -81,6 +81,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_catalogStatusDescribesBrowseWorkflow() {
+        let app = shell.createObject(null)
+        let status = findChild(app, "catalogStatus")
+        verify(status !== null)
+        compare(status.text, "Choose a folder to browse local audio files.")
+        app.destroy()
+    }
+
     function test_djMonitoringExplainsCurrentState() {
         let app = shell.createObject(null)
         let dj = findChild(app, "djPage")
