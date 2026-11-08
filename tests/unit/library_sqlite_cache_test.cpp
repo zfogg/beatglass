@@ -152,6 +152,11 @@ TEST_CASE("SQLite cache discards only retryable runs") {
   REQUIRE_FALSE(cache.discard_retryable("retry"));
   REQUIRE_THROWS_AS(cache.discard_retryable(""), std::invalid_argument);
 }
+TEST_CASE("SQLite retryable run query exposes its bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxRetryableRuns == 10000);
+  CHECK_THROWS_AS(cache.retryable_runs(kMaxRetryableRuns + 1), std::invalid_argument);
+}
 TEST_CASE("SQLite binding lengths are checked before narrowing") {
   auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
   REQUIRE(sqlite_length_representable(maximum));
