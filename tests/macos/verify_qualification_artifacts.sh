@@ -19,13 +19,16 @@ command -v plutil >/dev/null 2>&1 || { echo "plutil is required" >&2; exit 1; }
 plutil -lint "$topology" >/dev/null || { echo "invalid display topology evidence: $topology" >&2; exit 1; }
 [[ -s "$audio_inventory" ]] || { echo "missing or empty audio endpoint inventory: $audio_inventory" >&2; exit 1; }
 plutil -lint "$audio_inventory" >/dev/null || { echo "invalid audio endpoint inventory: $audio_inventory" >&2; exit 1; }
-for key in commit macos_version architecture hardware_model xcode_version sdk_version sdk_path developer_dir qt_version artifact_sha256; do
+for key in commit macos_version architecture hardware_model xcode_version sdk_version sdk_path developer_dir qt_version artifact_sha256 display_topology audio_inventory; do
   grep -q "^${key}=." "$manifest" || { echo "manifest missing ${key}" >&2; exit 1; }
 done
 manifest_hash_ref=$(sed -n 's/^artifact_sha256=//p' "$manifest")
 [[ "$manifest_hash_ref" == "qualification-artifacts.sha256" ]] || { echo "manifest artifact_sha256 must point to qualification-artifacts.sha256" >&2; exit 1; }
 manifest_case_ref=$(sed -n 's/^case_matrix=//p' "$manifest")
 [[ "$manifest_case_ref" == "qualification-cases.tsv" ]] || { echo "manifest case_matrix must point to qualification-cases.tsv" >&2; exit 1; }
+manifest_display_ref=$(sed -n 's/^display_topology=//p' "$manifest")
+manifest_audio_ref=$(sed -n 's/^audio_inventory=//p' "$manifest")
+[[ "$manifest_display_ref" == "display-topology.json" && "$manifest_audio_ref" == "audio-endpoints.json" ]] || { echo "manifest machine evidence links are unexpected" >&2; exit 1; }
 expected_cases=(permission_prompt capture_nonzero_timestamp permission_revoke_recovery output_switch_uid fifo_exhaustion_recovery overlay_visibility overlay_click_through_recovery overlay_display_change overlay_fullscreen_spaces menubar_dock_reopen)
 mapfile -t case_lines < "$case_matrix"
 [[ "${case_lines[0]:-}" == $'case_id\tstatus\tevidence' ]] || { echo "invalid qualification case matrix header" >&2; exit 1; }
