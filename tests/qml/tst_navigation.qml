@@ -359,6 +359,22 @@ TestCase {
         app.destroy()
     }
 
+    function test_visualizationModeFocusRemainsVisible() {
+        let app = shell.createObject(null)
+        let waveform = findChild(app, "waveformView")
+        let spectrum = findChild(app, "spectrumView")
+        verify(waveform !== null)
+        verify(spectrum !== null)
+        compare(waveform.background.border.width, 1)
+        waveform.forceActiveFocus()
+        tryCompare(waveform.background, "border.width", 3)
+        compare(waveform.background.border.color, "#60a5fa")
+        spectrum.forceActiveFocus()
+        tryCompare(spectrum.background, "border.width", 3)
+        compare(spectrum.background.border.color, "#c084fc")
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")
