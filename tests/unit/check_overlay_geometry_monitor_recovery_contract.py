@@ -10,7 +10,7 @@ required = [
     "!window.overlayDisplaySelectionRequired",
     "window.recoverOverlayAfterDisplayChange()",
     "retryOverlay.forceActiveFocus()",
-    "window.syncOverlaySizePreferenceFromGeometry(window.overlayBridge.geometry)",
+    "window.syncOverlayGeometryStateFromBridge()",
 ]
 missing = [marker for marker in required if marker not in qml]
 if missing:
