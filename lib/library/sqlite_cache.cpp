@@ -11,6 +11,17 @@
 namespace beatglass::library_detail {
 bool sqlite_length_representable(std::size_t size) noexcept { return size <= static_cast<std::size_t>(std::numeric_limits<int>::max()); }
 namespace {
+void validate_text(const std::string& value, const char* field, std::size_t maximum) {
+  if (value.empty() || value.size() > maximum || value.find('\0') != std::string::npos ||
+      !sqlite_length_representable(value.size()))
+    throw std::invalid_argument(std::string("invalid collection ") + field);
+}
+void validate_collection_entry(const CollectionEntry& e) {
+  validate_text(e.path, "path", 4096);
+  validate_text(e.name, "name", 1024);
+  validate_text(e.kind, "kind", 128);
+  validate_text(e.fingerprint, "fingerprint", 4096);
+}
 void validate_key(const CacheKey& key) {
   if (key.content.empty() || key.content.size() > 512 || key.engine.empty() || key.engine.size() > 4096 ||
       key.config.empty() || key.config.size() > 4096 || key.mode.empty() || key.mode.size() > 128 ||
@@ -101,20 +112,25 @@ public:
     bind_key(s.p, 1, key); done(s.p); return sqlite3_changes(db_) == 1;
   }
   void put_entry(const CollectionEntry& e) {
-    if (e.path.empty() || e.name.empty() || e.kind.empty()) throw std::invalid_argument("invalid collection entry");
+    validate_collection_entry(e);
     Statement s(db_, "INSERT INTO collection_entries(path,name,kind,fingerprint,size_bytes,modified_ns) VALUES(?,?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET name=excluded.name,kind=excluded.kind,fingerprint=excluded.fingerprint,size_bytes=excluded.size_bytes,modified_ns=excluded.modified_ns");
     bind(s.p,1,e.path); bind(s.p,2,e.name); bind(s.p,3,e.kind); bind(s.p,4,e.fingerprint);
     check(sqlite3_bind_int64(s.p,5,static_cast<sqlite3_int64>(e.size_bytes))); check(sqlite3_bind_int64(s.p,6,e.modified_ns)); done(s.p);
   }
-  bool remove_entry(const std::string& path) { Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
+  bool remove_entry(const std::string& path) { validate_text(path, "path", 4096); Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
   std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop) {
-    if (stop.stop_requested()) throw std::runtime_error("collection query cancelled");
+    if (path.empty() || path.size() > 4096 || path.find('\0') != std::string::npos ||
+        !sqlite_length_representable(path.size())) throw std::invalid_argument("invalid collection path");
+    if (stop.stop_requested()) throw CollectionCancelled();
     Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE path=?"); bind(s.p,1,path); const int rc=sqlite3_step(s.p); if(rc==SQLITE_DONE)return std::nullopt; if(rc!=SQLITE_ROW)throw std::runtime_error(sqlite3_errmsg(db_)); return read_entry(s.p);
   }
   std::vector<CollectionEntry> entries(const CollectionQuery& q, std::stop_token stop) {
     if (q.limit == 0 || q.limit > 10000) throw std::invalid_argument("invalid collection page size");
-    if (stop.stop_requested()) throw std::runtime_error("collection query cancelled");
-    Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE lower(name) LIKE lower(?) || '%' ORDER BY lower(name),name,path LIMIT ? OFFSET ?"); bind(s.p,1,q.search); check(sqlite3_bind_int64(s.p,2,static_cast<sqlite3_int64>(q.limit))); check(sqlite3_bind_int64(s.p,3,static_cast<sqlite3_int64>(q.offset))); std::vector<CollectionEntry> out; int rc=SQLITE_ROW; while((rc=sqlite3_step(s.p))==SQLITE_ROW){ if(stop.stop_requested()) throw std::runtime_error("collection query cancelled"); out.push_back(read_entry(s.p)); } if(rc!=SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_)); return out;
+    if (q.search.size() > 1024 || q.search.find('\0') != std::string::npos || !sqlite_length_representable(q.search.size()) ||
+        q.offset > static_cast<std::size_t>(std::numeric_limits<sqlite3_int64>::max()))
+      throw std::invalid_argument("invalid collection query");
+    if (stop.stop_requested()) throw CollectionCancelled();
+    Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE lower(name) LIKE lower(?) || '%' ORDER BY lower(name),name,path LIMIT ? OFFSET ?"); bind(s.p,1,q.search); check(sqlite3_bind_int64(s.p,2,static_cast<sqlite3_int64>(q.limit))); check(sqlite3_bind_int64(s.p,3,static_cast<sqlite3_int64>(q.offset))); std::vector<CollectionEntry> out; int rc=SQLITE_ROW; while((rc=sqlite3_step(s.p))==SQLITE_ROW){ if(stop.stop_requested()) throw CollectionCancelled(); out.push_back(read_entry(s.p)); } if(rc!=SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_)); return out;
   }
   // The worker rechecks evidence inside the transaction. The supplied callback
   // must compare the opened input's current version with its pre-analysis evidence.

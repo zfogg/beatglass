@@ -343,3 +343,13 @@ Primary navigation now reports the current Library, DJ, or Settings page as a li
 The Settings tab now uses the same explicit page-tab role as Library and DJ, keeping the primary navigation contract consistent across all three destinations for keyboard and assistive technology users.
 
 All three primary navigation tabs now report a selected/not-selected value in addition to the toolbar’s current-page value, so users can understand both the active destination and each tab’s state while moving through the navigation.
+
+The primary navigation group now documents all three page-switch shortcuts in its accessible description, keeping keyboard-discoverable navigation available even when focus is on the toolbar as a whole.
+
+Each primary navigation tab now updates its tooltip to identify the selected destination when active, keeping pointer and keyboard hover/focus feedback aligned with the live selected/not-selected values.
+
+The Settings Appearance group now reports its current theme and motion mode as a live group value, keeping the visual preference cluster’s state available before users navigate its individual controls.
+
+The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
+
+Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

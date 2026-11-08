@@ -308,11 +308,11 @@ ApplicationWindow {
                 Accessible.name: "Primary navigation"
                 Accessible.value: currentIndex === 0 ? "Library" : (currentIndex === 1 ? "DJ" : (currentIndex === 2 ? "Settings" : "no page selected"))
                 Accessible.role: Accessible.Toolbar
-                Accessible.description: "Switch between Library, DJ, and Settings pages."
+                Accessible.description: "Switch between Library, DJ, and Settings pages. Use Ctrl+Shift+1 for Library, Ctrl+Shift+2 for DJ, or Ctrl+Shift+3 for Settings."
                 ToolTip.text: "Primary workspace navigation; current page: " + (currentIndex === 0 ? "Library" : (currentIndex === 1 ? "DJ" : (currentIndex === 2 ? "Settings" : "none")))
-                TabButton { id: libraryTab; text: "Library"; objectName: "libraryTab"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: "Browse local audio files"; Accessible.name: "Library"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "Browse local audio files. Shortcut Ctrl+Shift+1; focus returns to this tab."; background: Rectangle { color: libraryTab.checked ? "#273b5d" : "transparent"; border.width: libraryTab.activeFocus ? 3 : 1; border.color: libraryTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
-                TabButton { id: djTab; text: "DJ"; objectName: "djTab"; activeFocusOnTab: true; Accessible.name: "DJ"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2; focus returns to this tab."; Accessible.role: Accessible.PageTab; ToolTip.text: "Open live DJ controls and overlay settings"; background: Rectangle { color: djTab.checked ? "#273b5d" : "transparent"; border.width: djTab.activeFocus ? 3 : 1; border.color: djTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
-                TabButton { id: settingsTab; text: "Settings"; objectName: "settingsTab"; activeFocusOnTab: true; Accessible.name: "Settings"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab."; Accessible.role: Accessible.PageTab; ToolTip.text: "Open audio, appearance, and overlay settings"; background: Rectangle { color: settingsTab.checked ? "#273b5d" : "transparent"; border.width: settingsTab.activeFocus ? 3 : 1; border.color: settingsTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
+                TabButton { id: libraryTab; text: "Library"; objectName: "libraryTab"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: checked ? "Library is selected; browse local audio files" : "Browse local audio files"; Accessible.name: "Library"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "Browse local audio files. Shortcut Ctrl+Shift+1; focus returns to this tab."; background: Rectangle { color: libraryTab.checked ? "#273b5d" : "transparent"; border.width: libraryTab.activeFocus ? 3 : 1; border.color: libraryTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
+                TabButton { id: djTab; text: "DJ"; objectName: "djTab"; activeFocusOnTab: true; Accessible.name: "DJ"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2; focus returns to this tab."; Accessible.role: Accessible.PageTab; ToolTip.text: checked ? "DJ is selected; open live controls and overlay settings" : "Open live DJ controls and overlay settings"; background: Rectangle { color: djTab.checked ? "#273b5d" : "transparent"; border.width: djTab.activeFocus ? 3 : 1; border.color: djTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
+                TabButton { id: settingsTab; text: "Settings"; objectName: "settingsTab"; activeFocusOnTab: true; Accessible.name: "Settings"; Accessible.value: checked ? "selected" : "not selected"; Accessible.description: "Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab."; Accessible.role: Accessible.PageTab; ToolTip.text: checked ? "Settings is selected; configure audio, appearance, and overlay" : "Open audio, appearance, and overlay settings"; background: Rectangle { color: settingsTab.checked ? "#273b5d" : "transparent"; border.width: settingsTab.activeFocus ? 3 : 1; border.color: settingsTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
             }
             ComboBox {
                 id: themeSelector
@@ -367,9 +367,10 @@ ApplicationWindow {
                 visible: !window.compactHeader
                 spacing: 3
                 Accessible.name: "Theme previews"
+                Accessible.value: window.selectedTheme
                 Accessible.role: Accessible.Grouping
                 Accessible.description: "Choose a color theme preview; the selected swatch is marked as selected."
-                ToolTip.text: "Theme preview choices"
+                ToolTip.text: "Theme preview choices; current theme: " + window.selectedTheme
                 Repeater {
                     model: window.themeNames.length
                     delegate: Button {
@@ -386,7 +387,7 @@ ApplicationWindow {
                                               + (checked ? "selected" : "not selected")
                         Accessible.role: Accessible.RadioButton
                         Accessible.value: checked ? "selected" : "not selected"
-                        ToolTip.text: "Select " + window.themeNames[index] + " theme"
+                        ToolTip.text: checked ? window.themeNames[index] + " theme is selected" : "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
                             objectName: "themePreviewSurface" + index
                             radius: 3
@@ -1347,6 +1348,7 @@ ApplicationWindow {
                 GroupBox {
                     title: "Appearance"
                     Accessible.name: "Appearance settings"
+                    Accessible.value: window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Choose the color theme and motion preference for the desktop."
                     ToolTip.text: "Configure theme and motion preferences"

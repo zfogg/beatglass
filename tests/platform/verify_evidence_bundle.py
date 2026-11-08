@@ -42,7 +42,9 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if not isinstance(entry, dict):
             errors.append(f"invalid artifact entry: {entry}")
             continue
-        relative, expected = entry.get("path"), entry.get("sha256", "").lower()
+        relative = entry.get("path")
+        raw_expected = entry.get("sha256", "")
+        expected = raw_expected.lower() if isinstance(raw_expected, str) else None
         canonical = Path(relative).as_posix() if isinstance(relative, str) else None
         if (
             not isinstance(relative, str)
@@ -68,7 +70,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"invalid scenario: {scenario}"); continue
         if scenario["status"] not in {"UNRUN", "PENDING"}:
             evidence = scenario.get("evidence")
-            if not evidence or evidence not in seen:
+            if not isinstance(evidence, str) or not evidence or evidence not in seen:
                 errors.append(f"scenario evidence is not retained: {scenario.get('id')}")
             elif evidence in evidence_owners:
                 errors.append(f"scenario evidence is shared: {evidence} ({evidence_owners[evidence]}, {scenario.get('id')})")
@@ -78,6 +80,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
                 errors.append(f"scenario evidence role mismatch: {scenario.get('id')} -> {evidence}")
             else:
                 evidence_owners[evidence] = scenario.get("id")
+        elif scenario.get("evidence"):
+            errors.append(f"incomplete scenario must not claim evidence: {scenario.get('id')}")
     return errors
 
 

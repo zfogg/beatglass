@@ -182,6 +182,31 @@ TEST_CASE("SQLite cache stores and pages collection metadata") {
   REQUIRE(cache.entry("/music/Beta.flac")->size_bytes == 20);
   REQUIRE(cache.remove_entry("/music/Beta.flac")); REQUIRE_FALSE(cache.entry("/music/Beta.flac"));
 }
+TEST_CASE("SQLite collection reads expose typed cancellation") {
+  SqliteCache cache(":memory:");
+  cache.put_entry({"/music/a.flac", "a.flac", "audio", "hash", 1, 1});
+  std::stop_source stop;
+  stop.request_stop();
+  CHECK_THROWS_AS(cache.entry("/music/a.flac", stop.get_token()), CollectionCancelled);
+  CHECK_THROWS_AS(cache.entries({"", 0, 10}, stop.get_token()), CollectionCancelled);
+}
+TEST_CASE("SQLite exact catalog lookup rejects unsafe paths") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.entry(""), std::invalid_argument);
+  CHECK_THROWS_AS(cache.entry("/music/a\0.flac"), std::invalid_argument);
+}
+TEST_CASE("SQLite catalog prefix queries bound search input") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.entries({std::string(1025, 'a'), 0, 10}), std::invalid_argument);
+}
+TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.put_entry({"/music/a\0.flac", "a.flac", "audio", "hash", 1, 1}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "", 1, 1}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.remove_entry("/music/a\0.flac"), std::invalid_argument);
+  CHECK_THROWS_AS(cache.entries({"a\0", 0, 10}), std::invalid_argument);
+}
 TEST_CASE("SQLite cache invalidates one active identity without deleting its source") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("run", key);

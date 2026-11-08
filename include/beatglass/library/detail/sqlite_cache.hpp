@@ -6,7 +6,13 @@
 #include <stop_token>
 #include <string>
 #include <vector>
+#include <stdexcept>
 namespace beatglass::library_detail {
+/** Raised when a collection read observes cancellation before or during SQLite iteration. */
+class CollectionCancelled : public std::runtime_error {
+public:
+  CollectionCancelled() : std::runtime_error("collection query cancelled") {}
+};
 /** On-disk schema version for the provisional analysis cache. */
 inline constexpr int kCacheSchemaVersion = 1;
 /** Metadata for one indexed local-library item; the source file is never owned or modified. */
@@ -17,7 +23,7 @@ struct CollectionEntry {
 };
 /** Bounded, case-insensitive name query over indexed entries. */
 /** Case-insensitive name-prefix page; offset is zero-based and limit must be between 1 and 10000. */
-struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; };
+struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; }; /** Search prefixes are limited to 1024 bytes. */
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;
 /** Maximum serialized analysis result accepted by the provisional cache. */
@@ -46,11 +52,11 @@ public:
   /** Close the connection. */ ~SqliteCache();
   SqliteCache(const SqliteCache&) = delete;
   SqliteCache& operator=(const SqliteCache&) = delete;
-  /** Insert or replace one index row on the worker; throws on invalid values or storage errors. Does not touch the source file. */
+  /** Insert or replace one index row on the worker; throws on empty, embedded-NUL, or oversized metadata and storage errors. Does not touch the source file. */
   void put_entry(const CollectionEntry& entry);
-  /** Remove only the index row; returns whether a row existed. Never removes a source file. */
+  /** Remove only the index row; rejects an empty or embedded-NUL path and returns whether a row existed. Never removes a source file. */
   bool remove_entry(const std::string& path);
-  /** Return an owned exact-path entry or absence; throws CollectionCancelled on observed stop and throws on storage errors. */
+  /** Return an owned exact-path entry or absence; rejects empty, embedded-NUL, or oversized paths, throws CollectionCancelled on observed stop, and throws on storage errors. The source file is not opened. */
   std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop = {});
   /** Return up to the requested bounded page of owned entries; throws CollectionCancelled on observed stop and throws on invalid query or storage errors. */
   std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});

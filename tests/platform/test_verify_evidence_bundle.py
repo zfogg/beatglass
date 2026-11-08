@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -32,6 +33,16 @@ class EvidenceBundleTest(unittest.TestCase):
             errors = module.verify(root, manifest)
             self.assertTrue(any("invalid artifact entry" in error for error in errors))
 
+    def test_artifact_hash_must_be_a_string(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": ["bad"], "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
+
     def test_pending_scenario_is_allowed_without_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
@@ -41,6 +52,29 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             errors = module.verify(root, manifest)
             self.assertFalse(any("invalid scenario" in error for error in errors))
+
+    def test_incomplete_scenario_cannot_claim_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); evidence = root / "capture.txt"; evidence.write_text("x", encoding="utf-8")
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": hashlib.sha256(b"x").hexdigest(), "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING", "evidence": "capture.txt"} if scenario == "capture"
+                                  else {"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("incomplete scenario must not claim evidence" in error for error in errors))
+
+    def test_completed_scenario_rejects_non_string_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PASS", "evidence": ["capture.txt"]} if scenario == "capture"
+                                  else {"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("scenario evidence is not retained" in error for error in errors))
 
     def test_pass_fixture_is_valid(self):
         root = Path(__file__).parent / "fixtures/evidence-bundle"
