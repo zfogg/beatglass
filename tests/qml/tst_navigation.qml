@@ -257,6 +257,10 @@ TestCase {
         compare(findChild(app, "analysisProgress").Accessible.name, "Analysis progress")
         compare(findChild(app, "analysisUncertainty").Accessible.name, "Analysis uncertainty")
         verify(findChild(app, "analysisUncertainty").text.indexOf("Track key: Unknown") === 0)
+        compare(findChild(app, "analysisProgress").text, "Queued · select an audio source to begin analysis.")
+        let retry = findChild(app, "retryAnalysis")
+        verify(!retry.enabled)
+        compare(retry.Accessible.description, "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations.")
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
