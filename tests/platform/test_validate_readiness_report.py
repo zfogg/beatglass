@@ -46,6 +46,13 @@ class ReadinessReportContractTest(unittest.TestCase):
         report["platforms"][0]["artifact_inventory"][0]["hash_valid"] = False
         self.assertIn("artifact hash is not valid", "\n".join(module.validate(report)))
 
+    def test_report_rejects_duplicate_artifact_paths(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        inventory = report["platforms"][0]["artifact_inventory"]
+        inventory.append(dict(inventory[0]))
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("duplicate report artifact path", errors)
+
     def test_retained_files_match_manifest_and_report(self):
         root = Path(__file__).parent / "fixtures/readiness-bundles"
         report = __import__("json").loads((root / "readiness-report.json").read_text(encoding="utf-8"))

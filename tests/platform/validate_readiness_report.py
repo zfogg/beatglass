@@ -63,6 +63,9 @@ def validate(report: dict) -> list[str]:
             if not isinstance(inventory, list) or not inventory:
                 errors.append(f"{item.get('platform')}: missing artifact inventory")
             else:
+                inventory_paths = [artifact.get("path") for artifact in inventory if isinstance(artifact, dict)]
+                if len(inventory_paths) != len(set(inventory_paths)):
+                    errors.append(f"{item.get('platform')}: duplicate report artifact path")
                 for artifact in inventory:
                     if not isinstance(artifact, dict) or not artifact.get("path"):
                         errors.append(f"{item.get('platform')}: artifact missing path")
