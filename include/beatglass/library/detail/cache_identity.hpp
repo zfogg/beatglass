@@ -45,4 +45,11 @@ FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
                                       const std::filesystem::path& path,
                                       std::stop_token stop = {},
                                       std::string* diagnostic = nullptr);
+/** Begin/publish one file-backed result only after an initial identity check.
+ * The cache publication callback repeats revalidation at the commit point;
+ * changed input becomes `stale_input` and remains retryable.
+ */
+Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
+                            const CacheKey& key, const std::filesystem::path& path,
+                            const std::string& result, std::stop_token stop = {});
 }
