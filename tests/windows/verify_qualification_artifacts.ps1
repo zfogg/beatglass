@@ -15,10 +15,12 @@ if (-not (Test-Path -LiteralPath $overlayEvidencePath -PathType Leaf)) { throw "
 $lines = @(Get-Content -LiteralPath $manifestPath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 if ($lines.Count -ne 4) { throw "Expected exactly four artifact hashes, found $($lines.Count)" }
 $seen = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+$relativePaths = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 foreach ($line in $lines) {
   if ($line -notmatch '^(?<hash>[0-9a-fA-F]{64})\s{2}(?<relative>[^\s].*)$') { throw "Malformed artifact hash line: $line" }
   $expected = $Matches.hash
   $relative = $Matches.relative.Trim()
+  [void]$relativePaths.Add($relative.Replace('\', '/'))
   if ([IO.Path]::IsPathRooted($relative)) { throw "Artifact path must be relative: $relative" }
   $candidate = [IO.Path]::GetFullPath((Join-Path $OutputDirectory $relative))
   $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
@@ -28,6 +30,8 @@ foreach ($line in $lines) {
   $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $candidate).Hash
   if ($actual -ine $expected) { throw "Hash mismatch for $relative (expected $expected, got $actual)" }
 }
+$expectedArtifacts = @("build/Release/beatglass-desktop.exe", "build/Release/windows_endpoint_tests.exe", "build/Release/windows_dj_bridge_tests.exe", "build/Release/windows_overlay_tests.exe")
+foreach ($expected in $expectedArtifacts) { if (-not $relativePaths.Contains($expected)) { throw "Artifact manifest is missing required executable: $expected" } }
 $expectedCases = @("endpoint-selection-start", "pause-resume", "seek-epoch-retirement", "endpoint-disappearance-recovery", "retry-native-diagnostic", "stop-cleanup")
 $evidence = @(Get-Content -LiteralPath $evidencePath -Raw | ConvertFrom-Json)
 if ($evidence.Count -ne $expectedCases.Count) { throw "Expected exactly six native playback evidence cases" }
