@@ -52,6 +52,7 @@ def main() -> int:
         "overlay status static roles": "objectName: \"overlayInteractionMode\"; text: window.overlayBridge",
         "library capture status roles": "objectName: \"endpointStatus\"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: \"Output endpoint status\"; Accessible.role: Accessible.StaticText",
         "library detail status roles": "objectName: \"selectedAudioName\"",
+        "analysis status roles": "objectName: \"analysisProgress\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

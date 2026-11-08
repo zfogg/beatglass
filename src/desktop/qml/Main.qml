@@ -625,6 +625,7 @@ ApplicationWindow {
                                 text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (window.analysisJobBridge ? (window.analysisJobBridge.status + " · observed " + window.analysisJobBridge.frames + " frames.") : "Analysis progress unavailable")
                                 objectName: "analysisProgress"
                                 Accessible.name: "Analysis progress"
+                                Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
@@ -635,6 +636,7 @@ ApplicationWindow {
                                       + " · rejected " + window.analysisJobBridge.batchRejectedCount
                                       + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")) : ""
                                 Accessible.name: "Batch analysis queue status"
+                                Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? text : "Batch queue status is unavailable until the analysis bridge reports it."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
@@ -643,6 +645,7 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
                                 Accessible.name: "Persisted analysis recovery status"
+                                Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
@@ -672,6 +675,7 @@ ApplicationWindow {
                                     text: "This removes only the retry record. The source audio file is not changed."
                                     wrapMode: Text.WordWrap
                                     Accessible.name: "Discard retryable run confirmation"
+                                    Accessible.role: Accessible.StaticText
                                 }
                                 onAccepted: storageRecovery.discardSelectedRun()
                             }
