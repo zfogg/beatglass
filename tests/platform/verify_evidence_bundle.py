@@ -68,7 +68,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"invalid scenario: {scenario}"); continue
         if scenario["status"] not in {"UNRUN", "PENDING"}:
             evidence = scenario.get("evidence")
-            if not evidence or evidence not in seen:
+            if not isinstance(evidence, str) or not evidence or evidence not in seen:
                 errors.append(f"scenario evidence is not retained: {scenario.get('id')}")
             elif evidence in evidence_owners:
                 errors.append(f"scenario evidence is shared: {evidence} ({evidence_owners[evidence]}, {scenario.get('id')})")

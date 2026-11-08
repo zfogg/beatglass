@@ -55,6 +55,17 @@ class EvidenceBundleTest(unittest.TestCase):
             errors = module.verify(root, manifest)
             self.assertTrue(any("incomplete scenario must not claim evidence" in error for error in errors))
 
+    def test_completed_scenario_rejects_non_string_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PASS", "evidence": ["capture.txt"]} if scenario == "capture"
+                                  else {"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("scenario evidence is not retained" in error for error in errors))
+
     def test_pass_fixture_is_valid(self):
         root = Path(__file__).parent / "fixtures/evidence-bundle"
         self.assertEqual(module.verify(root, root / "manifest.json"), [])
