@@ -21,6 +21,7 @@ xcode_version=test
 sdk_version=test
 sdk_path=/sdk
 developer_dir=/dev
+qt_version=UNAVAILABLE
 artifact_sha256=qualification-artifacts.sha256
 case_matrix=qualification-cases.tsv
 EOF
