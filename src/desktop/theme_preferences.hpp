@@ -19,6 +19,8 @@ public:
   bool reduceMotion() const noexcept { return reduce_motion_; }
   /** Store the reduced-motion preference. */
   void setReduceMotion(bool value);
+  /** Restore the portable presentation defaults and persist both values. */
+  Q_INVOKABLE void reset();
 signals:
   /** Emitted after a new clamped theme index is stored. */
   void themeIndexChanged();

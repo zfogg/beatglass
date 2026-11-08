@@ -25,3 +25,8 @@ void ThemePreferences::setThemeIndex(int index) {
   if (settings_) settings_->setValue(QStringLiteral("desktop/themeIndex"), theme_index_);
   emit themeIndexChanged();
 }
+
+void ThemePreferences::reset() {
+  setThemeIndex(0);
+  setReduceMotion(false);
+}
