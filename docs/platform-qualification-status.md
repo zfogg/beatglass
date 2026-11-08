@@ -182,3 +182,5 @@ Readiness retained-file and artifact-role indexes include only validated string 
 Readiness artifact-role diagnostics also require each scenario evidence reference to be a string before lookup. Structured evidence references are classified as missing ownership and keep the platform pending instead of raising during report generation.
 
 Readiness report aggregation treats non-list `artifacts` or `scenarios` containers as empty diagnostic inventories while the verifier records the manifest contract error. This preserves a machine-readable pending report for malformed container types.
+
+The lightweight readiness check applies the same validated-string scenario-ID rule as report generation, so malformed IDs cannot crash one consumer path while another reports a conservative pending result.

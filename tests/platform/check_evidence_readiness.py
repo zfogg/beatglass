@@ -54,7 +54,8 @@ def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
             continue
         if str(data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match status row")
-        scenario_status = {item.get("id"): item.get("status") for item in data.get("scenarios", []) if isinstance(item, dict)}
+        scenario_status = {item.get("id"): item.get("status") for item in data.get("scenarios", [])
+                           if isinstance(item, dict) and isinstance(item.get("id"), str)}
         unpassed = sorted(scenario_id for scenario_id in verifier.REQUIRED_SCENARIOS if scenario_status.get(scenario_id) != "PASS")
         if unpassed:
             errors.append(f"{platform}: required scenarios are not PASS: {unpassed}")
