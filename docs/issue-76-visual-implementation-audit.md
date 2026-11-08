@@ -547,8 +547,6 @@ The grouped visualization status surface now reports capture error, Starting, Re
 
 The issue-76 contract suite now checks each runtime status branch explicitly—Error, Starting/Reacquiring, ready data, and waiting for data—so future state changes cannot silently drop a visible or accessible transition.
 
-The visualization status group now includes a state-aware Clear selection action. It is enabled only when a waveform or FFT position is selected, reports available/unavailable through its accessible value, and keeps keyboard and pointer recovery paths available from the same responsive status layout.
-
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
