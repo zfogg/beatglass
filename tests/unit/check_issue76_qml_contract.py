@@ -18,7 +18,7 @@ def main() -> int:
         "visualization mode arrow focus": "spectrumView.forceActiveFocus()",
         "visualization shortcut focus": "waveformView.forceActiveFocus()",
         "visualization keyboard guidance": "Use Left and Right arrows to switch views",
-        "capture control accessible name": "Accessible.name: text; Accessible.description: window.captureMonitorBridge",
+        "capture control accessible name": "Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: window.captureMonitorBridge",
         "playback pause accessible name": "Accessible.name: text + \" playback\"",
         "playback stop accessible name": "Accessible.name: \"Stop playback\"",
         "playback seek accessible names": "Accessible.name: \"Seek backward five seconds\"",
@@ -73,6 +73,7 @@ def main() -> int:
         "primary control tab focus": "objectName: \"toggleMonitoring\"; activeFocusOnTab: true",
         "secondary control tab focus": "objectName: \"playbackDevice\"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true",
         "combo role consistency": "Accessible.role: Accessible.ComboBox",
+        "control role consistency": "Accessible.role: Accessible.Button",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
