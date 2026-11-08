@@ -34,6 +34,8 @@ Each native scenario record must retain its capture timestamp, supporting logs, 
 
 The retained-bundle verifier also requires every completed scenario to point to its own retained artifact. A single evidence file may not be reused to make multiple completed scenario rows appear qualified; duplicate evidence references are reported as a bundle error and keep the platform pending.
 
+Artifact identity is canonical and relative to the retained bundle root. Alias paths such as `./capture.json`, path traversal, duplicate entries, and other non-canonical spellings are rejected so a scenario cannot silently refer to a different retained file than the manifest inventory records.
+
 ## Issue #1 exit gate
 
 Issue #1 remains open until the handoff is **fail-closed** across all three native platforms. A release owner may mark a platform ready only when its retained report has `ready: true`, an attributable manifest and source/build identity, complete required scenarios, valid retained paths and hashes, and no freshness, invalidation, provenance, or aggregate-consistency errors. The top-level report must show `all_platforms_ready: true` and `aggregate_consistent: true`; one missing, stale, invalidated, or inconsistent row keeps the entire handoff pending.

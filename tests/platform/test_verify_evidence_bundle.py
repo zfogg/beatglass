@@ -31,6 +31,15 @@ def manifest(artifact):
 
 
 class EvidenceBundleNegativeTest(unittest.TestCase):
+    def test_artifact_path_alias_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
+            digest = __import__("hashlib").sha256(b"actual\n").hexdigest()
+            data = manifest({"path": "capture.txt", "sha256": digest})
+            data["artifacts"].append({"path": "./capture.txt", "sha256": digest})
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, path)))
+
     def test_passed_scenarios_cannot_share_one_evidence_artifact(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "evidence.json").write_text("{}", encoding="utf-8")
