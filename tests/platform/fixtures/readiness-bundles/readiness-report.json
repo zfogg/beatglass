@@ -232,6 +232,7 @@
       "missing": []
     }
   ],
+  "summary_consistent": true,
   "errors": [],
   "ready": true
 }
