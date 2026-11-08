@@ -410,6 +410,8 @@ def main() -> int:
         "visualization playback sync": "syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationPresentation.waveform.length)",
         "visualization generation gate": "readonly property bool presentationReady: typeof visualizationPresentation !== \"undefined\"",
         "visualization render gate": "if (!presentationReady)",
+        "visualization waveform validation": "if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))",
+        "visualization spectrum validation": "if (!isFinite(spec[k]))",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization status runtime state": "Accessible.value: window.liveBridge.status === \"Error\" ? \"capture error\"",
         "visualization reset reason": "visualizationSelectionResetReason",

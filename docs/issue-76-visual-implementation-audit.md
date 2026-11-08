@@ -500,6 +500,8 @@ Playback change notifications now synchronize the visualization selection from t
 
 Canvas rendering now requires a valid presentation generation and revision before consuming waveform/FFT arrays. Reduced-motion remains a presentation preference for animated surfaces only; it does not disable the real analysis data path or static waveform/FFT rendering.
 
+The renderer now validates waveform point pairs and finite FFT magnitudes before issuing canvas geometry, so malformed analysis results are skipped without breaking the rest of an accepted generation.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
