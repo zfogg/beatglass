@@ -133,6 +133,16 @@ TEST_CASE("file reader rejects source mutation before rewind") {
  CHECK_THROWS_WITH(reader.seek(0), "File reader failed");
 }
 
+TEST_CASE("file reader mutation at EOF still blocks rewind") {
+ WaveFixture fixture; FileReader reader(fixture.path, 29); std::array<float,4> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::end);
+ { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
+ CHECK_THROWS_WITH(reader.seek(0), "Audio source changed during seek");
+ CHECK_THROWS_WITH(reader.seek(0), "File reader failed");
+}
+
 TEST_CASE("file reader keeps source_changed sticky after mutation failure") {
  WaveFixture fixture; FileReader reader(fixture.path, 28); std::array<float,2> samples{};
  CHECK_FALSE(reader.source_changed());
