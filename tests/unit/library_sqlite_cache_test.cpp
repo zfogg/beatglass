@@ -90,3 +90,12 @@ TEST_CASE("SQLite cache holds exclusive ownership during recovery and use") {
   { SqliteCache next(path.string()); std::string result; REQUIRE(next.find({"hash", "engine", "config", "offline"}, result)); }
   REQUIRE(std::filesystem::remove(path));
 }
+TEST_CASE("SQLite cache stores and pages collection metadata") {
+  SqliteCache cache(":memory:");
+  cache.put_entry({"/music/Beta.flac", "Beta.flac", "audio", "sha256:b", 20, 2});
+  cache.put_entry({"/music/alpha.mp3", "alpha.mp3", "audio", "sha256:a", 10, 1});
+  auto page = cache.entries({"A", 0, 10});
+  REQUIRE(page.size() == 1); REQUIRE(page.front().path == "/music/alpha.mp3");
+  REQUIRE(cache.entry("/music/Beta.flac")->size_bytes == 20);
+  REQUIRE(cache.remove_entry("/music/Beta.flac")); REQUIRE_FALSE(cache.entry("/music/Beta.flac"));
+}

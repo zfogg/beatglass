@@ -39,6 +39,7 @@ public:
         try {
           exec("CREATE TABLE runs(id TEXT PRIMARY KEY, content TEXT NOT NULL, engine TEXT NOT NULL, config TEXT NOT NULL, mode TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('running','complete','retryable')), result BLOB, CHECK((status='complete' AND result IS NOT NULL) OR (status!='complete' AND result IS NULL)), UNIQUE(id,content,engine,config,mode,status))");
           exec("CREATE TABLE active(content TEXT NOT NULL, engine TEXT NOT NULL, config TEXT NOT NULL, mode TEXT NOT NULL, run_id TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'complete' CHECK(status='complete'), PRIMARY KEY(content,engine,config,mode), FOREIGN KEY(run_id,content,engine,config,mode,status) REFERENCES runs(id,content,engine,config,mode,status))");
+          exec("CREATE TABLE collection_entries(path TEXT PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL, fingerprint TEXT NOT NULL, size_bytes INTEGER NOT NULL, modified_ns INTEGER NOT NULL)");
           exec("PRAGMA user_version=1"); exec("COMMIT");
         } catch (...) { rollback(); throw; }
       }
@@ -63,6 +64,22 @@ public:
     auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 0));
     auto n = sqlite3_column_bytes(s.p, 0); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
   }
+  void put_entry(const CollectionEntry& e) {
+    if (e.path.empty() || e.name.empty() || e.kind.empty()) throw std::invalid_argument("invalid collection entry");
+    Statement s(db_, "INSERT INTO collection_entries(path,name,kind,fingerprint,size_bytes,modified_ns) VALUES(?,?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET name=excluded.name,kind=excluded.kind,fingerprint=excluded.fingerprint,size_bytes=excluded.size_bytes,modified_ns=excluded.modified_ns");
+    bind(s.p,1,e.path); bind(s.p,2,e.name); bind(s.p,3,e.kind); bind(s.p,4,e.fingerprint);
+    check(sqlite3_bind_int64(s.p,5,static_cast<sqlite3_int64>(e.size_bytes))); check(sqlite3_bind_int64(s.p,6,e.modified_ns)); done(s.p);
+  }
+  bool remove_entry(const std::string& path) { Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
+  std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop) {
+    if (stop.stop_requested()) throw std::runtime_error("collection query cancelled");
+    Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE path=?"); bind(s.p,1,path); const int rc=sqlite3_step(s.p); if(rc==SQLITE_DONE)return std::nullopt; if(rc!=SQLITE_ROW)throw std::runtime_error(sqlite3_errmsg(db_)); return read_entry(s.p);
+  }
+  std::vector<CollectionEntry> entries(const CollectionQuery& q, std::stop_token stop) {
+    if (q.limit == 0 || q.limit > 10000) throw std::invalid_argument("invalid collection page size");
+    if (stop.stop_requested()) throw std::runtime_error("collection query cancelled");
+    Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE lower(name) LIKE '%' || lower(?) || '%' ORDER BY lower(name),name,path LIMIT ? OFFSET ?"); bind(s.p,1,q.search); check(sqlite3_bind_int64(s.p,2,static_cast<sqlite3_int64>(q.limit))); check(sqlite3_bind_int64(s.p,3,static_cast<sqlite3_int64>(q.offset))); std::vector<CollectionEntry> out; int rc=SQLITE_ROW; while((rc=sqlite3_step(s.p))==SQLITE_ROW){ if(stop.stop_requested()) throw std::runtime_error("collection query cancelled"); out.push_back(read_entry(s.p)); } if(rc!=SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_)); return out;
+  }
   // The worker rechecks evidence inside the transaction. The supplied callback
   // must compare the opened input's current version with its pre-analysis evidence.
   // A stat/hash check cannot rule out all concurrent filesystem mutations.
@@ -85,6 +102,7 @@ public:
     } catch (...) { rollback(); return Publish::error; }
   }
 private:
+  CollectionEntry read_entry(sqlite3_stmt* s) { return {reinterpret_cast<const char*>(sqlite3_column_text(s,0)),reinterpret_cast<const char*>(sqlite3_column_text(s,1)),reinterpret_cast<const char*>(sqlite3_column_text(s,2)),reinterpret_cast<const char*>(sqlite3_column_text(s,3)),static_cast<std::uint64_t>(sqlite3_column_int64(s,4)),sqlite3_column_int64(s,5)}; }
   struct Statement {
     sqlite3_stmt* p = nullptr;
     Statement(sqlite3* db, const char* sql) { if (sqlite3_prepare_v2(db, sql, -1, &p, nullptr) != SQLITE_OK) throw std::runtime_error(sqlite3_errmsg(db)); }
@@ -102,6 +120,10 @@ SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>
 SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
+void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }
+bool SqliteCache::remove_entry(const std::string& path) { return impl_->remove_entry(path); }
+std::optional<CollectionEntry> SqliteCache::entry(const std::string& path, std::stop_token stop) { return impl_->entry(path, stop); }
+std::vector<CollectionEntry> SqliteCache::entries(const CollectionQuery& query, std::stop_token stop) { return impl_->entries(query, stop); }
 Publish SqliteCache::publish(const std::string& id, const CacheKey& key, const std::string& result,
                              std::stop_token stop, const std::function<bool()>& revalidate) {
   return impl_->publish(id, key, result, stop, revalidate);
