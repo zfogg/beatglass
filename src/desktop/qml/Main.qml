@@ -36,6 +36,16 @@ ApplicationWindow {
         onActivated: if (window.overlayBridge && window.overlayBridge.clickThrough)
                          window.overlayBridge.setClickThrough(false)
     }
+    Shortcut {
+        objectName: "playbackPauseShortcut"
+        sequence: "Ctrl+Alt+Space"
+        context: Qt.ApplicationShortcut
+        enabled: window.playbackBridge !== null
+            && (window.playbackBridge.state === "Playing" || window.playbackBridge.state === "Paused")
+        onActivated: window.playbackBridge.state === "Paused"
+            ? window.playbackBridge.resume()
+            : window.playbackBridge.pause()
+    }
     property string selectedTheme: "Light"
     readonly property var themeNames: ["Light", "Dark", "High contrast", "Purple", "Blue", "Yellow"]
     readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]

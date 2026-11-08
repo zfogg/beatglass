@@ -23,6 +23,8 @@ TestCase {
         property int opens: 0
         function openSource(url, nextEpoch) { source = url; epoch = nextEpoch; state = "Playing"; opens++; return true }
         function seek(frame, nextEpoch) { currentFrame = frame; epoch = nextEpoch; return true }
+        function pause() { state = "Paused" }
+        function resume() { state = "Playing" }
     }
     QtObject {
         id: fakeAnalysis
@@ -191,6 +193,19 @@ TestCase {
         compare(findChild(app, "seekForwardPlayback").Accessible.description, "Seek playback forward five seconds")
         compare(findChild(app, "seekFrame").Accessible.name, "Seek target frame")
         compare(findChild(app, "seekToFrame").Accessible.description, "Seek playback to the entered audio frame")
+        app.destroy()
+    }
+    function test_playbackPauseShortcutTracksPlaybackState() {
+        fakePlayback.state = "Playing"
+        let app = shellWithPlayback.createObject(null)
+        let shortcut = findChild(app, "playbackPauseShortcut")
+        verify(shortcut !== null)
+        compare(shortcut.sequence, "Ctrl+Alt+Space")
+        verify(shortcut.enabled)
+        fakePlayback.state = "Stopped"
+        verify(!shortcut.enabled)
+        fakePlayback.state = "Paused"
+        verify(shortcut.enabled)
         app.destroy()
     }
     function test_playbackDeviceSelectionControlsArePresent() {
