@@ -21,6 +21,8 @@ class ReadinessReviewTest(unittest.TestCase):
             self.assertIn("Gate status: **PENDING**", text)
             self.assertIn("Native qualification required: **True**", text)
             self.assertIn("## Platform support", text)
+            self.assertIn("Manifest SHA-256:", text)
+            self.assertIn("Source commit:", text)
             self.assertIn("capture", text)
             self.assertIn("Artifacts:", text)
             self.assertIn("## ingestion_errors", text)

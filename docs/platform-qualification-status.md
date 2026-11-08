@@ -239,6 +239,8 @@ The exported checklist includes all four audit-error channels (`generation_error
 
 It also displays the native-required flag and each platform’s support status, making an inconsistent transition visible before strict consumer acceptance.
 
+Each platform section includes manifest hash, source commit, capture time, and environment anchors so reviewers can correlate checklist observations with retained provenance.
+
 Use `--require-ready` when the checklist is an acceptance gate; it exits nonzero for `PENDING`. Without that flag, checklist export remains informational and never changes the report state.
 
 Strict review also invokes the downstream consumer, so malformed audit trails, unpassed scenarios, missing roles, experimental support, or native-required state cannot pass merely by changing the top-level gate.
