@@ -395,7 +395,21 @@ ApplicationWindow {
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         RowLayout { Layout.fillWidth: true
-                            Label { text: analysisJob ? (analysisJob.frames > 0 ? "Analysis observed " + analysisJob.frames + " frames." : "No analysis frames observed yet.") : "Analysis progress unavailable"; objectName: "analysisProgress"; Accessible.name: "Analysis progress"; Accessible.description: text; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                            Label {
+                                text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (analysisJob ? (analysisJob.frames > 0 ? "Running · observed " + analysisJob.frames + " frames." : "Queued · waiting for analysis telemetry.") : "Analysis progress unavailable")
+                                objectName: "analysisProgress"
+                                Accessible.name: "Analysis progress"
+                                Accessible.description: text
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Button {
+                                text: "Retry analysis"
+                                objectName: "retryAnalysis"
+                                enabled: false
+                                Accessible.name: "Retry analysis"
+                                Accessible.description: "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations."
+                                ToolTip.text: Accessible.description
+                            }
                         }
                     }
                 }
