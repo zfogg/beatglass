@@ -20,13 +20,21 @@ def build_report(root: Path) -> dict:
     rows = []
     for platform in PLATFORMS:
         bundle = root / platform
+        bundle_root = bundle.resolve()
+        errors = []
         manifest_path = bundle / "manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         inventory = []
         for item in manifest.get("artifacts", []):
             path = bundle / str(item.get("path", ""))
+            if not path.resolve().is_relative_to(bundle_root):
+                errors.append(f"artifact escapes bundle: {item.get('path')}")
+                inventory.append({"path": item.get("path"), "sha256": "", "bytes": -1, "hash_valid": False})
+                continue
             exists = path.is_file()
             digest = _sha(path) if exists else ""
+            if not exists:
+                errors.append(f"missing artifact: {item.get('path')}")
             inventory.append({"path": item.get("path"), "sha256": digest,
                              "bytes": path.stat().st_size if exists else -1,
                              "hash_valid": exists and digest == item.get("sha256")})
@@ -35,12 +43,23 @@ def build_report(root: Path) -> dict:
                                "evidence": scenarios.get(name, {}).get("evidence")} for name in SCENARIOS]
         output_name = manifest.get("qualification_output", "")
         output_path = bundle / output_name
+        if output_name and not output_path.resolve().is_relative_to(bundle_root):
+            errors.append(f"qualification output escapes bundle: {output_name}")
+            output_path = bundle / "__missing_output__"
+        elif output_name and not output_path.is_file():
+            errors.append(f"missing qualification output: {output_name}")
         output_hash = _sha(output_path) if output_path.is_file() else ""
         evidence_hashes = {}
         for scenario in scenario_inventory:
             evidence = scenario.get("evidence")
             if evidence:
                 evidence_path = bundle / str(evidence)
+                if not evidence_path.resolve().is_relative_to(bundle_root):
+                    errors.append(f"scenario evidence escapes bundle: {evidence}")
+                    evidence_hashes[scenario["id"]] = ""
+                    continue
+                if not evidence_path.is_file():
+                    errors.append(f"missing scenario evidence: {evidence}")
                 evidence_hashes[scenario["id"]] = _sha(evidence_path) if evidence_path.is_file() else ""
         rows.append({"platform": platform,
                      "manifest": str(manifest_path),
@@ -56,7 +75,7 @@ def build_report(root: Path) -> dict:
                      "scenario_evidence_sha256": evidence_hashes,
                      "manifest_platform": manifest.get("platform"),
                      "provenance_complete": all(manifest.get(k) for k in ("platform", "commit", "captured_at", "environment")),
-                     "errors": []})
+                     "errors": errors})
     status = [{"platform": p, "status": "experimental"} for p in PLATFORMS]
     return {"readiness_report_schema": 1, "support_language": "experimental",
             "native_qualification_required": True, "exit_gate_status": "PENDING",
