@@ -312,6 +312,10 @@ TestCase {
         verify(recovery !== null)
         verify(!recovery.visible)
         compare(recovery.Accessible.name, "Output endpoint recovery guidance")
+        let unavailable = findChild(app, "endpointUnavailableState")
+        verify(unavailable !== null)
+        verify(unavailable.visible)
+        compare(unavailable.Accessible.name, "Output endpoint discovery availability")
         app.destroy()
     }
 

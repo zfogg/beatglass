@@ -906,6 +906,15 @@ ApplicationWindow {
                             }
                             Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status"; Accessible.description: text }
                             Label {
+                                objectName: "endpointUnavailableState"
+                                visible: window.endpointSelectionBridge === null
+                                text: "Output endpoint discovery is unavailable in this build."
+                                Accessible.name: "Output endpoint discovery availability"
+                                Accessible.description: text
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                            Label {
                                 objectName: "endpointRecoveryGuidance"
                                 visible: window.endpointSelectionBridge && window.endpointSelectionBridge.status.indexOf("Error") >= 0
                                 text: "Output endpoint recovery is available: connect an output device and refresh the endpoint list."
