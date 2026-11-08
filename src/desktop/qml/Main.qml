@@ -283,12 +283,16 @@ ApplicationWindow {
     }
     function seekPlaybackToVisualizationPosition(position, durationFrames) {
         const frame = visualizationPositionToFrame(position, durationFrames)
-        if (frame < 0 || !window.playbackBridge || window.playbackBridge.state === "Stopped")
+        if (frame < 0 || visualizationCanvas.acceptedResultIdentity === ""
+                || !visualizationCanvas.presentationReady
+                || !window.playbackBridge || window.playbackBridge.state === "Stopped")
             return false
         return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
     }
     function syncVisualizationSelectionFromPlayback(frame, durationFrames) {
-        if (!isFinite(frame) || !isFinite(durationFrames) || durationFrames <= 0)
+        if (!isFinite(frame) || !isFinite(durationFrames) || durationFrames <= 0
+                || visualizationCanvas.acceptedResultIdentity === ""
+                || !visualizationCanvas.presentationReady)
             return false
         visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, frame / durationFrames))
         visualizationCanvas.requestPaint()
