@@ -10,6 +10,9 @@ required = [
     'objectName: "lookupAnalysisCache"',
     'objectName: "analysisCacheResult"',
     'storageRecovery.cachedResult',
+    'objectName: "analysisQueueOutcome"',
+    'window.analysisJobBridge.status',
+    'window.analysisJobBridge.canRetry ? " · retry available"',
     'storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)',
 ]
 missing = [marker for marker in required if marker not in qml]

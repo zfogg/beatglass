@@ -822,6 +822,15 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "No completed cached analysis result is selected."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
+                            Label {
+                                objectName: "analysisQueueOutcome"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.status !== undefined
+                                text: visible ? ("Analysis queue: " + window.analysisJobBridge.status
+                                      + (window.analysisJobBridge.canRetry ? " · retry available" : "")) : ""
+                                Accessible.name: "Analysis queue outcome"
+                                Accessible.description: visible ? text : "Analysis queue outcome is unavailable."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
                             RowLayout {
                                 objectName: "analysisCacheLookupControls"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.findCached !== undefined
