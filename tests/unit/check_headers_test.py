@@ -32,6 +32,16 @@ class HeaderCoverageTest(unittest.TestCase):
                 ".. cpp:autodoc:: lib/removed.hpp\n", encoding="utf-8")
             self.assertEqual(module.coverage(root), ([], ["lib/removed.hpp"]))
 
+    def test_duplicate_index_entry_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "docs/api").mkdir(parents=True)
+            for directory in ("include", "lib", "src"):
+                (root / directory).mkdir()
+            (root / "docs/api/index.rst").write_text(
+                ".. cpp:autodoc:: include/a.hpp include/a.hpp\n", encoding="utf-8")
+            self.assertEqual(module.duplicates(root), ["include/a.hpp"])
+
 
 if __name__ == "__main__":
     unittest.main()

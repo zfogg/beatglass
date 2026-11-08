@@ -16,11 +16,20 @@ def coverage(root: Path) -> tuple[list[str], list[str]]:
     return sorted(headers - listed), sorted(listed - headers)
 
 
+def duplicates(root: Path) -> list[str]:
+    """Return headers indexed more than once."""
+    index = (root / "docs/api/index.rst").read_text(encoding="utf-8")
+    entries = [item for line in index.splitlines() if line.startswith(".. cpp:autodoc:: ")
+               for item in line.split("::", 1)[1].split()]
+    return sorted({item for item in entries if entries.count(item) > 1})
+
+
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
     missing, extra = coverage(root)
-    if missing or extra:
-        print(f"Missing headers: {missing}; stale entries: {extra}", file=sys.stderr)
+    repeated = duplicates(root)
+    if missing or extra or repeated:
+        print(f"Missing headers: {missing}; stale entries: {extra}; duplicate entries: {repeated}", file=sys.stderr)
         return 1
     print("API index covers all production headers")
     return 0
