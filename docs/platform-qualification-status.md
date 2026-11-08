@@ -38,7 +38,7 @@ Artifact identity is canonical and relative to the retained bundle root. Alias p
 
 Scenario traceability is closed over the shared matrix: manifests must declare exactly the known `capture`, `recovery`, `output`, `display`, `playback`, and `overlay` scenario IDs. Unknown or duplicate IDs are verifier errors rather than silently ignored rows, so a typo cannot make a platform-specific native observation disappear from the readiness report.
 
-When a retained artifact declares a `role`, every completed scenario must match it (`capture`, `recovery`, `output`, `display`, `playback`, or `overlay`). A valid hash or screenshot in the wrong declared role is not evidence for that scenario; the verifier reports the mismatch and keeps the platform pending.
+Every completed scenario must declare an artifact `role` matching its scenario ID (`capture`, `recovery`, `output`, `display`, `playback`, or `overlay`). A valid hash or screenshot without a role, or in the wrong role, is not evidence for that scenario; the verifier reports the mismatch and keeps the platform pending.
 
 ## Issue #1 exit gate
 
