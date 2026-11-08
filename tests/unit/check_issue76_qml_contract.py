@@ -412,6 +412,8 @@ def main() -> int:
         "visualization render gate": "if (!presentationReady)",
         "visualization analysis handoff": 'objectName: "visualizationAnalysisHandoff"',
         "visualization handoff generation": '"Accepted analysis generation " + visualizationPresentation.generation',
+        "visualization rendered revision": "property int renderedRevision: -1",
+        "visualization handoff repaint": "visualizationCanvas.renderedRevision = visualizationPresentation.revision; visualizationCanvas.requestPaint()",
         "visualization waveform validation": "if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))",
         "visualization spectrum validation": "if (!isFinite(spec[k]))",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",

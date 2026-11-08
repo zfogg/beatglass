@@ -504,6 +504,8 @@ The renderer now validates waveform point pairs and finite FFT magnitudes before
 
 The status group now exposes an analysis handoff label that reports the accepted generation and revision consumed by rendering, or explicitly waits for an accepted result. This makes the queue-to-visualization boundary visible while retaining generation gating.
 
+The canvas now records the revision it last rendered and updates that value on each accepted presentation change before requesting a repaint; assistive canvas state therefore reflects the actual handoff revision driving the visible waveform/FFT.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
