@@ -43,7 +43,7 @@ class QualificationHandoffTest(unittest.TestCase):
     def test_handoff_docs_describe_versioned_report_contract(self) -> None:
         root = Path(__file__).resolve().parents[2]
         docs = (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8")
-        for phrase in ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes"):
+        for phrase in ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "platform_support_status", "native_qualification_required"):
             self.assertIn(phrase, docs)
 
     def test_current_status_has_one_row_per_platform(self) -> None:

@@ -38,7 +38,7 @@ def main() -> int:
     required_scenarios = ("permission", "device", "recovery")
     required_runtime_evidence = ("audio backend", "display server", "exact commands", "limitations")
     required_evidence_schema = ("timestamp", "logs", "screenshot")
-    required_report_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes")
+    required_report_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "platform_support_status", "native_qualification_required")
     required_exit_gate = (
         "## Issue #1 exit gate",
         "all_platforms_ready: true",
