@@ -246,6 +246,7 @@
     "manifest": []
   },
   "category_platforms_consistent": true,
+  "category_platform_lists_consistent": true,
   "required_scenario_summary": [
     {
       "platform": "windows",
