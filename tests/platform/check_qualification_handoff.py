@@ -47,7 +47,7 @@ def main() -> int:
     required_runtime_evidence = ("audio backend", "display server", "exact commands", "limitations")
     required_evidence_schema = ("timestamp", "logs", "screenshot")
     required_report_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "platform_support_status", "native_qualification_required")
-    required_pipeline_tools = ("run_readiness_handoff.py", "ingest_qualification_artifacts.py", "consume_readiness_handoff.py", "review_release_decision.py", "promote_review_bundle.py", "--require-ready", "--consume-review", "--decision-output")
+    required_pipeline_tools = ("run_readiness_handoff.py", "ingest_qualification_artifacts.py", "consume_readiness_handoff.py", "review_release_decision.py", "promote_review_bundle.py", "verify_release_manifest.py", "--require-ready", "--consume-review", "--decision-output")
     required_cross_document_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "native qualification", "experimental")
     required_exit_gate = (
         "## Issue #1 exit gate",
