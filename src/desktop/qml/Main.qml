@@ -174,6 +174,7 @@ ApplicationWindow {
                         width: 18; height: 18
                         padding: 0
                         Accessible.name: window.themeNames[index] + " theme preview"
+                        Accessible.role: Accessible.Button
                         ToolTip.text: "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
                             radius: 3
