@@ -340,6 +340,8 @@ Decode progress now flows through the operation’s wrapped progress callback, s
 
 Analysis operations now support an optional stop-aware transactional publisher carrying the run identity and cache revalidation boundary. The runner treats a rejected or cancelled commit as non-complete; legacy non-persistent publication remains supported.
 
+`AnalysisCoordinator` now owns the worker executor and `StorageOwner` together, attaching run-identity publication before queue submission. This is the safe library boundary for a future Qt bridge; native UI wiring and platform qualification remain pending.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
