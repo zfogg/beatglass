@@ -436,6 +436,16 @@ ApplicationWindow {
                 }
             }
         }
+        function onClickThroughChanged() {
+            if (window.overlayBridge && window.overlayBridge.clickThrough)
+                window.announceCaptureRecoveryState("DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.")
+            else
+                window.announceCaptureRecoveryState("DJ overlay interaction restored; keyboard and pointer input are available.")
+        }
+        function onOpacityChanged() {
+            if (window.overlayBridge)
+                window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
+        }
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
