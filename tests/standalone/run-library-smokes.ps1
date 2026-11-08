@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$OutputDir = "", [string]$Compiler = "g++")
+param([string]$OutputDir = "", [string]$Compiler = "g++", [switch]$ContinueOnFailure)
 
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
@@ -22,17 +22,28 @@ $cases = @(
   @{ Name = "analysis_verifier_error"; Sources = @($runnerSources + "tests/standalone/analysis_verifier_error_smoke.cpp") },
   @{ Name = "analysis_empty_cancel"; Sources = @($runnerSources + "tests/standalone/analysis_empty_cancel_smoke.cpp") },
   @{ Name = "analysis_serialize_exception"; Sources = @($runnerSources + "tests/standalone/analysis_serialize_exception_smoke.cpp") },
-  @{ Name = "storage_config"; Sources = @("tests/standalone/storage_config_smoke.cpp") }
+  @{ Name = "storage_config"; Sources = @("tests/standalone/storage_config_smoke.cpp") },
+  @{ Name = "analysis_postserialize_cancel"; Sources = @($runnerSources + "tests/standalone/analysis_postserialize_cancel_smoke.cpp") },
+  @{ Name = "analysis_postverify_cancel"; Sources = @($runnerSources + "tests/standalone/analysis_postverify_cancel_smoke.cpp") },
+  @{ Name = "analysis_empty_result"; Sources = @($runnerSources + "tests/standalone/analysis_empty_result_smoke.cpp") },
+  @{ Name = "analysis_verifier_exception"; Sources = @($runnerSources + "tests/standalone/analysis_exception_smoke.cpp") },
+  @{ Name = "analysis_progress_exception"; Sources = @($runnerSources + "tests/standalone/analysis_progress_exception_smoke.cpp") }
 )
 
 Push-Location $repo
 try {
   foreach ($case in $cases) {
     $binary = Join-Path $OutputDir "$($case.Name).exe"
-    & $Compiler @common $case.Sources -o $binary
-    if ($LASTEXITCODE -ne 0) { throw "compile failed: $($case.Name)" }
-    & $binary
-    if ($LASTEXITCODE -ne 0) { throw "smoke failed: $($case.Name)" }
+    try {
+      & $Compiler @common $case.Sources -o $binary
+      if ($LASTEXITCODE -ne 0) { throw "compile failed" }
+      & $binary
+      if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
+      Write-Output "PASS $($case.Name)"
+    } catch {
+      Write-Error "FAIL $($case.Name): $_"
+      if (-not $ContinueOnFailure) { throw }
+    }
   }
 } finally { Pop-Location }
 Write-Output "Standalone library smokes passed: $($cases.Count)"
