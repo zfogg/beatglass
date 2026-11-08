@@ -27,6 +27,7 @@ foreach ($line in $lines) {
   if (-not $candidate.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) { throw "Artifact path escapes output: $relative" }
   if (-not $seen.Add($candidate)) { throw "Duplicate artifact path: $relative" }
   if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { throw "Missing artifact: $candidate" }
+  if ((Get-Item -LiteralPath $candidate).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Artifact must not be a reparse point: $relative" }
   $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $candidate).Hash
   if ($actual -ine $expected) { throw "Hash mismatch for $relative (expected $expected, got $actual)" }
 }
@@ -43,6 +44,7 @@ for ($i = 0; $i -lt $expectedCases.Count; $i++) {
     $logPath = [IO.Path]::GetFullPath((Join-Path $OutputDirectory $evidence[$i].log))
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     if (-not $logPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $logPath -PathType Leaf)) { throw "Missing log evidence for $($evidence[$i].case): $($evidence[$i].log)" }
+    if ((Get-Item -LiteralPath $logPath).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Log evidence must not be a reparse point: $($evidence[$i].log)" }
   }
 }
 $expectedOverlayCases = @("show-hide-recovery", "click-through-unlock", "display-change-clamp", "dpi-fullscreen")
@@ -56,6 +58,7 @@ for ($i = 0; $i -lt $expectedOverlayCases.Count; $i++) {
     $screenshotPath = [IO.Path]::GetFullPath((Join-Path $OutputDirectory $overlayEvidence[$i].screenshot))
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     if (-not $screenshotPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $screenshotPath -PathType Leaf)) { throw "Missing screenshot evidence for $($overlayEvidence[$i].case): $($overlayEvidence[$i].screenshot)" }
+    if ((Get-Item -LiteralPath $screenshotPath).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Screenshot evidence must not be a reparse point: $($overlayEvidence[$i].screenshot)" }
   }
 }
 Write-Output "qualification artifact hashes verified: $OutputDirectory"
