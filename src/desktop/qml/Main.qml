@@ -1085,7 +1085,7 @@ ApplicationWindow {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge) overlayOpacityControl.value = window.overlayBridge.opacity }
                     }
-                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay opacity value" }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
@@ -1099,7 +1099,7 @@ ApplicationWindow {
                         onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
                         Layout.fillWidth: true
                     }
-                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay display status" }
                     Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
@@ -1121,7 +1121,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; wrapMode: Text.WordWrap }
+                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
                 Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Retry showing the native DJ overlay"; ToolTip.text: "Retry showing the native DJ overlay on the selected display"; onClicked: window.showOverlayAndHideControls() }
                 Item { Layout.fillHeight: true }
             }
