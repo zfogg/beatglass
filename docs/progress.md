@@ -1,5 +1,7 @@
 # Progress and handoff
 
+Decoder compatibility is explicit in retry recovery: `decoder_snapshot` travels with the persisted run, and legacy retry rows with an empty snapshot remain rejected rather than silently reusing a changed decoder. Local checks cover this policy; native codec/runtime compatibility is still unqualified.
+
 Retryable storage schema v2 persists `source_path` and `decoder_snapshot` with each run and migrates existing databases by adding empty defaults. Recovery UI and coordinator resubmission consume these fields conservatively; empty legacy metadata remains non-retryable until a source operation is reconstructed. This migration is covered by portable storage contracts, not native qualification.
 
 Playback/recovery behavior now treats an epoch change or endpoint interruption as a lifecycle boundary: stale queued evidence is cleared, reacquisition starts fresh, and prior results are not presented as current. Portable lifecycle contracts cover this behavior; native device-loss and real playback observations remain unqualified.
