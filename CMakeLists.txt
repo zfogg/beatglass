@@ -27,6 +27,9 @@ if(BUILD_TESTING)
   endif()
   find_package(Python3 QUIET COMPONENTS Interpreter)
   if(Python3_Interpreter_FOUND)
+    add_test(NAME api_docs_build_contract
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/check_api_docs_config.py)
+    set_tests_properties(api_docs_build_contract PROPERTIES LABELS documentation TIMEOUT 10)
     add_test(NAME qualification_handoff_inventory
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/check_qualification_handoff.py)
     set_tests_properties(qualification_handoff_inventory PROPERTIES LABELS documentation TIMEOUT 10)
