@@ -775,6 +775,7 @@ ApplicationWindow {
                         text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"
                         objectName: "visualizationModeStatus"
                         Accessible.name: "Visualization mode"
+                        Accessible.role: Accessible.StaticText
                         Accessible.description: text + ". Use Left and Right arrows to switch views, or Ctrl+1 and Ctrl+2."
                     }
                 }
@@ -854,6 +855,7 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     Accessible.name: "Visualization empty state"
+                    Accessible.role: Accessible.StaticText
                     Accessible.description: text
                 }
                 Label {
@@ -862,6 +864,7 @@ ApplicationWindow {
                         ? "Unavailable"
                         : (visualizationCanvas.modeHasData ? "Ready" : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
                     Accessible.name: "Visualization load state"
+                    Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current waveform/FFT presentation load state"
                     Layout.fillWidth: true
@@ -881,7 +884,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationDataStatus"
                     text: (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " waveform samples · " + (typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " spectrum bins"
-                    Accessible.name: "Visualization data status"; Accessible.description: text
+                    Accessible.name: "Visualization data status"; Accessible.role: Accessible.StaticText; Accessible.description: text
                     Layout.fillWidth: true
                 }
                 Label {
@@ -899,6 +902,7 @@ ApplicationWindow {
                     objectName: "visualizationSelectionStatus"
                     text: visualizationCanvas.selectedPosition < 0 ? "No visualization position selected" : "Selected visualization position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%"
                     Accessible.name: "Visualization selection status"
+                    Accessible.role: Accessible.StaticText
                     Accessible.description: "Click the canvas or use Left/Right/Home/End to select a presentation position. " + text
                     ToolTip.text: "Current selected waveform/FFT position"
                 }
