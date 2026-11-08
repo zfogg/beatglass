@@ -135,3 +135,12 @@ class ReadinessHandoffTest(unittest.TestCase):
             errors = handoff.bundle_consumer.consume(root, output.name, packet.name)
             self.assertTrue(any("source report hash mismatch" in error for error in errors))
 
+    def test_handoff_writes_conservative_release_decision(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"; decision = root / "decision.json"
+            errors = handoff.run(bundles, output, review_json=packet, decision_output=decision)
+            data = json.loads(decision.read_text(encoding="utf-8"))
+            self.assertEqual(data["decision"], "PENDING")
+            self.assertTrue(any("release decision is PENDING" in error for error in errors))
+

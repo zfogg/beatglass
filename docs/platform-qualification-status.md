@@ -261,7 +261,7 @@ For release/review handoff, retain both files in one bundle and consume them tog
 
 To create that retained handoff bundle from generated artifacts, run `python tests/platform/retain_review_bundle.py <report.json> <review.json> <bundle-root>`. Export is verified immediately; pending native evidence or any detached/invalid input returns a nonzero result and remains diagnostic rather than release-ready.
 
-To feed a canonical bundle into release/review automation, run `python tests/platform/review_release_decision.py <bundle-root> <decision.json>`. The decision artifact records `ACCEPTED` or conservative `PENDING`, the exact report SHA-256, and machine-readable reasons. Missing, detached, or native-pending evidence can never be promoted by this consumer.
+To feed a canonical bundle into release/review automation, run `python tests/platform/review_release_decision.py <bundle-root> <decision.json>`. The decision artifact records `ACCEPTED` or conservative `PENDING`, the exact report SHA-256, and machine-readable reasons. Missing, detached, or native-pending evidence can never be promoted by this consumer. The end-to-end handoff can emit the same artifact with `--review-json <review.json> --decision-output <decision.json>`; a pending decision is returned as a nonzero handoff result for release automation.
 
 The machine consumer is `python tests/platform/consume_review_packet.py <review.json>`. It rejects unsupported packet versions, recorded acceptance errors, and non-`READY` gate state; native qualification remains pending until the packet is backed by reviewed hardware evidence.
 
