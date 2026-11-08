@@ -107,7 +107,7 @@ def build_report(root: Path) -> dict:
             "exit_gate_reason_codes": ["native_qualification_required", "generated_report_pending_review"],
             "ready": False, "platform_support_status": status, "platforms": rows,
             "generation_errors": generation_errors, "handoff_check_errors": [],
-            "documentation_check_errors": []}
+            "documentation_check_errors": [], "ingestion_errors": []}
 
 
 def main() -> int:
