@@ -119,7 +119,7 @@ public:
     bind(s.p,1,e.path); bind(s.p,2,e.name); bind(s.p,3,e.kind); bind(s.p,4,e.fingerprint);
     check(sqlite3_bind_int64(s.p,5,static_cast<sqlite3_int64>(e.size_bytes))); check(sqlite3_bind_int64(s.p,6,e.modified_ns)); done(s.p);
   }
-  bool remove_entry(const std::string& path) { validate_text(path, "path", 4096); Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
+  bool remove_entry(const std::string& path) { validate_text(path, "path", kMaxCollectionPathBytes); Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
   std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop) {
     if (path.empty() || path.size() > kMaxCollectionPathBytes || path.find('\0') != std::string::npos ||
         !sqlite_length_representable(path.size())) throw std::invalid_argument("invalid collection path");
