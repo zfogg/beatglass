@@ -119,6 +119,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_overlayBeatPulseHonorsReducedMotion() {
+        let app = shell.createObject(null)
+        let pulse = findChild(app, "beatPulse")
+        verify(pulse !== null)
+        compare(pulse.repeat, true)
+        app.destroy()
+    }
+
     function test_libraryDetailsAvailabilityIsActionable() {
         let app = shell.createObject(null)
         let details = findChild(app, "detailsAvailability")
