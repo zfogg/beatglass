@@ -736,6 +736,15 @@ ApplicationWindow {
                     Accessible.description: text
                 }
                 Label {
+                    objectName: "visualizationLoadState"
+                    text: typeof visualizationPresentation === "undefined"
+                        ? "Unavailable"
+                        : (visualizationCanvas.modeHasData ? "Ready" : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
+                    Accessible.name: "Visualization load state"
+                    Accessible.description: text
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "visualizationStatus"
                     text: typeof visualizationPresentation === "undefined"
                           ? "Visualization unavailable"
