@@ -13,6 +13,8 @@ required = [
     'objectName: "analysisQueueOutcome"',
     'window.analysisJobBridge.status',
     'window.analysisJobBridge.canRetry ? " · retry available"',
+    'objectName: "analysisQueueProgress"',
+    'window.analysisJobBridge.frames',
     'storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)',
 ]
 missing = [marker for marker in required if marker not in qml]
