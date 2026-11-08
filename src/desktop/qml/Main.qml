@@ -932,6 +932,13 @@ ApplicationWindow {
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
                         Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        Label {
+                            objectName: "appearanceState"
+                            text: "Theme: " + window.selectedTheme + " · Motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
+                            Accessible.name: "Current appearance settings"
+                            Accessible.description: text
+                            Layout.fillWidth: true
+                        }
                     }
                 }
                 Label {
