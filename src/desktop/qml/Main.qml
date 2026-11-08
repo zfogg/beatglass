@@ -1658,14 +1658,14 @@ ApplicationWindow {
                                 objectName: "retryPersistedRecovery"
                                 activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
-                                enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable
+                                enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable && storageRecovery.analysisStatus !== "Analysis queued" && storageRecovery.analysisStatus !== "Analysis running"
                                 text: "Retry selected run"
                                 onClicked: { const runId = storageRecovery.selectedRunId; window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); window.announceVisualizationRecovery("Persisted recovery retry admitted for " + runId + "; reset status cleared."); forceActiveFocus() }
                                 Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Retry selected persisted analysis run " + storageRecovery.selectedRunId
                                     : "Retry selected persisted analysis run"
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
-                                Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                Accessible.description: typeof storageRecovery !== "undefined" && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running") ? "The selected run is active; retry is unavailable until it reaches a terminal state." : typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Retry persisted run " + storageRecovery.selectedRunId + " when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
                                     : "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
                             }
