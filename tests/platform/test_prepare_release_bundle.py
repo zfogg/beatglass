@@ -25,7 +25,7 @@ class ReleaseWorkflowTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); packet = root / "review.json"; signoff = root / "signoff.json"
             packet.write_text("{}", encoding="utf-8")
-            signoff.write_text(json.dumps({"report_sha256": "0" * 64}), encoding="utf-8")
+            signoff.write_text(json.dumps({"report_sha256": "0" * 64, "review_packet_sha256": "0" * 64}), encoding="utf-8")
             errors = workflow.prepare(fixture, packet, root / "retained", root / "release", signoff)
             self.assertTrue(errors)
             self.assertFalse((root / "release").exists())

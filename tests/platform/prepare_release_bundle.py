@@ -31,6 +31,8 @@ def prepare(report: Path, packet: Path, retained: Path, release: Path, signoff: 
             return [f"invalid release signoff: {error}"]
         if signoff_data.get("report_sha256") != result.get("report_sha256"):
             return ["release signoff report hash does not match decision"]
+        if signoff_data.get("review_packet_sha256") != result.get("review_packet_sha256"):
+            return ["release signoff packet hash does not match decision"]
     accepted, promotion_errors = promoter.promote(retained, release)
     if not accepted:
         return promotion_errors
