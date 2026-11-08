@@ -25,6 +25,23 @@ TEST_CASE("source replacement reacquires a paused session for the new source") {
   CHECK(session.state() == PlaybackState::playing);
   CHECK_FALSE(session.accept(9, 0)); REQUIRE(session.accept(10, 0));
 }
+TEST_CASE("stop retires source epoch and blocks stale or resumed delivery") {
+  PlaybackSession session; REQUIRE(session.start(14)); REQUIRE(session.accept(14, 0, 128));
+  session.stop();
+  CHECK(session.state() == PlaybackState::stopped);
+  CHECK(session.epoch() == 0); CHECK(session.next_frame() == 0);
+  CHECK_FALSE(session.accept(14, 128));
+  CHECK_FALSE(session.pause()); CHECK_FALSE(session.resume());
+  REQUIRE(session.start(15)); CHECK(session.state() == PlaybackState::playing);
+  CHECK_FALSE(session.accept(14, 0)); REQUIRE(session.accept(15, 0));
+}
+TEST_CASE("pause rejects delivery until resume and preserves source cursor") {
+  PlaybackSession session; REQUIRE(session.start(16)); REQUIRE(session.accept(16, 0, 64));
+  REQUIRE(session.pause()); CHECK(session.next_frame() == 64);
+  CHECK_FALSE(session.accept(16, 64)); CHECK_FALSE(session.pause());
+  REQUIRE(session.resume()); REQUIRE(session.accept(16, 64, 32));
+  CHECK(session.next_frame() == 96);
+}
 TEST_CASE("playback advances by decoded block frame count") {
   PlaybackSession session; REQUIRE(session.start(11));
   REQUIRE(session.accept(11, 0, 512)); CHECK(session.next_frame() == 512);
