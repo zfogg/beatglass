@@ -215,6 +215,23 @@
       "invalid": []
     }
   ],
+  "provenance_summary": [
+    {
+      "platform": "windows",
+      "complete": true,
+      "missing": []
+    },
+    {
+      "platform": "macos",
+      "complete": true,
+      "missing": []
+    },
+    {
+      "platform": "linux",
+      "complete": true,
+      "missing": []
+    }
+  ],
   "errors": [],
   "ready": true
 }
