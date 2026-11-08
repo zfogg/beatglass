@@ -97,6 +97,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_visualizationCanvasIsAccessible() {
+        let app = shell.createObject(null)
+        let canvas = findChild(app, "visualizationCanvas")
+        verify(canvas !== null)
+        compare(canvas.Accessible.name, "Live waveform and spectrum")
+        app.destroy()
+    }
+
     function test_libraryDetailsAvailabilityIsActionable() {
         let app = shell.createObject(null)
         let details = findChild(app, "detailsAvailability")
