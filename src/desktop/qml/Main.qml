@@ -50,13 +50,13 @@ ApplicationWindow {
         objectName: "visualizationWaveformShortcut"
         sequence: "Ctrl+1"
         context: Qt.ApplicationShortcut
-        onActivated: visualizationCanvas.viewMode = "waveform"
+        onActivated: { visualizationCanvas.viewMode = "waveform"; waveformView.forceActiveFocus() }
     }
     Shortcut {
         objectName: "visualizationSpectrumShortcut"
         sequence: "Ctrl+2"
         context: Qt.ApplicationShortcut
-        onActivated: visualizationCanvas.viewMode = "spectrum"
+        onActivated: { visualizationCanvas.viewMode = "spectrum"; spectrumView.forceActiveFocus() }
     }
     property string selectedTheme: "Light"
     readonly property bool compactHeader: width < 760
