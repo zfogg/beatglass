@@ -82,6 +82,24 @@ TEST_CASE("Core Audio FIFO reports loss and advances sample position", "[coreaud
   CHECK_FALSE(block.source_sample_time_valid);
 }
 
+TEST_CASE("Core Audio FIFO accumulates loss across recovered queue overflow", "[coreaudio]") {
+  CaptureFifo fifo(31, 48000, 2);
+  std::array<float, 2> input{1, 2};
+  for (int i = 0; i < 15; ++i) REQUIRE(fifo.push(input, 0, false));
+  CHECK_FALSE(fifo.push(input, 0, false));
+  CaptureBlock block;
+  REQUIRE(fifo.pop(block));
+  REQUIRE(fifo.push(input, 0, false));
+  CHECK_FALSE(fifo.push(input, 0, false));
+  CHECK(fifo.dropped_frames() == 2);
+  while (fifo.pop(block)) {}
+  REQUIRE(fifo.push(input, 0, false));
+  REQUIRE(fifo.pop(block));
+  CHECK(block.discontinuity);
+  CHECK(block.first_frame == 32);
+  CHECK(fifo.dropped_frames() == 2);
+}
+
 TEST_CASE("Core Audio FIFO rejects malformed or oversized blocks", "[coreaudio]") {
   CaptureFifo fifo(2, 48000, 2);
   std::array<float, 3> malformed{};
