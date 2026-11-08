@@ -280,6 +280,7 @@ fi
   printf 'sdk_path=%s\n' "$sdk_path"
   printf 'developer_dir=%s\n' "$developer_dir"
   printf 'qt_version=%s\n' "$qt_version"
+  printf 'display_topology=display-topology.json\naudio_inventory=audio-endpoints.json\n'
   printf 'desktop_signing=%s\ntap_signing=%s\nrecovery_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$tap_signing" "$recovery_signing" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'permission_result=%s\n' "$permission_result"

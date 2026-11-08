@@ -23,6 +23,8 @@ sdk_version=test
 sdk_path=/sdk
 developer_dir=/dev
 qt_version=UNAVAILABLE
+display_topology=display-topology.json
+audio_inventory=audio-endpoints.json
 artifact_sha256=qualification-artifacts.sha256
 case_matrix=qualification-cases.tsv
 EOF
