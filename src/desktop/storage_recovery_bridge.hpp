@@ -40,6 +40,8 @@ public:
   Q_INVOKABLE void invalidateCached(QString content, QString engine, QString configuration, QString mode);
   /** Submit a path-backed analysis through the worker-owned coordinator. */
   Q_INVOKABLE void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode);
+  /** Invalidate the selected identity and immediately submit a fresh worker-owned analysis. */
+  Q_INVOKABLE void reanalyze(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode);
   Q_INVOKABLE void cancelAnalysis();
   Q_INVOKABLE void retryAnalysis();
   bool cacheHit() const { return cacheHit_; }
