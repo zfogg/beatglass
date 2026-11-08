@@ -34,12 +34,39 @@ def check(status: Path, bundles: Path) -> list[str]:
     return errors
 
 
+def report(status: Path, bundles: Path) -> dict:
+    rows = []
+    for platform in platforms_from_status(status):
+        bundle = bundles / platform
+        manifest = bundle / "manifest.json"
+        errors = []
+        if manifest.is_file():
+            try:
+                data = json.loads(manifest.read_text(encoding="utf-8"))
+                errors = [f"{platform}: {error}" for error in verifier.verify(bundle, manifest)]
+                if str(data.get("platform", "")).lower() != platform:
+                    errors.append(f"{platform}: manifest platform does not match status row")
+                retained = len(data.get("artifacts", []))
+            except (OSError, json.JSONDecodeError) as exc:
+                errors = [f"{platform}: invalid manifest: {exc}"]
+                retained = 0
+        else:
+            retained = 0
+            errors = [f"{platform}: missing manifest: {manifest}"]
+        rows.append({"platform": platform, "manifest": str(manifest), "retained_artifacts": retained, "errors": errors})
+    return {"platforms": rows, "ready": not any(row["errors"] for row in rows)}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--status", type=Path, required=True)
     parser.add_argument("--bundles", type=Path, required=True)
+    parser.add_argument("--report", type=Path, help="write a JSON retention/readiness report")
     args = parser.parse_args()
     errors = check(args.status, args.bundles)
+    if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(report(args.status, args.bundles), indent=2) + "\n", encoding="utf-8")
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1

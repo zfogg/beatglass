@@ -32,7 +32,7 @@ Detailed handoff checklists: [Windows](windows-qualification.md), [macOS](macos-
 
 Each native scenario record must retain its capture timestamp, supporting logs, and a screenshot or recording path; a status without that evidence remains unqualified.
 
-Before accepting a handoff, run `python tests/platform/check_evidence_readiness.py --status docs/platform-qualification-status.md --bundles <retained-bundle-root>`. The command requires one attributable `windows/`, `macos/`, and `linux/` manifest beneath the bundle root, checks each manifest's platform against the status row, and runs the shared provenance, scenario, path, and hash verifier for every row.
+Before accepting a handoff, run `python tests/platform/check_evidence_readiness.py --status docs/platform-qualification-status.md --bundles <retained-bundle-root> --report <retained-bundle-root>/readiness-report.json`. The command requires one attributable `windows/`, `macos/`, and `linux/` manifest beneath the bundle root, checks each manifest's platform against the status row, runs the shared provenance, scenario, path, and hash verifier for every row, and records retained artifact counts plus failures in a machine-readable report. A report with `ready: false` must remain pending.
 
 ## Issue #76 UI gate
 
