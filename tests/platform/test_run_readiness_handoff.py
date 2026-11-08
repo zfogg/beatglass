@@ -37,3 +37,10 @@ class ReadinessHandoffTest(unittest.TestCase):
             report = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual(report["documentation_check_errors"], [])
 
+    def test_consumer_is_connected_and_rejects_pending_output(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "readiness.json"
+            errors = handoff.run(bundles, output, consume_report=True)
+            self.assertTrue(any("not accepted: PENDING" in error for error in errors))
+

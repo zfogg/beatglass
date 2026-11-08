@@ -17,10 +17,11 @@ generator = _load("generate_readiness_report")
 validator = _load("validate_readiness_report")
 readiness = _load("check_evidence_readiness")
 handoff_docs = _load("check_qualification_handoff")
+consumer = _load("consume_readiness_handoff")
 
 
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
-        check_docs: bool = False) -> list[str]:
+        check_docs: bool = False, consume_report: bool = False) -> list[str]:
     report = generator.build_report(bundles)
     errors = []
     if status is not None:
@@ -38,6 +39,8 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
     errors.extend(validator.validate(report))
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if consume_report:
+        errors.extend(consumer.consume(output))
     return errors
 
 
@@ -48,8 +51,9 @@ def main() -> int:
     parser.add_argument("--status", type=Path, help="status matrix to check against retained bundles")
     parser.add_argument("--max-age-hours", type=float, default=168)
     parser.add_argument("--check-docs", action="store_true", help="run the qualification documentation/tool checker")
+    parser.add_argument("--consume", action="store_true", help="run the downstream report consumer after writing")
     args = parser.parse_args()
-    errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs)
+    errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs, args.consume)
     if errors:
         print("\n".join(errors))
         return 1
