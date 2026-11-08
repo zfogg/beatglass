@@ -133,6 +133,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         for field in ("platform", "commit", "captured_at", "environment"):
             if not isinstance(manifest_data.get(field), str) or not manifest_data[field].strip():
                 errors.append(f"{platform}: manifest provenance field missing: {field}")
+            if field in row and row.get(field) != manifest_data.get(field):
+                errors.append(f"{platform}: report provenance does not match manifest: {field}")
         if not _valid_commit(manifest_data.get("commit")):
             errors.append(f"{platform}: manifest commit must be a 40-character hexadecimal SHA-1")
         captured_at = manifest_data.get("captured_at")
