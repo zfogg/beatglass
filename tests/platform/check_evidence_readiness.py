@@ -62,6 +62,7 @@ def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
 def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     rows = []
     platforms = platforms_from_status(status)
+    expected_platforms = ["windows", "macos", "linux"]
     matrix_errors = ["status matrix contains duplicate platform rows"] if len(platforms) != len(set(platforms)) else []
     for platform in platforms:
         bundle = bundles / platform
@@ -165,7 +166,10 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "error_count": len(matrix_errors + errors),
                      "retention_ok": not missing_artifacts and not mismatched_artifacts,
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
+    platform_summary_consistent = sorted(platforms) == expected_platforms
     errors = [error for row in rows for error in row["errors"]]
+    if not platform_summary_consistent:
+        errors.append("status matrix must contain exactly Windows, macOS, and Linux rows")
     categories = Counter()
     for error in errors:
         if "hash mismatch" in error: categories["hash"] += 1
@@ -178,7 +182,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     summary_consistent = (len(required) == len(rows) == len(provenance)
                           and [item["platform"] for item in required] == [row["platform"] for row in rows]
                           and [item["platform"] for item in provenance] == [row["platform"] for row in rows])
-    return {"platforms": rows, "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
+    return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
+            "platform_summary_consistent": platform_summary_consistent,
+            "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "ready": not errors}

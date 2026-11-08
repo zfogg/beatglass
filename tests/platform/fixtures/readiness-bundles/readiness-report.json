@@ -196,8 +196,17 @@
       "errors": []
     }
   ],
-  "error_count": 0,
-  "failure_categories": {},
+  "platform_count": 3,
+  "expected_platforms": [
+    "windows",
+    "macos",
+    "linux"
+  ],
+  "platform_summary_consistent": false,
+  "error_count": 1,
+  "failure_categories": {
+    "manifest": 1
+  },
   "required_scenario_summary": [
     {
       "platform": "windows",
@@ -233,6 +242,8 @@
     }
   ],
   "summary_consistent": true,
-  "errors": [],
-  "ready": true
+  "errors": [
+    "status matrix must contain exactly Windows, macOS, and Linux rows"
+  ],
+  "ready": false
 }
