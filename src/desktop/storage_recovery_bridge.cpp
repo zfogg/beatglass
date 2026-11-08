@@ -41,6 +41,11 @@ public slots:
     beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     std::string result; emit cached(coordinator_.storage().find_cached(identity, result), QString::fromStdString(result));
   }
+  void invalidateCached(QString content, QString engine, QString configuration, QString mode) {
+    beatglass::library::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+    const bool removed = coordinator_.storage().invalidate_cached(identity);
+    emit result(removed, removed ? QStringLiteral("Cached analysis invalidated") : QStringLiteral("No cached analysis found"));
+  }
   void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
     beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
@@ -112,6 +117,9 @@ void StorageRecoveryBridge::discardSelectedRun() { if (!selectedRunId_.isEmpty()
 void StorageRecoveryBridge::retrySelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::findCached(QString content, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+}
+void StorageRecoveryBridge::invalidateCached(QString content, QString engine, QString configuration, QString mode) {
+  if (worker_) QMetaObject::invokeMethod(worker_, "invalidateCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
 }
 void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
