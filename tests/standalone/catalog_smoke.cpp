@@ -54,6 +54,12 @@ int main() {
   const auto extension_named_directory = beatglass::library::browse(dir.path, "folder");
   require(extension_named_directory.entries.size() == 1 && extension_named_directory.entries[0].directory,
           "directory with an audio-like extension was filtered as a file");
+  std::ofstream(dir.path / "Take One.mp3") << "audio";
+  const auto spaced_source = beatglass::library::browse(dir.path, "TAKE ONE");
+  require(spaced_source.entries.size() == 1 && spaced_source.entries[0].name == "Take One.mp3" &&
+              spaced_source.entries[0].title == "Take One" && spaced_source.entries[0].path.filename() == "Take One.mp3",
+          "source identity with spaces was not preserved");
+  std::filesystem::remove(dir.path / "Take One.mp3");
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
   require(filtered.entries.empty(), "filter returned an unexpected entry");
