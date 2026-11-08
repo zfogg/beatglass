@@ -31,6 +31,7 @@ for i in "${!expected_cases[@]}"; do
       *) echo "evidence path escapes output: $evidence" >&2; exit 1;;
     esac
     [[ -f "$evidence_path" ]] || { echo "missing evidence file for $case_id: $evidence" >&2; exit 1; }
+    [[ ! -L "$evidence_path" ]] || { echo "evidence must not be a symlink: $evidence" >&2; exit 1; }
   fi
 done
 command -v shasum >/dev/null 2>&1 || { echo "shasum is required" >&2; exit 1; }
@@ -61,6 +62,7 @@ for line in "${hash_lines[@]}"; do
   [[ -z "${seen[$candidate]:-}" ]] || { echo "duplicate artifact path: $relative" >&2; exit 1; }
   seen[$candidate]=1
   [[ -f "$candidate" ]] || { echo "missing artifact: $candidate" >&2; exit 1; }
+  [[ ! -L "$candidate" ]] || { echo "artifact must not be a symlink: $relative" >&2; exit 1; }
   actual=$(shasum -a 256 "$candidate" | awk '{print $1}')
   [[ "$actual" == "$expected" ]] || {
     echo "hash mismatch for $relative (expected $expected, got $actual)" >&2; exit 1;
