@@ -316,6 +316,27 @@ ApplicationWindow {
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring"; Accessible.description: text }
                 Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                Canvas {
+                    id: visualizationCanvas; objectName: "visualizationCanvas"
+                    Layout.fillWidth: true; Layout.preferredHeight: 120
+                    Accessible.name: "Live waveform and spectrum"
+                    Accessible.description: "Bounded waveform and FFT magnitudes from the current output capture."
+                    onPaint: {
+                        var ctx = getContext("2d"); ctx.reset();
+                        ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
+                        var wave = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform : []
+                        var spec = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum : []
+                        ctx.strokeStyle = "#60a5fa"; ctx.beginPath()
+                        for (var i = 0; i < wave.length; ++i) {
+                            var x = i * width / Math.max(1, wave.length - 1)
+                            var lo = wave[i][0], hi = wave[i][1]
+                            ctx.moveTo(x, height * (0.5 - hi * 0.4)); ctx.lineTo(x, height * (0.5 - lo * 0.4))
+                        }
+                        ctx.stroke(); ctx.fillStyle = "#c084fc"; var bar = width / Math.max(1, spec.length)
+                        for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
+                    }
+                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
+                }
                 Label {
                     objectName: "djStatus"; text: "Status: " + window.liveBridge.status
                     Accessible.name: "DJ monitoring status"; Accessible.description: text
