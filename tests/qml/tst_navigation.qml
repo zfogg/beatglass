@@ -128,6 +128,14 @@ TestCase {
         app.destroy()
     }
 
+    function test_endpointSelectorUsesEndpointNames() {
+        let app = shell.createObject(null)
+        let selector = findChild(app, "endpointSelector")
+        verify(selector !== null)
+        compare(selector.textRole, "name")
+        app.destroy()
+    }
+
     function test_overlayReportsCaptureRecoveryStatus() {
         let app = shell.createObject(null)
         verify(findChild(app, "overlayCaptureStatus") !== null)
