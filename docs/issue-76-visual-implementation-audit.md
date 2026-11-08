@@ -255,3 +255,5 @@ The settings output-device surface now exposes a contextual tooltip that mirrors
 Appearance-state and settings-persistence summaries now expose contextual tooltips as well, making theme/motion state and the user-audio safety promise discoverable through the same visual and semantic channel.
 
 Output-endpoint empty, unavailable-build, and recovery guidance now expose dedicated tooltips matching their accessible descriptions, keeping device-discovery recovery actionable across visual and assistive interfaces.
+
+The endpoint selector now exposes a concise tooltip for choosing the live-capture source, aligning the primary settings control with its empty, unavailable, and recovery-state guidance.

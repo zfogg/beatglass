@@ -1149,6 +1149,7 @@ ApplicationWindow {
                                     Accessible.value: currentText
                                     Accessible.role: Accessible.ComboBox
                                     Accessible.description: currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture."
+                                    ToolTip.text: "Choose the output endpoint used for live capture"
                                     onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
                                 }
                                 Button { text: "Refresh"; objectName: "refreshEndpoints"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.role: Accessible.Button; Accessible.description: "Refresh the available output capture endpoints."; ToolTip.text: "Refresh available output capture endpoints"; onClicked: window.endpointSelectionBridge.refresh() }
