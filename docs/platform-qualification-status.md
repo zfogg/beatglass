@@ -10,6 +10,8 @@ This matrix records development evidence and the remaining gates. A build or hea
 
 For every native run, record the OS version, kernel or build number, compiler, Qt version, audio backend/session version, display server or compositor, output device, build identity, exact commands, and observed limitations. Until those records exist for the relevant platform scenarios, support language must remain experimental.
 
+Packaging readiness must separately record signing, packaged runtime dependencies, and menu-bar/tray recovery behavior where the platform provides it.
+
 Accessibility readiness must separately record reduced-motion behavior, click-through recovery, and keyboard-accessible recovery controls.
 
 Runtime evidence must explicitly retain the audio backend/session version, display server or compositor, exact commands, and observed limitations.
