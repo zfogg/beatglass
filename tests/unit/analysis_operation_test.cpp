@@ -84,6 +84,21 @@ TEST_CASE("storage owner invalidates one cached identity without affecting anoth
   REQUIRE(owner.find_cached(second, result));
   CHECK(result == "second-result");
 }
+TEST_CASE("invalidated identity is admitted for fresh reanalysis") {
+  beatglass::library::StorageOwner owner;
+  REQUIRE(owner.open_storage({":memory:"}));
+  const beatglass::library::AnalysisIdentity identity{"reanalyze", "engine", "config", "offline"};
+  const beatglass::library_detail::CacheKey key{"reanalyze", "engine", "config", "offline"};
+  owner.cache()->begin("reanalyze-seed", key, "track.wav", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(owner.cache()->publish("reanalyze-seed", key, "old", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  REQUIRE(owner.invalidate_cached(identity));
+  std::string result;
+  CHECK_FALSE(owner.find_cached(identity, result));
+  const auto admission = owner.admit_analysis("reanalyze-fresh", identity, "track.wav", beatglass::library::kFileDecoderSnapshot);
+  CHECK(admission.decoder_compatible);
+  CHECK_FALSE(admission.cached.has_value());
+  CHECK(admission.analysis_reserved);
+}
 
 TEST_CASE("coordinator admission replaces decoder on cache hit") {
   beatglass::library::AnalysisCoordinator coordinator;
