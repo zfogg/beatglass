@@ -16,6 +16,10 @@ namespace beatglass::library {
 struct CatalogEntry {
   std::filesystem::path path;
   std::string name;
+  /** Display title fallback derived from the filename stem; not embedded metadata. */
+  std::string title;
+  /** Embedded artist metadata, when available; empty during filesystem-only browse. */
+  std::string artist;
   bool directory{};
   /** Byte size for regular files; zero for directories or stat failures. */
   std::uintmax_t bytes{};

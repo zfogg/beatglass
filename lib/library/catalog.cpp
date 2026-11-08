@@ -51,10 +51,11 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
       else if (extension == ".mp3") format = "MP3";
       else if (extension == ".aiff" || extension == ".aif") format = "AIFF";
     }
+    const auto title = entry.path().stem().string();
     // Duration requires opening and decoding the source. Catalog browsing is
     // intentionally filesystem-only, so it reports an explicit unknown value
     // until the analysis/metadata worker supplies decoded duration.
-    result.entries.push_back({entry.path(), name, directory, bytes, std::move(format), -1.0});
+    result.entries.push_back({entry.path(), name, title, {}, directory, bytes, std::move(format), -1.0});
   }
   if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {

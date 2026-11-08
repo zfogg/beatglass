@@ -17,6 +17,8 @@ QVariantList LibraryCatalogBridge::browse(const QUrl& folder, const QString& sea
   for (const auto& entry : result.entries) {
     QVariantMap row;
     row.insert(QStringLiteral("name"), QString::fromStdString(entry.name));
+    row.insert(QStringLiteral("title"), QString::fromStdString(entry.title));
+    row.insert(QStringLiteral("artist"), QString::fromStdString(entry.artist));
     row.insert(QStringLiteral("path"), QString::fromStdString(entry.path.string()));
     row.insert(QStringLiteral("folder"), entry.directory);
     row.insert(QStringLiteral("audio"), !entry.directory);
