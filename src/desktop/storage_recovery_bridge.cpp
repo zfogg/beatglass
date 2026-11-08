@@ -31,7 +31,7 @@ public slots:
     emit runsChanged(ids, details);
   }
   void discard(QString id) { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
-  void discardBatch(QStringList ids) { std::vector<std::string> values; for (const auto& id : ids) values.push_back(id.toStdString()); const auto removed = coordinator_.storage().discard_retryable(values); const bool complete = removed == values.size(); emit result(complete, QStringLiteral("%1 of %2 retryable recovery runs discarded").arg(static_cast<qulonglong>(removed)).arg(static_cast<qulonglong>(values.size()))); if (removed) refresh(); }
+  void discardBatch(QStringList ids) { std::vector<std::string> values; for (const auto& id : ids) values.push_back(id.toStdString()); const auto removed = coordinator_.storage().discard_retryable(values); const bool complete = removed == values.size(); emit result(complete, QStringLiteral("%1 of %2 retryable recovery runs discarded").arg(static_cast<qulonglong>(removed)).arg(static_cast<qulonglong>(values.size()))); refresh(); }
   void retry(QString runId) {
     const auto found = coordinator_.storage().retryable_run(runId.toStdString());
     if (!found || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::missing_source_snapshot))); return; }
