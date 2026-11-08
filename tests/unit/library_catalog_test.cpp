@@ -171,3 +171,10 @@ TEST_CASE("catalog preserves empty directories as navigable entries") {
  CHECK(result.entries[0].bytes == 0);
  CHECK(result.entries[0].format.empty());
 }
+
+TEST_CASE("catalog reports a file path as an invalid browse root") {
+ TempDir dir; dir.file("track.wav");
+ const auto result = beatglass::library::browse(dir.path / "track.wav");
+ CHECK(result.entries.empty());
+ CHECK_FALSE(result.diagnostic.empty());
+}
