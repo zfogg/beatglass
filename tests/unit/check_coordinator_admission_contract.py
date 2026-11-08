@@ -8,6 +8,7 @@ required = {
     "admit before submit": "storage_.admit_analysis(run_id, operation.identity, operation.source.path.string(), operation.decoder_snapshot)",
     "reserved miss required": "if (!admission.decoder_compatible || (!admission.analysis_reserved && !admission.cached)) return {};",
     "cached decoder bypass": "operation.decode = [cached]",
+    "decoder snapshot admission": "operation.decoder_snapshot",
     "transactional publication retained": "make_transactional_publisher",
     "lifecycle docs": "reserves the run identity before decoding",
 }
