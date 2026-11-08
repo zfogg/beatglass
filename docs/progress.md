@@ -284,6 +284,8 @@ The desktop storage bridge now exposes an asynchronous cache lookup (`findCached
 
 The Library UI now provides a read-only cache lookup action for content, engine, configuration and mode identities. It enables the worker-backed call only when all fields are present; decoder admission and source revalidation remain queue-owned.
 
+Cache hits now render the serialized cached result in the Library surface, making the lookup outcome inspectable instead of status-only. This is intentionally a result handoff, not a claim that the UI has decoded or recomputed the source.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff

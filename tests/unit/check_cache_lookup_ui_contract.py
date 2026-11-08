@@ -8,6 +8,8 @@ required = [
     'objectName: "analysisCacheConfig"',
     'objectName: "analysisCacheMode"',
     'objectName: "lookupAnalysisCache"',
+    'objectName: "analysisCacheResult"',
+    'storageRecovery.cachedResult',
     'storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)',
 ]
 missing = [marker for marker in required if marker not in qml]
