@@ -52,6 +52,16 @@ TEST_CASE("analysis publication converts serialization failures into errors") {
   op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   REQUIRE(beatglass::library::publish_operation(cache, "run", op, {}) == beatglass::library_detail::Publish::error);
 }
+TEST_CASE("analysis publication contains nonstandard serialization throws") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library::AnalysisOperation op;
+  op.source.path = "track.wav"; op.source.content_hash = "sha256:test";
+  op.identity.content_hash = op.source.content_hash; op.identity.engine_version = "engine";
+  op.identity.configuration_id = "config"; op.identity.mode = "offline";
+  op.serialize = []() -> std::string { throw 7; };
+  op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  REQUIRE(beatglass::library::publish_operation(cache, "run", op, {}) == beatglass::library_detail::Publish::error);
+}
 TEST_CASE("analysis publication stops after cancellation during serialization") {
   beatglass::library_detail::SqliteCache cache(":memory:");
   beatglass::library::AnalysisOperation op;
