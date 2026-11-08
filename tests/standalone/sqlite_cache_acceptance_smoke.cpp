@@ -182,6 +182,18 @@ int main() {
     const auto stale_runs = cache.retryable_runs();
     assert(stale_runs.size() == 1 && stale_runs.front().id == "stale");
     assert(cache.discard_retryable("stale"));
+    const CacheKey rollback_key{"sha256:rollback", key.engine, key.config, key.mode};
+    cache.begin("rollback", rollback_key);
+    bool verifier_threw = false;
+    try {
+      (void)cache.publish("rollback", rollback_key, "discarded-result", {}, []() -> bool { throw std::runtime_error("verifier failed"); });
+    } catch (...) { verifier_threw = true; }
+    assert(verifier_threw);
+    const auto rollback_retryable = cache.retryable_runs();
+    assert(rollback_retryable.size() == 1 && rollback_retryable.front().id == "rollback");
+    assert(cache.publish("rollback", rollback_key, "recovered-after-rollback", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(rollback_key, result) && result == "recovered-after-rollback");
+    assert(cache.invalidate(rollback_key));
     bool empty_id_rejected = false;
     try { (void)cache.discard_retryable(""); } catch (const std::invalid_argument&) { empty_id_rejected = true; }
     bool nul_id_rejected = false;
