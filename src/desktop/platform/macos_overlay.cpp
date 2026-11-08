@@ -179,6 +179,7 @@ bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
       (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) {
     saveSettings(); setClickThrough(false);
+    if (event->type() == QEvent::Close && overlay_) overlay_->hide();
   }
   if (watched == overlay_ && event->type() == QEvent::PlatformSurface &&
       static_cast<QPlatformSurfaceEvent*>(event)->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
