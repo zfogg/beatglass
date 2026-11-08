@@ -79,6 +79,7 @@ def main() -> int:
         "status value announcements": "Accessible.value: visualizationCanvas.viewMode",
         "final state values": "Accessible.value: text",
         "visual recovery values": "objectName: \"visualizationLoadState\"",
+        "settings recovery values": "objectName: \"permissionGuidance\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

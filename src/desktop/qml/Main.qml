@@ -590,6 +590,7 @@ ApplicationWindow {
                             text: "Metadata could not be read. Retry this file or clear the selection and choose another source."
                             visible: window.metadataStatus.indexOf("Error:") === 0
                             Accessible.name: "Metadata error recovery guidance"
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -1026,7 +1027,7 @@ ApplicationWindow {
                         onActivated: if (window.overlayBridge) window.overlayBridge.moveToScreen(currentIndex)
                         Layout.fillWidth: true
                     }
-                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                     Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
@@ -1046,7 +1047,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; wrapMode: Text.WordWrap }
+                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; wrapMode: Text.WordWrap }
                 Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; Accessible.name: "Retry DJ overlay"; Accessible.description: "Retry showing the native DJ overlay"; ToolTip.text: "Retry showing the native DJ overlay on the selected display"; onClicked: window.showOverlayAndHideControls() }
                 Item { Layout.fillHeight: true }
             }
@@ -1126,6 +1127,7 @@ ApplicationWindow {
                                   : "System audio capture permission is not available yet; monitoring will remain stopped until a device is detected."
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio capture permission guidance"
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                         }
                     }
