@@ -29,6 +29,8 @@ struct CacheKey {
   /** Configuration identity. */ std::string config;
   /** Analysis mode. */ std::string mode;
 };
+/** Persisted analysis run that can be resumed after a process restart. */
+struct RetryableRun { std::string id; CacheKey key; };
 /** Provisional publication outcome; error may include an indeterminate commit. */
 enum class Publish {
   /** Active result was replaced. */ committed,
@@ -56,6 +58,8 @@ public:
   void begin(const std::string& id, const CacheKey& key);
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */
   bool find(const CacheKey& key, std::string& result);
+  /** Return bounded persisted runs left retryable by cancellation, stale input, or restart. */
+  std::vector<RetryableRun> retryable_runs(std::size_t limit = 100);
   /** Remove the active result for an exact identity; source files and historical runs remain untouched. */
   bool invalidate(const CacheKey& key);
   /** Revalidate and atomically publish. Cancellation before commit rolls back; cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. */

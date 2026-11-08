@@ -75,8 +75,9 @@ TEST_CASE("SQLite cache persists completed work and recovers interrupted runs") 
     cache.begin("interrupted", key);
   }
   {
-    SqliteCache cache(path.string()); std::string result;
+  SqliteCache cache(path.string()); std::string result;
     REQUIRE(cache.find(key, result)); REQUIRE(result == "stored");
+  const auto retryable = cache.retryable_runs(); REQUIRE(retryable.size() == 1); CHECK(retryable.front().id == "interrupted"); CHECK(retryable.front().key.content == key.content);
     REQUIRE_NOTHROW(cache.begin("interrupted", key));
     REQUIRE(cache.publish("interrupted", key, "recovered", {}, [] { return true; }) == Publish::committed);
     REQUIRE(cache.find(key, result)); REQUIRE(result == "recovered");
