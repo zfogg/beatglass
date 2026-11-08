@@ -88,6 +88,21 @@ TEST_CASE("SQLite cache observes cancellation immediately before commit") {
   cache.begin("one", key); std::stop_source stop;
   REQUIRE(cache.publish("one", key, "result", stop.get_token(), [&] { stop.request_stop(); return true; }) == Publish::cancelled);
   std::string result; REQUIRE_FALSE(cache.find(key, result));
+  // Cancellation must leave the run retryable rather than permanently
+  // running, so a replacement operation can begin without a restart.
+  REQUIRE_NOTHROW(cache.begin("one", key));
+  REQUIRE(cache.publish("one", key, "retry", {}, [] { return true; }) == Publish::committed);
+  REQUIRE(cache.find(key, result)); REQUIRE(result == "retry");
+}
+
+TEST_CASE("SQLite cache makes stale input runs immediately retryable") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("stale", key);
+  REQUIRE(cache.publish("stale", key, "discard", {}, [] { return false; }) == Publish::stale_input);
+  REQUIRE_NOTHROW(cache.begin("stale", key));
+  std::string result;
+  REQUIRE(cache.publish("stale", key, "fresh", {}, [] { return true; }) == Publish::committed);
+  REQUIRE(cache.find(key, result)); REQUIRE(result == "fresh");
 }
 TEST_CASE("SQLite binding lengths are checked before narrowing") {
   auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());

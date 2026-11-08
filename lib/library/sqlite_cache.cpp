@@ -93,8 +93,22 @@ public:
     try {
       if (result.size() > kMaxCachedResultBytes || !sqlite_length_representable(result.size())) return Publish::error;
       exec("BEGIN IMMEDIATE");
-      if (stop.stop_requested()) { rollback(); return Publish::cancelled; }
-      if (!revalidate()) { rollback(); return Publish::stale_input; }
+      // A cancelled or stale run remains retryable.  Do this inside the same
+      // transaction so a caller can immediately begin a replacement run while
+      // preserving the previous active result.
+      auto retryable = [&] {
+        Statement update(db_, "UPDATE runs SET status='retryable',result=NULL WHERE id=? AND content=? AND engine=? AND config=? AND mode=? AND status='running'");
+        bind(update.p, 1, id); bind_key(update.p, 2, key); done(update.p);
+        return sqlite3_changes(db_) == 1;
+      };
+      if (stop.stop_requested()) {
+        if (!retryable()) { rollback(); return Publish::error; }
+        exec("COMMIT"); return Publish::cancelled;
+      }
+      if (!revalidate()) {
+        if (!retryable()) { rollback(); return Publish::error; }
+        exec("COMMIT"); return Publish::stale_input;
+      }
       Statement update(db_, "UPDATE runs SET status='complete',result=? WHERE id=? AND content=? AND engine=? AND config=? AND mode=? AND status='running'");
       check(sqlite3_bind_blob(update.p, 1, result.data(), static_cast<int>(result.size()), SQLITE_TRANSIENT));
       bind(update.p, 2, id); bind_key(update.p, 3, key); done(update.p);
