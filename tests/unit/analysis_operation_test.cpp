@@ -132,6 +132,21 @@ TEST_CASE("cancelled analysis can be retried with a compatible snapshot") {
   CHECK(result == "fresh");
   CHECK(cache.retryable_runs().empty());
 }
+TEST_CASE("source verification failure preserves retryable metadata without publication") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library_detail::CacheKey key{"mismatch-hash", "engine", "config", "offline"};
+  cache.begin("mismatch-run", key, "missing-track.wav", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("mismatch-run", key, "wrong-source-result", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  std::string result;
+  CHECK_FALSE(cache.find(key, result));
+  const auto retryable = cache.retryable_runs();
+  REQUIRE(retryable.size() == 1);
+  CHECK(retryable.front().id == "mismatch-run");
+  CHECK(retryable.front().source_path == "missing-track.wav");
+  CHECK(retryable.front().decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
+  CHECK(cache.discard_retryable("mismatch-run"));
+  CHECK(cache.retryable_runs().empty());
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
