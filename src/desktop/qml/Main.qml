@@ -300,6 +300,7 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = ""
         window.overlayPreferredScreenIndex = -1
         window.overlayDisplaySelectionRequired = true
+        window.overlayDisplayRecoveryPending = true
         window.announceCaptureRecoveryState("Saved overlay display cleared; choose an available display to restore monitoring.")
     }
     function persistOverlayDisplaySelection(index, name) {
@@ -310,6 +311,7 @@ ApplicationWindow {
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
         window.overlayDisplaySelectionRequired = false
+        window.overlayDisplayRecoveryPending = false
         window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + ".")
         return true
     }
