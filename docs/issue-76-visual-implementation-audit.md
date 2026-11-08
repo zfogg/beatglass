@@ -352,6 +352,8 @@ The Settings Appearance group now reports its current theme and motion mode as a
 
 The Appearance group tooltip now includes the current theme and motion mode, keeping the grouped settings context synchronized for pointer and keyboard users.
 
+The Appearance group description now carries the same current theme and motion state as its value and tooltip, so assistive technology receives consistent context at group entry.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
