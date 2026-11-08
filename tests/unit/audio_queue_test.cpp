@@ -8,7 +8,13 @@
 #include <array>
 #include <atomic>
 #include <thread>
+#include <limits>
 using namespace beatglass;
+TEST_CASE("queue rejects blocks whose frame range overflows") {
+  AudioQueue<3, 2> q; std::array<float,1> samples{1};
+  AudioBlock input{{44100,1},1,std::numeric_limits<std::uint64_t>::max(),0,false,samples};
+  CHECK_FALSE(q.push(input)); CHECK(q.dropped_frames()==1); CHECK(q.size()==0);
+}
 TEST_CASE("queue rejects blocks without a source epoch") {
   AudioQueue<3, 4> q; std::array<float, 1> samples{1};
   AudioBlock input{{44100, 1}, 0, 0, 0, false, samples};
