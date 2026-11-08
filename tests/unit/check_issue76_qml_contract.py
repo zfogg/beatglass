@@ -442,6 +442,7 @@ def main() -> int:
         "visualization revision wraps": 'objectName: "visualizationRevisionStatus"',
         "visualization capture status theme": 'objectName: "visualizationCaptureStatus"',
         "visualization selection responsive spacing": "spacing: window.compactHeader ? 4 : 8",
+        "visualization selection alignment": "Layout.alignment: Qt.AlignVCenter",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
