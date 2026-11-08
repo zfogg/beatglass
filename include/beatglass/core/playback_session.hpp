@@ -18,6 +18,8 @@ public:
   void stop() noexcept;
   /** Seek to a frame using a strictly newer nonzero epoch. */
   bool seek(std::uint64_t frame, std::uint64_t new_epoch) noexcept;
+  /** Replace the active source at frame zero with a strictly newer epoch. */
+  bool replace(std::uint64_t new_epoch) noexcept;
   /** Accept a FileReader block only from the active epoch and in order. */
   bool accept(std::uint64_t epoch, std::uint64_t first_frame) noexcept;
   PlaybackState state() const noexcept { return state_; }

@@ -10,6 +10,10 @@ bool PlaybackSession::seek(std::uint64_t frame, std::uint64_t new_epoch) noexcep
   if (state_ == PlaybackState::stopped || !new_epoch || new_epoch <= epoch_) return false;
   epoch_ = new_epoch; next_frame_ = frame; state_ = PlaybackState::playing; return true;
 }
+bool PlaybackSession::replace(std::uint64_t new_epoch) noexcept {
+  if (state_ == PlaybackState::stopped || !new_epoch || new_epoch <= epoch_) return false;
+  epoch_ = new_epoch; next_frame_ = 0; state_ = PlaybackState::playing; return true;
+}
 bool PlaybackSession::accept(std::uint64_t epoch, std::uint64_t first_frame) noexcept {
   if (state_ != PlaybackState::playing || epoch != epoch_ || first_frame != next_frame_) return false;
   ++next_frame_; return true;
