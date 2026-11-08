@@ -124,6 +124,15 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertFalse(result["ready"])
             self.assertIn("duplicate platform rows", "\n".join(result["platforms"][0]["errors"]))
 
+    def test_readiness_report_propagates_failure_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertFalse(result["ready"])
+            self.assertEqual(result["error_count"], len(result["errors"]))
+            self.assertTrue(any("missing manifest" in error for error in result["errors"]))
+
 
 if __name__ == "__main__":
     unittest.main()
