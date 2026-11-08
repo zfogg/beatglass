@@ -172,3 +172,5 @@ Scenario inventory IDs are validated as strings before set-based completeness ch
 Duplicate-ID checks apply only to validated string IDs; repeated structured IDs are reported as invalid scenarios without allowing the duplicate analysis itself to throw.
 
 Artifact-role indexing likewise considers only validated string paths. A structured artifact path is rejected during manifest validation and cannot trigger a secondary exception while scenario ownership is being checked.
+
+Scenario statuses are validated as strings before allowed-state membership checks. Structured status values fail as invalid scenarios and leave the evidence bundle pending rather than raising in the verifier.
