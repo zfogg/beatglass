@@ -498,7 +498,9 @@ ApplicationWindow {
                     objectName: "visualizationStatus"
                     text: typeof visualizationPresentation === "undefined"
                           ? "Visualization unavailable"
-                          : "Waveform samples: " + visualizationPresentation.waveform.length + " · Spectrum bins: " + visualizationPresentation.spectrum.length
+                          : (visualizationPresentation.waveform.length === 0 && visualizationPresentation.spectrum.length === 0
+                             ? "Waiting for captured audio data"
+                             : "Waveform samples: " + visualizationPresentation.waveform.length + " · Spectrum bins: " + visualizationPresentation.spectrum.length)
                     Accessible.name: "Visualization data status"
                     Accessible.description: text
                     Layout.fillWidth: true

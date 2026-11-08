@@ -235,6 +235,7 @@ TestCase {
         verify(canvas !== null)
         compare(canvas.Accessible.name, "Live waveform and spectrum")
         compare(findChild(app, "visualizationStatus").Accessible.name, "Visualization data status")
+        compare(findChild(app, "visualizationStatus").text, "Visualization unavailable")
         app.destroy()
     }
 
