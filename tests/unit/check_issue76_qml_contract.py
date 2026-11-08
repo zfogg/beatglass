@@ -439,6 +439,7 @@ def main() -> int:
         "visualization selection status wraps": 'objectName: "visualizationSelectionStatus"',
         "visualization selection status shrinks": "Layout.minimumWidth: 0",
         "visualization responsive focus ring": "border.width: window.compactHeader ? 2 : 3",
+        "visualization responsive selection cursor": "ctx.lineWidth = window.compactHeader ? 1 : 2",
         "visualization inline clear theme": 'objectName: "clearVisualizationSelection"',
         "visualization inline clear width": "Layout.minimumWidth: window.compactHeader ? 104 : 128",
         "visualization revision theme": 'objectName: "visualizationRevisionStatus"',

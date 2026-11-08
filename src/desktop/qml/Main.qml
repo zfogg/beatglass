@@ -1144,7 +1144,7 @@ ApplicationWindow {
                             for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
                         }
                         if (selectedPosition >= 0) {
-                            ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]; ctx.lineWidth = 2; ctx.beginPath()
+                            ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]; ctx.lineWidth = window.compactHeader ? 1 : 2; ctx.beginPath()
                             ctx.moveTo(selectedPosition * width, 0); ctx.lineTo(selectedPosition * width, height); ctx.stroke()
                         }
                     }
