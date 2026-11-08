@@ -382,6 +382,7 @@ def main() -> int:
         "visualization mode radio roles": "objectName: \"waveformView\"; checkable: true; checked: visualizationCanvas.viewMode === \"waveform\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.role: Accessible.RadioButton",
         "visualization clear button state": "Accessible.name: \"Clear visualization position\"\n                    Accessible.value: enabled ? \"available\" : \"no position selected\"\n                    Accessible.role: Accessible.Button",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
+        "navigation shortcut guidance": "Accessible.description: \"Switch between Library, DJ, and Settings pages. Use Ctrl+Shift+1 for Library, Ctrl+Shift+2 for DJ, or Ctrl+Shift+3 for Settings.\"",
         "settings tab page role": "objectName: \"settingsTab\"; activeFocusOnTab: true; Accessible.name: \"Settings\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.description: \"Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab.\"; Accessible.role: Accessible.PageTab",
         "navigation tab selected values": "Accessible.name: \"DJ\"; Accessible.value: checked ? \"selected\" : \"not selected\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
