@@ -558,6 +558,7 @@ ApplicationWindow {
                             objectName: "metadataStatus"; text: window.metadataStatus
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio metadata status"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
                         Button {
