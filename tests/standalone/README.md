@@ -26,6 +26,7 @@ tests/standalone/run-library-smokes.ps1 -SelectedCases analysis_batch,analysis_c
 tests/standalone/run-library-smokes.ps1 -SelectedCases executor_queued_cancellation,executor_concurrent_submit,executor_explicit_failure,executor_progress,executor_handle_readers
 tests/standalone/run-library-smokes.ps1 -SelectedCases executor_after_shutdown,executor_empty,executor_exception,executor_explicit_cancel,executor_handle_terminal
 tests/standalone/run-library-smokes.ps1 -SelectedCases analysis_verifier,analysis_final_progress_exception,executor_fifo,executor_invalid_state,executor_shutdown_queued
+tests/standalone/run-library-smokes.ps1 -SelectedCases executor_handle_concurrent_cancel
 tests/standalone/run-library-smokes.ps1 -OpenSSLRoot C:/path/to/openssl
 tests/standalone/run-library-smokes.ps1 -SelectedCases storage_config -RunExisting -OutputDir C:/temp/beatglass-smokes
 ```

@@ -25,6 +25,7 @@ $cases = @(
   @{ Name = "executor_exception"; Sources = @($executorSource, "tests/standalone/job_executor_exception_smoke.cpp") },
   @{ Name = "executor_explicit_cancel"; Sources = @($executorSource, "tests/standalone/job_executor_explicit_cancel_smoke.cpp") },
   @{ Name = "executor_handle_terminal"; Sources = @($executorSource, "tests/standalone/job_handle_terminal_smoke.cpp") },
+  @{ Name = "executor_handle_concurrent_cancel"; Sources = @($executorSource, "tests/standalone/job_handle_concurrent_cancel_smoke.cpp") },
   @{ Name = "analysis_runner"; Sources = @($runnerSources + "tests/standalone/analysis_runner_smoke.cpp") },
   @{ Name = "analysis_batch"; Sources = @($runnerSources + "tests/standalone/analysis_batch_smoke.cpp") },
   @{ Name = "analysis_capacity"; Sources = @($runnerSources + "tests/standalone/analysis_capacity_smoke.cpp") },
@@ -84,11 +85,11 @@ try {
       & $binary
       if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
       $passed.Add($case.Name)
-      $records.Add([pscustomobject]@{ name=$case.Name; status="passed"; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)) })
+      $records.Add([pscustomobject]@{ name=$case.Name; status="passed"; sources=$case.Sources.Count; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)) })
       Write-Output ("PASS {0} ({1:n2}s)" -f $case.Name, ([DateTime]::UtcNow - $started).TotalSeconds)
     } catch {
       $failed.Add($case.Name)
-      $records.Add([pscustomobject]@{ name=$case.Name; status="failed"; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)); error=$_.Exception.Message })
+      $records.Add([pscustomobject]@{ name=$case.Name; status="failed"; sources=$case.Sources.Count; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)); error=$_.Exception.Message })
       Write-Error "FAIL $($case.Name): $_"
       if (-not $ContinueOnFailure) { throw }
     }
