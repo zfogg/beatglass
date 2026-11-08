@@ -33,6 +33,8 @@ cmake --build build --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
+The prerequisite scripts install the native tools and libraries needed before CMake configure. On Linux, `scripts/install-deps.sh` supports Debian/Ubuntu, Fedora/RHEL, Arch, openSUSE, and Alpine (including arm64/aarch64 package-manager hosts). The same script uses Homebrew on macOS. On Windows, run `scripts/install-deps.ps1`; it uses winget or Chocolatey for tools and installs the manifest libraries through vcpkg for x64 or arm64. These scripts do not configure, build, change user audio files, or write tags. Package repositories determine exact native versions; the vcpkg manifest remains the reproducible dependency option where its platform triplet is available.
+
 The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For example on Ubuntu 22.04:
 
 ```sh
