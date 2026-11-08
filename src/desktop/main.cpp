@@ -6,6 +6,9 @@
 #include "playback_session_bridge.hpp"
 #include "analysis_presentation.hpp"
 #include "capture_monitor_bridge.hpp"
+#ifdef Q_OS_WINDOWS
+#include "platform/windows_endpoint_bridge.hpp"
+#endif
 #include "analysis_job_bridge.hpp"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -15,11 +18,17 @@
 #include <QSettings>
 #endif
 int main(int argc, char** argv) {
+#ifdef Q_OS_WINDOWS
+  beatglass::windows::EndpointBridge endpointSelection;
+#endif
   QGuiApplication app(argc, argv); Metadata metadata; AnalysisPresentation analysis; AnalysisJobBridge analysisJob; CaptureMonitorBridge captureMonitor; LivePresentation livePresentation; VisualizationPresentationBridge visualization; ThemePreferences themePreferences; LibraryCatalogBridge libraryCatalog; PlaybackSessionBridge playbackSession;
 #ifdef Q_OS_MACOS
   beatglass::macos::OverlayController macOverlayController(
       beatglass::macos::makeOverlayNative(), nullptr,
       std::make_unique<QSettings>(QSettings::NativeFormat, QSettings::UserScope, QStringLiteral("Beatglass"), QStringLiteral("Beatglass")));
+#endif
+#ifdef Q_OS_WINDOWS
+  engine.rootContext()->setContextProperty("endpointSelection", &endpointSelection);
 #endif
   QQmlApplicationEngine engine;
   engine.rootContext()->setContextProperty("metadata", &metadata);
