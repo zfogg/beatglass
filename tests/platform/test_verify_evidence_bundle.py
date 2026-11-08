@@ -95,6 +95,17 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(first["platforms"][0]["artifact_inventory"][0]["path"], "capture.txt")
             self.assertEqual(first["platforms"][0]["artifact_inventory"][0]["bytes"], artifact.stat().st_size)
 
+    def test_readiness_rejects_duplicate_scenarios_and_reports_statuses(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            data["scenarios"] = [{"id": "capture", "status": "UNRUN"}, {"id": "capture", "status": "PASS"}]
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertIn("duplicate scenario", "\n".join(result["platforms"][0]["errors"]))
+            self.assertEqual([item["status"] for item in result["platforms"][0]["scenario_inventory"]], ["UNRUN", "PASS"])
+
 
 if __name__ == "__main__":
     unittest.main()
