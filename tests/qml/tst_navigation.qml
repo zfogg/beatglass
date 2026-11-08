@@ -408,6 +408,7 @@ TestCase {
         verify(app.clearVisualizationForCaptureState() === undefined)
         fakeLive.status = "Error"
         fakeLive.status = "Stopped"
+        fakeLive.status = "Reacquiring"
         verify(findChild(app, "visualizationEmptyState").visible)
         app.destroy()
     }
