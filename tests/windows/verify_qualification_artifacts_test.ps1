@@ -24,4 +24,9 @@ try {
   $tampered | ConvertTo-Json | Set-Content -LiteralPath $playbackPath
   try { & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root; throw "missing FAIL evidence unexpectedly passed" } catch { if ($_.Exception.Message -notmatch "observed result|log evidence") { throw } }
   Write-Output "Windows failed-case evidence regression passed"
+  $malformed = @(Get-Content -LiteralPath $playbackPath -Raw | ConvertFrom-Json)
+  $malformed[0].status = "BOGUS"
+  $malformed | ConvertTo-Json | Set-Content -LiteralPath $playbackPath
+  try { & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root; throw "invalid status unexpectedly passed" } catch { if ($_.Exception.Message -notmatch "Invalid status") { throw } }
+  Write-Output "Windows invalid-status regression passed"
 } finally { if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force } }
