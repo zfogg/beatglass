@@ -1003,7 +1003,7 @@ ApplicationWindow {
                         background: Rectangle {
                             color: waveformView.checked ? "#273b5d" : "#182231"
                             border.width: waveformView.activeFocus ? 3 : 1
-                            border.color: waveformView.activeFocus ? "#60a5fa" : "#718096"
+                            border.color: waveformView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex] : window.themeForegrounds[window.selectedThemeIndex]
                             radius: 6
                         }
                     }
@@ -1020,7 +1020,7 @@ ApplicationWindow {
                         background: Rectangle {
                             color: spectrumView.checked ? "#432c56" : "#182231"
                             border.width: spectrumView.activeFocus ? 3 : 1
-                            border.color: spectrumView.activeFocus ? "#c084fc" : "#718096"
+                            border.color: spectrumView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex] : window.themeForegrounds[window.selectedThemeIndex]
                             radius: 6
                         }
                     }

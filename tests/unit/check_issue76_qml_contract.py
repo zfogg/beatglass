@@ -413,6 +413,8 @@ def main() -> int:
         "theme refreshes visualization": 'visualizationCanvas.requestPaint()',
         "visualization themed focus ring": 'objectName: "visualizationFocusRing"',
         "visualization focus ring token": "border.color: window.themeAccentColors[window.selectedThemeIndex]",
+        "waveform themed focus": "waveformView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex]",
+        "spectrum themed focus": "spectrumView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex]",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
