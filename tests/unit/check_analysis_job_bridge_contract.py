@@ -16,6 +16,10 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
         self.assertIn('else if (batchRejected_ != 0 && status_ != QStringLiteral("Failed"))', source)
 
+    def test_cancellation_clears_stale_results(self):
+        source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
+        self.assertGreaterEqual(source.count('if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }'), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

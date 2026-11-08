@@ -89,6 +89,7 @@ bool AnalysisJobBridge::canRetry() const noexcept {
 void AnalysisJobBridge::cancel() {
   if (!canCancel()) return;
   retryable_->cancel();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   poll();
 }
 
@@ -139,6 +140,8 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
 
 void AnalysisJobBridge::cancelBatch() {
   for (const auto& operation : batch_) if (operation) operation->cancel();
+  batchResultsPublished_ = 0; batchLastResult_.clear();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   poll();
 }
 
