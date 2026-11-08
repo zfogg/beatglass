@@ -41,3 +41,11 @@ The tap path is scoped to macOS 14.2 or later and the selected output stream. Th
 ## Evidence rules
 
 Record `PASS`, `FAIL`, or `UNRUN` for each case with timestamp, action or command, observed output, and log or screenshot path. `UNRUN` is correct while the Mac is unavailable or interactive testing is not authorized. Qualification is complete only when every required case has evidence on the intended production build.
+
+## Native access limitation
+
+Current qualification status is `UNRUN` with `NATIVE_MAC_REQUIRED=1`. The portable Windows workspace cannot provide the required macOS Core Audio, Qt/AppKit, Screen & System Audio Recording, or overlay behavior. The previously identified `zachbook-pro` host is not reachable for this run, so no native result is inferred from local checks.
+
+The remaining native cases are: permission prompt, allow/deny/revoke recovery, generated-tone output capture with nonzero frames and valid timestamps, output switching and UID evidence, tap/recovery smoke, and the interactive overlay/menu-bar/display/click-through/fullscreen/Spaces scenarios above. Do not mark these cases `PASS` until evidence is captured on the intended signed macOS production build.
+
+Portable checks completed for this documentation update are `git diff --check` and `bash -n tests/macos/run_qualification.sh`; neither substitutes for native qualification.
