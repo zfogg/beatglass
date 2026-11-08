@@ -15,7 +15,7 @@ TestCase {
         let reset = findChild(app, "resetAppearance")
         let motion = findChild(app, "reduceMotion")
         compare(motion.Accessible.name, "Reduce motion")
-        compare(motion.Accessible.description, "Reduce animation and transition effects in the desktop presentation.")
+        compare(motion.Accessible.description, "Reduce animation and transition effects in the desktop presentation; currently disabled")
         compare(findChild(app, "libraryTab").Accessible.description, "Browse local audio files.")
         compare(findChild(app, "djTab").Accessible.description, "View live DJ controls and overlay settings.")
         compare(findChild(app, "settingsTab").Accessible.description, "Configure appearance, audio and overlay settings.")

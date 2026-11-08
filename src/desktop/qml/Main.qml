@@ -263,7 +263,7 @@ ApplicationWindow {
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
-                Accessible.description: "Reduce animation and transition effects in the desktop presentation."
+                Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
             }
             Button {
