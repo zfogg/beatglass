@@ -53,7 +53,7 @@ public:
   int batchFailedCount() const noexcept { return batchFailedCount_; }
   int batchCancelledCount() const noexcept { return batchCancelledCount_; }
   int batchCompletedCount() const noexcept { return batchCompletedCount_; }
-  int batchQueuedCount() const noexcept { return batchAccepted_ - batchResultsPublished_ - batchFailedCount_ - batchCancelledCount_; }
+  int batchQueuedCount() const noexcept { return batchAccepted_ - batchCompletedCount_ - batchFailedCount_ - batchCancelledCount_; }
 signals:
   void progressChanged();
   void statusChanged();
