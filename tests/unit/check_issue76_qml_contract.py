@@ -49,6 +49,7 @@ def main() -> int:
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
         "overlay empty display state": "overlayDisplayEmptyState",
+        "overlay status static roles": "objectName: \"overlayInteractionMode\"; text: window.overlayBridge",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
