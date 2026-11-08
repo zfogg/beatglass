@@ -1097,6 +1097,15 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "persistedRecoveryResetStatus"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== ""
+                                text: visible ? ("Persisted recovery status: " + storageRecovery.resetStatus) : ""
+                                Accessible.name: "Persisted recovery reset status"
+                                Accessible.description: visible ? text : "No persisted recovery reset has been performed."
+                                Accessible.role: Accessible.Status
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisBatchStatus"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount !== undefined
                                 text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount
