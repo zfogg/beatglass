@@ -1971,6 +1971,22 @@ ApplicationWindow {
                     }
                 }
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
+                Label {
+                    objectName: "overlayPersistedRecoveryDiagnostic"
+                    visible: window.overlayBridge !== null && !window.overlayBridge.available
+                        && typeof storageRecovery !== "undefined"
+                        && storageRecovery.analysisAdmissionResult !== undefined
+                        && storageRecovery.analysisAdmissionResult !== ""
+                        && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled")
+                    text: visible ? "Persisted analysis admission result (not current visualization): " + storageRecovery.analysisAdmissionResult : ""
+                    Accessible.name: "Overlay persisted recovery diagnostic: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Persisted bridge feedback is historical and must not be treated as the current visualization result."
+                    ToolTip.text: "Historical persisted analysis admission feedback"
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
                 Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display"); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay"); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay"); onClicked: { window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until the overlay is restored."); window.showOverlayAndHideControls() } }
                 Item { Layout.fillHeight: true }
             }

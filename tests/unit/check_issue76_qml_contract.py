@@ -496,6 +496,8 @@ def main() -> int:
         "visualization overlay retry selection required": "select a display first",
         "visualization overlay selection readiness": "DJ overlay display selected; retry is now available.",
         "visualization overlay retry focus": "retryOverlay.forceActiveFocus()",
+        "overlay persisted recovery diagnostic": 'objectName: "overlayPersistedRecoveryDiagnostic"',
+        "overlay historical diagnostic wording": "Persisted analysis admission result (not current visualization):",
         "settings endpoint recovery announcement": 'objectName: "endpointRecoveryAnnouncement"',
         "settings endpoint retry failure": "Endpoint retry failed; check device permission and connect an output device before refreshing.",
         "settings endpoint refresh focus": "endpointSelector.forceActiveFocus()",
