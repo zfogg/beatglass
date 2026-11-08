@@ -43,6 +43,7 @@ def main() -> int:
         "capture status role": "Accessible.name: \"Capture monitor status\"",
         "live monitoring status role": "Accessible.name: \"Live output monitoring\"",
         "metadata status role": "Accessible.name: \"Audio metadata status\"",
+        "current folder role": "Accessible.name: \"Current folder: \" + text",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",

@@ -418,6 +418,7 @@ ApplicationWindow {
                         text: window.browseFolder.toString() || "No folder selected"
                         elide: Text.ElideMiddle; Layout.fillWidth: true
                         Accessible.name: "Current folder: " + text
+                        Accessible.role: Accessible.StaticText
                     }
                 }
                 RowLayout {
