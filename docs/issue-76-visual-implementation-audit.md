@@ -341,3 +341,5 @@ Waveform and FFT mode controls now expose explicit radio-button roles, while the
 Primary navigation now reports the current Library, DJ, or Settings page as a live toolbar value, and its tooltip includes the same current-page context. This gives keyboard and assistive navigation a stable location announcement while switching between the three product surfaces.
 
 The Settings tab now uses the same explicit page-tab role as Library and DJ, keeping the primary navigation contract consistent across all three destinations for keyboard and assistive technology users.
+
+All three primary navigation tabs now report a selected/not-selected value in addition to the toolbar’s current-page value, so users can understand both the active destination and each tab’s state while moving through the navigation.
