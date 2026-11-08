@@ -1462,16 +1462,21 @@ ApplicationWindow {
                             Label { objectName: "selectedPersistedRecoveryResetStatus"; visible: typeof storageRecovery !== "undefined" && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== ""; text: visible ? ("Selected recovery: " + storageRecovery.resetStatus) : ""; Accessible.name: "Selected persisted recovery status"; Accessible.description: visible ? text : "No selected persisted recovery reset has been performed."; Accessible.role: Accessible.Status; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                             Dialog {
                                 id: discardRecoveryDialog
+                                objectName: "discardRecoveryDialog"
                                 title: "Discard saved analysis run?"
                                 modal: true
                                 standardButtons: Dialog.Ok | Dialog.Cancel
+                                Accessible.name: "Discard saved analysis run confirmation"
+                                Accessible.description: "Confirm to remove only the selected retry record. The source audio file is never changed. Cancel returns focus to the discard control."
                                 contentItem: Label {
                                     text: "This removes only the retry record. The source audio file is not changed."
                                     wrapMode: Text.WordWrap
                                     Accessible.name: "Discard retryable run confirmation"
+                                    Accessible.description: "The selected retry record will be removed; source audio remains unchanged."
                                     Accessible.role: Accessible.StaticText
                                 }
                                 onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discarded; selected retry state cleared."); discardPersistedRecoveryButton.forceActiveFocus() }
+                                onRejected: { window.announceVisualizationRecovery("Persisted recovery discard canceled; selected run was kept."); discardPersistedRecoveryButton.forceActiveFocus() }
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
