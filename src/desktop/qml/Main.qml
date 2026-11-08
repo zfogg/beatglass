@@ -974,15 +974,17 @@ ApplicationWindow {
                     Keys.onLeftPressed: {
                         selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.01)
                         requestPaint()
+                        event.accepted = true
                     }
                     Keys.onRightPressed: {
                         selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.01)
                         requestPaint()
+                        event.accepted = true
                     }
-                    Keys.onHomePressed: { selectedPosition = 0; requestPaint() }
-                    Keys.onEndPressed: { selectedPosition = 1; requestPaint() }
-                    Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint() }
-                    Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint() }
+                    Keys.onHomePressed: { selectedPosition = 0; requestPaint(); event.accepted = true }
+                    Keys.onEndPressed: { selectedPosition = 1; requestPaint(); event.accepted = true }
+                    Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint(); event.accepted = true }
+                    Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint(); event.accepted = true }
                     Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
