@@ -64,6 +64,8 @@ Primary playback, capture, overlay, and opacity controls now expose explicit But
 
 Reduced-motion and click-through state plus playback format and overlay opacity values are now exposed through explicit accessibility values.
 
+Seek target, playback device, overlay size, and waveform/FFT selected-state values are now explicit accessibility values as well.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
