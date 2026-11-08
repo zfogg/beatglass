@@ -520,6 +520,8 @@ Playback selection synchronization and Seek to position now use the same canvas-
 
 The visualization status group now exposes the queued/accepted analysis handoff alongside the generation-gated presentation. An accepted result identity combines the selected source, generation, and revision; seek availability is gated on that identity as well as the local waveform snapshot, making it explicit which accepted result selection controls target.
 
+That identity is now withheld until the selected Library analysis reports a completed/result-ready handoff. Canvas pointer and wheel selection are gated by the same completion contract, so an in-flight or unrelated presentation cannot create a seek target before the selected source has a usable result.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

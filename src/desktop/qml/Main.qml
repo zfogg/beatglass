@@ -28,7 +28,11 @@ ApplicationWindow {
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     property string visualizationSelectionResetReason: ""
     property string catalogDiagnostic: ""
+    readonly property bool libraryAnalysisResultReady: selectedName !== ""
+        && analysisJobBridge !== null
+        && (analysisJobBridge.status === "Complete" || analysisJobBridge.result !== "")
     readonly property string acceptedAnalysisIdentity: typeof visualizationPresentation === "undefined"
+        || !libraryAnalysisResultReady
         || visualizationPresentation.generation < 0 || visualizationPresentation.revision < 0
         ? ""
         : (selectedName + "|generation:" + visualizationPresentation.generation + "|revision:" + visualizationPresentation.revision)
@@ -1149,6 +1153,7 @@ ApplicationWindow {
                         }
                     }
                     readonly property bool presentationReady: typeof visualizationPresentation !== "undefined"
+                        && window.libraryAnalysisResultReady
                         && visualizationPresentation.generation >= 0
                         && visualizationPresentation.revision >= 0
                     readonly property bool modeHasData: presentationReady
@@ -1212,6 +1217,8 @@ ApplicationWindow {
                             }
                         }
                         onClicked: {
+                            if (!visualizationCanvas.presentationReady)
+                                return
                             visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, mouse.x / visualizationCanvas.width))
                             visualizationCanvas.forceActiveFocus()
                             visualizationCanvas.requestPaint()
@@ -1221,6 +1228,10 @@ ApplicationWindow {
                             mouse.accepted = true
                         }
                         onWheel: {
+                            if (!visualizationCanvas.presentationReady) {
+                                wheel.accepted = true
+                                return
+                            }
                             const stepDivisor = (wheel.modifiers & Qt.ControlModifier) ? 120 : ((wheel.modifiers & Qt.ShiftModifier) ? 240 : 1200)
                             const delta = wheel.angleDelta.y / stepDivisor
                             visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, (visualizationCanvas.selectedPosition < 0 ? 0 : visualizationCanvas.selectedPosition) + delta))
