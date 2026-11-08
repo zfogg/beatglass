@@ -28,10 +28,17 @@ def verify(root: Path, manifest: Path) -> list[str]:
     seen = set()
     for entry in artifacts or []:
         relative, expected = entry.get("path"), entry.get("sha256", "").lower()
-        if not isinstance(relative, str) or not isinstance(expected, str) or relative in seen:
+        canonical = Path(relative).as_posix() if isinstance(relative, str) else None
+        if (
+            not isinstance(relative, str)
+            or not isinstance(expected, str)
+            or not canonical
+            or canonical != relative
+            or canonical in seen
+        ):
             errors.append(f"invalid or duplicate artifact entry: {entry}"); continue
-        seen.add(relative)
-        path = (root / relative).resolve()
+        seen.add(canonical)
+        path = (root / canonical).resolve()
         if root.resolve() not in path.parents:
             errors.append(f"artifact escapes bundle: {relative}"); continue
         if not path.is_file():
