@@ -21,7 +21,112 @@ div.body .highlight {
   overflow-x: auto;
 }
 
+/* A dark, high-contrast reading surface with cyan/violet/coral wayfinding. */
+:root {
+  --bg: #0b1020;
+  --surface: #121a30;
+  --surface-raised: #192440;
+  --text: #e8eef8;
+  --muted: #b7c4d9;
+  --cyan: #67e8f9;
+  --violet: #c4b5fd;
+  --coral: #fda4af;
+  --border: #34456d;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+div.body,
+div.documentwrapper {
+  background: var(--surface);
+}
+
+div.body {
+  color: var(--text);
+}
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+  color: var(--text);
+}
+
+div.body h1 {
+  border-bottom: 2px solid var(--violet);
+  padding-bottom: 0.25em;
+}
+
+a,
+a.reference,
+a:visited {
+  color: var(--cyan);
+}
+
+a:hover,
+a:focus {
+  color: var(--coral);
+}
+
+code,
+tt {
+  background: var(--surface-raised);
+  color: var(--violet);
+}
+
+pre,
+div.highlight {
+  background: #0a0f1d;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+div.sphinxsidebar {
+  background: #0e162b;
+  color: var(--text);
+}
+
+div.sphinxsidebar h3,
+div.sphinxsidebar h4,
+div.sphinxsidebar p,
+div.sphinxsidebar h3 a,
+div.sphinxsidebar a {
+  color: var(--muted);
+}
+
+div.sphinxsidebar h3 {
+  color: var(--violet);
+}
+
+div.sphinxsidebar input {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+div.footer {
+  color: var(--muted);
+}
+
+div.footer a {
+  color: var(--cyan);
+}
+
+::selection {
+  background: #164e63;
+  color: var(--text);
+}
+
 @media screen and (max-width: 940px) {
+  body {
+    background: var(--surface);
+  }
+
   div.body .sig,
   div.body .sig span,
   div.body code.descname,
