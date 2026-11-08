@@ -480,6 +480,7 @@ TestCase {
         verify(empty !== null)
         fakePlayback.source = Qt.resolvedUrl("../fixtures/tone.flac")
         fakePlayback.epoch = 2
+        fakePlayback.state = "Stopped"
         verify(empty.visible)
         app.destroy()
     }
