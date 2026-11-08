@@ -132,6 +132,15 @@ TestCase {
         app.destroy()
     }
 
+    function test_seekPresentationDocumentsFrameBasedLimitation() {
+        let app = shell.createObject(null)
+        let limitation = findChild(app, "playbackSeekLimitation")
+        verify(limitation !== null)
+        verify(!limitation.visible)
+        compare(limitation.Accessible.name, "Playback seek limitation")
+        app.destroy()
+    }
+
     function test_selectedSourceMismatchOffersRecovery() {
         fakePlayback.source = ""; fakePlayback.state = "Stopped"; fakePlayback.epoch = 1; fakePlayback.opens = 0
         let app = shellWithPlayback.createObject(null)
