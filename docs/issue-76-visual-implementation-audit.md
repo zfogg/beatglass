@@ -358,6 +358,8 @@ Theme preview swatches now support Left/Right keyboard navigation while focused,
 
 Home and End now jump directly to the first and last theme swatches, completing predictable keyboard traversal for the palette preview group while preserving selector and preference synchronization.
 
+Arrow and Home/End palette navigation now moves focus to the newly selected swatch, preventing repeated key presses from operating on a stale delegate and keeping the visible focus ring aligned with the active theme.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

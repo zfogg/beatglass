@@ -394,6 +394,7 @@ def main() -> int:
         "appearance group dynamic description": "Accessible.description: \"Choose the color theme and motion preference for the desktop. Current settings: \" + window.selectedTheme",
         "theme preview keyboard navigation": "Keys.onLeftPressed: {\n                            const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length",
         "theme preview home end navigation": "Keys.onHomePressed: {\n                            window.selectedThemeIndex = 0",
+        "theme preview focus follows navigation": "themePreviews.children[nextIndex].forceActiveFocus()",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }

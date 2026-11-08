@@ -415,6 +415,7 @@ ApplicationWindow {
                             window.selectedTheme = window.themeNames[nextIndex]
                             themeSelector.currentIndex = nextIndex
                             if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
+                            themePreviews.children[nextIndex].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onRightPressed: {
@@ -423,6 +424,7 @@ ApplicationWindow {
                             window.selectedTheme = window.themeNames[nextIndex]
                             themeSelector.currentIndex = nextIndex
                             if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
+                            themePreviews.children[nextIndex].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onHomePressed: {
@@ -430,6 +432,7 @@ ApplicationWindow {
                             window.selectedTheme = window.themeNames[0]
                             themeSelector.currentIndex = 0
                             if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = 0
+                            themePreviews.children[0].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onEndPressed: {
@@ -438,6 +441,7 @@ ApplicationWindow {
                             window.selectedTheme = window.themeNames[lastIndex]
                             themeSelector.currentIndex = lastIndex
                             if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = lastIndex
+                            themePreviews.children[lastIndex].forceActiveFocus()
                             event.accepted = true
                         }
                         onClicked: {
