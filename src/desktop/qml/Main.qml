@@ -460,6 +460,7 @@ ApplicationWindow {
                                 Button { text: "Refresh"; objectName: "refreshEndpoints"; enabled: window.endpointSelectionBridge !== null; Accessible.description: "Refresh the available output capture endpoints."; onClicked: window.endpointSelectionBridge.refresh() }
                             }
                             Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status"; Accessible.description: text }
+                            Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint"; Accessible.description: text; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         ComboBox {
                             id: outputDevice
                             objectName: "outputDevice"
