@@ -52,7 +52,7 @@ public:
   void begin(const std::string& id, const CacheKey& key) {
     validate_key(key);
     if (id.empty() || id.size() > 4096 || id.find('\0') != std::string::npos) throw std::invalid_argument("invalid run ID");
-    Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status) VALUES(?,?,?,?,?,'running')");
+    Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status) VALUES(?,?,?,?,?,'running') ON CONFLICT(id) DO UPDATE SET status='running' WHERE runs.status='retryable' AND runs.content=excluded.content AND runs.engine=excluded.engine AND runs.config=excluded.config AND runs.mode=excluded.mode");
     bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p);
   }
   bool find(const CacheKey& key, std::string& result) {

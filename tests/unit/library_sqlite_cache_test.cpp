@@ -60,8 +60,9 @@ TEST_CASE("SQLite cache persists completed work and recovers interrupted runs") 
   {
     SqliteCache cache(path.string()); std::string result;
     REQUIRE(cache.find(key, result)); REQUIRE(result == "stored");
-    REQUIRE(cache.publish("interrupted", key, "partial", {}, [] { return true; }) == Publish::error);
-    REQUIRE(cache.find(key, result)); REQUIRE(result == "stored");
+    REQUIRE_NOTHROW(cache.begin("interrupted", key));
+    REQUIRE(cache.publish("interrupted", key, "recovered", {}, [] { return true; }) == Publish::committed);
+    REQUIRE(cache.find(key, result)); REQUIRE(result == "recovered");
   }
   REQUIRE(std::filesystem::remove(path));
 }
