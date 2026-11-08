@@ -1092,7 +1092,8 @@ ApplicationWindow {
                                       + " · cancelled " + window.analysisJobBridge.batchCancelledCount
                                       + " · complete " + window.analysisJobBridge.batchCompletedCount
                                       + " · queued " + window.analysisJobBridge.batchQueuedCount
-                                      + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")) : ""
+                                      + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")
+                                      + (typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== "" ? (" · recovery: " + storageRecovery.analysisError) : "")) : ""
                                 Accessible.name: "Batch analysis queue status: " + text
                                 ToolTip.text: "Accepted, rejected, and capacity limits for the analysis queue"
                                 Accessible.role: Accessible.StaticText
