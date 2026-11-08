@@ -9,6 +9,7 @@ required = {
     "cancellation boundary": "FileReadStatus::cancelled",
     "source verification": "FileVerificationOutcome::cancelled",
     "source availability": "is_regular_file(path, ec)",
+    "decode handoff": "op.decode = [path]",
     "serialized frame result": "decoded_frames=",
     "wrapped progress handoff": "op.decode(stop, op.progress)",
 }
