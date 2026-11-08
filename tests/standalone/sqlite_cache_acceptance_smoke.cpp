@@ -82,6 +82,11 @@ int main() {
     assert(cache.invalidate(next_content));
     assert(!cache.find(next_content, result));
     assert(cache.find(next_engine, result) && result == "engine-v2-data");
+    assert(cache.invalidate(next_engine));
+    assert(!cache.find(next_engine, result));
+    cache.begin("engine-republish", next_engine);
+    assert(cache.publish("engine-republish", next_engine, "engine-v2-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_engine, result) && result == "engine-v2-republished");
     cache.begin("republish", key);
     assert(cache.publish("republish", key, "result-b", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(key, result) && result == "result-b");
