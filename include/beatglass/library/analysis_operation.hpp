@@ -11,6 +11,8 @@ struct AnalysisOperation {
   AnalysisIdentity identity;
   /** Serialize a completed value for transactional cache publication. */
   std::function<std::string()> serialize;
+  /** Receive the verified serialized value on the worker before the job completes. The callback must not touch GUI or audio state. */
+  std::function<void(const std::string&)> publish;
   /** Revalidate the opened source before the cache commit point. */
   std::function<FileVerificationResult(std::stop_token)> verify;
   /** Monotonic progress in source frames; zero total means unknown. */

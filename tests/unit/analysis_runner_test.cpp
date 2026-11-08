@@ -7,10 +7,16 @@
 using namespace beatglass::library;
 using namespace beatglass::library_detail;
 namespace { AnalysisOperation op(bool valid) { AnalysisOperation o; o.source.path="track.wav"; o.source.content_hash="sha256:test"; o.identity.content_hash="sha256:test"; o.identity.engine_version="engine"; o.identity.configuration_id="config"; o.identity.mode="offline"; o.source.size_bytes=12; o.serialize=[] { return std::string("result"); }; o.verify=[valid](std::stop_token){ return beatglass::FileVerificationResult{valid ? beatglass::FileVerificationOutcome::match : beatglass::FileVerificationOutcome::changed}; }; return o; } }
-namespace { void wait_for_terminal(const std::shared_ptr<JobHandle>& handle) { for(int i=0;i<1000; ++i) { const auto state=handle->state(); if(state != TrackedState::queued && state != TrackedState::running) return; std::this_thread::yield(); } } }
+namespace { void wait_for_terminal(const std::shared_ptr<JobHandle>& handle) { for(int i=0;i<10000; ++i) { const auto state=handle->state(); if(state != TrackedState::queued && state != TrackedState::running) return; std::this_thread::sleep_for(std::chrono::microseconds(100)); } } }
 TEST_CASE("analysis runner cancellation never publishes a result") { JobExecutor executor(1); AnalysisRunner runner(executor); auto operation=op(true); operation.serialize=[] { return std::string("should not publish"); }; operation.verify=[](std::stop_token stop) { while(!stop.stop_requested()) std::this_thread::yield(); return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::cancelled}; }; auto h=runner.submit(std::move(operation)); REQUIRE(h); h->cancel(); wait_for_terminal(h); CHECK(h->state()==TrackedState::cancelled); CHECK(h->frames()==0); executor.shutdown(); }
 TEST_CASE("analysis runner converts verifier exceptions into a failed job") { JobExecutor executor(1); AnalysisRunner runner(executor); auto operation=op(true); operation.verify=[](std::stop_token) -> beatglass::FileVerificationResult { throw std::runtime_error("source disappeared"); }; auto h=runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); CHECK(h->frames()==0); executor.shutdown(); }
 TEST_CASE("analysis runner completes verified work and reports progress") { JobExecutor executor(1); AnalysisRunner runner(executor); auto h=runner.submit(op(true)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::completed); CHECK(h->frames()==12); executor.shutdown(); }
+TEST_CASE("analysis runner publishes serialized result before completion") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); std::string published;
+  auto operation = op(true); operation.publish = [&](const std::string& result) { published = result; };
+  auto h = runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h);
+  CHECK(h->state() == TrackedState::completed); CHECK(published == "result"); executor.shutdown();
+}
 TEST_CASE("analysis runner forwards decoder progress into the tracked handle") {
   JobExecutor executor(1); AnalysisRunner runner(executor); std::vector<std::uint64_t> reported;
   auto operation = op(true); operation.progress = [&](std::uint64_t done, std::uint64_t) { reported.push_back(done); };
