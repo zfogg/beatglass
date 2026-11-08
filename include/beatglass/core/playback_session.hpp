@@ -22,6 +22,9 @@ public:
   bool replace(std::uint64_t new_epoch) noexcept;
   /** Accept a FileReader block only from the active epoch and in order. */
   bool accept(std::uint64_t epoch, std::uint64_t first_frame) noexcept;
+  /** Accept an ordered block and advance by its actual frame count. */
+  bool accept(std::uint64_t epoch, std::uint64_t first_frame,
+              std::uint64_t frame_count) noexcept;
   PlaybackState state() const noexcept { return state_; }
   std::uint64_t epoch() const noexcept { return epoch_; }
   std::uint64_t next_frame() const noexcept { return next_frame_; }
