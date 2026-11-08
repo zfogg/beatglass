@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 
 SCENARIOS = ("capture", "recovery", "output", "display", "playback", "overlay")
 
@@ -20,6 +21,10 @@ def ingest(root: Path, output: Path) -> list[str]:
                 identity[key] = value
     else:
         errors.append("missing qualification-manifest.txt")
+    if not re.fullmatch(r"[0-9a-fA-F]{40}", identity.get("commit", "")):
+        errors.append("invalid source commit identity")
+    if not identity.get("captured_at", "").strip():
+        errors.append("missing capture time")
     artifacts = []
     hashes_path = root / "qualification-artifacts.sha256"
     if not hashes_path.is_file():
