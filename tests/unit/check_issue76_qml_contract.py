@@ -80,6 +80,7 @@ def main() -> int:
         "final state values": "Accessible.value: text",
         "visual recovery values": "objectName: \"visualizationLoadState\"",
         "settings recovery values": "objectName: \"permissionGuidance\"",
+        "recovery batch values": "objectName: \"endpointRecoveryGuidance\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

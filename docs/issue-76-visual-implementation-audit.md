@@ -74,6 +74,8 @@ Playback error/seek guidance and visualization load/data/selection statuses now 
 
 Metadata recovery, overlay display availability, and platform permission guidance now expose their rendered recovery text as accessibility values.
 
+Overlay unlock/capture hints and endpoint discovery/recovery guidance now expose explicit recovery values across the affected surfaces.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
