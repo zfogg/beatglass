@@ -399,6 +399,7 @@ def main() -> int:
         "visualization responsive canvas height": "Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120",
         "visualization responsive hint type": "font.pixelSize: window.compactHeader ? 12 : 14",
         "visualization error hint color": "color: window.liveBridge.status === \"Error\" ? \"#fca5a5\" : window.themeForegrounds[window.selectedThemeIndex]",
+        "visualization retry capture action": "objectName: \"visualizationRetryCapture\"\n                    visible: window.liveBridge.status === \"Error\"",
         "visualization responsive status spacing": "objectName: \"visualizationStatusGroup\"\n                    Layout.fillWidth: true\n                    spacing: window.compactHeader ? 4 : 8",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
