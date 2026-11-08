@@ -52,6 +52,14 @@ Set `BEATGLASS_MACOS_REQUIRE_SIGNING=1` for a release qualification run. The run
 
 The runner invokes both the tap and recovery smoke bundles when this variable is set; when it is absent, the log records capture as `UNRUN`. A supplied-UID run retains `tap-smoke.log` and `recovery-smoke.log` and fails unless tap output includes nonzero frames/samples, discontinuity and dropped-frame counters, and `timestamp_valid=1`; both recovery cycles must report nonzero frames/samples, discontinuity counts, and successful stops. Overlay/native CTest discovery is retained as `overlay-ctest-discovery.log`; execution output is retained as `overlay-ctest.log` and must contain a passing percentage summary. The exact configure/build/test commands are retained as `qualification-commands.log`; `qualification-manifest.txt` summarizes commit, macOS version, architecture, Xcode version, SDK version/path, active developer directory, signing state for desktop/tap/recovery, UID mode, evidence paths, and the path to `qualification-artifacts.sha256`. That SHA-256 manifest contains one hash per native desktop, tap-smoke, and recovery executable; preserve it with the logs and verify it later with `shasum -a 256 -c qualification-artifacts.sha256`. Codesign logs retain signing metadata for all three bundles. The runner also fails if required evidence files are empty.
 
+After transferring a qualification output directory, verify its evidence without rerunning native tests:
+
+```sh
+tests/macos/verify_qualification_artifacts.sh /path/to/qualification-output
+```
+
+The verifier requires the manifest identity fields, exactly three artifact hashes, and successful SHA-256 checks for the desktop, tap-smoke, and recovery binaries.
+
 ## Build identity
 
 Record the commit, macOS version, hardware model, Xcode and SDK versions, Qt version, signing state, selected output UID and display arrangement. Record whether the run used the production desktop bundle or a smoke bundle, plus the exact configure, build and CTest commands.
