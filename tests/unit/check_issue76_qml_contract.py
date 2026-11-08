@@ -21,6 +21,7 @@ def main() -> int:
         "capture control accessible name": "Accessible.name: text; Accessible.description: window.captureMonitorBridge",
         "playback pause accessible name": "Accessible.name: text + \" playback\"",
         "playback stop accessible name": "Accessible.name: \"Stop playback\"",
+        "playback seek accessible names": "Accessible.name: \"Seek backward five seconds\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
