@@ -26,6 +26,21 @@ def validate(report: dict) -> list[str]:
         errors.append("READY report cannot contain exit_gate_reason_codes")
     if report.get("exit_gate_status") == "PENDING" and not report.get("exit_gate_reason_codes"):
         errors.append("PENDING report must contain exit_gate_reason_codes")
+    if report.get("exit_gate_status") == "READY" and report.get("ready") is not True:
+        errors.append("READY report must set ready true")
+    if report.get("exit_gate_status") == "PENDING" and report.get("ready") is not False:
+        errors.append("PENDING report must set ready false")
+    platforms = report.get("platforms")
+    if not isinstance(platforms, list) or {item.get("platform") for item in platforms if isinstance(item, dict)} != EXPECTED_PLATFORMS:
+        errors.append("platforms must contain exactly Windows, macOS, and Linux rows")
+    else:
+        for item in platforms:
+            if not isinstance(item.get("manifest"), str) or not item["manifest"]:
+                errors.append(f"{item.get('platform')}: missing manifest linkage")
+            if not isinstance(item.get("manifest_sha256"), str) or len(item["manifest_sha256"]) != 64:
+                errors.append(f"{item.get('platform')}: invalid manifest hash linkage")
+            if item.get("provenance_complete") is not True:
+                errors.append(f"{item.get('platform')}: provenance is incomplete")
     return errors
 
 

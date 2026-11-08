@@ -70,6 +70,8 @@ The machine-readable report declares `readiness_report_schema: 1`. Consumers mus
 
 Before handing a report to automation, run `python tests/platform/validate_readiness_report.py <retained-bundle-root>/readiness-report.json`. This local consumer check verifies the versioned conservative fields, exact platform status rows, and the fail-closed relationship between exit status and reason codes.
 
+The consumer check also requires each platform row to link a manifest path and SHA-256 plus `provenance_complete: true`; a report with detached or incomplete platform identity is rejected before native evidence is considered.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.
