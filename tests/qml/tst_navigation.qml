@@ -478,10 +478,12 @@ TestCase {
         let app = shellWithPlayback.createObject(null)
         let empty = findChild(app, "visualizationEmptyState")
         verify(empty !== null)
+        findChild(app, "visualizationCanvas").selectedPosition = 0.5
         fakePlayback.source = Qt.resolvedUrl("../fixtures/tone.flac")
         fakePlayback.epoch = 2
         fakePlayback.state = "Stopped"
         verify(empty.visible)
+        compare(findChild(app, "visualizationCanvas").selectedPosition, -1)
         app.destroy()
     }
 

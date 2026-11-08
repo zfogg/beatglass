@@ -218,6 +218,10 @@ ApplicationWindow {
         window.metadataStatus = "Choose an audio file to inspect its metadata."
     }
     function clearVisualizationForCaptureState() {
+        if (typeof visualizationCanvas !== "undefined") {
+            visualizationCanvas.selectedPosition = -1
+            visualizationCanvas.requestPaint()
+        }
         if (typeof visualizationPresentation !== "undefined"
                 && visualizationPresentation.clear)
             visualizationPresentation.clear()
