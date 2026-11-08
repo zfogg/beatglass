@@ -41,6 +41,8 @@ required = {
     "batch completed count": 'Q_PROPERTY(int batchCompletedCount READ batchCompletedCount',
     "batch queued count": 'Q_PROPERTY(int batchQueuedCount READ batchQueuedCount',
     "queued derives terminal states": 'batchAccepted_ - batchCompletedCount_ - batchFailedCount_ - batchCancelledCount_',
+    "file decoder submission": 'Q_INVOKABLE bool submitFile',
+    "file decoder factory": 'make_file_decode_operation(path.toStdString()',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:

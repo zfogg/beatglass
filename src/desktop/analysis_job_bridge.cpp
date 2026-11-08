@@ -1,4 +1,5 @@
 #include "analysis_job_bridge.hpp"
+#include "beatglass/library/file_analysis_operation.hpp"
 
 namespace {
 constexpr std::size_t kMaxDisplayedResultBytes = 4096;
@@ -26,6 +27,15 @@ AnalysisJobBridge::AnalysisJobBridge(beatglass::library_detail::JobExecutor& exe
   poll_timer_.setInterval(50);
   poll_timer_.setSingleShot(false);
   connect(&poll_timer_, &QTimer::timeout, this, &AnalysisJobBridge::poll);
+}
+
+bool AnalysisJobBridge::submitFile(const QString& path, const QString& contentHash,
+                                   const QString& engineVersion, const QString& configurationId,
+                                   const QString& mode) {
+  beatglass::library::AnalysisIdentity identity;
+  identity.content_hash = contentHash.toStdString(); identity.engine_version = engineVersion.toStdString();
+  identity.configuration_id = configurationId.toStdString(); identity.mode = mode.toStdString();
+  return static_cast<bool>(submit(beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity))));
 }
 
 std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit(beatglass::library::AnalysisOperation op) {

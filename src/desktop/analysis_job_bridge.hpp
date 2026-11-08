@@ -39,6 +39,10 @@ public:
   /** Cancel the active job, publish Cancelled immediately, and clear stale result presentation. */
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void retry();
+  /** Submit a path-backed provisional decoder operation on the worker queue. */
+  Q_INVOKABLE bool submitFile(const QString& path, const QString& contentHash,
+                              const QString& engineVersion, const QString& configurationId,
+                              const QString& mode = QStringLiteral("offline"));
   /** Submit a bounded batch, publish Queued/Failed aggregate state, and retain accepted operations for retry. */
   int submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority = 0);
   /** Cancel active batch jobs, publish Cancelled immediately, and clear stale result/batch presentation. */
