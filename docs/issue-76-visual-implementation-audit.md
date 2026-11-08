@@ -282,6 +282,8 @@ The appearance summary tooltip now also reports the current theme and motion mod
 
 Reset appearance now exposes the current theme/motion value and dynamically explains exactly which settings will be restored, reducing ambiguity before destructive-looking recovery actions.
 
+The Library page heading now exposes explicit heading semantics and a concise browse tooltip, giving the primary file-navigation surface the same entry context as DJ and Settings.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
