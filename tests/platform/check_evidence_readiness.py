@@ -68,6 +68,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 if str(data.get("platform", "")).lower() != platform:
                     errors.append(f"{platform}: manifest platform does not match status row")
                 errors.extend(f"{platform}: {error}" for error in identity_errors(data, max_age_hours))
+                scenario_ids = [item.get("id") for item in data.get("scenarios", []) if isinstance(item, dict)]
+                if len(scenario_ids) != len(set(scenario_ids)):
+                    errors.append(f"{platform}: duplicate scenario id in manifest")
                 retained = len(data.get("artifacts", []))
                 artifact_bytes = sum((bundle / entry["path"]).stat().st_size for entry in data.get("artifacts", [])
                                      if isinstance(entry, dict) and isinstance(entry.get("path"), str)
@@ -78,21 +81,27 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                     path = bundle / entry.get("path", "")
                     inventory.append({"path": entry.get("path"), "sha256": entry.get("sha256"),
                                       "bytes": path.stat().st_size if path.is_file() else None})
+                scenario_inventory = sorted(
+                    [{"id": item.get("id"), "status": item.get("status"), "evidence": item.get("evidence")}
+                     for item in data.get("scenarios", []) if isinstance(item, dict)],
+                    key=lambda item: str(item.get("id", "")))
             except (OSError, json.JSONDecodeError) as exc:
                 errors = [f"{platform}: invalid manifest: {exc}"]
                 retained = 0
                 artifact_bytes = 0
                 manifest_sha256 = None
                 inventory = []
+                scenario_inventory = []
         else:
             retained = 0
             artifact_bytes = 0
             manifest_sha256 = None
             inventory = []
+            scenario_inventory = []
             errors = [f"{platform}: missing manifest: {manifest}"]
         rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
-                     "artifact_inventory": inventory, "errors": errors})
+                     "artifact_inventory": inventory, "scenario_inventory": scenario_inventory, "errors": errors})
     return {"platforms": rows, "ready": not any(row["errors"] for row in rows)}
 
 
