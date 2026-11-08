@@ -14,6 +14,14 @@ TestCase {
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
     QtObject {
+        id: fakePlayback
+        property string state: "Stopped"
+        property url source: ""
+        property int epoch: 1
+        property int opens: 0
+        function openSource(url, nextEpoch) { source = url; epoch = nextEpoch; state = "Playing"; opens++; return true }
+    }
+    QtObject {
         id: fakeThemePreferences
         property int themeIndex: 0
         property bool reduceMotion: false
@@ -39,6 +47,7 @@ TestCase {
         function resizeOverlay(width, height) { requestedWidth = width; return true }
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
+    Component { id: shellWithPlayback; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackBridge: fakePlayback } }
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
@@ -120,6 +129,21 @@ TestCase {
         let app = shell.createObject(null)
         compare(findChild(app, "playbackState").Accessible.name, "Playback state")
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
+        app.destroy()
+    }
+
+    function test_selectedSourceMismatchOffersRecovery() {
+        fakePlayback.source = ""; fakePlayback.state = "Stopped"; fakePlayback.epoch = 1; fakePlayback.opens = 0
+        let app = shellWithPlayback.createObject(null)
+        app.selectedAudioUrl = Qt.resolvedUrl("../fixtures/generated/tone.flac")
+        let recovery = findChild(app, "reopenSelectedPlayback")
+        verify(recovery.visible)
+        compare(findChild(app, "playbackSelectionStatus").text, "")
+        recovery.clicked()
+        compare(fakePlayback.opens, 1)
+        compare(fakePlayback.source, app.selectedAudioUrl)
+        compare(findChild(app, "playbackSelectionStatus").text, "Playing selected source")
+        verify(!recovery.visible)
         app.destroy()
     }
 
