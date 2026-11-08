@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <stdexcept>
 #include "beatglass/library/analysis_operation.hpp"
+#include "beatglass/library/file_analysis_operation.hpp"
 #include "beatglass/library/analysis_commit.hpp"
 #include "beatglass/library/analysis_admission.hpp"
 #include "beatglass/library/storage_owner.hpp"
@@ -145,4 +146,10 @@ TEST_CASE("analysis publication stops after cancellation during serialization") 
   op.verify = [&](std::stop_token) { verified = true; return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   REQUIRE(beatglass::library::publish_operation(cache, "run", op, stop.get_token()) == beatglass::library_detail::Publish::cancelled);
   CHECK_FALSE(verified);
+}
+TEST_CASE("file decoder retry accepts only the current snapshot") {
+  CHECK(beatglass::library::file_decoder_snapshot_compatible(beatglass::library::kFileDecoderSnapshot));
+  CHECK_FALSE(beatglass::library::file_decoder_snapshot_compatible(""));
+  CHECK_FALSE(beatglass::library::file_decoder_snapshot_compatible("file-reader-v0"));
+  CHECK_FALSE(beatglass::library::file_decoder_snapshot_compatible("decoder-v3;pcm-f32;44100"));
 }

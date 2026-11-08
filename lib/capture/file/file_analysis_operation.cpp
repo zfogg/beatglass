@@ -3,6 +3,9 @@
 #include <array>
 #include <sstream>
 namespace beatglass::library {
+bool file_decoder_snapshot_compatible(const std::string& snapshot) noexcept {
+  return snapshot == kFileDecoderSnapshot;
+}
 AnalysisOperation make_file_decode_operation(std::filesystem::path path, AnalysisIdentity identity, std::string decoder_snapshot) {
   AnalysisOperation op; op.source.path = path; op.source.content_hash = identity.content_hash; op.identity = std::move(identity); op.decoder_snapshot = std::move(decoder_snapshot);
   op.verify = [path](std::stop_token stop) {
