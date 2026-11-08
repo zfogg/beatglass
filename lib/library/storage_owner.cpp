@@ -11,4 +11,7 @@ std::vector<library_detail::RetryableRun> StorageOwner::retryable_runs(std::size
   return cache_ ? cache_->retryable_runs(limit) : std::vector<library_detail::RetryableRun>{};
 }
 bool StorageOwner::discard_retryable(const std::string& id) { return cache_ ? cache_->discard_retryable(id) : false; }
+bool StorageOwner::find_cached(const AnalysisIdentity& identity, std::string& result) const {
+  return cache_ && cache_->find({identity.content_hash, identity.engine_version, identity.configuration_id, identity.mode}, result);
+}
 }

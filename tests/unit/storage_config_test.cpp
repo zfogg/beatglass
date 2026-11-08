@@ -28,5 +28,17 @@ TEST_CASE("storage owner discards retryable runs without touching source files")
   CHECK_FALSE(owner.discard_retryable("retry"));
   owner.close(); std::filesystem::remove(path, ec);
 }
+TEST_CASE("storage owner exposes completed analysis cache reuse") {
+  beatglass::library::StorageOwner owner;
+  const auto path = std::filesystem::temp_directory_path() / "beatglass-storage-owner-cache.sqlite";
+  std::error_code ec; std::filesystem::remove(path, ec);
+  REQUIRE(owner.open({path}));
+  const beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  const beatglass::library_detail::CacheKey key{"hash", "engine", "config", "offline"};
+  owner.cache()->begin("run", key);
+  REQUIRE(owner.cache()->publish("run", key, "cached", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  std::string result; REQUIRE(owner.find_cached(identity, result)); CHECK(result == "cached");
+  owner.close(); std::filesystem::remove(path, ec);
+}
 #include <filesystem>
 #include <system_error>
