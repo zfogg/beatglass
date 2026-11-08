@@ -166,8 +166,7 @@ ApplicationWindow {
     }
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
-        window.restoreOverlayDisplaySelectionFromBridge()
-        window.restoreOverlayVisualStateFromBridge()
+        window.syncOverlaySettingsFromBridge()
         refreshCatalog()
     }
     function restoreOverlayDisplaySelectionFromBridge() {
@@ -219,6 +218,16 @@ ApplicationWindow {
         }
         window.overlayPreferredSizeIndex = best
         return true
+    }
+    function syncOverlaySettingsFromBridge() {
+        if (!window.overlayBridge)
+            return false
+        window.restoreOverlayDisplaySelectionFromBridge()
+        const geometry = window.overlayBridge.geometry
+        const visualStateReady = window.restoreOverlayVisualStateFromBridge()
+        if (visualStateReady)
+            window.announceCaptureRecoveryState("Overlay settings synchronized from native state.")
+        return visualStateReady || (geometry && geometry.width > 0)
     }
     function reapplyOverlayVisualState() {
         return window.restoreOverlayVisualStateFromBridge()
