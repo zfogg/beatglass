@@ -203,4 +203,6 @@ Portable regression coverage executes the cross-platform qualification script sy
 
 Native script output can be ingested with `python tests/platform/ingest_qualification_artifacts.py <qualification-output> <bundle>/manifest.json`. The ingester verifies listed hashes and path containment, carries forward identity metadata, and emits all native scenarios as `PENDING`; it never upgrades script output to qualification by itself.
 
+The same ingestion is available in the end-to-end handoff via `--native-output <qualification-output> --native-platform windows|macos|linux`; this writes the platform manifest before report generation, validation, and optional consumption. Ingestion failures remain visible and cannot be converted into readiness.
+
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.

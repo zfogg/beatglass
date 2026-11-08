@@ -44,3 +44,16 @@ class ReadinessHandoffTest(unittest.TestCase):
             errors = handoff.run(bundles, output, consume_report=True)
             self.assertTrue(any("not accepted: PENDING" in error for error in errors))
 
+    def test_native_ingestion_is_connected_to_handoff(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); native = root / "native"; bundles = root / "bundles"; bundles.mkdir()
+            artifact = native / "build" / "app.bin"; artifact.parent.mkdir(parents=True); artifact.write_bytes(b"fixture")
+            import hashlib
+            digest = hashlib.sha256(b"fixture").hexdigest()
+            (native / "qualification-artifacts.sha256").write_text(f"{digest}  build/app.bin\n", encoding="utf-8")
+            (native / "qualification-manifest.txt").write_text("platform=windows\ncommit=" + "0" * 40 + "\ncaptured_at=2026-11-08T00:00:00Z\nenvironment=test\n", encoding="utf-8")
+            output = root / "readiness.json"
+            errors = handoff.run(bundles, output, native_output=native, native_platform="windows")
+            self.assertFalse(any("missing qualification-manifest" in error for error in errors))
+            self.assertEqual(json.loads((bundles / "windows/manifest.json").read_text())["scenarios"][0]["status"], "PENDING")
+
