@@ -249,6 +249,11 @@ ApplicationWindow {
                 && visualizationPresentation.clear)
             visualizationPresentation.clear()
     }
+    function clearVisualizationPositionAndFocus() {
+        visualizationCanvas.selectedPosition = -1
+        visualizationCanvas.requestPaint()
+        visualizationCanvas.forceActiveFocus()
+    }
     function visualizationPositionToFrame(position, durationFrames) {
         if (!isFinite(position) || !isFinite(durationFrames) || durationFrames < 0)
             return -1
@@ -801,6 +806,14 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Label {
+                                objectName: "analysisCacheStatus"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.cachedResult !== undefined
+                                text: visible ? (storageRecovery.cacheHit ? "Cached analysis ready" : "No cached analysis for the requested identity") : ""
+                                Accessible.name: "Analysis cache status"
+                                Accessible.description: visible ? text : "Analysis cache status is unavailable."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
                                 visible: typeof storageRecovery !== "undefined"
@@ -927,7 +940,7 @@ ApplicationWindow {
                         id: waveformView
                         activeFocusOnTab: true
                         text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
-                        Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."
+                        Accessible.name: "Waveform view"; Accessible.description: checked ? "Waveform view is selected; show the selectable time-domain waveform." : "Show the selectable time-domain waveform."
                         ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
                         onClicked: visualizationCanvas.viewMode = "waveform"
                         Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; spectrumView.forceActiveFocus(); event.accepted = true }
@@ -944,7 +957,7 @@ ApplicationWindow {
                         id: spectrumView
                         activeFocusOnTab: true
                         text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
-                        Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."
+                        Accessible.name: "FFT view"; Accessible.description: checked ? "FFT view is selected; show the selectable frequency-domain FFT." : "Show the selectable frequency-domain FFT."
                         ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
                         onClicked: visualizationCanvas.viewMode = "spectrum"
                         Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; waveformView.forceActiveFocus(); event.accepted = true }
@@ -972,32 +985,58 @@ ApplicationWindow {
                     property real selectedPosition: -1
                     activeFocusOnTab: true
                     Keys.onLeftPressed: {
-                        selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.01)
+                        const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
+                        selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - step)
                         requestPaint()
+                        event.accepted = true
                     }
                     Keys.onRightPressed: {
-                        selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.01)
+                        const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
+                        selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + step)
                         requestPaint()
+                        event.accepted = true
                     }
-                    Keys.onHomePressed: { selectedPosition = 0; requestPaint() }
-                    Keys.onEndPressed: { selectedPosition = 1; requestPaint() }
-                    Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint() }
-                    Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint() }
-                    Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }
+                    Keys.onHomePressed: { selectedPosition = 0; requestPaint(); event.accepted = true }
+                    Keys.onEndPressed: { selectedPosition = 1; requestPaint(); event.accepted = true }
+                    Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint(); event.accepted = true }
+                    Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint(); event.accepted = true }
+                    Keys.onReturnPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
+                    Keys.onEnterPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
+                    Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
+                    Keys.onEscapePressed: { window.clearVisualizationPositionAndFocus(); event.accepted = true }
+                    Keys.onPressed: {
+                        if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Left) {
+                            selectedPosition = 0
+                            requestPaint()
+                            event.accepted = true
+                        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Right) {
+                            selectedPosition = 1
+                            requestPaint()
+                            event.accepted = true
+                        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Up) {
+                            viewMode = "waveform"
+                            waveformView.forceActiveFocus()
+                            event.accepted = true
+                        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Down) {
+                            viewMode = "spectrum"
+                            spectrumView.forceActiveFocus()
+                            event.accepted = true
+                        }
+                    }
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
                             : visualizationPresentation.spectrum.length > 0)
-                    Layout.fillWidth: true; Layout.preferredHeight: 120
+                    Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120
                     Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
                     Accessible.value: visualizationCanvas.viewMode + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%")
                     Accessible.role: Accessible.Graphic
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
                         : "Bounded frequency-domain FFT magnitudes from the current output capture.")
-                        + " Use Left/Right for fine movement, Page Up/Page Down for larger movement, Home/End for boundaries, and Escape to clear. "
+                        + " Click or scroll to select and scrub; double-click or right-click to clear; hold Shift or Ctrl while scrolling for larger steps. Use Left/Right for fine movement, Shift+Left/Shift+Right for five-percent movement, Page Up/Page Down for larger movement, Ctrl+Left/Ctrl+Right for boundary jumps, Ctrl+Up/Ctrl+Down to change mode, Home/End for boundaries, Enter or Space to reach clear, and Escape to clear. "
                         + (visualizationCanvas.selectedPosition < 0 ? "No position selected." : "Selected position " + Math.round(visualizationCanvas.selectedPosition * 100) + " percent.")
-                    ToolTip.text: "Click to select a position; use Left/Right/Page Up/Page Down/Home/End to navigate or Escape to clear"
+                    ToolTip.text: "Click or scroll to select a position; double-click or right-click to clear; hold Shift or Ctrl while scrolling for larger steps. Use Left/Right/Shift+Left/Shift+Right/Page Up/Page Down/Ctrl+Left/Ctrl+Right/Ctrl+Up/Ctrl+Down/Home/End to navigate, Enter or Space for clear, or Escape to clear"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
@@ -1022,9 +1061,28 @@ ApplicationWindow {
                     }
                     MouseArea {
                         anchors.fill: parent
+                        onPressed: {
+                            if (mouse.button === Qt.RightButton) {
+                                window.clearVisualizationPositionAndFocus()
+                                mouse.accepted = true
+                            }
+                        }
                         onClicked: {
                             visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, mouse.x / visualizationCanvas.width))
+                            visualizationCanvas.forceActiveFocus()
                             visualizationCanvas.requestPaint()
+                        }
+                        onDoubleClicked: {
+                            window.clearVisualizationPositionAndFocus()
+                            mouse.accepted = true
+                        }
+                        onWheel: {
+                            const stepDivisor = (wheel.modifiers & Qt.ControlModifier) ? 120 : ((wheel.modifiers & Qt.ShiftModifier) ? 240 : 1200)
+                            const delta = wheel.angleDelta.y / stepDivisor
+                            visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, (visualizationCanvas.selectedPosition < 0 ? 0 : visualizationCanvas.selectedPosition) + delta))
+                            visualizationCanvas.forceActiveFocus()
+                            visualizationCanvas.requestPaint()
+                            wheel.accepted = true
                         }
                     }
                     Rectangle {
@@ -1038,14 +1096,62 @@ ApplicationWindow {
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
+                Label {
+                    objectName: "visualizationInteractionHint"
+                    text: {
+                        const modeLabel = visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT"
+                        if (window.liveBridge.status === "Error")
+                            return "Capture error; retry monitoring before selecting a " + modeLabel + " position."
+                        if (visualizationCanvas.selectedPosition < 0)
+                            return "Select a " + modeLabel + " position with the pointer or keyboard."
+                        return modeLabel.charAt(0).toUpperCase() + modeLabel.slice(1) + " position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
+                    }
+                    Accessible.name: "Visualization interaction hint"
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: text
+                    ToolTip.text: "Current visualization selection and recovery hint"
+                    color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
+                Button {
+                    objectName: "visualizationRetryCapture"
+                    visible: window.liveBridge.status === "Error" && window.captureMonitorBridge && window.captureMonitorBridge.start
+                    enabled: visible
+                    text: "Retry monitoring"
+                    Accessible.name: "Retry visualization capture"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: "Retry output monitoring to restore live waveform and FFT data."
+                    ToolTip.text: "Retry output monitoring for visualization data"
+                    onClicked: {
+                        window.captureMonitorBridge.start()
+                        visualizationCanvas.forceActiveFocus()
+                    }
+                }
+                Label {
+                    objectName: "visualizationRetryFeedback"
+                    visible: window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring"
+                    text: window.liveBridge.status === "Reacquiring" ? "Reacquiring capture; visualization will resume when output is available." : "Starting capture; visualization will populate when output is available."
+                    Accessible.name: "Visualization capture recovery status"
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: text
+                    ToolTip.text: "Current visualization capture recovery transition"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
                 ColumnLayout {
                     objectName: "visualizationStatusGroup"
                     Layout.fillWidth: true
+                    spacing: window.compactHeader ? 4 : 8
                     Accessible.name: "Visualization data and capture status"
-                    Accessible.value: visualizationCanvas.modeHasData ? "ready" : "waiting"
+                    Accessible.value: window.liveBridge.status === "Error" ? "capture error" : (window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring" ? window.liveBridge.status.toLowerCase() : (visualizationCanvas.modeHasData ? "ready" : "waiting"))
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Current waveform or FFT availability, generation, and capture state."
-                    ToolTip.text: "Visualization data, generation, and capture status"
+                    ToolTip.text: "Visualization data, generation, and capture status: " + (window.liveBridge.status === "Error" ? "capture error" : (visualizationCanvas.modeHasData ? "ready" : "waiting"))
                 Label {
                     objectName: "visualizationEmptyState"
                     visible: !visualizationCanvas.modeHasData
@@ -1126,15 +1232,14 @@ ApplicationWindow {
                     objectName: "clearVisualizationSelection"
                     activeFocusOnTab: true
                     text: "Clear position"
-                    ToolTip.text: "Clear the selected waveform or FFT position"
+                    ToolTip.text: enabled ? "Clear the selected waveform or FFT position; Escape, Enter, Space, right-click, or double-click also clear" : "No visualization position selected"
                     enabled: visualizationCanvas.selectedPosition >= 0
                     Accessible.name: "Clear visualization position"
                     Accessible.value: enabled ? "available" : "no position selected"
                     Accessible.role: Accessible.Button
-                    Accessible.description: "Remove the selected waveform or FFT position"
+                    Accessible.description: "Remove the selected waveform or FFT position. Escape, Enter, Space, right-click, and double-click provide equivalent recovery paths."
                     onClicked: {
-                        visualizationCanvas.selectedPosition = -1
-                        visualizationCanvas.requestPaint()
+                        window.clearVisualizationPositionAndFocus()
                     }
                 }
                 }

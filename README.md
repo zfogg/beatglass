@@ -69,6 +69,8 @@ The [Phase 0 gate audit](docs/phase0-gate.md) records the coordinator's acceptan
 
 See the [platform qualification status](docs/platform-qualification-status.md) for executable preparation checks and the native gates that remain open on Windows, macOS, and Linux. Its versioned readiness report (`readiness_report_schema: 1`) is fail-closed: incomplete or unrun scenarios produce `PENDING`/a nonzero checker result, and the report cannot promote the repository's explicitly experimental support language without actual native desktop, audio, and overlay evidence.
 
+The executable handoff path is: ingest native script output with `tests/platform/ingest_qualification_artifacts.py`, run `tests/platform/run_readiness_handoff.py` to generate and validate the report, then consume it with `tests/platform/consume_readiness_handoff.py`. These tools preserve `PENDING` until native evidence is reviewed; portable tests and dry runs do not qualify hardware.
+
 ## Qt 6.8.3 prebuilt desktop preset
 
 With a clean vcpkg root and the selected Qt 6.8.3 SDK, set `VCPKG_ROOT` to the pinned vcpkg checkout and `BEATGLASS_QT_ROOT` to the SDK's compiler-specific directory (the directory containing `lib/cmake/Qt6`). From a fresh build directory run:

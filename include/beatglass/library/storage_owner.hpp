@@ -1,6 +1,7 @@
 #pragma once
 #include "beatglass/library/storage_config.hpp"
 #include "beatglass/library/detail/sqlite_cache.hpp"
+#include "beatglass/library/jobs.hpp"
 #include <memory>
 #include <string>
 #include <vector>
@@ -17,6 +18,8 @@ public:
   void close() noexcept;
   /** Return the open cache, or null while closed. */
   library_detail::SqliteCache* cache() noexcept { return cache_.get(); }
+  /** Find a completed cached result by identity on the storage worker. Returns false while closed or on a miss. */
+  bool find_cached(const AnalysisIdentity& identity, std::string& result) const;
   /** Read persisted retryable runs on the storage worker; returns empty while closed. */
   std::vector<library_detail::RetryableRun> retryable_runs(std::size_t limit = 100) const;
   /** Discard one retryable run on the storage worker; never removes source audio. */

@@ -130,6 +130,7 @@ def main() -> int:
         "analysis progress state": "objectName: \"analysisProgress\"",
         "analysis batch status": "objectName: \"analysisBatchStatus\"",
         "persisted recovery runs": "objectName: \"persistedRecoveryRuns\"",
+        "analysis cache status": "objectName: \"analysisCacheStatus\"",
         "discard persisted recovery": "objectName: \"discardPersistedRecovery\"",
         "retry analysis batch": "objectName: \"retryAnalysisBatch\"",
         "cancel analysis batch": "objectName: \"cancelAnalysisBatch\"",
@@ -368,7 +369,7 @@ def main() -> int:
         "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",
         "live monitoring heading tooltip": "Accessible.name: \"DJ monitoring\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Live output monitoring and visualization\"",
         "live output monitoring tooltip": "ToolTip.text: \"Current live output monitoring state\"",
-        "visualization status grouping": "objectName: \"visualizationStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Visualization data and capture status\"",
+        "visualization status grouping": "objectName: \"visualizationStatusGroup\"\n                    Layout.fillWidth: true\n                    spacing: window.compactHeader ? 4 : 8\n                    Accessible.name: \"Visualization data and capture status\"",
         "visualization selection grouping": "objectName: \"visualizationSelectionControls\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Visualization position selection\"",
         "selected audio details grouping": "objectName: \"selectedAudioDetails\"\n                        Accessible.name: \"Selected audio details\"",
         "clear audio selection value": "Accessible.name: \"Clear selected audio\"\n                            Accessible.value: enabled ? window.selectedName : \"no selection\"",
@@ -377,11 +378,33 @@ def main() -> int:
         "overlay live evidence grouping": "objectName: \"overlayLiveEvidenceGroup\"\n                anchors.fill: parent; anchors.margins: 14; spacing: 4\n                Accessible.name: \"Overlay live evidence\"",
         "visualization canvas graphic role": "Accessible.value: visualizationCanvas.viewMode + \", \" + (visualizationCanvas.selectedPosition < 0 ? \"no position selected\" : \"position \" + Math.round(visualizationCanvas.selectedPosition * 100) + \"%\")\n                    Accessible.role: Accessible.Graphic",
         "visualization empty state tooltip": "Accessible.role: Accessible.StaticText\n                    Accessible.description: text\n                    ToolTip.text: \"Visualization data availability and next action\"",
-        "visualization escape clear": "Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }",
-        "visualization keyboard recovery tooltip": "ToolTip.text: \"Click to select a position; use Left/Right/Page Up/Page Down/Home/End to navigate or Escape to clear\"",
-        "visualization coarse keyboard navigation": "Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint() }",
+        "visualization escape clear": "Keys.onEscapePressed: { window.clearVisualizationPositionAndFocus(); event.accepted = true }",
+        "visualization clear recovery helper": "function clearVisualizationPositionAndFocus() {\n        visualizationCanvas.selectedPosition = -1",
+        "visualization keyboard recovery tooltip": "ToolTip.text: \"Click or scroll to select a position; double-click or right-click to clear; hold Shift or Ctrl while scrolling for larger steps. Use Left/Right/Shift+Left/Shift+Right/Page Up/Page Down/Ctrl+Left/Ctrl+Right/Ctrl+Up/Ctrl+Down/Home/End to navigate, Enter or Space for clear, or Escape to clear\"",
+        "visualization coarse keyboard navigation": "Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint(); event.accepted = true }",
+        "visualization enter clear focus": "Keys.onReturnPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }",
+        "visualization space clear focus": "Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }",
+        "visualization ctrl boundary navigation": "if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Left)",
+        "visualization ctrl mode navigation": "if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Up)",
+        "visualization shift fine navigation": "const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01",
+        "visualization pointer focus": "visualizationCanvas.forceActiveFocus()",
+        "visualization wheel scrubbing": "onWheel: {\n                            const stepDivisor = (wheel.modifiers & Qt.ControlModifier) ? 120 : ((wheel.modifiers & Qt.ShiftModifier) ? 240 : 1200)",
+        "visualization right click clear": "if (mouse.button === Qt.RightButton) {\n                                window.clearVisualizationPositionAndFocus()",
+        "visualization double click clear": "onDoubleClicked: {\n                            window.clearVisualizationPositionAndFocus()",
+        "visualization coarse forward navigation": "Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint(); event.accepted = true }",
         "visualization mode radio roles": "objectName: \"waveformView\"; checkable: true; checked: visualizationCanvas.viewMode === \"waveform\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.role: Accessible.RadioButton",
         "visualization clear button state": "Accessible.name: \"Clear visualization position\"\n                    Accessible.value: enabled ? \"available\" : \"no position selected\"\n                    Accessible.role: Accessible.Button",
+        "visualization clear recovery description": "Accessible.description: \"Remove the selected waveform or FFT position. Escape, Enter, Space, right-click, and double-click provide equivalent recovery paths.\"",
+        "visualization interaction hint": "objectName: \"visualizationInteractionHint\"\n                    text: {\n                        const modeLabel = visualizationCanvas.viewMode === \"waveform\" ? \"waveform\" : \"FFT\"",
+        "visualization responsive canvas height": "Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120",
+        "visualization responsive hint type": "font.pixelSize: window.compactHeader ? 12 : 14",
+        "visualization error hint color": "color: window.liveBridge.status === \"Error\" ? \"#fca5a5\" : window.themeForegrounds[window.selectedThemeIndex]",
+        "visualization retry capture action": "objectName: \"visualizationRetryCapture\"\n                    visible: window.liveBridge.status === \"Error\"",
+        "visualization retry feedback": "objectName: \"visualizationRetryFeedback\"\n                    visible: window.liveBridge.status === \"Starting\" || window.liveBridge.status === \"Reacquiring\"",
+        "visualization responsive status spacing": "objectName: \"visualizationStatusGroup\"\n                    Layout.fillWidth: true\n                    spacing: window.compactHeader ? 4 : 8",
+        "visualization status runtime state": "Accessible.value: window.liveBridge.status === \"Error\" ? \"capture error\"",
+        "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
+        "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
         "navigation shortcut guidance": "Accessible.description: \"Switch between Library, DJ, and Settings pages. Use Ctrl+Shift+1 for Library, Ctrl+Shift+2 for DJ, or Ctrl+Shift+3 for Settings.\"",
         "settings tab page role": "objectName: \"settingsTab\"; activeFocusOnTab: true; Accessible.name: \"Settings\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.description: \"Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab.\"; Accessible.role: Accessible.PageTab",
@@ -406,7 +429,20 @@ def main() -> int:
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
         raise SystemExit("Missing issue #76 QML contract markers: " + ", ".join(missing))
-    print(f"Issue #76 QML contract markers verified ({len(required)} checks)")
+    interaction_matrix = {
+        "clear helper": "function clearVisualizationPositionAndFocus()",
+        "keyboard escape clear": "Keys.onEscapePressed: { window.clearVisualizationPositionAndFocus(); event.accepted = true }",
+        "keyboard enter clear focus": "Keys.onReturnPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }",
+        "keyboard space clear focus": "Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }",
+        "pointer right clear": "if (mouse.button === Qt.RightButton)",
+        "pointer double clear": "onDoubleClicked: {\n                            window.clearVisualizationPositionAndFocus()",
+        "pointer wheel scrub": "onWheel: {",
+        "pointer focus restore": "visualizationCanvas.forceActiveFocus()",
+    }
+    matrix_missing = [name for name, marker in interaction_matrix.items() if marker not in qml]
+    if matrix_missing:
+        raise SystemExit("Missing issue #76 interaction matrix markers: " + ", ".join(matrix_missing))
+    print(f"Issue #76 QML contract markers verified ({len(required) + len(interaction_matrix)} checks)")
     return 0
 
 

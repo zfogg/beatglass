@@ -184,3 +184,41 @@ Readiness artifact-role diagnostics also require each scenario evidence referenc
 Readiness report aggregation treats non-list `artifacts` or `scenarios` containers as empty diagnostic inventories while the verifier records the manifest contract error. This preserves a machine-readable pending report for malformed container types.
 
 The lightweight readiness check applies the same validated-string scenario-ID rule as report generation, so malformed IDs cannot crash one consumer path while another reports a conservative pending result.
+
+Valid JSON manifests must still have an object root. Non-object roots are reported explicitly by both readiness consumers and remain pending rather than causing `.get()` aggregation failures.
+
+Artifact diagnostic inventories sort paths by their string representation, so mixed valid and malformed path values remain deterministically reportable while the bundle stays pending.
+
+The lightweight readiness check also normalizes null or non-list artifact/scenario containers before iteration, matching report generation and preserving verifier contract errors rather than raising.
+
+The end-to-end local handoff command is `python tests/platform/run_readiness_handoff.py <retained-bundle-root> <report.json> --status docs/platform-qualification-status.md`. It generates the conservative report, validates the same JSON contract consumed by readiness tooling, checks retained bundles against the documented platform matrix, and records any `handoff_check_errors` in the report artifact itself. A structurally valid result remains `PENDING` until native desktop/audio/overlay evidence is reviewed; incomplete scenarios intentionally produce a nonzero result.
+
+`handoff_check_errors` is a required report field: it is always a list of nonempty strings (possibly empty when no status matrix was supplied), so consumers can distinguish a validated handoff artifact from one whose readiness checks were never recorded. With `--check-docs`, the command also runs `check_qualification_handoff.py` and records `documentation_check_errors`, proving the executable qualification procedures and status contract are present before a handoff is reviewed.
+
+`documentation_check_errors` is also required and typed as a list of nonempty strings. Generated reports initialize both error lists explicitly; a consumer must reject reports that omit either audit trail.
+
+The report consumer is `python tests/platform/consume_readiness_handoff.py <report.json>`. It validates the complete report contract and rejects `PENDING` (including all reports generated before native gates pass); only an explicitly validated `READY` report can be accepted by downstream automation. Add `--consume` to `run_readiness_handoff.py` to execute this consumer against the report produced by the same handoff run.
+
+Portable regression coverage executes the cross-platform qualification script syntax/required-artifact dry run when PowerShell is available and checks the macOS verifier shell syntax when Bash is available. These dry runs exercise script wiring and artifact-tool presence only; they do not establish native device, desktop, audio, or overlay qualification.
+
+Native script output can be ingested with `python tests/platform/ingest_qualification_artifacts.py <qualification-output> <bundle>/manifest.json`. The ingester verifies listed hashes and path containment, carries forward identity metadata, and emits all native scenarios as `PENDING`; it never upgrades script output to qualification by itself.
+
+The same ingestion is available in the end-to-end handoff via `--native-output <qualification-output> --native-platform windows|macos|linux`; this writes the platform manifest before report generation, validation, and optional consumption. Ingestion failures remain visible and cannot be converted into readiness.
+
+The handoff report records those failures in `ingestion_errors` as well as returning a nonzero result, making missing or tampered native artifacts auditable after the command exits.
+
+When ingestion is invoked through the handoff command, the manifest platform must match `--native-platform`; mismatched identity is rejected and recorded as an ingestion error rather than attributed to the wrong qualification row.
+
+Ingestion also requires a 40-hex source commit and nonempty capture time in the native identity manifest. Missing or malformed provenance is retained as an explicit ingestion error and cannot be promoted to readiness.
+
+Capture times are parsed as ISO-8601 during ingestion; a malformed timestamp is rejected before the artifact can participate in a readiness handoff.
+
+`ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
+
+The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
+
+The consumer additionally rejects `READY` while `native_qualification_required` remains true. A downstream acceptance decision therefore requires both an error-free report and an explicit native-qualification state change; portable preparation evidence cannot be promoted by editing the gate flag alone.
+
+The portable consumer tests cover the eventual transition explicitly: clearing `native_qualification_required` removes only that native-state rejection; all remaining report-contract, provenance, and readiness checks still apply. This is a transition contract, not native evidence.
+
+Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.

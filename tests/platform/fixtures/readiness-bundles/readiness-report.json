@@ -8,6 +8,9 @@
     "generated_report_pending_review"
   ],
   "ready": false,
+  "handoff_check_errors": [],
+  "documentation_check_errors": [],
+  "ingestion_errors": [],
   "platform_support_status": [
     {
       "platform": "windows",

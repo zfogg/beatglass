@@ -368,6 +368,52 @@ Escape now also returns focus from either Waveform/FFT mode button to the live v
 
 The live canvas now supports Page Up/Page Down for coarse ten-percent position movement alongside fine Left/Right steps and Home/End boundaries. The accessible description, tooltip, and contract checks document this complete keyboard navigation vocabulary.
 
+All canvas navigation keys now explicitly consume their events after updating selection, preventing parent controls from also handling the same keystroke and keeping keyboard interaction scoped to the focused visualization.
+
+Enter/Return on a selected canvas position now moves focus directly to the Clear position action, while Escape still clears immediately. The canvas description and tooltip document both recovery paths for keyboard users.
+
+Space now provides the same focus path as Enter/Return from the selected canvas position, covering the conventional activation key alongside the explicit clear and Escape recovery actions.
+
+Ctrl+Left and Ctrl+Right now jump directly to the visualization boundaries, complementing fine, coarse, and Home/End movement for efficient keyboard scrubbing. The canvas announcement and tooltip include the new shortcuts.
+
+Ctrl+Up and Ctrl+Down now switch directly between waveform and FFT modes from the focused canvas, returning focus to the selected mode control so the mode change remains visible and reversible through the keyboard.
+
+Shift+Left and Shift+Right now provide five-percent position steps between fine arrows and Page Up/Page Down coarse movement. The canvas announcement and tooltip expose the full scrubbing scale.
+
+Pointer interaction now restores canvas focus after clicking, and the canvas supports wheel scrubbing in one-percent increments with bounded selection. The tooltip and contract checks document both pointer recovery and scroll interaction.
+
+Holding Shift while scrolling now increases wheel scrubbing to five-percent steps, matching the keyboard’s medium-step interaction and giving pointer users the same fine/coarse control range.
+
+Right-clicking the canvas now clears the selected position and restores canvas focus, providing a direct pointer recovery action that is documented alongside the keyboard clear paths.
+
+Ctrl-modified wheel input now provides ten-percent scrubbing, extending the pointer fine/medium/coarse scale (plain, Shift, Ctrl) to match the canvas keyboard controls.
+
+Double-clicking the canvas now clears the selected position and restores focus, complementing right-click and keyboard recovery paths for pointer users who prefer a gesture over a context action.
+
+All keyboard and pointer clear paths now share one recovery helper that clears the selection, repaints the canvas, and restores canvas focus. This keeps Escape, Enter/Space, right-click, double-click, and the Clear position button behavior consistent.
+
+The issue-76 contract suite now verifies the complete visualization interaction matrix as a set: keyboard clear/focus paths (Escape, Enter, Space), pointer clear paths (right-click, double-click), wheel scrubbing, and pointer-focus restoration. This prevents a future change from preserving one input modality while silently regressing another.
+
+The Clear position action now announces all equivalent recovery paths in its accessible description and selected/empty state in its tooltip, connecting the focused action to the broader keyboard and pointer interaction matrix.
+
+The visualization now renders a live interaction hint below the canvas: empty state guidance explains pointer/keyboard selection, while an active selection announces its percentage and clear gestures. This gives sighted and assistive users the same immediate recovery context.
+
+The interaction hint now follows the active Waveform/FFT mode at runtime, naming the exact surface users are selecting or clearing. This keeps the responsive hint aligned with mode changes from buttons, shortcuts, or Ctrl+Up/Ctrl+Down canvas navigation.
+
+The Waveform and FFT controls now expose selected-state descriptions directly, so the mode controls and the responsive interaction hint announce the same active visualization state before focus moves into the canvas.
+
+The visualization canvas and interaction hint now adapt to compact-header layout: the canvas reduces its preferred height and the hint scales its text while retaining wrapping. This keeps the runtime guidance usable in narrow desktop layouts without hiding the interaction contract.
+
+The interaction hint now adopts the error color when capture is in an Error state and the active theme foreground otherwise; the status stack also tightens spacing in compact layouts. Runtime recovery state and responsive density therefore remain visually legible together.
+
+When capture enters Error, the interaction hint now changes its message to “retry monitoring before selecting” the active mode, preventing users from attempting selection against an unavailable stream. The same runtime state drives the error color and capture-status labels.
+
+The error-state visualization now exposes a contextual Retry monitoring button when the capture bridge can restart. Activating it starts capture and returns focus to the canvas, closing the loop between runtime error guidance and recovery behavior.
+
+Starting and Reacquiring states now render a dedicated recovery-feedback label below the retry action, so the transition after activation remains visible and accessible until capture returns to a usable state.
+
+The grouped visualization status surface now reports capture error, Starting, Reacquiring, ready, or waiting as its live value, and its tooltip reflects the same state. Assistive users can therefore distinguish data absence from an active recovery transition at the group boundary.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

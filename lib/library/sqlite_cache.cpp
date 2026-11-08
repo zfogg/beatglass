@@ -17,9 +17,9 @@ void validate_text(const std::string& value, const char* field, std::size_t maxi
     throw std::invalid_argument(std::string("invalid collection ") + field);
 }
 void validate_collection_entry(const CollectionEntry& e) {
-  validate_text(e.path, "path", 4096);
-  validate_text(e.name, "name", 1024);
-  validate_text(e.kind, "kind", 128);
+  validate_text(e.path, "path", kMaxCollectionPathBytes);
+  validate_text(e.name, "name", kMaxCollectionNameBytes);
+  validate_text(e.kind, "kind", kMaxCollectionKindBytes);
   validate_text(e.fingerprint, "fingerprint", kMaxCollectionFingerprintBytes);
 }
 void validate_key(const CacheKey& key) {
@@ -119,9 +119,9 @@ public:
     bind(s.p,1,e.path); bind(s.p,2,e.name); bind(s.p,3,e.kind); bind(s.p,4,e.fingerprint);
     check(sqlite3_bind_int64(s.p,5,static_cast<sqlite3_int64>(e.size_bytes))); check(sqlite3_bind_int64(s.p,6,e.modified_ns)); done(s.p);
   }
-  bool remove_entry(const std::string& path) { validate_text(path, "path", 4096); Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
+  bool remove_entry(const std::string& path) { validate_text(path, "path", kMaxCollectionPathBytes); Statement s(db_, "DELETE FROM collection_entries WHERE path=?"); bind(s.p,1,path); done(s.p); return sqlite3_changes(db_) == 1; }
   std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop) {
-    if (path.empty() || path.size() > 4096 || path.find('\0') != std::string::npos ||
+    if (path.empty() || path.size() > kMaxCollectionPathBytes || path.find('\0') != std::string::npos ||
         !sqlite_length_representable(path.size())) throw std::invalid_argument("invalid collection path");
     if (stop.stop_requested()) throw CollectionCancelled();
     Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE path=?"); bind(s.p,1,path); const int rc=sqlite3_step(s.p); if(rc==SQLITE_DONE)return std::nullopt; if(rc!=SQLITE_ROW)throw std::runtime_error(sqlite3_errmsg(db_)); return read_entry(s.p);

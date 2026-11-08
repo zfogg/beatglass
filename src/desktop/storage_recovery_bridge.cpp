@@ -20,9 +20,14 @@ public slots:
     emit runsChanged(ids);
   }
   void discard(QString id) { const bool ok = owner_.discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
+  void findCached(QString content, QString engine, QString configuration, QString mode) {
+    beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+    std::string result; emit cached(owner_.find_cached(identity, result), QString::fromStdString(result));
+  }
 signals:
   void result(bool ok, QString status);
   void runsChanged(QStringList ids);
+  void cached(bool hit, QString result);
 private:
   beatglass::library::StorageOwner owner_;
 };
@@ -36,6 +41,9 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids) {
     retryableRunIds_ = ids; emit retryableRunsChanged();
+  }, Qt::QueuedConnection);
+  connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
+    cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
   }, Qt::QueuedConnection);
   workerThread_.start();
 }
@@ -51,3 +59,6 @@ void StorageRecoveryBridge::close() { if (worker_) QMetaObject::invokeMethod(wor
 void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
 void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ == id) return; selectedRunId_ = id; emit selectedRunChanged(); }
 void StorageRecoveryBridge::discardSelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
+void StorageRecoveryBridge::findCached(QString content, QString engine, QString configuration, QString mode) {
+  if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+}

@@ -2,6 +2,8 @@
 #include "beatglass/library/analysis_operation.hpp"
 #include "beatglass/library/detail/sqlite_cache.hpp"
 namespace beatglass::library {
+/** Look up a completed result for an operation identity before running analysis. Returns false on a cache miss. Calls remain on the owning worker thread. */
+bool reuse_cached_operation(library_detail::SqliteCache&, const AnalysisIdentity&, std::string& result);
 /**
  * Publish one completed operation through the worker-owned cache boundary.
  * Invalid operations return an error without touching storage. When a run has

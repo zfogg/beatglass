@@ -1,5 +1,9 @@
 # Progress and handoff
 
+## Qualification handoff pipeline
+
+The merged portable handoff pipeline is now explicit: native platform scripts produce retained artifacts; `tests/platform/ingest_qualification_artifacts.py` verifies their hashes and identity into conservative manifests; `tests/platform/run_readiness_handoff.py` generates and validates the readiness report; and `tests/platform/consume_readiness_handoff.py` is the downstream acceptance boundary. Ingestion, documentation, and readiness failures remain auditable and nonzero, and generated scenarios remain `PENDING` until real native desktop/audio/overlay observations are reviewed. This pipeline is preparation evidence, not native qualification.
+
 Phase 0 is **not complete**. No feature work should start until its exit gate is met.
 
 - [x] Initial repository guidance and README.
@@ -271,3 +275,18 @@ The qualification work now has an executable, fail-closed preparation path on me
 The remaining Issue #1 exit gate is explicit: perform supported Windows WASAPI, macOS Core Audio and Linux PipeWire desktop/audio/overlay runs, retain build identity, environment, exact commands, logs and screenshots/recordings for every applicable scenario, and obtain an all-platform `READY` report. Headless, CI, WSL, SSH-only, synthetic and portable-fixture results remain preparation evidence rather than qualification.
 
 The readiness report contract is versioned as `readiness_report_schema: 1`; `exit_gate_status` and `exit_gate_reason_codes` are the stable handoff fields. Product support language remains experimental while native qualification is open.
+
+The desktop storage bridge now exposes an asynchronous cache lookup (`findCached`) and publishes hit/result state only after the worker responds. This keeps SQLite off the GUI thread and gives the future decoder queue a real UI-owned handoff; no decoder or analysis is started by the lookup, and native UI qualification remains pending.
+
+The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
+
+## Analysis queue admission handoff
+`admit_analysis` now gives the future file-analysis queue one worker-owned decision: return a completed cache result without decoding, or reserve a run ID before decoding begins. The helper does not fingerprint or revalidate a source; callers must supply the validated identity and publish only after decoder verification. Desktop scheduling and native qualification remain open.
+
+## Cache acceptance integration
+A cache acceptance regression demonstrates that a committed unchanged identity is found on the next analysis request and the analysis callback is not rerun. Changed identity and configuration invalidation remain covered by lifecycle tests; decoder/UI integration and native qualification remain pending.
+
+## Analysis cache handoff
+The library now exposes `reuse_cached_operation`, a worker-owned identity lookup that returns a completed cached result before analysis serialization/DSP begins. Configuration/content identity changes miss independently. The caller still owns fingerprinting, source revalidation and scheduling; decoder/UI wiring and native qualification remain open.
+
+StorageOwner now exposes the same completed-result lookup at the storage lifetime boundary, with a regression covering open/lookup/close behavior. This is an integration handoff for the future desktop analysis queue; the GUI still does not schedule real file analysis.

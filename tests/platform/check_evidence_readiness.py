@@ -52,6 +52,13 @@ def check(status: Path, bundles: Path, max_age_hours: float = 168) -> list[str]:
         except (OSError, json.JSONDecodeError) as exc:
             errors.append(f"{platform}: invalid manifest: {exc}")
             continue
+        if not isinstance(data, dict):
+            errors.append(f"{platform}: manifest root must be an object")
+            continue
+        if not isinstance(data.get("artifacts"), list):
+            data["artifacts"] = []
+        if not isinstance(data.get("scenarios"), list):
+            data["scenarios"] = []
         if str(data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match status row")
         scenario_status = {item.get("id"): item.get("status") for item in data.get("scenarios", [])
@@ -82,6 +89,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         if manifest.is_file():
             try:
                 data = json.loads(manifest.read_text(encoding="utf-8"))
+                if not isinstance(data, dict):
+                    errors = [f"{platform}: manifest root must be an object"]
+                    data = {}
                 if not isinstance(data.get("artifacts"), list):
                     data["artifacts"] = []
                 if not isinstance(data.get("scenarios"), list):
@@ -127,8 +137,11 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                     inventory.append({"path": entry.get("path"), "sha256": entry.get("sha256"),
                                       "bytes": path.stat().st_size if path and path.is_file() else None,
                                       "hash_valid": actual_hash == str(entry.get("sha256", "")).lower()})
-                missing_artifacts = sorted(item["path"] for item in inventory if item["bytes"] is None)
-                mismatched_artifacts = sorted(item["path"] for item in inventory if not item["hash_valid"] and item["bytes"] is not None)
+                missing_artifacts = sorted((item["path"] for item in inventory if item["bytes"] is None), key=str)
+                mismatched_artifacts = sorted(
+                    (item["path"] for item in inventory if not item["hash_valid"] and item["bytes"] is not None),
+                    key=str,
+                )
                 scenario_inventory = sorted(
                     [{"id": item.get("id"), "status": item.get("status"), "evidence": item.get("evidence")}
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
