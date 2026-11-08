@@ -831,6 +831,8 @@ Relaunch hydration now validates native geometry and opacity as well. Valid pers
 
 Invalid persisted opacity now falls back to a safe 90% value before any overlay show operation and announces the correction, preventing malformed native settings from producing an unusable or invisible overlay.
 
+Every overlay show, retry, and restore path now reapplies validated visual state immediately before the native show call, keeping geometry and opacity recovery consistent after relaunch, display replacement, and transient native failures.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
 Overlay availability recovery now synchronizes the action surface as a single transition: losing the native bridge marks recovery pending, while a reconnect refreshes the settings revision and distinguishes “no display available” from “display selection required.” Accessible focus and announcements direct the user to the display selector when actions cannot yet be used; once the selected display is valid, the recovery marker clears and Show, Restore, and Reapply report availability together.
 

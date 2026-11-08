@@ -49,6 +49,7 @@ MARKERS = {
     "qml overlay visual hydration": "function restoreOverlayVisualStateFromBridge()",
     "qml overlay visual fallback": "Persisted overlay geometry unavailable; control-window fallback remains active.",
     "qml overlay invalid opacity": "Persisted overlay opacity unavailable; safe 90 percent opacity applied.",
+    "qml overlay show hydration": "window.restoreOverlayVisualStateFromBridge()",
     "qml overlay target restoration": "saved display target selected by name.",
     "qml overlay click-through state": "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.",
     "qml overlay opacity state": "DJ overlay opacity set to ",
