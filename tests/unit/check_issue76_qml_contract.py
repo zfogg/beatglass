@@ -380,6 +380,7 @@ def main() -> int:
         "visualization escape clear": "Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }",
         "visualization keyboard recovery tooltip": "ToolTip.text: \"Click to select a position; use Left/Right/Page Up/Page Down/Home/End to navigate or Escape to clear\"",
         "visualization coarse keyboard navigation": "Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint() }",
+        "visualization coarse forward navigation": "Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint() }",
         "visualization mode radio roles": "objectName: \"waveformView\"; checkable: true; checked: visualizationCanvas.viewMode === \"waveform\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.role: Accessible.RadioButton",
         "visualization clear button state": "Accessible.name: \"Clear visualization position\"\n                    Accessible.value: enabled ? \"available\" : \"no position selected\"\n                    Accessible.role: Accessible.Button",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
