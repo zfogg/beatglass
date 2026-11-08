@@ -87,9 +87,19 @@ void AnalysisJobBridge::retry() {
 }
 
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
-  batch_.clear(); batchAccepted_ = batchRejected_ = 0;
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = 0;
   for (auto& operation : operations) {
     if (static_cast<int>(batch_.size()) >= batchCapacity_) { ++batchRejected_; continue; }
+    auto publish = operation.publish;
+    operation.publish = [weak_self = weak_self_, publish](const std::string& value) {
+      if (publish) publish(value);
+      if (!weak_self) return;
+      QMetaObject::invokeMethod(weak_self, [weak_self] {
+        if (!weak_self) return;
+        ++weak_self->batchResultsPublished_;
+        emit weak_self->batchChanged();
+      }, Qt::QueuedConnection);
+    };
     auto retained = runner_.submit_retryable(std::move(operation), priority);
     if (!retained) { ++batchRejected_; continue; }
     batch_.push_back(std::move(retained)); ++batchAccepted_;

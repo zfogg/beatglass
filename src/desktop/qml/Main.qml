@@ -799,6 +799,7 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount !== undefined
                                 text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount
                                       + " · rejected " + window.analysisJobBridge.batchRejectedCount
+                                      + " · published " + window.analysisJobBridge.batchResultsPublished
                                       + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")) : ""
                                 Accessible.name: "Batch analysis queue status: " + text
                                 ToolTip.text: "Accepted, rejected, and capacity limits for the analysis queue"
