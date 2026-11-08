@@ -16,9 +16,15 @@ pwsh -File tests/windows/run_qualification.ps1 -Build -RunTests -OutputDirectory
 The script records the commit, OS and tool versions, CTest discovery, and the
 expected desktop, endpoint, DJ bridge, and overlay test artifacts. It also emits
 `qualification-artifacts.sha256`, containing a SHA-256 entry for every required
-executable; preserve that file with the logs and verify it later with
-`Get-FileHash -Algorithm SHA256 -Path <artifact>` (or an equivalent manifest
-verifier). With `-RunTests` it also executes the
+executable with paths relative to the qualification output. Preserve that file
+with the logs and verify it later without rebuilding or rerunning native tests:
+
+```powershell
+pwsh -File tests/windows/verify_qualification_artifacts.ps1 build/windows-qualification
+```
+
+The verifier requires exactly four relative artifact paths, rejects duplicate or
+path-escaping entries, and recomputes every SHA-256 digest. With `-RunTests` it also executes the
 discovered CTest suite and retains `ctest-run.log`. It deliberately reports the native
 WASAPI, device-recovery, overlay, DPI, and interactive UI cases as `UNRUN`;
 those observations still require a logged-in Windows session and evidence.
