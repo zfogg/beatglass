@@ -454,6 +454,8 @@ def main() -> int:
         "visualization bridge source signal": "function onSourceChanged() { window.clearVisualizationForCaptureState",
         "visualization bridge epoch signal": "function onEpochChanged() { window.clearVisualizationForCaptureState",
         "visualization bridge state signal": "function onStateChanged() {",
+        "visualization stop stale reason": 'window.clearVisualizationForCaptureState("Playback stopped; accepted visualization snapshot cleared.")',
+        "visualization pause resume sync": "window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationCanvas.renderedWaveform.length)",
         "visualization waveform validation": "if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))",
         "visualization spectrum validation": "if (!isFinite(spec[k]))",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",

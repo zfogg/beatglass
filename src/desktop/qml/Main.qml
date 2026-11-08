@@ -315,7 +315,7 @@ ApplicationWindow {
         function onEpochChanged() { window.clearVisualizationForCaptureState("Selection cleared because the playback epoch changed.") }
         function onStateChanged() {
             if (window.playbackBridge.state === "Stopped")
-                window.clearVisualizationForCaptureState()
+                window.clearVisualizationForCaptureState("Playback stopped; accepted visualization snapshot cleared.")
         }
         function onChanged() {
             if (visualizationCanvas.acceptedPlaybackSource !== ""
