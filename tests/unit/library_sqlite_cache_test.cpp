@@ -34,6 +34,11 @@ TEST_CASE("SQLite cache rejects incomplete identities before creating runs") {
   REQUIRE_THROWS_AS(cache.begin("run", {"hash", "", "config", "offline"}), std::invalid_argument);
   REQUIRE_THROWS_AS(cache.begin("", {"hash", "engine", "config", "offline"}), std::invalid_argument);
 }
+TEST_CASE("SQLite cache lookup rejects malformed identities") {
+  SqliteCache cache(":memory:");
+  std::string result;
+  REQUIRE_THROWS_AS(cache.find({"", "engine", "config", "offline"}, result), std::invalid_argument);
+}
 TEST_CASE("SQLite cache rolls back failed publication") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("one", key);
