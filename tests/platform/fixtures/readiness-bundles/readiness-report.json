@@ -49,6 +49,8 @@
         }
       ],
       "fresh": true,
+      "manifest_platform": "windows",
+      "provenance_complete": true,
       "failure_categories": {},
       "error_count": 0,
       "retention_ok": true,
@@ -104,6 +106,8 @@
         }
       ],
       "fresh": true,
+      "manifest_platform": "macos",
+      "provenance_complete": true,
       "failure_categories": {},
       "error_count": 0,
       "retention_ok": true,
@@ -159,6 +163,8 @@
         }
       ],
       "fresh": true,
+      "manifest_platform": "linux",
+      "provenance_complete": true,
       "failure_categories": {},
       "error_count": 0,
       "retention_ok": true,
