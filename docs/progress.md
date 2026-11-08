@@ -363,3 +363,5 @@ Submission now uses coordinator admission: cache hits publish directly to the re
 The Library UI now consumes the coordinator admission status and admitted result properties from the recovery bridge, keeping cache-hit and queued-miss identity visible separately.
 
 Library controls now expose coordinator completion status with explicit cancel and retry actions, distinct from cache lookup controls.
+
+The completion surface now renders the coordinator’s decoded result payload separately from cached-result lookup, preserving result identity across retry and cancellation diagnostics.
