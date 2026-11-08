@@ -10,7 +10,7 @@ required = [
     'Accessible.name: "Current overlay display: " + text',
     'Accessible.role: Accessible.StaticText',
     'objectName: "overlayDisplayEmptyState"',
-    'objectName: "overlayMissingDisplayRecovery"',
+    'objectName: "overlaySavedDisplayRecovery"',
 ]
 missing = [marker for marker in required if marker not in qml]
 if missing:
