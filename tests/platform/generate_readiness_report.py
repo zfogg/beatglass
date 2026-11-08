@@ -46,6 +46,7 @@ def build_report(root: Path) -> dict:
                      "qualification_command": manifest.get("qualification_command", ""),
                      "qualification_output": manifest.get("qualification_output", ""),
                      "qualification_output_sha256": output_hash,
+                     "qualification_output_bytes": output_path.stat().st_size if output_path.is_file() else -1,
                      "manifest_platform": manifest.get("platform"),
                      "provenance_complete": all(manifest.get(k) for k in ("platform", "commit", "captured_at", "environment")),
                      "errors": []})
