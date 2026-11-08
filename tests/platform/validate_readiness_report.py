@@ -193,6 +193,11 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
                 errors.append(f"{platform}: duplicate manifest scenario id: {scenario_id}")
             scenario_ids.add(scenario_id)
             evidence = scenario.get("evidence")
+            status = scenario.get("status")
+            if status in {"PASS", "FAIL"} and (not isinstance(evidence, str) or not evidence.strip()):
+                errors.append(f"{platform}: completed scenario is missing evidence: {scenario_id}")
+            if status in {"UNRUN", "PENDING"} and evidence:
+                errors.append(f"{platform}: incomplete scenario must not claim evidence: {scenario_id}")
             if not evidence:
                 continue
             expected_evidence_ids.add(scenario_id)

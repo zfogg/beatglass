@@ -268,6 +268,22 @@ class ReadinessReportContractTest(unittest.TestCase):
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("invalid manifest scenario status", errors)
 
+    def test_scenario_status_and_evidence_must_agree(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["scenarios"][0]["status"] = "PASS"
+            manifest["scenarios"][0].pop("evidence")
+            manifest["scenarios"][1]["evidence"] = "capture.txt"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("completed scenario is missing evidence", errors)
+            self.assertIn("incomplete scenario must not claim evidence", errors)
+
     def test_report_inventory_must_match_manifest(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as directory:
