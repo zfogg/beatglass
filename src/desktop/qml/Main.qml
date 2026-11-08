@@ -2548,7 +2548,7 @@ ApplicationWindow {
                 Label {
                     objectName: "overlayRestoreState"
                     text: window.overlayBridge && window.overlayBridge.displayName !== ""
-                        ? "Persisted restore: " + window.overlayBridge.displayName + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex] + " · " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
+                        ? "Persisted restore: " + window.overlayBridge.displayName + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex] + " · " + (window.overlayBridge.geometry ? window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height : "geometry unavailable") + " · " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
                         : "Persisted restore state unavailable; control-window fallback remains active."
                     Accessible.name: "Overlay persisted restore state: " + text
                     Accessible.value: text
