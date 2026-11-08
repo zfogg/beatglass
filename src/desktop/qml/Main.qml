@@ -527,7 +527,9 @@ ApplicationWindow {
                             objectName: "playbackUnavailable"
                             text: "Playback controls are unavailable in this build; metadata and analysis details remain read-only."
                             visible: !window.playbackBridge
-                            Accessible.name: "Playback availability"
+                            Accessible.name: "Playback availability: " + text
+                            Accessible.value: text
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
