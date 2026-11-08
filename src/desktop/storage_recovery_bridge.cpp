@@ -3,6 +3,7 @@
 #include "beatglass/library/file_analysis_operation.hpp"
 #include <QMetaObject>
 #include <QTimer>
+#include <algorithm>
 
 class StorageRecoveryBridge::Worker final : public QObject {
   Q_OBJECT
@@ -23,9 +24,12 @@ public slots:
     emit runsChanged(ids, details);
   }
   void discard(QString id) { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
-  void retry(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
-    beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
-    auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
+  void retry(QString runId) {
+    const auto runs = coordinator_.storage().retryable_runs();
+    const auto found = std::find_if(runs.begin(), runs.end(), [&](const auto& run) { return run.id == runId.toStdString(); });
+    if (found == runs.end() || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: persisted source snapshot unavailable")); return; }
+    beatglass::library::AnalysisIdentity identity{found->key.content, found->key.engine, found->key.config, found->key.mode};
+    auto operation = beatglass::library::make_file_decode_operation(found->source_path, std::move(identity));
     const auto handle = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation));
     emit result(static_cast<bool>(handle), handle ? QStringLiteral("Retry queued") : QStringLiteral("Retry rejected: source identity or metadata unavailable"));
   }
@@ -99,7 +103,7 @@ void StorageRecoveryBridge::close() { if (worker_) QMetaObject::invokeMethod(wor
 void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
 void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ == id) return; selectedRunId_ = id; emit selectedRunChanged(); }
 void StorageRecoveryBridge::discardSelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
-void StorageRecoveryBridge::retrySelectedRun(QString path, QString contentHash, QString engine, QString configuration, QString mode) { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); }
+void StorageRecoveryBridge::retrySelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::findCached(QString content, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
 }
