@@ -564,6 +564,8 @@ Recovery announcements now share a helper that restores focus to the visualizati
 
 Retry controls now invoke the real analysis/recovery bridge through one helper. The UI announces queued admission while leaving focus on the retry control, then restores visualization focus only after the bridge reports a fresh completed result and the accepted identity is ready.
 
+The visualization status group now exposes explicit no-device, capture-permission/retry-failure, and reacquisition states from the live endpoint and capture bridges. Error and reacquiring transitions announce the recovery guidance and restore focus to the visualization target.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

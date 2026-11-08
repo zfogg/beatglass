@@ -383,6 +383,15 @@ ApplicationWindow {
             window.announceVisualizationRecovery("Capture endpoint state changed; visualization selection may require a fresh snapshot.")
         }
     }
+    Connections {
+        target: window.captureMonitorBridge
+        function onChanged() {
+            if (window.captureMonitorBridge.status === "Error")
+                window.announceVisualizationRecovery("Capture permission or device failure; retry monitoring to acquire a fresh snapshot.")
+            else if (window.captureMonitorBridge.status === "Reacquiring")
+                window.announceVisualizationRecovery("Capture is reacquiring; visualization focus restored when fresh audio arrives.")
+        }
+    }
 
     FolderListModel {
         id: files
@@ -1584,6 +1593,26 @@ ApplicationWindow {
                     Accessible.description: "Live announcement for keyboard or pointer playback recovery actions."
                     ToolTip.text: "Latest visualization playback recovery action"
                     color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
+                    objectName: "visualizationDeviceRecoveryState"
+                    text: window.endpointSelectionBridge !== null && window.endpointSelectionBridge.endpoints.length === 0
+                        ? "No output device detected · connect a device and refresh endpoints"
+                        : (window.captureMonitorBridge === null
+                           ? "Capture permission/device bridge unavailable"
+                           : (window.captureMonitorBridge.status === "Error"
+                              ? "Capture retry failed · check permission and selected device"
+                              : (window.captureMonitorBridge.status === "Reacquiring" ? "Capture reacquiring after a device transition" : "Capture device ready")))
+                    Accessible.name: "Visualization device recovery state: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Visible no-device, permission, retry-failure, and reacquisition guidance for visualization capture."
+                    ToolTip.text: "Capture device and permission recovery state"
+                    color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0

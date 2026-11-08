@@ -22,6 +22,8 @@ MARKERS = {
     "qml state reset": "function onStateChanged() {",
     "qml stop invalidation reason": 'Playback stopped; accepted visualization snapshot cleared.',
     "qml pause resume bridge sync": "window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame",
+    "qml capture retry state": "Capture retry failed · check permission and selected device",
+    "qml no device state": "No output device detected · connect a device and refresh endpoints",
 }
 
 
