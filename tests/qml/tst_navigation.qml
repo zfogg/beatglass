@@ -313,9 +313,19 @@ TestCase {
         compare(findChild(app, "analysisFreshness").Accessible.name, "Analysis freshness")
         verify(findChild(app, "analysisFreshness").text.indexOf("waiting for source-linked analysis evidence") >= 0)
         compare(findChild(app, "analysisProgress").text, "Queued · select an audio source to begin analysis.")
+        verify(!findChild(app, "analysisWaitingIndicator").visible)
         let retry = findChild(app, "retryAnalysis")
         verify(!retry.enabled)
         compare(retry.Accessible.description, "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations.")
+        app.destroy()
+    }
+    function test_analysisWaitingIndicatorUsesRealFrameState() {
+        let app = shell.createObject(null)
+        app.selectedName = "waiting.wav"
+        let indicator = findChild(app, "analysisWaitingIndicator")
+        verify(indicator.visible)
+        verify(indicator.running)
+        compare(indicator.Accessible.name, "Analysis waiting indicator")
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
