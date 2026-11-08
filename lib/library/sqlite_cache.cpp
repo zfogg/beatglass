@@ -33,7 +33,7 @@ public:
       int rc = sqlite3_step(version);
       int v = rc == SQLITE_ROW ? sqlite3_column_int(version, 0) : -1;
       sqlite3_finalize(version);
-      if (v != 0 && v != 1) throw std::runtime_error("unsupported database schema");
+      if (v != 0 && v != kCacheSchemaVersion) throw std::runtime_error("unsupported database schema");
       if (v == 0) {
         exec("BEGIN IMMEDIATE");
         try {
