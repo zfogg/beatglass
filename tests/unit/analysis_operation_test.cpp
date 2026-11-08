@@ -147,6 +147,21 @@ TEST_CASE("source verification failure preserves retryable metadata without publ
   CHECK(cache.discard_retryable("mismatch-run"));
   CHECK(cache.retryable_runs().empty());
 }
+TEST_CASE("permission-style endpoint failure is recoverable without stale publication") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library_detail::CacheKey key{"endpoint-hash", "engine", "config", "offline"};
+  cache.begin("endpoint-permission", key, "endpoint://default-output", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("endpoint-permission", key, "permission-denied-result", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  std::string result;
+  CHECK_FALSE(cache.find(key, result));
+  const auto retryable = cache.retryable_runs();
+  REQUIRE(retryable.size() == 1);
+  CHECK(retryable.front().id == "endpoint-permission");
+  CHECK(retryable.front().source_path == "endpoint://default-output");
+  CHECK(retryable.front().decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.discard_retryable("endpoint-permission"));
+  CHECK(cache.retryable_runs().empty());
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
