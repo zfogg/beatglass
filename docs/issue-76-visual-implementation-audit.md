@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Native playback state, unavailable-playback recovery, and first-frame analysis waiting now expose contextual tooltips alongside their accessible status semantics.
+
 Analysis queue capacity, persisted recovery status, retryable-run selection, and discard recovery actions now expose contextual tooltips aligned with their dynamic accessibility semantics.
 
 Selected-source identity, analysis detail/uncertainty/freshness, source workflow, and analysis progress now expose contextual tooltips aligned with their dynamic accessible values.
