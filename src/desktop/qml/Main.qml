@@ -232,6 +232,12 @@ ApplicationWindow {
         const clamped = Math.max(0, Math.min(1, position))
         return Math.min(durationFrames, Math.floor(clamped * durationFrames))
     }
+    function seekPlaybackToVisualizationPosition(position, durationFrames) {
+        const frame = visualizationPositionToFrame(position, durationFrames)
+        if (frame < 0 || !window.playbackBridge || window.playbackBridge.state === "Stopped")
+            return false
+        return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
+    }
     Connections {
         target: window.liveBridge
         function onStatusChanged() {

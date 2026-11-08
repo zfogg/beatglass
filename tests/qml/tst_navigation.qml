@@ -499,6 +499,18 @@ TestCase {
         app.destroy()
     }
 
+    function test_visualizationPositionCanSeekValidatedPlayback() {
+        let app = shellWithPlayback.createObject(null)
+        fakePlayback.state = "Playing"
+        fakePlayback.epoch = 3
+        verify(app.seekPlaybackToVisualizationPosition(0.5, 44100))
+        compare(fakePlayback.currentFrame, 22050)
+        compare(fakePlayback.epoch, 4)
+        fakePlayback.state = "Stopped"
+        verify(!app.seekPlaybackToVisualizationPosition(0.5, 44100))
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")
