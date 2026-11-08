@@ -566,6 +566,7 @@ ApplicationWindow {
                             text: window.selectedAudioUrl.toString() !== "" ? "Source: " + window.selectedAudioUrl : "Source unavailable"
                             elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio source: " + text
+                            ToolTip.text: "Selected source path"
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
@@ -574,6 +575,7 @@ ApplicationWindow {
                             objectName: "selectedAudioDuration"
                             text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
                             Accessible.name: "Selected audio duration: " + text
+                            ToolTip.text: "Selected source duration"
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
@@ -593,6 +595,7 @@ ApplicationWindow {
                             objectName: "metadataStatus"; text: window.metadataStatus
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio metadata status: " + text
+                            ToolTip.text: "Current metadata status"
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text

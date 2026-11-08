@@ -92,6 +92,8 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Selected source path, duration, and metadata status now have visual tooltips alongside their dynamic accessibility announcements.
+
 The library browser empty/error state now has a visual recovery tooltip alongside its accessible guidance.
 
 Metadata error recovery guidance now has an explicit tooltip label as a visual fallback for users who do not receive accessibility announcements.
