@@ -62,3 +62,10 @@ class ReadinessReportContractTest(unittest.TestCase):
         report["platforms"][0]["qualification_output_bytes"] = 0
         errors = "\n".join(module.validate_retained_files(report, root))
         self.assertIn("output byte count does not match", errors)
+
+    def test_scenario_evidence_hash_is_verified(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        report = __import__("json").loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0]["scenario_evidence_sha256"]["capture"] = "0" * 64
+        errors = "\n".join(module.validate_retained_files(report, root))
+        self.assertIn("scenario evidence hash does not match", errors)

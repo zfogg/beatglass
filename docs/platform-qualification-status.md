@@ -86,6 +86,8 @@ Generated rows also carry `qualification_output_sha256`; retained-file validatio
 
 The generated row also records `qualification_output_bytes`; the verifier checks the retained output size as well as its digest.
 
+For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.
