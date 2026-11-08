@@ -437,6 +437,7 @@ def main() -> int:
         "visualization selected counts wrap": 'objectName: "visualizationSelectedDataStatus"',
         "visualization selection status theme": 'objectName: "visualizationSelectionStatus"',
         "visualization selection status wraps": 'objectName: "visualizationSelectionStatus"',
+        "visualization selection status shrinks": "Layout.minimumWidth: 0",
         "visualization inline clear theme": 'objectName: "clearVisualizationSelection"',
         "visualization inline clear width": "Layout.minimumWidth: window.compactHeader ? 104 : 128",
         "visualization revision theme": 'objectName: "visualizationRevisionStatus"',

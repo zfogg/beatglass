@@ -477,3 +477,5 @@ Selected-view sample/bin summaries now wrap as well, preserving mode-specific ev
 The selection status/action row now uses vertical-center alignment, keeping wrapped status text and its clear button visually balanced as the compact layout changes height.
 
 The inline clear action now reserves a compact/full minimum width, preventing its label from collapsing while leaving the neighboring selection status room to wrap.
+
+The selected-position label explicitly permits zero minimum width, allowing the row layout to prioritize the clear action while wrapping status text on narrow screens.
