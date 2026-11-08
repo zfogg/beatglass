@@ -22,7 +22,9 @@ public:
   /**
    * Inspect borrowed block metadata and update the expected frame position.
    * @param block Interleaved PCM view valid for this call; it is not retained.
-   * @return The transition, or invalid for malformed geometry or overflow.
+   * @return The transition, or invalid for a zero epoch, malformed geometry,
+   *         an overflowing frame range, or an in-epoch format change. Invalid
+   *         input leaves the previously accepted stream state unchanged.
    */
   StreamTransition observe(const AudioBlock& block) noexcept {
     const auto& f = block.format;
