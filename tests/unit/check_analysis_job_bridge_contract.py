@@ -34,9 +34,9 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
         self.assertIn('batchResultsPublished_ = batchFailedCount_ = 0;', source)
         self.assertIn('emit batchChanged();', source)
 
-    def test_cancellation_clears_failure_diagnostic(self):
+    def test_batch_submission_clears_previous_failure_diagnostic(self):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
-        self.assertGreaterEqual(source.count('if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }'), 3)
+        self.assertIn('if (frames_ != 0) { frames_ = 0; emit progressChanged(); }\n  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }', source)
 
     def test_cancellation_clears_failure_diagnostic(self):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")

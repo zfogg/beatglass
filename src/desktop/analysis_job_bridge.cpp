@@ -108,6 +108,7 @@ void AnalysisJobBridge::retry() {
 
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
   if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }
   batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
