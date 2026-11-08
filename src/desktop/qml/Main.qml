@@ -28,6 +28,10 @@ ApplicationWindow {
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     property string visualizationSelectionResetReason: ""
     property string catalogDiagnostic: ""
+    readonly property string acceptedAnalysisIdentity: typeof visualizationPresentation === "undefined"
+        || visualizationPresentation.generation < 0 || visualizationPresentation.revision < 0
+        ? ""
+        : (selectedName + "|generation:" + visualizationPresentation.generation + "|revision:" + visualizationPresentation.revision)
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     Shortcut {
@@ -1103,6 +1107,7 @@ ApplicationWindow {
                     property int renderedRevision: -1
                     property var renderedWaveform: []
                     property var renderedSpectrum: []
+                    readonly property string acceptedResultIdentity: window.acceptedAnalysisIdentity
                     activeFocusOnTab: true
                     Keys.onLeftPressed: {
                         const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
@@ -1385,6 +1390,40 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
                 Label {
+                    objectName: "visualizationAnalysisQueueHandoff"
+                    text: window.analysisJobBridge === null
+                        ? "Analysis queue unavailable"
+                        : (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running"
+                           ? "Analysis handoff queued · " + window.analysisJobBridge.status
+                           : (window.analysisJobBridge.result !== "" ? "Analysis handoff accepted · result ready" : "Analysis handoff " + window.analysisJobBridge.status))
+                    Accessible.name: "Visualization analysis queue handoff: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "Queue and cached-result status adjacent to the generation-gated visualization handoff."
+                    ToolTip.text: "Cached, queued, and accepted analysis handoff status"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
+                    objectName: "visualizationAcceptedIdentity"
+                    text: visualizationCanvas.acceptedResultIdentity === ""
+                        ? "No accepted result identity"
+                        : "Accepted result identity: " + visualizationCanvas.acceptedResultIdentity
+                    Accessible.name: "Visualization accepted result identity: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "The source, generation, and revision that selection and seek controls currently target."
+                    ToolTip.text: "Source identity and accepted analysis revision targeted by selection controls"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "visualizationStatus"
                     text: typeof visualizationPresentation === "undefined"
                           ? "Visualization unavailable"
@@ -1472,6 +1511,7 @@ ApplicationWindow {
                     activeFocusOnTab: true
                     text: "Seek to position"
                     enabled: visualizationCanvas.selectedPosition >= 0
+                        && visualizationCanvas.acceptedResultIdentity !== ""
                         && window.playbackBridge
                         && window.playbackBridge.state !== "Stopped"
                         && typeof visualizationPresentation !== "undefined"
