@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime
 import shlex
 import subprocess
 
@@ -10,6 +11,7 @@ hawkmoth_compiler = "clang++-18"
 hawkmoth_clang_cpp = ["-std=c++20", "-I" + str(Path(hawkmoth_root) / "include")]
 hawkmoth_clang_cpp += shlex.split(subprocess.check_output(["pkg-config", "--cflags", "Qt6Core"], text=True))
 html_theme = "alabaster"
+copyright = f"Zachary Fogg {datetime.now().year}"
 templates_path = ["_templates"]
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
