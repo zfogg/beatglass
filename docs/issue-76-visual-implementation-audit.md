@@ -473,3 +473,5 @@ Selected-position status now fills the available row width and wraps in compact 
 Waveform sample and FFT-bin counts now wrap within their responsive status width, preventing long runtime evidence from forcing horizontal crowding in compact headers.
 
 Selected-view sample/bin summaries now wrap as well, preserving mode-specific evidence when compact layouts narrow the visualization column.
+
+The selection status/action row now uses vertical-center alignment, keeping wrapped status text and its clear button visually balanced as the compact layout changes height.
