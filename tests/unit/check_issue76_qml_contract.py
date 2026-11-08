@@ -327,6 +327,8 @@ def main() -> int:
         "live monitoring status value": "Accessible.name: \"Live output monitoring: \" + text; Accessible.value: text",
         "monitoring guidance status": "objectName: \"monitoringGuidance\"",
         "selected endpoint value": "objectName: \"selectedEndpointStatus\"; Accessible.name: \"Selected output endpoint: \" + text; Accessible.value: text",
+        "live monitoring heading tooltip": "Accessible.name: \"DJ monitoring\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Live output monitoring and visualization\"",
+        "live output monitoring tooltip": "ToolTip.text: \"Current live output monitoring state\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
