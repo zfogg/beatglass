@@ -76,7 +76,7 @@ public:
     auto n = sqlite3_column_bytes(s.p, 0); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
   }
   std::vector<RetryableRun> retryable_runs(std::size_t limit) {
-    if (limit == 0 || limit > 10000) throw std::invalid_argument("invalid retryable run limit");
+    if (limit == 0 || limit > kMaxRetryableRuns) throw std::invalid_argument("invalid retryable run limit");
     Statement s(db_, "SELECT id,content,engine,config,mode FROM runs WHERE status='retryable' ORDER BY id LIMIT ?");
     check(sqlite3_bind_int64(s.p, 1, static_cast<sqlite3_int64>(limit)));
     std::vector<RetryableRun> out; int rc = SQLITE_ROW;
