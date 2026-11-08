@@ -278,6 +278,8 @@ The readiness report contract is versioned as `readiness_report_schema: 1`; `exi
 
 The dependency-light `desktop_cache_bridge_contract` test now checks the complete cache handoff surface—Qt properties, queued worker dispatch, result signal, and visible QML hit state—without claiming a Qt build or native UI qualification.
 
+The dependency-light desktop transition contract now verifies that Library queue progress, retry/cancel controls, asynchronous cache lookup and cache-hit presentation coexist in one UI surface. It does not claim that a Qt build, decoder run or native qualification has occurred.
+
 The desktop storage bridge now exposes an asynchronous cache lookup (`findCached`) and publishes hit/result state only after the worker responds. This keeps SQLite off the GUI thread and gives the future decoder queue a real UI-owned handoff; no decoder or analysis is started by the lookup, and native UI qualification remains pending.
 
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.

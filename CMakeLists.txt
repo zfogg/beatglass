@@ -10,6 +10,12 @@ endif()
 
 if(BUILD_TESTING)
   find_program(BEATGLASS_BASH bash)
+  find_package(Python3 QUIET COMPONENTS Interpreter)
+  if(Python3_Interpreter_FOUND)
+    add_test(NAME desktop_analysis_transition_contract
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_desktop_analysis_transition.py)
+    set_tests_properties(desktop_analysis_transition_contract PROPERTIES LABELS unit TIMEOUT 10)
+  endif()
   if(BEATGLASS_BASH)
     add_test(NAME macos_qualification_script_syntax
       COMMAND "${BEATGLASS_BASH}" -n
