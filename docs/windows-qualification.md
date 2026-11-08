@@ -15,6 +15,8 @@ the actual machine rather than an unrecorded default device.
 The identity manifest includes the detected Qt version (or explicit
 `UNAVAILABLE`) so UI/overlay evidence cannot be confused with an unidentified
 Qt deployment.
+It also records the Windows manufacturer/model so native results remain tied to
+the qualified hardware.
 
 ## Build identity
 
