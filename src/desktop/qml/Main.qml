@@ -333,6 +333,12 @@ ApplicationWindow {
                             Accessible.name: "Analysis and playback status"
                             Accessible.description: text
                         }
+                        RowLayout { Layout.fillWidth: true
+                            Button { text: "Start analysis"; enabled: analysisJob && analysisJob.status === "Queued"; onClicked: analysisJob.start() }
+                            Button { text: "Cancel"; enabled: analysisJob && analysisJob.status === "Running"; onClicked: analysisJob.cancel() }
+                            Button { text: "Retry"; enabled: analysisJob && (analysisJob.status === "Cancelled" || analysisJob.status === "Failed"); onClicked: analysisJob.retry() }
+                            Label { text: analysisJob ? "Analysis: " + analysisJob.status + " (" + analysisJob.progress + ")" : "Analysis unavailable" }
+                        }
                     }
                 }
             }
