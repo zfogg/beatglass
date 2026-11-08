@@ -1157,6 +1157,8 @@ ApplicationWindow {
                         if (viewMode === "waveform") {
                             ctx.strokeStyle = window.themeAccentColors[window.selectedThemeIndex]; ctx.beginPath()
                             for (var i = 0; i < wave.length; ++i) {
+                                if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))
+                                    continue
                                 var x = i * width / Math.max(1, wave.length - 1)
                                 var lo = wave[i][0], hi = wave[i][1]
                                 ctx.moveTo(x, height * (0.5 - hi * 0.4)); ctx.lineTo(x, height * (0.5 - lo * 0.4))
@@ -1164,7 +1166,11 @@ ApplicationWindow {
                             ctx.stroke()
                         } else {
                             ctx.fillStyle = window.themeAccentColors[window.selectedThemeIndex]; var bar = width / Math.max(1, spec.length)
-                            for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
+                            for (var k = 0; k < spec.length; ++k) {
+                                if (!isFinite(spec[k]))
+                                    continue
+                                ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
+                            }
                         }
                         if (selectedPosition >= 0) {
                             ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]; ctx.lineWidth = window.compactHeader ? 1 : 2; ctx.beginPath()
