@@ -334,6 +334,8 @@ def main() -> int:
         "appearance intro guidance": "Accessible.name: \"Appearance guidance\"; Accessible.role: Accessible.StaticText",
         "settings tab guidance": "objectName: \"settingsTab\"; activeFocusOnTab: true; Accessible.name: \"Settings\";",
         "settings status description": "Accessible.description: \"Settings persistence status and user-audio safety guarantee.\"",
+        "dj tab guidance": "objectName: \"djTab\"; activeFocusOnTab: true; Accessible.name: \"DJ\";",
+        "brand heading guidance": "Accessible.name: \"Beatglass\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Beatglass desktop audio workspace\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
         "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",

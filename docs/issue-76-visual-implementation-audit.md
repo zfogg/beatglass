@@ -270,6 +270,8 @@ Audio-capture and appearance groups now expose grouping semantics, descriptions,
 
 The Settings tab now explicitly participates in tab navigation with a tab role and entry tooltip, while the persistence status exposes an explicit safety description for the user-audio preservation promise.
 
+The DJ tab now has explicit page-tab semantics, keyboard participation, and an entry tooltip; the Beatglass header label is exposed as a heading with workspace context for assistive and pointer users.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
