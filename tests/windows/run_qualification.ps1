@@ -33,6 +33,11 @@ try {
   $topology | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $topologyPath -Encoding utf8
   if ((Get-Item -LiteralPath $topologyPath).Length -eq 0) { throw "Display topology evidence is empty" }
   "Display topology evidence: $topologyPath"
+  $audioInventoryPath = Join-Path $OutputDirectory "audio-endpoints.json"
+  $audioInventory = @{ captured_at = (Get-Date -AsUTC -Format o); endpoints = @(Get-CimInstance Win32_SoundDevice | Select-Object Name, Status, PNPDeviceID) }
+  $audioInventory | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $audioInventoryPath -Encoding utf8
+  if ((Get-Item -LiteralPath $audioInventoryPath).Length -eq 0) { throw "Audio endpoint inventory is empty" }
+  "Audio endpoint inventory: $audioInventoryPath"
   Get-Command cmake | Select-Object -ExpandProperty Source
   cmake --version | Select-Object -First 1
   if ($env:VCPKG_ROOT) { "VCPKG_ROOT: $env:VCPKG_ROOT" } else { "VCPKG_ROOT: UNSET" }

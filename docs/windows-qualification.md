@@ -8,6 +8,9 @@ or redirected identity fields.
 It records `display-topology.json` (monitor and adapter inventory with capture
 time) before qualification. This evidence is required for display-selection,
 DPI, fullscreen, and overlay recovery claims and is validated offline.
+It also records `audio-endpoints.json` with the observed Windows sound-device
+inventory and timestamp, tying endpoint-selection and recovery observations to
+the actual machine rather than an unrecorded default device.
 
 ## Build identity
 
