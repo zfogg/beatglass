@@ -131,3 +131,16 @@ TEST_CASE("catalog excludes unsupported files from matching searches") {
  CHECK(result.entries.empty());
  CHECK(result.diagnostic.empty());
 }
+
+TEST_CASE("catalog search remains deterministic after replacing a filtered entry") {
+ TempDir dir; dir.file("Take.wav"); dir.file("Take.txt");
+ auto first = beatglass::library::browse(dir.path, "take");
+ REQUIRE(first.entries.size() == 1);
+ CHECK(first.entries[0].name == "Take.wav");
+ std::filesystem::remove(dir.path / "Take.wav");
+ dir.file("Take.mp3");
+ const auto replaced = beatglass::library::browse(dir.path, "TAKE");
+ REQUIRE(replaced.entries.size() == 1);
+ CHECK(replaced.entries[0].name == "Take.mp3");
+ CHECK(replaced.entries[0].format == "MP3");
+}
