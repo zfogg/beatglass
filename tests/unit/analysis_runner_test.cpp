@@ -24,6 +24,13 @@ TEST_CASE("analysis runner forwards decoder progress into the tracked handle") {
   REQUIRE(reported.size() == 2); CHECK(reported.front() == 0); CHECK(reported.back() == 12); CHECK(h->frames() == 12);
   executor.shutdown();
 }
+TEST_CASE("analysis runner hands decoded result and incremental progress to publication") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); std::string published; std::vector<std::uint64_t> observed;
+  auto operation = op(true); operation.decode = [&](std::stop_token, const auto& progress) { progress(4); progress(9); return std::string("decoded"); };
+  operation.publish = [&](const std::string& result) { published = result; };
+  auto h = runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h);
+  CHECK(h->state() == TrackedState::completed); CHECK(h->frames() == 12); CHECK(published == "decoded"); executor.shutdown();
+}
 TEST_CASE("analysis runner fails closed when verification rejects input") { JobExecutor executor(1); AnalysisRunner runner(executor); auto h=runner.submit(op(false)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
 TEST_CASE("analysis runner rejects operations without source attribution") { JobExecutor executor(1); AnalysisRunner runner(executor); auto missing=op(true); missing.source.path.clear(); auto h=runner.submit(std::move(missing)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
 TEST_CASE("analysis runner fails closed on empty serialization") { JobExecutor executor(1); AnalysisRunner runner(executor); auto empty=op(true); empty.serialize=[] { return std::string{}; }; auto h=runner.submit(std::move(empty)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
