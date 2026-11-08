@@ -60,6 +60,8 @@ public:
   bool find(const CacheKey& key, std::string& result);
   /** Return bounded persisted runs left retryable by cancellation, stale input, or restart. */
   std::vector<RetryableRun> retryable_runs(std::size_t limit = 100);
+  /** Discard one retryable run record without touching its source file. */
+  bool discard_retryable(const std::string& id);
   /** Remove the active result for an exact identity; source files and historical runs remain untouched. */
   bool invalidate(const CacheKey& key);
   /** Revalidate and atomically publish. Cancellation before commit rolls back; cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. */
