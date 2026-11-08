@@ -403,6 +403,7 @@ TestCase {
         verify(!findChild(app, "clickThrough").enabled)
         verify(!findChild(app, "overlayOpacity").enabled)
         compare(empty.Accessible.name, "Overlay display empty state")
+        compare(empty.ToolTip.text, "Connect a display before choosing an overlay destination")
         app.destroy()
         fakeOverlay.screenNames = ["Display"]
     }

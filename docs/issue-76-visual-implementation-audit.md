@@ -259,3 +259,5 @@ Output-endpoint empty, unavailable-build, and recovery guidance now expose dedic
 The endpoint selector now exposes a concise tooltip for choosing the live-capture source, aligning the primary settings control with its empty, unavailable, and recovery-state guidance.
 
 Overlay opacity value, display status, and unavailable-display messaging now expose contextual tooltips, completing the visual guidance for overlay routing and native-availability states.
+
+The overlay-display empty state now provides a direct tooltip explaining how to recover when no destination display is present.

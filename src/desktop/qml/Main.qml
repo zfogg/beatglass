@@ -1108,6 +1108,7 @@ ApplicationWindow {
                         Accessible.value: text
                         Accessible.role: Accessible.StaticText
                         Accessible.description: text + " Connect a display before choosing an overlay destination."
+                        ToolTip.text: "Connect a display before choosing an overlay destination"
                     }
                     Label { text: "Size" }
                     ComboBox {
