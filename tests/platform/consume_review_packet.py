@@ -17,6 +17,16 @@ def consume(path: Path) -> list[str]:
     errors = review.validate_packet(packet)
     if not errors and packet.get("acceptance_errors"):
         errors.append("review packet contains acceptance errors")
+    if packet.get("gate_status") == "READY" and packet.get("native_qualification_required") is True:
+        errors.append("review packet requires native qualification")
+    if packet.get("gate_status") == "READY" and any(row.get("status") == "experimental" for row in packet.get("platform_support_status", []) if isinstance(row, dict)):
+        errors.append("review packet contains experimental platform support")
+    if packet.get("gate_status") == "READY":
+        unpassed = [f"{row.get('platform')}:{scenario.get('id')}" for row in packet.get("platforms", [])
+                    if isinstance(row, dict) for scenario in row.get("scenarios", [])
+                    if isinstance(scenario, dict) and scenario.get("status") != "PASS"]
+        if unpassed:
+            errors.append(f"review packet has unpassed scenarios: {unpassed}")
     if not errors and packet.get("gate_status") != "READY":
         errors.append(f"review packet is not accepted: {packet.get('gate_status')}")
     return errors
