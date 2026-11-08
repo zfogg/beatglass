@@ -342,6 +342,8 @@ Analysis operations now support an optional stop-aware transactional publisher c
 
 `AnalysisCoordinator` now owns the worker executor and `StorageOwner` together, attaching run-identity publication before queue submission. This is the safe library boundary for a future Qt bridge; native UI wiring and platform qualification remain pending.
 
+`StorageRecoveryBridge::Worker` now owns that coordinator rather than a standalone storage object. Existing cache/retry recovery calls remain queued on the worker thread while sharing the coordinator’s storage lifetime with future analysis submissions.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
