@@ -186,3 +186,5 @@ Readiness report aggregation treats non-list `artifacts` or `scenarios` containe
 The lightweight readiness check applies the same validated-string scenario-ID rule as report generation, so malformed IDs cannot crash one consumer path while another reports a conservative pending result.
 
 Valid JSON manifests must still have an object root. Non-object roots are reported explicitly by both readiness consumers and remain pending rather than causing `.get()` aggregation failures.
+
+Artifact diagnostic inventories sort paths by their string representation, so mixed valid and malformed path values remain deterministically reportable while the bundle stays pending.
