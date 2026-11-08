@@ -932,6 +932,7 @@ ApplicationWindow {
                         onClicked: visualizationCanvas.viewMode = "waveform"
                         Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; spectrumView.forceActiveFocus(); event.accepted = true }
                         Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; event.accepted = true }
+                        Keys.onEscapePressed: { visualizationCanvas.forceActiveFocus(); event.accepted = true }
                         background: Rectangle {
                             color: waveformView.checked ? "#273b5d" : "#182231"
                             border.width: waveformView.activeFocus ? 3 : 1
@@ -948,6 +949,7 @@ ApplicationWindow {
                         onClicked: visualizationCanvas.viewMode = "spectrum"
                         Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; waveformView.forceActiveFocus(); event.accepted = true }
                         Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; event.accepted = true }
+                        Keys.onEscapePressed: { visualizationCanvas.forceActiveFocus(); event.accepted = true }
                         background: Rectangle {
                             color: spectrumView.checked ? "#432c56" : "#182231"
                             border.width: spectrumView.activeFocus ? 3 : 1
