@@ -1965,9 +1965,9 @@ ApplicationWindow {
                                     Accessible.role: Accessible.ComboBox
                                     Accessible.description: currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture."
                                     ToolTip.text: "Choose the output endpoint used for live capture"
-                                    onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
+                                    onActivated: { if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id); window.announceVisualizationRecovery("Output endpoint selected; capture will refresh the accepted visualization snapshot."); endpointSelector.forceActiveFocus() }
                                 }
-                                Button { text: "Refresh"; objectName: "refreshEndpoints"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.role: Accessible.Button; Accessible.description: "Refresh the available output capture endpoints."; ToolTip.text: "Refresh available output capture endpoints"; onClicked: window.endpointSelectionBridge.refresh() }
+                                Button { text: "Refresh"; objectName: "refreshEndpoints"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.role: Accessible.Button; Accessible.description: "Refresh the available output capture endpoints."; ToolTip.text: "Refresh available output capture endpoints"; onClicked: { window.endpointSelectionBridge.refresh(); window.announceVisualizationRecovery("Output endpoint refresh requested; focus remains on endpoint recovery controls."); endpointSelector.forceActiveFocus() } }
                             }
                             Label {
                                 objectName: "endpointEmptyState"
@@ -2003,6 +2003,20 @@ ApplicationWindow {
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 ToolTip.text: "Connect an output device and refresh endpoint discovery"
+                                wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                            }
+                            Label {
+                                objectName: "endpointRecoveryAnnouncement"
+                                text: window.endpointSelectionBridge && window.endpointSelectionBridge.status.indexOf("Error") >= 0
+                                    ? "Endpoint retry failed; check device permission and connect an output device before refreshing."
+                                    : ""
+                                visible: text !== ""
+                                Accessible.name: "Endpoint recovery announcement: " + text
+                                Accessible.value: text
+                                Accessible.role: Accessible.Status
+                                Accessible.description: "Live output-device permission and retry status."
+                                ToolTip.text: "Output endpoint retry and permission status"
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
