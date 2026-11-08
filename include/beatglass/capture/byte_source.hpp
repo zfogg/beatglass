@@ -91,6 +91,10 @@ public:
     if (position_ > size) return {ByteReadStatus::error, 0};
     if (position_ == size) return {ByteReadStatus::end, 0};
     auto result = source_.read_at(position_, buffer, cancel);
+    // A source may finish a non-interruptible read after cancellation was
+    // requested. Cancellation wins over data or EOF, and the cursor must not
+    // advance because the caller will discard the buffer.
+    if (cancel.stop_requested()) return {ByteReadStatus::cancelled, 0};
     if (result.status == ByteReadStatus::data && result.bytes > 0 &&
         result.bytes <= buffer.size() && result.bytes <= size - position_) {
       position_ += result.bytes; return result;

@@ -13,6 +13,7 @@ public:
  bool premature_end{};
  bool cancelled_after_write{};
  bool error_after_write{};
+ std::stop_source* cancel_after_read{};
  std::uint64_t size() const noexcept override { return reported_size; }
  ByteReadResult read_at(std::uint64_t offset, std::span<std::byte> out, std::stop_token) override {
    if (invalid) return {ByteReadStatus::data, out.size() + 1};
@@ -21,6 +22,7 @@ public:
    if (error_after_write) { out[0] = std::byte{8}; return {ByteReadStatus::error, 0}; }
    auto n = std::min(out.size(), bytes.size() - static_cast<std::size_t>(offset));
    std::copy_n(bytes.begin() + static_cast<std::ptrdiff_t>(offset), n, out.begin());
+   if (cancel_after_read) cancel_after_read->request_stop();
    return {ByteReadStatus::data, n};
  }
 };
@@ -71,4 +73,11 @@ TEST_CASE("byte cursor retains the opening size when the source mutates") {
  REQUIRE(cursor.seek(3));
  CHECK(cursor.read(out).status == ByteReadStatus::end);
  CHECK(cursor.position() == 3);
+}
+
+TEST_CASE("byte cursor cancellation wins when source returns data after stop") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ std::stop_source stop; source.cancel_after_read = &stop;
+ CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
+ CHECK(cursor.position() == 0);
 }
