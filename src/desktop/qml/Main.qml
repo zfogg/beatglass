@@ -1537,7 +1537,10 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.retryableRunDetails !== undefined && storageRecovery.retryableRunDetails.length > 0
                                 text: visible ? storageRecovery.retryableRunDetails.join("\n") : ""
                                 Accessible.name: "Persisted retryable analysis identities"
-                                Accessible.description: "Run ID, content identity, source path, and decoder snapshot for each saved retryable analysis."
+                                Accessible.value: visible ? text : ""
+                                Accessible.description: visible && typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                    ? "Diagnostic details for selected persisted recovery run " + storageRecovery.selectedRunId + ". Includes content identity, source path, and decoder snapshot."
+                                    : "Run ID, content identity, source path, and decoder snapshot for each saved retryable analysis."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Button {
