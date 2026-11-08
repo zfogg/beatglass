@@ -113,6 +113,13 @@ int main() {
   }
   assert(empty_rejected);
   std::filesystem::remove(empty_wav, cleanup);
+  const auto corrupt_wav = std::filesystem::temp_directory_path() / "beatglass-reader-corrupt.wav";
+  { std::ofstream corrupt(corrupt_wav, std::ios::binary); corrupt << "not-a-wave-file"; }
+  bool corrupt_rejected = false;
+  try { FileReader reader(corrupt_wav, 2); }
+  catch (const FileOpenError& error) { corrupt_rejected = error.kind() == FileOpenErrorKind::invalid_format; }
+  assert(corrupt_rejected);
+  std::filesystem::remove(corrupt_wav, cleanup);
   bool directory_rejected = false;
   try { FileReader reader(std::filesystem::temp_directory_path(), 3); }
   catch (const FileOpenError& error) { directory_rejected = error.kind() == FileOpenErrorKind::unreadable; }
