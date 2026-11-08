@@ -167,6 +167,16 @@ TEST_CASE("SQLite retryable runs preserve source and decoder snapshots") {
   CHECK(runs.front().source_path == "/music/example.flac");
   CHECK(runs.front().decoder_snapshot == "decoder-v3;pcm-f32;44100");
 }
+TEST_CASE("SQLite legacy retryable runs preserve an empty decoder snapshot") {
+  SqliteCache cache(":memory:");
+  CacheKey key{"legacy-hash", "engine", "config", "offline"};
+  cache.begin("legacy-snapshot", key, "/music/legacy.flac");
+  REQUIRE(cache.publish("legacy-snapshot", key, "discard", {}, [] { return false; }) == Publish::stale_input);
+  const auto runs = cache.retryable_runs();
+  REQUIRE(runs.size() == 1);
+  CHECK(runs.front().source_path == "/music/legacy.flac");
+  CHECK(runs.front().decoder_snapshot.empty());
+}
 TEST_CASE("SQLite cache run IDs expose their API bound") {
   SqliteCache cache(":memory:");
   CHECK(kMaxCacheRunIdBytes == 4096);
