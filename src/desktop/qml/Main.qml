@@ -1313,6 +1313,7 @@ ApplicationWindow {
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
                 }
                 Label {
                     objectName: "visualizationDataStatus"
@@ -1321,6 +1322,7 @@ ApplicationWindow {
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
                 }
                 Label {
                     objectName: "visualizationSelectedDataStatus"

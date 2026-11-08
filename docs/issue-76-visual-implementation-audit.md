@@ -469,3 +469,5 @@ The selection status/action row now reduces spacing in compact headers, preservi
 Generation/revision evidence now wraps within the available width, keeping long provenance values readable instead of truncating them on compact screens.
 
 Selected-position status now fills the available row width and wraps in compact layouts, preserving the status/action relationship without clipping the current selection announcement.
+
+Waveform sample and FFT-bin counts now wrap within their responsive status width, preventing long runtime evidence from forcing horizontal crowding in compact headers.
