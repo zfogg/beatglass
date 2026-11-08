@@ -93,6 +93,9 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(&workerThread_, &QThread::finished, worker_, &QObject::deleteLater);
   connect(worker_, &Worker::result, this, [this](bool ok, const QString& text) {
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
+    if (ok && (text == QStringLiteral("Retry queued") || text == QStringLiteral("Retryable run discarded") || text == QStringLiteral("Cached analysis invalidated"))) {
+      if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
+    }
     if (ok && text == QStringLiteral("Cached analysis invalidated")) {
       cacheHit_ = false; cachedResult_.clear(); emit cachedResultChanged();
       analysisStatus_ = QStringLiteral("Analysis idle · reanalysis required"); emit analysisStatusChanged();
