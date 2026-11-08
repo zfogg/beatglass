@@ -13,6 +13,10 @@ class AnalysisCoordinator final { public:
   /** Submit an operation; publication and revalidation stay on this worker boundary. */
   std::shared_ptr<RetryableAnalysis> submit(std::string run_id, AnalysisOperation operation, int priority = 0);
   Submission submit_admitted(std::string run_id, AnalysisOperation operation, int priority = 0);
+  /** Return cache-hit or reserved-run state through the coordinator-owned model boundary. */
+  CacheAdmission admit_analysis(const std::string& run_id, const AnalysisIdentity& identity) {
+    return storage_.admit_analysis(run_id, identity);
+  }
   StorageOwner& storage() noexcept { return storage_; }
 private: library_detail::JobExecutor executor_; AnalysisRunner runner_; StorageOwner storage_; };
 }
