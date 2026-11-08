@@ -1,6 +1,7 @@
 #pragma once
 #ifdef _WIN32
 #include <windows.h>
+#include "beatglass/capture/playback_pcm_queue.hpp"
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -18,6 +19,8 @@ public:
   bool open(std::uint32_t sample_rate, std::uint16_t channels, std::size_t max_samples, std::string& error);
   /** Convert and submit one interleaved float block; worker thread only. */
   bool submit(std::span<const float> samples) noexcept;
+  /** Drain one queued block into storage and submit it to waveOut. */
+  bool render_queue(PlaybackPcmQueue& queue, std::span<float> storage) noexcept;
   /** Stop, reset and release the device; safe to call repeatedly. */
   void stop() noexcept;
   bool running() const noexcept { return handle_ != nullptr; }
