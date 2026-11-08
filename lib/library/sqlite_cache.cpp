@@ -10,6 +10,15 @@
 
 namespace beatglass::library_detail {
 bool sqlite_length_representable(std::size_t size) noexcept { return size <= static_cast<std::size_t>(std::numeric_limits<int>::max()); }
+namespace {
+void validate_key(const CacheKey& key) {
+  if (key.content.empty() || key.content.size() > 512 || key.engine.empty() || key.engine.size() > 4096 ||
+      key.config.empty() || key.config.size() > 4096 || key.mode.empty() || key.mode.size() > 128 ||
+      key.content.find('\0') != std::string::npos || key.engine.find('\0') != std::string::npos ||
+      key.config.find('\0') != std::string::npos || key.mode.find('\0') != std::string::npos)
+    throw std::invalid_argument("invalid cache identity");
+}
+}
 struct SqliteCache::Impl {
 public:
   explicit Impl(const std::string& path) {
@@ -40,6 +49,8 @@ public:
   ~Impl() { sqlite3_close(db_); }
   // All calls, including destruction, belong to one database worker.
   void begin(const std::string& id, const CacheKey& key) {
+    validate_key(key);
+    if (id.empty() || id.size() > 4096 || id.find('\0') != std::string::npos) throw std::invalid_argument("invalid run ID");
     Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status) VALUES(?,?,?,?,?,'running')");
     bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p);
   }

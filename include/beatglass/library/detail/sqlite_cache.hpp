@@ -29,7 +29,15 @@ public:
   /** Close the connection. */ ~SqliteCache();
   SqliteCache(const SqliteCache&) = delete;
   SqliteCache& operator=(const SqliteCache&) = delete;
-  /** Insert a uniquely identified running job; throws on SQLite error or duplicate ID. */
+  /** Insert or replace one index row on the worker; throws on invalid values or storage errors. Does not touch the source file. */
+  void put_entry(const CollectionEntry& entry);
+  /** Remove only the index row; returns whether a row existed. Never removes a source file. */
+  bool remove_entry(const std::string& path);
+  /** Return an owned exact-path entry or absence; throws CollectionCancelled on observed stop and throws on storage errors. */
+  std::optional<CollectionEntry> entry(const std::string& path, std::stop_token stop = {});
+  /** Return up to the requested bounded page of owned entries; throws CollectionCancelled on observed stop and throws on invalid query or storage errors. */
+  std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});
+  /** Insert a uniquely identified running job; throws on invalid identity, invalid run ID, SQLite error, or duplicate ID. */
   void begin(const std::string& id, const CacheKey& key);
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */
   bool find(const CacheKey& key, std::string& result);

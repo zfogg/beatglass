@@ -21,6 +21,19 @@ TEST_CASE("SQLite cache replaces only completed revalidated runs") {
   auto changed = key; changed.config = "config2"; REQUIRE_FALSE(cache.find(changed, result));
   changed = key; changed.content = "sha256:b"; REQUIRE_FALSE(cache.find(changed, result));
 }
+TEST_CASE("SQLite cache rejects oversized results before they become active") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("oversized", key);
+  std::string result(8 * 1024 * 1024 + 1, 'x');
+  REQUIRE(cache.publish("oversized", key, result, {}, [] { return true; }) == Publish::error);
+  std::string found; REQUIRE_FALSE(cache.find(key, found));
+}
+TEST_CASE("SQLite cache rejects incomplete identities before creating runs") {
+  SqliteCache cache(":memory:");
+  REQUIRE_THROWS_AS(cache.begin("run", {"", "engine", "config", "offline"}), std::invalid_argument);
+  REQUIRE_THROWS_AS(cache.begin("run", {"hash", "", "config", "offline"}), std::invalid_argument);
+  REQUIRE_THROWS_AS(cache.begin("", {"hash", "engine", "config", "offline"}), std::invalid_argument);
+}
 TEST_CASE("SQLite cache rolls back failed publication") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("one", key);
