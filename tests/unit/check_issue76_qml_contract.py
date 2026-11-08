@@ -55,6 +55,7 @@ def main() -> int:
         "analysis status roles": "objectName: \"analysisProgress\"",
         "visual status roles": "objectName: \"visualizationLoadState\"",
         "recovery status roles": "objectName: \"playbackSeekLimitation\"",
+        "dj status roles": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
