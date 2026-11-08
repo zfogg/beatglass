@@ -1413,6 +1413,24 @@ ApplicationWindow {
                         window.clearVisualizationPositionAndFocus()
                     }
                 }
+                Button {
+                    objectName: "seekVisualizationSelection"
+                    activeFocusOnTab: true
+                    text: "Seek to position"
+                    enabled: visualizationCanvas.selectedPosition >= 0
+                        && window.playbackBridge
+                        && window.playbackBridge.state !== "Stopped"
+                        && typeof visualizationPresentation !== "undefined"
+                        && visualizationPresentation.waveform.length > 0
+                    Accessible.name: "Seek playback to visualization position"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: enabled
+                        ? "Seek playback to the selected waveform position using the available waveform sample span."
+                        : "Select a waveform position and start playback before seeking."
+                    ToolTip.text: enabled ? "Seek playback to the selected waveform position" : "Seeking requires an active playback source and waveform data"
+                    onClicked: window.seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationPresentation.waveform.length)
+                }
                 }
                 Label {
                     objectName: "visualizationRevisionStatus"
