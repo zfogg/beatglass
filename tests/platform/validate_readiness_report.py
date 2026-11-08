@@ -67,7 +67,10 @@ def validate(report: dict) -> list[str]:
                 if len(inventory_paths) != len(set(inventory_paths)):
                     errors.append(f"{item.get('platform')}: duplicate report artifact path")
                 for artifact in inventory:
-                    if not isinstance(artifact, dict) or not artifact.get("path"):
+                    if not isinstance(artifact, dict):
+                        errors.append(f"{item.get('platform')}: artifact entry must be an object")
+                        continue
+                    if not artifact.get("path"):
                         errors.append(f"{item.get('platform')}: artifact missing path")
                     if not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64:
                         errors.append(f"{item.get('platform')}: artifact missing SHA-256")
