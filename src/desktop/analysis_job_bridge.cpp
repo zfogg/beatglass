@@ -90,6 +90,7 @@ void AnalysisJobBridge::cancel() {
   if (!canCancel()) return;
   retryable_->cancel();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   if (status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
   poll();
 }
@@ -142,6 +143,7 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
 void AnalysisJobBridge::cancelBatch() {
   for (const auto& operation : batch_) if (operation) operation->cancel();
   batchResultsPublished_ = batchFailedCount_ = 0; batchLastResult_.clear();
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   emit batchChanged();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   if (!batch_.empty() && status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
