@@ -377,6 +377,8 @@ def main() -> int:
         "overlay live evidence grouping": "objectName: \"overlayLiveEvidenceGroup\"\n                anchors.fill: parent; anchors.margins: 14; spacing: 4\n                Accessible.name: \"Overlay live evidence\"",
         "visualization canvas graphic role": "Accessible.value: visualizationCanvas.viewMode + \", \" + (visualizationCanvas.selectedPosition < 0 ? \"no position selected\" : \"position \" + Math.round(visualizationCanvas.selectedPosition * 100) + \"%\")\n                    Accessible.role: Accessible.Graphic",
         "visualization empty state tooltip": "Accessible.role: Accessible.StaticText\n                    Accessible.description: text\n                    ToolTip.text: \"Visualization data availability and next action\"",
+        "visualization escape clear": "Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }",
+        "visualization keyboard recovery tooltip": "ToolTip.text: \"Click to select a position; use Left/Right/Home/End to navigate or Escape to clear\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
