@@ -24,6 +24,17 @@ cmake -S "$repo_root" -B "$out_dir/build" \
   -DBEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON \
   -DBEATGLASS_BUILD_MACOS_TAP_SMOKE=ON
 cmake --build "$out_dir/build" --parallel 1
+desktop_plist="$out_dir/build/beatglass-desktop.app/Contents/Info.plist"
+if [[ ! -f "$desktop_plist" ]]; then
+  echo "Production desktop bundle plist not found: $desktop_plist" >&2
+  exit 1
+fi
+usage_description="$(/usr/libexec/PlistBuddy -c 'Print :NSAudioCaptureUsageDescription' "$desktop_plist")"
+if [[ -z "$usage_description" ]]; then
+  echo "NSAudioCaptureUsageDescription is empty in the production bundle" >&2
+  exit 1
+fi
+echo "Production bundle usage description: $usage_description"
 ctest --test-dir "$out_dir/build" -R '^(macos_overlay_|macos_native_overlay$)' --output-on-failure
 
 cat <<'EOF'
