@@ -185,6 +185,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         elif "stale" in error or "future" in error: categories["freshness"] += 1
         elif "missing artifact" in error or "missing manifest" in error: categories["retention"] += 1
         else: categories["manifest"] += 1
+    failure_category_count_consistent = sum(categories.values()) == len(errors)
     required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
     summary_consistent = (len(required) == len(rows) == len(provenance)
@@ -201,10 +202,11 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "not_ready_platforms": not_ready_platforms,
             "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
+            "failure_category_count_consistent": failure_category_count_consistent,
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and error_count_consistent and ready_platforms == len(rows)}
+            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:
