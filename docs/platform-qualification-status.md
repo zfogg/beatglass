@@ -92,6 +92,10 @@ requires every scenario evidence hash mapping to match the manifest's scenario s
 Malformed JSON, path traversal, duplicate rows, and non-hexadecimal digests fail
 closed before any qualification claim is accepted.
 
+Each retained manifest must also carry a 40-character hexadecimal commit identity
+and an ISO-8601 capture timestamp, so provenance fields are machine-checkable rather
+than merely present.
+
 For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
 
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.

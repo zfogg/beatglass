@@ -1,5 +1,6 @@
 """Validate the stable, conservative machine-readable readiness report contract."""
 import argparse
+from datetime import datetime
 import hashlib
 import json
 from pathlib import Path
@@ -10,6 +11,16 @@ EXPECTED_PLATFORMS = {"windows", "macos", "linux"}
 
 def _valid_digest(value: object) -> bool:
     if not isinstance(value, str) or len(value) != 64:
+        return False
+    try:
+        int(value, 16)
+    except ValueError:
+        return False
+    return True
+
+
+def _valid_commit(value: object) -> bool:
+    if not isinstance(value, str) or len(value) != 40:
         return False
     try:
         int(value, 16)
@@ -115,6 +126,14 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         for field in ("platform", "commit", "captured_at", "environment"):
             if not isinstance(manifest_data.get(field), str) or not manifest_data[field].strip():
                 errors.append(f"{platform}: manifest provenance field missing: {field}")
+        if not _valid_commit(manifest_data.get("commit")):
+            errors.append(f"{platform}: manifest commit must be a 40-character hexadecimal SHA-1")
+        captured_at = manifest_data.get("captured_at")
+        if isinstance(captured_at, str) and captured_at.strip():
+            try:
+                datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
+            except ValueError:
+                errors.append(f"{platform}: manifest captured_at must be ISO-8601")
         if not isinstance(manifest_data.get("qualification_command"), str) or not manifest_data["qualification_command"].strip():
             errors.append(f"{platform}: manifest qualification command is missing")
         elif row.get("qualification_command") != manifest_data["qualification_command"]:
