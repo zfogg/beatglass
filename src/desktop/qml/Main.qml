@@ -94,6 +94,20 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "persistedRecoveryRetryShortcut"
+        sequence: "Ctrl+Shift+Y"
+        context: Qt.ApplicationShortcut
+        enabled: typeof storageRecovery !== "undefined"
+            && storageRecovery.selectedRunId !== ""
+            && storageRecovery.analysisRetryable
+        onActivated: {
+            storageRecovery.retrySelectedRun()
+            window.overlayPersistedDiagnosticDismissed = true
+            window.announceVisualizationRecovery("Persisted recovery retry admitted from keyboard; reset status cleared.")
+            retryPersistedRecovery.forceActiveFocus()
+        }
+    }
+    Shortcut {
         objectName: "visualizationWaveformShortcut"
         sequence: "Ctrl+1"
         context: Qt.ApplicationShortcut
