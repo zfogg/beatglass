@@ -1092,6 +1092,13 @@ ApplicationWindow {
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = window.themeBackgrounds[window.selectedThemeIndex]; ctx.fillRect(0, 0, width, height)
+                        ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]
+                        ctx.globalAlpha = 0.18; ctx.lineWidth = 1; ctx.beginPath()
+                        for (var grid = 1; grid < 4; ++grid) {
+                            var gridY = grid * height / 4
+                            ctx.moveTo(0, gridY); ctx.lineTo(width, gridY)
+                        }
+                        ctx.stroke(); ctx.globalAlpha = 1.0
                         var wave = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform : []
                         var spec = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum : []
                         if (viewMode === "waveform") {
