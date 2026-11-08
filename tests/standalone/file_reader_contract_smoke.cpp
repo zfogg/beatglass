@@ -96,6 +96,9 @@ int main() {
   try { FileReader reader(wav, 10); }
   catch (const FileOpenError& error) { reopen_failed = error.kind() == FileOpenErrorKind::unreadable; }
   assert(reopen_failed);
+  write_wav(wav);
+  { FileReader replacement(wav, 11); assert(replacement.metadata().frames == 4 && !replacement.source_changed()); }
+  std::filesystem::remove(wav, cleanup);
 
   const auto unsupported = std::filesystem::temp_directory_path() / "beatglass-reader.m4a";
   { std::ofstream out(unsupported, std::ios::binary); out << "not-audio"; }
