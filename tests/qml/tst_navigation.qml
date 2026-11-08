@@ -335,14 +335,17 @@ TestCase {
         verify(empty !== null)
         verify(!empty.visible)
         compare(empty.Accessible.name, "Output endpoint empty state")
+        compare(empty.ToolTip.text, "No output endpoint is available; refresh after connecting a device")
         let recovery = findChild(app, "endpointRecoveryGuidance")
         verify(recovery !== null)
         verify(!recovery.visible)
         compare(recovery.Accessible.name, "Output endpoint recovery guidance")
+        compare(recovery.ToolTip.text, "Connect an output device and refresh endpoint discovery")
         let unavailable = findChild(app, "endpointUnavailableState")
         verify(unavailable !== null)
         verify(unavailable.visible)
         compare(unavailable.Accessible.name, "Output endpoint discovery availability")
+        compare(unavailable.ToolTip.text, "Output endpoint discovery is unavailable in this build")
         app.destroy()
     }
 
