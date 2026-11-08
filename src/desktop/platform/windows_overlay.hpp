@@ -73,6 +73,8 @@ protected:
   bool eventFilter(QObject* watched, QEvent* event) override;
 private:
   void applyFlags();
+  /** Persist the current native display target after monitor/layout recovery. */
+  void persistCurrentDisplay();
   QPointer<QQuickWindow> overlay_;
   QPointer<QWindow> control_;
   QSettings* settings_{};

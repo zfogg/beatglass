@@ -60,11 +60,11 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     control_->installEventFilter(this);
     connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; setClickThrough(false); });
   }
-  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); emit geometryChanged(); emit screensChanged(); }); });
-  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); emit geometryChanged(); emit screensChanged(); }); });
+  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); persistCurrentDisplay(); emit geometryChanged(); emit screensChanged(); }); });
+  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); persistCurrentDisplay(); emit geometryChanged(); emit screensChanged(); }); });
   if (overlay_) {
     connect(overlay_, &QWindow::screenChanged, this, [this](QScreen*) {
-      QTimer::singleShot(0, this, [this] { keepOnScreen(); emit geometryChanged(); emit screensChanged(); });
+      QTimer::singleShot(0, this, [this] { keepOnScreen(); persistCurrentDisplay(); emit geometryChanged(); emit screensChanged(); });
     });
   }
 }
@@ -79,6 +79,11 @@ void OverlayController::setOpacity(qreal opacity) {
   }
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(1); }
+void OverlayController::persistCurrentDisplay() {
+  if (!settings_ || !overlay_) return;
+  if (auto* screen = QGuiApplication::screenAt(overlay_->geometry().center()))
+    settings_->setValue(QStringLiteral("overlay/displayName"), screen->name());
+}
 bool OverlayController::available() const { return overlay_ && control_; }
 QRect OverlayController::geometry() const { return overlay_ ? overlay_->geometry() : QRect{}; }
 QString OverlayController::displayName() const { auto* screen = overlay_ ? QGuiApplication::screenAt(overlay_->geometry().center()) : nullptr; return screen ? screen->name() : QString{}; }
