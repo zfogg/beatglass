@@ -34,14 +34,26 @@ public slots:
     handle_ = std::move(handle); emit analysis(handle_ ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected"));
     if (handle_) QTimer::singleShot(50, this, &Worker::pollAnalysis);
   }
+<<<<<<< HEAD
   void cancelAnalysis() { if (handle_) { handle_->cancel(); pollAnalysis(); } }
   void retryAnalysis() { if (handle_ && handle_->retry()) { emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); } }
+=======
+  void admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {
+    beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+    const auto admission = coordinator_.storage().admit_analysis(runId.toStdString(), identity);
+    emit admitted(admission.analysis_reserved, QString::fromStdString(admission.cached.value_or(std::string{})));
+  }
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
 signals:
   void result(bool ok, QString status);
   void runsChanged(QStringList ids);
   void cached(bool hit, QString result);
   void analysis(QString status);
+<<<<<<< HEAD
   void analysisResult(QString result);
+=======
+  void admitted(bool reserved, QString cachedResult);
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
 private:
   void pollAnalysis() {
     if (!handle_) return;
@@ -69,7 +81,11 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; emit analysisStatusChanged(); }, Qt::QueuedConnection);
+<<<<<<< HEAD
   connect(worker_, &Worker::analysisResult, this, [this](const QString& text) { analysisResult_ = text; emit analysisResultChanged(); }, Qt::QueuedConnection);
+=======
+  connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; emit analysisAdmissionChanged(); }, Qt::QueuedConnection);
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
   workerThread_.start();
 }
 
@@ -90,5 +106,11 @@ void StorageRecoveryBridge::findCached(QString content, QString engine, QString 
 void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
 }
+<<<<<<< HEAD
 void StorageRecoveryBridge::cancelAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); }
 void StorageRecoveryBridge::retryAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); }
+=======
+void StorageRecoveryBridge::admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {
+  if (worker_) QMetaObject::invokeMethod(worker_, "admitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+}
+>>>>>>> 17d8535a (feat: expose analysis admission in desktop bridge)
