@@ -370,6 +370,8 @@ The live canvas now supports Page Up/Page Down for coarse ten-percent position m
 
 All canvas navigation keys now explicitly consume their events after updating selection, preventing parent controls from also handling the same keystroke and keeping keyboard interaction scoped to the focused visualization.
 
+Enter/Return on a selected canvas position now moves focus directly to the Clear position action, while Escape still clears immediately. The canvas description and tooltip document both recovery paths for keyboard users.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
