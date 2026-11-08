@@ -11,6 +11,8 @@ exec > >(tee "$out_dir/qualification.log") 2>&1
 echo "Beatglass macOS qualification evidence"
 date -u +%FT%TZ
 git -C "$repo_root" rev-parse HEAD
+echo "Qualification output directory: $out_dir"
+echo "Selected output UID: ${BEATGLASS_MACOS_TAP_UID:-UNRUN (BEATGLASS_MACOS_TAP_UID not set)}"
 sw_vers
 system_profiler SPHardwareDataType SPDisplaysDataType
 xcodebuild -version
