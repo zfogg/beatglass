@@ -50,6 +50,18 @@ Record the commit, macOS version, hardware model, Xcode and SDK versions, Qt ver
 4. Repeat after selecting another output. Verify the selected UID and that no microphone or unrelated output is used.
 5. Deny access, revoke it in System Settings, and restore it. Record the typed error or unknown state, stale-evidence clearing, and whether a fresh start recovers.
 
+## Callback fault and FIFO exhaustion
+
+During the tone run, deliberately let the control worker stop draining long
+enough to fill the bounded FIFO, then resume polling. Record the nonzero
+`dropped_frames()` count, the discontinuity on the first accepted block after
+the drop, and the `status()` transition to `interrupted` when the FIFO reaches
+its exhaustion limit. The control owner must stop the tap, discard queued
+blocks, invalidate live analysis, and restart with a fresh epoch; it must not
+continue presenting the old epoch after a callback fault. Also record malformed
+or unexpected callback buffers as `UNRUN` unless the native harness can
+exercise them safely; synthetic FIFO tests do not qualify the Core Audio IOProc.
+
 The tap path is scoped to macOS 14.2 or later and the selected output stream. The smoke binary exits unsuccessfully if it observes frames/samples but never receives a valid native sample timestamp. Silence or a successful start does not prove permission. See [Apple’s Core Audio tap reference](https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps).
 
 ## Overlay and recovery
