@@ -1,4 +1,4 @@
 # Project-scoped Codex MCP configuration. No token is stored here.
 [mcp_servers.spaniel]
 transport = "http"
-url = "http://127.0.0.1:8080/mcp"
+url = "http://127.0.0.1:8286/mcp"
