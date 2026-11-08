@@ -63,6 +63,8 @@ TestCase {
         compare(display.Accessible.description, "Choose the display where the overlay is shown")
         compare(size.Accessible.description, "Choose the overlay window size")
         compare(findChild(app, "overlayOpacityValue").Accessible.name, "Current overlay opacity")
+        compare(findChild(app, "overlayInteractionMode").Accessible.name, "Overlay interaction mode")
+        compare(findChild(app, "overlayDisplayStatus").Accessible.name, "Current overlay display")
         display.activated(0); compare(fakeOverlay.selectedScreen, 0)
         size.currentIndex = 2; size.activated(2); compare(fakeOverlay.requestedWidth, 430)
         hide.clicked(); compare(fakeOverlay.hides, 1)

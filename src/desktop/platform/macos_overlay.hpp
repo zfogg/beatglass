@@ -32,6 +32,8 @@ class OverlayController final : public QObject {
   Q_PROPERTY(QStringList screenNames READ screenNames NOTIFY screensChanged)
   Q_PROPERTY(int screenIndex READ screenIndex NOTIFY screensChanged)
   Q_PROPERTY(qreal opacity READ opacity NOTIFY opacityChanged)
+  Q_PROPERTY(QRect geometry READ geometry NOTIFY geometryChanged)
+  Q_PROPERTY(QString displayName READ displayName NOTIFY geometryChanged)
 public:
   /** Own the native adapter and optional settings store; the Qt parent, if any, owns this controller. All methods run on the GUI thread. */
   explicit OverlayController(std::unique_ptr<OverlayNative> native, QObject* parent = nullptr, std::unique_ptr<QSettings> settings = {});
@@ -47,6 +49,10 @@ public:
   Q_INVOKABLE void setOpacity(qreal value);
   /** Return the current overlay opacity or the default before attachment. */
   qreal opacity() const;
+  /** Return logical overlay geometry, or an empty rectangle when unavailable. */
+  QRect geometry() const;
+  /** Return the current display name, or empty when unavailable. */
+  QString displayName() const;
   /** Apply input transparency only when a separate control window is visible and not minimized. A failed unlock hides the overlay. */
   Q_INVOKABLE bool setClickThrough(bool enabled);
   /** True if click-through was successfully requested and remains active. */
@@ -71,6 +77,7 @@ public:
   Q_SIGNAL void screensChanged();
   /** Emitted when the overlay opacity changes. */
   Q_SIGNAL void opacityChanged();
+  Q_SIGNAL void geometryChanged();
 protected:
   /** Reconfigure on surface recreation and unlock on control hide, close or minimization. */
   bool eventFilter(QObject* watched, QEvent* event) override;
