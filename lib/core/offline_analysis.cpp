@@ -21,7 +21,7 @@ OfflineValidation validate_offline_analysis(const OfflineAnalysis& r, OfflineLim
   }
   std::uint64_t previous = 0, previous_observed = 0; bool first = true;
   for (const auto& b : r.beats) {
-    if (b.frame >= b.observed_through || b.observed_through > r.analyzed_through ||
+    if (b.frame >= b.observed_through || b.observed_through > r.observed_through ||
         (!first && (b.frame < previous || b.observed_through < previous_observed)) ||
         (b.strength && !std::isfinite(*b.strength))) return OfflineValidation::invalid_beat;
     previous = b.frame; previous_observed = b.observed_through; first = false;
