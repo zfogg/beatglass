@@ -121,11 +121,19 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             missing_artifacts = []
             mismatched_artifacts = []
             errors = [f"{platform}: missing manifest: {manifest}"]
+        row_categories = Counter()
+        for error in matrix_errors + errors:
+            if "hash mismatch" in error: row_categories["hash"] += 1
+            elif "missing artifact" in error or "missing manifest" in error: row_categories["retention"] += 1
+            elif "stale" in error or "future" in error: row_categories["freshness"] += 1
+            elif "path" in error or "escapes bundle" in error: row_categories["path"] += 1
+            else: row_categories["manifest"] += 1
         rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
                      "missing_artifacts": missing_artifacts, "mismatched_artifacts": mismatched_artifacts,
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
+                     "failure_categories": dict(sorted(row_categories.items())),
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
     errors = [error for row in rows for error in row["errors"]]
     categories = Counter()

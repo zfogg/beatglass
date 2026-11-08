@@ -163,6 +163,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles, max_age_hours=1)
             self.assertGreater(result["failure_categories"]["retention"], 0)
             self.assertGreater(result["failure_categories"]["freshness"], 0)
+            self.assertGreater(result["platforms"][0]["failure_categories"]["freshness"], 0)
 
 
 if __name__ == "__main__":
