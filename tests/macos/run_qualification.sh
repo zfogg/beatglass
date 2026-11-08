@@ -166,13 +166,17 @@ tap_signing_log="$out_dir/codesign-tap.log"
 recovery_signing_log="$out_dir/codesign-recovery.log"
 codesign --display --verbose=4 "$tap_bundle" >"$tap_signing_log" 2>&1 || true
 codesign --display --verbose=4 "$recovery_bundle" >"$recovery_signing_log" 2>&1 || true
+tap_signing=unverified
+recovery_signing=unverified
+if codesign --verify --deep --strict "$tap_bundle" 2>>"$tap_signing_log"; then tap_signing=verified; fi
+if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_log"; then recovery_signing=verified; fi
 {
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'macos_version=%s\n' "$(sw_vers -productVersion)"
   printf 'architecture=%s\n' "$(uname -m)"
   printf 'xcode_version=%s\n' "$(xcodebuild -version | tr '\n' ' ')"
   printf 'sdk_version=%s\n' "$(xcrun --sdk macosx --show-sdk-version)"
-  printf 'desktop_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
+  printf 'desktop_signing=%s\ntap_signing=%s\nrecovery_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$tap_signing" "$recovery_signing" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'commands=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
   if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
