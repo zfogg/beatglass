@@ -111,6 +111,17 @@ TEST_CASE("cancellation wins over a simultaneous path mutation") {
  CHECK_THROWS_WITH(reader.read(samples), "Audio source changed during read");
 }
 
+TEST_CASE("cancellation at EOF wins before observing a later mutation") {
+ WaveFixture fixture; FileReader reader(fixture.path, 30); std::array<float,4> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::end);
+ { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
+ std::stop_source stop; stop.request_stop();
+ CHECK(reader.read(samples, stop.get_token()).status == FileReadStatus::cancelled);
+ CHECK_THROWS_WITH(reader.seek(0), "Audio source changed during seek");
+}
+
 TEST_CASE("invalid read buffers win over a simultaneous path mutation") {
  WaveFixture fixture; FileReader reader(fixture.path, 25); std::array<float,1> samples{};
  { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
