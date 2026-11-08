@@ -713,7 +713,9 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationEmptyState"
                     visible: !visualizationCanvas.modeHasData
-                    text: window.liveBridge.status === "Stopped"
+                    text: window.liveBridge.status === "Error"
+                        ? "Capture error; retry monitoring to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
+                        : window.liveBridge.status === "Stopped"
                         ? "Start monitoring to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
                         : "Waiting for captured audio data to populate the " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + "."
                     wrapMode: Text.WordWrap

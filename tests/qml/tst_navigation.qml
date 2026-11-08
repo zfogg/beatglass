@@ -385,6 +385,17 @@ TestCase {
         app.destroy()
     }
 
+    function test_visualizationEmptyStateExplainsCaptureError() {
+        fakeLive.status = "Error"
+        let app = shell.createObject(null)
+        let empty = findChild(app, "visualizationEmptyState")
+        verify(empty !== null)
+        verify(empty.visible)
+        compare(empty.text, "Capture error; retry monitoring to populate the waveform.")
+        fakeLive.status = "Stopped"
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")
