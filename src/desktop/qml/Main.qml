@@ -1374,6 +1374,7 @@ ApplicationWindow {
                     Accessible.description: "Remove the selected waveform or FFT position. Escape, Enter, Space, right-click, and double-click provide equivalent recovery paths."
                     contentItem: Text { text: parent.text; color: window.themeBackgrounds[window.selectedThemeIndex]; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; opacity: parent.enabled ? 1 : 0.65 }
                     background: Rectangle { color: window.themeForegrounds[window.selectedThemeIndex]; radius: 5; opacity: parent.enabled ? 1 : 0.35 }
+                    Layout.minimumWidth: window.compactHeader ? 104 : 128
                     onClicked: {
                         window.clearVisualizationPositionAndFocus()
                     }
