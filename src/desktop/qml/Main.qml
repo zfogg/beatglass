@@ -845,6 +845,17 @@ ApplicationWindow {
                     Accessible.name: "Visualization selection status"
                     Accessible.description: text
                 }
+                Button {
+                    objectName: "clearVisualizationSelection"
+                    text: "Clear position"
+                    enabled: visualizationCanvas.selectedPosition >= 0
+                    Accessible.name: "Clear visualization position"
+                    Accessible.description: "Remove the selected waveform or FFT position"
+                    onClicked: {
+                        visualizationCanvas.selectedPosition = -1
+                        visualizationCanvas.requestPaint()
+                    }
+                }
                 Label {
                     objectName: "visualizationRevisionStatus"
                     text: typeof visualizationPresentation === "undefined"
