@@ -200,6 +200,24 @@ ApplicationWindow {
             window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe 90 percent opacity applied.")
         }
         window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
+        window.syncOverlaySizePreferenceFromGeometry(savedGeometry)
+        return true
+    }
+    function syncOverlaySizePreferenceFromGeometry(geometry) {
+        if (!geometry || geometry.width <= 0 || geometry.height <= 0)
+            return false
+        const sizes = [[250, 110], [310, 130], [430, 180]]
+        let best = 0
+        let bestDistance = Number.MAX_VALUE
+        for (let index = 0; index < sizes.length; ++index) {
+            const distance = Math.abs(geometry.width - sizes[index][0])
+                    + Math.abs(geometry.height - sizes[index][1])
+            if (distance < bestDistance) {
+                best = index
+                bestDistance = distance
+            }
+        }
+        window.overlayPreferredSizeIndex = best
         return true
     }
     function reapplyOverlayVisualState() {
@@ -637,6 +655,8 @@ ApplicationWindow {
         function onGeometryChanged() {
             if (window.overlayBridge && window.overlayBridge.displayName !== "")
                 window.overlayPreferredDisplayName = window.overlayBridge.displayName
+            if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
+                window.syncOverlaySizePreferenceFromGeometry(window.overlayBridge.geometry)
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
         }
