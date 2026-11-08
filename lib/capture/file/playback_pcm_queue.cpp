@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <stdexcept>
 #include <limits>
-#include <limits>
 namespace beatglass {
 namespace { std::size_t checked_capacity(std::size_t slots) { if (!slots || slots == std::numeric_limits<std::size_t>::max()) throw std::invalid_argument("Playback queue dimensions are too large"); return slots + 1; } }
 PlaybackPcmQueue::PlaybackPcmQueue(std::size_t slot_count, std::size_t samples_per_slot)
@@ -11,8 +10,8 @@ PlaybackPcmQueue::PlaybackPcmQueue(std::size_t slot_count, std::size_t samples_p
   for (std::size_t i = 0; i < capacity_; ++i) slots_[i].samples = std::make_unique<float[]>(samples_per_slot_);
 }
 bool PlaybackPcmQueue::push(const AudioBlock& block) noexcept {
-  if (!block.epoch || block.samples.empty() || block.samples.size() > samples_per_slot_ ||
-      (block.format.channels && block.samples.size() / block.format.channels > std::numeric_limits<std::uint64_t>::max() - block.first_frame)) return false;
+  if (!block.epoch || !block.format.sample_rate || !block.format.channels || block.samples.empty() ||
+      block.samples.size() > samples_per_slot_ || block.samples.size() % block.format.channels) return false;
   const auto w = write_.load(std::memory_order_relaxed), next = (w + 1) % capacity_;
   if (next == read_.load(std::memory_order_acquire)) return false;
   auto& s = slots_[w]; std::copy(block.samples.begin(), block.samples.end(), s.samples.get());
