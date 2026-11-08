@@ -227,6 +227,26 @@ class ReadinessReportContractTest(unittest.TestCase):
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("manifest platform does not match report row", errors)
 
+    def test_report_inventory_must_match_manifest(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            report["platforms"][0]["artifact_inventory"] = report["platforms"][0]["artifact_inventory"][:-1]
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("report artifact inventory does not match manifest", errors)
+
+    def test_scenario_hash_mapping_must_match_manifest(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            report["platforms"][0]["scenario_evidence_sha256"]["unexpected"] = "0" * 64
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("scenario evidence hash mapping does not match manifest scenarios", errors)
+
     def test_duplicate_manifest_artifacts_are_rejected(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as directory:

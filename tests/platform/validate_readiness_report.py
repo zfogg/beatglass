@@ -141,6 +141,11 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
                 errors.append(f"{platform}: qualification output hash does not match report")
             if output_path.is_file() and output_path.stat().st_size != row.get("qualification_output_bytes"):
                 errors.append(f"{platform}: qualification output byte count does not match report")
+        report_inventory = row.get("artifact_inventory", [])
+        report_paths = [item.get("path") for item in report_inventory if isinstance(item, dict)]
+        manifest_paths = [item.get("path") for item in manifest_data.get("artifacts", []) if isinstance(item, dict)]
+        if set(report_paths) != set(manifest_paths):
+            errors.append(f"{platform}: report artifact inventory does not match manifest")
         evidence_hashes = row.get("scenario_evidence_sha256", {})
         if not isinstance(evidence_hashes, dict):
             errors.append(f"{platform}: scenario evidence hashes must be an object")
@@ -150,6 +155,7 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             errors.append(f"{platform}: manifest scenarios must be an array")
             scenarios = []
         scenario_ids = set()
+        expected_evidence_ids = set()
         for scenario in scenarios:
             if not isinstance(scenario, dict):
                 errors.append(f"{platform}: manifest scenario entry must be an object")
@@ -164,6 +170,7 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             evidence = scenario.get("evidence")
             if not evidence:
                 continue
+            expected_evidence_ids.add(scenario_id)
             path = bundles / platform / str(evidence)
             if not path.resolve().is_relative_to(platform_root):
                 errors.append(f"{platform}: scenario evidence escapes retained bundle: {evidence}")
@@ -173,6 +180,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
                 continue
             if hashlib.sha256(path.read_bytes()).hexdigest() != evidence_hashes.get(scenario_id):
                 errors.append(f"{platform}: scenario evidence hash does not match report: {scenario.get('id')}")
+        if set(evidence_hashes) != expected_evidence_ids:
+            errors.append(f"{platform}: scenario evidence hash mapping does not match manifest scenarios")
         manifest_platform = manifest_data.get("platform")
         if not isinstance(manifest_platform, str) or manifest_platform.lower() != platform:
             errors.append(f"{platform}: manifest platform does not match report row")
