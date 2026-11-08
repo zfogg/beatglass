@@ -1,5 +1,9 @@
 # Platform qualification status
 
+## Decoder retry evidence handoff
+
+Native handoff bundles must demonstrate both a compatible retry (same decoder snapshot, source fixture hash, and identity) and an incompatible retry that is rejected fail-closed. Retain the original and retry commands, diagnostics, build/runtime identity, and resulting readiness status. The negative case is required evidence that stale decoder output cannot be promoted.
+
 ## Native codec/runtime evidence expectations
 
 Each platform qualification run must record the decoder/runtime build identity, codec feature configuration, exact source fixture hash, decoder snapshot, selected backend/device, and the full command transcript. Evidence must include a successful decode plus a controlled failure or missing-codec case, with retained logs and the resulting readiness artifact. A portable decoder test or headless build is preparation evidence only and cannot advance the native matrix.
