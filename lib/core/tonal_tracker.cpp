@@ -68,7 +68,10 @@ struct TonalTracker::Impl {
     for (const auto& h : history) for (std::size_t i = 0; i < h.size(); ++i) average[i] += h[i] / history.size();
     std::string key_name, chord_name; Real ks{}, cs{};
     classify(*key, average, key_name, ks); classify(*chord, chroma, chord_name, cs);
-    if (std::isfinite(ks) && std::isfinite(cs)) {
+    // Essentia's strengths are uncalibrated evidence, not probabilities.  A
+    // non-positive or non-finite score is no evidence at all; fail closed so
+    // the UI cannot present a confident-looking label for an ambiguous frame.
+    if (!key_name.empty() && !chord_name.empty() && std::isfinite(ks) && std::isfinite(cs) && ks > 0 && cs > 0) {
       result.key = key_name; result.chord = chord_name; result.key_strength = ks; result.chord_strength = cs;
     }
   }
