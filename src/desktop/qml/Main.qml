@@ -1644,6 +1644,30 @@ ApplicationWindow {
                     ToolTip.text: enabled ? "Seek playback to the selected waveform position" : "Seeking requires an active playback source and waveform data"
                     onClicked: window.seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationCanvas.renderedWaveform.length)
                 }
+                Button {
+                    objectName: "resumeVisualizationPlayback"
+                    activeFocusOnTab: true
+                    text: "Resume playback"
+                    enabled: window.playbackBridge !== null && window.playbackBridge.state === "Paused"
+                    Accessible.name: "Resume playback for visualization"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: enabled ? "Resume playback while retaining the accepted visualization snapshot." : "Playback must be paused to resume it."
+                    ToolTip.text: enabled ? "Resume playback without clearing the accepted snapshot" : "Resume is available when playback is paused"
+                    onClicked: window.playbackBridge.resume()
+                }
+                Button {
+                    objectName: "stopVisualizationPlayback"
+                    activeFocusOnTab: true
+                    text: "Stop playback"
+                    enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped"
+                    Accessible.name: "Stop playback and clear visualization"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: enabled ? "Stop playback and clear the accepted visualization snapshot." : "Playback is already stopped."
+                    ToolTip.text: enabled ? "Stop playback and clear the accepted visualization snapshot" : "Playback is already stopped"
+                    onClicked: window.playbackBridge.stop()
+                }
                 }
                 Label {
                     objectName: "visualizationRevisionStatus"
