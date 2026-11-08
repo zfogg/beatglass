@@ -114,3 +114,13 @@ TEST_CASE("catalog reports a replaced audio file as a directory") {
  CHECK(replaced.entries[0].directory);
  CHECK(replaced.entries[0].format.empty());
 }
+
+TEST_CASE("catalog orders case-fold collisions by original name and preserves paths") {
+ TempDir dir; dir.file("alpha.wav"); dir.file("Alpha.wav");
+ const auto result = beatglass::library::browse(dir.path);
+ REQUIRE(result.entries.size() == 2);
+ CHECK(result.entries[0].name == "Alpha.wav");
+ CHECK(result.entries[1].name == "alpha.wav");
+ CHECK(result.entries[0].path == dir.path / "Alpha.wav");
+ CHECK(result.entries[1].path == dir.path / "alpha.wav");
+}

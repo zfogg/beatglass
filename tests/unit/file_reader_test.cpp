@@ -95,6 +95,14 @@ TEST_CASE("file reader rejects source mutation before the next read") {
  CHECK_THROWS_WITH(reader.read(samples), "File reader failed");
 }
 
+TEST_CASE("file reader rejects source shrink after playback progress") {
+ WaveFixture fixture; FileReader reader(fixture.path, 27); std::array<float,2> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ std::filesystem::resize_file(fixture.path, 20);
+ CHECK_THROWS_WITH(reader.read(samples), "Audio source changed during read");
+ CHECK_THROWS_WITH(reader.read(samples), "File reader failed");
+}
+
 TEST_CASE("cancellation wins over a simultaneous path mutation") {
  WaveFixture fixture; FileReader reader(fixture.path, 22); std::array<float,2> samples{};
  { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
