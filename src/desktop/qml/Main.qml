@@ -376,6 +376,8 @@ ApplicationWindow {
         window.requestActivate()
     }
     function quitApplication() {
+        window.overlayWasVisibleBeforeAvailabilityLoss = false
+        window.overlayDisplayRecoveryPending = false
         if (window.overlayBridge)
             window.overlayBridge.hideOverlay()
         window.announceCaptureRecoveryState("Beatglass is quitting; overlay hidden and persisted settings retained.")
