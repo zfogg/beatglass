@@ -36,6 +36,7 @@ public:
   Q_INVOKABLE void close();
   Q_INVOKABLE void refreshRetryableRuns();
     Q_INVOKABLE void discardSelectedRun();
+  Q_INVOKABLE void discardRuns(const QStringList& ids);
   /** Retry the selected persisted run using its stored source and decoder snapshot. */
   Q_INVOKABLE void retrySelectedRun();
   /** Look up a completed result on the storage worker without starting analysis. */
