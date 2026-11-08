@@ -6,6 +6,7 @@
 #include "playback_session_bridge.hpp"
 #include "analysis_presentation.hpp"
 #include "capture_monitor_bridge.hpp"
+#include "storage_recovery_bridge.hpp"
 #ifdef Q_OS_WINDOWS
 #include "platform/windows_endpoint_bridge.hpp"
 #include "platform/windows_overlay.hpp"
@@ -29,6 +30,11 @@ int main(int argc, char** argv) {
   beatglass::windows::EndpointBridge endpointSelection;
 #endif
   QGuiApplication app(argc, argv); Metadata metadata; AnalysisPresentation analysis;
+  StorageRecoveryBridge storageRecovery;
+  const QStringList args = app.arguments();
+  const int storageIndex = args.indexOf(QStringLiteral("--database"));
+  if (storageIndex >= 0 && storageIndex + 1 < args.size()) storageRecovery.setDatabasePath(args.at(storageIndex + 1));
+  if (!storageRecovery.databasePath().isEmpty()) storageRecovery.open();
 #ifdef BEATGLASS_BUILD_DESKTOP_ANALYSIS
   beatglass::library_detail::JobExecutor analysisExecutor(2); AnalysisJobBridge analysisJob(analysisExecutor);
 #endif
@@ -53,6 +59,7 @@ int main(int argc, char** argv) {
   engine.rootContext()->setContextProperty("visualizationPresentation", &visualization);
   engine.rootContext()->setContextProperty("libraryCatalog", &libraryCatalog);
   engine.rootContext()->setContextProperty("playbackSession", &playbackSession);
+  engine.rootContext()->setContextProperty("storageRecovery", &storageRecovery);
 #ifdef Q_OS_MACOS
   engine.rootContext()->setContextProperty("macOverlayController", &macOverlayController);
 #endif
