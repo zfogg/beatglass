@@ -29,4 +29,12 @@ CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
 FingerprintStatus refresh_collection_file(SqliteCache& cache, const std::filesystem::path& path,
                                           std::stop_token stop = {},
                                           std::string* diagnostic = nullptr);
+/** Recompute a file fingerprint and compare it with a previously published key.
+ * Returns `ok` only when the observed digest equals expected_content; callers
+ * should treat every other result as a cache miss or stale-input outcome.
+ */
+FingerprintStatus revalidate_file_identity(const std::filesystem::path& path,
+                                           const std::string& expected_content,
+                                           std::stop_token stop = {},
+                                           std::string* diagnostic = nullptr);
 }
