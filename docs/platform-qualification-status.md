@@ -160,3 +160,5 @@ This audit intentionally records unavailable evidence as pending rather than tre
 ## Documentation reconciliation
 
 The merged handoff tooling and this status page distinguish implemented preparation checks, attributable retained evidence, and native qualification observed on hardware. The first two states are covered by local verifier tests and portable fixtures; none changes the Windows, macOS or Linux rows to `READY`. Support language remains experimental until each row contains real desktop, audio and overlay evidence and the machine-readable report passes the all-platform exit gate.
+
+The evidence-bundle verifier also rejects incomplete (`UNRUN` or `PENDING`) scenarios that claim retained evidence. Evidence ownership is reserved for completed `PASS` or `FAIL` scenarios, preventing a pending row from being mistaken for a qualified observation.

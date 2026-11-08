@@ -78,6 +78,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
                 errors.append(f"scenario evidence role mismatch: {scenario.get('id')} -> {evidence}")
             else:
                 evidence_owners[evidence] = scenario.get("id")
+        elif scenario.get("evidence"):
+            errors.append(f"incomplete scenario must not claim evidence: {scenario.get('id')}")
     return errors
 
 
