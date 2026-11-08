@@ -21,6 +21,7 @@ consumer = _load("consume_readiness_handoff")
 ingester = _load("ingest_qualification_artifacts")
 reviewer = _load("review_readiness_handoff")
 packet_consumer = _load("consume_review_packet")
+bundle_consumer = _load("consume_review_bundle")
 
 
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
@@ -69,10 +70,10 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
         review_json.parent.mkdir(parents=True, exist_ok=True)
         review_json.write_text(json.dumps(reviewer.review_packet(output), indent=2, sort_keys=True) + "\n", encoding="utf-8")
         if consume_review or require_ready:
-            # Bind packet consumption to the exact report retained beside it.
-            # This prevents a copied/replaced report from being accepted with
-            # an otherwise valid review packet.
-            errors.extend(packet_consumer.consume(review_json, output))
+            # Strict handoff consumes the retained pair as one bundle. This
+            # prevents a copied/replaced report from being accepted with an
+            # otherwise valid review packet.
+            errors.extend(bundle_consumer.consume(review_json.parent, output.name, review_json.name))
     if consume_report:
         errors.extend(consumer.consume(output))
     return errors
