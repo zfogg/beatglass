@@ -1247,7 +1247,7 @@ ApplicationWindow {
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
-                            ToolTip.text: "Current theme and motion settings"
+                            ToolTip.text: "Current theme: " + window.selectedTheme + "; motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Layout.fillWidth: true
                         }
                     }
