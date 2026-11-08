@@ -2343,7 +2343,7 @@ ApplicationWindow {
                         ToolTip.text: "Clear the unavailable saved display and choose a replacement"
                         onClicked: window.forgetUnavailableOverlayDisplay()
                     }
-                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay display status" }
+                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.StaticText; Accessible.description: window.overlayDisplayRecoveryPending ? text + ". The saved display is being recovered; the overlay will return when it is available." : text + ". The overlay destination is ready."; ToolTip.text: "Current overlay display status" }
                     Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
