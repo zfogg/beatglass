@@ -1,5 +1,5 @@
 #include "storage_recovery_bridge.hpp"
-#include "beatglass/library/storage_owner.hpp"
+#include "beatglass/library/analysis_coordinator.hpp"
 #include <QMetaObject>
 
 class StorageRecoveryBridge::Worker final : public QObject {
@@ -8,28 +8,28 @@ public slots:
   void open(QString path) {
     beatglass::library::StorageConfig config{path.toStdString()};
     std::string diagnostic;
-    const bool ok = owner_.open(config, &diagnostic);
+    const bool ok = coordinator_.open_storage(config, &diagnostic);
     emit result(ok, QString::fromStdString(ok ? "Storage open" : diagnostic));
     if (ok) refresh();
   }
-  void close() { owner_.close(); emit result(true, QStringLiteral("Storage closed")); }
+  void close() { coordinator_.close_storage(); emit result(true, QStringLiteral("Storage closed")); }
   void refresh() {
-    const auto runs = owner_.retryable_runs();
+    const auto runs = coordinator_.storage().retryable_runs();
     QStringList ids;
     for (const auto& run : runs) ids.push_back(QString::fromStdString(run.id));
     emit runsChanged(ids);
   }
-  void discard(QString id) { const bool ok = owner_.discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
+  void discard(QString id) { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
   void findCached(QString content, QString engine, QString configuration, QString mode) {
     beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
-    std::string result; emit cached(owner_.find_cached(identity, result), QString::fromStdString(result));
+    std::string result; emit cached(coordinator_.storage().find_cached(identity, result), QString::fromStdString(result));
   }
 signals:
   void result(bool ok, QString status);
   void runsChanged(QStringList ids);
   void cached(bool hit, QString result);
 private:
-  beatglass::library::StorageOwner owner_;
+  beatglass::library::AnalysisCoordinator coordinator_;
 };
 
 StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent), worker_(new Worker) {

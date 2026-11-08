@@ -13,6 +13,8 @@ required = {
     "worker result signal": 'void cached(bool hit, QString result);',
     "visible cache status": 'objectName: "analysisCacheStatus"',
     "hit state binding": 'storageRecovery.cacheHit ? "Cached analysis ready"',
+    "coordinator-owned worker": 'AnalysisCoordinator coordinator_',
+    "coordinator storage lookup": 'coordinator_.storage().find_cached',
 }
 haystack = header + source + qml
 missing = [name for name, marker in required.items() if marker not in haystack]
