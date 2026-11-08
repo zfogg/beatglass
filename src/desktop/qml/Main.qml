@@ -1595,7 +1595,22 @@ ApplicationWindow {
                                 text: "Discard all saved runs"
                                 Accessible.name: "Discard all saved retryable analysis runs"
                                 Accessible.description: "Remove every persisted retry record currently shown. Source audio files are never changed."
-                                onClicked: { storageRecovery.discardRuns(storageRecovery.retryableRunIds); window.announceVisualizationRecovery("All saved recovery runs discarded."); forceActiveFocus() }
+                                onClicked: discardAllRecoveryDialog.open()
+                            }
+                            Dialog {
+                                id: discardAllRecoveryDialog
+                                objectName: "discardAllRecoveryDialog"
+                                title: "Discard all saved analysis runs?"
+                                modal: true
+                                standardButtons: Dialog.Ok | Dialog.Cancel
+                                Accessible.name: "Discard all saved recovery runs confirmation"
+                                Accessible.description: "Confirm removing every persisted retry record currently shown. Source audio files are never changed. Cancel is safe."
+                                contentItem: Label {
+                                    text: "This removes " + (typeof storageRecovery !== "undefined" ? storageRecovery.retryableRunIds.length : 0) + " saved retry record(s). Source audio files are not changed."
+                                    wrapMode: Text.WordWrap
+                                }
+                                onAccepted: { storageRecovery.discardRuns(storageRecovery.retryableRunIds); window.announceVisualizationRecovery("All saved recovery runs discarded."); discardAllPersistedRecovery.forceActiveFocus() }
+                                onRejected: discardAllPersistedRecovery.forceActiveFocus()
                             }
                             Label { objectName: "selectedPersistedRecoveryResetStatus"; visible: typeof storageRecovery !== "undefined" && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== ""; text: visible ? ("Selected recovery: " + storageRecovery.resetStatus) : ""; Accessible.name: "Selected persisted recovery status"; Accessible.description: visible ? text : "No selected persisted recovery reset has been performed."; Accessible.role: Accessible.Status; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                             Dialog {
