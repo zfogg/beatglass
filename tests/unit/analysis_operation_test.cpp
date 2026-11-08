@@ -97,6 +97,23 @@ TEST_CASE("coordinator rejects incompatible snapshots before reserving work") {
   CHECK_FALSE(coordinator.submit("legacy-run", std::move(op)));
   CHECK(coordinator.storage().retryable_runs().empty());
 }
+TEST_CASE("coordinator cancellation does not publish a stale result") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  std::atomic_bool published{false};
+  beatglass::library::AnalysisOperation op;
+  op.source.path = "track.wav"; op.source.content_hash = "cancel-hash";
+  op.identity = {"cancel-hash", "engine", "config", "offline"}; op.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  op.decode = [](std::stop_token stop, const auto&) { while (!stop.stop_requested()) std::this_thread::yield(); return std::string{}; };
+  op.verify = [](std::stop_token stop) { return beatglass::FileVerificationResult{stop.stop_requested() ? beatglass::FileVerificationOutcome::cancelled : beatglass::FileVerificationOutcome::match}; };
+  op.publish = [&published](const std::string&) { published.store(true); };
+  auto handle = coordinator.submit("cancel-run", std::move(op));
+  REQUIRE(handle);
+  handle->cancel();
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  CHECK(handle->state() == beatglass::library_detail::TrackedState::cancelled);
+  CHECK_FALSE(published.load());
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
