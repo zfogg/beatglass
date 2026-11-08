@@ -28,6 +28,8 @@ This audit is intentionally a completion aid, not a claim that issue #76 or issu
 
 The remaining library detail and analysis status labels now use explicit static-text roles while retaining source-attributed dynamic descriptions.
 
+Settings permission guidance, appearance state, and persistence status are also explicit static text with accessible names.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
