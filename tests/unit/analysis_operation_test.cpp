@@ -303,6 +303,33 @@ TEST_CASE("stale retry rejection reason survives coordinator restart") {
   coordinator.close_storage();
   REQUIRE(std::filesystem::remove(db));
 }
+TEST_CASE("decoder mismatch and missing source reasons survive restart") {
+  const auto db = std::filesystem::temp_directory_path() / ("beatglass-rejection-reasons-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  const beatglass::library_detail::CacheKey decoder_key{"decoder-restart", "engine", "config", "offline"};
+  const beatglass::library_detail::CacheKey missing_key{"missing-restart", "engine", "config", "offline"};
+  {
+    beatglass::library_detail::SqliteCache cache(db.string());
+    cache.begin("decoder-rejection", decoder_key, "endpoint://decoder", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("decoder-rejection", decoder_key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+    cache.begin("missing-rejection", missing_key, "", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("missing-rejection", missing_key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  }
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({db.string()}));
+  beatglass::library::AnalysisOperation decoder_operation;
+  decoder_operation.source.path = "endpoint://decoder"; decoder_operation.source.content_hash = decoder_key.content;
+  decoder_operation.identity = {decoder_key.content, decoder_key.engine, decoder_key.config, decoder_key.mode}; decoder_operation.decoder_snapshot = "file-reader-v0";
+  CHECK(coordinator.retry_rejection_reason("decoder-rejection", decoder_operation) == beatglass::library::RetryRejectionReason::incompatible_decoder_snapshot);
+  CHECK(std::string(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::incompatible_decoder_snapshot)) == "incompatible decoder snapshot");
+  beatglass::library::AnalysisOperation missing_operation;
+  missing_operation.source.path = ""; missing_operation.source.content_hash = missing_key.content;
+  missing_operation.identity = {missing_key.content, missing_key.engine, missing_key.config, missing_key.mode}; missing_operation.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  CHECK(coordinator.retry_rejection_reason("missing-rejection", missing_operation) == beatglass::library::RetryRejectionReason::missing_source_snapshot);
+  CHECK(std::string(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::missing_source_snapshot)) == "persisted source snapshot unavailable");
+  REQUIRE(coordinator.storage().retryable_runs().size() == 2);
+  coordinator.close_storage();
+  REQUIRE(std::filesystem::remove(db));
+}
 TEST_CASE("coordinator missing source retry fails closed without a cache result") {
   beatglass::library::AnalysisCoordinator coordinator;
   REQUIRE(coordinator.open_storage({":memory:"}));
