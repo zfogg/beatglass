@@ -301,7 +301,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 TabButton { id: libraryTab; text: "Library"; objectName: "libraryTab"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: "Browse local audio files"; Accessible.name: "Library"; Accessible.description: "Browse local audio files. Shortcut Ctrl+Shift+1; focus returns to this tab."; background: Rectangle { color: libraryTab.checked ? "#273b5d" : "transparent"; border.width: libraryTab.activeFocus ? 3 : 1; border.color: libraryTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
                 TabButton { id: djTab; text: "DJ"; objectName: "djTab"; Accessible.name: "DJ"; Accessible.description: "View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2; focus returns to this tab."; background: Rectangle { color: djTab.checked ? "#273b5d" : "transparent"; border.width: djTab.activeFocus ? 3 : 1; border.color: djTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
-                TabButton { id: settingsTab; text: "Settings"; objectName: "settingsTab"; Accessible.name: "Settings"; Accessible.description: "Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab."; background: Rectangle { color: settingsTab.checked ? "#273b5d" : "transparent"; border.width: settingsTab.activeFocus ? 3 : 1; border.color: settingsTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
+                TabButton { id: settingsTab; text: "Settings"; objectName: "settingsTab"; activeFocusOnTab: true; Accessible.name: "Settings"; Accessible.description: "Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab."; Accessible.role: Accessible.Tab; ToolTip.text: "Open audio, appearance, and overlay settings"; background: Rectangle { color: settingsTab.checked ? "#273b5d" : "transparent"; border.width: settingsTab.activeFocus ? 3 : 1; border.color: settingsTab.activeFocus ? "#60a5fa" : "#718096"; radius: 5 } }
             }
             ComboBox {
                 id: themeSelector
@@ -1254,6 +1254,7 @@ ApplicationWindow {
                     Accessible.name: "Settings status: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
+                    Accessible.description: "Settings persistence status and user-audio safety guarantee."
                     ToolTip.text: "Settings persistence and source-file safety"
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
