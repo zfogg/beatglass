@@ -245,3 +245,5 @@ Capture status, endpoint discovery and selection status, permission guidance, an
 Library folder and audio-file entries now expose context-specific tooltips that match their accessible action descriptions, making directory navigation and source selection discoverable on hover as well as through assistive technology.
 
 Analysis recovery actions now participate in the keyboard tab order explicitly. Retry/cancel controls for single and batch analysis expose matching tooltips and accessible descriptions, so keyboard and pointer users receive the same recovery guidance while jobs are queued, running, cancelled, or failed.
+
+Metadata recovery, source clearing, and waveform/FFT mode controls now explicitly participate in keyboard traversal. Their focusable state is covered alongside the existing error, empty, and loading semantics so recovery remains discoverable without a pointer.

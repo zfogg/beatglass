@@ -596,6 +596,7 @@ ApplicationWindow {
                         Button {
                             objectName: "clearSelectedAudio"
                             text: "Clear selection"
+                            activeFocusOnTab: true
                             enabled: window.selectedName !== ""
                             Accessible.name: "Clear selected audio"
                             Accessible.role: Accessible.Button
@@ -616,6 +617,7 @@ ApplicationWindow {
                             objectName: "retryMetadata"
                             text: "Retry metadata"
                             visible: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0
+                            activeFocusOnTab: true
                             enabled: visible
                             Accessible.name: "Retry metadata"
                             Accessible.role: Accessible.Button
@@ -815,6 +817,7 @@ ApplicationWindow {
                     objectName: "visualizationModeControls"
                     Button {
                         id: waveformView
+                        activeFocusOnTab: true
                         text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"
                         Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."
                         ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
@@ -830,6 +833,7 @@ ApplicationWindow {
                     }
                     Button {
                         id: spectrumView
+                        activeFocusOnTab: true
                         text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"
                         Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."
                         ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
