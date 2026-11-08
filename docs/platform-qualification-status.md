@@ -76,6 +76,8 @@ Each platform artifact inventory must likewise retain a path, SHA-256, byte coun
 
 Pass `--bundles <retained-bundle-root>` to `validate_readiness_report.py` to recompute each manifest and retained artifact hash/byte count locally. A report is not accepted when its recorded provenance or artifact inventory disagrees with the files on disk.
 
+To create a conservative report from retained platform bundles, run `python tests/platform/generate_readiness_report.py <retained-bundle-root> <readiness-report.json>`. Generation always emits `PENDING`, keeps support language experimental, and requires a later native-evidence review before any gate can change.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.
