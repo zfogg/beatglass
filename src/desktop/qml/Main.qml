@@ -795,6 +795,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisSourcePath"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.sourcePath !== ""
+                                text: visible ? ("Analysis source: " + window.analysisJobBridge.sourcePath) : ""
+                                Accessible.name: "Analysis source"
+                                Accessible.description: visible ? text : "No analysis source is selected."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideMiddle
+                            }
+                            Label {
                                 objectName: "analysisBatchStatus"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount !== undefined
                                 text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount

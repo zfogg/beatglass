@@ -316,6 +316,8 @@ Single and batch retries now reset/republish frame progress immediately, rather 
 
 Invalid single-operation submissions also clear prior result and frame state before entering `Failed`, so rejected work cannot display stale output.
 
+The desktop bridge now carries the submitted operation source path alongside status, progress, and results, making worker output source-attributed in the Library surface.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
