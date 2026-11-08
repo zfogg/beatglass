@@ -337,3 +337,5 @@ The live visualization canvas now declares graphic semantics in addition to its 
 The live visualization canvas now supports Escape as a keyboard recovery action that clears the selected position, and both its accessible description and tooltip document that path alongside Left/Right/Home/End navigation. This keeps selection state reversible without requiring pointer input or a separate button.
 
 Waveform and FFT mode controls now expose explicit radio-button roles, while the clear-position action reports whether it is available or has no selection to clear. Together with the grouped selection surface, this makes the visualization’s mode and position interaction state explicit before activation.
+
+Primary navigation now reports the current Library, DJ, or Settings page as a live toolbar value, and its tooltip includes the same current-page context. This gives keyboard and assistive navigation a stable location announcement while switching between the three product surfaces.

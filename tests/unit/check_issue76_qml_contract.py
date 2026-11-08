@@ -381,6 +381,7 @@ def main() -> int:
         "visualization keyboard recovery tooltip": "ToolTip.text: \"Click to select a position; use Left/Right/Home/End to navigate or Escape to clear\"",
         "visualization mode radio roles": "objectName: \"waveformView\"; checkable: true; checked: visualizationCanvas.viewMode === \"waveform\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.role: Accessible.RadioButton",
         "visualization clear button state": "Accessible.name: \"Clear visualization position\"\n                    Accessible.value: enabled ? \"available\" : \"no position selected\"\n                    Accessible.role: Accessible.Button",
+        "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
