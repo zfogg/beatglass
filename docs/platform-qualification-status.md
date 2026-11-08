@@ -170,3 +170,5 @@ Artifact manifest hashes follow the same fail-closed rule: `sha256` must be a st
 Scenario inventory IDs are validated as strings before set-based completeness checks. Structured IDs fail as invalid scenarios and preserve the missing-required-scenario signal, keeping malformed manifests pending rather than allowing an exception to bypass the consumer decision.
 
 Duplicate-ID checks apply only to validated string IDs; repeated structured IDs are reported as invalid scenarios without allowing the duplicate analysis itself to throw.
+
+Artifact-role indexing likewise considers only validated string paths. A structured artifact path is rejected during manifest validation and cannot trigger a secondary exception while scenario ownership is being checked.
