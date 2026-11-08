@@ -3,6 +3,7 @@ param([Parameter(Mandatory = $true)][string]$Manifest)
 $ErrorActionPreference = 'Stop'
 $manifestPath = (Resolve-Path -LiteralPath $Manifest).Path
 $base = Split-Path -Parent $manifestPath
+$basePrefix = $base.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
 $lines = @(Get-Content -LiteralPath $manifestPath | Where-Object { $_.Trim() })
 if ($lines.Count -eq 0) { throw "Artifact manifest is empty: $manifestPath" }
 $seen = @{}
@@ -13,7 +14,9 @@ foreach ($line in $lines) {
   $seen[$relative] = $true
   $path = Join-Path $base $relative
   if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing artifact: $path" }
-  $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash.ToLowerInvariant()
+  $resolved = (Resolve-Path -LiteralPath $path).Path
+  if (-not $resolved.StartsWith($basePrefix, [StringComparison]::OrdinalIgnoreCase)) { throw "Artifact path escapes manifest directory: $relative" }
+  $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $resolved).Hash.ToLowerInvariant()
   if ($actual -ne $expected) { throw "Hash mismatch: $path" }
 }
 Write-Output "Verified $($lines.Count) artifact hash(es) from $manifestPath"
