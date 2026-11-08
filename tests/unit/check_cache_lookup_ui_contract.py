@@ -20,6 +20,7 @@ required = [
     'objectName: "cancelAdmittedAnalysis"',
     'objectName: "retryAdmittedAnalysis"',
     'objectName: "analysisCompletionResult"',
+    'objectName: "analysisRetryOutcome"',
 ]
 missing = [marker for marker in required if marker not in qml]
 if missing:

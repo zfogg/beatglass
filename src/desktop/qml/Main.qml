@@ -909,6 +909,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisRetryOutcome"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.retryableRunIds !== undefined && storageRecovery.retryableRunIds.length > 0
+                                text: visible ? ("Persisted retry outcome: " + storageRecovery.retryableRunIds.length + " retryable run(s)") : ""
+                                Accessible.name: "Persisted retry outcome"
+                                Accessible.description: visible ? text : "No persisted retryable analysis runs are available."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisCompletionResult"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
                                 text: visible ? ("Completed analysis result: " + storageRecovery.analysisResult) : ""
