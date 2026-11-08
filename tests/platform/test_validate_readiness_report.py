@@ -394,6 +394,16 @@ class ReadinessReportContractTest(unittest.TestCase):
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("report row contains generation errors", errors)
 
+    def test_report_row_errors_require_nonempty_strings(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            report["platforms"][0]["errors"] = ["", 7]
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("report row errors must be a list of strings", errors)
+
     def test_report_artifact_roles_must_match_manifest(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as directory:

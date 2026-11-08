@@ -120,7 +120,10 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
     errors = []
     for row in report.get("platforms", []):
         platform = row.get("platform")
-        if isinstance(row.get("errors"), list) and row.get("errors"):
+        row_errors = row.get("errors", [])
+        if not isinstance(row_errors, list) or any(not isinstance(error, str) or not error.strip() for error in row_errors):
+            errors.append(f"{platform}: report row errors must be a list of strings")
+        elif row_errors:
             errors.append(f"{platform}: report row contains generation errors")
         platform_root = (bundles / str(platform)).resolve()
         manifest = bundles / platform / "manifest.json"
