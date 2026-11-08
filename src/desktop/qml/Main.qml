@@ -285,6 +285,8 @@ ApplicationWindow {
                             Button { text: "Open"; objectName: "openPlayback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
                             Button { text: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume" : "Pause"; objectName: "pausePlayback"; enabled: window.playbackBridge && window.playbackBridge.state === "Playing"; onClicked: window.playbackBridge.pause() }
                             Button { text: "Stop"; objectName: "stopPlayback"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.stop() }
+                            Button { text: "−5 s"; objectName: "seekBackPlayback"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - 5 * 44100), window.playbackBridge.epoch + 1) }
+                            Button { text: "+5 s"; objectName: "seekForwardPlayback"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * 44100, window.playbackBridge.epoch + 1) }
                             Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState" }
                         }
                     }
