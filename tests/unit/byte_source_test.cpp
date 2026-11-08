@@ -13,6 +13,7 @@ public:
  bool invalid{};
  bool invalid_after_read{};
  bool premature_end{};
+ bool end_with_bytes{};
  bool cancelled_after_write{};
  bool error_after_write{};
  bool throw_on_read{};
@@ -21,7 +22,7 @@ public:
  ByteReadResult read_at(std::uint64_t offset, std::span<std::byte> out, std::stop_token) override {
    if (throw_on_read) throw std::runtime_error("synthetic source failure");
    if (invalid) return {ByteReadStatus::data, out.size() + 1};
-   if (premature_end) return {ByteReadStatus::end, 0};
+   if (premature_end) return {ByteReadStatus::end, end_with_bytes ? 1u : 0u};
    if (cancelled_after_write) { out[0] = std::byte{9}; return {ByteReadStatus::cancelled, 0}; }
    if (error_after_write) { out[0] = std::byte{8}; return {ByteReadStatus::error, 0}; }
    auto n = std::min(out.size(), bytes.size() - static_cast<std::size_t>(offset));
@@ -59,6 +60,16 @@ TEST_CASE("byte cursor rejects malformed reads and preserves position on cancell
  CHECK(cursor.read({}).status == ByteReadStatus::error);
  CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
  CHECK(cursor.position() == source.size());
+}
+
+TEST_CASE("byte cursor rejects EOF responses that claim bytes") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ source.premature_end = true; source.end_with_bytes = true;
+ CHECK(cursor.read(out).status == ByteReadStatus::error);
+ CHECK(cursor.position() == 0);
+ source.premature_end = false; source.end_with_bytes = false;
+ CHECK(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 2);
 }
 TEST_CASE("signed byte seeks handle origins and extreme displacements") {
  MemorySource source; ByteCursor cursor(source);
