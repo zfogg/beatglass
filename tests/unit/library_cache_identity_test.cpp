@@ -26,3 +26,16 @@ TEST_CASE("cache identity never creates a key for missing or cancelled input") {
  CHECK(cancelled.status == FingerprintStatus::cancelled);
  CHECK(cancelled.key.content.empty());
 }
+
+TEST_CASE("collection refresh publishes only a validated fingerprint") {
+ Fixture f; SqliteCache cache(":memory:"); std::string diagnostic;
+ REQUIRE(refresh_collection_file(cache, f.path, {}, &diagnostic) == FingerprintStatus::ok);
+ const auto entry = cache.entry(f.path.string());
+ REQUIRE(entry.has_value());
+ CHECK(entry->fingerprint.rfind("sha256:", 0) == 0);
+ CHECK(entry->size_bytes == 8);
+ CHECK(entry->kind == "audio");
+ std::stop_source stop; stop.request_stop();
+ CHECK(refresh_collection_file(cache, f.path, stop.get_token(), &diagnostic) == FingerprintStatus::cancelled);
+ CHECK(cache.entry(f.path.string()).has_value());
+}

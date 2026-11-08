@@ -22,4 +22,11 @@ CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
                                              std::string config,
                                              std::string mode,
                                              std::stop_token stop = {});
+
+/** Refresh one regular-file catalog row from a validated content observation.
+ * A changed, cancelled, or failed fingerprint leaves the previous row intact.
+ */
+FingerprintStatus refresh_collection_file(SqliteCache& cache, const std::filesystem::path& path,
+                                          std::stop_token stop = {},
+                                          std::string* diagnostic = nullptr);
 }
