@@ -179,6 +179,7 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         manifest_roles = {item.get("path"): item.get("role") for item in manifest_data.get("artifacts", []) if isinstance(item, dict)}
         if report_roles and report_roles != manifest_roles:
             errors.append(f"{platform}: report artifact roles do not match manifest")
+        manifest_role_by_path = manifest_roles
         evidence_hashes = row.get("scenario_evidence_sha256", {})
         if not isinstance(evidence_hashes, dict):
             errors.append(f"{platform}: scenario evidence hashes must be an object")
@@ -227,6 +228,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             expected_evidence_ids.add(scenario_id)
             if evidence not in manifest_paths:
                 errors.append(f"{platform}: scenario evidence is not listed as an artifact: {evidence}")
+            elif manifest_role_by_path.get(evidence) != scenario_id:
+                errors.append(f"{platform}: scenario evidence role does not match scenario: {scenario_id}")
             path = bundles / platform / str(evidence)
             if not path.resolve().is_relative_to(platform_root):
                 errors.append(f"{platform}: scenario evidence escapes retained bundle: {evidence}")

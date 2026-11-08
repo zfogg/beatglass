@@ -112,6 +112,10 @@ The consumer also requires the complete capture, recovery, output, display,
 playback, and overlay scenario set on every manifest; partial bundles remain
 ineligible for acceptance.
 
+For completed scenarios, the retained evidence artifact's declared role must
+match the scenario ID, preventing a valid file from being reassigned to a
+different scenario after capture.
+
 For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
 
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
