@@ -42,10 +42,24 @@ def render(report_path: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
+def review_packet(report_path: Path) -> dict:
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    return {"gate_status": report.get("exit_gate_status"),
+            "native_qualification_required": report.get("native_qualification_required"),
+            "acceptance_errors": consumer.consume(report_path),
+            "platform_support_status": report.get("platform_support_status", []),
+            "platforms": [{"platform": row.get("platform"), "manifest": row.get("manifest"),
+                           "manifest_sha256": row.get("manifest_sha256"),
+                           "scenarios": row.get("scenario_inventory", []),
+                           "artifacts": row.get("artifact_inventory", [])}
+                          for row in report.get("platforms", [])]}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("report", type=Path); parser.add_argument("output", type=Path)
     parser.add_argument("--require-ready", action="store_true")
+    parser.add_argument("--json-output", type=Path, help="write a machine-readable review packet")
     args = parser.parse_args(); args.output.write_text(render(args.report), encoding="utf-8")
     report = json.loads(args.report.read_text(encoding="utf-8"))
     if args.require_ready and report.get("exit_gate_status") != "READY":
@@ -54,6 +68,9 @@ def main() -> int:
         errors = consumer.consume(args.report)
         if errors:
             print("\n".join(errors)); return 1
+    if args.json_output is not None:
+        args.json_output.parent.mkdir(parents=True, exist_ok=True)
+        args.json_output.write_text(json.dumps(review_packet(args.report), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"wrote native qualification review checklist: {args.output}"); return 0
 
 

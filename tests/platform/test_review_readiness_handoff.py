@@ -46,3 +46,10 @@ class ReadinessReviewTest(unittest.TestCase):
             report_path = Path(tmp) / "report.json"; report_path.write_text(json.dumps(report), encoding="utf-8")
             with mock.patch("sys.argv", ["review_readiness_handoff.py", str(report_path), str(output), "--require-ready"]):
                 self.assertEqual(review.main(), 1)
+
+    def test_machine_review_packet_preserves_gate_and_diagnostics(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        packet = review.review_packet(source)
+        self.assertEqual(packet["gate_status"], "PENDING")
+        self.assertTrue(packet["acceptance_errors"])
+        self.assertEqual(len(packet["platforms"]), 3)
