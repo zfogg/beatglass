@@ -39,10 +39,13 @@ int main() {
     bool stale_epoch = false;
     try { reader.seek(0, 9); } catch (const std::invalid_argument&) { stale_epoch = true; }
     assert(stale_epoch);
+    bool out_of_range = false;
+    try { reader.seek(5, 10); } catch (const std::out_of_range&) { out_of_range = true; }
+    assert(out_of_range);
     const auto end = reader.read(samples);
     assert(end.status == FileReadStatus::end);
   }
-  { std::ofstream append(wav, std::ios::app | std::ios::binary); append.put('\0'); }
+  { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
   { FileReader reader(wav, 8); assert(reader.source_changed()); }
   std::filesystem::remove(wav, cleanup);
   bool reopen_failed = false;
