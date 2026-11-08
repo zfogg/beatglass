@@ -96,7 +96,7 @@ TestCase {
         compare(toggle.Accessible.description, "Allow pointer input to pass through the overlay window")
         compare(findChild(app, "overlayOpacity").Accessible.description, "Adjust the overlay window opacity; current value 90%")
         compare(display.Accessible.description, "Choose the display where the overlay is shown")
-        compare(size.Accessible.description, "Choose the overlay window size")
+        compare(size.Accessible.description, "Choose the overlay window size; current size Medium")
         compare(findChild(app, "overlayOpacityValue").Accessible.name, "Current overlay opacity")
         compare(findChild(app, "overlayInteractionMode").Accessible.name, "Overlay interaction mode")
         compare(findChild(app, "overlayDisplayStatus").Accessible.name, "Current overlay display")
