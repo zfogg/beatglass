@@ -870,6 +870,7 @@ ApplicationWindow {
                     text: visualizationCanvas.selectedPosition < 0 ? "No visualization position selected" : "Selected visualization position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%"
                     Accessible.name: "Visualization selection status"
                     Accessible.description: "Click the canvas or use Left/Right/Home/End to select a presentation position. " + text
+                    ToolTip.text: "Current selected waveform/FFT position"
                 }
                 Button {
                     objectName: "clearVisualizationSelection"
