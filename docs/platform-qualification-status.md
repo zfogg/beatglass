@@ -12,6 +12,8 @@ For every native run, record the OS version, kernel or build number, compiler, Q
 
 Runtime evidence must explicitly retain the audio backend/session version, display server or compositor, exact commands, and observed limitations.
 
+The scenario matrix must cover permission handling, output-device selection/loss, and recovery or reacquisition behavior on each applicable platform.
+
 Detailed handoff checklists: [Windows](windows-qualification.md), [macOS](macos-qualification.md), and [Linux](linux-qualification-plan.md).
 
 Each native scenario record must retain its capture timestamp, supporting logs, and a screenshot or recording path; a status without that evidence remains unqualified.
