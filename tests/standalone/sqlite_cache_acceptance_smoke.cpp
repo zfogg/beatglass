@@ -264,5 +264,15 @@ int main() {
     assert(!reopened.discard_retryable("zz-crash-recovery"));
     assert(reopened.retryable_runs().empty());
   }
+  {
+    SqliteCache reopened_again(path.string());
+    assert(reopened_again.retryable_runs().empty());
+    std::string result;
+    const CacheKey retained_config{key.content, key.engine, "config-b", key.mode};
+    assert(reopened_again.find(retained_config, result) && result == "config-b-republished");
+    assert(reopened_again.invalidate(retained_config));
+    assert(!reopened_again.invalidate(retained_config));
+    assert(!reopened_again.find(retained_config, result));
+  }
   std::filesystem::remove(path, ec);
 }
