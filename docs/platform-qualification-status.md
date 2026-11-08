@@ -265,7 +265,7 @@ To feed a canonical bundle into release/review automation, run `python tests/pla
 
 The release boundary is executable: `python tests/platform/promote_review_bundle.py <bundle-root> <release-root>` copies the canonical report and packet only after the decision consumer returns `ACCEPTED`; it also writes and verifies `release-manifest.json` with both promoted artifact hashes. A `PENDING` bundle leaves the release destination untouched.
 
-Downstream release jobs must verify the promoted artifact with `python tests/platform/verify_release_manifest.py <release-root>`. The verifier recomputes both hashes, requires manifest schema 1 and `ACCEPTED`, and rejects missing or modified files before publication.
+Downstream release jobs must verify the promoted artifact with `python tests/platform/verify_release_manifest.py <release-root> --signoff <signoff.json>`. The verifier recomputes both hashes, requires manifest schema 1 and `ACCEPTED`, binds the signoff to the manifest report hash, and rejects missing, modified, or unsigned files before publication.
 
 The complete release workflow is `python tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root>`: it retains and verifies the pair, evaluates the conservative decision, promotes only `ACCEPTED`, and verifies the resulting manifest. Native-pending evidence stops before release output is created.
 

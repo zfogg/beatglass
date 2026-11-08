@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 
-def verify(root: Path) -> list[str]:
+def verify(root: Path, signoff_path: Path | None = None) -> list[str]:
     manifest_path = root / "release-manifest.json"
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -25,12 +25,27 @@ def verify(root: Path) -> list[str]:
             continue
         if actual != manifest.get(field):
             errors.append(f"release manifest hash mismatch: {filename}")
+    if signoff_path is not None:
+        try:
+            signoff = json.loads(signoff_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            errors.append(f"invalid release signoff: {error}")
+        else:
+            if signoff.get("release_signoff_schema") != 1:
+                errors.append("unsupported release_signoff_schema")
+            if signoff.get("decision") != "ACCEPTED":
+                errors.append("release signoff decision is not ACCEPTED")
+            if not isinstance(signoff.get("reviewer"), str) or not signoff["reviewer"].strip():
+                errors.append("release signoff reviewer is required")
+            if signoff.get("report_sha256") != manifest.get("report_sha256"):
+                errors.append("release signoff report hash does not match manifest")
     return errors
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("release_root", type=Path)
-    args = parser.parse_args(); errors = verify(args.release_root)
+    parser.add_argument("--signoff", type=Path, help="require and verify a manual release signoff")
+    args = parser.parse_args(); errors = verify(args.release_root, args.signoff)
     if errors:
         print("\n".join(errors)); return 1
     print("release manifest verified"); return 0

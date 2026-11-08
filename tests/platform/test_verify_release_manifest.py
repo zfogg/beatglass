@@ -26,3 +26,16 @@ class ReleaseManifestVerifierTest(unittest.TestCase):
             self.assertEqual(verifier.verify(root), [])
             report.write_text("tampered", encoding="utf-8")
             self.assertIn("release manifest hash mismatch: readiness-report.json", verifier.verify(root))
+
+    def test_mismatched_signoff_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); report = root / "readiness-report.json"; packet = root / "review.json"
+            report.write_text("report", encoding="utf-8"); packet.write_text("packet", encoding="utf-8")
+            import hashlib
+            manifest = {"release_manifest_schema": 1, "decision": "ACCEPTED",
+                        "report_sha256": hashlib.sha256(report.read_bytes()).hexdigest(),
+                        "review_packet_sha256": hashlib.sha256(packet.read_bytes()).hexdigest()}
+            (root / "release-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            signoff = root / "signoff.json"
+            signoff.write_text(json.dumps({"release_signoff_schema": 1, "decision": "ACCEPTED", "reviewer": "owner", "report_sha256": "b" * 64}), encoding="utf-8")
+            self.assertIn("release signoff report hash does not match manifest", verifier.verify(root, signoff))
