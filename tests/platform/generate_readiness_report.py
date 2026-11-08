@@ -41,6 +41,7 @@ def build_report(root: Path) -> dict:
                      "artifact_inventory": inventory,
                      "scenario_inventory": scenario_inventory,
                      "qualification_command": manifest.get("qualification_command", ""),
+                     "qualification_output": manifest.get("qualification_output", ""),
                      "manifest_platform": manifest.get("platform"),
                      "provenance_complete": all(manifest.get(k) for k in ("platform", "commit", "captured_at", "environment")),
                      "errors": []})
