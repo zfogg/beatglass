@@ -176,6 +176,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     retained_artifact_count = sum(row["retained_artifacts"] for row in rows)
     retained_artifact_bytes = sum(row["retained_bytes"] for row in rows)
     retained_bytes_consistent = retained_artifact_bytes == sum(row["retained_bytes"] for row in rows)
+    inventory_bytes_consistent = all(row["retained_bytes"] == sum(item["bytes"] or 0 for item in row["artifact_inventory"]) for row in rows)
     error_count_consistent = sum(item["errors"] for item in platform_failures) == len(errors)
     not_ready_platforms = [item["platform"] for item in platform_failures if not item["ready"]]
     failure_summary_consistent = [item["platform"] for item in platform_failures] == [row["platform"] for row in rows]
@@ -215,6 +216,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "retained_artifact_count": retained_artifact_count,
             "retained_artifact_bytes": retained_artifact_bytes,
             "retained_bytes_consistent": retained_bytes_consistent,
+            "inventory_bytes_consistent": inventory_bytes_consistent,
             "not_ready_platforms": not_ready_platforms,
             "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
@@ -227,7 +229,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and ready_platforms == len(rows)}
+            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and inventory_bytes_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:

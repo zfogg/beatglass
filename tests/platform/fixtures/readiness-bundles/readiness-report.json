@@ -238,6 +238,7 @@
   "retained_artifact_count": 3,
   "retained_artifact_bytes": 78,
   "retained_bytes_consistent": true,
+  "inventory_bytes_consistent": true,
   "not_ready_platforms": [],
   "all_platforms_ready": false,
   "error_count": 1,
