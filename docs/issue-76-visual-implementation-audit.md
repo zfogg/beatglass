@@ -447,3 +447,5 @@ The empty visualization state now uses the same compact typography and foregroun
 Starting and Reacquiring recovery feedback now uses the active theme accent and compact typography token, visually separating an active transition from the steady empty state while remaining consistent across screen sizes.
 
 The visualization Retry monitoring action now uses the active theme accent as its button surface with the theme background as text, giving the recovery affordance a consistent high-salience treatment across palettes.
+
+The Clear selection action now uses the active theme foreground as its surface and theme background as its label, with reduced opacity when unavailable, aligning selection recovery with the retry control while preserving disabled-state clarity.

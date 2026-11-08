@@ -425,6 +425,8 @@ def main() -> int:
         "visualization recovery accent": "color: window.themeAccentColors[window.selectedThemeIndex]",
         "visualization retry theme": 'objectName: "visualizationRetryCapture"',
         "visualization retry background": "background: Rectangle { color: window.themeAccentColors[window.selectedThemeIndex]",
+        "visualization clear themed content": 'objectName: "visualizationClearSelection"',
+        "visualization clear themed background": "background: Rectangle { color: window.themeForegrounds[window.selectedThemeIndex]",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
