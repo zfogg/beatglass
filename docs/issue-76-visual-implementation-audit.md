@@ -32,6 +32,8 @@ Settings permission guidance, appearance state, and persistence status are also 
 
 Generation/revision status is now explicitly identified as static text, keeping accepted presentation lineage discoverable to assistive technology.
 
+Library sorting and the system output-device selector now announce their current values alongside the action guidance.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
