@@ -5,6 +5,9 @@ This checklist is required before claiming Windows DJ support. CI and offscreen 
 The runner also writes `qualification-manifest.txt` with required build identity
 and canonical evidence links; the offline verifier rejects missing, duplicate,
 or redirected identity fields.
+It records `display-topology.json` (monitor and adapter inventory with capture
+time) before qualification. This evidence is required for display-selection,
+DPI, fullscreen, and overlay recovery claims and is validated offline.
 
 ## Build identity
 
