@@ -421,6 +421,8 @@ def main() -> int:
         "visualization mode status color": "color: window.themeForegrounds[window.selectedThemeIndex]",
         "visualization empty state theme": 'objectName: "visualizationEmptyState"',
         "visualization empty state emphasis": 'color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]',
+        "visualization recovery theme": 'objectName: "visualizationRetryFeedback"',
+        "visualization recovery accent": "color: window.themeAccentColors[window.selectedThemeIndex]",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
