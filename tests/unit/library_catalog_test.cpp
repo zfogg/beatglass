@@ -22,6 +22,8 @@ TEST_CASE("catalog lists folders and supported audio in deterministic order") {
   CHECK(result.entries[0].name == "Alpha.mp3");
   CHECK(result.entries[1].name == "Mixes");
   CHECK(result.entries[2].name == "zeta.WAV");
+  CHECK(result.entries[0].bytes == 5);
+  CHECK(result.entries[1].bytes == 0);
 }
 
 TEST_CASE("catalog applies case-insensitive name filtering and rejects missing folders") {

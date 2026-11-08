@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -16,6 +17,8 @@ struct CatalogEntry {
   std::filesystem::path path;
   std::string name;
   bool directory{};
+  /** Byte size for regular files; zero for directories or stat failures. */
+  std::uintmax_t bytes{};
 };
 
 /** Result of a synchronous folder query performed by a non-audio worker.
