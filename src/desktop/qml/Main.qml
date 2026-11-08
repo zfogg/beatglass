@@ -678,6 +678,10 @@ ApplicationWindow {
                 retryAnalysis.forceActiveFocus()
             }
         }
+        function onCanRetryChanged() {
+            if (!window.analysisJobBridge.canRetry)
+                window.activeWorkerOutcomeAnnouncementKey = ""
+        }
     }
     function clearVisualizationPositionAndFocus() {
         visualizationCanvas.selectedPosition = -1
