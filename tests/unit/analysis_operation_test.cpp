@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include "beatglass/library/analysis_operation.hpp"
 #include "beatglass/library/analysis_commit.hpp"
+#include "beatglass/library/analysis_admission.hpp"
 TEST_CASE("analysis operation retains source identity and bounded callback contract") { beatglass::library::AnalysisOperation op; op.source.size_bytes=12; op.identity.mode="offline"; op.serialize=[] { return std::string("result"); }; REQUIRE(op.serialize()=="result"); REQUIRE(op.identity.mode=="offline"); }
 TEST_CASE("analysis source identity includes a selected catalog path") {
   beatglass::library::AnalysisOperation op;
@@ -19,7 +20,7 @@ TEST_CASE("analysis publication requires source and cache identities to match") 
 }
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
-    beatglass::library::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
+    beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
     beatglass::library_detail::CacheKey key{identity.content_hash, identity.engine_version, identity.configuration_id, identity.mode};
     cache.begin("cached-run", key);
     REQUIRE(cache.publish("cached-run", key, "cached-result", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
@@ -28,6 +29,19 @@ TEST_CASE("analysis cache reuse checks identity before running work") {
     CHECK(result == "cached-result");
     auto changed = identity; changed.configuration_id = "new-config";
     CHECK_FALSE(beatglass::library::reuse_cached_operation(cache, changed, result));
+}
+TEST_CASE("analysis admission reserves only cache misses") {
+    beatglass::library_detail::SqliteCache cache(":memory:");
+    beatglass::AnalysisIdentity identity{"sha256:admit", "engine", "config", "offline"};
+    auto miss = beatglass::library::admit_analysis(cache, "admit-run", identity);
+    CHECK_FALSE(miss.cached);
+    REQUIRE(miss.analysis_reserved);
+    beatglass::library_detail::CacheKey key{identity.content_hash, identity.engine_version, identity.configuration_id, identity.mode};
+    REQUIRE(cache.publish("admit-run", key, "ready", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+    auto hit = beatglass::library::admit_analysis(cache, "unused", identity);
+    REQUIRE(hit.cached);
+    CHECK(*hit.cached == "ready");
+    CHECK_FALSE(hit.analysis_reserved);
 }
 TEST_CASE("analysis publication rejects invalid operations before callbacks") {
   beatglass::library_detail::SqliteCache cache(":memory:");

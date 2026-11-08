@@ -272,6 +272,9 @@ The remaining Issue #1 exit gate is explicit: perform supported Windows WASAPI, 
 
 The readiness report contract is versioned as `readiness_report_schema: 1`; `exit_gate_status` and `exit_gate_reason_codes` are the stable handoff fields. Product support language remains experimental while native qualification is open.
 
+## Analysis queue admission handoff
+`admit_analysis` now gives the future file-analysis queue one worker-owned decision: return a completed cache result without decoding, or reserve a run ID before decoding begins. The helper does not fingerprint or revalidate a source; callers must supply the validated identity and publish only after decoder verification. Desktop scheduling and native qualification remain open.
+
 ## Cache acceptance integration
 A cache acceptance regression demonstrates that a committed unchanged identity is found on the next analysis request and the analysis callback is not rerun. Changed identity and configuration invalidation remain covered by lifecycle tests; decoder/UI integration and native qualification remain pending.
 
