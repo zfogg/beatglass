@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Retry after cancellation or failure now announces that stale results were cleared and fresh evidence is pending, while the retry control remains in the keyboard focus order. The same announcement contract applies when new evidence is admitted; native screen-reader timing remains open.
+
 Recovery controls explicitly participate in tab focus after retry/cancel transitions. Source replacement and endpoint/discontinuity changes clear stale status before replacement work is announced, and the recovery controls remain keyboard reachable; native focus restoration timing still requires assistive-technology evidence.
 
 Source replacement, endpoint switch, discontinuity, and retry transitions expose one accessible recovery narrative: stale labels are cleared before new work is announced, focus remains on the recovery surface, and queued/running status identifies the transition without presenting prior source results as current.
