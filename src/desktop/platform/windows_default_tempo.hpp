@@ -24,6 +24,8 @@ public:
   explicit DefaultTempoFollower(SourceEpochAllocator& epochs, std::function<EndpointResult()> discovery = {}, std::function<bool(const std::function<bool()>&)> startGuard = {});
   /** Enable default following; the next tick performs discovery. Return false after fatal revision exhaustion. */
   bool start();
+  /** Request a specific endpoint for the next poll; worker-thread only. */
+  void select_endpoint(std::string id);
   /** Poll capture and periodically rediscover the multimedia default. now must be monotonic. On a new or lost endpoint, clear old evidence before stopping and restarting with a fresh epoch. Transient discovery failures are reported through status and retried on the next probe. False means a fatal capture failure or revision exhaustion; the owner must stop and clear the GUI using an external session boundary. */
   bool tick(std::chrono::steady_clock::time_point now);
   /** Return and remove the newest coalesced update, including clears. Transfer it to the GUI using an ordered/coalescing mechanism that retains clears. */
@@ -45,6 +47,7 @@ private:
   std::function<EndpointResult()> discovery_;
   std::function<bool(const std::function<bool()>&)> start_guard_;
   std::string endpoint_;
+  std::string requested_endpoint_;
   std::string diagnostic_;
   std::chrono::steady_clock::time_point next_probe_{};
   std::optional<StampedTempoUpdate> pending_;
