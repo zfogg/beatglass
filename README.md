@@ -47,11 +47,11 @@ On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink disc
 
 ## API documentation
 
-The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
+The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; the Markdown project, engineering, qualification and design documents are included in the same Sphinx site through MyST. Indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
 
 ```sh
 docker build -f docs/api/Dockerfile -t beatglass-docs .
-docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /work/build/docs/html
+docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html -c docs/api . /work/build/docs/html
 ```
 
 Open `build/docs/html/index.html`. On Windows PowerShell, use `${PWD}` in the volume argument. Python dependencies, the base image, and direct Clang, Python, pkg-config and Qt packages are pinned. Ubuntu transitive packages still come from live repositories; archived packages may be needed if pinned versions disappear. Pull requests validate the build; pushes to main deploy it through GitHub Pages when Pages is configured for GitHub Actions. The documentation does not establish native platform qualification or API stability.
