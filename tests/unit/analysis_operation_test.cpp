@@ -161,6 +161,22 @@ TEST_CASE("coordinator cancellation does not publish a stale result") {
   REQUIRE(recovered);
   CHECK(recovered->source_path == "track.wav");
 }
+TEST_CASE("decoder failure retains a retryable recovery record") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  beatglass::library::AnalysisOperation op;
+  op.source.path = "broken.wav"; op.source.content_hash = "broken-hash";
+  op.identity = {"broken-hash", "engine", "config", "offline"}; op.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  op.decode = [](std::stop_token, const auto&) -> std::string { throw std::runtime_error("decoder interrupted"); };
+  op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  auto handle = coordinator.submit("decoder-failure", std::move(op));
+  REQUIRE(handle);
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  CHECK(handle->state() == beatglass::library_detail::TrackedState::failed);
+  const auto recovered = coordinator.storage().retryable_run("decoder-failure");
+  REQUIRE(recovered);
+  CHECK(recovered->source_path == "broken.wav");
+}
 TEST_CASE("cancelled analysis can be retried with a compatible snapshot") {
   beatglass::library_detail::SqliteCache cache(":memory:");
   beatglass::library_detail::CacheKey key{"retry-hash", "engine", "config", "offline"};
