@@ -148,6 +148,16 @@ TEST_CASE("FileReader borrows byte source and requires externally allocated seek
   }
   CHECK((source.bytes==before));
 }
+
+TEST_CASE("FileReader seek reacquisition publishes only the new epoch") {
+  auto source=wav(); FileReader reader(source, 1); std::array<float,4> output{};
+  reader.seek(0,11); auto first=reader.read(output);
+  REQUIRE(first.status==FileReadStatus::data); CHECK(first.block.epoch==11);
+  reader.seek(0,12); auto reacquired=reader.read(output);
+  REQUIRE(reacquired.status==FileReadStatus::data);
+  CHECK(reacquired.block.epoch==12); CHECK(reacquired.block.first_frame==0);
+}
+
 TEST_CASE("FileReader borrowed source reports open and mid-read cancellation") {
   auto source=wav(); std::stop_source early; early.request_stop();
   CHECK_THROWS_AS(FileReader(source, 1, early.get_token()),FileOpenCancelled);
