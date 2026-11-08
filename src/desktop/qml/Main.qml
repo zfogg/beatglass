@@ -226,11 +226,13 @@ ApplicationWindow {
                 return
             if (!window.overlayBridge.available) {
                 window.overlayDisplayRecoveryPending = true
+                window.announceCaptureRecoveryState("Overlay actions disabled; control-window fallback remains available until the native overlay recovers.")
                 window.overlayWasVisibleBeforeAvailabilityLoss = djOverlay.visible
                 if (djOverlay.visible)
                     window.hideOverlayAndRestoreControls()
             } else {
                 window.syncOverlaySettingsFromBridge()
+                window.announceCaptureRecoveryState("Overlay actions restored; native display settings are available.")
                 if (window.overlayWasVisibleBeforeAvailabilityLoss) {
                     window.overlayWasVisibleBeforeAvailabilityLoss = false
                     window.recoverOverlayAfterDisplayChange()
@@ -780,7 +782,7 @@ ApplicationWindow {
                 {
                     window.overlayDisplayRecoveryPending = true
                     window.overlayDisplaySelectionRequired = true
-                    window.announceCaptureRecoveryState("DJ overlay display disappeared; controls restored until a display is available.")
+                    window.announceCaptureRecoveryState("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.")
                 }
             else {
                 const savedNameIndex = window.overlayPreferredDisplayName !== ""
@@ -793,7 +795,7 @@ ApplicationWindow {
                 } else {
                     window.overlayDisplaySelectionRequired = true
                     window.overlayDisplayRecoveryPending = true
-                    window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to resume overlay monitoring.")
+                    window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.")
                 }
             }
         }
