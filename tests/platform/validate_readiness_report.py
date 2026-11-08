@@ -186,6 +186,17 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         if not isinstance(scenarios, list):
             errors.append(f"{platform}: manifest scenarios must be an array")
             scenarios = []
+        report_scenarios = row.get("scenario_inventory", [])
+        manifest_scenario_map = {
+            str(item.get("id")): (item.get("status"), item.get("evidence"))
+            for item in scenarios if isinstance(item, dict) and item.get("id") is not None
+        }
+        report_scenario_map = {
+            str(item.get("id")): (item.get("status"), item.get("evidence"))
+            for item in report_scenarios if isinstance(item, dict) and item.get("id") is not None
+        } if isinstance(report_scenarios, list) else {}
+        if report_scenario_map != manifest_scenario_map:
+            errors.append(f"{platform}: scenario inventory does not match manifest")
         scenario_ids = set()
         expected_evidence_ids = set()
         for scenario in scenarios:

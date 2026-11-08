@@ -103,6 +103,11 @@ than merely present.
 Every retained artifact must declare a non-empty role, preserving the distinction
 between command output, scenario evidence, and other captured files.
 
+When consuming a generated report with `--bundles`, the scenario inventory is
+cross-checked against each retained manifest (status and evidence path), so a
+report cannot silently describe a different scenario state than the captured
+bundle.
+
 For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
 
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
