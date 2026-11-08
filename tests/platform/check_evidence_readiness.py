@@ -172,6 +172,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
                          for row in rows]
     ready_platforms = sum(item["ready"] for item in platform_failures)
+    error_count_consistent = sum(item["errors"] for item in platform_failures) == len(errors)
     not_ready_platforms = [item["platform"] for item in platform_failures if not item["ready"]]
     failure_summary_consistent = [item["platform"] for item in platform_failures] == [row["platform"] for row in rows]
     errors = [error for row in rows for error in row["errors"]]
@@ -195,6 +196,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
             "failure_summary_consistent": failure_summary_consistent,
+            "error_count_consistent": error_count_consistent,
             "ready_platform_count": ready_platforms,
             "not_ready_platforms": not_ready_platforms,
             "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
@@ -202,7 +204,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and ready_platforms == len(rows)}
+            "ready": not errors and aggregate_consistent and error_count_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:
