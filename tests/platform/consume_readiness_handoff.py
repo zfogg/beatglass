@@ -18,6 +18,8 @@ def consume(report_path: Path) -> list[str]:
     for field in ("generation_errors", "handoff_check_errors", "documentation_check_errors", "ingestion_errors"):
         if report.get(field):
             errors.append(f"readiness handoff contains {field}")
+    if not errors and report.get("exit_gate_status") == "READY" and report.get("native_qualification_required") is True:
+        errors.append("readiness handoff cannot be READY while native qualification is required")
     if not errors and report.get("exit_gate_status") != "READY":
         errors.append(f"readiness handoff is not accepted: {report.get('exit_gate_status')}")
     return errors
