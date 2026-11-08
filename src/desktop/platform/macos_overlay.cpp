@@ -115,7 +115,7 @@ void OverlayController::hideOverlay() {
   if (overlay_) overlay_->hide();
 }
 void OverlayController::setOpacity(qreal value) {
-  if (overlay_ && std::isfinite(value)) overlay_->setOpacity(std::clamp(value, qreal(0), qreal(1)));
+  if (overlay_ && std::isfinite(value)) overlay_->setOpacity(std::clamp(value, qreal(0.2), qreal(1)));
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(0.9); }
 QRect OverlayController::geometry() const { return overlay_ ? overlay_->geometry() : QRect{}; }

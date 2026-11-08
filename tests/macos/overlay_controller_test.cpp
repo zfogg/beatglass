@@ -54,6 +54,7 @@ private slots:
     QVERIFY(!controller.setClickThrough(true));
     controller.setOpacity(0.4); QVERIFY(qAbs(overlay.opacity() - 0.4) < 0.02);
     controller.setOpacity(std::numeric_limits<qreal>::quiet_NaN()); QVERIFY(qAbs(overlay.opacity() - 0.4) < 0.02);
+    controller.setOpacity(0.0); QVERIFY(qAbs(overlay.opacity() - 0.2) < 0.02);
   }
   void controlCloseRevokesClickThrough() {
     QQuickWindow overlay; QWindow control;
