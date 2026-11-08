@@ -335,3 +335,5 @@ The overlay’s live evidence surface now exposes one grouped semantic boundary 
 The live visualization canvas now declares graphic semantics in addition to its mode/position value, and its empty state provides a direct availability/next-action tooltip. This aligns the interactive rendered surface and its no-data state for keyboard and assistive navigation.
 
 The live visualization canvas now supports Escape as a keyboard recovery action that clears the selected position, and both its accessible description and tooltip document that path alongside Left/Right/Home/End navigation. This keeps selection state reversible without requiring pointer input or a separate button.
+
+Waveform and FFT mode controls now expose explicit radio-button roles, while the clear-position action reports whether it is available or has no selection to clear. Together with the grouped selection surface, this makes the visualization’s mode and position interaction state explicit before activation.
