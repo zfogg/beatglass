@@ -1347,6 +1347,7 @@ ApplicationWindow {
                 GroupBox {
                     title: "Appearance"
                     Accessible.name: "Appearance settings"
+                    Accessible.value: window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Choose the color theme and motion preference for the desktop."
                     ToolTip.text: "Configure theme and motion preferences"

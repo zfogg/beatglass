@@ -386,6 +386,7 @@ def main() -> int:
         "settings tab page role": "objectName: \"settingsTab\"; activeFocusOnTab: true; Accessible.name: \"Settings\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.description: \"Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab.\"; Accessible.role: Accessible.PageTab",
         "navigation tab selected values": "Accessible.name: \"DJ\"; Accessible.value: checked ? \"selected\" : \"not selected\"",
         "navigation selected tooltips": "ToolTip.text: checked ? \"Library is selected; browse local audio files\" : \"Browse local audio files\"",
+        "appearance group live value": "Accessible.name: \"Appearance settings\"\n                    Accessible.value: window.selectedTheme + \", \"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
