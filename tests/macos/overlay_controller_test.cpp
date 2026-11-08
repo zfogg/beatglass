@@ -189,6 +189,7 @@ private slots:
       QVERIFY(controller.attach(&overlay, &control)); QVERIFY(controller.showOverlay());
       const auto bounds = QGuiApplication::primaryScreen()->availableGeometry();
       overlay.setGeometry(QRect(bounds.topLeft() + QPoint(10, 10), QSize(260, 120)));
+      QVERIFY(controller.moveToScreen(0));
       controller.setOpacity(0.55); QVERIFY(controller.setClickThrough(true));
       saved = overlay.geometry();
     }
@@ -197,6 +198,8 @@ private slots:
       OverlayController controller(std::make_unique<FakeNative>(), nullptr, std::make_unique<QSettings>(path, QSettings::IniFormat));
       QVERIFY(controller.attach(&overlay, &control));
       QCOMPARE(overlay.geometry(), saved);
+      QSettings persisted(path, QSettings::IniFormat);
+      QCOMPARE(persisted.value(QStringLiteral("overlay/displayName")).toString(), QGuiApplication::screens().at(0)->name());
       QVERIFY(qAbs(controller.opacity() - 0.55) < 0.02);
       QVERIFY(!controller.clickThrough());
     }
