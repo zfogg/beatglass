@@ -276,6 +276,8 @@ The remaining Issue #1 exit gate is explicit: perform supported Windows WASAPI, 
 
 The readiness report contract is versioned as `readiness_report_schema: 1`; `exit_gate_status` and `exit_gate_reason_codes` are the stable handoff fields. Product support language remains experimental while native qualification is open.
 
+The dependency-light `desktop_cache_bridge_contract` test now checks the complete cache handoff surface—Qt properties, queued worker dispatch, result signal, and visible QML hit state—without claiming a Qt build or native UI qualification.
+
 The desktop storage bridge now exposes an asynchronous cache lookup (`findCached`) and publishes hit/result state only after the worker responds. This keeps SQLite off the GUI thread and gives the future decoder queue a real UI-owned handoff; no decoder or analysis is started by the lookup, and native UI qualification remains pending.
 
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
