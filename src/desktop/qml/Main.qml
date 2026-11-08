@@ -505,6 +505,14 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "Batch queue status is unavailable until the analysis bridge reports it."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Label {
+                                objectName: "persistedRecoveryStatus"
+                                visible: typeof storageRecovery !== "undefined"
+                                text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
+                                Accessible.name: "Persisted analysis recovery status"
+                                Accessible.description: visible ? text : "Persisted recovery status is unavailable."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
                             Button {
                                 objectName: "retryAnalysisBatch"
                                 text: "Retry batch"
