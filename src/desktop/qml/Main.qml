@@ -135,6 +135,7 @@ ApplicationWindow {
     function showOverlayAndHideControls() {
         if (!window.overlayBridge || !window.overlayBridge.available) return false
         if (!window.overlayBridge.showOverlay()) return false
+        window.announceCaptureRecoveryState("DJ overlay shown; output monitoring remains bound to the selected display.")
         window.hide()
         return true
     }
@@ -409,6 +410,12 @@ ApplicationWindow {
         function onAvailableChanged() {
             if (window.overlayBridge && !window.overlayBridge.available)
                 window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
+        }
+        function onScreensChanged() {
+            if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
+                window.announceCaptureRecoveryState("DJ overlay display disappeared; controls restored until a display is available.")
+            else
+                window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to resume overlay monitoring.")
         }
     }
 
