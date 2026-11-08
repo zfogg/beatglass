@@ -19,6 +19,7 @@ ApplicationWindow {
     property var catalogRows: []
     property bool sortDescending: false
     property string selectedName: ""
+    property url selectedAudioUrl: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     Shortcut {
         objectName: "overlayEscapeShortcut"
@@ -107,6 +108,7 @@ ApplicationWindow {
             browseFolder = url
         } else {
             selectedName = files.get(index, "fileName")
+            selectedAudioUrl = url
             metadataBridge.inspect(url)
         }
     }
@@ -301,7 +303,16 @@ ApplicationWindow {
                             objectName: "detailsAvailability"
                             text: window.selectedName ? "Read-only file details are shown above. Playback controls are not enabled in this build." : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
-                            Accessible.name: "Analysis and playback status"
+                            Accessible.name: "Details availability"
+                            Accessible.description: text
+                        }
+                        Label {
+                            objectName: "analysisStatus"
+                            text: window.selectedAudioUrl.toString() === ""
+                                ? "Select an audio file to prepare it for analysis."
+                                : "Selected source is ready for analysis; playback and saved results are not connected yet."
+                            Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            Accessible.name: "Analysis status"
                             Accessible.description: text
                         }
                     }
