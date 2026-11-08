@@ -184,3 +184,5 @@ Readiness artifact-role diagnostics also require each scenario evidence referenc
 Readiness report aggregation treats non-list `artifacts` or `scenarios` containers as empty diagnostic inventories while the verifier records the manifest contract error. This preserves a machine-readable pending report for malformed container types.
 
 The lightweight readiness check applies the same validated-string scenario-ID rule as report generation, so malformed IDs cannot crash one consumer path while another reports a conservative pending result.
+
+Valid JSON manifests must still have an object root. Non-object roots are reported explicitly by both readiness consumers and remain pending rather than causing `.get()` aggregation failures.
