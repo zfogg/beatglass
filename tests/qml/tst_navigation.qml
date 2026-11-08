@@ -450,6 +450,7 @@ TestCase {
         verify(status !== null)
         compare(status.Accessible.name, "Visualization data status")
         compare(findChild(app, "visualizationCaptureStatus").Accessible.name, "Visualization capture status")
+        compare(findChild(app, "visualizationCaptureStatus").ToolTip.text, "Current capture state feeding waveform and FFT data")
         verify(findChild(app, "visualizationCaptureStatus").text.indexOf("Capture is stopped") === 0)
         let selected = findChild(app, "visualizationSelectedDataStatus")
         verify(selected !== null)

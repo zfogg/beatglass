@@ -896,6 +896,7 @@ ApplicationWindow {
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
                     Accessible.name: "Visualization capture status"
                     Accessible.description: text
+                    ToolTip.text: "Current capture state feeding waveform and FFT data"
                     Layout.fillWidth: true; wrapMode: Text.WordWrap
                 }
                 Label {
