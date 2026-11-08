@@ -220,6 +220,7 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
 fi
 
 manifest="$out_dir/qualification-manifest.txt"
+artifact_manifest="$out_dir/qualification-artifacts.sha256"
 permission_result="${BEATGLASS_MACOS_PERMISSION_RESULT:-UNRUN}"
 if [[ "$permission_result" != "allowed" && "$permission_result" != "denied" && "$permission_result" != "UNRUN" ]]; then
   echo "BEATGLASS_MACOS_PERMISSION_RESULT must be allowed, denied, or UNRUN" >&2
@@ -265,6 +266,15 @@ if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_lo
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
 } > "$manifest"
+: > "$artifact_manifest"
+for artifact in "$desktop_binary" "$tap_binary" "$recovery_binary"; do
+  shasum -a 256 "$artifact" >> "$artifact_manifest"
+done
+if [[ ! -s "$artifact_manifest" ]] || [[ "$(wc -l < "$artifact_manifest" | tr -d ' ')" -ne 3 ]]; then
+  echo "Qualification artifact hash manifest is missing or incomplete" >&2
+  exit 1
+fi
+printf 'artifact_sha256=%s\n' "$artifact_manifest" >> "$manifest"
 if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest" || ! grep -q '^sdk_path=.' "$manifest" || ! grep -q '^developer_dir=.' "$manifest" || ! grep -q '^desktop_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^tap_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^recovery_signing=\(verified\|unverified\)$' "$manifest" || [[ ! -s "$signing_log" || ! -s "$tap_signing_log" || ! -s "$recovery_signing_log" ]]; then
   echo "Qualification manifest is missing or empty" >&2
   exit 1
