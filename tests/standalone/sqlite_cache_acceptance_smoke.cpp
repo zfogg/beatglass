@@ -73,6 +73,9 @@ int main() {
     assert(cache.invalidate(key));
     assert(!cache.find(key, result));
     assert(cache.find(live_key, result) && result == "live-data");
+    assert(cache.invalidate(live_key));
+    assert(!cache.find(live_key, result));
+    assert(cache.find(next_config, result) && result == "config-b-data");
     cache.begin("republish", key);
     assert(cache.publish("republish", key, "result-b", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(key, result) && result == "result-b");
