@@ -47,7 +47,13 @@ On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink disc
 
 ## API documentation
 
-The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; the Markdown project, engineering, qualification and design documents are included in the same Sphinx site through MyST. Indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
+The [published documentation site](https://zfogg.github.io/beatglass/) combines three documentation tools:
+
+- [MyST](https://myst-parser.readthedocs.io/) keeps the project, engineering, qualification and design documents in Markdown while giving Sphinx navigation, search and cross-links.
+- [Hawkmoth](https://hawkmoth.readthedocs.io/) extracts documented declarations from the provisional library and private `src/` and `lib/` C++ interfaces.
+- [Sphinx](https://www.sphinx-doc.org/) assembles both sources into one searchable site. The site uses a custom dark theme with pastel mint, lavender and peach accents, plus a styled green scrollbar.
+
+Indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
 
 ```sh
 docker build -f docs/api/Dockerfile -t beatglass-docs .
