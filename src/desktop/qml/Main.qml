@@ -789,6 +789,15 @@ ApplicationWindow {
                             visualizationCanvas.requestPaint()
                         }
                     }
+                    Rectangle {
+                        objectName: "visualizationFocusRing"
+                        anchors.fill: parent
+                        color: "transparent"
+                        border.width: 3
+                        border.color: "#60a5fa"
+                        visible: visualizationCanvas.activeFocus
+                        z: 2
+                    }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
                 Label {
