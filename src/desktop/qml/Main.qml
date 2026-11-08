@@ -814,7 +814,7 @@ ApplicationWindow {
                     Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current capture monitor status and recovery state" }
                 }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
-                Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; objectName: "monitoringGuidance"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Monitoring guidance"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; objectName: "monitoringGuidance"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Monitoring guidance"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Monitoring guidance and next action" }
                 RowLayout {
                     objectName: "visualizationModeControls"
                     Button {
@@ -1028,12 +1028,12 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "djStatus"; text: "Status: " + window.liveBridge.status
-                    Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text
+                    Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current DJ monitoring status"
                 }
                 Label {
                     objectName: "djEstimates"
                     text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
-                    Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text
+                    Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current BPM, key, and chord estimates"
                 }
                  Label {
                      objectName: "djEvidenceStatus"
@@ -1049,6 +1049,7 @@ ApplicationWindow {
                      Accessible.value: text
                      Accessible.role: Accessible.StaticText
                      Accessible.description: text
+                     ToolTip.text: "Live evidence quality and recovery status"
                      wrapMode: Text.WordWrap; Layout.fillWidth: true
                  }
                 RowLayout {

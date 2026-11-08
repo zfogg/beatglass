@@ -816,11 +816,17 @@ TestCase {
         let status = findChild(app, "djStatus")
         let estimates = findChild(app, "djEstimates")
         let evidence = findChild(app, "djEvidenceStatus")
+        let guidance = findChild(app, "monitoringGuidance")
         verify(status !== null); verify(estimates !== null)
         verify(evidence !== null)
+        verify(guidance !== null)
         compare(status.Accessible.name, "DJ monitoring status")
         compare(estimates.Accessible.name, "DJ estimates")
         compare(evidence.Accessible.name, "DJ evidence status")
+        compare(status.ToolTip.text, "Current DJ monitoring status")
+        compare(estimates.ToolTip.text, "Current BPM, key, and chord estimates")
+        compare(evidence.ToolTip.text, "Live evidence quality and recovery status")
+        compare(guidance.ToolTip.text, "Monitoring guidance and next action")
         fakeLive.status = "Reacquiring"
         tryCompare(evidence, "text", "Reacquiring the selected output source; previous BPM, key, and chord evidence has been cleared.")
         fakeLive.status = "Tracking"
