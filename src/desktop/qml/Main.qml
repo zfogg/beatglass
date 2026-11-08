@@ -774,6 +774,7 @@ ApplicationWindow {
                     Accessible.description: visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
                         : "Bounded frequency-domain FFT magnitudes from the current output capture."
+                    ToolTip.text: "Click to select a position; use Left/Right/Home/End when focused"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
