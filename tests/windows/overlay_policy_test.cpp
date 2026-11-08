@@ -11,3 +11,11 @@ TEST_CASE("Overlay click-through requires a visible escape path") {
   CHECK_FALSE(canEnableClickThrough(true, false, OverlayControlState::unavailable));
   CHECK(canEnableClickThrough(true, false, OverlayControlState::visible));
 }
+
+TEST_CASE("Overlay dragging requires a visible non-click-through overlay") {
+  using beatglass::windows::canBeginDrag;
+  CHECK_FALSE(canBeginDrag(false, true, false));
+  CHECK_FALSE(canBeginDrag(true, false, false));
+  CHECK_FALSE(canBeginDrag(true, true, true));
+  CHECK(canBeginDrag(true, true, false));
+}

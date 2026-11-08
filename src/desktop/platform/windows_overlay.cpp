@@ -68,7 +68,8 @@ bool OverlayController::setClickThrough(bool enabled) {
 bool OverlayController::clickThrough() const { return click_through_; }
 bool OverlayController::beginDrag() {
   POINT cursor{}; RECT bounds{};
-  if (!overlay_ || click_through_ || !GetCursorPos(&cursor) || !GetWindowRect(reinterpret_cast<HWND>(overlay_->winId()), &bounds)) return false;
+  if (!canBeginDrag(static_cast<bool>(overlay_), overlay_ && overlay_->isVisible(), click_through_) ||
+      !GetCursorPos(&cursor) || !GetWindowRect(reinterpret_cast<HWND>(overlay_->winId()), &bounds)) return false;
   cursor_x_ = cursor.x; cursor_y_ = cursor.y; window_x_ = bounds.left; window_y_ = bounds.top;
   dragging_ = true;
   drag_timer_->start();
