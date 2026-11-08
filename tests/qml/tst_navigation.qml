@@ -197,6 +197,7 @@ TestCase {
         compare(findChild(app, "playbackPosition").Accessible.name, "Playback position")
         compare(findChild(app, "playbackState").Accessible.name, "Playback state")
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
+        compare(findChild(app, "nativePlaybackError").ToolTip.text, "Native playback error details")
         compare(findChild(app, "playbackSeekLimitation").ToolTip.text, "Playback seek currently uses source audio frames")
         compare(findChild(app, "playbackSelectionStatus").ToolTip.text, "Whether playback matches the selected library source")
         compare(findChild(app, "playbackPosition").ToolTip.text, "Current source frame and playback epoch")
