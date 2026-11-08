@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+The complete Settings output-device flow is now traceable across design states: selection announces the chosen endpoint, refresh restores focus to the endpoint selector, permission failure exposes recovery guidance, replacement clears the stale selection, and reacquisition announces the new endpoint. Native device/permission timing remains a qualification gap.
+
 Settings endpoint controls are tied to the real endpoint bridge: Refresh requests a fresh enumeration, permission guidance reflects the bridge status, and device replacement clears the selected endpoint until reacquisition succeeds. Each control remains keyboard reachable and exposes its current state accessibly; native permission/device timing remains open.
 
 Settings-level output guidance covers no-device, permission-unavailable, retry-failure, endpoint refresh, and reacquisition states with matching accessible names and focusable controls. Native readiness still requires evidence of permission prompts, device replacement, and recovery timing on supported systems.
