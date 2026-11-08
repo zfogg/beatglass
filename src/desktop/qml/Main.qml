@@ -26,6 +26,7 @@ ApplicationWindow {
     property string selectedName: ""
     property url selectedAudioUrl: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    property string visualizationSelectionResetReason: ""
     property string catalogDiagnostic: ""
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
@@ -241,6 +242,13 @@ ApplicationWindow {
         window.metadataStatus = "Choose an audio file to inspect its metadata."
     }
     function clearVisualizationForCaptureState() {
+        window.visualizationSelectionResetReason = window.liveBridge.status === "Error"
+            ? "Selection cleared after a capture error."
+            : window.liveBridge.status === "Reacquiring"
+            ? "Selection cleared while capture is reacquiring."
+            : window.liveBridge.status === "Starting"
+            ? "Selection cleared while capture is starting."
+            : "Selection cleared because capture stopped."
         if (typeof visualizationCanvas !== "undefined") {
             visualizationCanvas.selectedPosition = -1
             visualizationCanvas.requestPaint()
@@ -1178,6 +1186,18 @@ ApplicationWindow {
                         : "There is no selected waveform or FFT position to clear."
                     ToolTip.text: enabled ? "Clear the selected visualization position" : "No visualization position is selected"
                     onClicked: window.clearVisualizationPositionAndFocus()
+                }
+                Label {
+                    objectName: "visualizationSelectionResetFeedback"
+                    visible: window.visualizationSelectionResetReason !== ""
+                    text: window.visualizationSelectionResetReason
+                    Accessible.name: "Visualization selection reset status"
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: text
+                    ToolTip.text: "Why the visualization selection was cleared"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
                 }
                 Label {
                     objectName: "visualizationRetryFeedback"
