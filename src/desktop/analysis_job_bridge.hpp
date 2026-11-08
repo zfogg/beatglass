@@ -23,6 +23,7 @@ class AnalysisJobBridge final : public QObject {
   Q_PROPERTY(int batchResultsPublished READ batchResultsPublished NOTIFY batchChanged)
   Q_PROPERTY(QString batchLastResult READ batchLastResult NOTIFY batchChanged)
   Q_PROPERTY(int batchFailedCount READ batchFailedCount NOTIFY batchChanged)
+  Q_PROPERTY(int batchCancelledCount READ batchCancelledCount NOTIFY batchChanged)
 public:
   explicit AnalysisJobBridge(beatglass::library_detail::JobExecutor&, QObject* parent = nullptr);
   std::shared_ptr<beatglass::library::RetryableAnalysis> submit(beatglass::library::AnalysisOperation);
@@ -46,6 +47,7 @@ public:
   int batchResultsPublished() const noexcept { return batchResultsPublished_; }
   QString batchLastResult() const { return batchLastResult_; }
   int batchFailedCount() const noexcept { return batchFailedCount_; }
+  int batchCancelledCount() const noexcept { return batchCancelledCount_; }
 signals:
   void progressChanged();
   void statusChanged();
@@ -65,6 +67,7 @@ private:
   int batchResultsPublished_{};
   QString batchLastResult_;
   int batchFailedCount_{};
+  int batchCancelledCount_{};
   const int batchCapacity_{2};
   QTimer poll_timer_;
   QPointer<AnalysisJobBridge> weak_self_{this};

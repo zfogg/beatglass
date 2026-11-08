@@ -326,6 +326,8 @@ The same failure explanation is surfaced when any accepted batch operation fails
 
 Batch status now also reports the count of accepted operations that failed, alongside published results and admission counts.
 
+It reports cancelled accepted operations separately from failures, preserving the distinction needed for retry and cancellation feedback.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
