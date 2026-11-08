@@ -327,6 +327,9 @@ def main() -> int:
         "live monitoring status value": "Accessible.name: \"Live output monitoring: \" + text; Accessible.value: text",
         "monitoring guidance status": "objectName: \"monitoringGuidance\"",
         "selected endpoint value": "objectName: \"selectedEndpointStatus\"; Accessible.name: \"Selected output endpoint: \" + text; Accessible.value: text",
+        "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
+        "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
+        "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",
         "live monitoring heading tooltip": "Accessible.name: \"DJ monitoring\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Live output monitoring and visualization\"",
         "live output monitoring tooltip": "ToolTip.text: \"Current live output monitoring state\"",
     }
