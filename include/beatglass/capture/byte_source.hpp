@@ -50,6 +50,7 @@ public:
   std::uint64_t position() const noexcept { return position_; }
   /** Seek to an absolute byte offset through EOF; reject offsets beyond EOF. */
   bool seek(std::uint64_t offset) {
+    if (source_.size() != snapshot_size_) return false;
     if (offset > snapshot_size_) return false;
     position_ = offset; return true;
   }
@@ -87,6 +88,7 @@ public:
   ByteReadResult read(std::span<std::byte> buffer, std::stop_token cancel = {}) {
     if (cancel.stop_requested()) return {ByteReadStatus::cancelled, 0};
     if (buffer.empty()) return {ByteReadStatus::error, 0};
+    if (source_.size() != snapshot_size_) return {ByteReadStatus::error, 0};
     const auto size = snapshot_size_;
     if (position_ > size) return {ByteReadStatus::error, 0};
     if (position_ == size) return {ByteReadStatus::end, 0};

@@ -71,7 +71,7 @@ TEST_CASE("byte cursor retains the opening size when the source mutates") {
  source.reported_size = 5;
  CHECK_FALSE(cursor.seek(4));
  REQUIRE(cursor.seek(3));
- CHECK(cursor.read(out).status == ByteReadStatus::end);
+ CHECK(cursor.read(out).status == ByteReadStatus::error);
  CHECK(cursor.position() == 3);
 }
 
@@ -80,4 +80,12 @@ TEST_CASE("byte cursor cancellation wins when source returns data after stop") {
  std::stop_source stop; source.cancel_after_read = &stop;
  CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
  CHECK(cursor.position() == 0);
+}
+
+TEST_CASE("byte cursor rejects a source that shrinks after opening") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ REQUIRE(cursor.read(out).status == ByteReadStatus::data);
+ source.reported_size = 1;
+ CHECK(cursor.read(out).status == ByteReadStatus::error);
+ CHECK(cursor.position() == 2);
 }
