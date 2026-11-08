@@ -85,11 +85,11 @@ try {
       & $binary
       if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
       $passed.Add($case.Name)
-      $records.Add([pscustomobject]@{ name=$case.Name; status="passed"; sources=$case.Sources.Count; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)) })
+      $records.Add([pscustomobject]@{ name=$case.Name; status="passed"; sources=@($case.Sources); binary=$binary; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)) })
       Write-Output ("PASS {0} ({1:n2}s)" -f $case.Name, ([DateTime]::UtcNow - $started).TotalSeconds)
     } catch {
       $failed.Add($case.Name)
-      $records.Add([pscustomobject]@{ name=$case.Name; status="failed"; sources=$case.Sources.Count; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)); error=$_.Exception.Message })
+      $records.Add([pscustomobject]@{ name=$case.Name; status="failed"; sources=@($case.Sources); binary=$binary; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)); error=$_.Exception.Message })
       Write-Error "FAIL $($case.Name): $_"
       if (-not $ContinueOnFailure) { throw }
     }
@@ -99,7 +99,19 @@ $selection = if ($SelectedCases.Count -gt 0) { $SelectedCases -join "," } else {
 $summary = "passed=$($passed.Count); failed=$($failed.Count); total=$($cases.Count); selected=$selection"
 $summary | Set-Content -Path (Join-Path $OutputDir "summary.txt")
 $log | Set-Content -Path (Join-Path $OutputDir "commands.log")
-$report = [pscustomobject]@{ selected=$selection; passed=$passed; failed=$failed; total_seconds=([math]::Round(([DateTime]::UtcNow - $runStarted).TotalSeconds, 2)); cases=$records }
+$report = [pscustomobject]@{
+  selected=$selection
+  compiler=$Compiler
+  platform=$([System.Environment]::OSVersion.VersionString)
+  powershell=$($PSVersionTable.PSVersion.ToString())
+  run_existing=[bool]$RunExisting
+  continue_on_failure=[bool]$ContinueOnFailure
+  output_directory=$OutputDir
+  passed=$passed
+  failed=$failed
+  total_seconds=([math]::Round(([DateTime]::UtcNow - $runStarted).TotalSeconds, 2))
+  cases=$records
+}
 $report | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $OutputDir "summary.json")
 if ($failed.Count -gt 0) { throw "Standalone library smokes failed: $($failed -join ', ')" }
 Write-Output "Standalone library smokes $summary"

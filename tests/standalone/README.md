@@ -9,7 +9,8 @@ configuration validation. The compiler can be selected explicitly for a
 toolchain or dependency environment. Each run writes `summary.txt` with
 pass/fail counts in the selected output directory. It also writes
 `commands.log` with the exact compiler invocations and elapsed time per case.
-`summary.json` contains machine-readable selection, case status, and timing. Use
+`summary.json` contains machine-readable selection, toolchain/platform metadata,
+execution mode, source and binary paths, case status, and timing. Use
 `-RunExisting` to run already-built binaries without invoking the compiler;
 this is useful when a focused smoke must run under a tight memory budget.
 
