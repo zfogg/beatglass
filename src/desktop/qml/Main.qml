@@ -487,6 +487,7 @@ ApplicationWindow {
                             Accessible.value: fileIsDir ? "folder" : "audio file"
                             Accessible.role: Accessible.ListItem
                             Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
+                            ToolTip.text: fileIsDir ? "Open folder " + fileName : "Select audio file " + fileName
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
                             contentItem: RowLayout {
                                 Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true }
