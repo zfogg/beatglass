@@ -70,6 +70,30 @@ private:
   std::uint32_t sample_rate_{}, high_rate_{};
   unsigned count_{};
 };
+
+/** GUI-facing publication gate for one visualization source generation.
+ * Own on the presentation thread. A clear invalidates every previously
+ * accepted frame synchronously; accept only strictly newer revisions from the
+ * current generation. The caller must serialize acceptance, painting and
+ * clearing on one thread and must clear its painted frame after clear(). */
+class VisualizationPublicationGate {
+public:
+  /** Invalidate the current generation and discard the accepted revision. */
+  void clear() noexcept { ++generation_; accepted_revision_ = 0; }
+  /** Current opaque generation token. */
+  std::uint64_t generation() const noexcept { return generation_; }
+  /** Accept a newer nonzero revision for the current generation. */
+  bool accept(std::uint64_t generation, std::uint64_t revision) noexcept {
+    if (!generation || generation != generation_ || !revision || revision <= accepted_revision_) return false;
+    accepted_revision_ = revision; return true;
+  }
+  /** Test whether a previously accepted frame is still current. */
+  bool current(std::uint64_t generation, std::uint64_t revision) const noexcept {
+    return generation == generation_ && revision && revision == accepted_revision_;
+  }
+private:
+  std::uint64_t generation_{1}, accepted_revision_{};
+};
 }
 
 
