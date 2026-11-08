@@ -81,6 +81,7 @@ Release automation may promote only an accepted bundle with `tests/platform/prom
 Downstream release jobs should verify that artifact with `tests/platform/verify_release_manifest.py <release-root> --signoff signoff.json` before publishing; any changed, missing, or unsigned file fails closed.
 The one-command workflow `tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root> --signoff signoff.json` runs retention, decision, promotion, and dual-hash signed manifest verification in order; pending native evidence or mismatched human approval stops before release output.
 After an accepted decision, record manual release ownership with `tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`; the signoff binds both report and review-packet hashes, and pending decisions cannot receive a signoff.
+The signed release checklist is therefore: retain the pair, emit the decision, record signoff, run the signed `prepare_release_bundle.py` workflow, and verify the dual-hash manifest before publication.
 
 ## Qt 6.8.3 prebuilt desktop preset
 
