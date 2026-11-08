@@ -1,4 +1,5 @@
 #include "beatglass/library/detail/cache_identity.hpp"
+#include <system_error>
 namespace beatglass::library_detail {
 CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
                                              std::string engine,
@@ -64,5 +65,14 @@ FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::
   const auto status = revalidate_file_identity(path, expected_content, stop, diagnostic);
   if (status == FingerprintStatus::changed || status == FingerprintStatus::error) cache.remove_entry(path);
   return status;
+}
+
+bool prune_missing_collection_entry(SqliteCache& cache, const std::filesystem::path& path,
+                                    std::string* diagnostic) {
+  std::error_code ec;
+  const bool exists = std::filesystem::exists(path, ec);
+  if (ec) { if (diagnostic) *diagnostic = ec.message(); return false; }
+  if (exists) return false;
+  return cache.remove_entry(path.string());
 }
 }
