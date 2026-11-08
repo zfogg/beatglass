@@ -1087,6 +1087,8 @@ ApplicationWindow {
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
                                     Accessible.name: "Output capture endpoint"
+                                    Accessible.value: currentText
+                                    Accessible.role: Accessible.ComboBox
                                     Accessible.description: currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture."
                                     onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
                                 }

@@ -92,6 +92,8 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Output capture endpoint selection now exposes its current endpoint value and ComboBox role, completing the transport input semantics.
+
 The no-display overlay empty state now includes actionable recovery guidance in its accessible description, clarifying how to restore display routing.
 
 Seek action, overlay display selection, and system output-device status now expose complete control roles and current values.
