@@ -524,6 +524,8 @@ That identity is now withheld until the selected Library analysis reports a comp
 
 The visualization now reports its reduced-motion state next to the accepted snapshot. Reduced motion affects animated presentation surfaces only; the accepted waveform and FFT arrays remain static, source-backed selection targets and continue to support playback seek.
 
+Load and playback feedback now carry that contract through recovery states: a ready reduced-motion canvas says it is using a static snapshot, and selection feedback distinguishes an accepted-snapshot seek from the unavailable state before playback starts.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

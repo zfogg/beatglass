@@ -1397,7 +1397,7 @@ ApplicationWindow {
                     objectName: "visualizationLoadState"
                     text: typeof visualizationPresentation === "undefined"
                         ? "Unavailable"
-                        : (visualizationCanvas.modeHasData ? "Ready" : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
+                        : (visualizationCanvas.modeHasData ? (visualizationCanvas.reducedMotion ? "Ready · static snapshot" : "Ready") : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
                     Accessible.name: "Visualization load state: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
@@ -1453,6 +1453,24 @@ ApplicationWindow {
                     Accessible.role: Accessible.StaticText
                     Accessible.description: "Reduced motion changes presentation animation only; accepted waveform and FFT snapshots remain available for selection and seek."
                     ToolTip.text: "Motion preference for visualization presentation"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
+                    objectName: "visualizationPlaybackFeedback"
+                    text: visualizationCanvas.selectedPosition < 0
+                        ? (visualizationCanvas.reducedMotion ? "Playback seek ready after selecting a static snapshot position" : "Playback seek ready after selecting a position")
+                        : (window.playbackBridge && window.playbackBridge.state !== "Stopped"
+                           ? "Selected " + Math.round(visualizationCanvas.selectedPosition * 100) + "% · seek uses accepted snapshot"
+                           : "Selected " + Math.round(visualizationCanvas.selectedPosition * 100) + "% · start playback to seek")
+                    Accessible.name: "Visualization playback feedback: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "Playback and seek readiness for the accepted waveform or FFT snapshot."
+                    ToolTip.text: "Playback seek feedback for the accepted visualization snapshot"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
