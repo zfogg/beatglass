@@ -636,8 +636,30 @@ ApplicationWindow {
                 Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 RowLayout {
                     objectName: "visualizationModeControls"
-                    Button { text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."; onClicked: visualizationCanvas.viewMode = "waveform" }
-                    Button { text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."; onClicked: visualizationCanvas.viewMode = "spectrum" }
+                    Button {
+                        id: waveformView
+                        text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"
+                        Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."
+                        onClicked: visualizationCanvas.viewMode = "waveform"
+                        background: Rectangle {
+                            color: waveformView.checked ? "#273b5d" : "#182231"
+                            border.width: waveformView.activeFocus ? 3 : 1
+                            border.color: waveformView.activeFocus ? "#60a5fa" : "#718096"
+                            radius: 6
+                        }
+                    }
+                    Button {
+                        id: spectrumView
+                        text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"
+                        Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."
+                        onClicked: visualizationCanvas.viewMode = "spectrum"
+                        background: Rectangle {
+                            color: spectrumView.checked ? "#432c56" : "#182231"
+                            border.width: spectrumView.activeFocus ? 3 : 1
+                            border.color: spectrumView.activeFocus ? "#c084fc" : "#718096"
+                            radius: 6
+                        }
+                    }
                     Label { text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"; objectName: "visualizationModeStatus"; Accessible.name: "Visualization mode" }
                 }
                 Canvas {
