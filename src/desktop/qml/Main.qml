@@ -801,9 +801,10 @@ ApplicationWindow {
                             : visualizationPresentation.spectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: 120
                     Accessible.name: "Live waveform and spectrum"
-                    Accessible.description: visualizationCanvas.viewMode === "waveform"
+                    Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
-                        : "Bounded frequency-domain FFT magnitudes from the current output capture."
+                        : "Bounded frequency-domain FFT magnitudes from the current output capture.")
+                        + " " + (visualizationCanvas.selectedPosition < 0 ? "No position selected." : "Selected position " + Math.round(visualizationCanvas.selectedPosition * 100) + " percent.")
                     ToolTip.text: "Click to select a position; use Left/Right/Home/End when focused"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
@@ -925,6 +926,7 @@ ApplicationWindow {
                         ? "No visualization generation is active"
                         : "Visualization generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
                     Accessible.name: "Visualization generation status"
+                    Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current accepted visualization generation and revision"
                     Layout.fillWidth: true
