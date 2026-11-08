@@ -142,6 +142,20 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   done
 fi
 
+manifest="$out_dir/qualification-manifest.txt"
+{
+  printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
+  printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
+  printf 'commands=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
+  if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
+    printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
+  fi
+} > "$manifest"
+if [[ ! -s "$manifest" ]]; then
+  echo "Qualification manifest is missing or empty" >&2
+  exit 1
+fi
+
 cat <<'EOF'
 
 Manual cases still required; record PASS, FAIL, or UNRUN in docs/macos-qualification.md:
