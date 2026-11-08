@@ -73,7 +73,7 @@ TEST_CASE("path reader rejects zero epoch before opening source") {
 }
 
 TEST_CASE("path reader classifies AAC and M4A as unsupported instead of unreadable") {
-  for (const auto extension : {".aac", ".m4a"}) {
+  for (const auto extension : {".aac", ".m4a", ".AAC", ".M4A"}) {
     const auto path = std::filesystem::temp_directory_path() /
       ("beatglass-unsupported" + std::string(extension));
     { std::ofstream out(path, std::ios::binary); out << "not a decoder fixture"; }
