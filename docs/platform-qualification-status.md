@@ -32,6 +32,8 @@ Detailed handoff checklists: [Windows](windows-qualification.md), [macOS](macos-
 
 Each native scenario record must retain its capture timestamp, supporting logs, and a screenshot or recording path; a status without that evidence remains unqualified.
 
+Before accepting a handoff, run `python tests/platform/check_evidence_readiness.py --status docs/platform-qualification-status.md --bundles <retained-bundle-root>`. The command requires one attributable `windows/`, `macos/`, and `linux/` manifest beneath the bundle root, checks each manifest's platform against the status row, and runs the shared provenance, scenario, path, and hash verifier for every row.
+
 ## Issue #76 UI gate
 
 The DJ workflow must remain usable when overlay capability is unavailable or denied. Native checks must verify that the main controls stay recoverable, the selected output device and capture state remain visible, stale analysis is cleared after loss, and an unavailable overlay never causes an invisible or stranded window. Click-through, tray/menu-bar recovery, fullscreen behavior, monitor changes, and reduced-motion behavior are separate platform observations; a mockup or window flag alone does not satisfy them.
