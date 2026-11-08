@@ -77,6 +77,7 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
     errors = []
     for row in report.get("platforms", []):
         platform = row.get("platform")
+        platform_root = (bundles / str(platform)).resolve()
         manifest = bundles / platform / "manifest.json"
         if not manifest.is_file():
             errors.append(f"{platform}: retained manifest is missing")
@@ -97,6 +98,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         elif not any(item.get("path") == output for item in manifest_data.get("artifacts", [])):
             errors.append(f"{platform}: qualification output is not retained as an artifact")
         elif output_path := (bundles / platform / output):
+            if not output_path.resolve().is_relative_to(platform_root):
+                errors.append(f"{platform}: qualification output escapes retained bundle")
+                continue
             if output_path.is_file() and hashlib.sha256(output_path.read_bytes()).hexdigest() != row.get("qualification_output_sha256"):
                 errors.append(f"{platform}: qualification output hash does not match report")
             if output_path.is_file() and output_path.stat().st_size != row.get("qualification_output_bytes"):
@@ -111,6 +115,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
                 continue
             path = bundles / platform / str(evidence)
             scenario_id = str(scenario.get("id"))
+            if not path.resolve().is_relative_to(platform_root):
+                errors.append(f"{platform}: scenario evidence escapes retained bundle: {evidence}")
+                continue
             if not path.is_file():
                 errors.append(f"{platform}: retained scenario evidence is missing: {evidence}")
                 continue
@@ -123,6 +130,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             errors.append(f"{platform}: manifest SHA-256 does not match report")
         for artifact in row.get("artifact_inventory", []):
             path = bundles / platform / str(artifact.get("path", ""))
+            if not path.resolve().is_relative_to(platform_root):
+                errors.append(f"{platform}: retained artifact escapes bundle: {artifact.get('path')}")
+                continue
             if not path.is_file():
                 errors.append(f"{platform}: retained artifact is missing: {artifact.get('path')}")
                 continue
