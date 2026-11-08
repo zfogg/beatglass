@@ -133,6 +133,16 @@ TestCase {
         app.destroy()
         fakeCapture.status = "Monitoring"
     }
+    function test_captureStartingDisablesDuplicateRequests() {
+        fakeCapture.status = "Starting"
+        let app = shellWithOverlay.createObject(null)
+        verify(app !== null)
+        let toggle = findChild(app, "toggleMonitoring")
+        compare(toggle.text, "Starting…")
+        verify(!toggle.enabled)
+        app.destroy()
+        fakeCapture.status = "Monitoring"
+    }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)
