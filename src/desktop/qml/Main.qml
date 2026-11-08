@@ -337,7 +337,7 @@ ApplicationWindow {
                             Accessible.description: text
                         }
                         RowLayout { Layout.fillWidth: true
-                            Label { text: "Analysis integration is unavailable until a decoder-backed operation is connected."; objectName: "analysisProgress"; Accessible.name: "Analysis progress"; Accessible.description: text; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                            Label { text: analysisJob ? (analysisJob.frames > 0 ? "Analysis observed " + analysisJob.frames + " frames." : "No analysis frames observed yet.") : "Analysis progress unavailable"; objectName: "analysisProgress"; Accessible.name: "Analysis progress"; Accessible.description: text; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                         }
                     }
                 }
