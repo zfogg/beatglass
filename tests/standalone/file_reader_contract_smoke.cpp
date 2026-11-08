@@ -62,6 +62,10 @@ int main() {
     assert(end.status == FileReadStatus::end);
     const auto repeated_end = reader.read(samples);
     assert(repeated_end.status == FileReadStatus::end && repeated_end.block.samples.empty());
+    std::stop_source eof_cancel;
+    eof_cancel.request_stop();
+    const auto cancelled_eof = reader.read(samples, eof_cancel.get_token());
+    assert(cancelled_eof.status == FileReadStatus::cancelled);
     reader.seek(0, 12);
     const auto replayed = reader.read(samples);
     assert(replayed.status == FileReadStatus::data && replayed.block.first_frame == 0 && replayed.block.epoch == 12);
