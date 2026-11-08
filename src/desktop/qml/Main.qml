@@ -817,6 +817,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisBatchLastResult"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastResult !== ""
+                                text: visible ? ("Latest batch result: " + window.analysisJobBridge.batchLastResult) : ""
+                                Accessible.name: "Latest batch analysis result"
+                                Accessible.description: visible ? text : "No batch analysis result is available."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
+                            }
+                            Label {
                                 objectName: "persistedRecoveryStatus"
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
