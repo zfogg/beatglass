@@ -7,6 +7,9 @@ import unittest
 spec = importlib.util.spec_from_file_location("verify_bundle", Path(__file__).with_name("verify_evidence_bundle.py"))
 module = importlib.util.module_from_spec(spec); assert spec.loader
 spec.loader.exec_module(module)
+readiness_spec = importlib.util.spec_from_file_location("readiness", Path(__file__).with_name("check_evidence_readiness.py"))
+readiness = importlib.util.module_from_spec(readiness_spec); assert readiness_spec.loader
+readiness_spec.loader.exec_module(readiness)
 
 
 class EvidenceBundleTest(unittest.TestCase):
@@ -39,6 +42,21 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             root = Path(tmp); path = root / "manifest.json"
             path.write_text(json.dumps(manifest({"path": "../outside.txt", "sha256": "0" * 64})), encoding="utf-8")
             self.assertTrue(any("escapes bundle" in error for error in module.verify(root, path)))
+
+    def test_readiness_requires_each_platform_bundle(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; bundles.mkdir()
+            status = root / "status.md"
+            status.write_text("| Windows | prep | gates |\n| macOS | prep | gates |\n| Linux | prep | gates |\n", encoding="utf-8")
+            (bundles / "windows").mkdir()
+            self.assertIn("macos: missing manifest", "\n".join(readiness.check(status, bundles)))
+
+    def test_readiness_rejects_platform_mismatch(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(manifest({"path": "capture.txt", "sha256": "0" * 64})), encoding="utf-8")
+            self.assertIn("platform does not match", "\n".join(readiness.check(status, bundles)))
 
 
 if __name__ == "__main__":
