@@ -13,6 +13,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
+    QtObject { id: fakeCatalog; function browse(folder, search) { return [{name: "tone.wav", kind: "audio"}] } }
     QtObject {
         id: fakeThemePreferences
         property int themeIndex: 0
@@ -39,6 +40,7 @@ TestCase {
         function resizeOverlay(width, height) { requestedWidth = width; return true }
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
+    Component { id: shellWithCatalog; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; libraryCatalogBridge: fakeCatalog } }
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
@@ -78,6 +80,14 @@ TestCase {
         tabs.currentIndex = 0
         tryCompare(library, "visible", true)
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
+        app.destroy()
+    }
+    function test_libraryDescriptionReportsCatalogReadiness() {
+        let app = shellWithCatalog.createObject(null)
+        app.browseFolder = "file:///tmp"
+        tryCompare(app, "catalogRows.length", 1)
+        compare(findChild(app, "libraryDescription").text,
+                "Catalog browsing is active for this folder. Select a file to inspect metadata and prepare it for analysis.")
         app.destroy()
     }
 
