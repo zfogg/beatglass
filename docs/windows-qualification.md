@@ -2,6 +2,10 @@
 
 This checklist is required before claiming Windows DJ support. CI and offscreen Qt runs do not qualify native capture or desktop behavior.
 
+The runner also writes `qualification-manifest.txt` with required build identity
+and canonical evidence links; the offline verifier rejects missing, duplicate,
+or redirected identity fields.
+
 ## Build identity
 
 The executable preparation check is `tests/windows/run_qualification.ps1`. Run it
