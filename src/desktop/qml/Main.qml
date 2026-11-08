@@ -520,7 +520,7 @@ ApplicationWindow {
                             Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current playback source"; elide: Text.ElideMiddle; Layout.fillWidth: true }
                             Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.currentFrame : 0; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
                             Label { text: window.playbackBridge && window.playbackBridge.state !== "Stopped" ? "Seek uses audio frames; track duration is not available yet." : ""; objectName: "playbackSeekLimitation"; Accessible.name: "Playback seek limitation"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Playback seek currently uses source audio frames"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                            Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
+                            Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
                         }
                         Label {
                             objectName: "playbackUnavailable"
@@ -745,7 +745,7 @@ ApplicationWindow {
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 RowLayout {
                     Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: window.captureMonitorBridge !== null && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
-                    Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                 }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring"; Accessible.role: Accessible.StaticText; Accessible.description: text }
                 Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
@@ -1002,7 +1002,7 @@ ApplicationWindow {
                             function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
                         }
                     }
-                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
+                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
                     Label { text: "Opacity" }
                     Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: if (window.overlayBridge) window.overlayBridge.setOpacity(value) }
                     Connections {
@@ -1083,7 +1083,7 @@ ApplicationWindow {
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
-                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                             Label {
                                 objectName: "endpointUnavailableState"
                                 visible: window.endpointSelectionBridge === null
@@ -1148,6 +1148,7 @@ ApplicationWindow {
                     objectName: "settingsStatus"
                     text: "Settings are saved for this desktop profile. User audio files are never modified."
                     Accessible.name: "Settings status: " + text
+                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }

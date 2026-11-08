@@ -50,7 +50,7 @@ def main() -> int:
         "playback discontinuity clear": "onEpochChanged()",
         "overlay empty display state": "overlayDisplayEmptyState",
         "overlay status static roles": "objectName: \"overlayInteractionMode\"; text: window.overlayBridge",
-        "library capture status roles": "objectName: \"endpointStatus\"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: \"Output endpoint status: \" + text; Accessible.role: Accessible.StaticText",
+        "library capture status roles": "objectName: \"endpointStatus\"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: \"Output endpoint status: \" + text; Accessible.value: text; Accessible.role: Accessible.StaticText",
         "library detail status roles": "objectName: \"selectedAudioName\"",
         "analysis status roles": "objectName: \"analysisProgress\"",
         "visual status roles": "objectName: \"visualizationLoadState\"",
@@ -77,6 +77,7 @@ def main() -> int:
         "control value announcements": "Accessible.value: Math.round(value * 100) + \"%\"",
         "remaining control values": "Accessible.value: checked ? \"selected\" : \"not selected\"",
         "status value announcements": "Accessible.value: visualizationCanvas.viewMode",
+        "final state values": "Accessible.value: text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
