@@ -38,6 +38,8 @@ MARKERS = {
     "qml overlay diagnostic dismissal": "!window.overlayPersistedDiagnosticDismissed",
     "qml overlay saved target": "overlayPreferredScreenIndex",
     "qml overlay target restoration": "saved display target selected.",
+    "qml overlay click-through state": "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.",
+    "qml overlay opacity state": "DJ overlay opacity set to ",
 }
 
 

@@ -624,6 +624,8 @@ Appearance settings now publish live accessible announcements when a theme is re
 
 Overlay display selection now persists in the desktop session: when the screen list returns and the saved index is still valid, QML reselects that target and announces readiness; if it is absent, explicit target selection remains required.
 
+Overlay click-through/unlock and opacity changes now flow through the same live recovery announcement path. Click-through explicitly explains how to restore interaction, unlock announces restored keyboard/pointer access, and opacity changes report the applied percentage.
+
 Endpoint bridge transitions now actively clear source-bound visualization selection, distinguish retry failure from no-device reacquisition, and restore focus to the endpoint selector. A replacement accepted snapshot is therefore required after endpoint replacement rather than reusing stale waveform/FFT state.
 
 Settings endpoint, DJ monitoring, and overlay availability now share the same capture-recovery reset path and no-device/reacquisition language. A failed monitor or unavailable overlay clears stale visualization selection and returns focus to the recovery target.
