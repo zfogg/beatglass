@@ -5,7 +5,7 @@
 #include <string>
 namespace beatglass::library {
 /** Worker-owned cache admission result. A hit contains a completed serialized result; a miss reserves run_id for analysis. */
-struct CacheAdmission { std::optional<std::string> cached; bool analysis_reserved{}; };
+struct CacheAdmission { std::optional<std::string> cached; bool analysis_reserved{}; bool decoder_compatible{true}; };
 /** Reuse a completed identity or reserve a retryable run before decoding/analysis begins. */
 CacheAdmission admit_analysis(library_detail::SqliteCache&, const std::string& run_id, const AnalysisIdentity&, const std::string& source_path = {}, const std::string& decoder_snapshot = {});
 }
