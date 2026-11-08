@@ -370,7 +370,7 @@ def main() -> int:
         "live monitoring heading tooltip": "Accessible.name: \"DJ monitoring\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Live output monitoring and visualization\"",
         "live output monitoring tooltip": "ToolTip.text: \"Current live output monitoring state\"",
         "visualization status grouping": "objectName: \"visualizationStatusGroup\"\n                    Layout.fillWidth: true\n                    spacing: window.compactHeader ? 4 : 8\n                    Accessible.name: \"Visualization data and capture status\"",
-        "visualization selection grouping": "objectName: \"visualizationSelectionControls\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Visualization position selection\"",
+        "visualization selection grouping": 'objectName: "visualizationSelectionControls"',
         "selected audio details grouping": "objectName: \"selectedAudioDetails\"\n                        Accessible.name: \"Selected audio details\"",
         "clear audio selection value": "Accessible.name: \"Clear selected audio\"\n                            Accessible.value: enabled ? window.selectedName : \"no selection\"",
         "retry metadata state value": "Accessible.name: \"Retry metadata\"\n                            Accessible.value: window.metadataStatus",
