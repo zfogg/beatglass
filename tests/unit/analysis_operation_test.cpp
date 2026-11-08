@@ -18,6 +18,18 @@ TEST_CASE("analysis publication requires source and cache identities to match") 
   op.identity.mode = "offline";
   REQUIRE(op.source.content_hash != op.identity.content_hash);
 }
+TEST_CASE("decoder-only publication uses the stop-aware decoder and preserves run identity") {
+    beatglass::library_detail::SqliteCache cache(":memory:");
+    beatglass::library::AnalysisOperation op;
+    op.source.path = "track.wav"; op.source.content_hash = "sha256:decode";
+    op.identity = {"sha256:decode", "engine", "config", "offline"};
+    op.decode = [](std::stop_token stop, const auto&) { return stop.stop_requested() ? std::string{} : std::string("decoded"); };
+    op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+    beatglass::library_detail::CacheKey key{"sha256:decode", "engine", "config", "offline"};
+    cache.begin("decode-run", key);
+    REQUIRE(beatglass::library::publish_operation(cache, "decode-run", op, {}) == beatglass::library_detail::Publish::committed);
+    std::string result; REQUIRE(cache.find(key, result)); CHECK(result == "decoded");
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
