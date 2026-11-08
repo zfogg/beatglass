@@ -140,6 +140,9 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
                 errors.append(f"{platform}: manifest scenario entry must be an object")
                 continue
             scenario_id = str(scenario.get("id"))
+            if not scenario_id.strip() or scenario_id == "None":
+                errors.append(f"{platform}: manifest scenario id is missing")
+                continue
             if scenario_id in scenario_ids:
                 errors.append(f"{platform}: duplicate manifest scenario id: {scenario_id}")
             scenario_ids.add(scenario_id)

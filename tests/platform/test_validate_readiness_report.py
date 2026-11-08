@@ -177,6 +177,19 @@ class ReadinessReportContractTest(unittest.TestCase):
             errors = chr(10).join(module.validate_retained_files(report, root))
             self.assertIn("duplicate manifest scenario id", errors)
 
+    def test_missing_manifest_scenario_id_is_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["scenarios"][0]["id"] = None
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("manifest scenario id is missing", errors)
+
     def test_duplicate_manifest_artifacts_are_rejected(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as directory:
