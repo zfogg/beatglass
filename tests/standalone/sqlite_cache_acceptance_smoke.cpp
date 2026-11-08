@@ -81,6 +81,11 @@ int main() {
     cache.begin("config-republish", next_config);
     assert(cache.publish("config-republish", next_config, "config-b-republished", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(next_config, live_result) && live_result == "config-b-republished");
+    cache.begin("stale-active", next_config);
+    assert(cache.publish("stale-active", next_config, "discarded-stale", {}, [] { return false; }) == Publish::stale_input);
+    assert(cache.find(next_config, live_result) && live_result == "config-b-republished");
+    assert(cache.discard_retryable("stale-active"));
+    assert(cache.find(next_config, live_result) && live_result == "config-b-republished");
     const CacheKey next_content{"sha256:two", key.engine, key.config, key.mode};
     cache.begin("next-content", next_content);
     assert(cache.publish("next-content", next_content, "content-two-data", {}, [] { return true; }) == Publish::committed);
