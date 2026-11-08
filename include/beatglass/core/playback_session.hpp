@@ -14,6 +14,8 @@ public:
   bool start(std::uint64_t epoch) noexcept;
   /** Pause without retiring the source epoch. */
   bool pause() noexcept;
+  /** Resume a paused session without retiring its source epoch. */
+  bool resume() noexcept;
   /** Stop and retire the current source. */
   void stop() noexcept;
   /** Seek to a frame using a strictly newer nonzero epoch. */

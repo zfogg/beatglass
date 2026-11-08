@@ -8,10 +8,9 @@ TEST_CASE("playback seek retires old epoch and reacquires from requested frame")
   REQUIRE(session.seek(42, 8)); CHECK(session.next_frame() == 42);
   CHECK_FALSE(session.accept(7, 42)); REQUIRE(session.accept(8, 42));
 }
-TEST_CASE("paused playback rejects delivery until resumed by a fresh start") {
+TEST_CASE("paused playback resumes without retiring its epoch") {
   PlaybackSession session; REQUIRE(session.start(3)); REQUIRE(session.pause());
-  CHECK_FALSE(session.accept(3, 0)); session.stop(); CHECK_FALSE(session.seek(0, 4));
-  REQUIRE(session.start(4)); REQUIRE(session.accept(4, 0));
+  CHECK_FALSE(session.accept(3, 0)); REQUIRE(session.resume()); REQUIRE(session.accept(3, 0));
 }
 TEST_CASE("source replacement resets the queue cursor and retires old deliveries") {
   PlaybackSession session; REQUIRE(session.start(4)); REQUIRE(session.accept(4, 0));
