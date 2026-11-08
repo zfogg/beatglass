@@ -87,7 +87,12 @@ if ! grep -Eq 'Total Tests: [1-9][0-9]*' <<<"$registered_tests"; then
   echo "No macOS overlay tests are registered for qualification" >&2
   exit 1
 fi
-ctest --test-dir "$out_dir/build" -R "$test_filter" --output-on-failure
+overlay_log="$out_dir/overlay-ctest.log"
+ctest --test-dir "$out_dir/build" -R "$test_filter" --output-on-failure | tee "$overlay_log"
+if ! grep -Eq '[0-9]+% tests passed' "$overlay_log"; then
+  echo "Overlay qualification log has no passing CTest summary" >&2
+  exit 1
+fi
 
 cat <<'EOF'
 
