@@ -82,6 +82,14 @@ TestCase {
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
         app.destroy()
     }
+    function test_analysisStatusUsesPublishedMetadata() {
+        let app = shell.createObject(null)
+        app.selectedAudioUrl = "file:///tmp/tone.wav"
+        fakeMetadata.statusChanged("WAV | 44100 Hz")
+        let status = findChild(app, "analysisStatus")
+        tryCompare(status, "text", "Selected source is ready for analysis. Metadata status: WAV | 44100 Hz")
+        app.destroy()
+    }
     function test_libraryDetailsAvailabilityIsActionable() {
         let app = shell.createObject(null)
         let details = findChild(app, "detailsAvailability")

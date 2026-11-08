@@ -313,7 +313,7 @@ ApplicationWindow {
                             objectName: "analysisStatus"
                             text: window.selectedAudioUrl.toString() === ""
                                 ? "Select an audio file to prepare it for analysis."
-                                : "Selected source is ready for analysis; playback and saved results are not connected yet."
+                                : "Selected source is ready for analysis. Metadata status: " + window.metadataStatus
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis status"
                             Accessible.description: text
