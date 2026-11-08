@@ -111,6 +111,13 @@ TestCase {
         app.destroy()
     }
 
+    function test_captureMonitorControlsAreBound() {
+        let app = shell.createObject(null)
+        verify(findChild(app, "toggleMonitoring") !== null)
+        verify(findChild(app, "captureStatus") !== null)
+        app.destroy()
+    }
+
     function test_visualizationCanvasIsAccessible() {
         let app = shell.createObject(null)
         let canvas = findChild(app, "visualizationCanvas")
