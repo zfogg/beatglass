@@ -79,7 +79,11 @@ void AnalysisJobBridge::cancel() {
 
 void AnalysisJobBridge::retry() {
   if (!canRetry()) return;
-  if (retryable_->retry()) { frames_ = retryable_->frames(); status_ = QStringLiteral("Queued"); poll_timer_.start(); emit statusChanged(); }
+  if (retryable_->retry()) {
+    frames_ = retryable_->frames();
+    if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+    status_ = QStringLiteral("Queued"); poll_timer_.start(); emit statusChanged();
+  }
 }
 
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
@@ -103,7 +107,10 @@ void AnalysisJobBridge::cancelBatch() {
 void AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
-  if (accepted) { poll_timer_.start(); emit statusChanged(); }
+  if (accepted) {
+    if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+    poll_timer_.start(); emit statusChanged();
+  }
 }
 
 void AnalysisJobBridge::poll() {

@@ -298,6 +298,8 @@ The worker analysis contract now also hands the verified serialized result to an
 
 The Library surface renders that worker result separately from cached-result status, preserving the distinction between a newly completed worker result and a cache lookup.
 
+Retrying an analysis attempt clears the prior worker result before the new attempt is queued, preventing stale output from being presented as current work.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
