@@ -361,6 +361,7 @@ def main() -> int:
         "overlay display value": "Accessible.name: \"Overlay display and size controls\"\n                    Accessible.value: window.overlayBridge && window.overlayBridge.screenIndex >= 0",
         "monitoring controls grouping": "objectName: \"monitoringControls\"\n                    Accessible.name: \"Live monitoring controls\"",
         "visualization controls grouping": "objectName: \"visualizationModeControls\"\n                    Accessible.name: \"Visualization mode controls\"",
+        "visualization canvas live value": "Accessible.name: \"Live \" + (visualizationCanvas.viewMode === \"waveform\" ? \"waveform\" : \"FFT spectrum\")\n                    Accessible.value: visualizationCanvas.viewMode + \", \"",
         "playback controls grouping": "objectName: \"playbackControls\"\n                            Layout.fillWidth: true\n                            Accessible.name: \"Playback controls\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",

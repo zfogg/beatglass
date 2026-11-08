@@ -917,6 +917,7 @@ ApplicationWindow {
                             : visualizationPresentation.spectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: 120
                     Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
+                    Accessible.value: visualizationCanvas.viewMode + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%")
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
                         : "Bounded frequency-domain FFT magnitudes from the current output capture.")

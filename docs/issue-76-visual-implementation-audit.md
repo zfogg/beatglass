@@ -312,6 +312,8 @@ Playback and overlay control groups now expose live state values in addition to 
 
 Live monitoring and visualization-mode rows now expose grouped semantics and live values, giving users one coherent context surface before reaching start/stop or waveform/FFT controls.
 
+The live visualization canvas now exposes its current mode and selected-position value directly, aligning keyboard selection feedback with the rendered waveform/FFT surface.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
