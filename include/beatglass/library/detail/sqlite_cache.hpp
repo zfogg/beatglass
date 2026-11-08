@@ -60,7 +60,7 @@ public:
   bool find(const CacheKey& key, std::string& result);
   /** Return 1–10000 persisted runs left retryable by cancellation, stale input, or restart. */
   std::vector<RetryableRun> retryable_runs(std::size_t limit = 100);
-  /** Discard one retryable run record without touching its source file. */
+  /** Discard one retryable run record without touching its source file; throws for an empty, NUL-containing, or overlong ID. */
   bool discard_retryable(const std::string& id);
   /** Mark a matching running operation retryable after a pre-publication worker failure. */
   bool mark_retryable(const std::string& id, const CacheKey& key);
