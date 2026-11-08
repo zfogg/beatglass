@@ -332,6 +332,8 @@ def main() -> int:
         "audio capture group guidance": "Accessible.name: \"Audio capture settings\"",
         "appearance group guidance": "Accessible.name: \"Appearance settings\"",
         "appearance intro guidance": "Accessible.name: \"Appearance guidance\"; Accessible.role: Accessible.StaticText",
+        "settings tab guidance": "objectName: \"settingsTab\"; activeFocusOnTab: true; Accessible.name: \"Settings\";",
+        "settings status description": "Accessible.description: \"Settings persistence status and user-audio safety guarantee.\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
         "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",
