@@ -1279,6 +1279,7 @@ ApplicationWindow {
                 ColumnLayout {
                     objectName: "visualizationStatusGroup"
                     Layout.fillWidth: true
+                    Layout.minimumWidth: 0
                     spacing: window.compactHeader ? 4 : 8
                     Accessible.name: "Visualization data and capture status"
                     Accessible.value: window.liveBridge.status === "Error" ? "capture error" : (window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring" ? window.liveBridge.status.toLowerCase() : (visualizationCanvas.modeHasData ? "ready" : "waiting"))
