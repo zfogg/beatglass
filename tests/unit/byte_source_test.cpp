@@ -89,3 +89,15 @@ TEST_CASE("byte cursor rejects a source that shrinks after opening") {
  CHECK(cursor.read(out).status == ByteReadStatus::error);
  CHECK(cursor.position() == 2);
 }
+
+TEST_CASE("byte cursor keeps mutation failure terminal after source restoration") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ REQUIRE(cursor.read(out).status == ByteReadStatus::data);
+ source.reported_size = 4;
+ CHECK(cursor.read(out).status == ByteReadStatus::error);
+ CHECK(cursor.position() == 2);
+ source.reported_size = 3;
+ CHECK(cursor.read(out).status == ByteReadStatus::error);
+ CHECK_FALSE(cursor.seek(0));
+ CHECK(cursor.position() == 2);
+}

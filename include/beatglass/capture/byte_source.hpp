@@ -39,8 +39,10 @@ public:
                                  std::stop_token cancel) = 0;
 };
 /** Worker-local cursor borrowing a source; it does not extend source lifetime.
- * It validates source responses and advances only after valid data. It is not
- * thread-safe and cannot turn a mutable underlying source into a snapshot.
+ * It validates source responses and advances only after valid data. A source
+ * size change is a terminal error for this cursor; callers must reopen against
+ * a fresh source snapshot. It is not thread-safe and cannot turn a mutable
+ * underlying source into a snapshot.
  */
 class ByteCursor {
 public:
@@ -50,7 +52,7 @@ public:
   std::uint64_t position() const noexcept { return position_; }
   /** Seek to an absolute byte offset through EOF; reject offsets beyond EOF. */
   bool seek(std::uint64_t offset) {
-    if (source_.size() != snapshot_size_) return false;
+    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return false; }
     if (offset > snapshot_size_) return false;
     position_ = offset; return true;
   }
@@ -58,6 +60,7 @@ public:
    * Reject underflow, overflow and positions past EOF without changing position.
    */
   bool seek_relative(std::int64_t displacement, ByteSeekOrigin origin) {
+    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return false; }
     const auto size = snapshot_size_;
     std::uint64_t base;
     switch (origin) {
@@ -88,7 +91,7 @@ public:
   ByteReadResult read(std::span<std::byte> buffer, std::stop_token cancel = {}) {
     if (cancel.stop_requested()) return {ByteReadStatus::cancelled, 0};
     if (buffer.empty()) return {ByteReadStatus::error, 0};
-    if (source_.size() != snapshot_size_) return {ByteReadStatus::error, 0};
+    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return {ByteReadStatus::error, 0}; }
     const auto size = snapshot_size_;
     if (position_ > size) return {ByteReadStatus::error, 0};
     if (position_ == size) return {ByteReadStatus::end, 0};
@@ -108,5 +111,6 @@ private:
   ByteSource& source_;
   const std::uint64_t snapshot_size_;
   std::uint64_t position_{};
+  bool failed_{};
 };
 }
