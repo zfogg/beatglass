@@ -144,6 +144,7 @@ fi
 
 manifest="$out_dir/qualification-manifest.txt"
 {
+  printf 'manifest_version=1\n'
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'commands=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
@@ -151,7 +152,7 @@ manifest="$out_dir/qualification-manifest.txt"
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
 } > "$manifest"
-if [[ ! -s "$manifest" ]]; then
+if [[ ! -s "$manifest" ]] || ! grep -q '^manifest_version=1$' "$manifest" || ! grep -q '^commit=' "$manifest"; then
   echo "Qualification manifest is missing or empty" >&2
   exit 1
 fi
