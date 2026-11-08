@@ -25,6 +25,7 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     connect(overlay_, &QWindow::widthChanged, this, &OverlayController::geometryChanged);
     connect(overlay_, &QWindow::heightChanged, this, &OverlayController::geometryChanged);
     overlay_->setColor(Qt::transparent);
+    overlay_->installEventFilter(this);
     connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; setClickThrough(false); });
     applyFlags();
     if (settings) {
@@ -51,7 +52,7 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     });
   }
 }
-OverlayController::~OverlayController() { setClickThrough(false); if (control_) control_->removeEventFilter(this); }
+OverlayController::~OverlayController() { setClickThrough(false); if (overlay_) overlay_->removeEventFilter(this); if (control_) control_->removeEventFilter(this); }
 void OverlayController::setOpacity(qreal opacity) {
   if (overlay_ && std::isfinite(opacity)) {
     const auto value = std::clamp(opacity, qreal(0), qreal(1));
@@ -131,6 +132,10 @@ void OverlayController::applyFlags() {
   if (visible && !overlay_->isVisible()) overlay_->show();
 }
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
+  if (watched == overlay_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close)) {
+    endDrag();
+    setClickThrough(false);
+  }
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
       (event->type() == QEvent::WindowStateChange && control_->windowState() == Qt::WindowMinimized))) { endDrag(); setClickThrough(false); }
   return QObject::eventFilter(watched, event);
