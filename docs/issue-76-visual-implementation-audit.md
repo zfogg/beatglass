@@ -479,3 +479,5 @@ The selection status/action row now uses vertical-center alignment, keeping wrap
 The inline clear action now reserves a compact/full minimum width, preventing its label from collapsing while leaving the neighboring selection status room to wrap.
 
 The selected-position label explicitly permits zero minimum width, allowing the row layout to prioritize the clear action while wrapping status text on narrow screens.
+
+The canvas focus ring reduces from three to two pixels in compact headers, preserving a clear keyboard-focus cue while reclaiming a small amount of visualization space.

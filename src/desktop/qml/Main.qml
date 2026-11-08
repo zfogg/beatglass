@@ -1178,7 +1178,7 @@ ApplicationWindow {
                         objectName: "visualizationFocusRing"
                         anchors.fill: parent
                         color: "transparent"
-                        border.width: 3
+                        border.width: window.compactHeader ? 2 : 3
                         border.color: window.themeAccentColors[window.selectedThemeIndex]
                         visible: visualizationCanvas.activeFocus
                         z: 2
