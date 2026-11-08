@@ -29,6 +29,9 @@ TestCase {
         property int frames: 0
         property bool canCancel: false
         property bool canRetry: false
+        property int batchAcceptedCount: 0
+        property int batchRejectedCount: 0
+        property int batchCapacity: 0
         property int cancels: 0
         property int retries: 0
         function cancel() { cancels++ ; status = "Cancelled"; canCancel = false; canRetry = true }
@@ -367,6 +370,17 @@ TestCase {
         verify(cancel.visible); verify(cancel.enabled); cancel.clicked(); compare(fakeAnalysis.cancels, 1)
         let retry = findChild(app, "retryAnalysis")
         verify(retry.enabled); retry.clicked(); compare(fakeAnalysis.retries, 1)
+        app.destroy()
+    }
+    function test_batchQueueStatusShowsCapacityAndRejectedInputs() {
+        fakeAnalysis.batchAcceptedCount = 3
+        fakeAnalysis.batchRejectedCount = 2
+        fakeAnalysis.batchCapacity = 4
+        let app = shellWithAnalysis.createObject(null)
+        let status = findChild(app, "analysisBatchStatus")
+        verify(status.visible)
+        compare(status.text, "Batch queue · accepted 3 · rejected 2 · capacity 4")
+        compare(status.Accessible.name, "Batch analysis queue status")
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
