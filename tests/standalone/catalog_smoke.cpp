@@ -50,6 +50,9 @@ int main() {
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
   require(filtered.entries.empty(), "filter returned an unexpected entry");
+  const auto extension_filtered = beatglass::library::browse(dir.path, "MP3");
+  require(extension_filtered.entries.size() == 1 && extension_filtered.entries[0].name == "Alpha.mp3",
+          "case-insensitive catalog filtering changed");
   const auto missing = beatglass::library::browse(dir.path / "missing");
   require(missing.entries.empty() && !missing.diagnostic.empty(),
           "missing directory was not reported atomically");
