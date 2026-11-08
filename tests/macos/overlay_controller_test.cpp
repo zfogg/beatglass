@@ -1,5 +1,6 @@
 #include "macos_overlay.hpp"
 #include <QGuiApplication>
+#include <QCloseEvent>
 #include <QQuickWindow>
 #include <QScreen>
 #include <QSettings>
@@ -53,6 +54,19 @@ private slots:
     QVERIFY(!controller.setClickThrough(true));
     controller.setOpacity(0.4); QVERIFY(qAbs(overlay.opacity() - 0.4) < 0.02);
     controller.setOpacity(std::numeric_limits<qreal>::quiet_NaN()); QVERIFY(qAbs(overlay.opacity() - 0.4) < 0.02);
+  }
+  void controlCloseRevokesClickThrough() {
+    QQuickWindow overlay; QWindow control;
+    control.show();
+    auto native = std::make_unique<FakeNative>(); auto* backend = native.get();
+    OverlayController controller(std::move(native));
+    QVERIFY(controller.attach(&overlay, &control));
+    QVERIFY(controller.showOverlay());
+    QVERIFY(controller.setClickThrough(true));
+    QCloseEvent close;
+    QCoreApplication::sendEvent(&control, &close);
+    QVERIFY(!controller.clickThrough());
+    QVERIFY(!backend->mode);
   }
   void nativeFailureHidesAndDetaches() {
     QQuickWindow overlay; QWindow control; control.show();
