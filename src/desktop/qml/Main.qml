@@ -54,6 +54,13 @@ ApplicationWindow {
             window.selectedTheme = window.themeNames[index]
         }
     }
+    Connections {
+        target: window.overlayBridge
+        function onAvailableChanged() {
+            if (window.overlayBridge && !window.overlayBridge.available && djOverlay.visible)
+                window.hideOverlayAndRestoreControls()
+        }
+    }
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
         refreshCatalog()
