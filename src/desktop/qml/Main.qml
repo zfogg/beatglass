@@ -2440,10 +2440,16 @@ ApplicationWindow {
                     objectName: "overlayActions"
                     visible: window.overlayBridge !== null
                     Accessible.name: "Overlay actions"
-                    Accessible.value: window.overlayBridge && window.overlayBridge.available ? "available" : "unavailable"
+                    Accessible.value: window.overlayBridge && window.overlayBridge.available
+                        ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available")
+                        : "unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Show, unlock, or hide the DJ overlay window."
-                    ToolTip.text: window.overlayBridge && window.overlayBridge.available ? "Overlay window actions are available" : "Overlay window actions are unavailable"
+                    Accessible.description: window.overlayDisplayRecoveryPending
+                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending and the control-window fallback remains available."
+                        : "Show, unlock, or hide the DJ overlay window."
+                    ToolTip.text: window.overlayBridge && window.overlayBridge.available
+                        ? (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available")
+                        : "Overlay window actions are unavailable; control-window fallback is active"
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Show the DJ overlay window"; ToolTip.text: "Show the DJ overlay and hide the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Restore overlay"; objectName: "restoreOverlay"; Accessible.name: "Restore DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Restore the DJ overlay using its persisted display, position, size, and opacity"; ToolTip.text: "Restore the overlay with persisted settings"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Reapply saved settings"; objectName: "reapplyOverlaySettings"; Accessible.name: "Reapply saved overlay settings"; Accessible.role: Accessible.Button; Accessible.description: "Reapply the saved display, position, size, and opacity before restoring the DJ overlay"; ToolTip.text: "Reapply saved overlay display, geometry, and opacity"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.reapplyOverlaySettingsAndRestore() }
