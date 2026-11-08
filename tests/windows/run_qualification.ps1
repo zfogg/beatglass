@@ -102,6 +102,7 @@ try {
   $hardwareModel = (Get-CimInstance Win32_ComputerSystem | Select-Object -First 1 | ForEach-Object { "$($_.Manufacturer) $($_.Model)" }).Trim()
   @(
     "commit=$(git -C $repoRoot rev-parse HEAD)"
+    "captured_at=$((Get-Date).ToUniversalTime().ToString('o'))"
     "windows_version=$([Environment]::OSVersion.VersionString)"
     "architecture=$([Environment]::Is64BitOperatingSystem)"
     "cmake_version=$((cmake --version | Select-Object -First 1).Trim())"
