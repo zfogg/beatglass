@@ -68,6 +68,17 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["platforms"][0]["retained_artifacts"], 1)
             self.assertTrue(result["platforms"][0]["errors"])
 
+    def test_readiness_rejects_bad_identity_and_stale_capture(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            data["commit"] = "not-a-sha"; data["captured_at"] = "2020-01-01T00:00:00Z"
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            errors = "\n".join(readiness.check(status, bundles, max_age_hours=1))
+            self.assertIn("invalid source commit", errors)
+            self.assertIn("evidence is stale", errors)
+
 
 if __name__ == "__main__":
     unittest.main()
