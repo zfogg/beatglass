@@ -72,6 +72,7 @@ int main() {
     assert(cache.find(key, result) && result == "result-a");
     assert(cache.invalidate(key));
     assert(!cache.find(key, result));
+    assert(cache.find(live_key, result) && result == "live-data");
     cache.begin("republish", key);
     assert(cache.publish("republish", key, "result-b", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(key, result) && result == "result-b");
