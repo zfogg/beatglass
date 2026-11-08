@@ -60,6 +60,17 @@ for bundle in "$tap_bundle" "$recovery_bundle"; do
     exit 1
   fi
 done
+validate_bundle_executable() {
+  local bundle="$1" expected="$2" plist="$bundle/Contents/Info.plist" actual
+  actual="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
+  if [[ "$actual" != "$expected" ]]; then
+    echo "Bundle executable mismatch in $plist: expected $expected, got $actual" >&2
+    exit 1
+  fi
+}
+validate_bundle_executable "$out_dir/build/beatglass-desktop.app" "beatglass-desktop"
+validate_bundle_executable "$tap_bundle" "beatglass-coreaudio-smoke"
+validate_bundle_executable "$recovery_bundle" "beatglass-coreaudio-recovery"
 echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
 validate_bundle_identity() {
   local bundle="$1" expected_executable="$2" expected_identifier="$3"
