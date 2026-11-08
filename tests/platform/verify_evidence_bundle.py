@@ -39,6 +39,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
+    evidence_owners = {}
     for scenario in scenarios or []:
         if not isinstance(scenario, dict) or not scenario.get("id") or scenario.get("status") not in {"PASS", "FAIL", "UNRUN"}:
             errors.append(f"invalid scenario: {scenario}"); continue
@@ -46,6 +47,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
             evidence = scenario.get("evidence")
             if not evidence or evidence not in seen:
                 errors.append(f"scenario evidence is not retained: {scenario.get('id')}")
+            elif evidence in evidence_owners:
+                errors.append(f"scenario evidence is shared: {evidence} ({evidence_owners[evidence]}, {scenario.get('id')})")
+            else:
+                evidence_owners[evidence] = scenario.get("id")
     return errors
 
 
