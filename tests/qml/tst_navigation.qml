@@ -89,6 +89,13 @@ TestCase {
         app.destroy()
     }
 
+    function test_playbackSeekControlsArePresent() {
+        let app = shell.createObject(null)
+        verify(findChild(app, "seekBackPlayback") !== null)
+        verify(findChild(app, "seekForwardPlayback") !== null)
+        app.destroy()
+    }
+
     function test_djMonitoringExplainsCurrentState() {
         let app = shell.createObject(null)
         let dj = findChild(app, "djPage")
