@@ -450,6 +450,13 @@ ApplicationWindow {
                                 Accessible.description: "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations."
                                 ToolTip.text: Accessible.description
                             }
+                            BusyIndicator {
+                                objectName: "analysisWaitingIndicator"
+                                running: window.selectedName !== "" && analysisJob && analysisJob.frames === 0
+                                visible: running
+                                Accessible.name: "Analysis waiting indicator"
+                                Accessible.description: "Analysis is waiting for the first observed frame; progress percentage is not available yet."
+                            }
                         }
                     }
                 }
