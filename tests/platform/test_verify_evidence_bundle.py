@@ -237,6 +237,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["ready_platform_count"], 0)
             self.assertEqual(result["retained_artifact_count"], 0)
             self.assertEqual(result["retained_artifact_bytes"], 0)
+            self.assertTrue(result["retained_bytes_consistent"])
             self.assertFalse(result["all_platforms_ready"])
             self.assertEqual(result["not_ready_platforms"], ["windows"])
             self.assertTrue(result["failure_summary_consistent"])
