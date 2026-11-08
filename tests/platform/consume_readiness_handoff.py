@@ -15,6 +15,9 @@ def consume(report_path: Path) -> list[str]:
     except (OSError, json.JSONDecodeError) as error:
         return [f"invalid readiness report: {error}"]
     errors = validator.validate(report)
+    for field in ("generation_errors", "handoff_check_errors", "documentation_check_errors", "ingestion_errors"):
+        if report.get(field):
+            errors.append(f"readiness handoff contains {field}")
     if not errors and report.get("exit_gate_status") != "READY":
         errors.append(f"readiness handoff is not accepted: {report.get('exit_gate_status')}")
     return errors

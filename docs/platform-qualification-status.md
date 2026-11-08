@@ -209,4 +209,6 @@ The handoff report records those failures in `ingestion_errors` as well as retur
 
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
+The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
+
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.
