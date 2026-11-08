@@ -144,9 +144,24 @@ ApplicationWindow {
         return "No matching audio files or folders. Try a different search or choose another folder."
     }
     function showOverlayAndHideControls() {
-        if (!window.overlayBridge || !window.overlayBridge.available) return false
-        if (!window.overlayBridge.showOverlay()) return false
-        window.announceCaptureRecoveryState("DJ overlay shown; output monitoring remains bound to the selected display.")
+        if (!window.overlayBridge || !window.overlayBridge.available) {
+            window.announceCaptureRecoveryState("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
+            window.show()
+            window.raise()
+            window.requestActivate()
+            return false
+        }
+        if (!window.overlayBridge.showOverlay()) {
+            window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
+            window.show()
+            window.raise()
+            window.requestActivate()
+            return false
+        }
+        const restoredGeometry = window.overlayBridge.geometry
+        window.announceCaptureRecoveryState(restoredGeometry && restoredGeometry.width > 0
+            ? "DJ overlay relaunched at its persisted position and size."
+            : "DJ overlay shown; output monitoring remains bound to the selected display.")
         window.hide()
         return true
     }
