@@ -1375,7 +1375,7 @@ ApplicationWindow {
                 RowLayout {
                     objectName: "visualizationSelectionControls"
                     Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignVCenter
+                    Layout.alignment: Qt.AlignTop
                     spacing: window.compactHeader ? 4 : 8
                     Accessible.name: "Visualization position selection"
                     Accessible.value: visualizationCanvas.selectedPosition < 0 ? "none" : Math.round(visualizationCanvas.selectedPosition * 100) + "% selected"
