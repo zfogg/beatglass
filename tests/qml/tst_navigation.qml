@@ -13,6 +13,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
+    QtObject { id: fakeCatalog; function browse(folder, search) { return [{name: "tone.wav", kind: "audio"}] } }
     QtObject {
         id: fakeThemePreferences
         property int themeIndex: 0
@@ -39,6 +40,7 @@ TestCase {
         function resizeOverlay(width, height) { requestedWidth = width; return true }
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
+    Component { id: shellWithCatalog; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; libraryCatalogBridge: fakeCatalog } }
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
@@ -80,12 +82,22 @@ TestCase {
         compare(findChild(app, "metadataStatus").text, "WAV | 44100 Hz")
         app.destroy()
     }
-
     function test_libraryDetailsAvailabilityIsActionable() {
         let app = shell.createObject(null)
         let details = findChild(app, "detailsAvailability")
         verify(details !== null)
         compare(details.text, "Select an audio file to inspect its read-only details.")
+        app.destroy()
+    }
+
+    function test_libraryDescriptionReflectsActiveCatalog() {
+        let app = shellWithCatalog.createObject(null)
+        let page = findChild(app, "libraryPage")
+        app.browseFolder = "file:///tmp"
+        tryCompare(app, "catalogRows.length", 1)
+        let description = findChild(page, "libraryDescription")
+        verify(description !== null)
+        compare(description.text, "Catalog browsing is active for this folder. Select a file to inspect metadata and prepare it for analysis.")
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {

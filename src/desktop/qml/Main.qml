@@ -212,7 +212,10 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
                 Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true }
                 Label {
-                    text: "Browse local folders. Indexing, analysis, playback and saved results are not available yet."
+                    objectName: "libraryDescription"
+                    text: window.browseFolder.toString() === ""
+                        ? "Choose a folder to browse local audio files."
+                        : "Catalog browsing is active for this folder. Select a file to inspect metadata and prepare it for analysis."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 RowLayout {
