@@ -402,6 +402,8 @@ The interaction hint now follows the active Waveform/FFT mode at runtime, naming
 
 The Waveform and FFT controls now expose selected-state descriptions directly, so the mode controls and the responsive interaction hint announce the same active visualization state before focus moves into the canvas.
 
+The visualization canvas and interaction hint now adapt to compact-header layout: the canvas reduces its preferred height and the hint scales its text while retaining wrapping. This keeps the runtime guidance usable in narrow desktop layouts without hiding the interaction contract.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
