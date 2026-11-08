@@ -48,6 +48,19 @@ def ingest(root: Path, output: Path) -> list[str]:
             if actual != digest.lower():
                 errors.append(f"artifact hash mismatch: {relative}")
             artifacts.append({"path": Path(relative).as_posix(), "sha256": actual, "role": "qualification-artifact"})
+    referenced = {
+        key: identity[key] for key in ("playback_evidence", "overlay_evidence", "display_topology", "audio_inventory")
+        if identity.get(key)
+    }
+    known_paths = {item["path"] for item in artifacts}
+    for key, relative in referenced.items():
+        path = (root / relative).resolve()
+        normalized = Path(relative).as_posix()
+        if root.resolve() not in path.parents or not path.is_file():
+            errors.append(f"missing or escaping referenced evidence: {relative}"); continue
+        if normalized in known_paths:
+            continue
+        artifacts.append({"path": normalized, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "role": key})
     report = {"platform": identity.get("platform", "unknown"), "commit": identity.get("commit", ""),
               "captured_at": identity.get("captured_at", ""), "environment": identity.get("environment", "native script output"),
               "artifacts": artifacts, "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in SCENARIOS]}
