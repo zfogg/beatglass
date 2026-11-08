@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+The consolidated keyboard/accessibility audit now asserts library search, sort, browser navigation, and empty-state keyboard surfaces.
+
 The visualization audit now covers waveform/spectrum shortcuts, focus-ring affordance, overall visualization status, selected-data status, and DJ status/estimate/evidence surfaces alongside the existing canvas and recovery states.
 
 Visualization selection and accepted revision status surfaces are now explicitly asserted in the static visual contract.
