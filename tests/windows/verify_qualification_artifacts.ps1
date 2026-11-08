@@ -46,6 +46,7 @@ for ($i = 0; $i -lt $expectedCases.Count; $i++) {
   if ($evidence[$i].case -ne $expectedCases[$i]) { throw "Unexpected native playback evidence case: $($evidence[$i].case)" }
   if ($evidence[$i].status -notin @("PASS", "FAIL", "UNRUN")) { throw "Invalid status for $($evidence[$i].case): $($evidence[$i].status)" }
   if ($evidence[$i].status -eq "PASS") {
+    if ([string]::IsNullOrWhiteSpace($evidence[$i].observed)) { throw "PASS case lacks observed result: $($evidence[$i].case)" }
     if ([string]::IsNullOrWhiteSpace($evidence[$i].log) -or [IO.Path]::IsPathRooted($evidence[$i].log)) { throw "PASS case lacks relative log evidence: $($evidence[$i].case)" }
     $logPath = [IO.Path]::GetFullPath((Join-Path $OutputDirectory $evidence[$i].log))
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
@@ -60,6 +61,7 @@ for ($i = 0; $i -lt $expectedOverlayCases.Count; $i++) {
   if ($overlayEvidence[$i].case -ne $expectedOverlayCases[$i]) { throw "Unexpected native overlay evidence case: $($overlayEvidence[$i].case)" }
   if ($overlayEvidence[$i].status -notin @("PASS", "FAIL", "UNRUN")) { throw "Invalid overlay status for $($overlayEvidence[$i].case): $($overlayEvidence[$i].status)" }
   if ($overlayEvidence[$i].status -eq "PASS") {
+    if ([string]::IsNullOrWhiteSpace($overlayEvidence[$i].log)) { throw "PASS overlay case lacks observed log: $($overlayEvidence[$i].case)" }
     if ([string]::IsNullOrWhiteSpace($overlayEvidence[$i].screenshot) -or [IO.Path]::IsPathRooted($overlayEvidence[$i].screenshot)) { throw "PASS overlay case lacks relative screenshot evidence: $($overlayEvidence[$i].case)" }
     $screenshotPath = [IO.Path]::GetFullPath((Join-Path $OutputDirectory $overlayEvidence[$i].screenshot))
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
