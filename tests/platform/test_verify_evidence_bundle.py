@@ -31,6 +31,17 @@ def manifest(artifact):
 
 
 class EvidenceBundleNegativeTest(unittest.TestCase):
+    def test_passed_scenarios_cannot_share_one_evidence_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "evidence.json").write_text("{}", encoding="utf-8")
+            data = manifest({"path": "evidence.json", "sha256": __import__("hashlib").sha256(b"{}").hexdigest()})
+            data["scenarios"] = [
+                {"id": "capture", "status": "PASS", "evidence": "evidence.json"},
+                {"id": "recovery", "status": "PASS", "evidence": "evidence.json"},
+            ]
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("scenario evidence is shared" in error for error in module.verify(root, path)))
+
     def test_hash_mismatch_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
