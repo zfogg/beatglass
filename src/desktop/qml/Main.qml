@@ -415,7 +415,7 @@ ApplicationWindow {
             objectName: "libraryPage"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 24; spacing: 10
-                Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true }
+                Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true; Accessible.name: "Library"; Accessible.role: Accessible.Heading; ToolTip.text: "Browse local audio files and folders" }
                 Label {
                     objectName: "catalogStatus"
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
