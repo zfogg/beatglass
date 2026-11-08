@@ -63,6 +63,7 @@ def main() -> int:
         "dynamic visualization and playback names": "Accessible.name: \"Live \" + (visualizationCanvas.viewMode",
         "dynamic overlay status names": "Accessible.name: \"Overlay interaction mode: \" + text",
         "dynamic capture and settings names": "Accessible.name: \"Capture monitor status: \" + text",
+        "dynamic visualization status names": "Accessible.name: \"Visualization load state: \" + text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
