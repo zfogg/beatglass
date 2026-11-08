@@ -588,7 +588,12 @@ ApplicationWindow {
                     }
                 }
                 Frame {
+                    objectName: "selectedAudioPanel"
                     Layout.fillWidth: true
+                    Accessible.name: "Selected audio panel"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Read-only details and recovery actions for the selected audio source."
+                    ToolTip.text: "Selected audio source details"
                     ColumnLayout {
                         anchors.fill: parent
                         objectName: "selectedAudioDetails"

@@ -373,6 +373,7 @@ def main() -> int:
         "selected audio details grouping": "objectName: \"selectedAudioDetails\"\n                        Accessible.name: \"Selected audio details\"",
         "clear audio selection value": "Accessible.name: \"Clear selected audio\"\n                            Accessible.value: enabled ? window.selectedName : \"no selection\"",
         "retry metadata state value": "Accessible.name: \"Retry metadata\"\n                            Accessible.value: window.metadataStatus",
+        "selected audio panel grouping": "objectName: \"selectedAudioPanel\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Selected audio panel\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
