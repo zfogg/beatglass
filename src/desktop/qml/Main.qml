@@ -249,6 +249,11 @@ ApplicationWindow {
                 && visualizationPresentation.clear)
             visualizationPresentation.clear()
     }
+    function clearVisualizationPositionAndFocus() {
+        visualizationCanvas.selectedPosition = -1
+        visualizationCanvas.requestPaint()
+        visualizationCanvas.forceActiveFocus()
+    }
     function visualizationPositionToFrame(position, durationFrames) {
         if (!isFinite(position) || !isFinite(durationFrames) || durationFrames < 0)
             return -1
@@ -990,7 +995,7 @@ ApplicationWindow {
                     Keys.onReturnPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onEnterPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
-                    Keys.onEscapePressed: { selectedPosition = -1; requestPaint(); event.accepted = true }
+                    Keys.onEscapePressed: { window.clearVisualizationPositionAndFocus(); event.accepted = true }
                     Keys.onPressed: {
                         if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Left) {
                             selectedPosition = 0
@@ -1050,9 +1055,7 @@ ApplicationWindow {
                         anchors.fill: parent
                         onPressed: {
                             if (mouse.button === Qt.RightButton) {
-                                visualizationCanvas.selectedPosition = -1
-                                visualizationCanvas.forceActiveFocus()
-                                visualizationCanvas.requestPaint()
+                                window.clearVisualizationPositionAndFocus()
                                 mouse.accepted = true
                             }
                         }
@@ -1062,9 +1065,7 @@ ApplicationWindow {
                             visualizationCanvas.requestPaint()
                         }
                         onDoubleClicked: {
-                            visualizationCanvas.selectedPosition = -1
-                            visualizationCanvas.forceActiveFocus()
-                            visualizationCanvas.requestPaint()
+                            window.clearVisualizationPositionAndFocus()
                             mouse.accepted = true
                         }
                         onWheel: {
@@ -1182,8 +1183,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: "Remove the selected waveform or FFT position"
                     onClicked: {
-                        visualizationCanvas.selectedPosition = -1
-                        visualizationCanvas.requestPaint()
+                        window.clearVisualizationPositionAndFocus()
                     }
                 }
                 }
