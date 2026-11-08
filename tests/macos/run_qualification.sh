@@ -79,10 +79,12 @@ validate_bundle_executable "$recovery_bundle" "beatglass-coreaudio-recovery"
 echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
 validate_bundle_identity() {
   local bundle="$1" expected_executable="$2" expected_identifier="$3"
-  local plist="$bundle/Contents/Info.plist" actual_executable actual_identifier
+  local plist="$bundle/Contents/Info.plist" actual_executable actual_identifier package_type bundle_version
   actual_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
   actual_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")"
-  if [[ "$actual_executable" != "$expected_executable" || "$actual_identifier" != "$expected_identifier" ]]; then
+  package_type="$(/usr/libexec/PlistBuddy -c 'Print :CFBundlePackageType' "$plist")"
+  bundle_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$plist")"
+  if [[ "$actual_executable" != "$expected_executable" || "$actual_identifier" != "$expected_identifier" || "$package_type" != "APPL" || ! "$bundle_version" =~ ^[0-9]+([.][0-9]+)*$ ]]; then
     echo "Bundle identity mismatch in $plist: expected $expected_executable/$expected_identifier, got $actual_executable/$actual_identifier" >&2
     exit 1
   fi
