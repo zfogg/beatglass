@@ -180,6 +180,34 @@ TEST_CASE("Core Audio control rejects a queued block from a prior epoch", "[core
   CHECK(interrupted->status.error == SourceError::backend_error);
 }
 
+TEST_CASE("Core Audio callback fault requires a fresh epoch on recovery", "[coreaudio]") {
+  SourceEpochAllocator epochs;
+  auto fake = std::make_unique<FakeBackend>();
+  auto* backend = fake.get();
+  SourceAdapter source(epochs, std::move(fake));
+  const auto first = source.start("output", [](const AudioBlock&) {});
+  REQUIRE(first.attempt);
+  const auto first_event = source.take_event();
+  REQUIRE(first_event);
+  REQUIRE(first_event->epoch);
+  REQUIRE(source.acknowledge_running(*first.attempt, first_event->sequence));
+
+  backend->native = {TapState::interrupted, "callback fault", TapFailure::backend_error};
+  const auto interrupted = source.take_event();
+  REQUIRE(interrupted);
+  CHECK(interrupted->state == SourceState::interrupted);
+  REQUIRE(source.stop());
+
+  const auto second = source.start("output", [](const AudioBlock&) {});
+  REQUIRE(second.attempt);
+  const auto second_event = source.take_event();
+  REQUIRE(second_event);
+  REQUIRE(second_event->epoch);
+  CHECK(*second_event->epoch > *first_event->epoch);
+  CHECK_FALSE(source.acknowledge_running(*first.attempt, second_event->sequence));
+  CHECK(source.acknowledge_running(*second.attempt, second_event->sequence));
+}
+
 TEST_CASE("Core Audio control fails closed on backend exceptions", "[coreaudio]") {
   SourceEpochAllocator epochs;
   auto fake = std::make_unique<FakeBackend>(); auto* backend = fake.get();
