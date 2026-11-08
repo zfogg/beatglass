@@ -203,6 +203,29 @@
     "linux"
   ],
   "platform_summary_consistent": false,
+  "platform_failure_summary": [
+    {
+      "platform": "windows",
+      "errors": 0,
+      "fresh": true,
+      "retention_ok": true,
+      "invalidated": false
+    },
+    {
+      "platform": "macos",
+      "errors": 0,
+      "fresh": true,
+      "retention_ok": true,
+      "invalidated": false
+    },
+    {
+      "platform": "linux",
+      "errors": 0,
+      "fresh": true,
+      "retention_ok": true,
+      "invalidated": false
+    }
+  ],
   "error_count": 1,
   "failure_categories": {
     "manifest": 1

@@ -167,6 +167,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "retention_ok": not missing_artifacts and not mismatched_artifacts,
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
     platform_summary_consistent = sorted(platforms) == expected_platforms
+    platform_failures = [{"platform": row["platform"], "errors": row["error_count"],
+                          "fresh": row["fresh"], "retention_ok": row["retention_ok"],
+                          "invalidated": row["invalidated"]} for row in rows]
     errors = [error for row in rows for error in row["errors"]]
     if not platform_summary_consistent:
         errors.append("status matrix must contain exactly Windows, macOS, and Linux rows")
@@ -184,6 +187,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           and [item["platform"] for item in provenance] == [row["platform"] for row in rows])
     return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
+            "platform_failure_summary": platform_failures,
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
