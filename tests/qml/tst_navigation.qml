@@ -617,6 +617,19 @@ TestCase {
         compare(app.selectedThemeIndex, 5)
         app.destroy()
     }
+    function test_themePreviewKeyboardFocusHasVisibleRing() {
+        let app = shell.createObject(null)
+        let preview = findChild(app, "themePreview4")
+        let ring = findChild(app, "themePreviewFocusRing4")
+        verify(preview !== null)
+        verify(ring !== null)
+        verify(!ring.visible)
+        preview.forceActiveFocus()
+        tryVerify(() => ring.visible)
+        compare(ring.border.width, 3)
+        compare(ring.border.color, app.themeAccentColors[4])
+        app.destroy()
+    }
     function test_themeSelectionFollowsExternalPreferenceChanges() {
         fakeThemePreferences.themeIndex = 0
         let app = shellWithPreferences.createObject(null)
