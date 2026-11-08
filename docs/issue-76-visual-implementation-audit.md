@@ -408,6 +408,8 @@ The interaction hint now adopts the error color when capture is in an Error stat
 
 When capture enters Error, the interaction hint now changes its message to “retry monitoring before selecting” the active mode, preventing users from attempting selection against an unavailable stream. The same runtime state drives the error color and capture-status labels.
 
+The error-state visualization now exposes a contextual Retry monitoring button when the capture bridge can restart. Activating it starts capture and returns focus to the canvas, closing the loop between runtime error guidance and recovery behavior.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.

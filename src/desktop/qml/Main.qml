@@ -1116,6 +1116,21 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
+                Button {
+                    objectName: "visualizationRetryCapture"
+                    visible: window.liveBridge.status === "Error" && window.captureMonitorBridge && window.captureMonitorBridge.start
+                    enabled: visible
+                    text: "Retry monitoring"
+                    Accessible.name: "Retry visualization capture"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: "Retry output monitoring to restore live waveform and FFT data."
+                    ToolTip.text: "Retry output monitoring for visualization data"
+                    onClicked: {
+                        window.captureMonitorBridge.start()
+                        visualizationCanvas.forceActiveFocus()
+                    }
+                }
                 ColumnLayout {
                     objectName: "visualizationStatusGroup"
                     Layout.fillWidth: true
