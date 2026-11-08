@@ -41,6 +41,19 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: invalid manifest hash linkage")
             if item.get("provenance_complete") is not True:
                 errors.append(f"{item.get('platform')}: provenance is incomplete")
+            inventory = item.get("artifact_inventory")
+            if not isinstance(inventory, list) or not inventory:
+                errors.append(f"{item.get('platform')}: missing artifact inventory")
+            else:
+                for artifact in inventory:
+                    if not isinstance(artifact, dict) or not artifact.get("path"):
+                        errors.append(f"{item.get('platform')}: artifact missing path")
+                    if not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64:
+                        errors.append(f"{item.get('platform')}: artifact missing SHA-256")
+                    if not isinstance(artifact.get("bytes"), int) or artifact["bytes"] < 0:
+                        errors.append(f"{item.get('platform')}: artifact has invalid byte count")
+                    if artifact.get("hash_valid") is not True:
+                        errors.append(f"{item.get('platform')}: artifact hash is not valid")
     return errors
 
 

@@ -72,6 +72,8 @@ Before handing a report to automation, run `python tests/platform/validate_readi
 
 The consumer check also requires each platform row to link a manifest path and SHA-256 plus `provenance_complete: true`; a report with detached or incomplete platform identity is rejected before native evidence is considered.
 
+Each platform artifact inventory must likewise retain a path, SHA-256, byte count, and `hash_valid: true`. This validates report linkage to retained files; it does not replace review of the actual native screenshots, recordings, logs, and command output.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.
