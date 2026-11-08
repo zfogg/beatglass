@@ -52,6 +52,14 @@ class QualificationHandoffTest(unittest.TestCase):
                 if line.startswith(("| Windows |", "| macOS |", "| Linux |"))]
         self.assertEqual(len(rows), len({row.split("|")[1].strip() for row in rows}))
 
+    def test_four_handoff_documents_share_readiness_contract(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        for relative in ("docs/progress.md", "docs/phase0-gate.md", "docs/foundation-handoff.md", "docs/platform-qualification-status.md"):
+            text = (root / relative).read_text(encoding="utf-8").lower()
+            self.assertIn("readiness_report_schema: 1", text, relative)
+            self.assertIn("native qualification", text, relative)
+            self.assertIn("experimental", text, relative)
+
 
 if __name__ == "__main__":
     unittest.main()

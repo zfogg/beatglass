@@ -10,6 +10,12 @@ REQUIRED = (
     "docs/windows-qualification.md",
     "docs/macos-qualification.md",
 )
+DOCUMENTATION_CONTRACT_FILES = (
+    "docs/progress.md",
+    "docs/phase0-gate.md",
+    "docs/foundation-handoff.md",
+    "docs/platform-qualification-status.md",
+)
 
 # A generic "native qualification" claim is not enough: each matrix row must
 # name the backend and desktop/overlay observations that still require a real
@@ -26,6 +32,7 @@ def main() -> int:
     docs = (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8")
     readme = (root / "README.md").read_text(encoding="utf-8")
     checklists = "\n".join((root / path).read_text(encoding="utf-8") for path in ("docs/windows-qualification.md", "docs/macos-qualification.md", "docs/linux-qualification-plan.md"))
+    documentation_contract = "\n".join((root / path).read_text(encoding="utf-8") for path in DOCUMENTATION_CONTRACT_FILES)
     required_disclaimers = ("does not establish native", "support language must remain experimental")
     required_platform_rows = ("| Windows |", "| macOS |", "| Linux |")
     required_matrix_columns = ("Current integrated/preparation evidence", "Native gates still required")
@@ -39,6 +46,7 @@ def main() -> int:
     required_runtime_evidence = ("audio backend", "display server", "exact commands", "limitations")
     required_evidence_schema = ("timestamp", "logs", "screenshot")
     required_report_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "platform_support_status", "native_qualification_required")
+    required_cross_document_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes", "native qualification", "experimental")
     required_exit_gate = (
         "## Issue #1 exit gate",
         "all_platforms_ready: true",
@@ -68,6 +76,7 @@ def main() -> int:
     unlinked.extend(f"runtime evidence field: {field}" for field in required_runtime_evidence if field.lower() not in docs.lower())
     unlinked.extend(f"evidence schema field: {field}" for field in required_evidence_schema if field.lower() not in docs.lower())
     unlinked.extend(f"readiness report contract: {field}" for field in required_report_contract if field.lower() not in docs.lower())
+    unlinked.extend(f"cross-document contract: {field}" for field in required_cross_document_contract if field.lower() not in documentation_contract.lower())
     unlinked.extend(f"issue #1 exit-gate contract: {phrase}" for phrase in required_exit_gate if phrase.lower() not in docs.lower())
     for row in platform_rows:
         cells = [cell.strip() for cell in row.strip("|").split("|")]
