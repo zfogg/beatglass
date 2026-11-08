@@ -396,6 +396,8 @@ def main() -> int:
         "visualization clear button state": "Accessible.name: \"Clear visualization position\"\n                    Accessible.value: enabled ? \"available\" : \"no position selected\"\n                    Accessible.role: Accessible.Button",
         "visualization clear recovery description": "Accessible.description: \"Remove the selected waveform or FFT position. Escape, Enter, Space, right-click, and double-click provide equivalent recovery paths.\"",
         "visualization interaction hint": "objectName: \"visualizationInteractionHint\"\n                    text: visualizationCanvas.selectedPosition < 0\n                        ? \"Select a \" + (visualizationCanvas.viewMode === \"waveform\" ? \"waveform\" : \"FFT\")",
+        "visualization responsive canvas height": "Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120",
+        "visualization responsive hint type": "font.pixelSize: window.compactHeader ? 12 : 14",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
