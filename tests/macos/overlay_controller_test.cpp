@@ -86,6 +86,16 @@ private slots:
     QVERIFY(!controller.available()); QVERIFY(!overlay.isVisible());
     QVERIFY(!controller.showOverlay());
   }
+  void hiddenControlCannotRevealOverlay() {
+    QQuickWindow overlay; QWindow control;
+    auto native = std::make_unique<FakeNative>(); auto* backend = native.get();
+    OverlayController controller(std::move(native));
+    QVERIFY(controller.attach(&overlay, &control));
+    QVERIFY(!controller.showOverlay());
+    QVERIFY(!overlay.isVisible());
+    QVERIFY(!controller.clickThrough());
+    QVERIFY(!backend->mode);
+  }
   void invalidWindowsAndDestroyedControl() {
     QQuickWindow overlay;
     auto native = std::make_unique<FakeNative>(); auto* backend = native.get();
