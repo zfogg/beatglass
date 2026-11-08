@@ -341,6 +341,7 @@ def main() -> int:
         "theme dynamic guidance": "ToolTip.text: \"Choose a color theme; current theme: \" + currentText",
         "reduce motion dynamic guidance": "ToolTip.text: checked ? \"Reduced motion is enabled; disable to restore transitions\"",
         "appearance state dynamic guidance": "ToolTip.text: \"Current theme: \" + window.selectedTheme + \"; motion: \"",
+        "reset appearance dynamic guidance": "Accessible.value: window.selectedTheme + \", \" + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? \"reduced motion\" : \"full motion\")",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
         "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",

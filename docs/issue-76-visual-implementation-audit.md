@@ -280,6 +280,8 @@ Theme selection and reduced-motion guidance now reflect their live values in too
 
 The appearance summary tooltip now also reports the current theme and motion mode directly, keeping the persisted state readable without requiring focus on the individual controls.
 
+Reset appearance now exposes the current theme/motion value and dynamically explains exactly which settings will be restored, reducing ambiguity before destructive-looking recovery actions.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
