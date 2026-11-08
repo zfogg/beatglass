@@ -406,6 +406,14 @@ ApplicationWindow {
                             Accessible.name: "Selected audio source"
                             Accessible.description: text
                         }
+                        Label {
+                            objectName: "selectedAudioDuration"
+                            text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
+                            Accessible.name: "Selected audio duration"
+                            Accessible.description: text
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
                         Button {
                             objectName: "clearSelectedAudio"
                             text: "Clear selection"

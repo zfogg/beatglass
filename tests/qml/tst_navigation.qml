@@ -562,6 +562,7 @@ TestCase {
         compare(app.selectedName, "tone.flac")
         verify(app.selectedAudioUrl.toString().endsWith("/tone.flac"))
         compare(findChild(app, "selectedAudioSource").Accessible.name, "Selected audio source")
+        compare(findChild(app, "selectedAudioDuration").text, "Duration: unknown until decoded metadata is available")
         verify(fakeMetadata.lastFile.toString().endsWith("/tone.flac"))
         app.destroy()
     }
