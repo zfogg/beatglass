@@ -257,6 +257,7 @@ TestCase {
         compare(findChild(app, "analysisProgress").Accessible.name, "Analysis progress")
         compare(findChild(app, "analysisUncertainty").Accessible.name, "Analysis uncertainty")
         verify(findChild(app, "analysisUncertainty").text.indexOf("Track key: Unknown") === 0)
+        compare(findChild(app, "analysisProgress").text, "Queued · select an audio source to begin analysis.")
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
