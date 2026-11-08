@@ -50,6 +50,7 @@ FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
 Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
                             const CacheKey& key, const std::filesystem::path& path,
                             const std::string& result, std::stop_token stop) {
+  if (result.empty()) return Publish::error;
   const auto initial = revalidate_file_identity(path, key.content, stop);
   if (initial == FingerprintStatus::cancelled) return Publish::cancelled;
   if (initial != FingerprintStatus::ok) return Publish::stale_input;
