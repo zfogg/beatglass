@@ -613,3 +613,5 @@ Overlay hide, unlock, and display changes now use that same helper. Their announ
 Overlay show and screen-list transitions use the same fallback contract: a missing display restores control-window guidance, while a restored display announces that a target must be chosen before overlay monitoring resumes.
 
 Retry overlay is now disabled until a display target exists. Once a display returns, the explicit retry action announces its attempt and keeps the control window available until the native overlay actually restores.
+
+After display restoration, Retry remains disabled until the user explicitly chooses a target. Selection clears that gate, restores focus to Retry, and announces readiness; reduced motion does not alter this keyboard/focus contract.

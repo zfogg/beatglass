@@ -20,6 +20,7 @@ ApplicationWindow {
     property var endpointSelectionBridge: typeof endpointSelection !== "undefined" ? endpointSelection : null
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
+    property bool overlayDisplaySelectionRequired: false
     property url browseFolder: ""
     property var catalogRows: []
     property bool sortDescending: false
@@ -414,8 +415,10 @@ ApplicationWindow {
         function onScreensChanged() {
             if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
                 window.announceCaptureRecoveryState("DJ overlay display disappeared; controls restored until a display is available.")
-            else
+            else {
+                window.overlayDisplaySelectionRequired = true
                 window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to resume overlay monitoring.")
+            }
         }
     }
 
@@ -1932,7 +1935,7 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
-                        onActivated: if (window.overlayBridge) { window.overlayBridge.moveToScreen(currentIndex); window.announceCaptureRecoveryState("DJ overlay display changed; output monitoring may reacquire.") }
+                        onActivated: if (window.overlayBridge) { window.overlayBridge.moveToScreen(currentIndex); window.overlayDisplaySelectionRequired = false; window.announceCaptureRecoveryState("DJ overlay display selected; retry is now available."); retryOverlay.forceActiveFocus() }
                         Layout.fillWidth: true
                     }
                     Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay display status" }
@@ -1959,7 +1962,7 @@ ApplicationWindow {
                     }
                 }
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
-                Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : "waiting for a display"; Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display" : "Connect or restore a display before retrying the native DJ overlay"; ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : "Waiting for a display before retrying the overlay"; onClicked: { window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until the overlay is restored."); window.showOverlayAndHideControls() } }
+                Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display"); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay"); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay"); onClicked: { window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until the overlay is restored."); window.showOverlayAndHideControls() } }
                 Item { Layout.fillHeight: true }
             }
         }

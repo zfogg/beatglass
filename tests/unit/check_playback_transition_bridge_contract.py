@@ -28,10 +28,12 @@ MARKERS = {
     "qml endpoint retry failure": "Capture endpoint retry failed; check permission and reacquire a device.",
     "qml overlay recovery": "DJ overlay unavailable; output monitoring remains unavailable until the display recovers.",
     "qml overlay hide recovery": "DJ overlay hidden; output monitoring remains available in the control window.",
-    "qml overlay display recovery": "DJ overlay display changed; output monitoring may reacquire.",
+    "qml overlay display recovery": "DJ overlay display selected; retry is now available.",
     "qml overlay display disappeared": "DJ overlay display disappeared; controls restored until a display is available.",
     "qml overlay display restored": "DJ overlay display restored; choose a display to resume overlay monitoring.",
     "qml overlay retry announcement": "DJ overlay retry requested; control window remains visible until the overlay is restored.",
+    "qml overlay selection gate": "overlayDisplaySelectionRequired",
+    "qml overlay selection readiness": "DJ overlay display selected; retry is now available.",
 }
 
 
