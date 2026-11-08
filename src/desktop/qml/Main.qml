@@ -814,6 +814,14 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "Analysis cache status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Label {
+                                objectName: "analysisCacheResult"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.cacheHit
+                                text: visible ? ("Cached result: " + storageRecovery.cachedResult) : ""
+                                Accessible.name: "Cached analysis result"
+                                Accessible.description: visible ? text : "No completed cached analysis result is selected."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
+                            }
                             RowLayout {
                                 objectName: "analysisCacheLookupControls"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.findCached !== undefined
