@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <stdexcept>
 using namespace beatglass;
 namespace {
 class MemorySource : public ByteSource {
@@ -13,9 +14,11 @@ public:
  bool premature_end{};
  bool cancelled_after_write{};
  bool error_after_write{};
+ bool throw_on_read{};
  std::stop_source* cancel_after_read{};
  std::uint64_t size() const noexcept override { return reported_size; }
  ByteReadResult read_at(std::uint64_t offset, std::span<std::byte> out, std::stop_token) override {
+   if (throw_on_read) throw std::runtime_error("synthetic source failure");
    if (invalid) return {ByteReadStatus::data, out.size() + 1};
    if (premature_end) return {ByteReadStatus::end, 0};
    if (cancelled_after_write) { out[0] = std::byte{9}; return {ByteReadStatus::cancelled, 0}; }
@@ -80,6 +83,18 @@ TEST_CASE("byte cursor cancellation wins when source returns data after stop") {
  std::stop_source stop; source.cancel_after_read = &stop;
  CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
  CHECK(cursor.position() == 0);
+}
+
+TEST_CASE("byte cursor preserves position when source throws") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ REQUIRE(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 2);
+ source.throw_on_read = true;
+ CHECK_THROWS(cursor.read(out));
+ CHECK(cursor.position() == 2);
+ source.throw_on_read = false;
+ CHECK(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 3);
 }
 
 TEST_CASE("byte cursor rejects a source that shrinks after opening") {
