@@ -27,6 +27,12 @@ with the logs and verify it later without rebuilding or rerunning native tests:
 pwsh -File tests/windows/verify_qualification_artifacts.ps1 build/windows-qualification
 ```
 
+Run the fixture regression on a Windows development host with:
+
+```powershell
+pwsh -File tests/windows/verify_qualification_artifacts_test.ps1
+```
+
 The verifier requires exactly four relative artifact paths, rejects duplicate or
 path-escaping entries, recomputes every SHA-256 digest, and requires the four
 expected `build/Release` desktop, endpoint, DJ bridge, and overlay executables.
