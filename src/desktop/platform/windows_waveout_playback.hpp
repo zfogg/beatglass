@@ -17,6 +17,8 @@ public:
   WaveOutPlayback(const WaveOutPlayback&) = delete;
   /** Open the default output at the source format; allocates fixed buffers. */
   bool open(std::uint32_t sample_rate, std::uint16_t channels, std::size_t max_samples, std::string& error);
+  /** Open an explicit waveOut device id; WAVE_MAPPER selects the default. */
+  bool open_device(UINT device_id, std::uint32_t sample_rate, std::uint16_t channels, std::size_t max_samples, std::string& error);
   /** Convert and submit one interleaved float block; worker thread only. */
   bool submit(std::span<const float> samples) noexcept;
   /** Drain one queued block into storage and submit it to waveOut. */
