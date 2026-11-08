@@ -310,6 +310,8 @@ Overlay interaction/opacity and display/size rows now expose separate grouping s
 
 Playback and overlay control groups now expose live state values in addition to static descriptions, so assistive technology and tooltips can communicate availability, playback state, interaction mode, opacity, and destination display together.
 
+Live monitoring and visualization-mode rows now expose grouped semantics and live values, giving users one coherent context surface before reaching start/stop or waveform/FFT controls.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.

@@ -837,6 +837,12 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true; Accessible.name: "DJ monitoring"; Accessible.role: Accessible.Heading; ToolTip.text: "Live output monitoring and visualization" }
                 RowLayout {
+                    objectName: "monitoringControls"
+                    Accessible.name: "Live monitoring controls"
+                    Accessible.value: window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Start, stop, or retry live output monitoring."
+                    ToolTip.text: "Live monitoring controls; current state is announced when available"
                     Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: window.captureMonitorBridge !== null && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; ToolTip.text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring" : window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry live output monitoring" : "Start live output monitoring"; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
                     Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current capture monitor status and recovery state" }
                 }
@@ -844,6 +850,11 @@ ApplicationWindow {
                 Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; objectName: "monitoringGuidance"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Monitoring guidance"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Monitoring guidance and next action" }
                 RowLayout {
                     objectName: "visualizationModeControls"
+                    Accessible.name: "Visualization mode controls"
+                    Accessible.value: visualizationCanvas.viewMode
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose waveform or frequency-domain FFT visualization."
+                    ToolTip.text: "Visualization mode controls; current mode is announced when available"
                     Button {
                         id: waveformView
                         activeFocusOnTab: true
