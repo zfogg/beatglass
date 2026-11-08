@@ -62,6 +62,18 @@ int main() {
     cache.begin("next-config", next_config);
     assert(cache.publish("next-config", next_config, "config-b-data", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(next_config, live_result) && live_result == "config-b-data");
+    const CacheKey live_config{key.content, key.engine, "config-b", "live"};
+    cache.begin("live-config", live_config);
+    assert(cache.publish("live-config", live_config, "live-config-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(live_config, live_result) && live_result == "live-config-data");
+    assert(cache.invalidate(live_config));
+    assert(!cache.find(live_config, live_result));
+    assert(cache.find(next_config, live_result) && live_result == "config-b-data");
+    assert(cache.invalidate(next_config));
+    assert(!cache.find(next_config, live_result));
+    cache.begin("config-republish", next_config);
+    assert(cache.publish("config-republish", next_config, "config-b-republished", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_config, live_result) && live_result == "config-b-republished");
     const CacheKey next_content{"sha256:two", key.engine, key.config, key.mode};
     cache.begin("next-content", next_content);
     assert(cache.publish("next-content", next_content, "content-two-data", {}, [] { return true; }) == Publish::committed);
@@ -80,9 +92,6 @@ int main() {
     assert(cache.invalidate(next_config));
     assert(!cache.find(next_config, result));
     assert(cache.find(next_engine, result) && result == "engine-v2-data");
-    cache.begin("config-republish", next_config);
-    assert(cache.publish("config-republish", next_config, "config-b-republished", {}, [] { return true; }) == Publish::committed);
-    assert(cache.find(next_config, result) && result == "config-b-republished");
     assert(cache.invalidate(next_content));
     assert(!cache.find(next_content, result));
     assert(!cache.invalidate(next_content));
