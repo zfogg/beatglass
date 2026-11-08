@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Overlay capture retry, show, unlock, hide, and unavailable-display retry controls are now explicitly asserted in the static visual contract.
+
 Output endpoint empty, unavailable-build, and recovery-guidance states are now explicitly asserted in the static visual contract.
 
 Output-device selection, endpoint refresh, endpoint status, and selected-endpoint surfaces are now explicitly asserted in the static visual contract.
