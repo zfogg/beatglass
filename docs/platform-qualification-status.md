@@ -10,6 +10,8 @@ This matrix records development evidence and the remaining gates. A build or hea
 
 For every native run, record the OS version, kernel or build number, compiler, Qt version, audio backend/session version, display server or compositor, output device, build identity, exact commands, and observed limitations. Until those records exist for the relevant platform scenarios, support language must remain experimental.
 
+The platform status row and retained manifest must agree on source commit, capture time, and environment/toolchain; otherwise the run is not attributable to the documented build.
+
 Each retained evidence bundle must include `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-playback-evidence.json`, and `native-overlay-evidence.json` where those scenarios apply.
 
 Every bundle manifest must enumerate the categories `capture`, `recovery`, `output`, `display`, `playback`, and `overlay`; categories not run remain explicitly `UNRUN`.
