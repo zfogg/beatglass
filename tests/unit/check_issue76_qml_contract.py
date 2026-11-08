@@ -82,6 +82,7 @@ def main() -> int:
         "settings recovery values": "objectName: \"permissionGuidance\"",
         "recovery batch values": "objectName: \"endpointRecoveryGuidance\"",
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
+        "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
