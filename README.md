@@ -73,7 +73,9 @@ The executable handoff path is: ingest native script output with `tests/platform
 
 For an acceptance review, add `--review-output review.md --require-ready` to the handoff command. It exports the human checklist and fails closed while any native gate remains pending.
 
-For automated review, pair `--review-json review.json --consume-review` with the same handoff command; the versioned packet consumer then validates the exported review artifact before release automation can proceed.
+For automated review, pair `--review-json review.json --consume-review --decision-output decision.json` with the same handoff command; the versioned packet consumer validates the exported review artifact and writes a conservative `ACCEPTED`/`PENDING` decision before release automation can proceed. Native evidence remains required for acceptance.
+
+The standalone decision consumer is `tests/platform/review_release_decision.py <bundle-root> <decision.json>` for already-retained canonical bundles.
 
 ## Qt 6.8.3 prebuilt desktop preset
 
