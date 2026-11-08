@@ -61,6 +61,19 @@ for bundle in "$tap_bundle" "$recovery_bundle"; do
   fi
 done
 echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
+validate_bundle_identity() {
+  local bundle="$1" expected_executable="$2" expected_identifier="$3"
+  local plist="$bundle/Contents/Info.plist" actual_executable actual_identifier
+  actual_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
+  actual_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")"
+  if [[ "$actual_executable" != "$expected_executable" || "$actual_identifier" != "$expected_identifier" ]]; then
+    echo "Bundle identity mismatch in $plist: expected $expected_executable/$expected_identifier, got $actual_executable/$actual_identifier" >&2
+    exit 1
+  fi
+}
+validate_bundle_identity "$out_dir/build/beatglass-desktop.app" "beatglass-desktop" "org.beatglass.desktop"
+validate_bundle_identity "$tap_bundle" "beatglass-coreaudio-smoke" "org.beatglass.coreaudio-smoke"
+validate_bundle_identity "$recovery_bundle" "beatglass-coreaudio-recovery" "org.beatglass.coreaudio-recovery"
 if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   echo "Running Core Audio tap smoke for supplied UID"
   tap_log="$out_dir/tap-smoke.log"
