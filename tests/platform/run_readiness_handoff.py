@@ -22,13 +22,15 @@ ingester = _load("ingest_qualification_artifacts")
 reviewer = _load("review_readiness_handoff")
 packet_consumer = _load("consume_review_packet")
 bundle_consumer = _load("consume_review_bundle")
+decision_consumer = _load("review_release_decision")
 
 
 def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: float = 168,
         check_docs: bool = False, consume_report: bool = False,
         native_output: Path | None = None, native_platform: str | None = None,
         review_output: Path | None = None, require_ready: bool = False,
-        review_json: Path | None = None, consume_review: bool = False) -> list[str]:
+        review_json: Path | None = None, consume_review: bool = False,
+        decision_output: Path | None = None) -> list[str]:
     ingestion_errors = []
     if native_output is not None:
         if native_platform not in {"windows", "macos", "linux"}:
@@ -76,6 +78,15 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
             errors.extend(bundle_consumer.consume(review_json.parent, output.name, review_json.name))
     if consume_report:
         errors.extend(consumer.consume(output))
+    if decision_output is not None:
+        if review_json is None:
+            errors.append("decision output requires review_json")
+        else:
+            decision = decision_consumer.decide(review_json.parent, output.name, review_json.name)
+            decision_output.parent.mkdir(parents=True, exist_ok=True)
+            decision_output.write_text(json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            if decision["decision"] != "ACCEPTED":
+                errors.append(f"release decision is {decision['decision']}")
     return errors
 
 
@@ -93,10 +104,11 @@ def main() -> int:
     parser.add_argument("--require-ready", action="store_true", help="fail if exported review is not READY")
     parser.add_argument("--review-json", type=Path, help="write a machine-readable review packet")
     parser.add_argument("--consume-review", action="store_true", help="consume the emitted review JSON packet")
+    parser.add_argument("--decision-output", type=Path, help="write a conservative release decision artifact")
     args = parser.parse_args()
     errors = run(args.bundles, args.output, args.status, args.max_age_hours, args.check_docs, args.consume,
                  args.native_output, args.native_platform, args.review_output, args.require_ready, args.review_json,
-                 args.consume_review)
+                 args.consume_review, args.decision_output)
     if errors:
         print("\n".join(errors))
         return 1

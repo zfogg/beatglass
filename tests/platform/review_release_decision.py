@@ -10,9 +10,10 @@ bundle = importlib.util.module_from_spec(spec); assert spec.loader
 spec.loader.exec_module(bundle)
 
 
-def decide(bundle_root: Path) -> dict:
+def decide(bundle_root: Path, report_name: str = "readiness-report.json", packet_name: str = "review.json") -> dict:
     report_path = bundle_root / "readiness-report.json"
-    errors = bundle.consume(bundle_root)
+    report_path = bundle_root / report_name
+    errors = bundle.consume(bundle_root, report_name, packet_name)
     result = {
         "release_decision_schema": 1,
         "decision": "ACCEPTED" if not errors else "PENDING",
