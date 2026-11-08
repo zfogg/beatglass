@@ -482,6 +482,8 @@ TestCase {
         compare(spectrum.sequence, "Ctrl+2")
         compare(waveform.context, Qt.ApplicationShortcut)
         compare(spectrum.context, Qt.ApplicationShortcut)
+        compare(waveform.ToolTip.text, "Show the time-domain waveform (Ctrl+1)")
+        compare(spectrum.ToolTip.text, "Show the frequency-domain FFT (Ctrl+2)")
         canvas.viewMode = "spectrum"
         waveform.activated()
         compare(canvas.viewMode, "waveform")
