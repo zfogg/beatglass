@@ -30,3 +30,14 @@ class ReadinessReportContractTest(unittest.TestCase):
         report = __import__("json").loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
         report["platforms"][0]["artifact_inventory"][0]["hash_valid"] = False
         self.assertIn("artifact hash is not valid", "\n".join(module.validate(report)))
+
+    def test_retained_files_match_manifest_and_report(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        report = __import__("json").loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+        self.assertEqual(module.validate_retained_files(report, root), [])
+
+    def test_retained_file_hash_mismatch_is_rejected(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        report = __import__("json").loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0]["artifact_inventory"][0]["sha256"] = "0" * 64
+        self.assertIn("hash mismatch", "\n".join(module.validate_retained_files(report, root)))
