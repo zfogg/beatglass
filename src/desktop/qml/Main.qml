@@ -446,7 +446,13 @@ ApplicationWindow {
                         anchors.fill: parent; spacing: 8
                         Label { text: "Output device"; font.bold: true }
                             RowLayout {
-                                ComboBox { objectName: "endpointSelector"; model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []; enabled: count > 0; Layout.fillWidth: true }
+                                ComboBox {
+                                    objectName: "endpointSelector"
+                                    model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []
+                                    textRole: "name"
+                                    enabled: count > 0; Layout.fillWidth: true
+                                    onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
+                                }
                                 Button { text: "Refresh"; objectName: "refreshEndpoints"; enabled: window.endpointSelectionBridge !== null; onClicked: window.endpointSelectionBridge.refresh() }
                             }
                             Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
