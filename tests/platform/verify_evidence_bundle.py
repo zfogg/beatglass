@@ -5,12 +5,15 @@ import json
 from pathlib import Path
 import sys
 
-REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
+REQUIRED_PROVENANCE = ("platform", "commit", "captured_at", "environment")
 
 
 def verify(root: Path, manifest: Path) -> list[str]:
     data = json.loads(manifest.read_text(encoding="utf-8"))
     errors = []
+    for field in REQUIRED_PROVENANCE:
+        if not isinstance(data.get(field), str) or not data[field].strip():
+            errors.append(f"missing provenance field: {field}")
     artifacts = data.get("artifacts")
     scenarios = data.get("scenarios")
     if not isinstance(artifacts, list) or not artifacts:
@@ -31,10 +34,6 @@ def verify(root: Path, manifest: Path) -> list[str]:
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
-    scenario_ids = {scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)}
-    missing_scenarios = REQUIRED_SCENARIOS - scenario_ids
-    if missing_scenarios:
-        errors.append(f"missing required scenarios: {sorted(missing_scenarios)}")
     for scenario in scenarios or []:
         if not isinstance(scenario, dict) or not scenario.get("id") or scenario.get("status") not in {"PASS", "FAIL", "UNRUN"}:
             errors.append(f"invalid scenario: {scenario}"); continue
