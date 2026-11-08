@@ -107,7 +107,7 @@ void AnalysisJobBridge::retry() {
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
   if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
   if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }
-  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = 0; batchLastResult_.clear();
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   for (auto& operation : operations) {
     if (static_cast<int>(batch_.size()) >= batchCapacity_) { ++batchRejected_; continue; }
@@ -151,7 +151,7 @@ void AnalysisJobBridge::retryBatch() {
   if (accepted) {
     if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
-    batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = 0; batchLastResult_.clear();
+    batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged(); poll();
   }
@@ -161,7 +161,7 @@ void AnalysisJobBridge::poll() {
   if (!retryable_ && batch_.empty()) return;
   if (!retryable_ && !batch_.empty()) {
     bool active = false, failed = false, cancelled = false;
-    int failed_count = 0, cancelled_count = 0;
+    int failed_count = 0, cancelled_count = 0, completed_count = 0;
     qulonglong total = 0;
     for (const auto& operation : batch_) {
       if (!operation) continue;
@@ -170,11 +170,13 @@ void AnalysisJobBridge::poll() {
       failed = failed || state == beatglass::library_detail::TrackedState::failed;
       if (state == beatglass::library_detail::TrackedState::failed) ++failed_count;
       if (state == beatglass::library_detail::TrackedState::cancelled) ++cancelled_count;
+      if (state == beatglass::library_detail::TrackedState::completed) ++completed_count;
       cancelled = cancelled || state == beatglass::library_detail::TrackedState::cancelled;
     }
     if (frames_ != total) { frames_ = total; emit progressChanged(); }
     if (batchFailedCount_ != failed_count) { batchFailedCount_ = failed_count; emit batchChanged(); }
     if (batchCancelledCount_ != cancelled_count) { batchCancelledCount_ = cancelled_count; emit batchChanged(); }
+    if (batchCompletedCount_ != completed_count) { batchCompletedCount_ = completed_count; emit batchChanged(); }
     const auto next = active ? QStringLiteral("Running") : failed ? QStringLiteral("Failed") : cancelled ? QStringLiteral("Cancelled") : QStringLiteral("Complete");
     if (status_ != next) { status_ = next; emit statusChanged(); }
     if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("One or more batch operations failed before publishing a verified result."); emit failureChanged(); }
