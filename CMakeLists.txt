@@ -27,6 +27,9 @@ if(BUILD_TESTING)
   endif()
   find_package(Python3 QUIET COMPONENTS Interpreter)
   if(Python3_Interpreter_FOUND)
+    add_test(NAME api_header_inventory
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_headers_test.py)
+    set_tests_properties(api_header_inventory PROPERTIES LABELS documentation TIMEOUT 10)
     add_test(
       NAME issue76_qml_contract
       COMMAND ${Python3_EXECUTABLE}
