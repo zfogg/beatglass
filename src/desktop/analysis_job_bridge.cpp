@@ -44,7 +44,7 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   result_.clear();
   emit resultChanged();
-  batch_.clear(); batchAccepted_ = batchRejected_ = 0; emit batchChanged();
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); emit batchChanged();
   auto progress = op.progress;
   auto publish = op.publish;
   op.publish = [weak_self = weak_self_, publish](const std::string& value) {
