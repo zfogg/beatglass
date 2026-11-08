@@ -16,4 +16,8 @@ bool reuse_cached_operation(library_detail::SqliteCache&, const AnalysisIdentity
  */
 library_detail::Publish publish_operation(library_detail::SqliteCache&, const std::string& run_id,
                                            const AnalysisOperation&, std::stop_token);
+/** Create a stop-aware transactional publisher carrying run identity and revalidation. */
+std::function<bool(const std::string&, std::stop_token)> make_transactional_publisher(
+    library_detail::SqliteCache&, std::string run_id, AnalysisIdentity identity,
+    std::function<FileVerificationResult(std::stop_token)> verify);
 }

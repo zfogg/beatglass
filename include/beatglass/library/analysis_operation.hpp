@@ -15,6 +15,8 @@ struct AnalysisOperation {
   std::function<std::string(std::stop_token, const std::function<void(std::uint64_t)>&)> decode;
   /** Receive the verified serialized value on the worker before the job completes. The callback must not touch GUI or audio state. */
   std::function<void(const std::string&)> publish;
+  /** Stop-aware transactional publication; return false when commit is cancelled or rejected. */
+  std::function<bool(const std::string&, std::stop_token)> publish_transaction;
   /** Revalidate the opened source before the cache commit point. */
   std::function<FileVerificationResult(std::stop_token)> verify;
   /** Monotonic progress in source frames; zero total means unknown. */

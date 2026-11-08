@@ -338,6 +338,8 @@ A provisional `make_file_decode_operation` now supplies the worker-side decoder 
 
 Decode progress now flows through the operation’s wrapped progress callback, so the worker handle and desktop bridge observe the same incremental frame counts rather than only the terminal result.
 
+Analysis operations now support an optional stop-aware transactional publisher carrying the run identity and cache revalidation boundary. The runner treats a rejected or cancelled commit as non-complete; legacy non-persistent publication remains supported.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff

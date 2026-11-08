@@ -26,7 +26,7 @@ TEST_CASE("analysis runner forwards decoder progress into the tracked handle") {
 }
 TEST_CASE("analysis runner hands decoded result and incremental progress to publication") {
   JobExecutor executor(1); AnalysisRunner runner(executor); std::string published; std::vector<std::uint64_t> observed;
-  auto operation = op(true); operation.decode = [&](std::stop_token, const auto& progress) { progress(4); progress(9); return std::string("decoded"); };
+  auto operation = op(true); operation.serialize = {}; operation.decode = [&](std::stop_token, const auto& progress) { progress(4); progress(9); return std::string("decoded"); };
   operation.publish = [&](const std::string& result) { published = result; };
   auto h = runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h);
   CHECK(h->state() == TrackedState::completed); CHECK(h->frames() == 12); CHECK(published == "decoded"); executor.shutdown();
