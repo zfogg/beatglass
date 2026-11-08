@@ -161,3 +161,13 @@ TEST_CASE("catalog ignores unsupported files even with case-folded matches") {
  CHECK(result.entries[0].name == "Take.FLAC");
  CHECK(result.entries[0].format == "FLAC");
 }
+
+TEST_CASE("catalog preserves empty directories as navigable entries") {
+ TempDir dir; std::filesystem::create_directory(dir.path / "Empty Mix");
+ const auto result = beatglass::library::browse(dir.path, "empty");
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.entries[0].directory);
+ CHECK(result.entries[0].name == "Empty Mix");
+ CHECK(result.entries[0].bytes == 0);
+ CHECK(result.entries[0].format.empty());
+}
