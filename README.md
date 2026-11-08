@@ -1,5 +1,7 @@
 # Beatglass
 
+Decoder snapshot validation is fail-closed: a retry is eligible only when the persisted `decoder_snapshot` is non-empty and matches the active decoder identity. Empty legacy snapshots and mismatched snapshots are rejected; they must be re-analyzed to establish fresh provenance.
+
 `decoder_snapshot` is a compatibility anchor for retryable analysis. A persisted run may be resubmitted only when its snapshot matches the active decoder/configuration contract; legacy rows with an empty snapshot are rejected conservatively until re-analysis establishes fresh metadata.
 
 Retryable analysis storage schema v2 persists `source_path` and `decoder_snapshot` beside content/engine/configuration/mode identity. The recovery bridge uses these fields for metadata-gated coordinator resubmission; missing or mismatched metadata remains a rejection.

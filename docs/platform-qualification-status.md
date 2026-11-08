@@ -1,5 +1,7 @@
 # Platform qualification status
 
+Decoder snapshot mismatch/legacy rejection is covered as a portable fail-closed rule. Native codec and runtime compatibility still require retained Windows, macOS, and Linux evidence; a passing mismatch contract is not native qualification.
+
 Retry recovery requires a compatible non-empty `decoder_snapshot`; migrated legacy rows are intentionally rejected until fresh metadata is captured. This fail-closed policy prevents decoder drift from being presented as a valid result, but does not qualify codec/runtime behavior on Windows, macOS, or Linux.
 
 Retryable storage schema v2 retains source-path and decoder-snapshot metadata for bridge resubmission. Portable migration and rejection checks do not establish that a native decoder, playback device, or audio endpoint can be reopened successfully; those observations remain required on each platform.
