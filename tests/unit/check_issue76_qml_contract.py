@@ -71,6 +71,7 @@ def main() -> int:
         "screen shortcut focus management": "libraryTab.forceActiveFocus()",
         "screen tab focus rings": "libraryTab.activeFocus ? 3 : 1",
         "primary control tab focus": "objectName: \"toggleMonitoring\"; activeFocusOnTab: true",
+        "secondary control tab focus": "objectName: \"playbackDevice\"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

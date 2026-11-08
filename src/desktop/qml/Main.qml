@@ -305,6 +305,7 @@ ApplicationWindow {
                 objectName: "themeSelector"
                 model: window.themeNames
                 currentIndex: window.selectedThemeIndex
+                activeFocusOnTab: true
                 Accessible.name: "Color theme"
                 Accessible.description: "Choose one of six color themes for the Beatglass desktop; current theme " + currentText
                 ToolTip.text: "Choose a color theme"
@@ -319,6 +320,7 @@ ApplicationWindow {
                 objectName: "reduceMotion"
                 text: "Reduce motion"
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
+                activeFocusOnTab: true
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
@@ -509,8 +511,8 @@ ApplicationWindow {
                             Button { text: "+5 s"; objectName: "seekForwardPlayback"; Accessible.name: "Seek forward five seconds"; Accessible.description: "Move playback five seconds later"; ToolTip.text: "Seek forward 5 seconds"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * 44100, window.playbackBridge.epoch + 1) }
                             SpinBox { id: seekFrame; objectName: "seekFrame"; from: 0; to: 2147483647; value: window.playbackBridge ? Math.min(seekFrame.to, window.playbackBridge.currentFrame) : 0; editable: true; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; Accessible.name: "Seek target frame"; Accessible.description: "Enter an audio frame and apply it as the playback position"; ToolTip.text: "Enter a source frame, then choose Seek" }
                             Button { text: "Seek"; objectName: "seekToFrame"; enabled: seekFrame.enabled; Accessible.name: "Seek to entered frame"; Accessible.description: "Seek playback to the entered audio frame"; ToolTip.text: "Seek playback to the entered source frame"; onClicked: window.playbackBridge.seek(seekFrame.value, window.playbackBridge.epoch + 1) }
-                            ComboBox { objectName: "playbackDevice"; model: window.playbackBridge ? window.playbackBridge.devices : []; enabled: window.playbackBridge; Accessible.name: "Playback output device"; Accessible.description: currentText !== "" ? "Current output device: " + currentText + ". Choose the native playback output device." : "No output device selected. Choose the native playback output device."; ToolTip.text: "Choose the output device used for native playback"; onActivated: if (window.playbackBridge) window.playbackBridge.deviceId = currentIndex >= 0 ? currentIndex : -1 }
-                            Button { text: "Refresh outputs"; objectName: "refreshPlaybackDevices"; enabled: window.playbackBridge; Accessible.name: "Refresh playback outputs"; Accessible.description: "Refresh native playback output devices"; ToolTip.text: "Refresh the available playback output devices"; onClicked: window.playbackBridge.refreshDevices() }
+                            ComboBox { objectName: "playbackDevice"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Playback output device"; Accessible.description: currentText !== "" ? "Current output device: " + currentText + ". Choose the native playback output device." : "No output device selected. Choose the native playback output device."; ToolTip.text: "Choose the output device used for native playback"; onActivated: if (window.playbackBridge) window.playbackBridge.deviceId = currentIndex >= 0 ? currentIndex : -1 }
+                            Button { text: "Refresh outputs"; objectName: "refreshPlaybackDevices"; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Refresh playback outputs"; Accessible.description: "Refresh native playback output devices"; ToolTip.text: "Refresh the available playback output devices"; onClicked: window.playbackBridge.refreshDevices() }
                             Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState"; Accessible.name: "Playback state: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current native playback state" }
                             Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current playback source"; elide: Text.ElideMiddle; Layout.fillWidth: true }
                             Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
@@ -980,6 +982,7 @@ ApplicationWindow {
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
+                        activeFocusOnTab: true
                         Accessible.name: checked ? "Disable click-through" : "Enable click-through"
                         Accessible.role: Accessible.CheckBox
                         Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled")
@@ -1054,6 +1057,7 @@ ApplicationWindow {
                             RowLayout {
                                 ComboBox {
                                     objectName: "endpointSelector"
+                                    activeFocusOnTab: true
                                     model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
@@ -1061,7 +1065,7 @@ ApplicationWindow {
                                     Accessible.description: currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture."
                                     onActivated: if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id)
                                 }
-                                Button { text: "Refresh"; objectName: "refreshEndpoints"; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.description: "Refresh the available output capture endpoints."; onClicked: window.endpointSelectionBridge.refresh() }
+                                Button { text: "Refresh"; objectName: "refreshEndpoints"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.description: "Refresh the available output capture endpoints."; onClicked: window.endpointSelectionBridge.refresh() }
                             }
                             Label {
                                 objectName: "endpointEmptyState"
