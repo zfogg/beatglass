@@ -24,11 +24,6 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
         header = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.hpp").read_text(encoding="utf-8")
         self.assertIn('publish Cancelled immediately, and clear stale result presentation.', header)
         self.assertIn('publish Cancelled immediately, and clear stale result/batch presentation.', header)
-
-    def test_cancellation_publishes_terminal_state_immediately(self):
-        source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
-        self.assertGreaterEqual(source.count('status_ = QStringLiteral("Cancelled"); emit statusChanged();'), 2)
-
     def test_cancellation_publishes_terminal_state_immediately(self):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
         self.assertGreaterEqual(source.count('status_ = QStringLiteral("Cancelled"); emit statusChanged();'), 2)
