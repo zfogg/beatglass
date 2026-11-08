@@ -10,6 +10,20 @@ This matrix records development evidence and the remaining gates. A build or hea
 
 For every native run, record the OS version, kernel or build number, compiler, Qt version, audio backend/session version, display server or compositor, output device, build identity, exact commands, and observed limitations. Until those records exist for the relevant platform scenarios, support language must remain experimental.
 
+## Recovery/resubmission validation
+
+The portable recovery path now retains and displays retry identity fields and rejects resubmission without an explicit source path plus matching content, engine, configuration, and mode metadata. Local contract checks cover the bridge/UI handoff; they do not prove decoder correctness, native audio routing, or desktop recovery on supported hardware.
+
+Local checks used for this slice:
+
+```text
+python tests/unit/check_recovery_details_ui_contract.py
+python tests/unit/check_bridge_resubmit_contract.py
+git diff --check
+```
+
+Native Windows WASAPI, macOS Core Audio, Linux PipeWire, desktop UI, overlay, device-loss, and packaged-runtime qualification remain open.
+
 The platform status row and retained manifest must agree on source commit, capture time, and environment/toolchain; otherwise the run is not attributable to the documented build. Readiness reports also verify that aggregate failure-category counts, retained-artifact counts, and retained-artifact bytes equal the sum of their per-platform counts, expose retained artifact counts/bytes by platform, and require each retained count/byte total to match its artifact inventory.
 
 The handoff matrix must contain exactly one Windows, one macOS, and one Linux row. Duplicate platform rows are a documentation error and fail the executable handoff check before retained evidence is considered.

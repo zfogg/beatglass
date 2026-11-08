@@ -368,4 +368,6 @@ The completion surface now renders the coordinator’s decoded result payload se
 
 The Library also surfaces persisted retryable-run count alongside active analysis status, making failed publication/recovery outcomes visible without conflating them with cache hits.
 
+The recovery bridge now displays each persisted retryable run's run ID, content identity, engine, configuration, and mode. Retry resubmission is metadata-gated: the bridge reconstructs a file decoder operation and calls the coordinator resubmission boundary only when an explicit source path and matching identity are supplied; missing metadata is rejected. This is a portable handoff contract, not native qualification.
+
 Recovery guidance now distinguishes unavailable storage from waiting retryable work and a clear recovery state; completed result identity remains a separate field.
