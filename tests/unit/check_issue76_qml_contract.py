@@ -627,6 +627,7 @@ def main() -> int:
         "visualization capture status shrinks": "Layout.fillWidth: true; Layout.minimumWidth: 0; wrapMode: Text.WordWrap",
         "visualization selection responsive spacing": "spacing: window.compactHeader ? 4 : 8",
         "visualization selection alignment": "Layout.alignment: Qt.AlignTop",
+        "visualization status runtime state": 'window.liveBridge.status === "Error" ? "capture error"',
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
