@@ -405,6 +405,8 @@ def main() -> int:
         "visualization responsive status spacing": 'objectName: "visualizationStatusGroup"',
         "visualization status group shrinks": "Layout.minimumWidth: 0",
         "visualization status group top aligned": "Layout.alignment: Qt.AlignTop",
+        "visualization seek action": 'objectName: "seekVisualizationSelection"',
+        "visualization seek frame contract": "seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationPresentation.waveform.length)",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization status runtime state": "Accessible.value: window.liveBridge.status === \"Error\" ? \"capture error\"",
         "visualization reset reason": "visualizationSelectionResetReason",
