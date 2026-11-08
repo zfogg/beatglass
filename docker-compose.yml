@@ -1,0 +1,24 @@
+services:
+  spaniel:
+    image: ${SPANIEL_IMAGE:-ghcr.io/zfogg/spaniel:latest}
+    command: ["--db-path", "/data/spaniel.duckdb", "--no-browser", "--mcp-allow-writes"]
+    environment:
+      SPANIEL_BIND_ADDRESS_V4: ${SPANIEL_CONTAINER_BIND_ADDRESS_V4:-0.0.0.0}
+      SPANIEL_BIND_ADDRESS_V6: ${SPANIEL_CONTAINER_BIND_ADDRESS_V6:-::}
+    restart: unless-stopped
+    ports:
+      - "${SPANIEL_BIND_ADDRESS:-127.0.0.1}:${SPANIEL_HTTP_PORT:-8080}:8080"
+      - "${SPANIEL_BIND_ADDRESS:-127.0.0.1}:${SPANIEL_OTLP_GRPC_PORT:-4317}:4317"
+      - "${SPANIEL_BIND_ADDRESS:-127.0.0.1}:${SPANIEL_OTLP_HTTP_PORT:-4318}:4318"
+    volumes:
+      - beatglass-spaniel-data:/data
+      - ./deploy/spaniel/dashboards:/etc/spaniel/dashboards:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 2s
+
+volumes:
+  beatglass-spaniel-data:

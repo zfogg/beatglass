@@ -2,6 +2,40 @@
 
 Phase 0 is **not complete**. No feature work should start until its exit gate is met.
 
+## Spaniel/Gotel integration validation
+
+This increment adds an opt-in Gotel C++ facade integration for the file CLI, a
+Spaniel `ghcr.io/zfogg/spaniel:latest` Compose deployment, and a project-scoped
+Codex MCP endpoint. Windows core build identity: GCC 15.2.0/CMake 4.4.4;
+`ctest --test-dir build-core2 --output-on-failure` passed 85/85 with one native
+device test skipped. Compose pulled the image and validated its configuration,
+but startup was blocked by an existing healthy `spaniel` container already
+using ports 8080/4317/4318. Spaniel MCP reported writes enabled and the
+configured endpoint was reachable; a safe `beatglass-mcp-validation` session
+was created. The Gotel-enabled configure reached dependency discovery after
+forcing its default Clang preference off, but was not completed in this run.
+The reviewed follow-up binds Compose ports to loopback by default, removes the
+fixed container name, and makes host ports configurable. The appearance-reset
+files were removed from this focused diff. With Gotel checkout `73e26ce` plus
+its C++ host native-accessor change, the core telemetry build completed with
+GCC 15.2.0/CMake 4.4.4:
+`cmake -S . -B build-otel-core2 -G Ninja -DBEATGLASS_ENABLE_TELEMETRY=ON
+-DBEATGLASS_GOTEL_SOURCE_DIR=C:/Users/zachf/src/gotel -DGOTEL_WITH_GRPC=OFF
+-DBUILD_TESTING=ON -DCMAKE_PREFIX_PATH=C:/Users/zachf/scoop/apps/vcpkg/current/installed/x64-windows`,
+`cmake --build build-otel-core2 --target beatglass-telemetry-smoke --parallel 4`,
+and the smoke executable exited 0. CTest for the full telemetry-enabled core
+suite passed 85/85 with one expected native-device skip. The optional slice
+link remains unqualified on this host because MinGW was paired with MSVC-built
+vcpkg aubio/libsndfile archives.
+
+The smoke export was received by the healthy Spaniel instance at
+`http://127.0.0.1:8080/mcp`: MCP reported service `beatglass`, one trace with
+root `beatglass.analyze`, beatglass metrics with sample counts, and one
+`INFO` log (`beatglass telemetry smoke finished`) correlated to the trace.
+The child-chat validation used the project MCP configuration, created
+`beatglass-child-chat-validation`, reported that the tools were usable, and was
+archived after its result was collected.
+
 - [x] Initial repository guidance and README.
 - [x] Initial CMake, pinned Catch2, CTest and three-platform CI configuration.
 - [x] Draft audio, result and job contracts; bounded SPSC queue with unit tests.

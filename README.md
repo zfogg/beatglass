@@ -12,6 +12,17 @@ Production implementation belongs in `src/` for applications and `lib/` for reus
 
 The current `main` branch includes the bounded analysis queue and retry lifecycle, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, and Windows endpoint-loss recovery. These are implemented slices, not a v1 completion claim: native capture, playback, full persistence workflows, and interactive qualification remain open.
 
+## Local telemetry and Spaniel
+
+The optional Gotel integration instruments the file CLI on its worker/application thread; it never runs from an audio callback. Configure it with the local merged Gotel checkout and send OTLP/HTTP to Spaniel:
+
+```sh
+cmake -S . -B build-otel -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_ENABLE_TELEMETRY=ON -DBEATGLASS_GOTEL_SOURCE_DIR=C:/Users/zachf/src/gotel -DBUILD_TESTING=ON
+docker compose up -d
+```
+
+`docker-compose.yml` uses `ghcr.io/zfogg/spaniel:latest`, enables Spaniel MCP writes, and persists only Spaniel data. Host ports bind to loopback by default and can be changed with `SPANIEL_BIND_ADDRESS`, `SPANIEL_HTTP_PORT`, `SPANIEL_OTLP_GRPC_PORT`, and `SPANIEL_OTLP_HTTP_PORT`; do not expose write-enabled MCP beyond a trusted network. The project-scoped `.codex/config.toml` points Codex at `http://127.0.0.1:8080/mcp`; it contains no credentials. Do not commit `OTEL_EXPORTER_OTLP_HEADERS` or other secrets.
+
 ## Build and test the groundwork
 
 Install a C++20 compiler, CMake 3.24 or newer, and Git/network access for the pinned Catch2 download. From the repository root:

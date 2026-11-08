@@ -1,10 +1,13 @@
 #include "beatglass/core/file_analysis.hpp"
 #include "state_label.hpp"
+#include "telemetry.hpp"
 #include <exception>
 #include <iomanip>
 #include <iostream>
 #include <locale>
 #include <string_view>
+#include <chrono>
+#include <limits>
 
 namespace {
 void json_string(std::string_view s) {
@@ -46,6 +49,11 @@ int main(int argc, char** argv) {
   }
   if (path.empty()) { std::cerr << "Usage: beatglass-cli [--replay] [--json] [--] <audio-file>\n"; return 2; }
   try {
+    beatglass::telemetry::Host telemetry;
+    const bool tracing = telemetry.start(replay ? "beatglass.replay_file" : "beatglass.analyze_file");
+    const auto started = std::chrono::steady_clock::now();
+    telemetry.set("beatglass.mode", replay ? "replay" : "analyze");
+    telemetry.stage("decode");
     const auto r = replay ? beatglass::replay_file(path, [json](std::uint64_t frame, const beatglass::TempoResult& state) {
       if (json) { json_result("replay", state, frame); return; }
       std::cout << "observed frame: " << frame << " tempo: ";
@@ -56,6 +64,18 @@ int main(int argc, char** argv) {
       std::cout << "{\"type\":\"beat\",\"schema_version\":1,\"epoch\":" << beat.epoch
                 << ",\"frame\":" << beat.frame << ",\"observed_through\":" << beat.observed_through << "}\n";
     }) : beatglass::analyze_file(path);
+    telemetry.set("audio.format", r.metadata.format.substr(0, 32));
+    telemetry.set("audio.sample_rate", static_cast<std::int64_t>(r.metadata.sample_rate));
+    telemetry.set("audio.channels", static_cast<std::int64_t>(r.metadata.channels));
+    telemetry.set("audio.frames", static_cast<std::int64_t>(std::min<std::uint64_t>(r.metadata.frames, static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()))));
+    telemetry.set("audio.beats", static_cast<std::int64_t>(r.beats));
+    telemetry.metric("beatglass.operations", 1);
+    telemetry.metric("beatglass.frames", static_cast<double>(r.metadata.frames));
+    telemetry.metric("beatglass.beats", static_cast<double>(r.beats));
+    if (r.bpm) telemetry.metric("beatglass.bpm", *r.bpm);
+    telemetry.metric("beatglass.duration", static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count()) / 1000.0);
+    telemetry.log("beatglass operation finished");
+    if (tracing) telemetry.finish();
     if (json) { json_result("result", r); return 0; }
     std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nbeats: " << r.beats << "\ntempo: ";
     if (r.bpm) std::cout << *r.bpm << " BPM\n"; else std::cout << "unknown\n";
