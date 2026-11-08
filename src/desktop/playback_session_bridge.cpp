@@ -45,6 +45,7 @@ void PlaybackSessionBridge::refreshDevices() {
   emit changed();
 }
 bool PlaybackSessionBridge::startNative(qulonglong epoch, int sampleRate, int channels, int maxSamples) {
+  native_epoch_ = epoch; native_rate_ = sampleRate; native_channels_ = channels; native_max_samples_ = maxSamples;
 #ifdef _WIN32
   if (sampleRate <= 0 || channels <= 0 || maxSamples <= 0) { native_error_ = QStringLiteral("Invalid native playback format"); emit changed(); return false; }
   if (!native_) native_ = std::make_unique<beatglass::windows::WindowsPlaybackSession>();
@@ -56,5 +57,6 @@ bool PlaybackSessionBridge::startNative(qulonglong epoch, int sampleRate, int ch
   Q_UNUSED(epoch); Q_UNUSED(sampleRate); Q_UNUSED(channels); Q_UNUSED(maxSamples); return false;
 #endif
 }
+bool PlaybackSessionBridge::retryNative() { if (!native_epoch_ || native_rate_ <= 0 || native_channels_ <= 0 || native_max_samples_ <= 0) return false; return startNative(native_epoch_, native_rate_, native_channels_, native_max_samples_); }
 
 bool PlaybackSessionBridge::resume() { const bool ok = session_.resume(); if (ok) emit changed(); return ok; }

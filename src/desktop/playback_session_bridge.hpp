@@ -31,6 +31,8 @@ public:
   Q_INVOKABLE void refreshDevices();
   /** Start native playback with decoded source format and selected device. */
   Q_INVOKABLE bool startNative(qulonglong epoch, int sampleRate, int channels, int maxSamples);
+  /** Retry the last failed native start using the same format/device. */
+  Q_INVOKABLE bool retryNative();
   bool nativeRunning() const noexcept { return native_running_; }
   QString nativeError() const { return native_error_; }
   Q_INVOKABLE bool open(qulonglong epoch);
@@ -49,6 +51,7 @@ private:
   int device_id_{-1};
   bool native_running_{};
   QString native_error_;
+  qulonglong native_epoch_{}; int native_rate_{}, native_channels_{}, native_max_samples_{};
 #ifdef _WIN32
   std::unique_ptr<beatglass::windows::WindowsPlaybackSession> native_;
 #endif
