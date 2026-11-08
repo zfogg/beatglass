@@ -212,6 +212,7 @@ TestCase {
         compare(findChild(app, "browser").Accessible.name, "Folder contents")
         compare(findChild(app, "browserEmptyState").Accessible.name, "Library browser empty state")
         compare(findChild(app, "chooseFolder").Accessible.description, "Choose a local folder to browse")
+        compare(findChild(app, "sortOrder").Accessible.description, "Toggle ascending or descending file-name order")
         app.destroy()
     }
     function test_librarySearchExplainsFiltering() {
