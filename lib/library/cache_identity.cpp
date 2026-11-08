@@ -13,4 +13,15 @@ CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
   out.key = CacheKey{fingerprint.digest, std::move(engine), std::move(config), std::move(mode)};
   return out;
 }
+
+FingerprintStatus refresh_collection_file(SqliteCache& cache, const std::filesystem::path& path,
+                                          std::stop_token stop, std::string* diagnostic) {
+  const auto fingerprint = fingerprint_file(path, stop);
+  if (diagnostic) *diagnostic = fingerprint.diagnostic;
+  if (fingerprint.status != FingerprintStatus::ok) return fingerprint.status;
+  const auto name = path.filename().string();
+  cache.put_entry({path.string(), name, "audio", fingerprint.digest, fingerprint.size,
+                   fingerprint.modified.time_since_epoch().count()});
+  return FingerprintStatus::ok;
+}
 }
