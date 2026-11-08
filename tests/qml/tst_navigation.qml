@@ -96,6 +96,14 @@ TestCase {
         hide.clicked(); compare(fakeOverlay.hides, 1); tryCompare(app, "visible", true)
         app.destroy()
     }
+    function test_closingShellHidesOverlay() {
+        fakeOverlay.hides = 0
+        let app = shellWithOverlay.createObject(null)
+        verify(app !== null)
+        app.close()
+        compare(fakeOverlay.hides, 1)
+        app.destroy()
+    }
     function test_destinationsAndMetadata() {
         let app = shell.createObject(null)
         verify(app !== null)
