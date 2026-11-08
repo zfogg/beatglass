@@ -36,6 +36,7 @@ def main() -> int:
         "capture endpoint refresh accessible name": "Accessible.name: \"Refresh capture endpoints\"",
         "capture endpoint current selection": "Current capture endpoint: \" + currentText",
         "parent folder accessible name": "Accessible.name: \"Go to parent folder\"",
+        "browser keyboard guidance": "Use Up and Down to select an entry",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
