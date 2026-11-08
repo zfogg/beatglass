@@ -684,6 +684,8 @@ The overlay action group now surfaces both launch fallback and explicit hidden-b
 
 Bridge availability and display-list transitions now announce action enablement changes directly: actions are disabled with the control fallback during loss, restored after native synchronization, and gated until a replacement display is explicitly chosen.
 
+Show, Restore, and Reapply now share that display-target gate in their actual enabled state. When a saved monitor is missing, each control reports “choose a display first” and the display selector remains the recovery focus; no action claims success before a native target exists.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.

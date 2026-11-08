@@ -7,7 +7,7 @@ required = [
     'objectName: "showOverlay"',
     'objectName: "restoreOverlay"',
     'objectName: "reapplyOverlaySettings"',
-    'Accessible.value: enabled ? "available" : "unavailable; control-window fallback active"',
+    'Accessible.value: enabled ? "available" :',
     'Native overlay unavailable; control-window fallback remains available',
     'Overlay unavailable; control-window fallback is active',
 ]
