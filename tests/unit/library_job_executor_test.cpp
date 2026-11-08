@@ -39,6 +39,12 @@ TEST_CASE("zero-capacity executor rejects all submissions") {
   executor.shutdown();
   REQUIRE_FALSE(ran);
 }
+TEST_CASE("executor rejects null work without creating a tracked job") {
+  JobExecutor executor(1);
+  REQUIRE_FALSE(executor.submit(0, {}));
+  REQUIRE_FALSE(executor.submit_tracked(0, {}));
+  executor.shutdown();
+}
 
 TEST_CASE("library executor cancels active work and discards waiting jobs") {
   JobExecutor executor(1);
