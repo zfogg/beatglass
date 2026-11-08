@@ -39,11 +39,11 @@ On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink disc
 
 ## API documentation
 
-The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
+The provisional library and private `src/` and `lib/` C++ interfaces are documented with Hawkmoth and Sphinx; the Markdown project, engineering, qualification and design documents are included in the same Sphinx site through MyST. Indexing a private header does not install it. Check header coverage with `python docs/api/check_headers.py` and `python tests/unit/check_headers_test.py`. Build the same Linux container used by CI from the repository root (Docker required):
 
 ```sh
 docker build -f docs/api/Dockerfile -t beatglass-docs .
-docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html docs/api /work/build/docs/html
+docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html -c docs/api . /work/build/docs/html
 ```
 
 Open `build/docs/html/index.html`. On Windows PowerShell, use `${PWD}` in the volume argument. Python dependencies, the base image, and direct Clang, Python, pkg-config and Qt packages are pinned. Ubuntu transitive packages still come from live repositories; archived packages may be needed if pinned versions disappear. Pull requests validate the build; pushes to main deploy it through GitHub Pages when Pages is configured for GitHub Actions. The documentation does not establish native platform qualification or API stability.
@@ -96,6 +96,17 @@ cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD
 cmake --build /tmp/beatglass-library-phase1 -j 3
 ctest --test-dir /tmp/beatglass-library-phase1 --output-on-failure
 ```
+
+If a platform does not provide SQLite3 development headers and a vcpkg toolchain is not available, the same prototype tests can use the pinned SQLite 3.45.3 amalgamation fetched by CMake:
+
+```sh
+cmake -S . -B /tmp/beatglass-library-fetch -DBUILD_TESTING=ON \
+  -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DBEATGLASS_FETCH_SQLITE3=ON
+cmake --build /tmp/beatglass-library-fetch
+ctest --test-dir /tmp/beatglass-library-fetch --output-on-failure
+```
+
+The fallback is opt-in, verifies the upstream archive SHA-256, and is intended for development/test environments; production packaging should continue to use the platform package manager or the pinned vcpkg manifest.
 
 This is an isolated review increment, not a functioning library backend. File hashing and file-version validation, actual DSP integration, typed public outcomes, individual job cancellation/progress, result schema, database location and pinning remain open. Do not use the prototype for user data. It does not write audio or tags.
 

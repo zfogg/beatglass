@@ -71,11 +71,11 @@ private:
   unsigned count_{};
 };
 
-/** GUI-facing publication gate for one visualization source generation.
- * Own on the presentation thread. A clear invalidates every previously
- * accepted frame synchronously; accept only strictly newer revisions from the
- * current generation. The caller must serialize acceptance, painting and
- * clearing on one thread and must clear its painted frame after clear(). */
+/// GUI-facing publication gate for one visualization source generation.
+/// Own on the presentation thread. A clear invalidates every previously
+/// accepted frame synchronously; accept only strictly newer revisions from the
+/// current generation. The caller must serialize acceptance, painting and
+/// clearing on one thread and must clear its painted frame after clear().
 class VisualizationPublicationGate {
 public:
   /** Invalidate the current generation and discard the accepted revision. */

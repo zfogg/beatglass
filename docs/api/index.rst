@@ -10,6 +10,53 @@ them public. Callers must respect each interface's ownership and threading rules
 The implementation and the issue's remaining product gates take precedence over
 aspirational behavior; see the repository README and progress notes.
 
+Repository documentation
+------------------------
+
+The Markdown documents below are included directly through MyST. They remain
+Markdown source files for repository and GitHub use, while Sphinx provides one
+searchable, cross-linked documentation site alongside the Hawkmoth C++ API
+reference.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Project and engineering documentation
+
+   ../../README.md
+   ../../AGENTS.md
+   ../progress.md
+   ../decisions.md
+   ../contracts.md
+   ../phase0-gate.md
+   ../phase1-contract-proposals.md
+   ../foundation-handoff.md
+   ../platform-qualification-status.md
+   ../linux-qualification-plan.md
+   ../linux-platform-increment.md
+   ../linux-native-evidence-template.md
+   ../macos-qualification.md
+   ../macos-coreaudio-status.md
+   ../macos-overlay.md
+   ../windows-qualification.md
+   ../windows-platform.md
+   ../windows-overlay.md
+   ../packaging-qualification.md
+   ../audio-format-support.md
+   ../collection-ui-integration.md
+   ../pipewire-status-contract.md
+   ../library-duration-contract.md
+   ../dependency-identity-proposal.md
+   ../epoch-handoff-proposal.md
+   ../same-source-proposal.md
+   ../essentia-spike.md
+   ../tonal-experiment.md
+   ../../design/v1/README.md
+   ../../design/v1/PRODUCT.md
+   ../../design/v1/DESIGN.md
+   ../../design/v1/STATES.md
+   ../../design/v1/REVIEW.md
+   ../../skills/beatglass-documentation/SKILL.md
+
 Audio and capture
 -----------------
 
@@ -23,6 +70,8 @@ worker requests; it must outlive those callers and is never called by an audio
 callback. Issuance does not order worker completion or install stream formats.
 
 .. cpp:autodoc:: include/beatglass/core/audio.hpp include/beatglass/core/audio_clock.hpp include/beatglass/core/channel_reduction.hpp include/beatglass/core/stream_continuity.hpp include/beatglass/core/audio_queue.hpp include/beatglass/capture/detail/pipewire_discovery.hpp include/beatglass/capture/source.hpp include/beatglass/capture/coreaudio_internal.hpp include/beatglass/capture/coreaudio_fifo_internal.hpp include/beatglass/capture/coreaudio_tap_internal.hpp include/beatglass/capture/coreaudio_source_internal.hpp include/beatglass/capture/source_lifecycle.hpp include/beatglass/capture/byte_source.hpp include/beatglass/capture/file_reader.hpp
+
+.. cpp:autodoc:: include/beatglass/capture/decoded_pcm_pump.hpp include/beatglass/capture/playback_output_adapter.hpp include/beatglass/capture/playback_pcm_queue.hpp
 
 .. cpp:function:: bool beatglass::coreaudio::SourceBackend::stop() noexcept
 
@@ -82,6 +131,8 @@ Desktop application internals
 -----------------------------
 
 .. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/analysis_job_bridge.hpp src/desktop/analysis_presentation.hpp src/desktop/capture_monitor_bridge.hpp src/desktop/library_catalog_bridge.hpp src/desktop/platform/windows_endpoint_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_device_position.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_live_music.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/windows_overlay_policy.hpp src/desktop/platform/macos_overlay.hpp src/desktop/playback_session_bridge.hpp src/desktop/theme_preferences.hpp src/desktop/visualization_presentation_bridge.hpp
+
+.. cpp:autodoc:: include/beatglass/desktop/macos_playback_session.hpp src/desktop/platform/windows_playback_session.hpp src/desktop/platform/windows_waveout_devices.hpp src/desktop/platform/windows_waveout_playback.hpp src/desktop/storage_recovery_bridge.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
