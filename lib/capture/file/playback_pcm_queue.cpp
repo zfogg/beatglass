@@ -1,9 +1,11 @@
 #include "beatglass/capture/playback_pcm_queue.hpp"
 #include <algorithm>
 #include <stdexcept>
+#include <limits>
 namespace beatglass {
+namespace { std::size_t checked_capacity(std::size_t slots) { if (!slots || slots == std::numeric_limits<std::size_t>::max()) throw std::invalid_argument("Playback queue dimensions are too large"); return slots + 1; } }
 PlaybackPcmQueue::PlaybackPcmQueue(std::size_t slot_count, std::size_t samples_per_slot)
-    : capacity_(slot_count + 1), samples_per_slot_(samples_per_slot), slots_(std::make_unique<Slot[]>(capacity_)) {
+    : capacity_(checked_capacity(slot_count)), samples_per_slot_(samples_per_slot), slots_(std::make_unique<Slot[]>(capacity_)) {
   if (!slot_count || !samples_per_slot) throw std::invalid_argument("Playback queue dimensions must be nonzero");
   for (std::size_t i = 0; i < capacity_; ++i) slots_[i].samples = std::make_unique<float[]>(samples_per_slot_);
 }

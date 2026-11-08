@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/capture/playback_pcm_queue.hpp"
 #include <array>
+#include <limits>
 using namespace beatglass;
 TEST_CASE("playback queue rejects blocks without a source epoch") {
   PlaybackPcmQueue q(2, 2); std::array<float,1> samples{1};
@@ -15,4 +16,4 @@ TEST_CASE("playback queue rejects oversize and full blocks without allocation") 
   PlaybackPcmQueue q(1,2); std::array<float,3> large{}; AudioBlock too_large{{44100,1},1,0,0,false,large}; CHECK_FALSE(q.push(too_large));
   std::array<float,2> data{1,2}; AudioBlock block{{44100,1},1,0,0,false,data}; REQUIRE(q.push(block)); CHECK_FALSE(q.push(block)); std::array<float,1> short_out{}; AudioBlock got{}; CHECK_FALSE(q.pop(short_out,got)); CHECK(q.size()==1); std::array<float,2> out{}; REQUIRE(q.pop(out,got));
 }
-TEST_CASE("playback queue requires bounded dimensions") { CHECK_THROWS(PlaybackPcmQueue(0,1)); CHECK_THROWS(PlaybackPcmQueue(1,0)); }
+TEST_CASE("playback queue requires bounded dimensions") { CHECK_THROWS(PlaybackPcmQueue(0,1)); CHECK_THROWS(PlaybackPcmQueue(1,0)); CHECK_THROWS(PlaybackPcmQueue(std::numeric_limits<std::size_t>::max(),1)); }
