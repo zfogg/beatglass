@@ -274,6 +274,8 @@ The readiness report contract is versioned as `readiness_report_schema: 1`; `exi
 
 The desktop storage bridge now exposes an asynchronous cache lookup (`findCached`) and publishes hit/result state only after the worker responds. This keeps SQLite off the GUI thread and gives the future decoder queue a real UI-owned handoff; no decoder or analysis is started by the lookup, and native UI qualification remains pending.
 
+The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
+
 ## Analysis queue admission handoff
 `admit_analysis` now gives the future file-analysis queue one worker-owned decision: return a completed cache result without decoding, or reserve a run ID before decoding begins. The helper does not fingerprint or revalidate a source; callers must supply the validated identity and publish only after decoder verification. Desktop scheduling and native qualification remain open.
 
