@@ -79,6 +79,14 @@ public:
     if (rc != SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_));
     return out;
   }
+  bool discard_retryable(const std::string& id) {
+    if (id.empty() || id.size() > 4096 || id.find('\0') != std::string::npos)
+      throw std::invalid_argument("invalid run ID");
+    Statement s(db_, "DELETE FROM runs WHERE id=? AND status='retryable'");
+    bind(s.p, 1, id);
+    done(s.p);
+    return sqlite3_changes(db_) != 0;
+  }
   bool invalidate(const CacheKey& key) {
     validate_key(key);
     Statement s(db_, "DELETE FROM active WHERE content=? AND engine=? AND config=? AND mode=?");
@@ -117,14 +125,17 @@ public:
         return sqlite3_changes(db_) == 1;
       };
       if (stop.stop_requested()) {
-        if (!retryable()) { rollback(); return Publish::error; }
+        // Cancellation is idempotent for a run already made retryable by a
+        // prior stale/cancelled publication; do not turn that terminal state
+        // into an unexpected storage error.
+        if (!retryable()) { rollback(); return Publish::cancelled; }
         exec("COMMIT"); return Publish::cancelled;
       }
       if (!revalidate()) {
         if (!retryable()) { rollback(); return Publish::error; }
         exec("COMMIT"); return Publish::stale_input;
       }
-      Statement update(db_, "UPDATE runs SET status='complete',result=? WHERE id=? AND content=? AND engine=? AND config=? AND mode=? AND status='running'");
+      Statement update(db_, "UPDATE runs SET status='complete',result=? WHERE id=? AND content=? AND engine=? AND config=? AND mode=? AND status IN ('running','retryable')");
       check(sqlite3_bind_blob(update.p, 1, result.data(), static_cast<int>(result.size()), SQLITE_TRANSIENT));
       bind(update.p, 2, id); bind_key(update.p, 3, key); done(update.p);
       if (sqlite3_changes(db_) != 1) throw std::runtime_error("unknown or non-running run");
@@ -155,7 +166,7 @@ SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
 std::vector<RetryableRun> SqliteCache::retryable_runs(std::size_t limit) { return impl_->retryable_runs(limit); }
-bool SqliteCache::discard_retryable(const std::string& id) { Statement s(impl_->db_, "DELETE FROM runs WHERE id=? AND status='retryable'"); bind(s.p,1,id); done(s.p); return sqlite3_changes(impl_->db_) != 0; }
+bool SqliteCache::discard_retryable(const std::string& id) { return impl_->discard_retryable(id); }
 bool SqliteCache::invalidate(const CacheKey& key) { return impl_->invalidate(key); }
 void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }
 bool SqliteCache::remove_entry(const std::string& path) { return impl_->remove_entry(path); }
