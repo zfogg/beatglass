@@ -20,6 +20,8 @@ MARKERS = {
     "qml source reset": "function onSourceChanged() { window.clearVisualizationForCaptureState",
     "qml epoch reset": "function onEpochChanged() { window.clearVisualizationForCaptureState",
     "qml state reset": "function onStateChanged() {",
+    "qml stop invalidation reason": 'Playback stopped; accepted visualization snapshot cleared.',
+    "qml pause resume bridge sync": "window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame",
 }
 
 
