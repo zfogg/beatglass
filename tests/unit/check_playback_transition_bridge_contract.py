@@ -34,6 +34,7 @@ MARKERS = {
     "qml overlay retry announcement": "DJ overlay retry requested; control window remains visible until the overlay is restored.",
     "qml overlay selection gate": "overlayDisplaySelectionRequired",
     "qml overlay selection readiness": "DJ overlay display selected; retry is now available.",
+    "qml overlay persisted diagnostic": "Persisted analysis admission result (not current visualization):",
 }
 
 
