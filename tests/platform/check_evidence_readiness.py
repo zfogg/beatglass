@@ -81,6 +81,10 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         if manifest.is_file():
             try:
                 data = json.loads(manifest.read_text(encoding="utf-8"))
+                if not isinstance(data.get("artifacts"), list):
+                    data["artifacts"] = []
+                if not isinstance(data.get("scenarios"), list):
+                    data["scenarios"] = []
                 manifest_platform = str(data.get("platform", "")).lower() or None
                 provenance_complete = all(isinstance(data.get(field), str) and data[field].strip()
                                           for field in verifier.REQUIRED_PROVENANCE)
