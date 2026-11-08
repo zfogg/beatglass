@@ -20,7 +20,7 @@ jobs:
       - name: Build with warnings as errors
         run: docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html -c docs/api . /work/build/docs/html
       - name: Check rendered declarations
-        run: python3 docs/api/check_rendered.py build/docs/html/index.html
+        run: python3 docs/api/check_rendered.py build/docs/html/docs/api/index.html
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
