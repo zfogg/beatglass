@@ -44,6 +44,8 @@ MARKERS = {
     "qml overlay forget announcement": "Saved overlay display cleared; choose an available display to restore monitoring.",
     "qml overlay persist display": "function persistOverlayDisplaySelection(index, name)",
     "qml overlay persist announcement": "DJ overlay display selection persisted for ",
+    "qml overlay relaunch hydration": "function restoreOverlayDisplaySelectionFromBridge()",
+    "qml overlay stale selection": "savedIndex < 0",
     "qml overlay target restoration": "saved display target selected by name.",
     "qml overlay click-through state": "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.",
     "qml overlay opacity state": "DJ overlay opacity set to ",
