@@ -101,7 +101,7 @@ TEST_CASE("reading and seeking leave the source file unchanged") {
  WaveFixture fixture;
  auto bytes = [&] { std::ifstream in(fixture.path, std::ios::binary); return std::vector<char>(std::istreambuf_iterator<char>(in), {}); };
  const auto before = bytes(); REQUIRE_FALSE(before.empty());
- { FileReader reader(fixture.path); std::array<float,4> samples{}; REQUIRE(reader.read(samples).status == FileReadStatus::data); reader.seek(0); REQUIRE(reader.read(samples).status == FileReadStatus::data); }
+ { FileReader reader(fixture.path, 1); std::array<float,4> samples{}; REQUIRE(reader.read(samples).status == FileReadStatus::data); reader.seek(0); REQUIRE(reader.read(samples).status == FileReadStatus::data); }
  CHECK(bytes() == before);
 }
 TEST_CASE("path reader accepts externally allocated epochs without moving on rejection") {
