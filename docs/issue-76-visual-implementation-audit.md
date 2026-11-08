@@ -514,6 +514,8 @@ The analysis-handoff label now carries that stale-clear reason while waiting for
 
 When a valid replacement revision arrives, the presentation change handler clears the stale-replacement message, updates the rendered revision, and requests the repaint in the same accepted-result callback.
 
+Accepted waveform and FFT arrays are now snapshotted into canvas-local rendered buffers before repaint; invalid revisions clear both buffers. Rendering therefore consumes the accepted handoff snapshot rather than reading mutable bridge arrays after invalidation.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
