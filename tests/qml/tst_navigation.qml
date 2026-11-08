@@ -397,6 +397,7 @@ TestCase {
         compare(findChild(app, "visualizationStatus").text, "Visualization unavailable")
         let focusRing = findChild(app, "visualizationFocusRing")
         verify(focusRing !== null)
+        compare(canvas.ToolTip.text, "Click to select a position; use Left/Right/Home/End when focused")
         verify(!focusRing.visible)
         canvas.forceActiveFocus()
         tryVerify(() => focusRing.visible)
