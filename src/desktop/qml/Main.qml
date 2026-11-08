@@ -288,6 +288,7 @@ ApplicationWindow {
                             width: ListView.view.width
                             highlighted: ListView.isCurrentItem
                             Accessible.name: fileName + (fileIsDir ? ", folder" : ", audio file")
+                            Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
                             contentItem: RowLayout {
                                 Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true }
