@@ -457,6 +457,7 @@ TestCase {
         verify(selected !== null)
         compare(selected.text, "0 samples in selected waveform view")
         compare(selected.Accessible.name, "Selected visualization data status")
+        compare(selected.ToolTip.text, "Data available in the selected waveform or FFT view")
         app.destroy()
     }
 
