@@ -410,6 +410,7 @@ ApplicationWindow {
                         text: "Up"; objectName: "parentFolder"
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
                         onClicked: window.browseFolder = files.parentFolder
+                        Accessible.name: "Go to parent folder"
                         Accessible.description: "Go to the parent folder"
                     }
                     Label {
