@@ -418,6 +418,7 @@ def main() -> int:
         "visualization invalid revision gate": "visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1",
         "visualization source transition clear": 'Selection cleared because the playback source changed.',
         "visualization epoch transition clear": 'Selection cleared because the playback epoch changed.',
+        "visualization handoff stale status": '"Waiting for replacement analysis result; " + window.visualizationSelectionResetReason',
         "visualization waveform validation": "if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))",
         "visualization spectrum validation": "if (!isFinite(spec[k]))",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
