@@ -688,6 +688,8 @@ Show, Restore, and Reapply now share that display-target gate in their actual en
 
 Activating a valid replacement display now announces that Show, Restore, and Reapply are enabled and moves focus to the retry/recovery control. Failed native selection returns focus to the display selector, preserving a keyboard-complete recovery path.
 
+Display enumeration changes now follow the same focus contract: unplugging or losing all displays focuses the disabled selector, an unknown replacement target focuses it again, and a valid saved target returns focus to Retry after recovery. This keeps action enablement and keyboard recovery synchronized across unplug/replug transitions.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
