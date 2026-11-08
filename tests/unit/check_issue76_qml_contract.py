@@ -69,6 +69,7 @@ def main() -> int:
         "final dynamic status names": "Accessible.name: \"Visualization mode: \" + text",
         "screen keyboard shortcuts": "objectName: \"libraryTabShortcut\"",
         "screen shortcut focus management": "libraryTab.forceActiveFocus()",
+        "screen tab focus rings": "libraryTab.activeFocus ? 3 : 1",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:
