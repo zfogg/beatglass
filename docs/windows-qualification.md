@@ -5,6 +5,8 @@ the transferable bundle schema used by Windows and macOS.
 
 This checklist is required before claiming Windows DJ support. CI and offscreen Qt runs do not qualify native capture or desktop behavior.
 
+Retain `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-capture-evidence.json`, `native-recovery-evidence.json`, `native-output-evidence.json`, and `native-display-evidence.json` with the scenario bundle.
+
 The runner also writes `qualification-manifest.txt` with required build identity
 and canonical evidence links; the offline verifier rejects missing, duplicate,
 or redirected identity fields.

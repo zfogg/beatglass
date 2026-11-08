@@ -16,6 +16,7 @@ def main() -> int:
     root = Path(__file__).resolve().parents[2]
     docs = (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8")
     readme = (root / "README.md").read_text(encoding="utf-8")
+    checklists = "\n".join((root / path).read_text(encoding="utf-8") for path in ("docs/windows-qualification.md", "docs/macos-qualification.md", "docs/linux-qualification-plan.md"))
     required_disclaimers = ("does not establish native", "support language must remain experimental")
     required_platform_rows = ("| Windows |", "| macOS |", "| Linux |")
     required_matrix_columns = ("Current integrated/preparation evidence", "Native gates still required")
@@ -40,6 +41,7 @@ def main() -> int:
     unlinked.extend(f"output/display artifact: {artifact}" for artifact in required_output_display_artifacts if artifact.lower() not in docs.lower())
     unlinked.extend(f"capture artifact: {artifact}" for artifact in required_capture_artifacts if artifact.lower() not in docs.lower())
     unlinked.extend(f"bundle artifact: {artifact}" for artifact in required_bundle_artifacts if artifact.lower() not in docs.lower())
+    unlinked.extend(f"checklist artifact: {artifact}" for artifact in required_bundle_artifacts if artifact.lower() not in checklists.lower())
     unlinked.extend(f"matrix scenario: {scenario}" for scenario in required_matrix_scenarios if scenario.lower() not in docs.lower())
     unlinked.extend(f"accessibility scenario requirement: {scenario}" for scenario in required_accessibility_scenarios if scenario.lower() not in docs.lower())
     unlinked.extend(f"scenario requirement: {scenario}" for scenario in required_scenarios if scenario.lower() not in docs.lower())

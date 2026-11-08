@@ -5,6 +5,8 @@ the transferable bundle schema used by macOS and Windows.
 
 This checklist records native macOS audio and overlay evidence. Do not mark a case passed from a Windows build, a silent buffer, or a successful API call alone.
 
+Retain `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-capture-evidence.json`, `native-recovery-evidence.json`, `native-output-evidence.json`, and `native-display-evidence.json` with the scenario bundle.
+
 The repeatable build and evidence setup is `tests/macos/run_qualification.sh`. Run it from a logged-in Mac with an output-specific `NSAudioCaptureUsageDescription` that explicitly describes system-output capture and does not mention microphone or camera capture; it records the build identity, verifies launchable `APPL` bundle executable/identifier/name/version metadata, runs native test output, then prints the manual cases that still require permission, playback and desktop interaction.
 
 For an actual output-capture run, pass the exact UID printed by the smoke bundle's discovery mode. The runner retains `output-discovery.log`, requires it to remain nonempty, rejects duplicate UIDs, and verifies any supplied UID exactly matches a discovered entry before capture:
