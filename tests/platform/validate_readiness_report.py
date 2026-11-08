@@ -169,6 +169,10 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         manifest_paths = [item.get("path") for item in manifest_data.get("artifacts", []) if isinstance(item, dict)]
         if set(report_paths) != set(manifest_paths):
             errors.append(f"{platform}: report artifact inventory does not match manifest")
+        report_roles = {item.get("path"): item.get("role") for item in report_inventory if isinstance(item, dict) and item.get("role")}
+        manifest_roles = {item.get("path"): item.get("role") for item in manifest_data.get("artifacts", []) if isinstance(item, dict)}
+        if report_roles and report_roles != manifest_roles:
+            errors.append(f"{platform}: report artifact roles do not match manifest")
         evidence_hashes = row.get("scenario_evidence_sha256", {})
         if not isinstance(evidence_hashes, dict):
             errors.append(f"{platform}: scenario evidence hashes must be an object")
