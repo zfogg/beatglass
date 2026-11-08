@@ -38,6 +38,28 @@ record_command "xcrun --sdk macosx --show-sdk-path"
 record_command "xcrun --sdk macosx --show-sdk-version"
 record_command "xcode-select -p"
 
+# CMake's slice configuration needs aubio headers. Fail with the native
+# package-manager remediation instead of leaving a less actionable find_path
+# error several lines later.
+aubio_header=""
+for candidate in \
+  "${AUBIO_INCLUDE_DIR:-}/aubio/aubio.h" \
+  "$(brew --prefix aubio 2>/dev/null || true)/include/aubio/aubio.h" \
+  /opt/homebrew/include/aubio/aubio.h \
+  /usr/local/include/aubio/aubio.h; do
+  if [[ -n "$candidate" && -f "$candidate" ]]; then
+    aubio_header="$candidate"
+    break
+  fi
+done
+if [[ -z "$aubio_header" ]]; then
+  echo "aubio/aubio.h is required for the macOS qualification build but was not found." >&2
+  echo "Install it with: brew install aubio" >&2
+  echo "Then rerun: tests/macos/run_qualification.sh $out_dir" >&2
+  exit 1
+fi
+echo "aubio header: $aubio_header"
+
 record_command "cmake -S $repo_root -B $out_dir/build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DBEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON -DBEATGLASS_BUILD_MACOS_TAP_SMOKE=ON"
 cmake -S "$repo_root" -B "$out_dir/build" \
   -DBUILD_TESTING=ON \

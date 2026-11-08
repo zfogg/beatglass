@@ -24,6 +24,8 @@ ApplicationWindow {
     property string selectedName: ""
     property url selectedAudioUrl: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
+        && playbackBridge.source.toString() === selectedAudioUrl.toString()
     Shortcut {
         objectName: "overlayEscapeShortcut"
         sequence: "Escape"
@@ -331,6 +333,7 @@ ApplicationWindow {
                         RowLayout {
                             Layout.fillWidth: true
                             Button { text: "Open"; objectName: "openPlayback"; Accessible.description: "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
+                            Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.description: "Replace the current playback source with the selected audio source"; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1) }
                             Button { text: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume" : "Pause"; objectName: "pausePlayback"; Accessible.description: "Pause or resume the selected audio source"; enabled: window.playbackBridge && window.playbackBridge.state === "Playing"; onClicked: window.playbackBridge.pause() }
                             Button { text: "Stop"; objectName: "stopPlayback"; Accessible.description: "Stop playback and clear the current source"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.stop() }
                             Button { text: "−5 s"; objectName: "seekBackPlayback"; Accessible.description: "Seek playback backward five seconds"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - 5 * 44100), window.playbackBridge.epoch + 1) }
@@ -338,6 +341,7 @@ ApplicationWindow {
                             Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState"; Accessible.name: "Playback state"; Accessible.description: text }
                             Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source"; Accessible.description: text; elide: Text.ElideMiddle; Layout.fillWidth: true }
                             Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position"; Accessible.description: text }
+                            Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status"; Accessible.description: text; visible: text !== "" }
                         }
                     }
                 }
