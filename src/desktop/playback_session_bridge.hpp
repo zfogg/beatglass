@@ -17,6 +17,7 @@ class PlaybackSessionBridge final : public QObject {
   Q_PROPERTY(QUrl source READ source NOTIFY changed)
   Q_PROPERTY(QStringList devices READ devices NOTIFY changed)
   Q_PROPERTY(int deviceId READ deviceId WRITE setDeviceId NOTIFY changed)
+  Q_PROPERTY(bool nativeRunning READ nativeRunning NOTIFY changed)
 public:
   explicit PlaybackSessionBridge(QObject* parent = nullptr) : QObject(parent) {}
   QString state() const;
@@ -29,6 +30,7 @@ public:
   Q_INVOKABLE void refreshDevices();
   /** Start native playback with decoded source format and selected device. */
   Q_INVOKABLE bool startNative(qulonglong epoch, int sampleRate, int channels, int maxSamples);
+  bool nativeRunning() const noexcept { return native_running_; }
   Q_INVOKABLE bool open(qulonglong epoch);
   Q_INVOKABLE bool openSource(const QUrl& source, qulonglong epoch);
   Q_INVOKABLE bool replaceSource(const QUrl& source, qulonglong epoch);
@@ -42,6 +44,7 @@ private:
   QUrl source_;
   QStringList devices_;
   int device_id_{-1};
+  bool native_running_{};
 #ifdef _WIN32
   std::unique_ptr<beatglass::windows::WindowsPlaybackSession> native_;
 #endif

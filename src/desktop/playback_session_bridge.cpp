@@ -24,6 +24,7 @@ void PlaybackSessionBridge::stop() { session_.stop();
 #ifdef _WIN32
   if (native_) native_->stop();
 #endif
+  native_running_ = false;
   source_ = QUrl{}; emit changed(); }
 bool PlaybackSessionBridge::seek(qulonglong frame, qulonglong epoch) { const bool ok = session_.seek(frame, epoch); if (ok) emit changed(); return ok; }
 void PlaybackSessionBridge::refreshDevices() {
@@ -39,6 +40,7 @@ bool PlaybackSessionBridge::startNative(qulonglong epoch, int sampleRate, int ch
   if (sampleRate <= 0 || channels <= 0 || maxSamples <= 0) return false;
   if (!native_) native_ = std::make_unique<beatglass::windows::WindowsPlaybackSession>();
   std::string error; const bool ok = device_id_ >= 0 ? native_->start_device(static_cast<UINT>(device_id_), static_cast<std::uint32_t>(sampleRate), static_cast<std::uint16_t>(channels), static_cast<std::size_t>(maxSamples), epoch, error) : native_->start(static_cast<std::uint32_t>(sampleRate), static_cast<std::uint16_t>(channels), static_cast<std::size_t>(maxSamples), epoch, error);
+  if (ok) native_running_ = true;
   if (ok) emit changed(); return ok;
 #else
   Q_UNUSED(epoch); Q_UNUSED(sampleRate); Q_UNUSED(channels); Q_UNUSED(maxSamples); return false;
