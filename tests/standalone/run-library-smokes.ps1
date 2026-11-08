@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$OutputDir = "", [string]$Compiler = "g++", [string[]]$SelectedCases = @(), [string]$OpenSSLRoot = "", [switch]$ListCases, [switch]$ContinueOnFailure)
+param([string]$OutputDir = "", [string]$Compiler = "g++", [string[]]$SelectedCases = @(), [string]$OpenSSLRoot = "", [switch]$ListCases, [switch]$ContinueOnFailure, [switch]$RunExisting)
 
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
@@ -42,23 +42,28 @@ if ($cases.Count -eq 0) { throw "No smoke cases selected" }
 $passed = [System.Collections.Generic.List[string]]::new()
 $failed = [System.Collections.Generic.List[string]]::new()
 $log = [System.Collections.Generic.List[string]]::new()
+$records = [System.Collections.Generic.List[object]]::new()
 Push-Location $repo
 try {
   foreach ($case in $cases) {
     $binary = Join-Path $OutputDir "$($case.Name).exe"
     try {
       $extra = if ($null -ne $case.Extra) { $case.Extra } else { @() }
-      $compilerArgs = @($common + $case.Sources + $extra + @("-o", $binary))
-      $log.Add("$Compiler $($compilerArgs -join ' ')")
       $started = [DateTime]::UtcNow
-      & $Compiler @compilerArgs
-      if ($LASTEXITCODE -ne 0) { throw "compile failed" }
+      if (-not $RunExisting) {
+        $compilerArgs = @($common + $case.Sources + $extra + @("-o", $binary))
+        $log.Add("$Compiler $($compilerArgs -join ' ')")
+        & $Compiler @compilerArgs
+        if ($LASTEXITCODE -ne 0) { throw "compile failed" }
+      } elseif (-not (Test-Path $binary)) { throw "missing existing binary: $binary" }
       & $binary
       if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
       $passed.Add($case.Name)
+      $records.Add([pscustomobject]@{ name=$case.Name; status="passed"; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)) })
       Write-Output ("PASS {0} ({1:n2}s)" -f $case.Name, ([DateTime]::UtcNow - $started).TotalSeconds)
     } catch {
       $failed.Add($case.Name)
+      $records.Add([pscustomobject]@{ name=$case.Name; status="failed"; seconds=([math]::Round(([DateTime]::UtcNow - $started).TotalSeconds, 2)); error=$_.Exception.Message })
       Write-Error "FAIL $($case.Name): $_"
       if (-not $ContinueOnFailure) { throw }
     }
@@ -67,5 +72,6 @@ try {
 $summary = "passed=$($passed.Count); failed=$($failed.Count); total=$($cases.Count)"
 $summary | Set-Content -Path (Join-Path $OutputDir "summary.txt")
 $log | Set-Content -Path (Join-Path $OutputDir "commands.log")
+$records | ConvertTo-Json -Depth 3 | Set-Content -Path (Join-Path $OutputDir "summary.json")
 if ($failed.Count -gt 0) { throw "Standalone library smokes failed: $($failed -join ', ')" }
 Write-Output "Standalone library smokes $summary"
