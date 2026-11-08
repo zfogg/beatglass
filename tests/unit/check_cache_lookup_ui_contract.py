@@ -16,6 +16,9 @@ required = [
     'objectName: "analysisQueueProgress"',
     'window.analysisJobBridge.frames',
     'storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)',
+    'objectName: "analysisLifecycleControls"',
+    'objectName: "cancelAdmittedAnalysis"',
+    'objectName: "retryAdmittedAnalysis"',
 ]
 missing = [marker for marker in required if marker not in qml]
 if missing:

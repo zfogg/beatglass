@@ -905,6 +905,13 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             RowLayout {
+                                objectName: "analysisLifecycleControls"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
+                                Label { text: visible ? storageRecovery.analysisStatus : ""; Accessible.name: "Analysis lifecycle status"; Layout.fillWidth: true }
+                                Button { objectName: "cancelAdmittedAnalysis"; text: "Cancel analysis"; visible: parent.visible && storageRecovery.cancelAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running"); onClicked: storageRecovery.cancelAnalysis(); Accessible.name: "Cancel admitted analysis" }
+                                Button { objectName: "retryAdmittedAnalysis"; text: "Retry analysis"; visible: parent.visible && storageRecovery.retryAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled"); onClicked: storageRecovery.retryAnalysis(); Accessible.name: "Retry admitted analysis" }
+                            }
+                            RowLayout {
                                 objectName: "analysisCacheLookupControls"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.findCached !== undefined
                                 Layout.fillWidth: true
