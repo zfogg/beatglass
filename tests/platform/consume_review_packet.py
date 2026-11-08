@@ -3,6 +3,7 @@ import argparse
 import json
 from pathlib import Path
 import importlib.util
+import re
 
 spec = importlib.util.spec_from_file_location("review", Path(__file__).with_name("review_readiness_handoff.py"))
 review = importlib.util.module_from_spec(spec); assert spec.loader
@@ -15,6 +16,8 @@ def consume(path: Path) -> list[str]:
     except (OSError, json.JSONDecodeError) as error:
         return [f"invalid review packet: {error}"]
     errors = review.validate_packet(packet)
+    if not isinstance(packet, dict) or not re.fullmatch(r"[0-9a-fA-F]{64}", packet.get("report_sha256", "")):
+        errors.append("review packet has invalid report hash anchor")
     if not errors and packet.get("acceptance_errors"):
         errors.append("review packet contains acceptance errors")
     if packet.get("gate_status") == "READY" and packet.get("native_qualification_required") is True:
