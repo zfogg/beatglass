@@ -500,7 +500,7 @@ ApplicationWindow {
                                 Accessible.name: "Library browser empty state: " + text
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
-                                Accessible.description: text
+                                Accessible.description: text + " Use Choose folder to recover from an empty or unreadable location."
                             }
                             Button {
                                 objectName: "chooseFolderEmpty"
@@ -610,7 +610,7 @@ ApplicationWindow {
                             objectName: "metadataErrorGuidance"
                             text: "Metadata could not be read. Retry this file or clear the selection and choose another source."
                             visible: window.metadataStatus.indexOf("Error:") === 0
-                            Accessible.name: "Metadata error recovery guidance"
+                            Accessible.name: "Metadata error recovery guidance: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
