@@ -16,6 +16,10 @@ try {
   @(@{ case = "show-hide-recovery"; status = "UNRUN" }, @{ case = "click-through-unlock"; status = "UNRUN" }, @{ case = "display-change-clamp"; status = "UNRUN" }, @{ case = "dpi-fullscreen"; status = "UNRUN" }) | ConvertTo-Json | Set-Content (Join-Path $root "native-overlay-evidence.json")
   & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root
   Write-Output "Windows qualification verifier regression passed"
+  $hashManifest = Join-Path $root "qualification-artifacts.sha256"
+  (Get-Content -LiteralPath $hashManifest) -replace "build/Release/beatglass-desktop.exe", "../escape.exe" | Set-Content -LiteralPath $hashManifest
+  try { & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root; throw "path-escaping artifact unexpectedly passed" } catch { if ($_.Exception.Message -notmatch "escapes|missing") { throw } }
+  Write-Output "Windows path-escape regression passed"
   Add-Content -LiteralPath (Join-Path $root "qualification-manifest.txt") -Value "commit=0123456789abcdef0123456789abcdef01234567"
   try { & (Join-Path $PSScriptRoot "verify_qualification_artifacts.ps1") $root; throw "duplicate manifest key unexpectedly passed" } catch { if ($_.Exception.Message -notmatch "duplicate") { throw } }
   Write-Output "Windows duplicate-manifest regression passed"
