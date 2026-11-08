@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Live overlay tempo and harmony estimates now expose contextual tooltips, while overlay hide and retry-capture actions explicitly declare button roles for assistive technology.
+
 Overlay unlock guidance and capture status now expose contextual recovery tooltips, while platform permission guidance includes explicit value, role, and description semantics.
 
 Native playback state, unavailable-playback recovery, and first-frame analysis waiting now expose contextual tooltips alongside their accessible status semantics.
