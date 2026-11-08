@@ -60,6 +60,12 @@ int main() {
               spaced_source.entries[0].title == "Take One" && spaced_source.entries[0].path.filename() == "Take One.mp3",
           "source identity with spaces was not preserved");
   std::filesystem::remove(dir.path / "Take One.mp3");
+  std::ofstream(dir.path / ".hidden.mp3") << "audio";
+  const auto hidden_source = beatglass::library::browse(dir.path, "HIDDEN");
+  require(hidden_source.entries.size() == 1 && hidden_source.entries[0].name == ".hidden.mp3" &&
+              hidden_source.entries[0].title == ".hidden" && hidden_source.entries[0].format == "MP3",
+          "hidden source identity was not preserved");
+  std::filesystem::remove(dir.path / ".hidden.mp3");
 
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
   require(filtered.entries.empty(), "filter returned an unexpected entry");
