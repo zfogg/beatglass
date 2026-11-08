@@ -58,6 +58,10 @@ int main() {
     assert(cache.publish("next-engine", next_engine, "engine-v2-data", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(next_engine, live_result) && live_result == "engine-v2-data");
     assert(cache.find(key, live_result) == false);
+    const CacheKey next_config{key.content, key.engine, "config-b", key.mode};
+    cache.begin("next-config", next_config);
+    assert(cache.publish("next-config", next_config, "config-b-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(next_config, live_result) && live_result == "config-b-data");
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
