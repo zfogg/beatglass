@@ -36,7 +36,13 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
     }
     const auto name = entry.path().filename().string();
     if (!query.empty() && folded(name).find(query) == std::string::npos) continue;
-    result.entries.push_back({entry.path(), name, directory});
+    std::uintmax_t bytes = 0;
+    if (!directory) {
+      std::error_code size_error;
+      bytes = entry.file_size(size_error);
+      if (size_error) bytes = 0;
+    }
+    result.entries.push_back({entry.path(), name, directory, bytes});
   }
   if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
