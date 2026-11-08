@@ -1248,6 +1248,15 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "storageTransitionStatus"
+                                visible: typeof storageRecovery !== "undefined" && (storageRecovery.status === "Opening storage" || storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
+                                text: visible ? ("Storage transition: " + storageRecovery.status + ". Persisted recovery controls were refreshed for this database state.") : ""
+                                Accessible.name: "Storage transition status"
+                                Accessible.description: visible ? text : "No storage transition is active."
+                                Accessible.role: Accessible.Status
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisRetryOutcome"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.retryableRunIds !== undefined && storageRecovery.retryableRunIds.length > 0
                                 text: visible ? ("Persisted retry outcome: " + storageRecovery.retryableRunIds.length + " retryable run(s)") : ""
