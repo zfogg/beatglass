@@ -281,7 +281,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                         ("native-blocker-consistency", native_blockers_consistent), ("aggregate-consistency", aggregate_consistent)):
         if not valid and name not in exit_gate_reason_codes:
             exit_gate_reason_codes.append(name)
-    return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
+    return {"readiness_report_schema": 1, "platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
             "native_qualification_summary": native_qualification_summary,
