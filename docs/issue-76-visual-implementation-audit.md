@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Clear-selection, playback-unavailable recovery, analysis-detail availability, and source-workflow status are now explicitly asserted in the static visual contract.
+
 Selected audio identity, source path, duration, metadata status, and metadata recovery guidance are now explicitly asserted in the static visual contract.
 
 Analysis detail availability, uncertainty, freshness, source workflow, and progress states are now explicitly asserted in the static visual contract.
