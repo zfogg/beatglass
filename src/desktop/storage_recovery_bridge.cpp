@@ -14,6 +14,7 @@ public slots:
     const bool ok = coordinator_.open_storage(config, &diagnostic);
     emit result(ok, QString::fromStdString(ok ? "Storage open" : diagnostic));
     if (ok) refresh();
+    else { emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); }
   }
   void close() {
     coordinator_.close_storage();
