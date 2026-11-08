@@ -885,7 +885,7 @@ ApplicationWindow {
                     Button {
                         id: waveformView
                         activeFocusOnTab: true
-                        text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"
+                        text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
                         Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."
                         ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
                         onClicked: visualizationCanvas.viewMode = "waveform"
@@ -901,7 +901,7 @@ ApplicationWindow {
                     Button {
                         id: spectrumView
                         activeFocusOnTab: true
-                        text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"
+                        text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
                         Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."
                         ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
                         onClicked: visualizationCanvas.viewMode = "spectrum"
@@ -1084,6 +1084,8 @@ ApplicationWindow {
                     ToolTip.text: "Clear the selected waveform or FFT position"
                     enabled: visualizationCanvas.selectedPosition >= 0
                     Accessible.name: "Clear visualization position"
+                    Accessible.value: enabled ? "available" : "no position selected"
+                    Accessible.role: Accessible.Button
                     Accessible.description: "Remove the selected waveform or FFT position"
                     onClicked: {
                         visualizationCanvas.selectedPosition = -1
