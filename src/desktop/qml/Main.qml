@@ -403,6 +403,14 @@ ApplicationWindow {
                             onClicked: window.metadataBridge.inspect(window.selectedAudioUrl)
                         }
                         Label {
+                            objectName: "metadataErrorGuidance"
+                            text: "Metadata could not be read. Retry this file or clear the selection and choose another source."
+                            visible: window.metadataStatus.indexOf("Error:") === 0
+                            Accessible.name: "Metadata error recovery guidance"
+                            Accessible.description: text
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        Label {
                             objectName: "detailsAvailability"
                             text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap

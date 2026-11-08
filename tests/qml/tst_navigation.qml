@@ -285,6 +285,9 @@ TestCase {
         app.metadataStatus = "Error: unreadable audio"
         let retry = findChild(app, "retryMetadata")
         verify(retry.visible)
+        let guidance = findChild(app, "metadataErrorGuidance")
+        verify(guidance.visible)
+        compare(guidance.Accessible.name, "Metadata error recovery guidance")
         compare(retry.Accessible.description, "Retry reading metadata for the selected audio source after an error.")
         retry.clicked()
         compare(fakeMetadata.lastFile, app.selectedAudioUrl)
