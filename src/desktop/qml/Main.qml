@@ -59,6 +59,14 @@ ApplicationWindow {
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
             ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
     }
+    function browserEmptyMessage() {
+        if (!window.browseFolder.toString()) return "Choose a folder to browse."
+        if (files.status === FolderListModel.Error)
+            return "This folder could not be read. Choose another folder or check its permissions."
+        if (files.status === FolderListModel.Loading)
+            return "Loading folder contents…"
+        return "No matching audio files or folders. Try a different search or choose another folder."
+    }
     function showOverlayAndHideControls() {
         if (!window.overlayBridge || !window.overlayBridge.available) return false
         if (!window.overlayBridge.showOverlay()) return false
@@ -323,7 +331,8 @@ ApplicationWindow {
                             visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)
                             spacing: 8
                             Label {
-                                text: window.browseFolder.toString() ? "No matching audio files or folders, or this folder cannot be read." : "Choose a folder to browse."
+                                objectName: "browserEmptyMessage"
+                                text: window.browserEmptyMessage()
                                 Accessible.name: "Library browser empty state"
                                 Accessible.description: text
                             }

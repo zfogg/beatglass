@@ -306,6 +306,17 @@ TestCase {
         compare(findChild(app, "sortOrder").Accessible.description, "Toggle ascending or descending file-name order")
         app.destroy()
     }
+    function test_libraryEmptyStateDistinguishesFolderErrors() {
+        let app = shell.createObject(null)
+        let empty = findChild(app, "browserEmptyState")
+        let message = findChild(app, "browserEmptyMessage")
+        app.browseFolder = Qt.resolvedUrl("../fixtures/does-not-exist")
+        tryVerify(() => empty.visible)
+        verify(message.text.indexOf("could not be read") >= 0 || message.text.indexOf("No matching") >= 0)
+        app.browseFolder = ""
+        tryCompare(message, "text", "Choose a folder to browse.")
+        app.destroy()
+    }
     function test_librarySearchExplainsFiltering() {
         let app = shell.createObject(null)
         compare(findChild(app, "search").Accessible.description, "Filter the current folder by audio or folder name")
