@@ -67,12 +67,19 @@ struct TonalTracker::Impl {
     std::vector<Real> average(chroma.size());
     for (const auto& h : history) for (std::size_t i = 0; i < h.size(); ++i) average[i] += h[i] / history.size();
     std::string key_name, chord_name; Real ks{}, cs{};
-    classify(*key, average, key_name, ks); classify(*chord, chroma, chord_name, cs);
-    // Essentia's strengths are uncalibrated evidence, not probabilities.  A
+    // Key and chord are independent evidence streams. A malformed or
+    // unsupported chord result must not erase a valid track-level key (and
+    // vice versa); each label is published only when its own score is usable.
+    try { classify(*key, average, key_name, ks); } catch (...) { key_name.clear(); ks = 0; }
+    try { classify(*chord, chroma, chord_name, cs); } catch (...) { chord_name.clear(); cs = 0; }
+    // Essentia's strengths are uncalibrated evidence, not probabilities. A
     // non-positive or non-finite score is no evidence at all; fail closed so
     // the UI cannot present a confident-looking label for an ambiguous frame.
-    if (!key_name.empty() && !chord_name.empty() && std::isfinite(ks) && std::isfinite(cs) && ks > 0 && cs > 0) {
-      result.key = key_name; result.chord = chord_name; result.key_strength = ks; result.chord_strength = cs;
+    if (!key_name.empty() && std::isfinite(ks) && ks > 0) {
+      result.key = key_name; result.key_strength = ks;
+    }
+    if (!chord_name.empty() && std::isfinite(cs) && cs > 0) {
+      result.chord = chord_name; result.chord_strength = cs;
     }
   }
 };
