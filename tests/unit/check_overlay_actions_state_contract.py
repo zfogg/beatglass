@@ -7,7 +7,7 @@ required = [
     'objectName: "overlayActions"',
     'window.overlayDisplayRecoveryPending ?', 
     '"unavailable; control-window fallback active"',
-    'recovery is pending and the control-window fallback remains available.',
+    '"recovery is pending and the control-window fallback remains available."',
     '"Overlay actions are available; recovery is pending"',
     '"Overlay window actions are unavailable; control-window fallback is active"',
 ]
