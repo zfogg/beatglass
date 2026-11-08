@@ -36,7 +36,7 @@ Storage configuration is caller-owned. The desktop owner must choose and
 validate a database file path before constructing worker-owned SQLite storage;
 this interface does not select platform defaults or perform migration.
 
-.. cpp:autodoc:: include/beatglass/library/storage_config.hpp include/beatglass/library/storage_owner.hpp
+.. cpp:autodoc:: include/beatglass/library/storage_config.hpp include/beatglass/library/storage_owner.hpp include/beatglass/library/catalog.hpp include/beatglass/library/details.hpp
 
 .. cpp:function:: std::optional<std::int64_t> beatglass::coreaudio::SourceBackend::host_time_ns(std::uint64_t ticks) const noexcept
 
