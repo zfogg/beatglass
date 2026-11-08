@@ -21,17 +21,49 @@ div.body .highlight {
   overflow-x: auto;
 }
 
-/* A dark, high-contrast reading surface with cyan/violet/coral wayfinding. */
+/* A dark reading surface with a soft pastel palette and green wayfinding. */
 :root {
-  --bg: #0b1020;
-  --surface: #121a30;
-  --surface-raised: #192440;
-  --text: #e8eef8;
-  --muted: #b7c4d9;
-  --cyan: #67e8f9;
-  --violet: #c4b5fd;
-  --coral: #fda4af;
-  --border: #34456d;
+  --bg: #10151f;
+  --surface: #18202d;
+  --surface-raised: #222d3d;
+  --text: #f4f0eb;
+  --muted: #c5c7d1;
+  --mint: #a7e8c3;
+  --lavender: #d8c7f4;
+  --peach: #f5c4b3;
+  --border: #435064;
+  --scroll-track: #151d29;
+  --scroll-thumb: #7cc99a;
+  --scroll-thumb-hover: #a7e8c3;
+}
+
+html {
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  scrollbar-width: thin;
+}
+
+* {
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border: 3px solid var(--scroll-track);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
 }
 
 body {
@@ -58,25 +90,25 @@ div.body h6 {
 }
 
 div.body h1 {
-  border-bottom: 2px solid var(--violet);
+  border-bottom: 2px solid var(--lavender);
   padding-bottom: 0.25em;
 }
 
 a,
 a.reference,
 a:visited {
-  color: var(--cyan);
+  color: var(--mint);
 }
 
 a:hover,
 a:focus {
-  color: var(--coral);
+  color: var(--peach);
 }
 
 code,
 tt {
   background: var(--surface-raised);
-  color: var(--violet);
+  color: var(--lavender);
 }
 
 pre,
@@ -100,7 +132,7 @@ div.sphinxsidebar a {
 }
 
 div.sphinxsidebar h3 {
-  color: var(--violet);
+  color: var(--lavender);
 }
 
 div.sphinxsidebar input {
@@ -114,11 +146,11 @@ div.footer {
 }
 
 div.footer a {
-  color: var(--cyan);
+  color: var(--mint);
 }
 
 ::selection {
-  background: #164e63;
+  background: #315d4b;
   color: var(--text);
 }
 
