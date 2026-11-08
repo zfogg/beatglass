@@ -8,6 +8,7 @@
 #include "capture_monitor_bridge.hpp"
 #ifdef Q_OS_WINDOWS
 #include "platform/windows_endpoint_bridge.hpp"
+#include "platform/windows_overlay.hpp"
 #endif
 #ifdef BEATGLASS_BUILD_DESKTOP_ANALYSIS
 #include "analysis_job_bridge.hpp"
@@ -16,6 +17,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickWindow>
+#include <QSettings>
+#include <memory>
 #ifdef Q_OS_MACOS
 #include "platform/macos_overlay.hpp"
 #include <QSettings>
@@ -53,5 +57,16 @@ int main(int argc, char** argv) {
   engine.rootContext()->setContextProperty("macOverlayController", &macOverlayController);
 #endif
   engine.load(QUrl("qrc:/Main.qml")); if (engine.rootObjects().isEmpty()) return 1;
+#ifdef Q_OS_WINDOWS
+  // The QML overlay is created by the engine, so wire the native controller
+  // after loading while keeping ownership in this GUI-thread scope.
+  auto* root = engine.rootObjects().constFirst();
+  auto* control = qobject_cast<QQuickWindow*>(root);
+  auto* overlay = root->findChild<QQuickWindow*>(QStringLiteral("djOverlay"));
+  std::unique_ptr<QSettings> overlaySettings = std::make_unique<QSettings>(QSettings::NativeFormat,
+      QSettings::UserScope, QStringLiteral("Beatglass"), QStringLiteral("Beatglass"));
+  beatglass::windows::OverlayController windowsOverlay(overlay, control, nullptr, overlaySettings.get());
+  root->setProperty("overlayBridge", QVariant::fromValue(static_cast<QObject*>(&windowsOverlay)));
+#endif
   return app.exec();
 }
