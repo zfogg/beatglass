@@ -77,6 +77,9 @@ TEST_CASE("SQLite binding lengths are checked before narrowing") {
   REQUIRE(sqlite_length_representable(maximum));
   REQUIRE_FALSE(sqlite_length_representable(maximum + 1));
 }
+TEST_CASE("SQLite cache exposes its on-disk schema version") {
+  REQUIRE(kCacheSchemaVersion == 1);
+}
 TEST_CASE("SQLite cache holds exclusive ownership during recovery and use") {
   auto path = std::filesystem::temp_directory_path() /
     ("beatglass-exclusive-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");

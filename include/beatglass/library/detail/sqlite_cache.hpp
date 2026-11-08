@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 namespace beatglass::library_detail {
+/** On-disk schema version for the provisional analysis cache. */
+inline constexpr int kCacheSchemaVersion = 1;
 /** Metadata for one indexed local-library item; the source file is never owned or modified. */
 struct CollectionEntry {
   std::string path, name, kind, fingerprint;
