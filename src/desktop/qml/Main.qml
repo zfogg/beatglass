@@ -1101,6 +1101,16 @@ ApplicationWindow {
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            Button {
+                                objectName: "reopenStorage"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.open !== undefined
+                                enabled: visible && (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
+                                text: "Reopen storage"
+                                Accessible.name: "Reopen analysis storage"
+                                Accessible.description: "Retry opening the configured storage database and refresh persisted recovery runs."
+                                ToolTip.text: Accessible.description
+                                onClicked: { storageRecovery.open(); window.announceVisualizationRecovery("Storage reopen requested; persisted recovery will refresh when the database is available."); forceActiveFocus() }
+                            }
                             Label {
                                 objectName: "persistedRecoveryResetStatus"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== ""
