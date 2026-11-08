@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Visualization selection and accepted revision status surfaces are now explicitly asserted in the static visual contract.
+
 Visualization canvas, data, generation, capture, and load-status surfaces are now explicitly asserted in the static visual contract.
 
 Waveform mode controls, visualization mode status, selection status, and selection clearing are now explicitly asserted in the static visual contract.
