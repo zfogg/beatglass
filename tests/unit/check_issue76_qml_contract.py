@@ -392,6 +392,7 @@ def main() -> int:
         "appearance group dynamic tooltip": "ToolTip.text: \"Configure theme and motion preferences; current: \" + window.selectedTheme",
         "theme preview group dynamic description": "Accessible.description: \"Choose a color theme preview; the selected swatch is marked as selected. Current theme: \" + window.selectedTheme",
         "appearance group dynamic description": "Accessible.description: \"Choose the color theme and motion preference for the desktop. Current settings: \" + window.selectedTheme",
+        "theme preview keyboard navigation": "Keys.onLeftPressed: {\n                            const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }

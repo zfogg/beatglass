@@ -409,6 +409,22 @@ ApplicationWindow {
                                 visible: themePreviewButton.activeFocus
                             }
                         }
+                        Keys.onLeftPressed: {
+                            const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length
+                            window.selectedThemeIndex = nextIndex
+                            window.selectedTheme = window.themeNames[nextIndex]
+                            themeSelector.currentIndex = nextIndex
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
+                            event.accepted = true
+                        }
+                        Keys.onRightPressed: {
+                            const nextIndex = (index + 1) % window.themeNames.length
+                            window.selectedThemeIndex = nextIndex
+                            window.selectedTheme = window.themeNames[nextIndex]
+                            themeSelector.currentIndex = nextIndex
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
+                            event.accepted = true
+                        }
                         onClicked: {
                             window.selectedThemeIndex = index
                             window.selectedTheme = window.themeNames[index]
