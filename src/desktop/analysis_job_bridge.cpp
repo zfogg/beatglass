@@ -1,6 +1,13 @@
 #include "analysis_job_bridge.hpp"
 
 namespace {
+constexpr std::size_t kMaxDisplayedResultBytes = 4096;
+std::string displayedResult(std::string value) {
+  if (value.size() <= kMaxDisplayedResultBytes) return value;
+  value.resize(kMaxDisplayedResultBytes);
+  value += "…[truncated]";
+  return value;
+}
 QString stateText(beatglass::library_detail::TrackedState state) {
   using beatglass::library_detail::TrackedState;
   switch (state) {
@@ -36,7 +43,8 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   op.publish = [weak_self = weak_self_, publish](const std::string& value) {
     if (publish) publish(value);
     if (!weak_self) return;
-    const auto result = QString::fromUtf8(value.data(), static_cast<int>(value.size()));
+    const auto displayed = displayedResult(value);
+    const auto result = QString::fromUtf8(displayed.data(), static_cast<int>(displayed.size()));
     QMetaObject::invokeMethod(weak_self, [weak_self, result] {
       if (!weak_self) return;
       weak_self->result_ = result;
@@ -95,7 +103,8 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
     operation.publish = [weak_self = weak_self_, publish](const std::string& value) {
       if (publish) publish(value);
       if (!weak_self) return;
-      const auto result = QString::fromUtf8(value.data(), static_cast<int>(value.size()));
+      const auto displayed = displayedResult(value);
+      const auto result = QString::fromUtf8(displayed.data(), static_cast<int>(displayed.size()));
       QMetaObject::invokeMethod(weak_self, [weak_self, result] {
         if (!weak_self) return;
         ++weak_self->batchResultsPublished_;

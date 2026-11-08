@@ -26,6 +26,7 @@ required = {
     "fresh batch clears single result": 'if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }',
     "batch latest result": 'Q_PROPERTY(QString batchLastResult READ batchLastResult',
     "batch result rendering": 'objectName: "analysisBatchLastResult"',
+    "bounded displayed result": 'kMaxDisplayedResultBytes = 4096',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:
