@@ -4,6 +4,15 @@ This checklist records native macOS audio and overlay evidence. Do not mark a ca
 
 The repeatable build and evidence setup is `tests/macos/run_qualification.sh`. Run it from a logged-in Mac with an output directory argument; it records the build identity, verifies the production bundle contains `NSAudioCaptureUsageDescription`, runs native test output, then prints the manual cases that still require permission, playback and desktop interaction.
 
+For an actual output-capture run, pass the exact UID printed by the smoke bundle's discovery mode:
+
+```sh
+BEATGLASS_MACOS_TAP_UID='CoreAudio-output-UID' \
+  tests/macos/run_qualification.sh build/macos-qualification
+```
+
+The runner invokes both the tap and recovery smoke bundles when this variable is set; when it is absent, the log records capture as `UNRUN`.
+
 ## Build identity
 
 Record the commit, macOS version, hardware model, Xcode and SDK versions, Qt version, signing state, selected output UID and display arrangement. Record whether the run used the production desktop bundle or a smoke bundle, plus the exact configure, build and CTest commands.
