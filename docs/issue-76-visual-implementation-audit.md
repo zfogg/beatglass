@@ -658,6 +658,8 @@ Click-through unlock now shares one recovery function across the Escape shortcut
 
 Overlay geometry and action groups now expose recovery-pending state through accessible names, values, descriptions, and tooltips. Missing-display, failed-reapply, explicit hide/show, and window-close paths keep the control-window fallback visible and actionable; local contract checks cover these transitions, while native monitor/compositor timing remains a qualification requirement.
 
+Failed overlay show and visual-restore transitions now share a production fallback helper that shows, raises, and activates the control window, with an explicit tray/taskbar fallback announcement. The native overlay remains hidden until restoration succeeds, so users always have a discoverable recovery surface.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
