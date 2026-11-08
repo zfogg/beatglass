@@ -64,3 +64,14 @@ TEST_CASE("stale identity invalidation removes only the active cached result") {
  CHECK(invalidate_if_stale(cache, identity.key, f.path) == FingerprintStatus::changed);
  CHECK_FALSE(cache.find(identity.key, result));
 }
+
+TEST_CASE("file publication revalidates before and at the commit boundary") {
+ Fixture f; SqliteCache cache(":memory:");
+ const auto identity = cache_identity_from_file(f.path, "e", "c", "offline");
+ REQUIRE(identity.status == FingerprintStatus::ok);
+ CHECK(publish_file_result(cache, "run", identity.key, f.path, "result") == Publish::committed);
+ std::string result; REQUIRE(cache.find(identity.key, result)); CHECK(result == "result");
+ { std::ofstream out(f.path, std::ios::binary | std::ios::trunc); out << "changed"; }
+ CHECK(publish_file_result(cache, "retry", identity.key, f.path, "stale") == Publish::stale_input);
+ CHECK(cache.find(identity.key, result)); CHECK(result == "result");
+}

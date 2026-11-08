@@ -45,4 +45,16 @@ FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
   if (status == FingerprintStatus::changed) cache.invalidate(key);
   return status;
 }
+
+Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
+                            const CacheKey& key, const std::filesystem::path& path,
+                            const std::string& result, std::stop_token stop) {
+  const auto initial = revalidate_file_identity(path, key.content, stop);
+  if (initial == FingerprintStatus::cancelled) return Publish::cancelled;
+  if (initial != FingerprintStatus::ok) return Publish::stale_input;
+  cache.begin(run_id, key);
+  return cache.publish(run_id, key, result, stop, [&] {
+    return revalidate_file_identity(path, key.content, stop) == FingerprintStatus::ok;
+  });
+}
 }
