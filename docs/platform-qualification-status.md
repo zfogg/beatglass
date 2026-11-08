@@ -207,4 +207,6 @@ The same ingestion is available in the end-to-end handoff via `--native-output <
 
 The handoff report records those failures in `ingestion_errors` as well as returning a nonzero result, making missing or tampered native artifacts auditable after the command exits.
 
+`ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
+
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.
