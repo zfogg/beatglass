@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
+
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
 
 After fresh source and display selection, a successful recovery clears the persisted retry rejection and stale identity message before presenting the new accepted state. If recovery fails, the rejection remains visible and actionable; the cleanup boundary is covered portably, while native recovery timing remains open.
