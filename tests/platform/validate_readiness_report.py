@@ -82,7 +82,11 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         if not manifest.is_file():
             errors.append(f"{platform}: retained manifest is missing")
             continue
-        manifest_data = json.loads(manifest.read_text(encoding="utf-8"))
+        try:
+            manifest_data = json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            errors.append(f"{platform}: retained manifest is invalid JSON: {error}")
+            continue
         for field in ("platform", "commit", "captured_at", "environment"):
             if not isinstance(manifest_data.get(field), str) or not manifest_data[field].strip():
                 errors.append(f"{platform}: manifest provenance field missing: {field}")
