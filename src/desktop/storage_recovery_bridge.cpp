@@ -18,8 +18,9 @@ public slots:
   void refresh() {
     const auto runs = coordinator_.storage().retryable_runs();
     QStringList ids;
-    for (const auto& run : runs) ids.push_back(QString::fromStdString(run.id));
-    emit runsChanged(ids);
+    QStringList details;
+    for (const auto& run : runs) { ids.push_back(QString::fromStdString(run.id)); details.push_back(QString::fromStdString(run.id + " | " + run.key.content + " | " + run.key.engine + " | " + run.key.config + " | " + run.key.mode)); }
+    emit runsChanged(ids, details);
   }
   void discard(QString id) { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
   void findCached(QString content, QString engine, QString configuration, QString mode) {
@@ -44,7 +45,7 @@ public slots:
   }
 signals:
   void result(bool ok, QString status);
-  void runsChanged(QStringList ids);
+  void runsChanged(QStringList ids, QStringList details);
   void cached(bool hit, QString result);
   void analysis(QString status);
   void analysisResult(QString result);
@@ -69,8 +70,8 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
     emit statusChanged();
   }, Qt::QueuedConnection);
-  connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids) {
-    retryableRunIds_ = ids; emit retryableRunsChanged();
+  connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids, const QStringList& details) {
+    retryableRunIds_ = ids; retryableRunDetails_ = details; emit retryableRunsChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
