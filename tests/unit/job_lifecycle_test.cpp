@@ -23,11 +23,14 @@ TEST_CASE("cancelled and failed jobs can be retried from zero progress") {
   REQUIRE(cancelled.retry());
   CHECK(cancelled.snapshot().status == JobStatus::queued);
   CHECK(cancelled.snapshot().frames_processed == 0);
+  REQUIRE(cancelled.snapshot().total_frames.has_value());
+  CHECK(*cancelled.snapshot().total_frames == 100);
   REQUIRE(cancelled.start()); REQUIRE(cancelled.progress(100)); REQUIRE(cancelled.complete());
 
   JobLifecycle failed;
   REQUIRE(failed.fail()); REQUIRE(failed.retry());
   CHECK(failed.snapshot().status == JobStatus::queued);
+  CHECK_FALSE(failed.snapshot().total_frames.has_value());
   CHECK_FALSE(failed.retry());
 }
 
