@@ -134,6 +134,14 @@ TestCase {
         compare(estimates.Accessible.name, "DJ estimates")
         app.destroy()
     }
+
+    function test_overlayControlsDescribeKeyboardActions() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "showOverlay").Accessible.description, "Show the DJ overlay window")
+        compare(findChild(app, "unlockOverlay").Accessible.description, "Restore keyboard and pointer access to the overlay")
+        compare(findChild(app, "hideOverlay").Accessible.description, "Hide the DJ overlay window")
+        app.destroy()
+    }
     function test_themePreviewsSelectTheirPalette() {
         let app = shell.createObject(null)
         let previews = findChild(app, "themePreviews")
