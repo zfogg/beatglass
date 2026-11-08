@@ -391,3 +391,4 @@ The Library also surfaces persisted retryable-run count alongside active analysi
 The recovery bridge now displays each persisted retryable run's run ID, content identity, engine, configuration, and mode. Retry resubmission is metadata-gated: the bridge reconstructs a file decoder operation and calls the coordinator resubmission boundary only when an explicit source path and matching identity are supplied; missing metadata is rejected. This is a portable handoff contract, not native qualification.
 
 Recovery guidance now distinguishes unavailable storage from waiting retryable work and a clear recovery state; completed result identity remains a separate field.
+A cancellation retry regression now verifies that a cancelled publication leaves no active cache result, preserves the persisted source/decoder snapshot, and can be admitted and committed again with retryable state cleared. This remains provisional until native desktop qualification.
