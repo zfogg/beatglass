@@ -30,7 +30,8 @@ def validate(report: dict) -> list[str]:
         errors.append("native_qualification_required must be true")
     if report.get("exit_gate_status") not in {"PENDING", "READY"}:
         errors.append("exit_gate_status must be PENDING or READY")
-    if not isinstance(report.get("exit_gate_reason_codes"), list):
+    reason_codes = report.get("exit_gate_reason_codes")
+    if not isinstance(reason_codes, list) or any(not isinstance(code, str) or not code.strip() for code in reason_codes):
         errors.append("exit_gate_reason_codes must be a list")
     statuses = report.get("platform_support_status")
     if not isinstance(statuses, list) or len(statuses) != len(EXPECTED_PLATFORMS) or any(not isinstance(item, dict) for item in statuses) or {item.get("platform") for item in statuses} != EXPECTED_PLATFORMS:
