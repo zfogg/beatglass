@@ -275,9 +275,25 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent
-                        Label { text: window.selectedName || "No file selected"; font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                        Label { objectName: "metadataStatus"; text: window.metadataStatus; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                        Label { text: "Analysis details and playback are not available yet."; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                        Label {
+                            objectName: "selectedAudioName"
+                            text: window.selectedName || "No file selected"
+                            font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true
+                            Accessible.name: "Selected audio file"
+                            Accessible.description: text
+                        }
+                        Label {
+                            objectName: "metadataStatus"; text: window.metadataStatus
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                            Accessible.name: "Audio metadata status"
+                            Accessible.description: text
+                        }
+                        Label {
+                            text: "Analysis details and playback are not available yet."
+                            Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            Accessible.name: "Analysis and playback status"
+                            Accessible.description: text
+                        }
                     }
                 }
             }
