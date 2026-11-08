@@ -80,6 +80,7 @@ The standalone decision consumer is `tests/platform/review_release_decision.py <
 Release automation may promote only an accepted bundle with `tests/platform/promote_review_bundle.py <bundle-root> <release-root>`. The command refuses `PENDING` decisions, leaves the release destination untouched, writes `release-manifest.json` with the promoted report and packet SHA-256 values, and verifies that manifest before reporting success.
 Downstream release jobs should verify that artifact with `tests/platform/verify_release_manifest.py <release-root>` before publishing; any changed or missing file fails closed.
 The one-command workflow `tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root>` runs retention, decision, promotion, and manifest verification in order; pending native evidence stops before release output.
+After an accepted decision, record manual release ownership with `tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`; pending decisions cannot receive a signoff.
 
 ## Qt 6.8.3 prebuilt desktop preset
 
