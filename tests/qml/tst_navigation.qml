@@ -464,6 +464,10 @@ TestCase {
         verify(shortcut !== null)
         compare(shortcut.sequence, "Escape")
         compare(shortcut.context, Qt.ApplicationShortcut)
+        let hint = findChild(app, "overlayEscapeHint")
+        verify(hint !== null)
+        compare(hint.Accessible.name, "Overlay recovery hint")
+        compare(hint.text, "Press Escape to unlock overlay controls")
         app.destroy()
     }
     function test_themePreviewsSelectTheirPalette() {
