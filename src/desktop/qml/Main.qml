@@ -1286,6 +1286,8 @@ ApplicationWindow {
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current waveform/FFT presentation load state"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
                 }
                 Label {
@@ -1299,6 +1301,8 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
                 }
                 Label {
