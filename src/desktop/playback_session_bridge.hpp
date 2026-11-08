@@ -27,7 +27,7 @@ public:
   QUrl source() const { return source_; }
   QStringList devices() const { return devices_; }
   int deviceId() const noexcept { return device_id_; }
-  void setDeviceId(int id) noexcept { if (device_id_ != id) { device_id_ = id; emit changed(); } }
+  void setDeviceId(int id) noexcept;
   Q_INVOKABLE void refreshDevices();
   /** Start native playback with decoded source format and selected device. */
   Q_INVOKABLE bool startNative(qulonglong epoch, int sampleRate, int channels, int maxSamples);
