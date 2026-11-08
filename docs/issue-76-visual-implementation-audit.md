@@ -382,6 +382,8 @@ Shift+Left and Shift+Right now provide five-percent position steps between fine 
 
 Pointer interaction now restores canvas focus after clicking, and the canvas supports wheel scrubbing in one-percent increments with bounded selection. The tooltip and contract checks document both pointer recovery and scroll interaction.
 
+Holding Shift while scrolling now increases wheel scrubbing to five-percent steps, matching the keyboard’s medium-step interaction and giving pointer users the same fine/coarse control range.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
