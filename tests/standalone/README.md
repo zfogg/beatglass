@@ -31,6 +31,7 @@ tests/standalone/run-library-smokes.ps1 -SelectedCases executor_handle_concurren
 tests/standalone/run-library-smokes.ps1 -SelectedCases sqlite_cache_acceptance
 tests/standalone/run-library-smokes.ps1 -SQLiteRoot C:/path/to/sqlite -SelectedCases sqlite_cache_acceptance
 tests/standalone/run-library-smokes.ps1 -SQLiteRoot C:/path/to/sqlite -SelectedCases storage_owner_acceptance
+tests/standalone/run-library-smokes.ps1 -SndfileRoot C:/path/to/libsndfile -SelectedCases file_reader_contract
 tests/standalone/run-library-smokes.ps1 -OpenSSLRoot C:/path/to/openssl
 tests/standalone/run-library-smokes.ps1 -SelectedCases storage_config -RunExisting -OutputDir C:/temp/beatglass-smokes
 ```
