@@ -29,6 +29,11 @@ void validate_key(const CacheKey& key) {
       key.config.find('\0') != std::string::npos || key.mode.find('\0') != std::string::npos)
     throw std::invalid_argument("invalid cache identity");
 }
+void validate_snapshot_text(const std::string& value, const char* field, std::size_t maximum) {
+  if (value.size() > maximum || value.find('\0') != std::string::npos ||
+      !sqlite_length_representable(value.size()))
+    throw std::invalid_argument(std::string("invalid retry snapshot ") + field);
+}
 }
 struct SqliteCache::Impl {
 public:
@@ -67,6 +72,8 @@ public:
   // All calls, including destruction, belong to one database worker.
   void begin(const std::string& id, const CacheKey& key, const std::string& source_path, const std::string& decoder_snapshot) {
     validate_key(key);
+    validate_snapshot_text(source_path, "source path", kMaxCollectionPathBytes);
+    validate_snapshot_text(decoder_snapshot, "decoder snapshot", kMaxCacheConfigurationBytes);
     if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos) throw std::invalid_argument("invalid run ID");
     Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status,source_path,decoder_snapshot) VALUES(?,?,?,?,?,'running',?,?) ON CONFLICT(id) DO UPDATE SET status='running',source_path=excluded.source_path,decoder_snapshot=excluded.decoder_snapshot WHERE runs.status='retryable' AND runs.content=excluded.content AND runs.engine=excluded.engine AND runs.config=excluded.config AND runs.mode=excluded.mode");
     bind(s.p, 1, id); bind_key(s.p, 2, key); bind(s.p, 6, source_path); bind(s.p, 7, decoder_snapshot); done(s.p);

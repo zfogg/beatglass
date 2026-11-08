@@ -16,7 +16,7 @@ public:
   StorageOwner() = default;
   StorageOwner(const StorageOwner&) = delete;
   StorageOwner& operator=(const StorageOwner&) = delete;
-  /** Validate configuration and open storage; failure leaves the owner closed. */
+  /** Validate configuration and open storage; clears a supplied diagnostic on entry and success, and failure leaves the owner closed. */
   bool open(const StorageConfig& config, std::string* diagnostic = nullptr);
   /** Close storage on the owning worker. */
   void close() noexcept;
