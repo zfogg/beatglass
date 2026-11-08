@@ -380,6 +380,8 @@ Ctrl+Up and Ctrl+Down now switch directly between waveform and FFT modes from th
 
 Shift+Left and Shift+Right now provide five-percent position steps between fine arrows and Page Up/Page Down coarse movement. The canvas announcement and tooltip expose the full scrubbing scale.
 
+Pointer interaction now restores canvas focus after clicking, and the canvas supports wheel scrubbing in one-percent increments with bounded selection. The tooltip and contract checks document both pointer recovery and scroll interaction.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
