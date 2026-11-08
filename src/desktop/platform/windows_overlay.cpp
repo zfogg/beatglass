@@ -115,6 +115,7 @@ bool OverlayController::resizeOverlay(int width, int height) {
 }
 bool OverlayController::setClickThrough(bool enabled) {
   if (enabled) {
+    if (!overlay_ || !overlay_->isVisible()) return false;
     const auto control_state = !control_ ? OverlayControlState::unavailable :
         control_->isVisible() ? (control_->windowState() == Qt::WindowMinimized ? OverlayControlState::minimized : OverlayControlState::visible) : OverlayControlState::hidden;
     if (!canEnableClickThrough(static_cast<bool>(overlay_), overlay_ && control_ && overlay_.data() == control_.data(), control_state)) return false;
