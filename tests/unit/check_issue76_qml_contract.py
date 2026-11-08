@@ -428,6 +428,7 @@ def main() -> int:
         "visualization recovery accent": "color: window.themeAccentColors[window.selectedThemeIndex]",
         "visualization recovery responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization retry responsive width": "Layout.minimumWidth: window.compactHeader ? 112 : 136",
+        "visualization recovery shrinks": "Layout.minimumWidth: 0",
         "visualization retry theme": 'objectName: "visualizationRetryCapture"',
         "visualization retry background": "background: Rectangle { color: window.themeAccentColors[window.selectedThemeIndex]",
         "visualization clear themed content": 'objectName: "visualizationClearSelection"',
