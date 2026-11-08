@@ -218,6 +218,11 @@ TestCase {
         compare(findChild(app, "search").Accessible.description, "Filter the current folder by audio or folder name")
         app.destroy()
     }
+    function test_libraryFolderPathExplainsContext() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "folderPath").Accessible.description, "Folder currently used for Library browsing")
+        app.destroy()
+    }
     function test_analysisControlsAreAccessible() {
         let app = shell.createObject(null)
         compare(findChild(app, "analysisProgress").Accessible.name, "Analysis progress")
