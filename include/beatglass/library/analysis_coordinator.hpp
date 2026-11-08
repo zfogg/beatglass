@@ -2,6 +2,7 @@
 #include "beatglass/library/analysis_runner.hpp"
 #include "beatglass/library/storage_owner.hpp"
 #include "beatglass/library/analysis_admission.hpp"
+#include <algorithm>
 namespace beatglass::library {
 /** Explain why persisted retry reconstruction was rejected before work starts. */
 enum class RetryRejectionReason { none, missing_source_snapshot, incompatible_decoder_snapshot, stale_source_identity };
@@ -35,6 +36,15 @@ class AnalysisCoordinator final { public:
   /** Re-submit a persisted retryable run with a freshly reconstructed source operation. */
   std::shared_ptr<RetryableAnalysis> resubmit_retryable(std::string run_id, AnalysisOperation operation, int priority = 0) {
     return submit(std::move(run_id), std::move(operation), priority);
+  }
+  /** Classify persisted retry compatibility before reconstructing decoder work. */
+  RetryRejectionReason retry_rejection_reason(const std::string& run_id, const AnalysisOperation& operation) const {
+    const auto runs = storage_.retryable_runs();
+    const auto found = std::find_if(runs.begin(), runs.end(), [&](const auto& run) { return run.id == run_id; });
+    if (found == runs.end() || found->source_path.empty()) return RetryRejectionReason::missing_source_snapshot;
+    if (found->key.content != operation.identity.content_hash || found->key.engine != operation.identity.engine_version || found->key.config != operation.identity.configuration_id || found->key.mode != operation.identity.mode) return RetryRejectionReason::stale_source_identity;
+    if (found->decoder_snapshot != operation.decoder_snapshot) return RetryRejectionReason::incompatible_decoder_snapshot;
+    return RetryRejectionReason::none;
   }
   Submission submit_admitted(std::string run_id, AnalysisOperation operation, int priority = 0);
   /** Return cache-hit or reserved-run state through the coordinator-owned model boundary. */

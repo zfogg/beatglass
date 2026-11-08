@@ -269,6 +269,18 @@ TEST_CASE("coordinator rejects persisted retry from a stale source epoch") {
   REQUIRE(coordinator.storage().retryable_runs().size() == 1);
   CHECK(coordinator.storage().retryable_runs().front().key.content == "epoch-1");
 }
+TEST_CASE("coordinator explains stale source identity before retry") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  const beatglass::library_detail::CacheKey key{"epoch-1", "engine", "config", "offline"};
+  coordinator.storage().cache()->begin("identity-retry", key, "endpoint://device", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(coordinator.storage().cache()->publish("identity-retry", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  beatglass::library::AnalysisOperation operation;
+  operation.source.path = "endpoint://device"; operation.source.content_hash = "epoch-2";
+  operation.identity = {"epoch-2", key.engine, key.config, key.mode}; operation.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  CHECK(coordinator.retry_rejection_reason("identity-retry", operation) == beatglass::library::RetryRejectionReason::stale_source_identity);
+  CHECK(std::string(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::stale_source_identity)) == "stale source identity");
+}
 TEST_CASE("coordinator missing source retry fails closed without a cache result") {
   beatglass::library::AnalysisCoordinator coordinator;
   REQUIRE(coordinator.open_storage({":memory:"}));

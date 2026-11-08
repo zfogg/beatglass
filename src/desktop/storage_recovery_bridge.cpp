@@ -31,6 +31,9 @@ public slots:
     if (!beatglass::library::file_decoder_snapshot_compatible(found->decoder_snapshot)) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::incompatible_decoder_snapshot))); return; }
     beatglass::library::AnalysisIdentity identity{found->key.content, found->key.engine, found->key.config, found->key.mode};
     auto operation = beatglass::library::make_file_decode_operation(found->source_path, std::move(identity), found->decoder_snapshot);
+    const auto rejection = coordinator_.retry_rejection_reason(runId.toStdString(), operation);
+    // Includes RetryRejectionReason::stale_source_identity for an epoch mismatch.
+    if (rejection != beatglass::library::RetryRejectionReason::none) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(rejection))); return; }
     const auto handle = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation));
     emit result(static_cast<bool>(handle), handle ? QStringLiteral("Retry queued") : QStringLiteral("Retry rejected: source identity or metadata unavailable"));
   }
