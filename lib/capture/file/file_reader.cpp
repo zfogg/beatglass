@@ -73,6 +73,7 @@ FileReadResult FileReader::read(std::span<float> buffer, std::stop_token cancel)
   auto& f = *impl_; if (f.failed) throw std::runtime_error("File reader failed");
   if (f.virtual_reader) return f.virtual_reader->read(buffer, cancel);
   if (cancel.stop_requested()) return {FileReadStatus::cancelled, {}};
+  if (f.source_changed()) { f.failed = true; throw std::runtime_error("Audio source changed during read"); }
   if (buffer.empty() || buffer.size() % f.metadata.channels || buffer.size() / f.metadata.channels > static_cast<std::uint64_t>(std::numeric_limits<sf_count_t>::max())) throw std::invalid_argument("Buffer must hold whole frames");
   if (f.ended) return {FileReadStatus::end, {}};
   const auto frames = sf_readf_float(f.handle, buffer.data(), static_cast<sf_count_t>(buffer.size() / f.metadata.channels));
