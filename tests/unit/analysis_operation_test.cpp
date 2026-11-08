@@ -281,6 +281,28 @@ TEST_CASE("coordinator explains stale source identity before retry") {
   CHECK(coordinator.retry_rejection_reason("identity-retry", operation) == beatglass::library::RetryRejectionReason::stale_source_identity);
   CHECK(std::string(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::stale_source_identity)) == "stale source identity");
 }
+TEST_CASE("stale retry rejection reason survives coordinator restart") {
+  const auto db = std::filesystem::temp_directory_path() / ("beatglass-stale-reason-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  const beatglass::library_detail::CacheKey key{"restart-epoch-1", "engine", "config", "offline"};
+  {
+    beatglass::library_detail::SqliteCache cache(db.string());
+    cache.begin("stale-reason", key, "endpoint://device", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("stale-reason", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  }
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({db.string()}));
+  beatglass::library::AnalysisOperation operation;
+  operation.source.path = "endpoint://device"; operation.source.content_hash = "restart-epoch-2";
+  operation.identity = {"restart-epoch-2", key.engine, key.config, key.mode}; operation.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  operation.serialize = [] { return std::string("must-not-run"); };
+  operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  CHECK(coordinator.retry_rejection_reason("stale-reason", operation) == beatglass::library::RetryRejectionReason::stale_source_identity);
+  CHECK(std::string(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::stale_source_identity)) == "stale source identity");
+  REQUIRE(coordinator.storage().retryable_runs().size() == 1);
+  CHECK(coordinator.storage().retryable_runs().front().source_path == "endpoint://device");
+  coordinator.close_storage();
+  REQUIRE(std::filesystem::remove(db));
+}
 TEST_CASE("coordinator missing source retry fails closed without a cache result") {
   beatglass::library::AnalysisCoordinator coordinator;
   REQUIRE(coordinator.open_storage({":memory:"}));
