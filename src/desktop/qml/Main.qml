@@ -1677,7 +1677,7 @@ ApplicationWindow {
                                     Accessible.role: Accessible.StaticText
                                 }
                                 onOpened: { window.announceVisualizationRecovery("Confirm discard for persisted recovery run " + storageRecovery.selectedRunId + ". Source audio will remain unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
-                                onAccepted: { const runId = storageRecovery.selectedRunId; window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery run " + runId + " discarded; selected retry state cleared."); discardPersistedRecoveryButton.forceActiveFocus() }
+                                onAccepted: { const runId = storageRecovery.selectedRunId; window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discard requested for " + runId + "; the status will report if active work prevents removal."); discardPersistedRecoveryButton.forceActiveFocus() }
                                 onRejected: { const runId = storageRecovery.selectedRunId; window.announceVisualizationRecovery("Persisted recovery discard canceled for " + runId + "; selected run was kept."); discardPersistedRecoveryButton.forceActiveFocus() }
                             }
                             Button {
