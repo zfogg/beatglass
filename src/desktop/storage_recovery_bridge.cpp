@@ -86,6 +86,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(&workerThread_, &QThread::finished, worker_, &QObject::deleteLater);
   connect(worker_, &Worker::result, this, [this](bool ok, const QString& text) {
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
+    if (ok && text == QStringLiteral("Cached analysis invalidated")) { cacheHit_ = false; cachedResult_.clear(); emit cachedResultChanged(); }
     emit statusChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids, const QStringList& details) {
