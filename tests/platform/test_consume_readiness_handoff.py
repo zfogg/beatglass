@@ -28,3 +28,13 @@ class ReadinessConsumerTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "report.json"; path.write_text(json.dumps(report), encoding="utf-8")
             self.assertTrue(any("contains ingestion_errors" in error for error in consumer.consume(path)))
+
+    def test_ready_report_requiring_native_qualification_is_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        report = json.loads(source.read_text(encoding="utf-8"))
+        report.update({"exit_gate_status": "READY", "ready": True, "exit_gate_reason_codes": [],
+                       "handoff_check_errors": [], "documentation_check_errors": [], "ingestion_errors": [],
+                       "generation_errors": []})
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "report.json"; path.write_text(json.dumps(report), encoding="utf-8")
+            self.assertTrue(any("native qualification is required" in error for error in consumer.consume(path)))

@@ -211,4 +211,6 @@ The handoff report records those failures in `ingestion_errors` as well as retur
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
 
+The consumer additionally rejects `READY` while `native_qualification_required` remains true. A downstream acceptance decision therefore requires both an error-free report and an explicit native-qualification state change; portable preparation evidence cannot be promoted by editing the gate flag alone.
+
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.
