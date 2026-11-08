@@ -528,6 +528,8 @@ Load and playback feedback now carry that contract through recovery states: a re
 
 The playback bridge helpers now enforce the same accepted-result identity and presentation-ready gates as the controls. Selection sync and seek therefore return without mutating playback when a snapshot is stale, incomplete, or no longer belongs to the selected Library result.
 
+Seek availability now also requires live playback source/epoch alignment. The visualization reports the current epoch when aligned and carries the explicit source/discontinuity reset reason after a clear, so stale selections cannot silently remain actionable.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

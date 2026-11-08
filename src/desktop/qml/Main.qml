@@ -1150,6 +1150,11 @@ ApplicationWindow {
                     property var renderedSpectrum: []
                     readonly property string acceptedResultIdentity: window.acceptedAnalysisIdentity
                     readonly property bool reducedMotion: window.themePreferencesBridge !== null && window.themePreferencesBridge.reduceMotion
+                    readonly property bool playbackSnapshotAligned: presentationReady
+                        && window.playbackBridge !== null
+                        && window.playbackBridge.state !== "Stopped"
+                        && window.playbackBridge.epoch >= 0
+                        && window.playbackMatchesSelection
                     activeFocusOnTab: true
                     Keys.onLeftPressed: {
                         const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
@@ -1491,6 +1496,24 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
                 Label {
+                    objectName: "visualizationPlaybackEpochFeedback"
+                    text: visualizationCanvas.playbackSnapshotAligned
+                        ? "Playback aligned · epoch " + window.playbackBridge.epoch + " · accepted snapshot seek available"
+                        : (window.visualizationSelectionResetReason !== ""
+                           ? "Playback snapshot cleared · " + window.visualizationSelectionResetReason
+                           : "Playback source/epoch is not aligned with the accepted snapshot")
+                    Accessible.name: "Visualization playback epoch feedback: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "Live playback source and epoch alignment for the accepted visualization snapshot."
+                    ToolTip.text: "Playback source and epoch alignment for visualization seek"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "visualizationAcceptedIdentity"
                     text: visualizationCanvas.acceptedResultIdentity === ""
                         ? "No accepted result identity"
@@ -1595,8 +1618,7 @@ ApplicationWindow {
                     text: "Seek to position"
                     enabled: visualizationCanvas.selectedPosition >= 0
                         && visualizationCanvas.acceptedResultIdentity !== ""
-                        && window.playbackBridge
-                        && window.playbackBridge.state !== "Stopped"
+                        && visualizationCanvas.playbackSnapshotAligned
                         && typeof visualizationPresentation !== "undefined"
                         && visualizationCanvas.renderedWaveform.length > 0
                     Accessible.name: "Seek playback to visualization position"
