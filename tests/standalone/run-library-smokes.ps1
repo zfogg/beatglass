@@ -15,6 +15,11 @@ $cases = @(
   @{ Name = "executor_priority"; Sources = @($executorSource, "tests/standalone/job_executor_priority_smoke.cpp") },
   @{ Name = "executor_cancellation"; Sources = @($executorSource, "tests/standalone/job_executor_cancel_smoke.cpp") },
   @{ Name = "executor_shutdown"; Sources = @($executorSource, "tests/standalone/job_executor_shutdown_smoke.cpp") },
+  @{ Name = "executor_queued_cancellation"; Sources = @($executorSource, "tests/standalone/job_executor_queued_cancel_smoke.cpp") },
+  @{ Name = "executor_concurrent_submit"; Sources = @($executorSource, "tests/standalone/job_executor_concurrent_submit_smoke.cpp") },
+  @{ Name = "executor_explicit_failure"; Sources = @($executorSource, "tests/standalone/job_executor_explicit_fail_smoke.cpp") },
+  @{ Name = "executor_progress"; Sources = @($executorSource, "tests/standalone/job_executor_progress_smoke.cpp") },
+  @{ Name = "executor_handle_readers"; Sources = @($executorSource, "tests/standalone/job_handle_readers_smoke.cpp") },
   @{ Name = "analysis_runner"; Sources = @($runnerSources + "tests/standalone/analysis_runner_smoke.cpp") },
   @{ Name = "analysis_batch"; Sources = @($runnerSources + "tests/standalone/analysis_batch_smoke.cpp") },
   @{ Name = "analysis_capacity"; Sources = @($runnerSources + "tests/standalone/analysis_capacity_smoke.cpp") },
@@ -40,6 +45,7 @@ $cases = @(
 if (-not [string]::IsNullOrWhiteSpace($OpenSSLRoot)) { $cases += @{ Name = "file_fingerprint"; Sources = @("lib/library/file_fingerprint.cpp", "tests/standalone/file_fingerprint_smoke.cpp"); Extra = @("-I$OpenSSLRoot/include", "-L$OpenSSLRoot/lib", "-lcrypto") } }
 if ($ListCases) { $cases | ForEach-Object { $_.Name }; exit 0 }
 if ($SelectedCases.Count -gt 0) {
+  $SelectedCases = @($SelectedCases | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
   $available = @($cases.Name)
   $unknown = @($SelectedCases | Where-Object { $available -notcontains $_ })
   if ($unknown.Count -gt 0) { throw "Unknown smoke case(s): $($unknown -join ', ')" }
@@ -77,9 +83,11 @@ try {
     }
   }
 } finally { Pop-Location }
-$summary = "passed=$($passed.Count); failed=$($failed.Count); total=$($cases.Count)"
+$selection = if ($SelectedCases.Count -gt 0) { $SelectedCases -join "," } else { "all" }
+$summary = "passed=$($passed.Count); failed=$($failed.Count); total=$($cases.Count); selected=$selection"
 $summary | Set-Content -Path (Join-Path $OutputDir "summary.txt")
 $log | Set-Content -Path (Join-Path $OutputDir "commands.log")
-$records | ConvertTo-Json -Depth 3 | Set-Content -Path (Join-Path $OutputDir "summary.json")
+$report = [pscustomobject]@{ selected=$selection; passed=$passed; failed=$failed; cases=$records }
+$report | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $OutputDir "summary.json")
 if ($failed.Count -gt 0) { throw "Standalone library smokes failed: $($failed -join ', ')" }
 Write-Output "Standalone library smokes $summary"
