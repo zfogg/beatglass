@@ -1,0 +1,31 @@
+"""Static regression checks for the issue #76 QML acceptance contract.
+
+This complements qmltestrunner on hosts where Qt is unavailable. It checks
+that the production QML still exposes the interaction and recovery hooks that
+the visual audit documents; it does not replace native or runtime testing.
+"""
+
+from pathlib import Path
+
+
+def main() -> int:
+    root = Path(__file__).resolve().parents[2]
+    qml = (root / "src" / "desktop" / "qml" / "Main.qml").read_text(encoding="utf-8")
+    required = {
+        "compact responsive header": "compactHeader",
+        "visualization focus ring": "visualizationFocusRing",
+        "visualization keyboard selection": "Keys.onRightPressed",
+        "visualization empty state": "visualizationEmptyState",
+        "generation/revision status": "visualizationRevisionStatus",
+        "playback discontinuity clear": "onEpochChanged()",
+        "overlay empty display state": "overlayDisplayEmptyState",
+    }
+    missing = [name for name, marker in required.items() if marker not in qml]
+    if missing:
+        raise SystemExit("Missing issue #76 QML contract markers: " + ", ".join(missing))
+    print(f"Issue #76 QML contract markers verified ({len(required)} checks)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
