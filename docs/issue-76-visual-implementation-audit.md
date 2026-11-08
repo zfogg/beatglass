@@ -92,6 +92,8 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Library folder selection, empty-library recovery, and opening the selected playback source now declare explicit button roles alongside their existing keyboard focus behavior.
+
 Native playback sample-rate and channel inputs now declare explicit SpinBox roles alongside their hertz/channel values.
 
 Output capture endpoint selection now exposes its current endpoint value and ComboBox role, completing the transport input semantics.
