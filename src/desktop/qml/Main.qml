@@ -202,6 +202,7 @@ ApplicationWindow {
                 text: "Reduce motion"
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
                 Accessible.name: "Reduce motion"
+                Accessible.role: Accessible.CheckBox
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation."
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
             }
@@ -571,6 +572,8 @@ ApplicationWindow {
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
+                        Accessible.name: "Click through"
+                        Accessible.role: Accessible.CheckBox
                         Accessible.description: "Allow pointer input to pass through the overlay window"
                         enabled: window.overlayBridge && window.overlayBridge.available
                         onClicked: if (window.overlayBridge) {

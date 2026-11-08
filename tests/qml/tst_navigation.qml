@@ -448,6 +448,16 @@ TestCase {
         app.destroy()
     }
 
+    function test_accessibilityRolesForPreferenceSwitches() {
+        let app = shell.createObject(null)
+        let motion = findChild(app, "reduceMotion")
+        let clickThrough = findChild(app, "clickThrough")
+        compare(motion.Accessible.role, Accessible.CheckBox)
+        compare(clickThrough.Accessible.role, Accessible.CheckBox)
+        compare(clickThrough.Accessible.name, "Click through")
+        app.destroy()
+    }
+
     function test_escapeShortcutProvidesOverlayRecovery() {
         let app = shell.createObject(null)
         let shortcut = findChild(app, "overlayEscapeShortcut")
