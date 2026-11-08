@@ -12,6 +12,7 @@ class StorageRecoveryBridge final : public QObject {
   Q_PROPERTY(QString databasePath READ databasePath WRITE setDatabasePath NOTIFY databasePathChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
   Q_PROPERTY(QStringList retryableRunIds READ retryableRunIds NOTIFY retryableRunsChanged)
+  Q_PROPERTY(QStringList retryableRunDetails READ retryableRunDetails NOTIFY retryableRunsChanged)
   Q_PROPERTY(QString selectedRunId READ selectedRunId WRITE selectRun NOTIFY selectedRunChanged)
   Q_PROPERTY(bool cacheHit READ cacheHit NOTIFY cachedResultChanged)
   Q_PROPERTY(QString cachedResult READ cachedResult NOTIFY cachedResultChanged)
@@ -25,6 +26,7 @@ public:
   QString databasePath() const { return databasePath_; }
   QString status() const { return status_; }
   QStringList retryableRunIds() const { return retryableRunIds_; }
+  QStringList retryableRunDetails() const { return retryableRunDetails_; }
   QString selectedRunId() const { return selectedRunId_; }
   Q_INVOKABLE void open();
   Q_INVOKABLE void close();
@@ -65,6 +67,7 @@ private:
   QString databasePath_;
   QString status_{QStringLiteral("Storage not configured")};
   QStringList retryableRunIds_;
+  QStringList retryableRunDetails_;
   QString selectedRunId_;
   bool cacheHit_{};
   QString cachedResult_;
