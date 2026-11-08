@@ -34,7 +34,7 @@ for i in "${!expected_cases[@]}"; do
       "$out_dir"/*) ;;
       *) echo "evidence path escapes output: $evidence" >&2; exit 1;;
     esac
-    [[ -f "$evidence_path" ]] || { echo "missing evidence file for $case_id: $evidence" >&2; exit 1; }
+    [[ -s "$evidence_path" ]] || { echo "missing or empty evidence file for $case_id: $evidence" >&2; exit 1; }
     [[ ! -L "$evidence_path" ]] || { echo "evidence must not be a symlink: $evidence" >&2; exit 1; }
   fi
 done
