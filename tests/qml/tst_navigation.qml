@@ -103,9 +103,11 @@ TestCase {
         compare(size.Accessible.description, "Choose the overlay window size; current size Medium")
         compare(size.ToolTip.text, "Choose Compact, Medium, or Large overlay size")
         compare(findChild(app, "overlayOpacityValue").Accessible.name, "Current overlay opacity")
+        compare(findChild(app, "overlayOpacityValue").ToolTip.text, "Current overlay opacity value")
         compare(findChild(app, "overlayInteractionMode").Accessible.name, "Overlay interaction mode")
         compare(findChild(app, "overlayInteractionMode").ToolTip.text, "Current overlay pointer interaction mode")
         compare(findChild(app, "overlayDisplayStatus").Accessible.name, "Current overlay display")
+        compare(findChild(app, "overlayDisplayStatus").ToolTip.text, "Current overlay display status")
         display.activated(0); compare(fakeOverlay.selectedScreen, 0); compare(display.currentIndex, 0)
         size.currentIndex = 2; size.activated(2); compare(fakeOverlay.requestedWidth, 430)
         fakeOverlay.opacity = 0.6; tryCompare(findChild(app, "overlayOpacity"), "value", 0.6)
@@ -375,6 +377,7 @@ TestCase {
         let state = findChild(app, "overlayUnavailable")
         verify(state !== null)
         compare(state.Accessible.name, "Overlay availability")
+        compare(state.ToolTip.text, "Native overlay is unavailable on the selected display")
         app.destroy()
     }
     function test_overlayUnavailableOffersRetry() {

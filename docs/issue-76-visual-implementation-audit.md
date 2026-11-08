@@ -257,3 +257,5 @@ Appearance-state and settings-persistence summaries now expose contextual toolti
 Output-endpoint empty, unavailable-build, and recovery guidance now expose dedicated tooltips matching their accessible descriptions, keeping device-discovery recovery actionable across visual and assistive interfaces.
 
 The endpoint selector now exposes a concise tooltip for choosing the live-capture source, aligning the primary settings control with its empty, unavailable, and recovery-state guidance.
+
+Overlay opacity value, display status, and unavailable-display messaging now expose contextual tooltips, completing the visual guidance for overlay routing and native-availability states.
