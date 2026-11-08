@@ -1,5 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <stdexcept>
+#include <atomic>
+#include <thread>
 #include "beatglass/library/analysis_operation.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
 #include "beatglass/library/analysis_commit.hpp"
@@ -76,10 +78,24 @@ TEST_CASE("coordinator admission replaces decoder on cache hit") {
   op.source.path = "track.wav"; op.source.content_hash = identity.content_hash;
   op.identity = identity; op.decoder_snapshot = beatglass::library::kFileDecoderSnapshot; op.serialize = [] { return std::string("fallback"); };
   op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match, {}}; };
-  op.decode = [](std::stop_token, const auto&) { throw std::runtime_error("decoder must be skipped"); return std::string{}; };
+  std::atomic_bool decoder_called{false};
+  op.decode = [&decoder_called](std::stop_token, const auto&) { decoder_called.store(true); return std::string("unexpected"); };
   auto handle = coordinator.submit("cache-hit", std::move(op));
   REQUIRE(handle);
-  CHECK(handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running || handle->state() == beatglass::library_detail::TrackedState::completed);
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  REQUIRE(handle->state() == beatglass::library_detail::TrackedState::completed);
+  CHECK_FALSE(decoder_called.load());
+}
+TEST_CASE("coordinator rejects incompatible snapshots before reserving work") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  beatglass::library::AnalysisOperation op;
+  op.source.path = "track.wav"; op.source.content_hash = "hash";
+  op.identity = {"hash", "engine", "config", "offline"}; op.decoder_snapshot = "legacy";
+  op.decode = [](std::stop_token, const auto&) { return std::string("must not run"); };
+  op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  CHECK_FALSE(coordinator.submit("legacy-run", std::move(op)));
+  CHECK(coordinator.storage().retryable_runs().empty());
 }
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
