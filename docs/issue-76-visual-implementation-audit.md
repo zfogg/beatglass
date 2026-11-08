@@ -423,3 +423,5 @@ The compact-header theme preview group now reports the selected theme directly a
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
 
 The Theme previews group’s accessible description now carries the current palette alongside its selected-swatch guidance, keeping the non-visual group announcement synchronized with the dynamic value and tooltip.
+
+Capture transitions now expose a visible and accessible reset explanation when selection is cleared: stopped, starting, reacquiring, and error states each identify why the previous visualization position is no longer available.

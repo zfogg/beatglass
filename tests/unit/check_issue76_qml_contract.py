@@ -403,6 +403,8 @@ def main() -> int:
         "visualization retry feedback": "objectName: \"visualizationRetryFeedback\"\n                    visible: window.liveBridge.status === \"Starting\" || window.liveBridge.status === \"Reacquiring\"",
         "visualization responsive status spacing": "objectName: \"visualizationStatusGroup\"\n                    Layout.fillWidth: true\n                    spacing: window.compactHeader ? 4 : 8",
         "visualization status runtime state": "Accessible.value: window.liveBridge.status === \"Error\" ? \"capture error\"",
+        "visualization reset reason": "visualizationSelectionResetReason",
+        "visualization reset feedback": 'objectName: "visualizationSelectionResetFeedback"',
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
