@@ -540,6 +540,8 @@ The focused bridge contract test checks those notify properties, signal declarat
 
 The visualization recovery row now exposes direct Resume and Stop playback actions. Resume is available only while paused and preserves the accepted snapshot; Stop invokes the real bridge stop path, which clears the snapshot and announces the recovery reason through the existing accessible feedback.
 
+The same actions now have application-level keyboard parity: Ctrl+Alt+R resumes paused playback, and Ctrl+Alt+Shift+S stops active playback. Shortcut enabled states mirror the buttons, so keyboard users receive the same state and stale-snapshot behavior as pointer users.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
