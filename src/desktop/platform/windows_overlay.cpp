@@ -43,8 +43,13 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
     control_->installEventFilter(this);
     connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; setClickThrough(false); });
   }
-  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); emit screensChanged(); }); });
-  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen*) { emit screensChanged(); });
+  connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); emit geometryChanged(); emit screensChanged(); }); });
+  connect(qGuiApp, &QGuiApplication::screenAdded, this, [this](QScreen*) { QTimer::singleShot(0, this, [this] { keepOnScreen(); emit geometryChanged(); emit screensChanged(); }); });
+  if (overlay_) {
+    connect(overlay_, &QWindow::screenChanged, this, [this](QScreen*) {
+      QTimer::singleShot(0, this, [this] { keepOnScreen(); emit geometryChanged(); emit screensChanged(); });
+    });
+  }
 }
 OverlayController::~OverlayController() { setClickThrough(false); if (control_) control_->removeEventFilter(this); }
 void OverlayController::setOpacity(qreal opacity) {
