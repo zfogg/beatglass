@@ -312,6 +312,8 @@ Starting a fresh batch also clears any prior single-operation result before queu
 
 Fresh batch admission also resets the displayed aggregate frame count, preventing progress from the previous single operation from appearing on the new batch.
 
+Single and batch retries now reset/republish frame progress immediately, rather than waiting for the periodic bridge poll to correct stale values.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
