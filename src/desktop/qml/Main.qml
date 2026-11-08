@@ -21,6 +21,7 @@ ApplicationWindow {
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property bool overlayDisplaySelectionRequired: false
+    property int overlayPreferredScreenIndex: -1
     property bool overlayPersistedDiagnosticDismissed: false
     property url browseFolder: ""
     property var catalogRows: []
@@ -425,8 +426,14 @@ ApplicationWindow {
             if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
                 window.announceCaptureRecoveryState("DJ overlay display disappeared; controls restored until a display is available.")
             else {
-                window.overlayDisplaySelectionRequired = true
-                window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to resume overlay monitoring.")
+                if (window.overlayPreferredScreenIndex >= 0 && window.overlayPreferredScreenIndex < window.overlayBridge.screenNames.length) {
+                    window.overlayBridge.moveToScreen(window.overlayPreferredScreenIndex)
+                    window.overlayDisplaySelectionRequired = false
+                    window.announceCaptureRecoveryState("DJ overlay display restored; saved display target selected.")
+                } else {
+                    window.overlayDisplaySelectionRequired = true
+                    window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to resume overlay monitoring.")
+                }
             }
         }
     }
@@ -1975,7 +1982,7 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
-                        onActivated: if (window.overlayBridge) { window.overlayBridge.moveToScreen(currentIndex); window.overlayDisplaySelectionRequired = false; window.announceCaptureRecoveryState("DJ overlay display selected; retry is now available."); retryOverlay.forceActiveFocus() }
+                        onActivated: if (window.overlayBridge) { window.overlayBridge.moveToScreen(currentIndex); window.overlayPreferredScreenIndex = currentIndex; window.overlayDisplaySelectionRequired = false; window.announceCaptureRecoveryState("DJ overlay display selected; retry is now available."); retryOverlay.forceActiveFocus() }
                         Layout.fillWidth: true
                     }
                     Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay display status" }
