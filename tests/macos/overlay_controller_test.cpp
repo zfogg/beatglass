@@ -96,6 +96,20 @@ private slots:
     QVERIFY(controller.setClickThrough(true)); control.reset();
     QVERIFY(!controller.available()); QVERIFY(!controller.clickThrough()); QVERIFY(!overlay.isVisible()); QVERIFY(!backend->mode);
   }
+  void destroyedOverlayRevokesNativeMode() {
+    auto overlay = std::make_unique<QQuickWindow>();
+    QWindow control; control.show();
+    auto native = std::make_unique<FakeNative>(); auto* backend = native.get();
+    OverlayController controller(std::move(native));
+    QVERIFY(controller.attach(overlay.get(), &control));
+    QVERIFY(controller.showOverlay());
+    QVERIFY(controller.setClickThrough(true));
+    overlay.reset();
+    QCoreApplication::processEvents();
+    QVERIFY(!controller.available());
+    QVERIFY(!controller.clickThrough());
+    QVERIFY(!backend->mode);
+  }
   void restoresGeometry() {
     QQuickWindow overlay; QWindow control;
     OverlayController controller(std::make_unique<FakeNative>());
