@@ -347,6 +347,14 @@ TestCase {
         compare(canvas.Accessible.name, "Live waveform and spectrum")
         compare(findChild(app, "visualizationStatus").Accessible.name, "Visualization data status")
         compare(findChild(app, "visualizationStatus").text, "Visualization unavailable")
+        let empty = findChild(app, "visualizationEmptyState")
+        verify(empty !== null)
+        verify(empty.visible)
+        compare(empty.text, "Start monitoring to populate the waveform.")
+        findChild(app, "spectrumView").clicked()
+        compare(empty.text, "Start monitoring to populate the FFT.")
+        compare(findChild(app, "visualizationCanvas").Accessible.description,
+                "Bounded frequency-domain FFT magnitudes from the current output capture.")
         app.destroy()
     }
 
