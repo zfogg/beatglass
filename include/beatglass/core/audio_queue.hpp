@@ -31,7 +31,7 @@ public:
     const auto frames = input.format.channels ? input.samples.size() / input.format.channels : 0;
     const auto write = write_.load(std::memory_order_relaxed);
     const auto next = (write + 1) % Slots;
-    if (input.samples.empty() || !input.format.channels || !input.format.sample_rate || input.samples.size() % input.format.channels ||
+    if (input.samples.empty() || !input.epoch || !input.format.channels || !input.format.sample_rate || input.samples.size() % input.format.channels ||
         input.samples.size() > MaxSamples || next == read_.load(std::memory_order_acquire)) {
       dropped_.fetch_add(frames, std::memory_order_relaxed);
       discontinuity_ = true;
