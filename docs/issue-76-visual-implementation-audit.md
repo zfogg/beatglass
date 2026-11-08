@@ -329,3 +329,5 @@ The Library’s selected-audio panel now exposes one grouped details surface cov
 Selected-audio recovery actions now expose live values: clearing reports the selected filename or “no selection,” and metadata retry reports the current metadata error/status. This makes action availability and recovery context explicit before activation.
 
 The selected-audio details column now sits inside an explicitly named panel grouping with its own entry tooltip, preserving the visual card boundary as a meaningful navigation boundary for assistive technology.
+
+The overlay’s live evidence surface now exposes one grouped semantic boundary for its header state, tempo/harmony estimates, capture status, recovery hint, and retry action. The group reports the current capture state and provides a single entry tooltip before users navigate its dynamic evidence.

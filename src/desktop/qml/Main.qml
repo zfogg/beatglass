@@ -180,7 +180,13 @@ ApplicationWindow {
                 }
             }
             ColumnLayout {
+                objectName: "overlayLiveEvidenceGroup"
                 anchors.fill: parent; anchors.margins: 14; spacing: 4
+                Accessible.name: "Overlay live evidence"
+                Accessible.value: window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable"
+                Accessible.role: Accessible.Grouping
+                Accessible.description: "Current live status, tempo, harmony, capture state, and recovery action for the DJ overlay."
+                ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true
                     Label { text: "Beatglass · " + window.liveBridge.status; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
