@@ -1348,6 +1348,22 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
                 Label {
+                    objectName: "visualizationAnalysisHandoff"
+                    text: typeof visualizationPresentation === "undefined" || !visualizationCanvas.presentationReady
+                        ? "Waiting for an accepted analysis result"
+                        : "Accepted analysis generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
+                    Accessible.name: "Visualization analysis handoff: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "Status of the generation-gated analysis result consumed by waveform and FFT rendering."
+                    ToolTip.text: "Accepted analysis generation and revision consumed by the visualization"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "visualizationStatus"
                     text: typeof visualizationPresentation === "undefined"
                           ? "Visualization unavailable"

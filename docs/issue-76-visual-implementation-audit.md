@@ -502,6 +502,8 @@ Canvas rendering now requires a valid presentation generation and revision befor
 
 The renderer now validates waveform point pairs and finite FFT magnitudes before issuing canvas geometry, so malformed analysis results are skipped without breaking the rest of an accepted generation.
 
+The status group now exposes an analysis handoff label that reports the accepted generation and revision consumed by rendering, or explicitly waits for an accepted result. This makes the queue-to-visualization boundary visible while retaining generation gating.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
