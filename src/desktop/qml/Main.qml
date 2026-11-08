@@ -40,6 +40,7 @@ ApplicationWindow {
     property string visualizationSelectionResetReason: ""
     property string visualizationRecoveryAnnouncement: ""
     property string persistedRecoveryOutcomeAnnouncementKey: ""
+    property bool persistedRecoverySelectionActivated: false
     property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
@@ -131,8 +132,12 @@ ApplicationWindow {
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
+        function onSelectedRunIdChanged() {
+            window.persistedRecoverySelectionActivated = false
+            window.persistedRecoveryOutcomeAnnouncementKey = ""
+        }
         function onAnalysisStatusChanged() {
-            if (storageRecovery.selectedRunId === "" || !storageRecovery.analysisRetryable) {
+            if (!window.persistedRecoverySelectionActivated || storageRecovery.selectedRunId === "" || !storageRecovery.analysisRetryable) {
                 window.persistedRecoveryOutcomeAnnouncementKey = ""
                 return
             }
@@ -1574,7 +1579,7 @@ ApplicationWindow {
                                 ToolTip.text: count > 0
                                     ? "Choose one of " + count + " saved analysis runs" + (typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== "" ? ". Selected: " + storageRecovery.selectedRunId : "")
                                     : "No saved analysis runs available"
-                                onActivated: { storageRecovery.selectRun(currentText); window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Retry and discard controls are now available when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
+                                onActivated: { storageRecovery.selectRun(currentText); window.persistedRecoverySelectionActivated = true; window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Retry and discard controls are now available when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
                             }
                             Label {
                                 objectName: "persistedRecoveryRunDetails"
