@@ -455,3 +455,5 @@ Selection-reset explanations now use the active theme accent and compact typogra
 Load-state and data-status labels now consume the theme foreground and compact typography tokens, keeping runtime evidence readable as the visualization moves between unavailable, waiting, and populated states.
 
 Waveform/FFT sample totals and selected-view summaries now use the same tokens, completing the responsive visual hierarchy for runtime evidence and preventing a palette change from leaving secondary status text behind.
+
+The selected-position status now follows the same foreground and compact typography tokens, keeping the active scrub position legible beside its clear action in both full and compact layouts.

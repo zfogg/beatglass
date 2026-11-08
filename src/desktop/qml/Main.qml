@@ -1343,6 +1343,8 @@ ApplicationWindow {
                     Accessible.role: Accessible.StaticText
                     Accessible.description: "Click the canvas or use Left/Right/Home/End to select a presentation position. " + text
                     ToolTip.text: "Current selected waveform/FFT position"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
                 }
                 Button {
                     objectName: "clearVisualizationSelection"
