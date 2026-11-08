@@ -10,7 +10,7 @@ required = [
     '["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex]',
     'Math.round(window.overlayBridge.opacity * 100)',
     'window.overlayDisplayRecoveryPending ? " · recovery pending"',
-    'Accessible.description: "Restored overlay display and opacity',
+    'Accessible.description: "Restored overlay display, size, and opacity',
 ]
 missing = [marker for marker in required if marker not in qml]
 if missing:
