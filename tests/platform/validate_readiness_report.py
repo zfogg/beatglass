@@ -93,6 +93,8 @@ def validate(report: dict) -> list[str]:
             scenario_ids = {str(entry.get("id")) for entry in scenario_inventory if isinstance(entry, dict)} if isinstance(scenario_inventory, list) else set()
             if not isinstance(scenario_inventory, list) or len(scenario_inventory) != len(REQUIRED_SCENARIOS) or scenario_ids != REQUIRED_SCENARIOS:
                 errors.append(f"{item.get('platform')}: scenario inventory must contain exactly the required scenario set")
+            elif any(entry.get("status") not in EXPECTED_SCENARIO_STATUSES for entry in scenario_inventory):
+                errors.append(f"{item.get('platform')}: scenario inventory contains invalid status")
             evidence_hashes = item.get("scenario_evidence_sha256")
             if not isinstance(evidence_hashes, dict):
                 errors.append(f"{item.get('platform')}: missing scenario evidence hashes")
