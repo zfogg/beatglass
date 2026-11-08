@@ -130,6 +130,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
 StorageRecoveryBridge::~StorageRecoveryBridge() { close(); workerThread_.quit(); workerThread_.wait(); }
 void StorageRecoveryBridge::setDatabasePath(const QString& path) {
   if (databasePath_ == path) return;
+  if (!databasePath_.isEmpty() && !path.isEmpty()) close();
   databasePath_ = path; emit databasePathChanged();
   if (cacheHit_) { cacheHit_ = false; emit cachedResultChanged(); }
   if (!cachedResult_.isEmpty()) { cachedResult_.clear(); emit cachedResultChanged(); }
