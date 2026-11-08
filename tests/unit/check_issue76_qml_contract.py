@@ -15,6 +15,7 @@ def main() -> int:
         "compact responsive header": "compactHeader",
         "visualization focus ring": "visualizationFocusRing",
         "visualization keyboard selection": "Keys.onRightPressed",
+        "visualization mode arrow focus": "spectrumView.forceActiveFocus()",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
