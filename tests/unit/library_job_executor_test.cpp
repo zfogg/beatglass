@@ -29,6 +29,17 @@ TEST_CASE("library executor bounds waiting work and orders priorities") {
   REQUIRE_FALSE(executor.submit(0, add(5)));
 }
 
+TEST_CASE("zero-capacity executor rejects all submissions") {
+  JobExecutor executor(0);
+  bool ran = false;
+  REQUIRE_FALSE(executor.submit(0, [&](std::stop_token) { ran = true; }));
+  REQUIRE_FALSE(executor.submit_tracked(0, [&](std::stop_token, const auto&) {
+    ran = true; return beatglass::library_detail::TrackedState::completed;
+  }));
+  executor.shutdown();
+  REQUIRE_FALSE(ran);
+}
+
 TEST_CASE("library executor cancels active work and discards waiting jobs") {
   JobExecutor executor(1);
   std::promise<void> started;
