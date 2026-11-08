@@ -1131,6 +1131,19 @@ ApplicationWindow {
                         visualizationCanvas.forceActiveFocus()
                     }
                 }
+                Button {
+                    objectName: "visualizationClearSelection"
+                    enabled: visualizationCanvas.selectedPosition >= 0
+                    text: enabled ? "Clear selection" : "No selection"
+                    Accessible.name: "Clear visualization selection"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: enabled
+                        ? "Clear the selected waveform or FFT position."
+                        : "There is no selected waveform or FFT position to clear."
+                    ToolTip.text: enabled ? "Clear the selected visualization position" : "No visualization position is selected"
+                    onClicked: window.clearVisualizationPositionAndFocus()
+                }
                 Label {
                     objectName: "visualizationRetryFeedback"
                     visible: window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring"
