@@ -591,6 +591,12 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent
+                        objectName: "selectedAudioDetails"
+                        Accessible.name: "Selected audio details"
+                        Accessible.value: window.selectedName !== "" ? window.selectedName + ", " + window.metadataStatus : "no audio selected"
+                        Accessible.role: Accessible.Grouping
+                        Accessible.description: "Selected audio source, metadata, analysis, and recovery details."
+                        ToolTip.text: "Selected audio details and recovery state"
                         Label {
                             objectName: "selectedAudioName"
                             text: window.selectedName || "No file selected"
