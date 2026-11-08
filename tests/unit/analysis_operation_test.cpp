@@ -330,6 +330,25 @@ TEST_CASE("decoder mismatch and missing source reasons survive restart") {
   coordinator.close_storage();
   REQUIRE(std::filesystem::remove(db));
 }
+TEST_CASE("resolved retry diagnostics clear after recovery or discard") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  const beatglass::library_detail::CacheKey recovered_key{"resolved", "engine", "config", "offline"};
+  cache.begin("resolved-run", recovered_key, "endpoint://resolved", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("resolved-run", recovered_key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  REQUIRE(cache.retryable_runs().size() == 1);
+  cache.begin("resolved-run", recovered_key, "endpoint://resolved", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("resolved-run", recovered_key, "fresh", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  CHECK(cache.retryable_runs().empty());
+  std::string result;
+  REQUIRE(cache.find(recovered_key, result));
+  CHECK(result == "fresh");
+
+  const beatglass::library_detail::CacheKey discarded_key{"discarded", "engine", "config", "offline"};
+  cache.begin("discarded-run", discarded_key, "endpoint://discarded", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("discarded-run", discarded_key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  REQUIRE(cache.discard_retryable("discarded-run"));
+  CHECK(cache.retryable_runs().empty());
+}
 TEST_CASE("coordinator missing source retry fails closed without a cache result") {
   beatglass::library::AnalysisCoordinator coordinator;
   REQUIRE(coordinator.open_storage({":memory:"}));
