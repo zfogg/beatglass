@@ -28,6 +28,12 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
   const auto query = folded(std::move(search));
   for (std::filesystem::directory_iterator it(folder, error), end; it != end && !error; it.increment(error)) {
     const auto& entry = *it;
+    // Library browsing is intentionally one level deep; do not follow links
+    // into unrelated trees or expose a linked source under a misleading path.
+    if (entry.is_symlink(error)) {
+      if (error) break;
+      continue;
+    }
     const bool directory = entry.is_directory(error);
     if (error) break;
     if (!directory && (!entry.is_regular_file(error) || !supported_audio(entry.path()))) {
