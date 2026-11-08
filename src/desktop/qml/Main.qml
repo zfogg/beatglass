@@ -140,6 +140,14 @@ ApplicationWindow {
                         onClicked: window.overlayBridge.hideOverlay()
                     }
                 }
+                Label {
+                    objectName: "overlayEscapeHint"
+                    visible: window.overlayBridge && window.overlayBridge.clickThrough
+                    text: "Press Escape to unlock overlay controls"
+                    color: "#dbeafe"
+                    Accessible.name: "Overlay recovery hint"
+                    Accessible.description: text
+                }
                 Label { text: "BPM " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24; font.bold: true }
                 Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; color: "white" }
                 Label { text: window.captureMonitorBridge ? "Capture " + window.captureMonitorBridge.status : "Capture unavailable"; color: "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status"; Accessible.description: text }
@@ -576,6 +584,20 @@ ApplicationWindow {
                     text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
                     Accessible.name: "DJ estimates"; Accessible.description: text
                 }
+                 Label {
+                     objectName: "djEvidenceStatus"
+                     text: {
+                         const state = window.liveBridge.status
+                         if (state === "Tracking") return "Live evidence is provisional and source-attributed to the selected output mix. Overlapping decks or notifications may make key/chord labels ambiguous."
+                         if (state === "Reacquiring") return "Reacquiring the selected output source; previous BPM, key, and chord evidence has been cleared."
+                         if (state === "Silent") return "No active output evidence; BPM, key, and chord labels are unavailable until audio resumes."
+                         if (state === "Error") return "Output capture error; live evidence is unavailable. Check the selected endpoint and retry monitoring."
+                         return "Live evidence is unavailable until output monitoring starts."
+                     }
+                     Accessible.name: "DJ evidence status"
+                     Accessible.description: text
+                     wrapMode: Text.WordWrap; Layout.fillWidth: true
+                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.description: "Show the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }

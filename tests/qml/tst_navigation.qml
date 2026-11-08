@@ -434,9 +434,17 @@ TestCase {
         let app = shell.createObject(null)
         let status = findChild(app, "djStatus")
         let estimates = findChild(app, "djEstimates")
+        let evidence = findChild(app, "djEvidenceStatus")
         verify(status !== null); verify(estimates !== null)
+        verify(evidence !== null)
         compare(status.Accessible.name, "DJ monitoring status")
         compare(estimates.Accessible.name, "DJ estimates")
+        compare(evidence.Accessible.name, "DJ evidence status")
+        fakeLive.status = "Reacquiring"
+        tryCompare(evidence, "text", "Reacquiring the selected output source; previous BPM, key, and chord evidence has been cleared.")
+        fakeLive.status = "Tracking"
+        verify(evidence.text.indexOf("provisional") >= 0)
+        fakeLive.status = "Stopped"
         app.destroy()
     }
 
@@ -464,6 +472,10 @@ TestCase {
         verify(shortcut !== null)
         compare(shortcut.sequence, "Escape")
         compare(shortcut.context, Qt.ApplicationShortcut)
+        let hint = findChild(app, "overlayEscapeHint")
+        verify(hint !== null)
+        compare(hint.Accessible.name, "Overlay recovery hint")
+        compare(hint.text, "Press Escape to unlock overlay controls")
         app.destroy()
     }
     function test_themePreviewsSelectTheirPalette() {
