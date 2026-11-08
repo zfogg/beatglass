@@ -32,6 +32,9 @@ The runner also emits `native-playback-evidence.json`, a fixed six-case matrix
 initialized to `UNRUN`; update statuses and log/screenshot fields only after
 observing each native playback scenario, then rerun the verifier before claiming
 qualification.
+It emits `native-overlay-evidence.json` for the four overlay recovery, click-through,
+display/DPI, and fullscreen cases; a `PASS` requires screenshot evidence and is
+rejected by the verifier when that field is missing.
 
 - Record commit SHA, compiler/MSVC toolset, Windows version/build, architecture, Qt and vcpkg manifest revisions.
 - Build the pinned desktop preset in Release configuration and archive the exact CMake configure/build output.

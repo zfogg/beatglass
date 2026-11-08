@@ -8,8 +8,10 @@ $ErrorActionPreference = "Stop"
 $OutputDirectory = (Resolve-Path -LiteralPath $OutputDirectory).Path
 $manifestPath = Join-Path $OutputDirectory "qualification-artifacts.sha256"
 $evidencePath = Join-Path $OutputDirectory "native-playback-evidence.json"
+$overlayEvidencePath = Join-Path $OutputDirectory "native-overlay-evidence.json"
 if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw "Missing artifact hash manifest: $manifestPath" }
 if (-not (Test-Path -LiteralPath $evidencePath -PathType Leaf)) { throw "Missing native playback evidence template: $evidencePath" }
+if (-not (Test-Path -LiteralPath $overlayEvidencePath -PathType Leaf)) { throw "Missing native overlay evidence template: $overlayEvidencePath" }
 $lines = @(Get-Content -LiteralPath $manifestPath | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 if ($lines.Count -ne 4) { throw "Expected exactly four artifact hashes, found $($lines.Count)" }
 $seen = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
@@ -33,5 +35,13 @@ for ($i = 0; $i -lt $expectedCases.Count; $i++) {
   if ($evidence[$i].case -ne $expectedCases[$i]) { throw "Unexpected native playback evidence case: $($evidence[$i].case)" }
   if ($evidence[$i].status -notin @("PASS", "FAIL", "UNRUN")) { throw "Invalid status for $($evidence[$i].case): $($evidence[$i].status)" }
   if ($evidence[$i].status -eq "PASS" -and [string]::IsNullOrWhiteSpace($evidence[$i].log)) { throw "PASS case lacks log evidence: $($evidence[$i].case)" }
+}
+$expectedOverlayCases = @("show-hide-recovery", "click-through-unlock", "display-change-clamp", "dpi-fullscreen")
+$overlayEvidence = @(Get-Content -LiteralPath $overlayEvidencePath -Raw | ConvertFrom-Json)
+if ($overlayEvidence.Count -ne $expectedOverlayCases.Count) { throw "Expected exactly four native overlay evidence cases" }
+for ($i = 0; $i -lt $expectedOverlayCases.Count; $i++) {
+  if ($overlayEvidence[$i].case -ne $expectedOverlayCases[$i]) { throw "Unexpected native overlay evidence case: $($overlayEvidence[$i].case)" }
+  if ($overlayEvidence[$i].status -notin @("PASS", "FAIL", "UNRUN")) { throw "Invalid overlay status for $($overlayEvidence[$i].case): $($overlayEvidence[$i].status)" }
+  if ($overlayEvidence[$i].status -eq "PASS" -and [string]::IsNullOrWhiteSpace($overlayEvidence[$i].screenshot)) { throw "PASS overlay case lacks screenshot evidence: $($overlayEvidence[$i].case)" }
 }
 Write-Output "qualification artifact hashes verified: $OutputDirectory"
