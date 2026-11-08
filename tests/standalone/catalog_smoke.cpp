@@ -102,6 +102,12 @@ int main() {
   const auto renamed_replacement = beatglass::library::browse(dir.path, "beta");
   require(renamed_replacement.entries.size() == 1 && renamed_replacement.entries[0].name == "Beta.mp3",
           "replacement source was not visible after catalog refresh");
+  std::filesystem::remove(dir.path / "Beta.mp3");
+  std::filesystem::create_directory(dir.path / "Beta.mp3");
+  const auto directory_replacement = beatglass::library::browse(dir.path, "beta");
+  require(directory_replacement.entries.size() == 1 && directory_replacement.entries[0].directory,
+          "directory replacement was not visible after catalog refresh");
+  std::filesystem::remove_all(dir.path / "Beta.mp3");
   std::filesystem::remove_all(dir.path / "Mixes");
   const auto after_directory_remove = beatglass::library::browse(dir.path, "mix");
   require(after_directory_remove.entries.empty() && after_directory_remove.diagnostic.empty(),
