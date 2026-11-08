@@ -2475,7 +2475,9 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     objectName: "overlayRoutingControls"
                     Accessible.name: "Overlay interaction and opacity controls"
-                    Accessible.value: window.overlayBridge ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" : "unavailable"
+                    Accessible.value: window.overlayBridge
+                        ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" + (window.overlayDisplayRecoveryPending ? ", recovery pending" : "")
+                        : "unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Configure pointer click-through and overlay opacity."
                     ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
