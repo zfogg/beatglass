@@ -323,6 +323,7 @@ ApplicationWindow {
             Button {
                 objectName: "resetAppearance"
                 text: "Reset appearance"
+                visible: !window.compactHeader
                 Accessible.name: "Reset appearance settings"
                 Accessible.description: "Restore the default Light theme and turn off reduced motion."
                 ToolTip.text: "Restore Light theme and full motion"
