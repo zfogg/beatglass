@@ -1122,7 +1122,10 @@ ApplicationWindow {
                             event.accepted = true
                         }
                     }
-                    readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
+                    readonly property bool presentationReady: typeof visualizationPresentation !== "undefined"
+                        && visualizationPresentation.generation >= 0
+                        && visualizationPresentation.revision >= 0
+                    readonly property bool modeHasData: presentationReady
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
                             : visualizationPresentation.spectrum.length > 0)
@@ -1147,6 +1150,8 @@ ApplicationWindow {
                             ctx.moveTo(0, gridY); ctx.lineTo(width, gridY)
                         }
                         ctx.stroke(); ctx.globalAlpha = 1.0
+                        if (!presentationReady)
+                            return
                         var wave = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform : []
                         var spec = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum : []
                         if (viewMode === "waveform") {

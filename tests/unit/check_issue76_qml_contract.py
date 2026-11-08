@@ -408,6 +408,8 @@ def main() -> int:
         "visualization seek action": 'objectName: "seekVisualizationSelection"',
         "visualization seek frame contract": "seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationPresentation.waveform.length)",
         "visualization playback sync": "syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame, visualizationPresentation.waveform.length)",
+        "visualization generation gate": "readonly property bool presentationReady: typeof visualizationPresentation !== \"undefined\"",
+        "visualization render gate": "if (!presentationReady)",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization status runtime state": "Accessible.value: window.liveBridge.status === \"Error\" ? \"capture error\"",
         "visualization reset reason": "visualizationSelectionResetReason",

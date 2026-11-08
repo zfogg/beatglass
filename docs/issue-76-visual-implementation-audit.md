@@ -498,6 +498,8 @@ Selection controls now include a bounded Seek to position action. When playback 
 
 Playback change notifications now synchronize the visualization selection from the live playback frame over the available waveform span, so the selected cursor follows actual source playback while preserving the existing clear-on-source/epoch transitions.
 
+Canvas rendering now requires a valid presentation generation and revision before consuming waveform/FFT arrays. Reduced-motion remains a presentation preference for animated surfaces only; it does not disable the real analysis data path or static waveform/FFT rendering.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
