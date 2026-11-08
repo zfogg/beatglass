@@ -22,6 +22,7 @@ ApplicationWindow {
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
     property bool overlayDisplaySelectionRequired: false
     property int overlayPreferredScreenIndex: -1
+    property int overlayPreferredSizeIndex: 1
     property bool overlayPersistedDiagnosticDismissed: false
     property url browseFolder: ""
     property var catalogRows: []
@@ -2010,15 +2011,29 @@ ApplicationWindow {
                     ComboBox {
                         objectName: "overlaySize"
                     Accessible.name: "Overlay size"; Accessible.value: currentText; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the overlay window size; current size " + currentText; ToolTip.text: "Choose Compact, Medium, or Large overlay size"
-                        model: ["Compact", "Medium", "Large"]; currentIndex: 1
+                        model: ["Compact", "Medium", "Large"]; currentIndex: window.overlayPreferredSizeIndex
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onActivated: if (window.overlayBridge) {
                             const sizes = [[250, 110], [310, 130], [430, 180]]
+                            window.overlayPreferredSizeIndex = currentIndex
                             window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
+                            window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
                         }
                     }
                 }
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
+                Label {
+                    objectName: "overlayFallbackState"
+                    visible: window.overlayBridge !== null && !window.overlayBridge.available
+                    text: "Control window remains available as the tray/taskbar fallback until the overlay display recovers."
+                    Accessible.name: "Overlay fallback state"
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: text
+                    ToolTip.text: "Tray/taskbar fallback keeps controls available while the overlay is unavailable"
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
                 Label {
                     objectName: "overlayPersistedRecoveryDiagnostic"
                     visible: window.overlayBridge !== null && !window.overlayBridge.available

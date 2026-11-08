@@ -40,6 +40,8 @@ MARKERS = {
     "qml overlay target restoration": "saved display target selected.",
     "qml overlay click-through state": "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.",
     "qml overlay opacity state": "DJ overlay opacity set to ",
+    "qml overlay size state": "DJ overlay size set to ",
+    "qml overlay fallback": "Control window remains available as the tray/taskbar fallback until the overlay display recovers.",
 }
 
 
