@@ -675,7 +675,12 @@ TestCase {
         verify(!findChild(app, "analysisWaitingIndicator").visible)
         let retry = findChild(app, "retryAnalysis")
         verify(!retry.enabled)
+        verify(retry.activeFocusOnTab)
         compare(retry.Accessible.description, "Retry is unavailable until the analysis job lifecycle bridge exposes cancellation and retry operations.")
+        compare(retry.ToolTip.text, retry.Accessible.description)
+        verify(findChild(app, "cancelAnalysis").activeFocusOnTab)
+        verify(findChild(app, "retryAnalysisBatch").activeFocusOnTab)
+        verify(findChild(app, "cancelAnalysisBatch").activeFocusOnTab)
         app.destroy()
     }
     function test_analysisWaitingIndicatorUsesRealFrameState() {
@@ -716,9 +721,10 @@ TestCase {
         let app = shellWithAnalysis.createObject(null)
         let cancel = findChild(app, "cancelAnalysisBatch")
         verify(cancel.visible); verify(cancel.enabled); cancel.clicked(); compare(fakeAnalysis.batchCancels, 1)
+        compare(cancel.ToolTip.text, cancel.Accessible.description)
         fakeAnalysis.status = "Failed"
         let retry = findChild(app, "retryAnalysisBatch")
-        verify(retry.visible); verify(retry.enabled); retry.clicked(); compare(fakeAnalysis.batchRetries, 1)
+        verify(retry.visible); verify(retry.enabled); compare(retry.ToolTip.text, retry.Accessible.description); retry.clicked(); compare(fakeAnalysis.batchRetries, 1)
         app.destroy()
     }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {

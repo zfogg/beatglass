@@ -243,3 +243,5 @@ Selected-source identity, analysis detail/uncertainty/freshness, source workflow
 Capture status, endpoint discovery and selection status, permission guidance, and the monitoring action now expose contextual tooltips that mirror their accessible recovery semantics.
 
 Library folder and audio-file entries now expose context-specific tooltips that match their accessible action descriptions, making directory navigation and source selection discoverable on hover as well as through assistive technology.
+
+Analysis recovery actions now participate in the keyboard tab order explicitly. Retry/cancel controls for single and batch analysis expose matching tooltips and accessible descriptions, so keyboard and pointer users receive the same recovery guidance while jobs are queued, running, cancelled, or failed.

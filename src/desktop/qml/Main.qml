@@ -721,6 +721,7 @@ ApplicationWindow {
                             }
                             Button {
                                 objectName: "discardPersistedRecovery"
+                                activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
                                 enabled: visible && storageRecovery.selectedRunId !== ""
                                 text: "Discard saved run"
@@ -744,25 +745,30 @@ ApplicationWindow {
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
+                                activeFocusOnTab: true
                                 text: "Retry batch"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.retryBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
                                 Accessible.name: "Retry analysis batch"
                                 Accessible.description: "Retry cancelled or failed analysis items retained in the current batch."
+                                ToolTip.text: Accessible.description
                                 onClicked: window.analysisJobBridge.retryBatch()
                             }
                             Button {
                                 objectName: "cancelAnalysisBatch"
+                                activeFocusOnTab: true
                                 text: "Cancel batch"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.cancelBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running")
                                 Accessible.name: "Cancel analysis batch"
                                 Accessible.description: "Cancel all queued or running analysis items retained in the current batch."
+                                ToolTip.text: Accessible.description
                                 onClicked: window.analysisJobBridge.cancelBatch()
                             }
                             Button {
                                 text: "Retry analysis"
                                 objectName: "retryAnalysis"
+                                activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
                                 enabled: visible && window.analysisJobBridge.canRetry
                                 Accessible.name: "Retry analysis"
@@ -773,10 +779,12 @@ ApplicationWindow {
                             Button {
                                 objectName: "cancelAnalysis"
                                 text: "Cancel analysis"
+                                activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
                                 enabled: visible && window.analysisJobBridge.canCancel
                                 Accessible.name: "Cancel analysis"
                                 Accessible.description: "Cancel the active source-attributed analysis operation."
+                                ToolTip.text: Accessible.description
                                 onClicked: window.analysisJobBridge.cancel()
                             }
                             BusyIndicator {
