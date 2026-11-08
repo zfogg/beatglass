@@ -205,4 +205,6 @@ Native script output can be ingested with `python tests/platform/ingest_qualific
 
 The same ingestion is available in the end-to-end handoff via `--native-output <qualification-output> --native-platform windows|macos|linux`; this writes the platform manifest before report generation, validation, and optional consumption. Ingestion failures remain visible and cannot be converted into readiness.
 
+The handoff report records those failures in `ingestion_errors` as well as returning a nonzero result, making missing or tampered native artifacts auditable after the command exits.
+
 Tampered or path-escaping retained artifacts fail ingestion with explicit errors, so a bundle cannot become a seemingly valid pending manifest while silently losing provenance. The resulting manifest remains diagnostic only until native scenario observations are reviewed.

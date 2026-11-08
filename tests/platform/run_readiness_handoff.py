@@ -34,6 +34,7 @@ def run(bundles: Path, output: Path, status: Path | None = None, max_age_hours: 
             ingestion_errors.extend(ingester.ingest(native_output, target))
     report = generator.build_report(bundles)
     errors = list(ingestion_errors)
+    report["ingestion_errors"] = ingestion_errors
     if status is not None:
         readiness_errors = readiness.check(status, bundles, max_age_hours)
         report["handoff_check_errors"] = readiness_errors
