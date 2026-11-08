@@ -249,6 +249,12 @@ TEST_CASE("SQLite collection sizes are checked before signed binding") {
   CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "hash",
     std::numeric_limits<std::uint64_t>::max(), 1}), std::invalid_argument);
 }
+TEST_CASE("SQLite collection fingerprints expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCollectionFingerprintBytes == 4096);
+  CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio",
+    std::string(kMaxCollectionFingerprintBytes + 1, 'x'), 1, 1}), std::invalid_argument);
+}
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);
