@@ -1108,7 +1108,7 @@ ApplicationWindow {
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
                             : visualizationPresentation.spectrum.length > 0)
-                    Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120
+                    Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120; Layout.minimumHeight: window.compactHeader ? 72 : 96
                     Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
                     Accessible.value: visualizationCanvas.viewMode + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%")
                     Accessible.role: Accessible.Graphic
