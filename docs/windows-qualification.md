@@ -4,6 +4,20 @@ This checklist is required before claiming Windows DJ support. CI and offscreen 
 
 ## Build identity
 
+The executable preparation check is `tests/windows/run_qualification.ps1`. Run it
+from a PowerShell session on the target machine with `-Build` to configure and
+build the pinned x64 Visual Studio configuration, or point it at an existing
+build directory to repeat discovery and artifact checks:
+
+```powershell
+pwsh -File tests/windows/run_qualification.ps1 -Build -OutputDirectory build/windows-qualification
+```
+
+The script records the commit, OS and tool versions, CTest discovery, and the
+expected desktop/endpoint test artifacts. It deliberately reports the native
+WASAPI, device-recovery, overlay, DPI, and interactive UI cases as `UNRUN`;
+those observations still require a logged-in Windows session and evidence.
+
 - Record commit SHA, compiler/MSVC toolset, Windows version/build, architecture, Qt and vcpkg manifest revisions.
 - Build the pinned desktop preset in Release configuration and archive the exact CMake configure/build output.
 
