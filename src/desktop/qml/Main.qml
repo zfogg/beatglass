@@ -612,6 +612,7 @@ ApplicationWindow {
                                   ? "Track key: Unknown · No validated track-level key. Window evidence is provisional and source-attributed."
                                   : "Track key: Unknown until a source is selected."
                             Accessible.name: "Analysis uncertainty: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -620,6 +621,7 @@ ApplicationWindow {
                             objectName: "analysisFreshness"
                             text: window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? "Analysis freshness: source-linked analysis complete." : "Analysis freshness: waiting for source-linked analysis evidence."
                             Accessible.name: "Analysis freshness: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -630,6 +632,7 @@ ApplicationWindow {
                                   ? "Select an audio source to inspect and play it."
                                   : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · " + window.metadataStatus
                             Accessible.name: "Selected source workflow status"
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -871,6 +874,7 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     Accessible.name: "Visualization empty state"
+                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                 }

@@ -80,6 +80,8 @@ Playback source, selected visualization data, DJ estimates, and DJ evidence now 
 
 Analysis/playback detail, visualization generation/capture, and DJ monitoring statuses now expose explicit values, closing the remaining dynamic status gaps in the audit.
 
+Analysis uncertainty/freshness, source workflow, and visualization empty-state messages now expose explicit values for assistive technology.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
