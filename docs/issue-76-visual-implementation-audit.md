@@ -648,4 +648,6 @@ Overlay geometry now exposes the persisted/native position and size in Settings 
 
 Overlay relaunch now reports when persisted geometry was restored and keeps the control window raised and active when native restoration is unavailable or fails. This preserves a usable tray/taskbar fallback instead of leaving the user with a hidden or ambiguous control surface.
 
+Settings now exposes a dedicated Restore overlay affordance. It follows the production relaunch path, which reuses persisted display, position, size, and opacity state, while retaining the visible control-window fallback if the native overlay cannot be restored.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
