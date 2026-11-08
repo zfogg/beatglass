@@ -525,6 +525,8 @@ def main() -> int:
         "overlay visual hydration call": "window.restoreOverlayVisualStateFromBridge()",
         "overlay visual geometry restore": "Persisted overlay geometry and opacity restored.",
         "overlay visual geometry fallback": "Persisted overlay geometry unavailable; control-window fallback remains active.",
+        "overlay invalid opacity fallback": "Persisted overlay opacity unavailable; safe 90 percent opacity applied.",
+        "overlay opacity applied before show": "window.overlayBridge.setOpacity(savedOpacity)",
         "overlay saved target restore": "saved display target selected by name.",
         "overlay selection persistence": "window.overlayPreferredScreenIndex = index",
         "overlay click-through announcement": "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.",

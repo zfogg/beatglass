@@ -153,8 +153,13 @@ ApplicationWindow {
             return false
         }
         window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)
-        if (window.overlayBridge.opacity >= 0.2 && window.overlayBridge.opacity <= 1.0)
-            window.overlayBridge.setOpacity(window.overlayBridge.opacity)
+        const savedOpacity = Number(window.overlayBridge.opacity)
+        if (isFinite(savedOpacity) && savedOpacity >= 0.2 && savedOpacity <= 1.0)
+            window.overlayBridge.setOpacity(savedOpacity)
+        else {
+            window.overlayBridge.setOpacity(0.9)
+            window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe 90 percent opacity applied.")
+        }
         window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
         return true
     }
