@@ -13,9 +13,13 @@ public:
   PlaybackPcmQueue(std::size_t slot_count, std::size_t samples_per_slot);
   PlaybackPcmQueue(const PlaybackPcmQueue&) = delete;
   PlaybackPcmQueue& operator=(const PlaybackPcmQueue&) = delete;
-  /** Copy a borrowed block; producer-thread only, never allocates or blocks. */
+  /** Copy a borrowed block; producer-thread only, never allocates or blocks.
+   * Returns false for an empty/oversized block, zero epoch, invalid format or
+   * a frame range that would overflow. Rejected input remains caller-owned and
+   * does not alter queued blocks. */
   bool push(const AudioBlock& block) noexcept;
-  /** Copy one block into caller storage; consumer-thread only. */
+  /** Copy one block into caller storage; consumer-thread only.
+   * A destination that is too small leaves the block queued for retry. */
   bool pop(std::span<float> destination, AudioBlock& block) noexcept;
   /** Diagnostic queued-block count. */
   std::size_t size() const noexcept;
