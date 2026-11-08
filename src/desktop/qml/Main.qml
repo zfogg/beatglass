@@ -1533,7 +1533,7 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined"
                                 model: visible ? storageRecovery.retryableRunIds : []
                                 enabled: visible && count > 0
-                                Accessible.name: "Persisted retryable analysis runs"
+                                Accessible.name: "Persisted retryable analysis runs (" + count + ")"
                                 Accessible.role: Accessible.ComboBox
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
                                 Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
