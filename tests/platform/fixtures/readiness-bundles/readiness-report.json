@@ -198,6 +198,23 @@
   ],
   "error_count": 0,
   "failure_categories": {},
+  "required_scenario_summary": [
+    {
+      "platform": "windows",
+      "missing": [],
+      "invalid": []
+    },
+    {
+      "platform": "macos",
+      "missing": [],
+      "invalid": []
+    },
+    {
+      "platform": "linux",
+      "missing": [],
+      "invalid": []
+    }
+  ],
   "errors": [],
   "ready": true
 }
