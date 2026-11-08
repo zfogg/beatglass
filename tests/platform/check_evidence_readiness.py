@@ -68,6 +68,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         manifest = bundle / "manifest.json"
         identity_failures = []
         provenance_complete = False
+        missing_provenance = []
         manifest_platform = None
         errors = []
         if manifest.is_file():
@@ -76,6 +77,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 manifest_platform = str(data.get("platform", "")).lower() or None
                 provenance_complete = all(isinstance(data.get(field), str) and data[field].strip()
                                           for field in verifier.REQUIRED_PROVENANCE)
+                missing_provenance = [field for field in verifier.REQUIRED_PROVENANCE
+                                      if not isinstance(data.get(field), str) or not data[field].strip()]
                 errors = [f"{platform}: {error}" for error in verifier.verify(bundle, manifest)]
                 if str(data.get("platform", "")).lower() != platform:
                     errors.append(f"{platform}: manifest platform does not match status row")
@@ -139,6 +142,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
+                     "missing_provenance": missing_provenance,
                      "failure_categories": dict(sorted(row_categories.items())),
                      "error_count": len(matrix_errors + errors),
                      "retention_ok": not missing_artifacts and not mismatched_artifacts,
