@@ -698,6 +698,8 @@ The settings synchronization path now validates native opacity alongside display
 
 Direct display and size edits flow through native geometry callbacks to advance that same settings revision, while opacity edits advance it at the control boundary. The settings summary cannot silently combine a newly edited control with an older native geometry snapshot, and no edit is counted twice when the bridge echoes the change.
 
+Opacity edits now carry an in-flight marker: the originating control edit advances the revision once, while its native bridge echo only clears the marker; unrelated native opacity changes still advance the revision. This keeps concurrent local/native updates visible without duplicate counts.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
