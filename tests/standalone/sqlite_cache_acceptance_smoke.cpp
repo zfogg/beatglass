@@ -96,6 +96,9 @@ int main() {
     cache.begin("engine-republish", next_engine);
     assert(cache.publish("engine-republish", next_engine, "engine-v2-republished", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(next_engine, result) && result == "engine-v2-republished");
+    assert(cache.invalidate(next_engine));
+    assert(!cache.find(next_engine, result));
+    assert(cache.find(next_config, result) && result == "config-b-republished");
     cache.begin("republish", key);
     assert(cache.publish("republish", key, "result-b", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(key, result) && result == "result-b");
