@@ -427,3 +427,5 @@ The Theme previews group’s accessible description now carries the current pale
 Capture transitions now expose a visible and accessible reset explanation when selection is cleared: stopped, starting, reacquiring, and error states each identify why the previous visualization position is no longer available.
 
 The waveform and FFT canvas now consumes the active six-theme palette at render time: the background follows the theme surface, plotted data uses the theme accent, and the selection cursor uses the theme foreground for contrast. Theme changes therefore affect the live visualization rather than only surrounding controls.
+
+The canvas also draws a low-contrast, foreground-derived three-row grid and resets its alpha before rendering data, giving each theme a consistent orientation cue without overpowering waveform, FFT bars, or the selection cursor.
