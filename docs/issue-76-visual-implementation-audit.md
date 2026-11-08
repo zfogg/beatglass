@@ -372,6 +372,8 @@ All canvas navigation keys now explicitly consume their events after updating se
 
 Enter/Return on a selected canvas position now moves focus directly to the Clear position action, while Escape still clears immediately. The canvas description and tooltip document both recovery paths for keyboard users.
 
+Space now provides the same focus path as Enter/Return from the selected canvas position, covering the conventional activation key alongside the explicit clear and Escape recovery actions.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
