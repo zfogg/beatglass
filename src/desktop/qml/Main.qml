@@ -1033,7 +1033,7 @@ ApplicationWindow {
                     Label { text: "Display" }
                     ComboBox {
                         objectName: "overlayDisplay"
-                    Accessible.name: "Overlay display"; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"); ToolTip.text: "Choose the display where the overlay is shown"
+                    Accessible.name: "Overlay display"; Accessible.value: currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"); ToolTip.text: "Choose the display where the overlay is shown"
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
@@ -1046,6 +1046,8 @@ ApplicationWindow {
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
                         text: "No displays are available for the overlay."
                         Accessible.name: "Overlay display empty state"
+                        Accessible.value: text
+                        Accessible.role: Accessible.StaticText
                         Accessible.description: text
                     }
                     Label { text: "Size" }
