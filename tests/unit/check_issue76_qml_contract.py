@@ -84,6 +84,8 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "overlay display selector value": "objectName: \"overlayDisplay\"\n                    Accessible.name: \"Overlay display\"; Accessible.value:",
+        "overlay display empty value": "Accessible.name: \"Overlay display empty state\"\n                        Accessible.value: text",
         "overlay unlock explicit role": "objectName: \"unlockOverlay\"; Accessible.name: \"Unlock DJ overlay\"; Accessible.role: Accessible.Button",
         "overlay hide explicit role": "objectName: \"hideOverlay\"; Accessible.name: \"Hide DJ overlay\"; Accessible.role: Accessible.Button",
         "pause playback role": "objectName: \"pausePlayback\"; Accessible.name: text + \" playback\"; Accessible.role: Accessible.Button",
