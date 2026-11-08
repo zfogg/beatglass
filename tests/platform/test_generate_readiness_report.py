@@ -48,6 +48,16 @@ class GenerateReadinessReportTest(unittest.TestCase):
             errors = [error for row in report["platforms"] for error in row["errors"]]
             self.assertTrue(any("escapes bundle" in error for error in errors))
 
+    def test_generation_surfaces_malformed_or_missing_manifests(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            for platform in module.PLATFORMS:
+                bundle = root / platform
+                bundle.mkdir()
+                (bundle / "manifest.json").write_text("{not-json", encoding="utf-8")
+            report = module.build_report(root)
+            self.assertTrue(all(any("invalid manifest JSON" in error for error in row["errors"]) for row in report["platforms"]))
+
 
 if __name__ == "__main__":
     unittest.main()
