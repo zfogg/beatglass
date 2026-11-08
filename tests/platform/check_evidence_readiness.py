@@ -70,6 +70,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         provenance_complete = False
         missing_provenance = []
         missing_scenarios = []
+        invalid_scenarios = []
         manifest_platform = None
         errors = []
         if manifest.is_file():
@@ -82,6 +83,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                                       if not isinstance(data.get(field), str) or not data[field].strip()]
                 scenario_ids = {item.get("id") for item in data.get("scenarios", []) if isinstance(item, dict)}
                 missing_scenarios = sorted(verifier.REQUIRED_SCENARIOS - scenario_ids)
+                invalid_scenarios = [item.get("id") if isinstance(item, dict) else str(item)
+                                     for item in data.get("scenarios", [])
+                                     if not isinstance(item, dict) or item.get("status") not in {"PASS", "FAIL", "UNRUN"}]
                 errors = [f"{platform}: {error}" for error in verifier.verify(bundle, manifest)]
                 if str(data.get("platform", "")).lower() != platform:
                     errors.append(f"{platform}: manifest platform does not match status row")
@@ -125,6 +129,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 scenario_status_counts = {}
                 missing_artifacts = []
                 mismatched_artifacts = []
+                invalid_scenarios = []
         else:
             retained = 0
             artifact_bytes = 0
@@ -134,6 +139,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             scenario_status_counts = {}
             missing_artifacts = []
             mismatched_artifacts = []
+            invalid_scenarios = []
             errors = [f"{platform}: missing manifest: {manifest}"]
         row_categories = Counter()
         for error in matrix_errors + errors:
@@ -152,6 +158,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
                      "missing_provenance": missing_provenance,
                      "missing_scenarios": missing_scenarios,
+                     "invalid_scenarios": invalid_scenarios,
                      "failure_categories": dict(sorted(row_categories.items())),
                      "error_count": len(matrix_errors + errors),
                      "retention_ok": not missing_artifacts and not mismatched_artifacts,
