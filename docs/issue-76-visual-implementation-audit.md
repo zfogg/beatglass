@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+The Library surface now exposes an accessible stale-result status when cancellation or failure invalidates an analysis: the prior result is cleared and retry requires fresh source evidence. The same contract applies after source changes and endpoint/discontinuity transitions; native announcement timing remains a qualification gap.
+
 ## Shortcut announcement contract
 
 Shortcut-triggered stop/resume and retry actions must update the same accessible lifecycle announcement used by pointer activation, preserve focus on the active recovery surface, and clear stale result text when an epoch or endpoint changes. The portable contract is checked with `python tests/unit/check_desktop_analysis_transition.py`; native screen-reader announcement timing and focus restoration still require platform evidence.

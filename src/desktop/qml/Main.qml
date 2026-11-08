@@ -959,6 +959,14 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisStaleState"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
+                                text: visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? "Prior analysis result cleared; retry requires fresh source evidence." : ""
+                                Accessible.name: "Analysis stale-result status"
+                                Accessible.description: visible ? text : "No stale analysis result is present."
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisCompletionResult"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
                                 text: visible ? ("Completed analysis result: " + storageRecovery.analysisResult) : ""
