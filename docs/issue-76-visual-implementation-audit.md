@@ -490,6 +490,8 @@ Selected-view summaries reserve responsive line height for wrapped text, keeping
 
 The live waveform/FFT data-status label now permits zero minimum width, keeping its sample/bin evidence inside the responsive visualization column.
 
+The live data-status message reserves responsive line height, keeping populated and waiting states visually stable as their evidence wraps.
+
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
 
 The selection status/action row now uses vertical-center alignment, keeping wrapped status text and its clear button visually balanced as the compact layout changes height.
