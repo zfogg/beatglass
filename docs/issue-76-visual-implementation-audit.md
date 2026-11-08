@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+The consolidated loading/error audit now asserts visualization loading and empty states, focus affordance, metadata retry, analysis retry/cancel, and batch retry/cancel controls.
+
 The browser/library audit now consolidates folder navigation, delegate semantics, selected-source, metadata, analysis progress, and analysis-waiting states in the static contract.
 
 The consolidated keyboard/accessibility audit now asserts library search, sort, browser navigation, and empty-state keyboard surfaces.
