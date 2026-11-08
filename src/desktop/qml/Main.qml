@@ -334,6 +334,7 @@ ApplicationWindow {
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
+                ToolTip.text: "Toggle reduced motion for animations and transitions"
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
             }
             Button {
@@ -344,7 +345,6 @@ ApplicationWindow {
                 Accessible.name: "Reset appearance settings"
                 Accessible.role: Accessible.Button
                 Accessible.description: "Restore the default Light theme and turn off reduced motion."
-                ToolTip.text: "Restore Light theme and full motion"
                 ToolTip.text: "Restore the default theme and motion setting"
                 onClicked: {
                     if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
