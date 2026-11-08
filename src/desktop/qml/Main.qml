@@ -602,6 +602,7 @@ ApplicationWindow {
                             text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status: " + text
+                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text
                         }
@@ -944,6 +945,7 @@ ApplicationWindow {
                         ? "No visualization generation is active"
                         : "Visualization generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
                     Accessible.name: "Visualization generation status: " + text
+                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current accepted visualization generation and revision"
@@ -953,6 +955,7 @@ ApplicationWindow {
                     objectName: "visualizationCaptureStatus"
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
                     Accessible.name: "Visualization capture status: " + text
+                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
@@ -960,7 +963,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "djStatus"; text: "Status: " + window.liveBridge.status
-                    Accessible.name: "DJ monitoring status"; Accessible.role: Accessible.StaticText; Accessible.description: text
+                    Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text
                 }
                 Label {
                     objectName: "djEstimates"
