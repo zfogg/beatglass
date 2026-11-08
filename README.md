@@ -81,11 +81,11 @@ ctest --preset prebuilt-qt-desktop
 
 On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the configure command. The SDK must match the compiler and target architecture. The preset enforces version 6.8.3 and uses the core vcpkg manifest; do not enable its `desktop` feature or point it at an install tree containing a different Qt version. The source-building `vcpkg-desktop` preset remains experimental. This is a development proposal, not a finished cross-platform package or fully hashed artifact lock; acquisition, platform and license caveats are in [decisions](docs/decisions.md).
 
-The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
+The optional [tonal worker experiment](docs/experiments.md) requires Essentia and is not connected to product analysis.
 
 File replay uses the proposed worker-owned `CausalTempoReplay` block interface. It accepts arbitrary interleaved chunk sizes, buffers partial 512-frame hops, and reports accepted and analyzed exclusive boundaries separately. An incomplete final hop is not analyzed. Live capture and the library snapshot job are not connected yet.
 
-The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
+The optional [tonal worker experiment](docs/experiments.md) requires Essentia and is not connected to product analysis.
 
 The experimental worker-only aubio beat tracker is not connected to the CLI or snapshots; see [progress](docs/progress.md) for its timing and qualification limits.
 
@@ -96,7 +96,7 @@ With `BEATGLASS_BUILD_SLICE=ON`, `BEATGLASS_BUILD_TONAL_SPIKE=ON`, and `BEATGLAS
 The same `CausalMusicReplay` consumes worker-delivered live `AudioBlock`s; its explicit interruption operation clears internal evidence and requires a fresh coordinator-issued epoch. The caller must also deliver revisioned clears to UI consumers. No capture backend, library snapshot, or desktop presentation is connected by this experiment. Generated synthetic tests do not establish real-music accuracy, latency, platform support, or legal clearance for distributing Essentia.
 
 
-The [Essentia dependency spike](docs/essentia-spike.md) records research builds, licensing considerations and the proposed tonal architecture; the combined CLI remains experimental.
+The [Essentia dependency spike](docs/experiments.md) records research builds, licensing considerations and the proposed tonal architecture; the combined CLI remains experimental.
 
 
 The experimental worker-only aubio beat tracker is not connected to the CLI or snapshots; see [progress](docs/progress.md) for its timing and qualification limits.

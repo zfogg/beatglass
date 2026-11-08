@@ -83,8 +83,7 @@ reference.
    ../../design/v1/DESIGN.md
    ../../design/v1/STATES.md
    ../../design/v1/REVIEW.md
-   ../essentia-spike.md
-   ../tonal-experiment.md
+   ../experiments.md
    ../issue-76-visual-implementation-audit.md
 
 .. toctree::

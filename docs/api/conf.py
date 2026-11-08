@@ -16,7 +16,7 @@ templates_path = ["_templates"]
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_sidebars = {"**": ["searchbox.html", "docsnav.html", "localtoc.html"]}
-exclude_patterns = [".worktree-*", "build", ".git", "tests/fixtures/generated"]
+exclude_patterns = [".worktree-*", "build", ".git", "tests/fixtures/generated", "docs/essentia-spike.md", "docs/tonal-experiment.md"]
 
 hawkmoth_transform_default = "javadoc"
 myst_enable_extensions = ["colon_fence", "deflist", "fieldlist", "substitution"]
