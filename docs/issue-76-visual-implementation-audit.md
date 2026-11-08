@@ -434,6 +434,8 @@ Capture-status guidance now also permits zero minimum width, keeping stopped/err
 
 The empty-state message likewise permits zero minimum width, allowing its error, stopped, and waiting guidance to wrap without expanding the visualization layout.
 
+Load-state evidence now permits zero minimum width as well, keeping Unavailable/Ready/Waiting/Idle text within the responsive status column.
+
 Capture transitions now expose a visible and accessible reset explanation when selection is cleared: stopped, starting, reacquiring, and error states each identify why the previous visualization position is no longer available.
 
 The waveform and FFT canvas now consumes the active six-theme palette at render time: the background follows the theme surface, plotted data uses the theme accent, and the selection cursor uses the theme foreground for contrast. Theme changes therefore affect the live visualization rather than only surrounding controls.
