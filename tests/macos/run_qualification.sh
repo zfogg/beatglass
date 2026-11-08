@@ -78,20 +78,21 @@ validate_bundle_executable "$tap_bundle" "beatglass-coreaudio-smoke"
 validate_bundle_executable "$recovery_bundle" "beatglass-coreaudio-recovery"
 echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
 validate_bundle_identity() {
-  local bundle="$1" expected_executable="$2" expected_identifier="$3"
-  local plist="$bundle/Contents/Info.plist" actual_executable actual_identifier package_type bundle_version
+  local bundle="$1" expected_executable="$2" expected_identifier="$3" expected_name="$4"
+  local plist="$bundle/Contents/Info.plist" actual_executable actual_identifier actual_name package_type bundle_version
   actual_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
   actual_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")"
+  actual_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$plist")"
   package_type="$(/usr/libexec/PlistBuddy -c 'Print :CFBundlePackageType' "$plist")"
   bundle_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$plist")"
-  if [[ "$actual_executable" != "$expected_executable" || "$actual_identifier" != "$expected_identifier" || "$package_type" != "APPL" || ! "$bundle_version" =~ ^[0-9]+([.][0-9]+)*$ ]]; then
+  if [[ "$actual_executable" != "$expected_executable" || "$actual_identifier" != "$expected_identifier" || "$actual_name" != "$expected_name" || "$package_type" != "APPL" || ! "$bundle_version" =~ ^[0-9]+([.][0-9]+)*$ ]]; then
     echo "Bundle identity mismatch in $plist: expected $expected_executable/$expected_identifier, got $actual_executable/$actual_identifier" >&2
     exit 1
   fi
 }
-validate_bundle_identity "$out_dir/build/beatglass-desktop.app" "beatglass-desktop" "org.beatglass.desktop"
-validate_bundle_identity "$tap_bundle" "beatglass-coreaudio-smoke" "org.beatglass.coreaudio-smoke"
-validate_bundle_identity "$recovery_bundle" "beatglass-coreaudio-recovery" "org.beatglass.coreaudio-recovery"
+validate_bundle_identity "$out_dir/build/beatglass-desktop.app" "beatglass-desktop" "org.beatglass.desktop" "Beatglass"
+validate_bundle_identity "$tap_bundle" "beatglass-coreaudio-smoke" "org.beatglass.coreaudio-smoke" "Beatglass Core Audio Smoke"
+validate_bundle_identity "$recovery_bundle" "beatglass-coreaudio-recovery" "org.beatglass.coreaudio-recovery" "Beatglass Core Audio Recovery"
 for bundle in "$out_dir/build/beatglass-desktop.app" "$tap_bundle" "$recovery_bundle"; do
   bundle_plist="$bundle/Contents/Info.plist"
   for forbidden_key in NSMicrophoneUsageDescription NSCameraUsageDescription; do
