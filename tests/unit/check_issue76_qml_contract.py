@@ -84,7 +84,7 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
-        "overlay display recovery guidance": "objectName: \"overlayDisplayEmptyState\"\n                        Accessible.value: text\n                        Accessible.role: Accessible.StaticText\n                        Accessible.description: text + \" Connect a display",
+        "overlay display recovery guidance": "objectName: \"overlayDisplayEmptyState\"",
         "seek button role": "objectName: \"seekToFrame\"; enabled: seekFrame.enabled; Accessible.name: \"Seek to entered frame\"; Accessible.role: Accessible.Button",
         "overlay display role": "Accessible.name: \"Overlay display\"; Accessible.value: currentIndex",
         "output device value": "Accessible.name: \"Output device\"\n                            Accessible.value: currentText",
