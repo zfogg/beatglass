@@ -81,4 +81,5 @@ EndpointResult enumerate_render_endpoints() {
     return {{}, error.what()};
   }
 }
+bool contains_render_endpoint(const EndpointResult& snapshot, const std::string& id) noexcept { if (id.empty() || !snapshot.error.empty()) return false; for (const auto& endpoint : snapshot.endpoints) if (endpoint.id == id) return true; return false; }
 }
