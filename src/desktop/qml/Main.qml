@@ -44,6 +44,7 @@ ApplicationWindow {
     property string persistedRecoveryOutcomeAnnouncementKey: ""
     property bool persistedRecoverySelectionActivated: false
     property string activeAnalysisOutcomeAnnouncementKey: ""
+    property string activeWorkerOutcomeAnnouncementKey: ""
     property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
@@ -647,6 +648,7 @@ ApplicationWindow {
     }
     function retryVisualizationAnalysis() {
         window.overlayPersistedDiagnosticDismissed = true
+        window.activeWorkerOutcomeAnnouncementKey = ""
         if (window.analysisJobBridge && window.analysisJobBridge.retry !== undefined && window.analysisJobBridge.canRetry) {
             window.analysisJobBridge.retry()
             window.announceVisualizationRecovery("Analysis retry queued; focus will return after a fresh accepted result.")
@@ -662,10 +664,17 @@ ApplicationWindow {
     Connections {
         target: window.analysisJobBridge
         function onStatusChanged() {
-            if (window.analysisJobBridge.status === "Complete" && window.libraryAnalysisResultReady) {
+            const status = window.analysisJobBridge.status
+            if (status === "Complete" && window.libraryAnalysisResultReady) {
+                window.activeWorkerOutcomeAnnouncementKey = ""
                 window.announceVisualizationRecovery("Fresh analysis result accepted; visualization recovery focus restored.")
-            } else if (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") {
-                window.announceVisualizationRecovery("Analysis " + window.analysisJobBridge.status.toLowerCase() + "; Retry analysis is available.")
+            } else if (status !== "Failed" && status !== "Cancelled") {
+                window.activeWorkerOutcomeAnnouncementKey = ""
+            } else if (window.activeWorkerOutcomeAnnouncementKey === status) {
+                return
+            } else if (window.analysisJobBridge.canRetry) {
+                window.activeWorkerOutcomeAnnouncementKey = status
+                window.announceVisualizationRecovery("Analysis " + status.toLowerCase() + "; Retry analysis is available.")
                 retryAnalysis.forceActiveFocus()
             }
         }

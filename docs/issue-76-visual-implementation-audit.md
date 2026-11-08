@@ -12,6 +12,8 @@ Active-job rejection is isolated from persisted-run recovery: when no persisted 
 
 The active analysis surface now gates admission through the actual worker handle: `retry()` is called only when `canRetry` is true, storage fallback requires `analysisRetryable`, and worker `Failed`/`Cancelled` status transitions announce the available Retry action and restore focus to it. This prevents a stale enabled button from claiming a retry when the worker has already accepted or cleared the job.
 
+Active worker terminal announcements are de-duplicated by status and reset as soon as a retry is admitted or the worker enters a new non-terminal state. A fresh failure or cancellation can therefore announce and restore focus again, while repeated worker notifications for the same terminal state remain silent.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
