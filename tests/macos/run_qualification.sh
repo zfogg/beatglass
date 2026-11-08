@@ -96,6 +96,12 @@ for required_path in "$desktop_binary" "$tap_bundle" "$tap_binary" "$recovery_bu
     exit 1
   fi
 done
+for native_binary in "$desktop_binary" "$tap_binary" "$recovery_binary"; do
+  if ! file -b "$native_binary" | grep -q 'Mach-O'; then
+    echo "Qualification artifact is not a native Mach-O executable: $native_binary" >&2
+    exit 1
+  fi
+done
 for bundle in "$tap_bundle" "$recovery_bundle"; do
   bundle_plist="$bundle/Contents/Info.plist"
   if [[ ! -f "$bundle_plist" ]]; then
