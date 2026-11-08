@@ -22,6 +22,7 @@ tests/standalone/run-library-smokes.ps1 -Compiler C:/path/to/g++.exe
 tests/standalone/run-library-smokes.ps1 -ContinueOnFailure
 tests/standalone/run-library-smokes.ps1 -ListCases
 tests/standalone/run-library-smokes.ps1 -SelectedCases analysis_progress,storage_config
+tests/standalone/run-library-smokes.ps1 -SelectedCases analysis_batch,analysis_capacity,analysis_direct_cancellation
 tests/standalone/run-library-smokes.ps1 -OpenSSLRoot C:/path/to/openssl
 tests/standalone/run-library-smokes.ps1 -SelectedCases storage_config -RunExisting -OutputDir C:/temp/beatglass-smokes
 ```

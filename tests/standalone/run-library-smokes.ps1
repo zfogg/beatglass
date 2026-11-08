@@ -16,6 +16,9 @@ $cases = @(
   @{ Name = "executor_cancellation"; Sources = @($executorSource, "tests/standalone/job_executor_cancel_smoke.cpp") },
   @{ Name = "executor_shutdown"; Sources = @($executorSource, "tests/standalone/job_executor_shutdown_smoke.cpp") },
   @{ Name = "analysis_runner"; Sources = @($runnerSources + "tests/standalone/analysis_runner_smoke.cpp") },
+  @{ Name = "analysis_batch"; Sources = @($runnerSources + "tests/standalone/analysis_batch_smoke.cpp") },
+  @{ Name = "analysis_capacity"; Sources = @($runnerSources + "tests/standalone/analysis_capacity_smoke.cpp") },
+  @{ Name = "analysis_direct_cancellation"; Sources = @($runnerSources + "tests/standalone/analysis_cancel_smoke.cpp") },
   @{ Name = "analysis_progress"; Sources = @($runnerSources + "tests/standalone/analysis_progress_smoke.cpp") },
   @{ Name = "analysis_cancellation"; Sources = @($runnerSources + "tests/standalone/analysis_postverify_cancel_smoke.cpp") },
   @{ Name = "analysis_operation"; Sources = @("tests/standalone/analysis_operation_smoke.cpp") },
@@ -36,7 +39,12 @@ $cases = @(
 )
 if (-not [string]::IsNullOrWhiteSpace($OpenSSLRoot)) { $cases += @{ Name = "file_fingerprint"; Sources = @("lib/library/file_fingerprint.cpp", "tests/standalone/file_fingerprint_smoke.cpp"); Extra = @("-I$OpenSSLRoot/include", "-L$OpenSSLRoot/lib", "-lcrypto") } }
 if ($ListCases) { $cases | ForEach-Object { $_.Name }; exit 0 }
-if ($SelectedCases.Count -gt 0) { $cases = @($cases | Where-Object { $SelectedCases -contains $_.Name }) }
+if ($SelectedCases.Count -gt 0) {
+  $available = @($cases.Name)
+  $unknown = @($SelectedCases | Where-Object { $available -notcontains $_ })
+  if ($unknown.Count -gt 0) { throw "Unknown smoke case(s): $($unknown -join ', ')" }
+  $cases = @($cases | Where-Object { $SelectedCases -contains $_.Name })
+}
 if ($cases.Count -eq 0) { throw "No smoke cases selected" }
 
 $passed = [System.Collections.Generic.List[string]]::new()
