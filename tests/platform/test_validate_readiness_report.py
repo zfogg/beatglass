@@ -284,6 +284,19 @@ class ReadinessReportContractTest(unittest.TestCase):
             self.assertIn("completed scenario is missing evidence", errors)
             self.assertIn("incomplete scenario must not claim evidence", errors)
 
+    def test_scenario_evidence_must_be_manifest_artifact(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["scenarios"][0]["evidence"] = "manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("scenario evidence is not listed as an artifact", errors)
+
     def test_report_inventory_must_match_manifest(self):
         source = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as directory:

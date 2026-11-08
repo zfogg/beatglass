@@ -201,6 +201,8 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
             if not evidence:
                 continue
             expected_evidence_ids.add(scenario_id)
+            if evidence not in manifest_paths:
+                errors.append(f"{platform}: scenario evidence is not listed as an artifact: {evidence}")
             path = bundles / platform / str(evidence)
             if not path.resolve().is_relative_to(platform_root):
                 errors.append(f"{platform}: scenario evidence escapes retained bundle: {evidence}")
