@@ -560,6 +560,8 @@ The announcement lifecycle now also updates on analysis cancellation, endpoint c
 
 Recovery announcements now share a helper that restores focus to the visualization canvas. Cancellation, endpoint transitions, source/discontinuity clears, and playback recovery therefore leave keyboard users at the next actionable visualization target while preserving the same status wording.
 
+Retry controls now invoke the real analysis/recovery bridge through one helper. The UI announces queued admission while leaving focus on the retry control, then restores visualization focus only after the bridge reports a fresh completed result and the accepted identity is ready.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.

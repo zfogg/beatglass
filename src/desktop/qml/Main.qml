@@ -294,6 +294,27 @@ ApplicationWindow {
         if (typeof visualizationCanvas !== "undefined")
             visualizationCanvas.forceActiveFocus()
     }
+    function retryVisualizationAnalysis() {
+        if (window.analysisJobBridge && window.analysisJobBridge.retry !== undefined) {
+            window.analysisJobBridge.retry()
+            window.announceVisualizationRecovery("Analysis retry queued; focus will return after a fresh accepted result.")
+            return true
+        }
+        if (typeof storageRecovery !== "undefined" && storageRecovery.retryAnalysis !== undefined) {
+            storageRecovery.retryAnalysis()
+            window.announceVisualizationRecovery("Analysis retry admitted; focus will return after a fresh accepted result.")
+            return true
+        }
+        return false
+    }
+    Connections {
+        target: window.analysisJobBridge
+        function onStatusChanged() {
+            if (window.analysisJobBridge.status === "Complete" && window.libraryAnalysisResultReady) {
+                window.announceVisualizationRecovery("Fresh analysis result accepted; visualization recovery focus restored.")
+            }
+        }
+    }
     function clearVisualizationPositionAndFocus() {
         visualizationCanvas.selectedPosition = -1
         visualizationCanvas.requestPaint()
@@ -1001,7 +1022,7 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 Label { text: visible ? storageRecovery.analysisStatus : ""; Accessible.name: "Analysis lifecycle status"; Layout.fillWidth: true }
                                 Button { objectName: "cancelAdmittedAnalysis"; text: "Cancel analysis"; activeFocusOnTab: true; visible: parent.visible && storageRecovery.cancelAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running"); onClicked: { storageRecovery.cancelAnalysis(); window.announceVisualizationRecovery("Analysis cancelled; waiting for a replacement accepted snapshot.") }; Accessible.name: "Cancel admitted analysis"; Accessible.description: "Cancel and keep keyboard focus on the analysis recovery controls." }
-                                Button { objectName: "retryAdmittedAnalysis"; text: "Retry analysis"; activeFocusOnTab: true; visible: parent.visible && storageRecovery.retryAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled"); onClicked: storageRecovery.retryAnalysis(); Accessible.name: "Retry admitted analysis"; Accessible.description: "Retry with fresh evidence and keep keyboard focus on the analysis recovery controls." }
+                                Button { objectName: "retryAdmittedAnalysis"; text: "Retry analysis"; activeFocusOnTab: true; visible: parent.visible && storageRecovery.retryAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled"); onClicked: window.retryVisualizationAnalysis(); Accessible.name: "Retry admitted analysis"; Accessible.description: "Retry with fresh evidence and restore visualization focus after the fresh result is accepted." }
                             }
                             RowLayout {
                                 objectName: "analysisCacheLookupControls"
@@ -1072,7 +1093,7 @@ ApplicationWindow {
                                 Accessible.name: "Retry analysis batch"
                                 Accessible.description: "Retry cancelled or failed analysis items retained in the current batch."
                                 ToolTip.text: Accessible.description
-                                onClicked: window.analysisJobBridge.retryBatch()
+                                onClicked: { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result.") }
                             }
                             Button {
                                 objectName: "cancelAnalysisBatch"
@@ -1093,7 +1114,7 @@ ApplicationWindow {
                                 enabled: visible && window.analysisJobBridge.canRetry
                                 Accessible.name: "Retry analysis"
                                 Accessible.description: "Retry the last source-attributed analysis operation after cancellation or failure."
-                                onClicked: window.analysisJobBridge.retry()
+                                onClicked: window.retryVisualizationAnalysis()
                                 ToolTip.text: Accessible.description
                             }
                             Button {
