@@ -94,7 +94,7 @@ TestCase {
         let display = findChild(app, "overlayDisplay")
         let size = findChild(app, "overlaySize")
         compare(toggle.Accessible.description, "Allow pointer input to pass through the overlay window")
-        compare(findChild(app, "overlayOpacity").Accessible.description, "Adjust the overlay window opacity")
+        compare(findChild(app, "overlayOpacity").Accessible.description, "Adjust the overlay window opacity; current value 90%")
         compare(display.Accessible.description, "Choose the display where the overlay is shown")
         compare(size.Accessible.description, "Choose the overlay window size")
         compare(findChild(app, "overlayOpacityValue").Accessible.name, "Current overlay opacity")
@@ -103,6 +103,7 @@ TestCase {
         display.activated(0); compare(fakeOverlay.selectedScreen, 0); compare(display.currentIndex, 0)
         size.currentIndex = 2; size.activated(2); compare(fakeOverlay.requestedWidth, 430)
         fakeOverlay.opacity = 0.6; tryCompare(findChild(app, "overlayOpacity"), "value", 0.6)
+        compare(findChild(app, "overlayOpacity").Accessible.description, "Adjust the overlay window opacity; current value 60%")
         hide.clicked(); compare(fakeOverlay.hides, 1); tryCompare(app, "visible", true)
         app.destroy()
     }
