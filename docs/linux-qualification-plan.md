@@ -4,6 +4,7 @@ This plan records the evidence still required before Linux support can be claime
 
 ## Runnable preparation checks
 
+- Run `python tests/qualification/linux_environment_report.py` and retain its JSON output. On non-Linux hosts it exits with status 2 and reports `native_linux_claim: false`; that is an environment blocker, not a failed product test.
 - Build with `-DBEATGLASS_BUILD_PIPEWIRE=ON` and run the complete CTest suite.
 - Run the isolated virtual-sink graph tests for capture, source replacement, wrong-link injection, interruption, and bounded queue overflow.
 - Run the strict API documentation checks and record the indexed header count.
