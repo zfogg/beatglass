@@ -18,6 +18,17 @@ TEST_CASE("analysis admission rejects incompatible decoder snapshots") {
   CHECK_FALSE(rejected.analysis_reserved);
   CHECK_FALSE(rejected.cached.has_value());
 }
+TEST_CASE("retryable recovery looks up one persisted run by ID") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  const beatglass::library_detail::CacheKey key{"recovery-id", "engine", "config", "offline"};
+  cache.begin("recovery-id", key, "/music/recovery.flac", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("recovery-id", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  const auto found = cache.retryable_run("recovery-id");
+  REQUIRE(found);
+  CHECK(found->source_path == "/music/recovery.flac");
+  CHECK(found->decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
+  CHECK_FALSE(cache.retryable_run("missing-recovery-id"));
+}
 TEST_CASE("analysis admission accepts a compatible snapshot cache hit") {
   beatglass::library_detail::SqliteCache cache(":memory:");
   beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
