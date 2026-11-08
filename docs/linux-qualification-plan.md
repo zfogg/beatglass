@@ -2,6 +2,8 @@
 
 This plan records the evidence still required before Linux support can be claimed. WSL, CI, headless sessions, and virtual PipeWire graphs are useful development checks but do not satisfy the native desktop gates.
 
+Retain `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-capture-evidence.json`, `native-recovery-evidence.json`, `native-output-evidence.json`, and `native-display-evidence.json` with each native run.
+
 ## Runnable preparation checks
 
 - Build with `-DBEATGLASS_BUILD_PIPEWIRE=ON` and run the complete CTest suite.
