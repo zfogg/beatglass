@@ -448,7 +448,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; wrapMode: Text.WordWrap }
+                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability"; Accessible.description: text; wrapMode: Text.WordWrap }
                 Item { Layout.fillHeight: true }
             }
         }
