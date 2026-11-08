@@ -96,7 +96,9 @@ TEST_CASE("Core Audio FIFO accumulates loss across recovered queue overflow", "[
   REQUIRE(fifo.push(input, 0, false));
   REQUIRE(fifo.pop(block));
   CHECK(block.discontinuity);
-  CHECK(block.first_frame == 32);
+  // Each input block contains one frame (two samples / two channels); the
+  // two rejected pushes therefore advance the next position to frame 18.
+  CHECK(block.first_frame == 18);
   CHECK(fifo.dropped_frames() == 2);
 }
 
