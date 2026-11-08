@@ -74,6 +74,13 @@ TEST_CASE("cancellation at EOF wins and rewind starts a fresh epoch") {
  CHECK(replay.block.epoch == 12);
  CHECK(replay.block.first_frame == 0);
 }
+
+TEST_CASE("file reader rejects source mutation before the next read") {
+ WaveFixture fixture; FileReader reader(fixture.path, 21); std::array<float,2> samples{};
+ { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
+ CHECK_THROWS_WITH(reader.read(samples), "Audio source changed during read");
+ CHECK_THROWS_WITH(reader.read(samples), "File reader failed");
+}
 TEST_CASE("seek refuses epoch overflow") {
  WaveFixture fixture; FileReader reader(fixture.path, std::numeric_limits<std::uint64_t>::max());
  CHECK_THROWS_AS(reader.seek(0), std::overflow_error);
