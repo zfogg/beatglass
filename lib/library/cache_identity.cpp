@@ -66,7 +66,10 @@ FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::
   // An unreadable path is not proof that the catalog entry is stale. Keep it
   // available with its diagnostic so a transient permission/device failure can
   // be retried without losing the user's catalog row.
-  if (status == FingerprintStatus::changed) cache.remove_entry(path);
+  if (status == FingerprintStatus::changed) {
+    cache.remove_entry(path);
+    if (diagnostic) *diagnostic = "content identity changed; catalog entry removed";
+  }
   return status;
 }
 
@@ -76,6 +79,8 @@ bool prune_missing_collection_entry(SqliteCache& cache, const std::filesystem::p
   const bool exists = std::filesystem::exists(path, ec);
   if (ec) { if (diagnostic) *diagnostic = ec.message(); return false; }
   if (exists) return false;
-  return cache.remove_entry(path.string());
+  const bool removed = cache.remove_entry(path.string());
+  if (removed && diagnostic) *diagnostic = "source path missing; catalog entry removed";
+  return removed;
 }
 }
