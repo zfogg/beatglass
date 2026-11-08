@@ -39,7 +39,7 @@ executable with paths relative to the qualification output. Preserve that file
 with the logs and verify it later without rebuilding or rerunning native tests:
 
 ```powershell
-pwsh -File tests/windows/verify_qualification_artifacts.ps1 build/windows-qualification
+pwsh -File tests/windows/verify_artifact_manifest.ps1 -Manifest build/windows-qualification/qualification-artifacts.sha256
 ```
 
 Run the fixture regression on a Windows development host with:
