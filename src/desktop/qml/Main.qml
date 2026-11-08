@@ -1037,6 +1037,14 @@ ApplicationWindow {
                     ToolTip.text: "Data available in the selected waveform or FFT view"
                     Layout.fillWidth: true
                 }
+                RowLayout {
+                    objectName: "visualizationSelectionControls"
+                    Layout.fillWidth: true
+                    Accessible.name: "Visualization position selection"
+                    Accessible.value: visualizationCanvas.selectedPosition < 0 ? "none" : Math.round(visualizationCanvas.selectedPosition * 100) + "% selected"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Review or clear the selected waveform or FFT position."
+                    ToolTip.text: "Visualization position selection and reset"
                 Label {
                     objectName: "visualizationSelectionStatus"
                     text: visualizationCanvas.selectedPosition < 0 ? "No visualization position selected" : "Selected visualization position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%"
@@ -1058,6 +1066,7 @@ ApplicationWindow {
                         visualizationCanvas.selectedPosition = -1
                         visualizationCanvas.requestPaint()
                     }
+                }
                 }
                 Label {
                     objectName: "visualizationRevisionStatus"
