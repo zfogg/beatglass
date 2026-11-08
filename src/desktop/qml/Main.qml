@@ -55,6 +55,20 @@ ApplicationWindow {
             ? window.playbackBridge.resume()
             : window.playbackBridge.pause()
     }
+    Shortcut {
+        objectName: "visualizationResumeShortcut"
+        sequence: "Ctrl+Alt+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.playbackBridge !== null && window.playbackBridge.state === "Paused"
+        onActivated: window.playbackBridge.resume()
+    }
+    Shortcut {
+        objectName: "visualizationStopShortcut"
+        sequence: "Ctrl+Alt+Shift+S"
+        context: Qt.ApplicationShortcut
+        enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped"
+        onActivated: window.playbackBridge.stop()
+    }
     Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus() } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
