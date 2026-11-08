@@ -1507,7 +1507,7 @@ ApplicationWindow {
                                 modal: true
                                 standardButtons: Dialog.Ok | Dialog.Cancel
                                 Accessible.name: "Discard saved analysis run confirmation"
-                                Accessible.description: "Confirm to remove only the selected retry record. The source audio file is never changed. Cancel returns focus to the discard control."
+                                Accessible.description: "Confirm to remove only the selected retry record. Cancel is focused first; press Tab to reach the destructive OK action. The source audio file is never changed. Cancel returns focus to the discard control."
                                 contentItem: Label {
                                     text: "This removes only the retry record. The source audio file is not changed."
                                     wrapMode: Text.WordWrap
