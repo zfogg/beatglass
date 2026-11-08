@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/analysis_runner.hpp"
+#include <chrono>
 #include <thread>
 using namespace beatglass::library;
 using namespace beatglass::library_detail;
@@ -8,3 +9,8 @@ namespace { void wait_for_terminal(const std::shared_ptr<JobHandle>& handle) { f
 TEST_CASE("analysis runner completes verified work and reports progress") { JobExecutor executor(1); AnalysisRunner runner(executor); auto h=runner.submit(op(true)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::completed); CHECK(h->frames()==12); executor.shutdown(); }
 TEST_CASE("analysis runner fails closed when verification rejects input") { JobExecutor executor(1); AnalysisRunner runner(executor); auto h=runner.submit(op(false)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
 TEST_CASE("analysis runner fails closed on empty serialization") { JobExecutor executor(1); AnalysisRunner runner(executor); auto empty=op(true); empty.serialize=[] { return std::string{}; }; auto h=runner.submit(std::move(empty)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
+TEST_CASE("analysis runner retains cancellable worker operation") {
+  beatglass::library_detail::JobExecutor executor(1); beatglass::library::AnalysisRunner runner(executor); std::stop_source gate;
+  beatglass::library::AnalysisOperation op; op.source.size_bytes=10; op.identity.mode="offline"; op.serialize=[] { return std::string("x"); }; op.verify=[](std::stop_token){ return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match,{}}; };
+  auto handle=runner.submit(std::move(op)); REQUIRE(handle); handle->cancel(); REQUIRE((handle->state()==beatglass::library_detail::TrackedState::cancelled || handle->state()==beatglass::library_detail::TrackedState::completed));
+}
