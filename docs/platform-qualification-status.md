@@ -196,3 +196,5 @@ The end-to-end local handoff command is `python tests/platform/run_readiness_han
 `handoff_check_errors` is a required report field: it is always a list of nonempty strings (possibly empty when no status matrix was supplied), so consumers can distinguish a validated handoff artifact from one whose readiness checks were never recorded. With `--check-docs`, the command also runs `check_qualification_handoff.py` and records `documentation_check_errors`, proving the executable qualification procedures and status contract are present before a handoff is reviewed.
 
 `documentation_check_errors` is also required and typed as a list of nonempty strings. Generated reports initialize both error lists explicitly; a consumer must reject reports that omit either audit trail.
+
+The report consumer is `python tests/platform/consume_readiness_handoff.py <report.json>`. It validates the complete report contract and rejects `PENDING` (including all reports generated before native gates pass); only an explicitly validated `READY` report can be accepted by downstream automation.
