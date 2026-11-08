@@ -263,7 +263,7 @@ To create that retained handoff bundle from generated artifacts, run `python tes
 
 To feed a canonical bundle into release/review automation, run `python tests/platform/review_release_decision.py <bundle-root> <decision.json>`. The decision artifact records `ACCEPTED` or conservative `PENDING`, the exact report SHA-256, and machine-readable reasons. Missing, detached, or native-pending evidence can never be promoted by this consumer. The end-to-end handoff can emit the same artifact with `--review-json <review.json> --decision-output <decision.json>`; a pending decision is returned as a nonzero handoff result for release automation.
 
-The release boundary is executable: `python tests/platform/promote_review_bundle.py <bundle-root> <release-root>` copies the canonical report and packet only after the decision consumer returns `ACCEPTED`; it also writes `release-manifest.json` with both promoted artifact hashes. A `PENDING` bundle leaves the release destination untouched.
+The release boundary is executable: `python tests/platform/promote_review_bundle.py <bundle-root> <release-root>` copies the canonical report and packet only after the decision consumer returns `ACCEPTED`; it also writes and verifies `release-manifest.json` with both promoted artifact hashes. A `PENDING` bundle leaves the release destination untouched.
 
 Downstream release jobs must verify the promoted artifact with `python tests/platform/verify_release_manifest.py <release-root>`. The verifier recomputes both hashes, requires manifest schema 1 and `ACCEPTED`, and rejects missing or modified files before publication.
 
