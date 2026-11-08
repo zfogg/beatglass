@@ -22,6 +22,14 @@ cmake --build build --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
+For a targeted build, build the aggregate test target first so every
+CTest-discovered executable exists:
+
+```sh
+cmake --build build --target beatglass_all_tests --config Debug
+ctest --test-dir build -C Debug --output-on-failure
+```
+
 The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For example on Ubuntu 22.04:
 
 ```sh
