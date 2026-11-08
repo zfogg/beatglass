@@ -25,6 +25,18 @@ ApplicationWindow {
     readonly property var themeForegrounds: ["#20242b", "#f4f6fb", "#ffffff", "#f4eaff", "#eaf4ff", "#fffbe6"]
     readonly property var themeAccentColors: ["#3f51b5", "#90caf9", "#ffff00", "#c084fc", "#60a5fa", "#facc15"]
     property int selectedThemeIndex: themePreferencesBridge ? themePreferencesBridge.themeIndex : 0
+    // Keep the visual selection synchronized when preferences are restored or
+    // changed by another settings surface. Assignments from the controls below
+    // intentionally remain immediate; this connection handles external changes.
+    Connections {
+        target: window.themePreferencesBridge
+        function onThemeIndexChanged() {
+            const index = Math.max(0, Math.min(window.themeNames.length - 1,
+                                               window.themePreferencesBridge.themeIndex))
+            window.selectedThemeIndex = index
+            window.selectedTheme = window.themeNames[index]
+        }
+    }
     Component.onCompleted: {
         if (overlayBridge) overlayBridge.attach(djOverlay, window)
     }

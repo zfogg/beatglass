@@ -14,6 +14,11 @@ TestCase {
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
     QtObject {
+        id: fakeThemePreferences
+        property int themeIndex: 0
+        property bool reduceMotion: false
+    }
+    QtObject {
         id: fakeOverlay
         property bool available: true
         property bool clickThrough: false
@@ -35,6 +40,7 @@ TestCase {
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
+    Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
         fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = -1; fakeOverlay.requestedWidth = 0
         let app = shellWithOverlay.createObject(null)
@@ -123,6 +129,21 @@ TestCase {
         keyClick(Qt.Key_Return)
         compare(app.selectedTheme, "Yellow")
         compare(app.selectedThemeIndex, 5)
+        app.destroy()
+    }
+    function test_themeSelectionFollowsExternalPreferenceChanges() {
+        fakeThemePreferences.themeIndex = 0
+        let app = shellWithPreferences.createObject(null)
+        verify(app !== null)
+        compare(app.selectedThemeIndex, 0)
+        compare(app.selectedTheme, "Light")
+        fakeThemePreferences.themeIndex = 4
+        tryCompare(app, "selectedThemeIndex", 4)
+        compare(app.selectedTheme, "Blue")
+        compare(findChild(app, "themeSelector").currentIndex, 4)
+        fakeThemePreferences.themeIndex = 99
+        tryCompare(app, "selectedThemeIndex", 5)
+        compare(app.selectedTheme, "Yellow")
         app.destroy()
     }
     function test_realFolderNavigationAndSelection() {
