@@ -167,7 +167,7 @@ stale input and storage error. Its worker owns the cancellation-versus-commit
 decision; file verification accepts cooperative cancellation before that
 decision. The interface and helper do not implement SQLite transactions.
 
-.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp include/beatglass/library/analysis_operation.hpp include/beatglass/library/analysis_runner.hpp include/beatglass/library/analysis_commit.hpp include/beatglass/library/detail/file_fingerprint.hpp include/beatglass/library/detail/job_executor.hpp include/beatglass/library/detail/sqlite_cache.hpp include/beatglass/library/detail/cache_identity.hpp
+.. cpp:autodoc:: include/beatglass/library/jobs.hpp include/beatglass/library/job_lifecycle.hpp include/beatglass/library/store.hpp include/beatglass/library/analysis_operation.hpp include/beatglass/library/analysis_runner.hpp include/beatglass/library/analysis_commit.hpp include/beatglass/library/detail/*.hpp
 
 Desktop application internals
 -----------------------------
