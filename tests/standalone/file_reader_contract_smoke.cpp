@@ -34,6 +34,11 @@ int main() {
     try { (void)reader.read(std::span<float>{}); }
     catch (const std::invalid_argument&) { empty_buffer_rejected = true; }
     assert(empty_buffer_rejected);
+    std::stop_source cancelled_read;
+    cancelled_read.request_stop();
+    std::vector<float> cancelled_samples(2);
+    const auto cancelled = reader.read(cancelled_samples, cancelled_read.get_token());
+    assert(cancelled.status == FileReadStatus::cancelled);
     std::vector<float> partial_samples(2);
     const auto partial_first = reader.read(partial_samples);
     assert(partial_first.status == FileReadStatus::data && partial_first.block.samples.size() == 2 && partial_first.block.first_frame == 0);
