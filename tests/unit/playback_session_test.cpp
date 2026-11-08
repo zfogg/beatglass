@@ -19,3 +19,9 @@ TEST_CASE("source replacement resets the queue cursor and retires old deliveries
   CHECK_FALSE(session.accept(4, 0)); REQUIRE(session.accept(5, 0));
   CHECK_FALSE(session.replace(5));
 }
+TEST_CASE("source replacement reacquires a paused session for the new source") {
+  PlaybackSession session; REQUIRE(session.start(9)); REQUIRE(session.pause());
+  REQUIRE(session.replace(10));
+  CHECK(session.state() == PlaybackState::playing);
+  CHECK_FALSE(session.accept(9, 0)); REQUIRE(session.accept(10, 0));
+}
