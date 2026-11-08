@@ -237,6 +237,8 @@ The same checklist can be exported during handoff with `--review-output <review.
 
 The exported checklist includes all four audit-error channels (`generation_errors`, `handoff_check_errors`, `documentation_check_errors`, and `ingestion_errors`) before the platform scenario/artifact sections, giving reviewers an actionable reason for every pending handoff.
 
+It also displays the native-required flag and each platform’s support status, making an inconsistent transition visible before strict consumer acceptance.
+
 Use `--require-ready` when the checklist is an acceptance gate; it exits nonzero for `PENDING`. Without that flag, checklist export remains informational and never changes the report state.
 
 Strict review also invokes the downstream consumer, so malformed audit trails, unpassed scenarios, missing roles, experimental support, or native-required state cannot pass merely by changing the top-level gate.
