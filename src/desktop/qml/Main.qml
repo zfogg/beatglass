@@ -2450,6 +2450,21 @@ ApplicationWindow {
                     Layout.fillWidth: true
                 }
                 Label {
+                    objectName: "overlaySettingsSummary"
+                    text: "Overlay settings: "
+                        + (window.overlayBridge && window.overlayBridge.displayName !== "" ? window.overlayBridge.displayName : "display unavailable")
+                        + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex]
+                        + " · " + (window.overlayBridge ? Math.round(window.overlayBridge.opacity * 100) : 90) + "% opacity"
+                        + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
+                    Accessible.name: "Overlay settings summary"
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Current overlay display, size, opacity, and recovery state."
+                    ToolTip.text: "Current overlay display, size, opacity, and recovery state"
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "overlayPersistedRecoveryDiagnostic"
                     visible: window.overlayBridge !== null && !window.overlayBridge.available
                         && typeof storageRecovery !== "undefined"
