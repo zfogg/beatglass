@@ -463,3 +463,5 @@ The inline Clear position action now shares the themed surface, label contrast, 
 Generation and revision status now use the theme foreground and compact typography tokens, keeping provenance evidence legible beside the live data state on narrow screens.
 
 Capture-status guidance now uses the theme foreground in normal operation and the existing error tint when capture fails, with compact typography for narrow layouts.
+
+The selection status/action row now reduces spacing in compact headers, preserving room for both the current position and its reset affordance without changing keyboard order.
