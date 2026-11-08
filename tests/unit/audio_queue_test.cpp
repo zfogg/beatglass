@@ -9,6 +9,12 @@
 #include <atomic>
 #include <thread>
 using namespace beatglass;
+TEST_CASE("queue rejects blocks without a source epoch") {
+  AudioQueue<3, 4> q; std::array<float, 1> samples{1};
+  AudioBlock input{{44100, 1}, 0, 0, 0, false, samples};
+  CHECK_FALSE(q.push(input));
+  CHECK(q.dropped_frames() == 1);
+}
 TEST_CASE("queue preserves data and wraps") {
   AudioQueue<3, 4> q; AudioQueue<3, 4>::Block out;
   std::array<float, 4> samples{1, 2, 3, 4};
