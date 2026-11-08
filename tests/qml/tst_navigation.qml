@@ -98,6 +98,18 @@ TestCase {
         hide.clicked(); compare(fakeOverlay.hides, 1); tryCompare(app, "visible", true)
         app.destroy()
     }
+    function test_overlayAvailabilityFailureRestoresControls() {
+        fakeOverlay.hides = 0; fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        verify(app !== null)
+        let show = findChild(app, "showOverlay")
+        show.clicked(); tryCompare(app, "visible", false)
+        fakeOverlay.available = false
+        tryCompare(fakeOverlay, "hides", 1)
+        tryCompare(app, "visible", true)
+        app.destroy()
+        fakeOverlay.available = true
+    }
     function test_closingShellHidesOverlay() {
         fakeOverlay.hides = 0
         let app = shellWithOverlay.createObject(null)
