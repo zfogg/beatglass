@@ -48,7 +48,7 @@ int main() {
   require(handle->state() == TrackedState::completed, "progress operation failed");
   {
     std::lock_guard lock(mutex);
-    require(observed == 0 && total == 1234, "operation progress callback was not propagated");
+    require(observed == 1234 && total == 1234, "final operation progress was not propagated");
   }
   require(handle->frames() == 1234, "tracked final progress was not propagated");
   executor.shutdown();
