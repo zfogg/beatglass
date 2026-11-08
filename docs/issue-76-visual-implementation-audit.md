@@ -92,6 +92,8 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Playback availability now includes its current recovery text in the accessible name and value, completing the unavailable-build status path.
+
 Playback seek limitation guidance now includes its current text in the accessible name, making the frame-based recovery constraint discoverable during active playback.
 
 Native playback error announcements now include their current error text in the accessible name, making output recovery failures actionable without requiring visual inspection.

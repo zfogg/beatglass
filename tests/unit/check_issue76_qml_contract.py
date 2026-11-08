@@ -84,6 +84,7 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "playback availability value": "Accessible.name: \"Playback availability: \" + text",
         "seek limitation dynamic value": "objectName: \"playbackSeekLimitation\"; Accessible.name: \"Playback seek limitation: \" + text",
         "native playback error value": "objectName: \"nativePlaybackError\"; Accessible.name: \"Native playback error: \" + text",
         "overlay tempo value": "objectName: \"overlayTempo\"",
