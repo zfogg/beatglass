@@ -173,6 +173,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                          for row in rows]
     ready_platforms = sum(item["ready"] for item in platform_failures)
     not_ready_platforms = [item["platform"] for item in platform_failures if not item["ready"]]
+    failure_summary_consistent = [item["platform"] for item in platform_failures] == [row["platform"] for row in rows]
     errors = [error for row in rows for error in row["errors"]]
     if not platform_summary_consistent:
         errors.append("status matrix must contain exactly Windows, macOS, and Linux rows")
@@ -191,13 +192,14 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     return {"platforms": rows, "platform_count": len(platforms), "expected_platforms": expected_platforms,
             "platform_summary_consistent": platform_summary_consistent,
             "platform_failure_summary": platform_failures,
+            "failure_summary_consistent": failure_summary_consistent,
             "ready_platform_count": ready_platforms,
             "not_ready_platforms": not_ready_platforms,
             "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
-            "ready": not errors and platform_summary_consistent and ready_platforms == len(rows)}
+            "ready": not errors and platform_summary_consistent and failure_summary_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:

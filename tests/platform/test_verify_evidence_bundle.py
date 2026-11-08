@@ -237,6 +237,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["ready_platform_count"], 0)
             self.assertFalse(result["all_platforms_ready"])
             self.assertEqual(result["not_ready_platforms"], ["windows"])
+            self.assertTrue(result["failure_summary_consistent"])
 
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:
