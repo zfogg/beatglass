@@ -38,6 +38,7 @@ def main() -> int:
         "parent folder accessible name": "Accessible.name: \"Go to parent folder\"",
         "browser keyboard guidance": "Use Up and Down to select an entry",
         "library empty state role": "Accessible.role: Accessible.StaticText",
+        "visualization status role": "Accessible.name: \"Visualization data status\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
