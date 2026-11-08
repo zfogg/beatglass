@@ -69,6 +69,12 @@ int main() {
           "M4A extension was incorrectly advertised");
   require(beatglass::library::browse(dir.path, "voice").entries.empty(),
           "AAC extension was incorrectly advertised");
+  std::filesystem::rename(dir.path / "Alpha.mp3", dir.path / "Alpha.txt");
+  require(beatglass::library::browse(dir.path, "alpha").entries.empty(),
+          "unsupported extension mutation remained visible");
+  std::filesystem::rename(dir.path / "Alpha.txt", dir.path / "Alpha.mp3");
+  require(beatglass::library::browse(dir.path, "alpha").entries.size() == 1,
+          "supported extension restoration was not visible");
   const auto empty = beatglass::library::browse(dir.path, "empty");
   require(empty.entries.size() == 1 && empty.entries[0].bytes == 0 && empty.entries[0].format == "WAV",
           "zero-byte supported source metadata was not retained");
