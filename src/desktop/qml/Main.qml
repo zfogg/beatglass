@@ -1368,6 +1368,7 @@ ApplicationWindow {
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
+                                id: retryAnalysisBatchButton
                                 activeFocusOnTab: true
                                 text: "Retry batch"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.retryBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
@@ -1375,16 +1376,17 @@ ApplicationWindow {
                                 Accessible.name: "Retry analysis batch"
                                 Accessible.description: "Retry cancelled or failed analysis items retained in the current batch."
                                 ToolTip.text: Accessible.description
-                                onClicked: { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result.") }
+                                onClicked: { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result."); retryAnalysisBatchButton.forceActiveFocus() }
                             }
                             Button {
                                 objectName: "discardAnalysisBatch"
+                                id: discardAnalysisBatchButton
                                 activeFocusOnTab: true
                                 text: "Discard batch"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.discardBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
                                 Accessible.name: "Discard analysis batch"
-                                Accessible.description: "Clear the terminal batch recovery state without changing source audio. Confirmation is required."
+                                Accessible.description: "Clear the terminal batch recovery state without changing source audio. Confirmation is required; focus returns here after the dialog."
                                 ToolTip.text: Accessible.description
                                 onClicked: discardAnalysisBatchDialog.open()
                             }
@@ -1394,7 +1396,8 @@ ApplicationWindow {
                                 title: "Discard analysis batch?"
                                 standardButtons: Dialog.Ok | Dialog.Cancel
                                 contentItem: Label { text: "This clears the retained batch recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis batch confirmation"; Accessible.role: Accessible.StaticText }
-                                onAccepted: { window.analysisJobBridge.discardBatch(); window.announceVisualizationRecovery("Analysis batch recovery discarded; focus remains on the recovery controls.") }
+                                onAccepted: { window.analysisJobBridge.discardBatch(); window.announceVisualizationRecovery("Analysis batch recovery discarded; focus remains on the recovery controls."); discardAnalysisBatchButton.forceActiveFocus() }
+                                onRejected: discardAnalysisBatchButton.forceActiveFocus()
                             }
                             Button {
                                 objectName: "cancelAnalysisBatch"
