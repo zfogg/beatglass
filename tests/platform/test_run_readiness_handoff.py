@@ -26,4 +26,6 @@ class ReadinessHandoffTest(unittest.TestCase):
             status.write_text("| Windows | prep | gates |\n| macOS | prep | gates |\n| Linux | prep | gates |\n", encoding="utf-8")
             errors = handoff.run(bundles, output, status, max_age_hours=100000)
             self.assertTrue(any("required scenarios are not PASS" in error for error in errors))
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(report["handoff_check_errors"])
 
