@@ -18,6 +18,17 @@ TEST_CASE("analysis admission rejects incompatible decoder snapshots") {
   CHECK_FALSE(rejected.analysis_reserved);
   CHECK_FALSE(rejected.cached.has_value());
 }
+TEST_CASE("retryable recovery looks up one persisted run by ID") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  const beatglass::library_detail::CacheKey key{"recovery-id", "engine", "config", "offline"};
+  cache.begin("recovery-id", key, "/music/recovery.flac", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("recovery-id", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  const auto found = cache.retryable_run("recovery-id");
+  REQUIRE(found);
+  CHECK(found->source_path == "/music/recovery.flac");
+  CHECK(found->decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
+  CHECK_FALSE(cache.retryable_run("missing-recovery-id"));
+}
 TEST_CASE("analysis admission accepts a compatible snapshot cache hit") {
   beatglass::library_detail::SqliteCache cache(":memory:");
   beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
@@ -146,6 +157,25 @@ TEST_CASE("coordinator cancellation does not publish a stale result") {
   for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
   CHECK(handle->state() == beatglass::library_detail::TrackedState::cancelled);
   CHECK_FALSE(published.load());
+  const auto recovered = coordinator.storage().retryable_run("cancel-run");
+  REQUIRE(recovered);
+  CHECK(recovered->source_path == "track.wav");
+}
+TEST_CASE("decoder failure retains a retryable recovery record") {
+  beatglass::library::AnalysisCoordinator coordinator;
+  REQUIRE(coordinator.open_storage({":memory:"}));
+  beatglass::library::AnalysisOperation op;
+  op.source.path = "broken.wav"; op.source.content_hash = "broken-hash";
+  op.identity = {"broken-hash", "engine", "config", "offline"}; op.decoder_snapshot = beatglass::library::kFileDecoderSnapshot;
+  op.decode = [](std::stop_token, const auto&) -> std::string { throw std::runtime_error("decoder interrupted"); };
+  op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  auto handle = coordinator.submit("decoder-failure", std::move(op));
+  REQUIRE(handle);
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  CHECK(handle->state() == beatglass::library_detail::TrackedState::failed);
+  const auto recovered = coordinator.storage().retryable_run("decoder-failure");
+  REQUIRE(recovered);
+  CHECK(recovered->source_path == "broken.wav");
 }
 TEST_CASE("cancelled analysis can be retried with a compatible snapshot") {
   beatglass::library_detail::SqliteCache cache(":memory:");

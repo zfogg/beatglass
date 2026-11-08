@@ -96,8 +96,20 @@ public:
     return out;
   }
   std::optional<RetryableRun> retryable_run(const std::string& id) {
-    for (const auto& run : retryable_runs(kMaxRetryableRuns)) if (run.id == id) return run;
-    return std::nullopt;
+    if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
+      throw std::invalid_argument("invalid run ID");
+    Statement s(db_, "SELECT id,content,engine,config,mode,source_path,decoder_snapshot FROM runs WHERE id=? AND status='retryable'");
+    bind(s.p, 1, id);
+    const int rc = sqlite3_step(s.p);
+    if (rc == SQLITE_DONE) return std::nullopt;
+    if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_));
+    return RetryableRun{reinterpret_cast<const char*>(sqlite3_column_text(s.p, 0)),
+                        {reinterpret_cast<const char*>(sqlite3_column_text(s.p, 1)),
+                         reinterpret_cast<const char*>(sqlite3_column_text(s.p, 2)),
+                         reinterpret_cast<const char*>(sqlite3_column_text(s.p, 3)),
+                         reinterpret_cast<const char*>(sqlite3_column_text(s.p, 4))},
+                        reinterpret_cast<const char*>(sqlite3_column_text(s.p, 5)),
+                        reinterpret_cast<const char*>(sqlite3_column_text(s.p, 6))};
   }
   bool discard_retryable(const std::string& id) {
     if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)

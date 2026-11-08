@@ -82,7 +82,7 @@ public:
   bool find(const CacheKey& key, std::string& result);
   /** Return 1–10000 persisted runs left retryable by cancellation, stale input, or restart. */
   std::vector<RetryableRun> retryable_runs(std::size_t limit = 100);
-  /** Return one persisted retryable run by ID, including source and decoder metadata. */
+  /** Return one persisted retryable run by ID, including source and decoder metadata; lookup is independent of the bounded list page. */
   std::optional<RetryableRun> retryable_run(const std::string& id);
   /** Discard one retryable run record without touching its source file; throws for an empty, NUL-containing, or overlong ID. */
   bool discard_retryable(const std::string& id);

@@ -19,6 +19,8 @@ struct AnalysisOperation {
   std::function<void(const std::string&)> publish;
   /** Stop-aware transactional publication; return false when commit is cancelled or rejected. */
   std::function<bool(const std::string&, std::stop_token)> publish_transaction;
+  /** Recover a reserved persistent run when cancellation interrupts work before publication. */
+  std::function<void()> recover_cancellation;
   /** Revalidate the opened source before the cache commit point. */
   std::function<FileVerificationResult(std::stop_token)> verify;
   /** Monotonic progress in source frames; zero total means unknown. */
