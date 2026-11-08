@@ -267,6 +267,12 @@ TEST_CASE("SQLite collection kinds expose their API bound") {
   CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac",
     std::string(kMaxCollectionKindBytes + 1, 'x'), "hash", 1, 1}), std::invalid_argument);
 }
+TEST_CASE("SQLite collection paths expose their API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCollectionPathBytes == 4096);
+  CHECK_THROWS_AS(cache.put_entry({std::string(kMaxCollectionPathBytes + 1, 'x'),
+    "a.flac", "audio", "hash", 1, 1}), std::invalid_argument);
+}
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);
