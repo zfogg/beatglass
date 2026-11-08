@@ -203,19 +203,13 @@ Desktop application internals
    Destroy the private native adapter on the GUI thread. It never owns the Qt
    window passed to its operations.
 
-Experimental tonal worker internals
------------------------------------
+Experimental internals
+----------------------
 
 .. cpp:autodoc:: lib/core/tonal_tracker.hpp
 
 
-Experimental virtual file I/O
------------------------------
-
 .. cpp:autodoc:: lib/capture/file/virtual_io.hpp
-
-Experimental beat-event worker
-------------------------------
 
 .. cpp:autodoc:: lib/core/beat_tracker.hpp
 
