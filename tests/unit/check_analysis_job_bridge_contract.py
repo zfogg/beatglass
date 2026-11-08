@@ -12,6 +12,10 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
         self.assertIn('if (status_ != QStringLiteral("Queued")) { status_ = QStringLiteral("Queued"); emit statusChanged(); }', source)
 
+    def test_fully_rejected_batch_publishes_failed_state(self):
+        source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
+        self.assertIn('else if (batchRejected_ != 0 && status_ != QStringLiteral("Failed"))', source)
+
 
 if __name__ == "__main__":
     unittest.main()

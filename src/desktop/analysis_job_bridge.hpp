@@ -34,7 +34,7 @@ public:
   bool canRetry() const noexcept;
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void retry();
-  /** Submit a bounded batch, publish Queued for accepted work, and retain each operation for retry. */
+  /** Submit a bounded batch, publish Queued/Failed aggregate state, and retain accepted operations for retry. */
   int submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority = 0);
   Q_INVOKABLE void cancelBatch();
   /** Retry terminal batch jobs and immediately publish the refreshed aggregate state. */

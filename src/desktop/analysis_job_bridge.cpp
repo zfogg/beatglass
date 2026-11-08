@@ -131,6 +131,8 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
   if (!batch_.empty()) {
     if (status_ != QStringLiteral("Queued")) { status_ = QStringLiteral("Queued"); emit statusChanged(); }
     poll_timer_.start();
+  } else if (batchRejected_ != 0 && status_ != QStringLiteral("Failed")) {
+    status_ = QStringLiteral("Failed"); emit statusChanged();
   }
   return batchAccepted_;
 }
