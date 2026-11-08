@@ -532,6 +532,8 @@ Seek availability now also requires live playback source/epoch alignment. The vi
 
 Accepted snapshots now record the playback epoch used when they were published. The playback bridge change path compares that epoch before synchronizing selection and clears the local waveform/FFT snapshot plus selection on discontinuity, ensuring stale data cannot survive an epoch transition.
 
+Snapshots also record the playback source URL. Source changes and capture-state transitions now clear that source-bound snapshot and selection through the same recovery helper, so a new source cannot inherit a prior source’s cursor or seek target.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
