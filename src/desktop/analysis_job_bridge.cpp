@@ -102,6 +102,7 @@ void AnalysisJobBridge::cancel() {
   retryable_->cancel();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  if (failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Analysis cancelled before publication; retry is available."); emit failureChanged(); }
   if (status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
   poll();
 }
@@ -198,14 +199,16 @@ void AnalysisJobBridge::poll() {
     if (batchCompletedCount_ != completed_count) { batchCompletedCount_ = completed_count; emit batchChanged(); }
     const auto next = active ? QStringLiteral("Running") : failed ? QStringLiteral("Failed") : cancelled ? QStringLiteral("Cancelled") : QStringLiteral("Complete");
     if (status_ != next) { status_ = next; emit statusChanged(); }
-    if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("One or more batch operations failed before publishing a verified result."); emit failureChanged(); }
+    if (next == QStringLiteral("Cancelled") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Analysis batch cancelled before publication; retry is available."); emit failureChanged(); }
+    if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("One or more batch operations failed before publishing a verified result."); failureReason_ += QStringLiteral(" Retry is available."); emit failureChanged(); }
     if (!active) poll_timer_.stop();
     return;
   }
   const auto next = stateText(retryable_->state());
   if (frames_ != retryable_->frames()) { frames_ = retryable_->frames(); emit progressChanged(); }
   if (status_ != next) { status_ = next; emit statusChanged(); }
-  if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Worker analysis failed before publishing a verified result."); emit failureChanged(); }
+  if (next == QStringLiteral("Cancelled") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Analysis cancelled before publication; retry is available."); emit failureChanged(); }
+  if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Worker analysis failed before publishing a verified result; retry is available."); emit failureChanged(); }
   if (!canCancel()) poll_timer_.stop();
 }
 
