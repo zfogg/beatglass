@@ -5,6 +5,7 @@ out_dir="${1:?usage: verify_qualification_artifacts.sh <qualification-output-dir
 manifest="$out_dir/qualification-manifest.txt"
 hashes="$out_dir/qualification-artifacts.sha256"
 case_matrix="$out_dir/qualification-cases.tsv"
+topology="$out_dir/display-topology.json"
 [[ -s "$manifest" ]] || { echo "missing qualification manifest: $manifest" >&2; exit 1; }
 [[ -s "$hashes" ]] || { echo "missing artifact hash manifest: $hashes" >&2; exit 1; }
 awk -F= 'NF < 2 || $1 == "" || seen[$1]++ { bad = 1 } END { exit bad }' "$manifest" || {
@@ -12,6 +13,9 @@ awk -F= 'NF < 2 || $1 == "" || seen[$1]++ { bad = 1 } END { exit bad }' "$manife
   exit 1
 }
 [[ -s "$case_matrix" ]] || { echo "missing qualification case matrix: $case_matrix" >&2; exit 1; }
+[[ -s "$topology" ]] || { echo "missing or empty display topology evidence: $topology" >&2; exit 1; }
+command -v plutil >/dev/null 2>&1 || { echo "plutil is required" >&2; exit 1; }
+plutil -lint "$topology" >/dev/null || { echo "invalid display topology evidence: $topology" >&2; exit 1; }
 for key in commit macos_version architecture xcode_version sdk_version sdk_path developer_dir artifact_sha256; do
   grep -q "^${key}=." "$manifest" || { echo "manifest missing ${key}" >&2; exit 1; }
 done

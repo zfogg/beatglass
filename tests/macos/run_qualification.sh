@@ -20,6 +20,11 @@ record_command "sw_vers"
 sw_vers
 record_command "system_profiler SPHardwareDataType SPDisplaysDataType"
 system_profiler SPHardwareDataType SPDisplaysDataType
+topology_path="$out_dir/display-topology.json"
+record_command "system_profiler SPHardwareDataType SPDisplaysDataType -json > $topology_path"
+system_profiler SPHardwareDataType SPDisplaysDataType -json > "$topology_path"
+[[ -s "$topology_path" ]] || { echo "display topology evidence is empty" >&2; exit 1; }
+echo "Display topology evidence: $topology_path"
 record_command "xcodebuild -version"
 xcodebuild -version
 record_command "cmake --version"
