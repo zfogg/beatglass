@@ -92,6 +92,7 @@ validate_bundle_identity "$tap_bundle" "beatglass-coreaudio-smoke" "org.beatglas
 validate_bundle_identity "$recovery_bundle" "beatglass-coreaudio-recovery" "org.beatglass.coreaudio-recovery"
 if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
   echo "Running Core Audio tap smoke for supplied UID"
+  record_command "$tap_binary $BEATGLASS_MACOS_TAP_UID"
   tap_log="$out_dir/tap-smoke.log"
   "$tap_binary" "$BEATGLASS_MACOS_TAP_UID" | tee "$tap_log"
   if ! grep -Eq 'frames=[1-9][0-9]* nonzero_samples=[1-9][0-9]* .*discontinuities=[0-9]+ dropped_frames=[0-9]+ timestamp_valid=1' "$tap_log"; then
@@ -99,6 +100,7 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
     exit 1
   fi
   echo "Running Core Audio recovery smoke for supplied UID"
+  record_command "$recovery_binary $BEATGLASS_MACOS_TAP_UID"
   recovery_log="$out_dir/recovery-smoke.log"
   "$recovery_binary" "$BEATGLASS_MACOS_TAP_UID" | tee "$recovery_log"
   for cycle in 0 1; do
