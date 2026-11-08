@@ -433,6 +433,7 @@ def main() -> int:
         "visualization status theme": 'objectName: "visualizationStatus"',
         "visualization data status theme": 'objectName: "visualizationDataStatus"',
         "visualization selected data theme": 'objectName: "visualizationSelectedDataStatus"',
+        "visualization counts wrap": 'objectName: "visualizationDataStatus"',
         "visualization selection status theme": 'objectName: "visualizationSelectionStatus"',
         "visualization selection status wraps": 'objectName: "visualizationSelectionStatus"',
         "visualization inline clear theme": 'objectName: "clearVisualizationSelection"',
