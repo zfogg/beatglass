@@ -1082,11 +1082,11 @@ ApplicationWindow {
                     ToolTip.text: "Click or scroll to select a position; double-click or right-click to clear; hold Shift or Ctrl while scrolling for larger steps. Use Left/Right/Shift+Left/Shift+Right/Page Up/Page Down/Ctrl+Left/Ctrl+Right/Ctrl+Up/Ctrl+Down/Home/End to navigate, Enter or Space for clear, or Escape to clear"
                     onPaint: {
                         var ctx = getContext("2d"); ctx.reset();
-                        ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
+                        ctx.fillStyle = window.themeBackgrounds[window.selectedThemeIndex]; ctx.fillRect(0, 0, width, height)
                         var wave = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform : []
                         var spec = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum : []
                         if (viewMode === "waveform") {
-                            ctx.strokeStyle = "#60a5fa"; ctx.beginPath()
+                            ctx.strokeStyle = window.themeAccentColors[window.selectedThemeIndex]; ctx.beginPath()
                             for (var i = 0; i < wave.length; ++i) {
                                 var x = i * width / Math.max(1, wave.length - 1)
                                 var lo = wave[i][0], hi = wave[i][1]
@@ -1094,11 +1094,11 @@ ApplicationWindow {
                             }
                             ctx.stroke()
                         } else {
-                            ctx.fillStyle = "#c084fc"; var bar = width / Math.max(1, spec.length)
+                            ctx.fillStyle = window.themeAccentColors[window.selectedThemeIndex]; var bar = width / Math.max(1, spec.length)
                             for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
                         }
                         if (selectedPosition >= 0) {
-                            ctx.strokeStyle = "#facc15"; ctx.lineWidth = 2; ctx.beginPath()
+                            ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]; ctx.lineWidth = 2; ctx.beginPath()
                             ctx.moveTo(selectedPosition * width, 0); ctx.lineTo(selectedPosition * width, height); ctx.stroke()
                         }
                     }
