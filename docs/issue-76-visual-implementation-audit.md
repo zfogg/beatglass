@@ -658,4 +658,6 @@ Click-through unlock now shares one recovery function across the Escape shortcut
 
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
+The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
