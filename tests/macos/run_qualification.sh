@@ -276,7 +276,12 @@ fi
 } > "$manifest"
 : > "$artifact_manifest"
 for artifact in "$desktop_binary" "$tap_binary" "$recovery_binary"; do
-  shasum -a 256 "$artifact" >> "$artifact_manifest"
+  artifact_rel=${artifact#"$out_dir"/}
+  [[ "$artifact_rel" != "$artifact" && "$artifact_rel" != /* ]] || {
+    echo "Qualification artifact is outside output directory: $artifact" >&2
+    exit 1
+  }
+  (cd "$out_dir" && shasum -a 256 "$artifact_rel") >> "$artifact_manifest"
 done
 if [[ ! -s "$artifact_manifest" ]] || [[ "$(wc -l < "$artifact_manifest" | tr -d ' ')" -ne 3 ]]; then
   echo "Qualification artifact hash manifest is missing or incomplete" >&2
