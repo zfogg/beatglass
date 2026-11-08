@@ -27,9 +27,16 @@ $cases = @(
   @{ Name = "analysis_postverify_cancel"; Sources = @($runnerSources + "tests/standalone/analysis_postverify_cancel_smoke.cpp") },
   @{ Name = "analysis_empty_result"; Sources = @($runnerSources + "tests/standalone/analysis_empty_result_smoke.cpp") },
   @{ Name = "analysis_verifier_exception"; Sources = @($runnerSources + "tests/standalone/analysis_exception_smoke.cpp") },
-  @{ Name = "analysis_progress_exception"; Sources = @($runnerSources + "tests/standalone/analysis_progress_exception_smoke.cpp") }
+  @{ Name = "analysis_progress_exception"; Sources = @($runnerSources + "tests/standalone/analysis_progress_exception_smoke.cpp") },
+  @{ Name = "catalog"; Sources = @("lib/library/catalog.cpp", "tests/standalone/catalog_smoke.cpp") },
+  @{ Name = "file_details"; Sources = @("lib/library/details.cpp", "tests/standalone/details_smoke.cpp") },
+  @{ Name = "store_contract"; Sources = @("tests/standalone/store_contract_smoke.cpp") },
+  @{ Name = "job_lifecycle"; Sources = @("tests/standalone/job_lifecycle_smoke.cpp") },
+  @{ Name = "retryable_analysis"; Sources = @($runnerSources + "tests/standalone/retryable_analysis_smoke.cpp") }
 )
 
+$passed = [System.Collections.Generic.List[string]]::new()
+$failed = [System.Collections.Generic.List[string]]::new()
 Push-Location $repo
 try {
   foreach ($case in $cases) {
@@ -39,11 +46,16 @@ try {
       if ($LASTEXITCODE -ne 0) { throw "compile failed" }
       & $binary
       if ($LASTEXITCODE -ne 0) { throw "smoke failed" }
+      $passed.Add($case.Name)
       Write-Output "PASS $($case.Name)"
     } catch {
+      $failed.Add($case.Name)
       Write-Error "FAIL $($case.Name): $_"
       if (-not $ContinueOnFailure) { throw }
     }
   }
 } finally { Pop-Location }
-Write-Output "Standalone library smokes passed: $($cases.Count)"
+$summary = "passed=$($passed.Count); failed=$($failed.Count); total=$($cases.Count)"
+$summary | Set-Content -Path (Join-Path $OutputDir "summary.txt")
+if ($failed.Count -gt 0) { throw "Standalone library smokes failed: $($failed -join ', ')" }
+Write-Output "Standalone library smokes $summary"

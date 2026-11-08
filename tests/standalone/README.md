@@ -6,7 +6,8 @@ It covers submission, bounded capacity, priority/FIFO scheduling, progress,
 cooperative cancellation, shutdown, terminal outcomes, and analysis retry /
 verification behavior, serialization/callback failures, and storage
 configuration validation. The compiler can be selected explicitly for a
-toolchain or dependency environment.
+toolchain or dependency environment. Each run writes `summary.txt` with
+pass/fail counts in the selected output directory.
 
 The output directory is optional and defaults to `build/standalone-smokes`:
 
