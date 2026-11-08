@@ -409,6 +409,13 @@ ApplicationWindow {
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         Label {
+                            objectName: "analysisFreshness"
+                            text: window.selectedName && analysisJob && analysisJob.frames > 0 ? "Analysis freshness: observed frames are not source-attributed in this shell; treat them as provisional until a source-linked result is published." : "Analysis freshness: waiting for source-linked analysis evidence."
+                            Accessible.name: "Analysis freshness"
+                            Accessible.description: text
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        Label {
                             objectName: "sourceWorkflowStatus"
                             text: window.selectedAudioUrl.toString() === ""
                                   ? "Select an audio source to inspect and play it."
