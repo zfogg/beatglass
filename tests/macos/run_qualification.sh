@@ -199,17 +199,23 @@ if [[ "$permission_result" == "allowed" && -z "${BEATGLASS_MACOS_TAP_UID:-}" ]];
 fi
 signing_log="$out_dir/codesign-desktop.log"
 signing_state=unverified
+record_command "codesign --display --verbose=4 $out_dir/build/beatglass-desktop.app"
 codesign --display --verbose=4 "$out_dir/build/beatglass-desktop.app" >"$signing_log" 2>&1 || true
+record_command "codesign --verify --deep --strict $out_dir/build/beatglass-desktop.app"
 if codesign --verify --deep --strict "$out_dir/build/beatglass-desktop.app" 2>>"$signing_log"; then
   signing_state=verified
 fi
 tap_signing_log="$out_dir/codesign-tap.log"
 recovery_signing_log="$out_dir/codesign-recovery.log"
+record_command "codesign --display --verbose=4 $tap_bundle"
 codesign --display --verbose=4 "$tap_bundle" >"$tap_signing_log" 2>&1 || true
+record_command "codesign --display --verbose=4 $recovery_bundle"
 codesign --display --verbose=4 "$recovery_bundle" >"$recovery_signing_log" 2>&1 || true
 tap_signing=unverified
 recovery_signing=unverified
+record_command "codesign --verify --deep --strict $tap_bundle"
 if codesign --verify --deep --strict "$tap_bundle" 2>>"$tap_signing_log"; then tap_signing=verified; fi
+record_command "codesign --verify --deep --strict $recovery_bundle"
 if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_log"; then recovery_signing=verified; fi
 {
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
