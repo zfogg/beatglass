@@ -350,6 +350,7 @@ TestCase {
         let empty = findChild(app, "visualizationEmptyState")
         verify(empty !== null)
         verify(empty.visible)
+        compare(findChild(app, "visualizationCanvas").modeHasData, false)
         compare(empty.text, "Start monitoring to populate the waveform.")
         findChild(app, "spectrumView").clicked()
         compare(empty.text, "Start monitoring to populate the FFT.")
