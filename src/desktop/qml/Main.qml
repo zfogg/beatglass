@@ -1364,6 +1364,7 @@ ApplicationWindow {
                                 model: visible ? storageRecovery.retryableRunIds : []
                                 enabled: visible && count > 0
                                 Accessible.name: "Persisted retryable analysis runs"
+                                Accessible.description: visible && storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Selected persisted recovery status: " + storageRecovery.resetStatus : "Choose a saved analysis run to recover."
                                 ToolTip.text: "Choose a saved analysis run to recover"
                                 onActivated: storageRecovery.selectRun(currentText)
                             }
