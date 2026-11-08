@@ -616,6 +616,8 @@ The visualization status group explicitly permits zero minimum width, allowing i
 
 The interaction hint reserves a taller compact-layout line box for wrapped guidance, preventing keyboard/pointer instructions from colliding with adjacent recovery controls.
 
+Visualization status, data counts, and selected-view readouts now consume the canvas-local accepted waveform/FFT snapshots used by rendering and seek. The visible evidence therefore clears and updates atomically with stale-result lifecycle instead of reading mutable bridge arrays.
+
 Endpoint bridge transitions now actively clear source-bound visualization selection, distinguish retry failure from no-device reacquisition, and restore focus to the endpoint selector. A replacement accepted snapshot is therefore required after endpoint replacement rather than reusing stale waveform/FFT state.
 
 Settings endpoint, DJ monitoring, and overlay availability now share the same capture-recovery reset path and no-device/reacquisition language. A failed monitor or unavailable overlay clears stale visualization selection and returns focus to the recovery target.
