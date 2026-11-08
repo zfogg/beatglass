@@ -354,6 +354,8 @@ def main() -> int:
         "browser empty grouping": "objectName: \"browserEmptyState\"\n                            visible: !window.browseFolder.toString() || (files.status === FolderListModel.Ready && files.count === 0)\n                            spacing: 8\n                            Accessible.name: \"Library browser empty state\"",
         "browser frame grouping": "objectName: \"browserFrame\"\n                    Layout.fillWidth: true; Layout.fillHeight: true\n                    Accessible.name: \"Library folder browser\"",
         "overlay actions grouping": "objectName: \"overlayActions\"\n                    visible: window.overlayBridge !== null\n                    Accessible.name: \"Overlay actions\"",
+        "overlay routing grouping": "objectName: \"overlayRoutingControls\"\n                    Accessible.name: \"Overlay interaction and opacity controls\"",
+        "overlay display grouping": "objectName: \"overlayDisplayControls\"\n                    Accessible.name: \"Overlay display and size controls\"",
         "playback controls grouping": "objectName: \"playbackControls\"\n                            Layout.fillWidth: true\n                            Accessible.name: \"Playback controls\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
