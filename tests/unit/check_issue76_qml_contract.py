@@ -31,6 +31,7 @@ def main() -> int:
         "click-through action accessible name": "Accessible.name: checked ? \"Disable click-through\"",
         "refresh outputs accessible name": "Accessible.name: \"Refresh playback outputs\"",
         "open playback accessible name": "Accessible.name: \"Open selected playback source\"",
+        "playback frame actions accessible names": "Accessible.name: \"Seek to entered frame\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
