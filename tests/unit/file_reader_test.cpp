@@ -188,6 +188,19 @@ TEST_CASE("path reader classifies malformed known audio as invalid format") {
   }
 }
 
+TEST_CASE("malformed source remains untouched when open fails") {
+ const auto path = std::filesystem::temp_directory_path() / "beatglass-malformed-preserve.wav";
+ const std::string contents = "not a wave";
+ { std::ofstream out(path, std::ios::binary); out << contents; }
+ try {
+   try { FileReader reader(path, 1); FAIL("malformed input opened"); }
+   catch (const FileOpenError& error) { CHECK(error.kind() == FileOpenErrorKind::invalid_format); }
+   std::ifstream in(path, std::ios::binary);
+   CHECK(std::string(std::istreambuf_iterator<char>(in), {}) == contents);
+ } catch (...) { std::filesystem::remove(path); throw; }
+ std::filesystem::remove(path);
+}
+
 TEST_CASE("path reader keeps missing known audio as unreadable") {
   const auto path = std::filesystem::temp_directory_path() / "beatglass-missing.wav";
   std::filesystem::remove(path);

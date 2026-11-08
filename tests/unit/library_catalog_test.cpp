@@ -101,3 +101,16 @@ TEST_CASE("catalog reports a replaced folder path without stale entries") {
  CHECK(replaced.entries[0].name == "Library.wav");
  CHECK(replaced.entries[0].format == "WAV");
 }
+
+TEST_CASE("catalog reports a replaced audio file as a directory") {
+ TempDir dir; dir.file("Session.wav");
+ const auto first = beatglass::library::browse(dir.path, "SESSION");
+ REQUIRE(first.entries.size() == 1);
+ CHECK_FALSE(first.entries[0].directory);
+ std::filesystem::remove(dir.path / "Session.wav");
+ std::filesystem::create_directory(dir.path / "Session.wav");
+ const auto replaced = beatglass::library::browse(dir.path, "session");
+ REQUIRE(replaced.entries.size() == 1);
+ CHECK(replaced.entries[0].directory);
+ CHECK(replaced.entries[0].format.empty());
+}
