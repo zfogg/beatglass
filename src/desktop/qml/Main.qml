@@ -1345,9 +1345,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined"
                                 enabled: visible && storageRecovery.selectedRunId !== ""
                                 text: "Discard saved run"
-                                Accessible.name: "Discard saved retryable analysis run"
+                                Accessible.name: "Discard selected persisted analysis run"
                                 ToolTip.text: "Discard the selected saved analysis run"
-                                Accessible.description: "Remove the selected retryable run record without touching the source audio file."
+                                Accessible.description: "Open confirmation to discard the selected persisted recovery record without changing source audio. Focus returns here after confirmation."
                                 onClicked: discardRecoveryDialog.open()
                             }
                             Button { objectName: "retryPersistedRecovery"; activeFocusOnTab: true; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); window.announceVisualizationRecovery("Persisted recovery retry admitted; reset status cleared."); forceActiveFocus() }; Accessible.name: "Retry selected persisted analysis run"; Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted." }
@@ -1364,6 +1364,7 @@ ApplicationWindow {
                                     Accessible.role: Accessible.StaticText
                                 }
                                 onAccepted: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discarded; selected retry state cleared."); discardPersistedRecoveryButton.forceActiveFocus() }
+                                onRejected: discardPersistedRecoveryButton.forceActiveFocus()
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
