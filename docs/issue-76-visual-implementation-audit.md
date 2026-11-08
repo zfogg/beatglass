@@ -284,6 +284,8 @@ Reset appearance now exposes the current theme/motion value and dynamically expl
 
 The Library page heading now exposes explicit heading semantics and a concise browse tooltip, giving the primary file-navigation surface the same entry context as DJ and Settings.
 
+Library browser column headers now expose column-header semantics and concise name/type tooltips, making the folder listing structure discoverable before users navigate individual entries.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.

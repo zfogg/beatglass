@@ -343,6 +343,8 @@ def main() -> int:
         "appearance state dynamic guidance": "ToolTip.text: \"Current theme: \" + window.selectedTheme + \"; motion: \"",
         "reset appearance dynamic guidance": "Accessible.value: window.selectedTheme + \", \" + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? \"reduced motion\" : \"full motion\")",
         "library heading guidance": "Accessible.name: \"Library\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Browse local audio files and folders\"",
+        "library name column guidance": "Accessible.name: \"File name column\"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: \"Audio file or folder name\"",
+        "library type column guidance": "Accessible.name: \"File type column\"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: \"Audio format or folder type\"",
         "overlay opacity heading guidance": "Accessible.name: \"Overlay opacity control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Adjust the overlay window opacity\"",
         "overlay display heading guidance": "Accessible.name: \"Overlay display control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay destination display\"",
         "overlay size heading guidance": "Accessible.name: \"Overlay size control\"; Accessible.role: Accessible.Heading; ToolTip.text: \"Choose the overlay window size\"",
