@@ -112,6 +112,13 @@ TestCase {
         app.destroy()
     }
 
+    function test_playbackStateAndSourceAreAccessible() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "playbackState").Accessible.name, "Playback state")
+        compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
+        app.destroy()
+    }
+
     function test_djMonitoringExplainsCurrentState() {
         let app = shell.createObject(null)
         let dj = findChild(app, "djPage")
@@ -162,6 +169,14 @@ TestCase {
         let canvas = findChild(app, "visualizationCanvas")
         verify(canvas !== null)
         compare(canvas.Accessible.name, "Live waveform and spectrum")
+        app.destroy()
+    }
+
+    function test_visualizationDataStatusIsAccessible() {
+        let app = shell.createObject(null)
+        let status = findChild(app, "visualizationDataStatus")
+        verify(status !== null)
+        compare(status.Accessible.name, "Visualization data status")
         app.destroy()
     }
 
