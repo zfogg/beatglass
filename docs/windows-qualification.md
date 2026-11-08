@@ -10,11 +10,12 @@ build the pinned x64 Visual Studio configuration, or point it at an existing
 build directory to repeat discovery and artifact checks:
 
 ```powershell
-pwsh -File tests/windows/run_qualification.ps1 -Build -OutputDirectory build/windows-qualification
+pwsh -File tests/windows/run_qualification.ps1 -Build -RunTests -OutputDirectory build/windows-qualification
 ```
 
 The script records the commit, OS and tool versions, CTest discovery, and the
-expected desktop/endpoint test artifacts. It deliberately reports the native
+expected desktop/endpoint test artifacts. With `-RunTests` it also executes the
+discovered CTest suite and retains `ctest-run.log`. It deliberately reports the native
 WASAPI, device-recovery, overlay, DPI, and interactive UI cases as `UNRUN`;
 those observations still require a logged-in Windows session and evidence.
 

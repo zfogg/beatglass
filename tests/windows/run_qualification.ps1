@@ -2,7 +2,8 @@
 param(
   [Parameter(Position = 0)]
   [string]$OutputDirectory = "",
-  [switch]$Build
+  [switch]$Build,
+  [switch]$RunTests
 )
 
 $ErrorActionPreference = "Stop"
@@ -46,6 +47,15 @@ try {
 
   if (-not (Test-Path $buildDirectory)) {
     throw "Build directory is missing: $buildDirectory. Re-run with -Build or provide a prepared build directory."
+  }
+  if ($RunTests) {
+    $ctestRun = Join-Path $OutputDirectory "ctest-run.log"
+    $testArgs = @("--test-dir", $buildDirectory, "-C", "Release", "--output-on-failure")
+    "ctest $($testArgs -join ' ')"
+    & ctest @testArgs 2>&1 | Tee-Object -FilePath $ctestRun
+    if ($LASTEXITCODE -ne 0) { throw "CTest execution failed with exit code $LASTEXITCODE" }
+  } else {
+    "UNRUN: CTest execution (pass -RunTests to execute the discovered Windows tests)."
   }
   $ctestList = Join-Path $OutputDirectory "ctest-discovery.log"
   & ctest --test-dir $buildDirectory -C Release -N | Tee-Object -FilePath $ctestList
