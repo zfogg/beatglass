@@ -7,6 +7,11 @@
 #include <thread>
 #include <vector>
 using namespace beatglass;
+TEST_CASE("source lifecycle rejects zero running epochs") {
+  SourceLifecycle lifecycle; auto attempt = lifecycle.start(); REQUIRE(attempt);
+  CHECK(lifecycle.notify(*attempt, 1, SourceState::running, 0) == SourceEventResult::invalid);
+  CHECK(lifecycle.state() == SourceState::error);
+}
 TEST_CASE("ordered source events reject duplicates and fail closed on gaps") {
  SourceLifecycle s; auto a = s.start(); REQUIRE(a);
  REQUIRE(s.notify(*a, 1, SourceState::running, 10) == SourceEventResult::accepted);

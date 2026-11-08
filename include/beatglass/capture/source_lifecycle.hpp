@@ -68,7 +68,7 @@ public:
     if (state_ == SourceState::stopped || state_ == SourceState::error || attempt.generation != generation_ || generation_ == 0 || sequence <= last_sequence_) return SourceEventResult::stale;
     if (last_sequence_ == std::numeric_limits<std::uint64_t>::max() || sequence != last_sequence_ + 1) { fail_closed(); return SourceEventResult::sequence_gap; }
     last_sequence_ = sequence;
-    if (next == SourceState::running && epoch && (state_ == SourceState::starting || state_ == SourceState::interrupted) && (!last_epoch_ || *epoch > *last_epoch_)) { epoch_ = epoch; last_epoch_ = epoch; state_ = next; return SourceEventResult::accepted; }
+    if (next == SourceState::running && epoch && *epoch && (state_ == SourceState::starting || state_ == SourceState::interrupted) && (!last_epoch_ || *epoch > *last_epoch_)) { epoch_ = epoch; last_epoch_ = epoch; state_ = next; return SourceEventResult::accepted; }
     if (!epoch && ((next == SourceState::interrupted && state_ == SourceState::running) || next == SourceState::error)) { epoch_.reset(); state_ = next; return SourceEventResult::accepted; }
     fail_closed(); return SourceEventResult::invalid;
   }
