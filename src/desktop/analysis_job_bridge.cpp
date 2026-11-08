@@ -28,6 +28,7 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
     retryable_.reset(); return {};
   }
   frames_ = 0;
+  batch_.clear(); batchAccepted_ = batchRejected_ = 0; emit batchChanged();
   auto progress = op.progress;
   op.progress = [this, progress](auto done, auto total) {
     if (progress) progress(done, total);
@@ -66,8 +67,48 @@ void AnalysisJobBridge::retry() {
   if (retryable_->retry()) { frames_ = retryable_->frames(); status_ = QStringLiteral("Queued"); poll_timer_.start(); emit statusChanged(); }
 }
 
+int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
+  batch_.clear(); batchAccepted_ = batchRejected_ = 0;
+  for (auto& operation : operations) {
+    if (static_cast<int>(batch_.size()) >= batchCapacity_) { ++batchRejected_; continue; }
+    auto retained = runner_.submit_retryable(std::move(operation), priority);
+    if (!retained) { ++batchRejected_; continue; }
+    batch_.push_back(std::move(retained)); ++batchAccepted_;
+  }
+  emit batchChanged();
+  if (!batch_.empty()) poll_timer_.start();
+  return batchAccepted_;
+}
+
+void AnalysisJobBridge::cancelBatch() {
+  for (const auto& operation : batch_) if (operation) operation->cancel();
+  poll();
+}
+
+void AnalysisJobBridge::retryBatch() {
+  bool accepted = false;
+  for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
+  if (accepted) { poll_timer_.start(); emit statusChanged(); }
+}
+
 void AnalysisJobBridge::poll() {
-  if (!retryable_) return;
+  if (!retryable_ && batch_.empty()) return;
+  if (!retryable_ && !batch_.empty()) {
+    bool active = false, failed = false, cancelled = false;
+    qulonglong total = 0;
+    for (const auto& operation : batch_) {
+      if (!operation) continue;
+      const auto state = operation->state(); total += operation->frames();
+      active = active || state == beatglass::library_detail::TrackedState::queued || state == beatglass::library_detail::TrackedState::running;
+      failed = failed || state == beatglass::library_detail::TrackedState::failed;
+      cancelled = cancelled || state == beatglass::library_detail::TrackedState::cancelled;
+    }
+    if (frames_ != total) { frames_ = total; emit progressChanged(); }
+    const auto next = active ? QStringLiteral("Running") : failed ? QStringLiteral("Failed") : cancelled ? QStringLiteral("Cancelled") : QStringLiteral("Complete");
+    if (status_ != next) { status_ = next; emit statusChanged(); }
+    if (!active) poll_timer_.stop();
+    return;
+  }
   const auto next = stateText(retryable_->state());
   if (frames_ != retryable_->frames()) { frames_ = retryable_->frames(); emit progressChanged(); }
   if (status_ != next) { status_ = next; emit statusChanged(); }
