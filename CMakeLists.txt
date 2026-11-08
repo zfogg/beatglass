@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.24)
 project(beatglass VERSION 0.1.0 LANGUAGES C CXX)
 include(CTest)
+
+if(BUILD_TESTING)
+  find_package(Python3 QUIET COMPONENTS Interpreter)
+  if(Python3_Interpreter_FOUND)
+    add_test(
+      NAME issue76_qml_contract
+      COMMAND ${Python3_EXECUTABLE}
+              ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue76_qml_contract.py)
+    set_tests_properties(issue76_qml_contract PROPERTIES LABELS unit TIMEOUT 10)
+  endif()
+endif()
 option(BEATGLASS_ENABLE_PACKAGING "Enable CPack package metadata for release candidates" OFF)
 
 # Packaging is opt-in: normal development builds never claim to produce an
