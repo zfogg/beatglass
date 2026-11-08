@@ -787,6 +787,7 @@ TestCase {
     function test_overlayControlsDescribeKeyboardActions() {
         let app = shell.createObject(null)
         compare(findChild(app, "showOverlay").Accessible.description, "Show the DJ overlay window")
+        compare(findChild(app, "showOverlay").ToolTip.text, "Show the DJ overlay and hide the control window")
         compare(findChild(app, "unlockOverlay").Accessible.description, "Restore keyboard and pointer access to the overlay")
         compare(findChild(app, "unlockOverlay").ToolTip.text, "Restore keyboard and pointer access to the overlay")
         compare(findChild(app, "hideOverlay").Accessible.description, "Hide the DJ overlay window")
