@@ -12,6 +12,10 @@ It also records `audio-endpoints.json` with the observed Windows sound-device
 inventory and timestamp, tying endpoint-selection and recovery observations to
 the actual machine rather than an unrecorded default device.
 
+The identity manifest includes the detected Qt version (or explicit
+`UNAVAILABLE`) so UI/overlay evidence cannot be confused with an unidentified
+Qt deployment.
+
 ## Build identity
 
 The executable preparation check is `tests/windows/run_qualification.ps1`. Run it
