@@ -49,6 +49,7 @@ int main() {
     assert(!cache.mark_retryable("marked", CacheKey{"sha256:wrong", key.engine, key.config, key.mode}));
     assert(cache.mark_retryable("marked", key));
     assert(cache.discard_retryable("marked"));
+    assert(!cache.mark_retryable("marked", key));
   }
   {
     SqliteCache reopened(path.string());
