@@ -536,6 +536,8 @@ Snapshots also record the playback source URL. Source changes and capture-state 
 
 The native playback bridge now publishes dedicated source, epoch, and state notifications in addition to its aggregate change signal. QML therefore receives the actual transition events needed to invalidate visualization snapshots, including source replacement, seek epochs, stop, and pause/resume state changes.
 
+The focused bridge contract test checks those notify properties, signal declarations, stop/pause/seek emission paths, and matching QML reset handlers. This keeps source and discontinuity invalidation covered even when a full Qt build is unavailable.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
