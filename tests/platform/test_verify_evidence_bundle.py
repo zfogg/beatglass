@@ -240,6 +240,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertTrue(result["failure_summary_consistent"])
             self.assertFalse(result["aggregate_consistent"])
             self.assertTrue(result["error_count_consistent"])
+            self.assertTrue(result["platforms"][0]["failure_category_count_consistent"])
             self.assertTrue(result["failure_category_count_consistent"])
 
     def test_readiness_aggregates_failure_categories(self):

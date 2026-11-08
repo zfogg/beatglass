@@ -163,6 +163,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "missing_scenarios": missing_scenarios,
                      "invalid_scenarios": invalid_scenarios,
                      "failure_categories": dict(sorted(row_categories.items())),
+                     "failure_category_count_consistent": sum(row_categories.values()) == len(matrix_errors + errors),
                      "error_count": len(matrix_errors + errors),
                      "retention_ok": not missing_artifacts and not mismatched_artifacts,
                      "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
