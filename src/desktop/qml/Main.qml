@@ -42,6 +42,7 @@ ApplicationWindow {
     property string visualizationRecoveryAnnouncement: ""
     property string persistedRecoveryOutcomeAnnouncementKey: ""
     property bool persistedRecoverySelectionActivated: false
+    property string activeAnalysisOutcomeAnnouncementKey: ""
     property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
@@ -138,11 +139,28 @@ ApplicationWindow {
             window.persistedRecoveryOutcomeAnnouncementKey = ""
         }
         function onAnalysisStatusChanged() {
-            if (!window.persistedRecoverySelectionActivated || storageRecovery.selectedRunId === "" || !storageRecovery.analysisRetryable) {
+            const status = storageRecovery.analysisStatus
+            if (storageRecovery.selectedRunId === "") {
+                if (status !== "Analysis failed" && status !== "Analysis cancelled") {
+                    window.activeAnalysisOutcomeAnnouncementKey = ""
+                    return
+                }
+                const activeOutcomeKey = status
+                if (window.activeAnalysisOutcomeAnnouncementKey === activeOutcomeKey)
+                    return
+                window.activeAnalysisOutcomeAnnouncementKey = activeOutcomeKey
+                if (status === "Analysis failed")
+                    window.announceVisualizationRecovery("Active analysis failed; Retry analysis is available.")
+                else
+                    window.announceVisualizationRecovery("Active analysis was canceled; Retry analysis is available.")
+                retryAdmittedAnalysis.forceActiveFocus()
+                return
+            }
+            window.activeAnalysisOutcomeAnnouncementKey = ""
+            if (!window.persistedRecoverySelectionActivated || !storageRecovery.analysisRetryable) {
                 window.persistedRecoveryOutcomeAnnouncementKey = ""
                 return
             }
-            const status = storageRecovery.analysisStatus
             if (status !== "Analysis failed" && status !== "Analysis cancelled") {
                 window.persistedRecoveryOutcomeAnnouncementKey = ""
                 return

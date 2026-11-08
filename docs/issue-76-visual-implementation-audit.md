@@ -8,6 +8,8 @@ Rapid persisted-run changes are guarded separately: selecting a different run cl
 
 Selector activation is explicit: programmatic selected-run changes clear outcome/focus state without stealing focus or announcing a terminal result; user activation marks the run eligible for worker outcome feedback, restores selector focus, and instructs keyboard users to Tab into Retry or Discard.
 
+Active-job rejection is isolated from persisted-run recovery: when no persisted run is selected, a real worker `Analysis failed` or `Analysis cancelled` transition is announced once as an admitted Retry action and focus returns to `Retry analysis`. Persisted terminal outcomes use their own run-keyed announcement state, so neither surface duplicates or steals focus for the other.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
