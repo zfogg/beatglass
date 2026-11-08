@@ -626,6 +626,8 @@ Overlay display selection now persists in the desktop session: when the screen l
 
 Overlay click-through/unlock and opacity changes now flow through the same live recovery announcement path. Click-through explicitly explains how to restore interaction, unlock announces restored keyboard/pointer access, and opacity changes report the applied percentage.
 
+Overlay size selection now persists within the desktop session and announces the applied Compact/Medium/Large state. When the native overlay is unavailable, an explicit tray/taskbar fallback status keeps the control window available for recovery and retry.
+
 Endpoint bridge transitions now actively clear source-bound visualization selection, distinguish retry failure from no-device reacquisition, and restore focus to the endpoint selector. A replacement accepted snapshot is therefore required after endpoint replacement rather than reusing stale waveform/FFT state.
 
 Settings endpoint, DJ monitoring, and overlay availability now share the same capture-recovery reset path and no-device/reacquisition language. A failed monitor or unavailable overlay clears stale visualization selection and returns focus to the recovery target.
