@@ -486,6 +486,8 @@ Waveform sample and FFT-bin counts now wrap within their responsive status width
 
 Selected-view sample/bin summaries now wrap as well, preserving mode-specific evidence when compact layouts narrow the visualization column.
 
+The live waveform/FFT data-status label now permits zero minimum width, keeping its sample/bin evidence inside the responsive visualization column.
+
 The selection status/action row now uses vertical-center alignment, keeping wrapped status text and its clear button visually balanced as the compact layout changes height.
 
 The inline clear action now reserves a compact/full minimum width, preventing its label from collapsing while leaving the neighboring selection status room to wrap.
