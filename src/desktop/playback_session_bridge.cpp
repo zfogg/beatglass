@@ -38,7 +38,9 @@ bool PlaybackSessionBridge::seek(qulonglong frame, qulonglong epoch) { const boo
   if (ok) emit changed(); return ok; }
 void PlaybackSessionBridge::refreshDevices() {
 #ifdef _WIN32
-  devices_.clear(); for (const auto& device : beatglass::windows::enumerate_waveout_devices()) devices_.append(QString::number(device.id) + QStringLiteral(": ") + QString::fromStdString(device.name));
+  devices_.clear(); bool selected_present = device_id_ < 0;
+  for (const auto& device : beatglass::windows::enumerate_waveout_devices()) { if (static_cast<int>(device.id) == device_id_) selected_present = true; devices_.append(QString::number(device.id) + QStringLiteral(": ") + QString::fromStdString(device.name)); }
+  if (!selected_present && native_running_) { if (native_) native_->stop(); native_running_ = false; native_error_ = QStringLiteral("Selected output disappeared; choose another device and restart"); }
 #else
   devices_.clear();
 #endif
