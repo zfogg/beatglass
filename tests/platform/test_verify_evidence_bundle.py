@@ -323,6 +323,8 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["platform_support_status"][0]["status"], "PENDING")
             self.assertIn("scenario", result["platform_support_status"][0]["reason_codes"])
             self.assertTrue(result["platform_support_status_consistent"])
+            self.assertEqual(result["support_language"], "experimental")
+            self.assertTrue(result["native_qualification_required"])
             self.assertEqual(result["not_ready_platforms"], ["windows"])
             self.assertTrue(result["failure_summary_consistent"])
             self.assertFalse(result["aggregate_consistent"])

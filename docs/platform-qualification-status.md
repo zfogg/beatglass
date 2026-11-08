@@ -62,6 +62,8 @@ Reports provide `platform_support_status` for dashboards: each row is explicitly
 
 The companion `platform_support_status_consistent` flag must be true before consumers use that projection; it verifies that row order and READY/PENDING values still agree with the underlying native qualification summary.
 
+Reports explicitly set `support_language` to `experimental` and `native_qualification_required` to `true`. These fields are intentionally conservative: evidence tooling cannot promote product support language or waive the native desktop/audio/overlay exit gate.
+
 Readiness is stricter than manifest syntax: every required `capture`, `recovery`, `output`, `display`, `playback`, and `overlay` scenario must be `PASS` before a platform can be ready. The report exposes `unpassed` scenario IDs, so a complete list containing `UNRUN` rows cannot be mistaken for native qualification.
 
 The same rule is enforced by the executable `check_evidence_readiness.py` command: any required scenario that is missing or not `PASS` makes the command exit nonzero. A report may still be generated for diagnosis, but its incomplete bundle must not be accepted by automation.

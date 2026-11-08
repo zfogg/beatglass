@@ -289,6 +289,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "native_blockers_consistent": native_blockers_consistent,
             "platform_support_status": platform_support_status,
             "platform_support_status_consistent": platform_support_status_consistent,
+            "support_language": "experimental",
+            "native_qualification_required": True,
             "native_qualification_ready": bool(native_qualification_summary) and all(item["ready"] and item["evidence_complete"] for item in native_qualification_summary),
             "native_summary_consistent": native_summary_consistent,
             "failure_summary_consistent": failure_summary_consistent,
