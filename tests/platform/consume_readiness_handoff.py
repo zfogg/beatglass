@@ -21,6 +21,9 @@ def consume(report_path: Path) -> list[str]:
     if not errors and report.get("exit_gate_status") == "READY" and report.get("native_qualification_required") is True:
         errors.append("readiness handoff cannot be READY while native qualification is required")
     if report.get("exit_gate_status") == "READY":
+        if any(isinstance(row, dict) and row.get("status") == "experimental"
+               for row in report.get("platform_support_status", [])):
+            errors.append("readiness handoff cannot be READY with experimental platform support")
         missing_roles = [entry.get("path") for row in report.get("platforms", [])
                          for entry in row.get("artifact_inventory", [])
                          if not isinstance(entry, dict) or not isinstance(entry.get("role"), str) or not entry["role"]]
