@@ -11,6 +11,15 @@ BEATGLASS_MACOS_TAP_UID='CoreAudio-output-UID' \
   tests/macos/run_qualification.sh build/macos-qualification
 ```
 
+When the logged-in Mac has no checkout, transfer the exact source tree without copying local build artifacts, then run the qualification script on the Mac:
+
+```sh
+tests/macos/prepare_remote_checkout.sh zachbook-pro /tmp/beatglass-native-qualification HEAD
+ssh zachbook-pro 'cd /tmp/beatglass-native-qualification && tests/macos/run_qualification.sh build/macos-qualification'
+```
+
+The transfer helper only prepares the bounded `/tmp/beatglass-native-qualification` directory; it does not grant permissions or claim native qualification.
+
 Set `BEATGLASS_MACOS_PERMISSION_RESULT=allowed` or `denied` after observing the System Settings prompt/revocation; `allowed` additionally requires `BEATGLASS_MACOS_TAP_UID`. Omit it to record `UNRUN` without changing permissions.
 
 The runner invokes both the tap and recovery smoke bundles when this variable is set; when it is absent, the log records capture as `UNRUN`. A supplied-UID run retains `tap-smoke.log` and `recovery-smoke.log` and fails unless tap output includes nonzero frames/samples, discontinuity and dropped-frame counters, and `timestamp_valid=1`; both recovery cycles must report nonzero frames/samples, discontinuity counts, and successful stops. Overlay/native CTest discovery is retained as `overlay-ctest-discovery.log`; execution output is retained as `overlay-ctest.log` and must contain a passing percentage summary. The exact configure/build/test commands are retained as `qualification-commands.log`; `qualification-manifest.txt` summarizes commit, macOS version, architecture, Xcode version, SDK version/path, active developer directory, signing state for desktop/tap/recovery, UID mode, and evidence paths, while codesign logs retain signing metadata for all three bundles. The runner also fails if required evidence files are empty.
