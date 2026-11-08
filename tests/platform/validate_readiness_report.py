@@ -8,6 +8,16 @@ import sys
 EXPECTED_PLATFORMS = {"windows", "macos", "linux"}
 
 
+def _valid_digest(value: object) -> bool:
+    if not isinstance(value, str) or len(value) != 64:
+        return False
+    try:
+        int(value, 16)
+    except ValueError:
+        return False
+    return True
+
+
 def validate(report: dict) -> list[str]:
     if not isinstance(report, dict):
         return ["readiness report must be a JSON object"]
@@ -40,7 +50,7 @@ def validate(report: dict) -> list[str]:
         for item in platforms:
             if not isinstance(item.get("manifest"), str) or not item["manifest"]:
                 errors.append(f"{item.get('platform')}: missing manifest linkage")
-            if not isinstance(item.get("manifest_sha256"), str) or len(item["manifest_sha256"]) != 64:
+            if not _valid_digest(item.get("manifest_sha256")):
                 errors.append(f"{item.get('platform')}: invalid manifest hash linkage")
             if item.get("provenance_complete") is not True:
                 errors.append(f"{item.get('platform')}: provenance is incomplete")
@@ -48,7 +58,7 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: missing qualification command linkage")
             if not isinstance(item.get("qualification_output"), str) or not item["qualification_output"].strip():
                 errors.append(f"{item.get('platform')}: missing qualification output linkage")
-            if not isinstance(item.get("qualification_output_sha256"), str) or len(item["qualification_output_sha256"]) != 64:
+            if not _valid_digest(item.get("qualification_output_sha256")):
                 errors.append(f"{item.get('platform')}: invalid qualification output hash")
             if not isinstance(item.get("qualification_output_bytes"), int) or item["qualification_output_bytes"] < 0:
                 errors.append(f"{item.get('platform')}: invalid qualification output byte count")
@@ -57,7 +67,7 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: missing scenario evidence hashes")
             else:
                 for scenario, digest in evidence_hashes.items():
-                    if not isinstance(digest, str) or len(digest) != 64:
+                    if not _valid_digest(digest):
                         errors.append(f"{item.get('platform')}: invalid evidence hash for {scenario}")
             inventory = item.get("artifact_inventory")
             if not isinstance(inventory, list) or not inventory:
@@ -72,7 +82,7 @@ def validate(report: dict) -> list[str]:
                         continue
                     if not artifact.get("path"):
                         errors.append(f"{item.get('platform')}: artifact missing path")
-                    if not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64:
+                    if not _valid_digest(artifact.get("sha256")):
                         errors.append(f"{item.get('platform')}: artifact missing SHA-256")
                     if not isinstance(artifact.get("bytes"), int) or artifact["bytes"] < 0:
                         errors.append(f"{item.get('platform')}: artifact has invalid byte count")
