@@ -451,6 +451,7 @@ def main() -> int:
         "visualization revision theme": 'objectName: "visualizationRevisionStatus"',
         "visualization revision wraps": 'objectName: "visualizationRevisionStatus"',
         "visualization capture status theme": 'objectName: "visualizationCaptureStatus"',
+        "visualization capture status shrinks": "Layout.fillWidth: true; Layout.minimumWidth: 0; wrapMode: Text.WordWrap",
         "visualization selection responsive spacing": "spacing: window.compactHeader ? 4 : 8",
         "visualization selection alignment": "Layout.alignment: Qt.AlignVCenter",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
