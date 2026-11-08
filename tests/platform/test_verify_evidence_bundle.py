@@ -31,6 +31,21 @@ def manifest(artifact):
 
 
 class EvidenceBundleNegativeTest(unittest.TestCase):
+    def test_unknown_and_duplicate_scenarios_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
+            digest = __import__("hashlib").sha256(b"actual\n").hexdigest()
+            data = manifest({"path": "capture.txt", "sha256": digest})
+            data["scenarios"] = [
+                {"id": "capture", "status": "UNRUN"},
+                {"id": "capture", "status": "UNRUN"},
+                {"id": "overlay-typo", "status": "UNRUN"},
+            ]
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, path)
+            self.assertTrue(any("unknown scenarios" in error for error in errors))
+            self.assertTrue(any("duplicate scenarios" in error for error in errors))
+
     def test_artifact_path_alias_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
