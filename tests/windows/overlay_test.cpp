@@ -118,6 +118,16 @@ private slots:
     adapter.setOpacity(0.4);
     QVERIFY(qAbs(overlay.opacity() - 0.4) < 0.02);
   }
+  void clickThroughRequiresVisibleOverlay() {
+    QQuickWindow overlay;
+    QWindow control;
+    control.show();
+    beatglass::windows::OverlayController adapter(&overlay, &control);
+    QVERIFY(!overlay.isVisible());
+    QVERIFY(!adapter.setClickThrough(true));
+    overlay.show();
+    QVERIFY(adapter.setClickThrough(true));
+  }
   void offscreenGeometryIsRecovered() {
     QQuickWindow overlay;
     QWindow control;
