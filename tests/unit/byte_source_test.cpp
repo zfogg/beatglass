@@ -116,3 +116,24 @@ TEST_CASE("byte cursor keeps mutation failure terminal after source restoration"
  CHECK_FALSE(cursor.seek(0));
  CHECK(cursor.position() == 2);
 }
+
+TEST_CASE("byte cursor cancellation wins before observing a mutation") {
+ MemorySource source; ByteCursor cursor(source); std::array<std::byte, 2> out{};
+ std::stop_source stop; stop.request_stop(); source.reported_size = 4;
+ CHECK(cursor.read(out, stop.get_token()).status == ByteReadStatus::cancelled);
+ CHECK(cursor.position() == 0);
+ source.reported_size = 3;
+ CHECK(cursor.read(out).status == ByteReadStatus::data);
+ CHECK(cursor.position() == 2);
+}
+
+TEST_CASE("byte cursor seek relative rejects mutation before changing position") {
+ MemorySource source; ByteCursor cursor(source);
+ REQUIRE(cursor.seek(1));
+ source.reported_size = 4;
+ CHECK_FALSE(cursor.seek_relative(1, ByteSeekOrigin::current));
+ CHECK(cursor.position() == 1);
+ source.reported_size = 3;
+ CHECK_FALSE(cursor.seek_relative(-1, ByteSeekOrigin::current));
+ CHECK(cursor.position() == 1);
+}
