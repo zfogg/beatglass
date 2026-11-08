@@ -19,6 +19,7 @@ public slots:
     for (const auto& run : runs) ids.push_back(QString::fromStdString(run.id));
     emit runsChanged(ids);
   }
+  void discard(QString id) { const bool ok = owner_.discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
 signals:
   void result(bool ok, QString status);
   void runsChanged(QStringList ids);
@@ -48,3 +49,5 @@ void StorageRecoveryBridge::open() {
 }
 void StorageRecoveryBridge::close() { if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection); }
 void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
+void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ == id) return; selectedRunId_ = id; emit selectedRunChanged(); }
+void StorageRecoveryBridge::discardSelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }

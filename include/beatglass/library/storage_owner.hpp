@@ -19,6 +19,8 @@ public:
   library_detail::SqliteCache* cache() noexcept { return cache_.get(); }
   /** Read persisted retryable runs on the storage worker; returns empty while closed. */
   std::vector<library_detail::RetryableRun> retryable_runs(std::size_t limit = 100) const;
+  /** Discard one retryable run on the storage worker; never removes source audio. */
+  bool discard_retryable(const std::string& id);
 private:
   std::unique_ptr<library_detail::SqliteCache> cache_;
 };

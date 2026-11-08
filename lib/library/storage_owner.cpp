@@ -10,4 +10,5 @@ void StorageOwner::close() noexcept { cache_.reset(); }
 std::vector<library_detail::RetryableRun> StorageOwner::retryable_runs(std::size_t limit) const {
   return cache_ ? cache_->retryable_runs(limit) : std::vector<library_detail::RetryableRun>{};
 }
+bool StorageOwner::discard_retryable(const std::string& id) { return cache_ ? cache_->discard_retryable(id) : false; }
 }

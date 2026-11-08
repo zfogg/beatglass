@@ -155,6 +155,7 @@ SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
 std::vector<RetryableRun> SqliteCache::retryable_runs(std::size_t limit) { return impl_->retryable_runs(limit); }
+bool SqliteCache::discard_retryable(const std::string& id) { Statement s(impl_->db_, "DELETE FROM runs WHERE id=? AND status='retryable'"); bind(s.p,1,id); done(s.p); return sqlite3_changes(impl_->db_) != 0; }
 bool SqliteCache::invalidate(const CacheKey& key) { return impl_->invalidate(key); }
 void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }
 bool SqliteCache::remove_entry(const std::string& path) { return impl_->remove_entry(path); }

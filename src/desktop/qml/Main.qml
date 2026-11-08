@@ -516,6 +516,23 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            ComboBox {
+                                objectName: "persistedRecoveryRuns"
+                                visible: typeof storageRecovery !== "undefined"
+                                model: visible ? storageRecovery.retryableRunIds : []
+                                enabled: visible && count > 0
+                                Accessible.name: "Persisted retryable analysis runs"
+                                onActivated: storageRecovery.selectRun(currentText)
+                            }
+                            Button {
+                                objectName: "discardPersistedRecovery"
+                                visible: typeof storageRecovery !== "undefined"
+                                enabled: visible && storageRecovery.selectedRunId !== ""
+                                text: "Discard saved run"
+                                Accessible.name: "Discard saved retryable analysis run"
+                                Accessible.description: "Remove the selected retryable run record without touching the source audio file."
+                                onClicked: storageRecovery.discardSelectedRun()
+                            }
                             Button {
                                 objectName: "retryAnalysisBatch"
                                 text: "Retry batch"
