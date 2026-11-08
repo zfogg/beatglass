@@ -119,8 +119,9 @@ ApplicationWindow {
         enabled: typeof storageRecovery !== "undefined"
             && storageRecovery.selectedRunId !== ""
         onActivated: {
+            const runId = storageRecovery.selectedRunId
             discardPersistedRecoveryButton.forceActiveFocus()
-            window.announceVisualizationRecovery("Persisted recovery discard focused; press Enter to review the confirmation dialog.")
+            window.announceVisualizationRecovery("Persisted recovery discard focused for " + runId + "; press Enter to review the confirmation dialog.")
         }
     }
     Shortcut {
