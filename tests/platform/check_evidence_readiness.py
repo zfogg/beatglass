@@ -218,6 +218,10 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "status": "READY" if item["ready"] and item["evidence_complete"] else "PENDING",
             "reason_codes": (["scenario"] if item["unpassed_scenarios"] or item["missing_artifact_roles"] else []) + (["verifier"] if item["verifier_errors"] else []),
             "blocker_count": len(blockers["errors"]) if blockers else 0})
+    platform_support_status_consistent = (
+        [item["platform"] for item in platform_support_status] == [item["platform"] for item in native_qualification_summary]
+        and all(item["status"] == ("READY" if summary["ready"] and summary["evidence_complete"] else "PENDING")
+                for item, summary in zip(platform_support_status, native_qualification_summary)))
     native_summary_consistent = (
         [item["platform"] for item in native_qualification_summary] == [row["platform"] for row in rows]
         and all(item["evidence_complete"] == (not item["unpassed_scenarios"] and not item["missing_artifact_roles"])
@@ -284,6 +288,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "native_qualification_blockers": native_qualification_blockers,
             "native_blockers_consistent": native_blockers_consistent,
             "platform_support_status": platform_support_status,
+            "platform_support_status_consistent": platform_support_status_consistent,
             "native_qualification_ready": bool(native_qualification_summary) and all(item["ready"] and item["evidence_complete"] for item in native_qualification_summary),
             "native_summary_consistent": native_summary_consistent,
             "failure_summary_consistent": failure_summary_consistent,
@@ -311,7 +316,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "exit_gate_status": "READY" if readiness_ready else "PENDING",
             "exit_gate_reasons": [] if readiness_ready else errors,
             "exit_gate_reason_codes": [] if readiness_ready else sorted(exit_gate_reason_codes),
-            "ready": readiness_ready}
+            "ready": readiness_ready and platform_support_status_consistent}
 
 
 def main() -> int:
