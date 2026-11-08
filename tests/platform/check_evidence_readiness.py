@@ -1,5 +1,6 @@
 """Check that every documented platform row has an attributable evidence bundle."""
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -68,13 +69,22 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                     errors.append(f"{platform}: manifest platform does not match status row")
                 errors.extend(f"{platform}: {error}" for error in identity_errors(data, max_age_hours))
                 retained = len(data.get("artifacts", []))
+                artifact_bytes = sum((bundle / entry["path"]).stat().st_size for entry in data.get("artifacts", [])
+                                     if isinstance(entry, dict) and isinstance(entry.get("path"), str)
+                                     and (bundle / entry["path"]).is_file())
+                manifest_sha256 = hashlib.sha256(manifest.read_bytes()).hexdigest()
             except (OSError, json.JSONDecodeError) as exc:
                 errors = [f"{platform}: invalid manifest: {exc}"]
                 retained = 0
+                artifact_bytes = 0
+                manifest_sha256 = None
         else:
             retained = 0
+            artifact_bytes = 0
+            manifest_sha256 = None
             errors = [f"{platform}: missing manifest: {manifest}"]
-        rows.append({"platform": platform, "manifest": str(manifest), "retained_artifacts": retained, "errors": errors})
+        rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
+                     "retained_artifacts": retained, "retained_bytes": artifact_bytes, "errors": errors})
     return {"platforms": rows, "ready": not any(row["errors"] for row in rows)}
 
 

@@ -79,6 +79,20 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertIn("invalid source commit", errors)
             self.assertIn("evidence is stale", errors)
 
+    def test_readiness_report_is_reproducible_and_records_retained_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            artifact = bundles / "windows" / "capture.txt"; artifact.write_text("actual\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            data["artifacts"][0]["sha256"] = __import__("hashlib").sha256(artifact.read_bytes()).hexdigest()
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            first = readiness.report(status, bundles)
+            second = readiness.report(status, bundles)
+            self.assertEqual(first, second)
+            self.assertEqual(first["platforms"][0]["retained_bytes"], artifact.stat().st_size)
+            self.assertTrue(first["platforms"][0]["manifest_sha256"])
+
 
 if __name__ == "__main__":
     unittest.main()
