@@ -501,6 +501,7 @@ ApplicationWindow {
                                 Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text + " Use Choose folder to recover from an empty or unreadable location."
+                                ToolTip.text: "Library browser recovery state"
                             }
                             Button {
                                 objectName: "chooseFolderEmpty"
