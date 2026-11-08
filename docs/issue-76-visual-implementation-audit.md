@@ -702,6 +702,8 @@ Opacity edits now carry an in-flight marker: the originating control edit advanc
 
 Rapid opacity edits now retain the latest pending value and match native echoes by value, not arrival order. An older/out-of-order echo cannot overwrite the slider or clear the newer edit’s pending state; the revision remains one increment per user edit.
 
+Bridge disconnect/reconnect now clears the pending opacity marker and in-flight flag before resynchronizing native settings. Reconnect cannot apply a stale slider echo or drift the accessible settings revision; the fallback and restored-action announcements remain explicit.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.
