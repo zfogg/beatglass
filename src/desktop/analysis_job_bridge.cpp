@@ -167,6 +167,7 @@ void AnalysisJobBridge::poll() {
     if (frames_ != total) { frames_ = total; emit progressChanged(); }
     const auto next = active ? QStringLiteral("Running") : failed ? QStringLiteral("Failed") : cancelled ? QStringLiteral("Cancelled") : QStringLiteral("Complete");
     if (status_ != next) { status_ = next; emit statusChanged(); }
+    if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("One or more batch operations failed before publishing a verified result."); emit failureChanged(); }
     if (!active) poll_timer_.stop();
     return;
   }
