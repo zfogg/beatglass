@@ -1091,6 +1091,11 @@ ApplicationWindow {
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
+                    objectName: "overlayRoutingControls"
+                    Accessible.name: "Overlay interaction and opacity controls"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Configure pointer click-through and overlay opacity."
+                    ToolTip.text: "Overlay interaction and opacity controls"
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
@@ -1121,6 +1126,11 @@ ApplicationWindow {
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
+                    objectName: "overlayDisplayControls"
+                    Accessible.name: "Overlay display and size controls"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Choose the overlay destination display and window size."
+                    ToolTip.text: "Overlay display and size controls"
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"

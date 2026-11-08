@@ -306,6 +306,8 @@ The browser empty-state container now exposes grouping semantics and recovery gu
 
 The folder browser frame and overlay action row now expose grouping semantics with concise entry tooltips, giving users context before navigating list items or show/unlock/hide actions.
 
+Overlay interaction/opacity and display/size rows now expose separate grouping semantics and entry tooltips, clarifying the two distinct routing-control clusters before focus reaches their individual fields.
+
 DJ monitoring status, estimates, evidence quality, and monitoring guidance now expose contextual tooltips, making live-state interpretation and recovery guidance consistent across the visualization and overlay surfaces.
 
 The DJ page heading and live-output monitoring summary now expose explicit heading semantics and a concise state tooltip, making the monitoring context discoverable before users reach the action controls.
