@@ -277,3 +277,5 @@ A cache acceptance regression demonstrates that a committed unchanged identity i
 
 ## Analysis cache handoff
 The library now exposes `reuse_cached_operation`, a worker-owned identity lookup that returns a completed cached result before analysis serialization/DSP begins. Configuration/content identity changes miss independently. The caller still owns fingerprinting, source revalidation and scheduling; decoder/UI wiring and native qualification remain open.
+
+StorageOwner now exposes the same completed-result lookup at the storage lifetime boundary, with a regression covering open/lookup/close behavior. This is an integration handoff for the future desktop analysis queue; the GUI still does not schedule real file analysis.
