@@ -160,6 +160,14 @@ TEST_CASE("SQLite cache discards only retryable runs") {
   REQUIRE_FALSE(cache.discard_retryable("retry"));
   REQUIRE_THROWS_AS(cache.discard_retryable(""), std::invalid_argument);
 }
+TEST_CASE("SQLite cache preserves retryable rows when batch validation fails") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("keep", key);
+  REQUIRE(cache.publish("keep", key, "partial", {}, [] { return false; }) == Publish::stale_input);
+  REQUIRE_THROWS_AS(cache.discard_retryable(std::vector<std::string>{"keep", std::string("bad\0id", 6)}), std::invalid_argument);
+  REQUIRE(cache.retryable_runs().size() == 1);
+  CHECK(cache.retryable_runs().front().id == "keep");
+}
 TEST_CASE("SQLite cache rolls back a batch discard when a later ID is malformed") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("keep", key);
