@@ -247,6 +247,10 @@
   },
   "category_platforms_consistent": true,
   "category_platform_lists_consistent": true,
+  "category_platform_counts": {
+    "manifest": 0
+  },
+  "category_counts_consistent": false,
   "required_scenario_summary": [
     {
       "platform": "windows",

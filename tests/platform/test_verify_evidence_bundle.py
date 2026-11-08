@@ -245,6 +245,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertIn("retention", result["failure_category_platforms"])
             self.assertTrue(result["category_platforms_consistent"])
             self.assertTrue(result["category_platform_lists_consistent"])
+            self.assertFalse(result["category_counts_consistent"])
 
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:

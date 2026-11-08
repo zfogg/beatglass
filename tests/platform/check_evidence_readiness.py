@@ -193,6 +193,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     category_platform_lists_consistent = all(platform in category_platforms.get(category, [])
                                              for category in category_platforms
                                              for platform in category_platforms[category])
+    category_platform_counts = {category: sum(row["failure_categories"].get(category, 0) for row in rows)
+                                for category in sorted(categories)}
+    category_counts_consistent = category_platform_counts == dict(categories)
     required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
     summary_consistent = (len(required) == len(rows) == len(provenance)
@@ -213,10 +216,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "failure_category_platforms": category_platforms,
             "category_platforms_consistent": category_platforms_consistent,
             "category_platform_lists_consistent": category_platform_lists_consistent,
+            "category_platform_counts": category_platform_counts,
+            "category_counts_consistent": category_counts_consistent,
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and ready_platforms == len(rows)}
+            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:
