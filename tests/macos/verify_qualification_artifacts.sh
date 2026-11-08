@@ -19,7 +19,15 @@ for i in "${!expected_cases[@]}"; do
   IFS=$'\t' read -r case_id status evidence <<< "${case_lines[$((i + 1))]}"
   [[ "$case_id" == "${expected_cases[$i]}" ]] || { echo "unexpected qualification case: $case_id" >&2; exit 1; }
   [[ "$status" =~ ^(PASS|FAIL|UNRUN)$ ]] || { echo "invalid status for $case_id: $status" >&2; exit 1; }
-  if [[ "$status" == PASS && -z "$evidence" ]]; then echo "PASS case lacks evidence: $case_id" >&2; exit 1; fi
+  if [[ "$status" == PASS ]]; then
+    [[ -n "$evidence" && "$evidence" != /* ]] || { echo "PASS case lacks relative evidence: $case_id" >&2; exit 1; }
+    evidence_path=$(cd "$out_dir" && cd "$(dirname -- "$evidence")" 2>/dev/null && pwd)/$(basename -- "$evidence") || { echo "invalid evidence path: $evidence" >&2; exit 1; }
+    case "$evidence_path" in
+      "$out_dir"/*) ;;
+      *) echo "evidence path escapes output: $evidence" >&2; exit 1;;
+    esac
+    [[ -f "$evidence_path" ]] || { echo "missing evidence file for $case_id: $evidence" >&2; exit 1; }
+  fi
 done
 command -v shasum >/dev/null 2>&1 || { echo "shasum is required" >&2; exit 1; }
 mapfile -t hash_lines < "$hashes"
