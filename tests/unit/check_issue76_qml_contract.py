@@ -177,7 +177,7 @@ def main() -> int:
         "appearance status contract": "objectName: \"appearanceState\"",
         "dj navigation description": "Accessible.name: \"DJ\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.description: \"View live DJ controls and overlay settings. Shortcut Ctrl+Shift+2; focus returns to this tab.\"",
         "settings navigation description": "Accessible.name: \"Settings\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.description: \"Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab.\"",
-        "library navigation tab semantics": "objectName: \"libraryTab\"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: \"Browse local audio files\"",
+        "library navigation tab semantics": "objectName: \"libraryTab\"; activeFocusOnTab: true; Accessible.role: Accessible.PageTab; ToolTip.text: checked ? \"Library is selected; browse local audio files\" : \"Browse local audio files\"",
         "reset appearance button role": "Accessible.name: \"Reset appearance settings\"\n                Accessible.role: Accessible.Button",
         "overlay tempo tooltip": "ToolTip.text: \"Current live tempo estimate\"",
         "overlay harmony tooltip": "ToolTip.text: \"Current live key and chord estimate\"",
@@ -385,6 +385,7 @@ def main() -> int:
         "navigation shortcut guidance": "Accessible.description: \"Switch between Library, DJ, and Settings pages. Use Ctrl+Shift+1 for Library, Ctrl+Shift+2 for DJ, or Ctrl+Shift+3 for Settings.\"",
         "settings tab page role": "objectName: \"settingsTab\"; activeFocusOnTab: true; Accessible.name: \"Settings\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.description: \"Configure appearance, audio and overlay settings. Shortcut Ctrl+Shift+3; focus returns to this tab.\"; Accessible.role: Accessible.PageTab",
         "navigation tab selected values": "Accessible.name: \"DJ\"; Accessible.value: checked ? \"selected\" : \"not selected\"",
+        "navigation selected tooltips": "ToolTip.text: checked ? \"Library is selected; browse local audio files\" : \"Browse local audio files\"",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
