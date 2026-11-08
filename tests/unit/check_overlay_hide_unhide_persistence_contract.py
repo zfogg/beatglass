@@ -7,7 +7,7 @@ required = [
     "property bool overlayHiddenByUser: false",
     "window.overlayHiddenByUser = true",
     "window.overlayHiddenByUser = false",
-    '"hidden by user"',
+    "hidden by user",
     "function hideOverlayAndRestoreControls()",
     "function showOverlayAndHideControls()",
     "function quitApplication()",
