@@ -45,3 +45,11 @@ TEST_CASE("catalog does not advertise unqualified codecs") {
   REQUIRE(result.entries.size() == 1);
   CHECK(result.entries[0].name == "track.aiff");
 }
+
+TEST_CASE("catalog normalizes the short AIFF extension") {
+  TempDir dir; dir.file("voice.aif");
+  const auto result = beatglass::library::browse(dir.path);
+  REQUIRE(result.entries.size() == 1);
+  CHECK(result.entries[0].format == "AIFF");
+  CHECK(result.entries[0].title == "voice");
+}
