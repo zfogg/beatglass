@@ -1,14 +1,16 @@
 # Beatglass
 
-Beatglass is planned as a local desktop music analysis application with a library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. Neither mode is implemented yet. A preliminary file-tempo CLI and desktop shell with Library and DJ navigation are available when built with optional dependencies. The Library page can browse folders and inspect file metadata; library management and DJ capture are not yet available.
+Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, and platform recovery contracts. End-to-end persistence, playback, native capture, and full native qualification remain in progress.
 
 The intended stack is C++20, CMake, Qt 6 Quick, SQLite, aubio and Essentia, with PipeWire, Core Audio taps and WASAPI loopback for Linux, macOS and Windows respectively. Dependency availability, versions and licenses must be verified before selection. No account or network service should be required at runtime.
 
 ## Current status and prerequisites
 
-This repository is at the initial groundwork stage. The full application is not implemented. The preliminary shared contracts and queue have a CMake/CTest test target; see [progress](docs/progress.md) and [decisions](docs/decisions.md). A C++20 compiler, CMake, Qt 6 and platform-specific audio development dependencies are anticipated; exact versions, installation instructions and reproducible build, run and test commands will be added as the foundation is verified. All three platforms are currently unsupported.
+This repository is beyond initial groundwork but is not yet a completed v1. Shared contracts, CTest coverage, the Qt desktop shell, analysis lifecycle controls, queue capacity reporting, visualization modes, and truthful recovery states are integrated incrementally; see [progress](docs/progress.md) and [decisions](docs/decisions.md). Native audio, overlay, and full workflow qualification remain pending and are not inferred from headless tests.
 
 Production implementation belongs in `src/` for applications and `lib/` for reusable libraries, with library headers in `include/beatglass/`, tests and fixtures in `tests/`, and documentation in `docs/`. See issue #1 for the complete specification, acceptance criteria and phased execution plan.
+
+The current `main` branch includes the bounded analysis queue and retry lifecycle, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, and Windows endpoint-loss recovery. These are implemented slices, not a v1 completion claim: native capture, playback, full persistence workflows, and interactive qualification remain open.
 
 ## Build and test the groundwork
 
@@ -20,7 +22,7 @@ cmake --build build --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-The default builds the dependency-light foundation tests. To build the experimental CLI, install aubio and libsndfile development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON`. Add `-DBEATGLASS_BUILD_DESKTOP=ON` and Qt 6 Quick development and QML runtime modules for the metadata shell. For example on Ubuntu 22.04:
+The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For example on Ubuntu 22.04:
 
 ```sh
 sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript
