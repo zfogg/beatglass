@@ -1,5 +1,7 @@
 # Progress and handoff
 
+Shortcut-triggered stop/resume must announce the resulting lifecycle state through the same accessible status surface as pointer actions. Portable contracts cover focus, shortcut dispatch, and state text; native screen-reader timing, focus restoration, and assistive-technology behavior remain unqualified.
+
 Keyboard playback recovery parity is part of the readiness handoff: transport, retry, endpoint refresh, and clear/reacquire actions must be reachable through the same focus order and accessible names as pointer controls. Portable UI contracts document this parity; native assistive-technology and hardware recovery remain unqualified.
 
 Playback recovery controls and the storage bridge transition surface are now documented as one handoff: queued/running/completed/cancelled/failed states remain distinct, stale results clear across epoch or endpoint transitions, and retry controls require preserved identity. Local transition contracts are preparation evidence; native playback, endpoint-loss, and overlay behavior remain open.

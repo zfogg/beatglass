@@ -1,5 +1,7 @@
 # Platform qualification status
 
+Readiness evidence for shortcut recovery must show that stop/resume shortcuts update an accessible announcement (`queued`, `running`, `cancelled`, `retry`, or `complete`), preserve focus, and do not leave stale results presented. Run the portable contract with `python tests/unit/check_desktop_analysis_transition.py`; native screen-reader and assistive-technology timing still require platform runs.
+
 Native readiness evidence must verify keyboard parity for playback recovery: focus reaches pause/resume, retry, endpoint refresh, and reacquisition controls; accessible names expose current state; and stale-result clearing is announced without pointer input. Reproduce the portable audit with `python tests/unit/check_desktop_analysis_transition.py`; this does not replace native UI/accessibility qualification.
 
 Native readiness handoff must include bridge transition evidence for playback recovery controls: queued, running, cancellation, retry, completion, endpoint loss, reacquisition, and stale-result clearing. Reproduce portable checks with `python tests/unit/check_desktop_analysis_transition.py` and `python tests/unit/check_playback_epoch_docs_contract.py`; these do not replace native desktop/audio/overlay observations.
