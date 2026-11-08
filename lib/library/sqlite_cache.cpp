@@ -64,6 +64,21 @@ public:
     auto p = static_cast<const char*>(sqlite3_column_blob(s.p, 0));
     auto n = sqlite3_column_bytes(s.p, 0); result.assign(p ? p : "", static_cast<std::size_t>(n)); return true;
   }
+  std::vector<RetryableRun> retryable_runs(std::size_t limit) {
+    if (limit == 0 || limit > 10000) throw std::invalid_argument("invalid retryable run limit");
+    Statement s(db_, "SELECT id,content,engine,config,mode FROM runs WHERE status='retryable' ORDER BY id LIMIT ?");
+    check(sqlite3_bind_int64(s.p, 1, static_cast<sqlite3_int64>(limit)));
+    std::vector<RetryableRun> out; int rc = SQLITE_ROW;
+    while ((rc = sqlite3_step(s.p)) == SQLITE_ROW) {
+      out.push_back({reinterpret_cast<const char*>(sqlite3_column_text(s.p, 0)),
+                     {reinterpret_cast<const char*>(sqlite3_column_text(s.p, 1)),
+                      reinterpret_cast<const char*>(sqlite3_column_text(s.p, 2)),
+                      reinterpret_cast<const char*>(sqlite3_column_text(s.p, 3)),
+                      reinterpret_cast<const char*>(sqlite3_column_text(s.p, 4))}});
+    }
+    if (rc != SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_));
+    return out;
+  }
   bool invalidate(const CacheKey& key) {
     validate_key(key);
     Statement s(db_, "DELETE FROM active WHERE content=? AND engine=? AND config=? AND mode=?");
@@ -139,6 +154,7 @@ SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>
 SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
+std::vector<RetryableRun> SqliteCache::retryable_runs(std::size_t limit) { return impl_->retryable_runs(limit); }
 bool SqliteCache::invalidate(const CacheKey& key) { return impl_->invalidate(key); }
 void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }
 bool SqliteCache::remove_entry(const std::string& path) { return impl_->remove_entry(path); }
