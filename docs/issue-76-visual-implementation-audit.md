@@ -485,3 +485,5 @@ The canvas focus ring reduces from three to two pixels in compact headers, prese
 The selected-position cursor similarly reduces from two to one pixel in compact headers, retaining the theme-foreground cue without overpowering the smaller canvas.
 
 The canvas now also has explicit compact/full minimum heights, preserving a usable pointer and keyboard interaction target when the surrounding screen is constrained.
+
+The visualization status group explicitly permits zero minimum width, allowing its evidence labels to wrap instead of forcing the surrounding screen wider under responsive pressure.
