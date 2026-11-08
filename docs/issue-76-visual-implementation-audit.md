@@ -1,5 +1,9 @@
 # Issue #76 visual implementation audit
 
+## Shortcut announcement contract
+
+Shortcut-triggered stop/resume and retry actions must update the same accessible lifecycle announcement used by pointer activation, preserve focus on the active recovery surface, and clear stale result text when an epoch or endpoint changes. The portable contract is checked with `python tests/unit/check_desktop_analysis_transition.py`; native screen-reader announcement timing and focus restoration still require platform evidence.
+
 This is the current implementation audit against `design/v1/DESIGN.md` and `design/v1/STATES.md`. It records what is implemented in the Qt prototype and keeps the remaining design work explicit rather than treating a mock render as a product guarantee.
 
 ## Implemented interaction/state slices
