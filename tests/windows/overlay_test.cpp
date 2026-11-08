@@ -142,6 +142,22 @@ private slots:
     QVERIFY(!adapter.clickThrough());
     QVERIFY(!window.flags().testFlag(Qt::WindowTransparentForInput));
   }
+
+  void displaySelectionUsesCurrentScreens() {
+    QQuickWindow overlay;
+    QWindow control;
+    beatglass::windows::OverlayController adapter(&overlay, &control);
+    const auto screens = QGuiApplication::screens();
+    QCOMPARE(adapter.screenNames().size(), screens.size());
+    if (screens.isEmpty()) {
+      QCOMPARE(adapter.screenIndex(), -1);
+      QVERIFY(!adapter.moveToScreen(0));
+      return;
+    }
+    QVERIFY(adapter.moveToScreen(0));
+    QCOMPARE(adapter.screenIndex(), 0);
+    QVERIFY(screens.at(0)->availableGeometry().contains(overlay.geometry().center()));
+  }
   void nativePointerPassThrough() {
     if (!qEnvironmentVariableIsSet("BEATGLASS_NATIVE_OVERLAY_TEST")) QSKIP("Set BEATGLASS_NATIVE_OVERLAY_TEST to run the interactive pointer test");
     struct RestoreCursor { POINT position{}; RestoreCursor() { GetCursorPos(&position); } ~RestoreCursor() { SetCursorPos(position.x, position.y); } } restore;
