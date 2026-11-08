@@ -506,8 +506,15 @@ ApplicationWindow {
                 }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring"; Accessible.description: text }
                 Label { text: window.liveBridge.status === "Stopped" ? "Start monitoring from the DJ controls when an output source is available." : "Live estimates update below as output audio is captured."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                RowLayout {
+                    objectName: "visualizationModeControls"
+                    Button { text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.name: "Waveform view"; Accessible.description: "Show the selectable time-domain waveform."; onClicked: visualizationCanvas.viewMode = "waveform" }
+                    Button { text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.name: "FFT view"; Accessible.description: "Show the selectable frequency-domain FFT."; onClicked: visualizationCanvas.viewMode = "spectrum" }
+                    Label { text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"; objectName: "visualizationModeStatus"; Accessible.name: "Visualization mode" }
+                }
                 Canvas {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
+                    property string viewMode: "waveform"
                     Layout.fillWidth: true; Layout.preferredHeight: 120
                     Accessible.name: "Live waveform and spectrum"
                     Accessible.description: "Bounded waveform and FFT magnitudes from the current output capture."
@@ -516,14 +523,18 @@ ApplicationWindow {
                         ctx.fillStyle = "#10151f"; ctx.fillRect(0, 0, width, height)
                         var wave = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform : []
                         var spec = typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum : []
-                        ctx.strokeStyle = "#60a5fa"; ctx.beginPath()
-                        for (var i = 0; i < wave.length; ++i) {
-                            var x = i * width / Math.max(1, wave.length - 1)
-                            var lo = wave[i][0], hi = wave[i][1]
-                            ctx.moveTo(x, height * (0.5 - hi * 0.4)); ctx.lineTo(x, height * (0.5 - lo * 0.4))
+                        if (viewMode === "waveform") {
+                            ctx.strokeStyle = "#60a5fa"; ctx.beginPath()
+                            for (var i = 0; i < wave.length; ++i) {
+                                var x = i * width / Math.max(1, wave.length - 1)
+                                var lo = wave[i][0], hi = wave[i][1]
+                                ctx.moveTo(x, height * (0.5 - hi * 0.4)); ctx.lineTo(x, height * (0.5 - lo * 0.4))
+                            }
+                            ctx.stroke()
+                        } else {
+                            ctx.fillStyle = "#c084fc"; var bar = width / Math.max(1, spec.length)
+                            for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
                         }
-                        ctx.stroke(); ctx.fillStyle = "#c084fc"; var bar = width / Math.max(1, spec.length)
-                        for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
                 }
