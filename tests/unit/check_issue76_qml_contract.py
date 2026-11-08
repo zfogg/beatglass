@@ -57,6 +57,8 @@ def main() -> int:
         "recovery status roles": "objectName: \"playbackSeekLimitation\"",
         "dj status roles": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "settings status roles": "objectName: \"settingsStatus\"",
+        "generation status role": "objectName: \"visualizationRevisionStatus\"",
+        "canvas selection announcement": "Selected position \" + Math.round(visualizationCanvas.selectedPosition * 100)",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

@@ -30,6 +30,8 @@ The remaining library detail and analysis status labels now use explicit static-
 
 Settings permission guidance, appearance state, and persistence status are also explicit static text with accessible names.
 
+Generation/revision status is now explicitly identified as static text, keeping accepted presentation lineage discoverable to assistive technology.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
