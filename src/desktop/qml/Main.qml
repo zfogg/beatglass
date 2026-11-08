@@ -1327,7 +1327,7 @@ ApplicationWindow {
                                 Accessible.description: "Remove the selected retryable run record without touching the source audio file."
                                 onClicked: discardRecoveryDialog.open()
                             }
-                            Button { objectName: "retryPersistedRecovery"; activeFocusOnTab: true; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); forceActiveFocus() }; Accessible.name: "Retry selected persisted analysis run"; Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work." }
+                            Button { objectName: "retryPersistedRecovery"; activeFocusOnTab: true; visible: typeof storageRecovery !== "undefined"; enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.analysisRetryable; text: "Retry selected run"; onClicked: { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); forceActiveFocus() }; Accessible.name: "Retry selected persisted analysis run"; Accessible.description: "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted." }
                             Dialog {
                                 id: discardRecoveryDialog
                                 title: "Discard saved analysis run?"
