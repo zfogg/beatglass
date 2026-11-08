@@ -24,7 +24,7 @@ TEST_CASE("SQLite cache replaces only completed revalidated runs") {
 TEST_CASE("SQLite cache rejects oversized results before they become active") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("oversized", key);
-  std::string result(8 * 1024 * 1024 + 1, 'x');
+  std::string result(kMaxCachedResultBytes + 1, 'x');
   REQUIRE(cache.publish("oversized", key, result, {}, [] { return true; }) == Publish::error);
   std::string found; REQUIRE_FALSE(cache.find(key, found));
 }
@@ -72,7 +72,6 @@ TEST_CASE("SQLite cache observes cancellation immediately before commit") {
   REQUIRE(cache.publish("one", key, "result", stop.get_token(), [&] { stop.request_stop(); return true; }) == Publish::cancelled);
   std::string result; REQUIRE_FALSE(cache.find(key, result));
 }
-
 TEST_CASE("SQLite binding lengths are checked before narrowing") {
   auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
   REQUIRE(sqlite_length_representable(maximum));

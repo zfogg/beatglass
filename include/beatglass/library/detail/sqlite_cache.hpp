@@ -17,6 +17,8 @@ struct CollectionEntry {
 struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; };
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;
+/** Maximum serialized analysis result accepted by the provisional cache. */
+inline constexpr std::size_t kMaxCachedResultBytes = 8u * 1024u * 1024u;
 /** Provisional caller-supplied cache identity. The caller must establish a validated content hash and stable algorithm/configuration versions. */
 struct CacheKey {
   /** Validated content identity. */ std::string content;
