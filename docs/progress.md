@@ -304,6 +304,8 @@ Batch analysis now reports how many accepted operations have published verified 
 
 The published-result count is scoped to the current batch attempt and resets when that batch is retried.
 
+The bridge also exposes the latest verified batch payload for inspection; it is cleared when a new batch or retry begins and remains separate from the single-operation result.
+
 Starting a fresh batch also clears any prior single-operation result before queue admission, so the Library surface cannot attribute old output to the new batch.
 
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.

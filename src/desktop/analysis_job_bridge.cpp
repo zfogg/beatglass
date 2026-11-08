@@ -87,7 +87,7 @@ void AnalysisJobBridge::retry() {
 }
 
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
-  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = 0;
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = 0; batchLastResult_.clear();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   for (auto& operation : operations) {
     if (static_cast<int>(batch_.size()) >= batchCapacity_) { ++batchRejected_; continue; }
@@ -95,9 +95,11 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
     operation.publish = [weak_self = weak_self_, publish](const std::string& value) {
       if (publish) publish(value);
       if (!weak_self) return;
-      QMetaObject::invokeMethod(weak_self, [weak_self] {
+      const auto result = QString::fromUtf8(value.data(), static_cast<int>(value.size()));
+      QMetaObject::invokeMethod(weak_self, [weak_self, result] {
         if (!weak_self) return;
         ++weak_self->batchResultsPublished_;
+        weak_self->batchLastResult_ = result;
         emit weak_self->batchChanged();
       }, Qt::QueuedConnection);
     };
@@ -119,7 +121,7 @@ void AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
   if (accepted) {
-    batchResultsPublished_ = 0;
+    batchResultsPublished_ = 0; batchLastResult_.clear();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged();
   }
