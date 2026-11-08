@@ -96,6 +96,13 @@ TestCase {
         app.destroy()
     }
 
+    function test_playbackSourceAndPositionAreVisible() {
+        let app = shell.createObject(null)
+        verify(findChild(app, "playbackSource") !== null)
+        verify(findChild(app, "playbackPosition") !== null)
+        app.destroy()
+    }
+
     function test_djMonitoringExplainsCurrentState() {
         let app = shell.createObject(null)
         let dj = findChild(app, "djPage")
