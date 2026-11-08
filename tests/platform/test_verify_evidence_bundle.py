@@ -23,6 +23,23 @@ class EvidenceBundleTest(unittest.TestCase):
         root = Path(__file__).parent / "fixtures/evidence-bundle"
         self.assertEqual(module.verify(root, root / "manifest.json"), [])
 
+def manifest(artifact):
+    return {"platform": "test", "commit": "0" * 40, "captured_at": "2026-11-08T00:00:00Z", "environment": "unit", "artifacts": [artifact], "scenarios": [{"id": "capture", "status": "UNRUN"}]}
+
+
+class EvidenceBundleNegativeTest(unittest.TestCase):
+    def test_hash_mismatch_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
+            path = root / "manifest.json"; path.write_text(json.dumps(manifest({"path": "capture.txt", "sha256": "0" * 64})), encoding="utf-8")
+            self.assertTrue(any("hash mismatch" in error for error in module.verify(root, path)))
+
+    def test_path_escape_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); path = root / "manifest.json"
+            path.write_text(json.dumps(manifest({"path": "../outside.txt", "sha256": "0" * 64})), encoding="utf-8")
+            self.assertTrue(any("escapes bundle" in error for error in module.verify(root, path)))
+
 
 if __name__ == "__main__":
     unittest.main()
