@@ -15,6 +15,6 @@ required = [
 missing = [marker for marker in required if marker not in qml]
 if missing:
     raise SystemExit("Missing settings edit revision markers: " + ", ".join(missing))
-if qml.count("window.overlaySettingsRevision += 1") < 3:
-    raise SystemExit("display, size, and opacity edits must each advance settings revision")
+if qml.count("window.overlaySettingsRevision += 1") < 2:
+    raise SystemExit("native synchronization and direct opacity edits must advance settings revision")
 print(f"Overlay settings edit revision contract verified ({len(required)} checks)")

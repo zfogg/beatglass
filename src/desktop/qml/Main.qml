@@ -491,7 +491,6 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = name
         window.overlayDisplaySelectionRequired = false
         window.overlayDisplayRecoveryPending = false
-        window.overlaySettingsRevision += 1
         window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.")
         return true
     }
@@ -2671,7 +2670,6 @@ ApplicationWindow {
                             const sizes = [[250, 110], [310, 130], [430, 180]]
                             window.overlayPreferredSizeIndex = currentIndex
                             window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
-                            window.overlaySettingsRevision += 1
                             window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
                         }
                     }
