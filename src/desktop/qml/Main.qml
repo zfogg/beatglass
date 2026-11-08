@@ -2567,7 +2567,9 @@ ApplicationWindow {
                     Accessible.name: "Overlay geometry status: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Persisted overlay position and size, or the fallback state when native geometry is unavailable."
+                    Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
+                        ? "Persisted overlay position and size: " + text + "."
+                        : "Persisted overlay position and size unavailable; control-window fallback remains active."
                     ToolTip.text: "Current persisted overlay position and size"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
@@ -2575,7 +2577,7 @@ ApplicationWindow {
                 Label {
                     objectName: "overlayRestoreState"
                     text: window.overlayBridge && window.overlayBridge.displayName !== ""
-                        ? "Persisted restore: " + window.overlayBridge.displayName + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex] + " · " + (window.overlayBridge.geometry ? window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height : "geometry unavailable") + " · " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
+                        ? "Persisted restore: " + window.overlayBridge.displayName + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex] + " · " + (window.overlayBridge.geometry ? window.overlayBridge.geometry.x + "," + window.overlayBridge.geometry.y + " · " + window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height : "geometry unavailable") + " · " + Math.round(window.overlayBridge.opacity * 100) + "% opacity" + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
                         : "Persisted restore state unavailable; control-window fallback remains active."
                     Accessible.name: "Overlay persisted restore state: " + text
                     Accessible.value: text
