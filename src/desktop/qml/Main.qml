@@ -128,6 +128,20 @@ ApplicationWindow {
             window.announceVisualizationRecovery("Persisted recovery discard focused for " + runId + "; press Enter to review the confirmation dialog.")
         }
     }
+    Connections {
+        target: typeof storageRecovery !== "undefined" ? storageRecovery : null
+        function onAnalysisStatusChanged() {
+            if (storageRecovery.selectedRunId === "" || !storageRecovery.analysisRetryable)
+                return
+            if (storageRecovery.analysisStatus === "Analysis failed") {
+                window.announceVisualizationRecovery("Persisted recovery run " + storageRecovery.selectedRunId + " failed; retry is available.")
+                retryPersistedRecovery.forceActiveFocus()
+            } else if (storageRecovery.analysisStatus === "Analysis cancelled") {
+                window.announceVisualizationRecovery("Persisted recovery run " + storageRecovery.selectedRunId + " was canceled; retry is available.")
+                retryPersistedRecovery.forceActiveFocus()
+            }
+        }
+    }
     Shortcut {
         objectName: "visualizationWaveformShortcut"
         sequence: "Ctrl+1"
