@@ -24,7 +24,9 @@ pwsh -File tests/windows/verify_qualification_artifacts.ps1 build/windows-qualif
 ```
 
 The verifier requires exactly four relative artifact paths, rejects duplicate or
-path-escaping entries, and recomputes every SHA-256 digest. With `-RunTests` it also executes the
+path-escaping entries, recomputes every SHA-256 digest, and requires the four
+expected `build/Release` desktop, endpoint, DJ bridge, and overlay executables.
+With `-RunTests` it also executes the
 discovered CTest suite and retains `ctest-run.log`. It deliberately reports the native
 WASAPI, device-recovery, overlay, DPI, and interactive UI cases as `UNRUN`;
 those observations still require a logged-in Windows session and evidence.
