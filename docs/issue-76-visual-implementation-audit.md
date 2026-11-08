@@ -412,6 +412,8 @@ The error-state visualization now exposes a contextual Retry monitoring button w
 
 Starting and Reacquiring states now render a dedicated recovery-feedback label below the retry action, so the transition after activation remains visible and accessible until capture returns to a usable state.
 
+The grouped visualization status surface now reports capture error, Starting, Reacquiring, ready, or waiting as its live value, and its tooltip reflects the same state. Assistive users can therefore distinguish data absence from an active recovery transition at the group boundary.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
