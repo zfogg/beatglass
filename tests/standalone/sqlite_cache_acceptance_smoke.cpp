@@ -78,6 +78,13 @@ int main() {
     cache.begin("next-content", next_content);
     assert(cache.publish("next-content", next_content, "content-two-data", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(next_content, live_result) && live_result == "content-two-data");
+    const CacheKey live_content{"sha256:two", key.engine, key.config, "live"};
+    cache.begin("live-content", live_content);
+    assert(cache.publish("live-content", live_content, "live-content-data", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(live_content, live_result) && live_result == "live-content-data");
+    assert(cache.invalidate(live_content));
+    assert(!cache.find(live_content, live_result));
+    assert(cache.find(next_content, live_result) && live_result == "content-two-data");
     cache.begin("complete", key);
     assert(cache.publish("complete", key, "result-a", {}, [] { return true; }) == Publish::committed);
     std::string result;
