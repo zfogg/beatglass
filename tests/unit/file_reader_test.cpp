@@ -133,6 +133,20 @@ TEST_CASE("file reader rejects replacement at the original path") {
  std::error_code ec; std::filesystem::remove(moved, ec);
 }
 
+TEST_CASE("failed reader open after rename preserves the moved source") {
+ WaveFixture fixture;
+ const auto moved = fixture.path.string() + ".moved";
+ std::filesystem::rename(fixture.path, moved);
+ try {
+   CHECK_THROWS_AS(FileReader(fixture.path, 24), FileOpenError);
+   CHECK(std::filesystem::exists(moved));
+   CHECK_FALSE(std::filesystem::exists(fixture.path));
+ } catch (...) {
+   std::error_code ec; std::filesystem::remove(moved, ec); throw;
+ }
+ std::error_code ec; std::filesystem::remove(moved, ec);
+}
+
 TEST_CASE("seek refuses epoch overflow") {
  WaveFixture fixture; FileReader reader(fixture.path, std::numeric_limits<std::uint64_t>::max());
  CHECK_THROWS_AS(reader.seek(0), std::overflow_error);
