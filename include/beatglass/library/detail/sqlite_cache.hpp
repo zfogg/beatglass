@@ -16,6 +16,7 @@ struct CollectionEntry {
   std::int64_t modified_ns{};
 };
 /** Bounded, case-insensitive name query over indexed entries. */
+/** Case-insensitive name-prefix page; offset is zero-based and limit is bounded by the implementation. */
 struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; };
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;
