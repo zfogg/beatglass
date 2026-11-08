@@ -14,6 +14,9 @@ bool StorageOwner::discard_retryable(const std::string& id) { return cache_ ? ca
 bool StorageOwner::find_cached(const AnalysisIdentity& identity, std::string& result) const {
   return cache_ && cache_->find({identity.content_hash, identity.engine_version, identity.configuration_id, identity.mode}, result);
 }
+bool StorageOwner::invalidate_cached(const AnalysisIdentity& identity) {
+  return cache_ && cache_->invalidate({identity.content_hash, identity.engine_version, identity.configuration_id, identity.mode});
+}
 library_detail::Publish StorageOwner::publish_analysis(const std::string& run_id, const AnalysisOperation& operation,
                                                        std::stop_token stop) {
   if (!cache_) return library_detail::Publish::error;
