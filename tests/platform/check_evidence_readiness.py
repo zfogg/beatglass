@@ -65,6 +65,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     for platform in platforms:
         bundle = bundles / platform
         manifest = bundle / "manifest.json"
+        identity_failures = []
         errors = []
         if manifest.is_file():
             try:
@@ -72,7 +73,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 errors = [f"{platform}: {error}" for error in verifier.verify(bundle, manifest)]
                 if str(data.get("platform", "")).lower() != platform:
                     errors.append(f"{platform}: manifest platform does not match status row")
-                errors.extend(f"{platform}: {error}" for error in identity_errors(data, max_age_hours))
+                identity_failures = identity_errors(data, max_age_hours)
+                errors.extend(f"{platform}: {error}" for error in identity_failures)
                 scenario_ids = [item.get("id") for item in data.get("scenarios", []) if isinstance(item, dict)]
                 if len(scenario_ids) != len(set(scenario_ids)):
                     errors.append(f"{platform}: duplicate scenario id in manifest")
@@ -113,7 +115,8 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
         rows.append({"platform": platform, "manifest": str(manifest), "manifest_sha256": manifest_sha256,
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
-                     "errors": matrix_errors + errors})
+                     "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
+                     "invalidated": bool(matrix_errors + errors), "errors": matrix_errors + errors})
     errors = [error for row in rows for error in row["errors"]]
     return {"platforms": rows, "error_count": len(errors), "errors": errors,
             "ready": not errors}
