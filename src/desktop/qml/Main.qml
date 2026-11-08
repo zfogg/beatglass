@@ -401,6 +401,7 @@ ApplicationWindow {
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                     Accessible.name: "Library catalog status"
+                    Accessible.role: Accessible.StaticText
                     Accessible.description: text
                 }
                 RowLayout {
@@ -1041,16 +1042,18 @@ ApplicationWindow {
                                 visible: window.endpointSelectionBridge && window.endpointSelectionBridge.endpoints.length === 0
                                 text: "No output endpoints detected. Refresh after connecting an output device."
                                 Accessible.name: "Output endpoint empty state"
+                                Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
-                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status"; Accessible.description: text }
+                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status"; Accessible.role: Accessible.StaticText; Accessible.description: text }
                             Label {
                                 objectName: "endpointUnavailableState"
                                 visible: window.endpointSelectionBridge === null
                                 text: "Output endpoint discovery is unavailable in this build."
                                 Accessible.name: "Output endpoint discovery availability"
+                                Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
@@ -1060,11 +1063,12 @@ ApplicationWindow {
                                 visible: window.endpointSelectionBridge && window.endpointSelectionBridge.status.indexOf("Error") >= 0
                                 text: "Output endpoint recovery is available: connect an output device and refresh the endpoint list."
                                 Accessible.name: "Output endpoint recovery guidance"
+                                Accessible.role: Accessible.StaticText
                                 Accessible.description: text
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
-                            Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint"; Accessible.description: text; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint"; Accessible.role: Accessible.StaticText; Accessible.description: text; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         ComboBox {
                             id: outputDevice
                             objectName: "outputDevice"
