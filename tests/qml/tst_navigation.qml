@@ -385,6 +385,7 @@ TestCase {
         let selection = findChild(app, "visualizationSelectionStatus")
         verify(selection !== null)
         compare(selection.text, "No visualization position selected")
+        verify(selection.Accessible.description.indexOf("Left/Right/Home/End") >= 0)
         mouseClick(canvas, canvas.width * 0.25, canvas.height * 0.5)
         compare(selection.text, "Selected visualization position 25%")
         let clearSelection = findChild(app, "clearVisualizationSelection")
