@@ -59,6 +59,14 @@ for bundle in "$tap_bundle" "$recovery_bundle"; do
   fi
 done
 echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
+if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
+  echo "Running Core Audio tap smoke for supplied UID"
+  "$tap_binary" "$BEATGLASS_MACOS_TAP_UID"
+  echo "Running Core Audio recovery smoke for supplied UID"
+  "$recovery_binary" "$BEATGLASS_MACOS_TAP_UID"
+else
+  echo "UNRUN: set BEATGLASS_MACOS_TAP_UID to execute tap and recovery smoke bundles"
+fi
 test_filter='^(macos_overlay_|macos_native_overlay$)'
 registered_tests="$(ctest --test-dir "$out_dir/build" -N -R "$test_filter")"
 if ! grep -Eq 'Total Tests: [1-9][0-9]*' <<<"$registered_tests"; then
