@@ -113,7 +113,7 @@ ApplicationWindow {
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; color: "white"; font.pixelSize: 24; font.bold: true }
                 Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; color: "white" }
-                Label { text: window.captureMonitorBridge ? "Capture " + window.captureMonitorBridge.status : "Capture unavailable"; color: "#cbd5e1"; objectName: "overlayCaptureStatus" }
+                Label { text: window.captureMonitorBridge ? "Capture " + window.captureMonitorBridge.status : "Capture unavailable"; color: "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status"; Accessible.description: text }
             }
         }
     }
