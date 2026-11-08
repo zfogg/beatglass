@@ -50,6 +50,7 @@ foreach ($line in $lines) {
 $expectedArtifacts = @("build/Release/beatglass-desktop.exe", "build/Release/windows_endpoint_tests.exe", "build/Release/windows_dj_bridge_tests.exe", "build/Release/windows_overlay_tests.exe")
 foreach ($expected in $expectedArtifacts) { if (-not $relativePaths.Contains($expected)) { throw "Artifact manifest is missing required executable: $expected" } }
 $expectedCases = @("endpoint-selection-start", "pause-resume", "seek-epoch-retirement", "endpoint-disappearance-recovery", "retry-native-diagnostic", "stop-cleanup")
+$seenPlaybackLogs = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $evidence = @(Get-Content -LiteralPath $evidencePath -Raw | ConvertFrom-Json)
 if ($evidence.Count -ne $expectedCases.Count) { throw "Expected exactly six native playback evidence cases" }
 for ($i = 0; $i -lt $expectedCases.Count; $i++) {
@@ -62,9 +63,11 @@ for ($i = 0; $i -lt $expectedCases.Count; $i++) {
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     if (-not $logPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $logPath -PathType Leaf) -or (Get-Item -LiteralPath $logPath).Length -eq 0) { throw "Missing or empty log evidence for $($evidence[$i].case): $($evidence[$i].log)" }
     if ((Get-Item -LiteralPath $logPath).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Log evidence must not be a reparse point: $($evidence[$i].log)" }
+    if (-not $seenPlaybackLogs.Add($logPath)) { throw "Duplicate playback log evidence: $($evidence[$i].log)" }
   }
 }
 $expectedOverlayCases = @("show-hide-recovery", "click-through-unlock", "display-change-clamp", "dpi-fullscreen")
+$seenOverlayScreenshots = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 $overlayEvidence = @(Get-Content -LiteralPath $overlayEvidencePath -Raw | ConvertFrom-Json)
 if ($overlayEvidence.Count -ne $expectedOverlayCases.Count) { throw "Expected exactly four native overlay evidence cases" }
 for ($i = 0; $i -lt $expectedOverlayCases.Count; $i++) {
@@ -77,6 +80,7 @@ for ($i = 0; $i -lt $expectedOverlayCases.Count; $i++) {
     $root = [IO.Path]::GetFullPath($OutputDirectory).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
     if (-not $screenshotPath.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or -not (Test-Path -LiteralPath $screenshotPath -PathType Leaf) -or (Get-Item -LiteralPath $screenshotPath).Length -eq 0) { throw "Missing or empty screenshot evidence for $($overlayEvidence[$i].case): $($overlayEvidence[$i].screenshot)" }
     if ((Get-Item -LiteralPath $screenshotPath).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Screenshot evidence must not be a reparse point: $($overlayEvidence[$i].screenshot)" }
+    if (-not $seenOverlayScreenshots.Add($screenshotPath)) { throw "Duplicate overlay screenshot evidence: $($overlayEvidence[$i].screenshot)" }
   }
 }
 Write-Output "qualification artifact hashes verified: $OutputDirectory"
