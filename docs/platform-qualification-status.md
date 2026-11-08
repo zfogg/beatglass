@@ -269,6 +269,8 @@ Downstream release jobs must verify the promoted artifact with `python tests/pla
 
 The complete release workflow is `python tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root>`: it retains and verifies the pair, evaluates the conservative decision, promotes only `ACCEPTED`, and verifies the resulting manifest. Native-pending evidence stops before release output is created.
 
+After automation accepts a bundle, a release owner records manual acceptance with `python tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`. The signoff is bound to the decision's report hash and refuses `PENDING`; it is an audit record, not a substitute for native desktop/audio/overlay qualification.
+
 The machine consumer is `python tests/platform/consume_review_packet.py <review.json>`. It rejects unsupported packet versions, recorded acceptance errors, and non-`READY` gate state; native qualification remains pending until the packet is backed by reviewed hardware evidence.
 
 The packet consumer independently rechecks native-required state, experimental support rows, and scenario statuses, so clearing `acceptance_errors` in a tampered packet cannot bypass release acceptance.
