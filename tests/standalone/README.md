@@ -28,6 +28,8 @@ tests/standalone/run-library-smokes.ps1 -SelectedCases executor_queued_cancellat
 tests/standalone/run-library-smokes.ps1 -SelectedCases executor_after_shutdown,executor_empty,executor_exception,executor_explicit_cancel,executor_handle_terminal
 tests/standalone/run-library-smokes.ps1 -SelectedCases analysis_verifier,analysis_final_progress_exception,executor_fifo,executor_invalid_state,executor_shutdown_queued
 tests/standalone/run-library-smokes.ps1 -SelectedCases executor_handle_concurrent_cancel
+tests/standalone/run-library-smokes.ps1 -SelectedCases sqlite_cache_acceptance
+tests/standalone/run-library-smokes.ps1 -SQLiteRoot C:/path/to/sqlite -SelectedCases sqlite_cache_acceptance
 tests/standalone/run-library-smokes.ps1 -OpenSSLRoot C:/path/to/openssl
 tests/standalone/run-library-smokes.ps1 -SelectedCases storage_config -RunExisting -OutputDir C:/temp/beatglass-smokes
 ```
