@@ -538,6 +538,8 @@ The native playback bridge now publishes dedicated source, epoch, and state noti
 
 The focused bridge contract test checks those notify properties, signal declarations, stop/pause/seek emission paths, and matching QML reset handlers. This keeps source and discontinuity invalidation covered even when a full Qt build is unavailable.
 
+The visualization recovery row now exposes direct Resume and Stop playback actions. Resume is available only while paused and preserves the accepted snapshot; Stop invokes the real bridge stop path, which clears the snapshot and announces the recovery reason through the existing accessible feedback.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
