@@ -17,6 +17,7 @@ def main() -> int:
         "visualization keyboard selection": "Keys.onRightPressed",
         "visualization mode arrow focus": "spectrumView.forceActiveFocus()",
         "visualization shortcut focus": "waveformView.forceActiveFocus()",
+        "visualization keyboard guidance": "Use Left and Right arrows to switch views",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",

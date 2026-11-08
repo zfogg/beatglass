@@ -753,7 +753,12 @@ ApplicationWindow {
                             radius: 6
                         }
                     }
-                    Label { text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"; objectName: "visualizationModeStatus"; Accessible.name: "Visualization mode" }
+                    Label {
+                        text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"
+                        objectName: "visualizationModeStatus"
+                        Accessible.name: "Visualization mode"
+                        Accessible.description: text + ". Use Left and Right arrows to switch views, or Ctrl+1 and Ctrl+2."
+                    }
                 }
                 Canvas {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
