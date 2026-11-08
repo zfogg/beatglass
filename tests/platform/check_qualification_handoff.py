@@ -19,6 +19,7 @@ def main() -> int:
     required_disclaimers = ("does not establish native", "support language must remain experimental")
     required_platform_rows = ("| Windows |", "| macOS |", "| Linux |")
     required_matrix_columns = ("Current integrated/preparation evidence", "Native gates still required")
+    required_scenarios = ("permission", "device", "recovery")
     required_runtime_evidence = ("audio backend", "display server", "exact commands", "limitations")
     required_evidence_schema = ("timestamp", "logs", "screenshot")
     platform_rows = tuple(line for line in docs.splitlines() if line.startswith(("| Windows |", "| macOS |", "| Linux |")))
@@ -31,6 +32,7 @@ def main() -> int:
         unlinked.append("docs/platform-qualification-status.md (README)")
     unlinked.extend(f"status matrix row: {row}" for row in required_platform_rows if row not in docs)
     unlinked.extend(f"status matrix column: {column}" for column in required_matrix_columns if column not in docs)
+    unlinked.extend(f"scenario requirement: {scenario}" for scenario in required_scenarios if scenario.lower() not in docs.lower())
     unlinked.extend(f"runtime evidence field: {field}" for field in required_runtime_evidence if field.lower() not in docs.lower())
     unlinked.extend(f"evidence schema field: {field}" for field in required_evidence_schema if field.lower() not in docs.lower())
     for row in platform_rows:
