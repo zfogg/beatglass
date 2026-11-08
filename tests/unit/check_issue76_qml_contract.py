@@ -25,6 +25,7 @@ def main() -> int:
         "native playback accessible names": "Accessible.name: \"Start native playback\"",
         "playback device current selection": "Current output device: \" + currentText",
         "native playback selected format": "Start native playback at \" + playbackSampleRate.value",
+        "overlay action accessible names": "Accessible.name: \"Show DJ overlay\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
