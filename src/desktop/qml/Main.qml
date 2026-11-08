@@ -1098,9 +1098,14 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "visualizationInteractionHint"
-                    text: visualizationCanvas.selectedPosition < 0
-                        ? "Select a " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT") + " position with the pointer or keyboard."
-                        : (visualizationCanvas.viewMode === "waveform" ? "Waveform" : "FFT") + " position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
+                    text: {
+                        const modeLabel = visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT"
+                        if (window.liveBridge.status === "Error")
+                            return "Capture error; retry monitoring before selecting a " + modeLabel + " position."
+                        if (visualizationCanvas.selectedPosition < 0)
+                            return "Select a " + modeLabel + " position with the pointer or keyboard."
+                        return modeLabel.charAt(0).toUpperCase() + modeLabel.slice(1) + " position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
+                    }
                     Accessible.name: "Visualization interaction hint"
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText

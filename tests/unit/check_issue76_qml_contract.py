@@ -395,7 +395,7 @@ def main() -> int:
         "visualization mode radio roles": "objectName: \"waveformView\"; checkable: true; checked: visualizationCanvas.viewMode === \"waveform\"; Accessible.value: checked ? \"selected\" : \"not selected\"; Accessible.role: Accessible.RadioButton",
         "visualization clear button state": "Accessible.name: \"Clear visualization position\"\n                    Accessible.value: enabled ? \"available\" : \"no position selected\"\n                    Accessible.role: Accessible.Button",
         "visualization clear recovery description": "Accessible.description: \"Remove the selected waveform or FFT position. Escape, Enter, Space, right-click, and double-click provide equivalent recovery paths.\"",
-        "visualization interaction hint": "objectName: \"visualizationInteractionHint\"\n                    text: visualizationCanvas.selectedPosition < 0\n                        ? \"Select a \" + (visualizationCanvas.viewMode === \"waveform\" ? \"waveform\" : \"FFT\")",
+        "visualization interaction hint": "objectName: \"visualizationInteractionHint\"\n                    text: {\n                        const modeLabel = visualizationCanvas.viewMode === \"waveform\" ? \"waveform\" : \"FFT\"",
         "visualization responsive canvas height": "Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120",
         "visualization responsive hint type": "font.pixelSize: window.compactHeader ? 12 : 14",
         "visualization error hint color": "color: window.liveBridge.status === \"Error\" ? \"#fca5a5\" : window.themeForegrounds[window.selectedThemeIndex]",

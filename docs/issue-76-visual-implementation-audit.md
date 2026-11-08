@@ -406,6 +406,8 @@ The visualization canvas and interaction hint now adapt to compact-header layout
 
 The interaction hint now adopts the error color when capture is in an Error state and the active theme foreground otherwise; the status stack also tightens spacing in compact layouts. Runtime recovery state and responsive density therefore remain visually legible together.
 
+When capture enters Error, the interaction hint now changes its message to “retry monitoring before selecting” the active mode, preventing users from attempting selection against an unavailable stream. The same runtime state drives the error color and capture-status labels.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
