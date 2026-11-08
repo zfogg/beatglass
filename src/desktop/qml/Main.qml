@@ -835,6 +835,7 @@ ApplicationWindow {
                         : (visualizationCanvas.modeHasData ? "Ready" : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
                     Accessible.name: "Visualization load state"
                     Accessible.description: text
+                    ToolTip.text: "Current waveform/FFT presentation load state"
                     Layout.fillWidth: true
                 }
                 Label {

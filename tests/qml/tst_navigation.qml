@@ -428,6 +428,7 @@ TestCase {
         verify(loadState !== null)
         compare(loadState.text, "Unavailable")
         compare(loadState.Accessible.name, "Visualization load state")
+        compare(loadState.ToolTip.text, "Current waveform/FFT presentation load state")
         let revision = findChild(app, "visualizationRevisionStatus")
         verify(revision !== null)
         compare(revision.text, "No visualization generation is active")
