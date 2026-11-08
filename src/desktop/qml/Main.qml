@@ -589,6 +589,7 @@ ApplicationWindow {
                             Accessible.name: "Clear selected audio"
                             Accessible.role: Accessible.Button
                             Accessible.description: window.selectedName !== "" ? "Clear the selected audio source and return analysis details to the empty state: " + window.selectedName : "No audio source is selected."
+                            ToolTip.text: window.selectedName !== "" ? "Clear " + window.selectedName : "No audio source selected"
                             onClicked: window.clearSelectedAudio()
                         }
                         Label {
@@ -608,6 +609,7 @@ ApplicationWindow {
                             Accessible.name: "Retry metadata"
                             Accessible.role: Accessible.Button
                             Accessible.description: "Retry reading metadata for the selected audio source after an error. Current status: " + window.metadataStatus
+                            ToolTip.text: "Retry metadata for the selected source"
                             onClicked: window.metadataBridge.inspect(window.selectedAudioUrl)
                         }
                         Label {
