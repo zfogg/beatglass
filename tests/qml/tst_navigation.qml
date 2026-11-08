@@ -790,6 +790,7 @@ TestCase {
         compare(findChild(app, "unlockOverlay").Accessible.description, "Restore keyboard and pointer access to the overlay")
         compare(findChild(app, "unlockOverlay").ToolTip.text, "Restore keyboard and pointer access to the overlay")
         compare(findChild(app, "hideOverlay").Accessible.description, "Hide the DJ overlay window")
+        compare(findChild(app, "hideOverlay").ToolTip.text, "Hide the DJ overlay and restore the control window")
         let overlayHide = findChild(app, "overlayWindowHide")
         verify(overlayHide !== null)
         compare(overlayHide.Accessible.description, "Hide the overlay window and restore the control window")

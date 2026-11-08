@@ -923,7 +923,7 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.description: "Show the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.showOverlayAndHideControls() }
                     Button { text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.description: "Restore keyboard and pointer access to the overlay"; ToolTip.text: "Restore keyboard and pointer access to the overlay"; enabled: window.overlayBridge && window.overlayBridge.clickThrough; onClicked: window.overlayBridge.setClickThrough(false) }
-                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.description: "Hide the DJ overlay window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
+                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
