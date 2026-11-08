@@ -54,6 +54,12 @@ class ReadinessReportContractTest(unittest.TestCase):
         report["platforms"][0]["artifact_inventory"][0]["hash_valid"] = False
         self.assertIn("artifact hash is not valid", "\n".join(module.validate(report)))
 
+    def test_report_rejects_non_hex_digests(self):
+        report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
+        report["platforms"][0]["manifest_sha256"] = "z" * 64
+        errors = chr(10).join(module.validate(report))
+        self.assertIn("invalid manifest hash linkage", errors)
+
     def test_report_rejects_duplicate_artifact_paths(self):
         report = json.loads((Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json").read_text(encoding="utf-8"))
         inventory = report["platforms"][0]["artifact_inventory"]
