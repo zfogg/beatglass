@@ -21,6 +21,7 @@ public slots:
     QStringList ids;
     QStringList details;
     for (const auto& run : runs) { ids.push_back(QString::fromStdString(run.id)); details.push_back(QString::fromStdString(run.id + " | " + run.key.content + " | " + run.key.engine + " | " + run.key.config + " | " + run.key.mode + " | source=" + run.source_path + " | decoder=" + run.decoder_snapshot)); }
+    emit analysis(runs.empty() ? QStringLiteral("Analysis idle") : QStringLiteral("Analysis recovery available"));
     emit runsChanged(ids, details);
   }
   void discard(QString id) { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) refresh(); }
