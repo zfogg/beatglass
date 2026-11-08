@@ -259,6 +259,8 @@ For retention verification, pass `--report <report.json>` to the packet consumer
 
 For release/review handoff, retain both files in one bundle and consume them together with `python tests/platform/consume_review_bundle.py <bundle-root>`. The bundle consumer validates the report contract, requires the packet, and verifies the packet's source hash against that exact retained report. Missing or replaced files remain pending; this portable workflow does not claim native desktop/audio/overlay qualification.
 
+To create that retained handoff bundle from generated artifacts, run `python tests/platform/retain_review_bundle.py <report.json> <review.json> <bundle-root>`. Export is verified immediately; pending native evidence or any detached/invalid input returns a nonzero result and remains diagnostic rather than release-ready.
+
 The machine consumer is `python tests/platform/consume_review_packet.py <review.json>`. It rejects unsupported packet versions, recorded acceptance errors, and non-`READY` gate state; native qualification remains pending until the packet is backed by reviewed hardware evidence.
 
 The packet consumer independently rechecks native-required state, experimental support rows, and scenario statuses, so clearing `acceptance_errors` in a tampered packet cannot bypass release acceptance.
