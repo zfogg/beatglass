@@ -444,6 +444,7 @@ def main() -> int:
         "visualization counts wrap": 'objectName: "visualizationDataStatus"',
         "visualization selected counts wrap": 'objectName: "visualizationSelectedDataStatus"',
         "visualization data status shrinks": 'objectName: "visualizationStatus"',
+        "visualization revision wraps": 'objectName: "visualizationRevisionStatus"',
         "visualization selection status theme": 'objectName: "visualizationSelectionStatus"',
         "visualization selection status wraps": 'objectName: "visualizationSelectionStatus"',
         "visualization selection status shrinks": "Layout.minimumWidth: 0",
