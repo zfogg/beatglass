@@ -314,6 +314,8 @@ Fresh batch admission also resets the displayed aggregate frame count, preventin
 
 Single and batch retries now reset/republish frame progress immediately, rather than waiting for the periodic bridge poll to correct stale values.
 
+Invalid single-operation submissions also clear prior result and frame state before entering `Failed`, so rejected work cannot display stale output.
+
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
 ## Analysis queue admission handoff
