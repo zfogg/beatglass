@@ -19,6 +19,8 @@ class ReadinessReviewTest(unittest.TestCase):
             output.write_text(review.render(report), encoding="utf-8")
             text = output.read_text(encoding="utf-8")
             self.assertIn("Gate status: **PENDING**", text)
+            self.assertIn("Native qualification required: **True**", text)
+            self.assertIn("## Platform support", text)
             self.assertIn("capture", text)
             self.assertIn("Artifacts:", text)
             self.assertIn("## ingestion_errors", text)

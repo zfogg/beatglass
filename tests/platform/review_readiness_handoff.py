@@ -11,8 +11,12 @@ consumer_spec.loader.exec_module(consumer)
 
 def render(report_path: Path) -> str:
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    lines = ["# Native qualification review", "", f"Gate status: **{report.get('exit_gate_status', 'UNKNOWN')}**", "",
+    lines = ["# Native qualification review", "", f"Gate status: **{report.get('exit_gate_status', 'UNKNOWN')}**",
+             f"Native qualification required: **{report.get('native_qualification_required', 'UNKNOWN')}**", "",
              "This checklist is review evidence only; it does not promote native qualification.", ""]
+    lines.append("## Platform support")
+    lines.extend([f"- {row.get('platform')}: {row.get('status')}" for row in report.get("platform_support_status", [])] or ["- none recorded"])
+    lines.append("")
     for field in ("generation_errors", "handoff_check_errors", "documentation_check_errors", "ingestion_errors"):
         values = report.get(field, [])
         lines.append(f"## {field}")
