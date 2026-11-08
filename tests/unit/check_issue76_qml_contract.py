@@ -415,6 +415,8 @@ def main() -> int:
         "visualization focus ring token": "border.color: window.themeAccentColors[window.selectedThemeIndex]",
         "waveform themed focus": "waveformView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex]",
         "spectrum themed focus": "spectrumView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex]",
+        "waveform themed fill": "waveformView.checked ? Qt.darker(window.themeAccentColors[window.selectedThemeIndex], 1.8)",
+        "spectrum themed fill": "spectrumView.checked ? Qt.darker(window.themeAccentColors[window.selectedThemeIndex], 1.8)",
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",

@@ -1001,7 +1001,7 @@ ApplicationWindow {
                         Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; event.accepted = true }
                         Keys.onEscapePressed: { visualizationCanvas.forceActiveFocus(); event.accepted = true }
                         background: Rectangle {
-                            color: waveformView.checked ? "#273b5d" : "#182231"
+                            color: waveformView.checked ? Qt.darker(window.themeAccentColors[window.selectedThemeIndex], 1.8) : window.themeBackgrounds[window.selectedThemeIndex]
                             border.width: waveformView.activeFocus ? 3 : 1
                             border.color: waveformView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex] : window.themeForegrounds[window.selectedThemeIndex]
                             radius: 6
@@ -1018,7 +1018,7 @@ ApplicationWindow {
                         Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; event.accepted = true }
                         Keys.onEscapePressed: { visualizationCanvas.forceActiveFocus(); event.accepted = true }
                         background: Rectangle {
-                            color: spectrumView.checked ? "#432c56" : "#182231"
+                            color: spectrumView.checked ? Qt.darker(window.themeAccentColors[window.selectedThemeIndex], 1.8) : window.themeBackgrounds[window.selectedThemeIndex]
                             border.width: spectrumView.activeFocus ? 3 : 1
                             border.color: spectrumView.activeFocus ? window.themeAccentColors[window.selectedThemeIndex] : window.themeForegrounds[window.selectedThemeIndex]
                             radius: 6
