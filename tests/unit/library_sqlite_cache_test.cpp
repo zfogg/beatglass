@@ -160,6 +160,14 @@ TEST_CASE("SQLite cache discards only retryable runs") {
   REQUIRE_FALSE(cache.discard_retryable("retry"));
   REQUIRE_THROWS_AS(cache.discard_retryable(""), std::invalid_argument);
 }
+TEST_CASE("SQLite cache discards retryable runs atomically as a batch") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("one", key); REQUIRE(cache.publish("one", key, "x", {}, [] { return false; }) == Publish::stale_input);
+  cache.begin("two", key); REQUIRE(cache.publish("two", key, "x", {}, [] { return false; }) == Publish::stale_input);
+  CHECK(cache.discard_retryable(std::vector<std::string>{"one", "two", "missing"}) == 2);
+  CHECK(cache.retryable_runs().empty());
+  REQUIRE_THROWS_AS(cache.discard_retryable(std::vector<std::string>{"ok", std::string("bad\0id", 6)}), std::invalid_argument);
+}
 TEST_CASE("SQLite retryable run query exposes its bound") {
   SqliteCache cache(":memory:");
   CHECK(kMaxRetryableRuns == 10000);
