@@ -310,13 +310,19 @@ ApplicationWindow {
     }
     function reapplyOverlaySettingsAndRestore() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
+            window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.")
             return false
         }
         if (window.overlayBridge.screenIndex >= 0)
-            window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)
-        if (!window.restoreOverlayVisualStateFromBridge())
+            if (!window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)) {
+                window.overlayDisplayRecoveryPending = true
+                return false
+            }
+        if (!window.restoreOverlayVisualStateFromBridge()) {
+            window.overlayDisplayRecoveryPending = true
             return false
+        }
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
         return window.showOverlayAndHideControls()
     }
