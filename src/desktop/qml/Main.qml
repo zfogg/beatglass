@@ -457,8 +457,8 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Label { text: "Name"; font.bold: true; Layout.fillWidth: true }
-                    Label { text: "Type"; font.bold: true; Layout.preferredWidth: 100 }
+                    Label { text: "Name"; font.bold: true; Layout.fillWidth: true; Accessible.name: "File name column"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: "Audio file or folder name" }
+                    Label { text: "Type"; font.bold: true; Layout.preferredWidth: 100; Accessible.name: "File type column"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: "Audio format or folder type" }
                 }
                 Label {
                     objectName: "catalogStatus"
