@@ -304,6 +304,10 @@ TestCase {
         verify(status !== null)
         compare(status.Accessible.name, "Output endpoint status")
         compare(findChild(app, "selectedEndpointStatus").Accessible.name, "Selected output endpoint")
+        let empty = findChild(app, "endpointEmptyState")
+        verify(empty !== null)
+        verify(!empty.visible)
+        compare(empty.Accessible.name, "Output endpoint empty state")
         app.destroy()
     }
 
