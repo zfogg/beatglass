@@ -78,6 +78,7 @@ def main() -> int:
         "remaining control values": "Accessible.value: checked ? \"selected\" : \"not selected\"",
         "status value announcements": "Accessible.value: visualizationCanvas.viewMode",
         "final state values": "Accessible.value: text",
+        "visual recovery values": "objectName: \"visualizationLoadState\"",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

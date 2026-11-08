@@ -70,6 +70,8 @@ Playback state/frame, visualization mode, and current appearance settings now ex
 
 Capture, endpoint, overlay interaction, playback-selection, and settings persistence statuses now expose their rendered text as explicit accessibility values across all screens.
 
+Playback error/seek guidance and visualization load/data/selection statuses now expose their rendered values explicitly as well.
+
 Visualization mode, empty/loading, data, and selection status labels now expose the same static-text role while preserving dynamic view and capture descriptions.
 
 Playback seek limitations, source-selection mismatch, native errors, and overlay recovery hints are likewise explicit status text, keeping recovery guidance discoverable without changing the underlying bridge behavior.
