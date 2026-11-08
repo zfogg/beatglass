@@ -195,6 +195,10 @@ TEST_CASE("SQLite exact catalog lookup rejects unsafe paths") {
   CHECK_THROWS_AS(cache.entry(""), std::invalid_argument);
   CHECK_THROWS_AS(cache.entry("/music/a\0.flac"), std::invalid_argument);
 }
+TEST_CASE("SQLite catalog prefix queries bound search input") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.entries({std::string(1025, 'a'), 0, 10}), std::invalid_argument);
+}
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);
