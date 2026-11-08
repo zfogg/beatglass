@@ -107,6 +107,15 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             (bundles / "windows").mkdir()
             self.assertIn("macos: missing manifest", "\n".join(readiness.check(status, bundles)))
 
+    def test_readiness_cli_rejects_unrun_required_scenarios(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            (bundles / "windows" / "capture.txt").write_text("actual\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": __import__("hashlib").sha256(b"actual\n").hexdigest()})
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("required scenarios are not PASS", "\n".join(readiness.check(status, bundles)))
+
     def test_readiness_rejects_platform_mismatch(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
