@@ -48,6 +48,10 @@
           "evidence": null
         }
       ],
+      "scenario_status_counts": {
+        "PASS": 1,
+        "UNRUN": 5
+      },
       "fresh": true,
       "manifest_platform": "windows",
       "provenance_complete": true,
@@ -107,6 +111,10 @@
           "evidence": null
         }
       ],
+      "scenario_status_counts": {
+        "PASS": 1,
+        "UNRUN": 5
+      },
       "fresh": true,
       "manifest_platform": "macos",
       "provenance_complete": true,
@@ -166,6 +174,10 @@
           "evidence": null
         }
       ],
+      "scenario_status_counts": {
+        "PASS": 1,
+        "UNRUN": 5
+      },
       "fresh": true,
       "manifest_platform": "linux",
       "provenance_complete": true,
