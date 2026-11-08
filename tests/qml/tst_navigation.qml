@@ -392,6 +392,7 @@ TestCase {
         verify(empty !== null)
         verify(empty.visible)
         compare(empty.text, "No displays are available for the overlay.")
+        verify(!findChild(app, "overlaySize").enabled)
         compare(empty.Accessible.name, "Overlay display empty state")
         app.destroy()
         fakeOverlay.screenNames = ["Display"]
