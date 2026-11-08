@@ -32,6 +32,7 @@ bool sqlite_length_representable(std::size_t size) noexcept;
 /** Maximum serialized analysis result accepted by the provisional cache. */
 inline constexpr std::size_t kMaxCachedResultBytes = 8u * 1024u * 1024u;
 inline constexpr std::size_t kMaxRetryableRuns = 10000;
+inline constexpr std::size_t kMaxCacheRunIdBytes = 4096;
 /** Provisional caller-supplied cache identity. The caller must establish a validated content hash and stable algorithm/configuration versions. */
 struct CacheKey {
   /** Validated content identity. */ std::string content;

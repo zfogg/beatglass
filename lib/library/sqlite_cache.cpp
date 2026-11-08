@@ -62,7 +62,7 @@ public:
   // All calls, including destruction, belong to one database worker.
   void begin(const std::string& id, const CacheKey& key) {
     validate_key(key);
-    if (id.empty() || id.size() > 4096 || id.find('\0') != std::string::npos) throw std::invalid_argument("invalid run ID");
+    if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos) throw std::invalid_argument("invalid run ID");
     Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status) VALUES(?,?,?,?,?,'running') ON CONFLICT(id) DO UPDATE SET status='running' WHERE runs.status='retryable' AND runs.content=excluded.content AND runs.engine=excluded.engine AND runs.config=excluded.config AND runs.mode=excluded.mode");
     bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p);
   }
@@ -91,7 +91,7 @@ public:
     return out;
   }
   bool discard_retryable(const std::string& id) {
-    if (id.empty() || id.size() > 4096 || id.find('\0') != std::string::npos)
+    if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
       throw std::invalid_argument("invalid run ID");
     Statement s(db_, "DELETE FROM runs WHERE id=? AND status='retryable'");
     bind(s.p, 1, id);
