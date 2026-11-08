@@ -256,6 +256,7 @@ ApplicationWindow {
                 Repeater {
                     model: window.themeNames.length
                     delegate: Button {
+                        id: themePreviewButton
                         required property int index
                         objectName: "themePreview" + index
                         width: 18; height: 18
@@ -268,10 +269,25 @@ ApplicationWindow {
                         Accessible.role: Accessible.RadioButton
                         ToolTip.text: "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
+                            objectName: "themePreviewSurface" + index
                             radius: 3
                             color: window.themeBackgrounds[index]
                             border.width: window.selectedThemeIndex === index ? 2 : 1
                             border.color: window.themeAccentColors[index]
+                            // Keep keyboard focus visible even when a theme's
+                            // palette is dark or low contrast.  The ring is
+                            // deliberately outside the swatch so it cannot be
+                            // mistaken for the selected-state border.
+                            Rectangle {
+                                objectName: "themePreviewFocusRing" + index
+                                anchors.fill: parent
+                                anchors.margins: -3
+                                radius: parent.radius + 2
+                                color: "transparent"
+                                border.width: 3
+                                border.color: window.themeAccentColors[index]
+                                visible: themePreviewButton.activeFocus
+                            }
                         }
                         onClicked: {
                             window.selectedThemeIndex = index
