@@ -60,7 +60,7 @@ Snapshot timelines use an exclusive observed-frame boundary. Beats precede
 that boundary, and chord segments are nonempty half-open intervals whose end
 may equal it. Producers using the former inclusive boundary must adjust.
 
-.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/music_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp
+.. cpp:autodoc:: include/beatglass/core/results.hpp include/beatglass/core/estimator.hpp include/beatglass/core/strategies.hpp include/beatglass/core/presentation.hpp include/beatglass/core/presentation_gate.hpp include/beatglass/core/tempo_tracker.hpp include/beatglass/core/causal_replay.hpp include/beatglass/core/music_replay.hpp include/beatglass/core/file_analysis.hpp include/beatglass/core/tracking_machine.hpp include/beatglass/core/snapshot_publisher.hpp include/beatglass/core/playback_session.hpp include/beatglass/core/source_presentation_gate.hpp include/beatglass/core/visualization_presentation.hpp
 
 Offline results preserve overlapping local tonal evidence separately from an
 optional validated track-level key. Missing windows and scores remain unknown;
@@ -81,7 +81,7 @@ decision. The interface and helper do not implement SQLite transactions.
 Desktop application internals
 -----------------------------
 
-.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_device_position.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_live_music.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/macos_overlay.hpp
+.. cpp:autodoc:: src/desktop/metadata.hpp src/desktop/live_presentation.hpp src/desktop/analysis_job_bridge.hpp src/desktop/analysis_presentation.hpp src/desktop/capture_monitor_bridge.hpp src/desktop/library_catalog_bridge.hpp src/desktop/platform/windows_endpoints.hpp src/desktop/platform/windows_loopback.hpp src/desktop/platform/windows_device_position.hpp src/desktop/platform/windows_loopback_session.hpp src/desktop/platform/windows_live_tempo.hpp src/desktop/platform/windows_live_music.hpp src/desktop/platform/windows_default_tempo.hpp src/desktop/platform/windows_dj_bridge.hpp src/desktop/platform/windows_overlay.hpp src/desktop/platform/windows_overlay_policy.hpp src/desktop/platform/macos_overlay.hpp src/desktop/playback_session_bridge.hpp src/desktop/theme_preferences.hpp src/desktop/visualization_presentation_bridge.hpp
 
 .. cpp:function:: beatglass::windows::LoopbackSession::~LoopbackSession()
 
