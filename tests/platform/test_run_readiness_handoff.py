@@ -76,3 +76,16 @@ class ReadinessHandoffTest(unittest.TestCase):
             errors = handoff.run(bundles, root / "readiness.json", native_output=native, native_platform="windows")
             self.assertTrue(any("platform mismatch" in error for error in errors))
 
+    def test_full_handoff_pipeline_review_is_nonzero_and_auditable(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; status = root / "status.md"
+            status.write_text("| Windows | prep | gates |\n| macOS | prep | gates |\n| Linux | prep | gates |\n", encoding="utf-8")
+            errors = handoff.run(bundles, output, status, 100000, check_docs=True, consume_report=True)
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(errors)
+            self.assertEqual(report["exit_gate_status"], "PENDING")
+            self.assertIn("handoff_check_errors", report)
+            self.assertIn("documentation_check_errors", report)
+            self.assertIn("ingestion_errors", report)
+
