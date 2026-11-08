@@ -59,7 +59,13 @@ for bundle in "$tap_bundle" "$recovery_bundle"; do
   fi
 done
 echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
-ctest --test-dir "$out_dir/build" -R '^(macos_overlay_|macos_native_overlay$)' --output-on-failure
+test_filter='^(macos_overlay_|macos_native_overlay$)'
+registered_tests="$(ctest --test-dir "$out_dir/build" -N -R "$test_filter")"
+if ! grep -Eq 'Total Tests: [1-9][0-9]*' <<<"$registered_tests"; then
+  echo "No macOS overlay tests are registered for qualification" >&2
+  exit 1
+fi
+ctest --test-dir "$out_dir/build" -R "$test_filter" --output-on-failure
 
 cat <<'EOF'
 
