@@ -1,5 +1,7 @@
 # Platform qualification status
 
+Playback epoch/recovery status: portable tests cover stale-state clearing and reacquisition after an epoch or endpoint transition. Native qualification must still capture real playback/output loss, recovery, and post-reacquisition evidence on each supported platform; headless epoch tests do not substitute for those observations.
+
 This matrix records development evidence and the remaining gates. A build or headless test does not establish native desktop, audio, or overlay support.
 
 | Platform | Current integrated/preparation evidence | Native gates still required |
