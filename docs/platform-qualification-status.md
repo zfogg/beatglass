@@ -78,6 +78,10 @@ Pass `--bundles <retained-bundle-root>` to `validate_readiness_report.py` to rec
 
 To create a conservative report from retained platform bundles, run `python tests/platform/generate_readiness_report.py <retained-bundle-root> <readiness-report.json>`. Generation always emits `PENDING`, keeps support language experimental, and requires a later native-evidence review before any gate can change.
 
+The generator creates missing parent directories for the output path and writes
+stable, sorted JSON, so reports can be safely produced into a fresh evidence
+workspace and compared across runs.
+
 Each retained manifest must include `qualification_command`; the generated platform row echoes it so reviewers can trace report values back to the exact command that produced the bundle. The command string is provenance metadata, not proof that native qualification succeeded.
 
 Manifests also identify `qualification_output`, which must name a retained artifact. The validator checks that the report echoes this path and that the output is present in the manifest inventory, preventing command claims that cannot be tied to retained output.
