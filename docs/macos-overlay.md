@@ -31,3 +31,16 @@ After reconciling with merged capture PR #36 at `a609349`, the serial Windows fo
 The first hosted macOS overlay build compiled the AppKit source but failed to link because Qt 6.8.3's `WrapOpenGL` adds an AGL framework link even when Xcode 26's SDK no longer provides it. [Apple's macOS 26 release notes](https://developer.apple.com/documentation/macos-release-notes/macos-26-release-notes) state that the 64-bit AGL framework was removed and its symbols were inert. The CMake overlay path now drops only the AGL entry when the selected SDK has no AGL library and retains OpenGL; the hosted macOS overlay job is the regression check for that adjustment. A new run is pending, so this is not yet evidence that the workaround works on Zach's Mac.
 
 The subsequent hosted macOS overlay job passed in GitHub Actions run 42384709900 after the AGL adjustment, compiling the AppKit source and running offscreen tests. That is a hosted build check, not a real desktop qualification. An earlier documentation CI run also caught a missing blank line introduced during merge reconciliation; the reference was corrected and the warnings-as-errors build is rerun below.
+
+On 2026-11-08, the native AppKit overlay test was configured and run on
+`zachbook-pro` (macOS 26.7.2, Intel MacBookPro16,1, Xcode 26.2, Clang 23.1.5,
+CMake 4.4.5). Because the desktop target currently requires the aubio-backed
+slice, this isolated native check used `BEATGLASS_BUILD_DESKTOP=OFF`,
+`BEATGLASS_BUILD_SLICE=OFF`,
+`BEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON`, and
+`BEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON`. The command built
+`macos_native_overlay_tests` successfully and CTest passed `1/1`
+(`macos_native_overlay`). The linker emitted a non-fatal `/lib` search-path
+warning. This establishes a native AppKit test result for the isolated overlay
+controller only; production desktop, audio capture, permission, pointer,
+fullscreen, Spaces, and multi-display qualification remain open.
