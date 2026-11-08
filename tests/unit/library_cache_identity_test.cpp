@@ -88,3 +88,15 @@ TEST_CASE("stale file publication can retry the same run after restoration") {
  CHECK(publish_file_result(cache, "retry", identity.key, f.path, "second") == Publish::committed);
  REQUIRE(cache.find(identity.key, result)); CHECK(result == "second");
 }
+
+TEST_CASE("stale catalog rows are removed only after failed identity validation") {
+ Fixture f; SqliteCache cache(":memory:");
+ const auto identity = cache_identity_from_file(f.path, "e", "c", "offline");
+ REQUIRE(identity.status == FingerprintStatus::ok);
+ REQUIRE(refresh_collection_file(cache, f.path) == FingerprintStatus::ok);
+ CHECK(invalidate_collection_if_stale(cache, f.path.string(), identity.key.content) == FingerprintStatus::ok);
+ REQUIRE(cache.entry(f.path.string()).has_value());
+ { std::ofstream out(f.path, std::ios::binary | std::ios::trunc); out << "changed"; }
+ CHECK(invalidate_collection_if_stale(cache, f.path.string(), identity.key.content) == FingerprintStatus::changed);
+ CHECK_FALSE(cache.entry(f.path.string()).has_value());
+}

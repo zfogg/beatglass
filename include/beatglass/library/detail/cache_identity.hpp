@@ -52,4 +52,12 @@ FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
 Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
                             const CacheKey& key, const std::filesystem::path& path,
                             const std::string& result, std::stop_token stop = {});
+/** Revalidate a catalog file and remove its row only when the path is stale.
+ * A matching, cancelled, or unreadable path leaves the row available for
+ * retry/diagnostics; callers can refresh or remove it explicitly afterward.
+ */
+FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::string& path,
+                                                 const std::string& expected_content,
+                                                 std::stop_token stop = {},
+                                                 std::string* diagnostic = nullptr);
 }
