@@ -28,6 +28,7 @@ required = {
     "batch result rendering": 'objectName: "analysisBatchLastResult"',
     "bounded displayed result": 'kMaxDisplayedResultBytes = 4096',
     "fresh batch resets frames": 'if (frames_ != 0) { frames_ = 0; emit progressChanged(); }',
+    "single retry emits progress": 'frames_ = retryable_->frames();\n    emit progressChanged();',
 }
 missing = [name for name, marker in required.items() if marker not in qml + bridge + job_bridge + job_bridge_header]
 if missing:
