@@ -153,6 +153,17 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = readiness.report(status, bundles)
             self.assertEqual(result["platforms"][0]["mismatched_artifacts"], ["capture.txt"])
 
+    def test_readiness_aggregates_failure_categories(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "missing.json", "sha256": "0" * 64})
+            data["captured_at"] = "2020-01-01T00:00:00Z"
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles, max_age_hours=1)
+            self.assertGreater(result["failure_categories"]["retention"], 0)
+            self.assertGreater(result["failure_categories"]["freshness"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -158,6 +158,7 @@
     }
   ],
   "error_count": 0,
+  "failure_categories": {},
   "errors": [],
   "ready": true
 }
