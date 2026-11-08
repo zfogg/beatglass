@@ -19,3 +19,11 @@ class ReadinessHandoffTest(unittest.TestCase):
             self.assertEqual(report["exit_gate_status"], "PENDING")
             self.assertTrue(report["native_qualification_required"])
 
+    def test_status_matrix_check_reports_incomplete_native_evidence(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; status = root / "status.md"
+            status.write_text("| Windows | prep | gates |\n| macOS | prep | gates |\n| Linux | prep | gates |\n", encoding="utf-8")
+            errors = handoff.run(bundles, output, status, max_age_hours=100000)
+            self.assertTrue(any("required scenarios are not PASS" in error for error in errors))
+
