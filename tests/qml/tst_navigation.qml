@@ -193,7 +193,7 @@ TestCase {
         compare(findChild(app, "playbackState").Accessible.name, "Playback state")
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
         compare(findChild(app, "playbackDevice").ToolTip.text, "Choose the output device used for native playback")
-        compare(findChild(app, "openPlayback").Accessible.description, "Open the selected audio source for playback")
+        compare(findChild(app, "openPlayback").Accessible.description, "Select an audio source before opening playback")
         compare(findChild(app, "seekForwardPlayback").Accessible.description, "Seek playback forward five seconds")
         compare(findChild(app, "seekBackPlayback").ToolTip.text, "Seek backward 5 seconds")
         compare(findChild(app, "seekForwardPlayback").ToolTip.text, "Seek forward 5 seconds")
