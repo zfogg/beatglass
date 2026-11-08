@@ -23,6 +23,8 @@ TEST_CASE("catalog lists folders and supported audio in deterministic order") {
   CHECK(result.entries[1].name == "Mixes");
   CHECK(result.entries[2].name == "zeta.WAV");
   CHECK(result.entries[0].bytes == 5);
+  CHECK(result.entries[0].format == "MP3");
+  CHECK(result.entries[0].duration_seconds == -1.0);
   CHECK(result.entries[1].bytes == 0);
 }
 
