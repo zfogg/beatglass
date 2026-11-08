@@ -349,6 +349,14 @@ ApplicationWindow {
                             Label { text: window.playbackBridge && window.playbackBridge.state !== "Stopped" ? "Seek uses audio frames; track duration is not available yet." : ""; objectName: "playbackSeekLimitation"; Accessible.name: "Playback seek limitation"; Accessible.description: text; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                             Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status"; Accessible.description: text; visible: text !== "" }
                         }
+                        Label {
+                            objectName: "playbackUnavailable"
+                            text: "Playback controls are unavailable in this build; metadata and analysis details remain read-only."
+                            visible: !window.playbackBridge
+                            Accessible.name: "Playback availability"
+                            Accessible.description: text
+                            wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
                     }
                 }
                 Frame {

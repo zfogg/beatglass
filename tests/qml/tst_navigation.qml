@@ -129,6 +129,9 @@ TestCase {
         let app = shell.createObject(null)
         compare(findChild(app, "playbackState").Accessible.name, "Playback state")
         compare(findChild(app, "playbackSource").Accessible.name, "Playback source")
+        let unavailable = findChild(app, "playbackUnavailable")
+        verify(unavailable.visible)
+        compare(unavailable.Accessible.name, "Playback availability")
         app.destroy()
     }
 
