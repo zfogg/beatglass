@@ -390,6 +390,8 @@ Ctrl-modified wheel input now provides ten-percent scrubbing, extending the poin
 
 Double-clicking the canvas now clears the selected position and restores focus, complementing right-click and keyboard recovery paths for pointer users who prefer a gesture over a context action.
 
+All keyboard and pointer clear paths now share one recovery helper that clears the selection, repaints the canvas, and restores canvas focus. This keeps Escape, Enter/Space, right-click, double-click, and the Clear position button behavior consistent.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
