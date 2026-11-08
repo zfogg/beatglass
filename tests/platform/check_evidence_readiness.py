@@ -114,6 +114,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                     [{"id": item.get("id"), "status": item.get("status"), "evidence": item.get("evidence")}
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
                     key=lambda item: str(item.get("id", "")))
+                scenario_status_counts = dict(sorted(Counter(item["status"] for item in scenario_inventory).items()))
             except (OSError, json.JSONDecodeError) as exc:
                 errors = [f"{platform}: invalid manifest: {exc}"]
                 retained = 0
@@ -121,6 +122,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 manifest_sha256 = None
                 inventory = []
                 scenario_inventory = []
+                scenario_status_counts = {}
                 missing_artifacts = []
                 mismatched_artifacts = []
         else:
@@ -129,6 +131,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             manifest_sha256 = None
             inventory = []
             scenario_inventory = []
+            scenario_status_counts = {}
             missing_artifacts = []
             mismatched_artifacts = []
             errors = [f"{platform}: missing manifest: {manifest}"]
@@ -143,6 +146,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "retained_artifacts": retained, "retained_bytes": artifact_bytes,
                      "missing_artifacts": missing_artifacts, "mismatched_artifacts": mismatched_artifacts,
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
+                     "scenario_status_counts": scenario_status_counts,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
                      "missing_provenance": missing_provenance,
