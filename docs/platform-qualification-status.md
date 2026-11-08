@@ -1,5 +1,7 @@
 # Platform qualification status
 
+The local retry decision contract is reproducible with `python tests/unit/check_bridge_resubmit_contract.py`, `python tests/unit/check_retry_evidence_docs.py`, and `git diff --check`. It verifies compatible retry admission and fail-closed rejection, but native decoder/runtime, playback, endpoint-loss, and overlay evidence remain required.
+
 ## Decoder retry evidence handoff
 
 Native handoff bundles must demonstrate both a compatible retry (same decoder snapshot, source fixture hash, and identity) and an incompatible retry that is rejected fail-closed. Retain the original and retry commands, diagnostics, build/runtime identity, and resulting readiness status. The negative case is required evidence that stale decoder output cannot be promoted.
