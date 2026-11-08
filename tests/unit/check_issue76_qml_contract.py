@@ -41,6 +41,7 @@ def main() -> int:
         "visualization status role": "Accessible.name: \"Visualization data status\"",
         "selected visualization status role": "Accessible.name: \"Selected visualization data status\"",
         "capture status role": "Accessible.name: \"Capture monitor status\"",
+        "live monitoring status role": "Accessible.name: \"Live output monitoring\"",
         "visualization empty state": "visualizationEmptyState",
         "generation/revision status": "visualizationRevisionStatus",
         "playback discontinuity clear": "onEpochChanged()",
