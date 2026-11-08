@@ -96,6 +96,15 @@ TEST_CASE("file reader rejects source mutation before rewind") {
  CHECK_THROWS_WITH(reader.seek(0), "Audio source changed during seek");
  CHECK_THROWS_WITH(reader.seek(0), "File reader failed");
 }
+TEST_CASE("file reader rejects replacement at the original path") {
+ WaveFixture fixture; FileReader reader(fixture.path, 24); std::array<float,2> samples{};
+ const auto moved = fixture.path.string() + ".moved";
+ std::filesystem::rename(fixture.path, moved);
+ { std::ifstream in(moved, std::ios::binary); std::ofstream out(fixture.path, std::ios::binary); out << in.rdbuf(); out.put('\0'); }
+ CHECK_THROWS_WITH(reader.read(samples), "Audio source changed during read");
+ std::error_code ec; std::filesystem::remove(moved, ec);
+}
+
 TEST_CASE("seek refuses epoch overflow") {
  WaveFixture fixture; FileReader reader(fixture.path, std::numeric_limits<std::uint64_t>::max());
  CHECK_THROWS_AS(reader.seek(0), std::overflow_error);
