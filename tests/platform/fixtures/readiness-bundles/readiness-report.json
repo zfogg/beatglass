@@ -45,6 +45,8 @@
           "evidence": null
         }
       ],
+      "fresh": true,
+      "invalidated": false,
       "errors": []
     },
     {
@@ -92,6 +94,8 @@
           "evidence": null
         }
       ],
+      "fresh": true,
+      "invalidated": false,
       "errors": []
     },
     {
@@ -139,6 +143,8 @@
           "evidence": null
         }
       ],
+      "fresh": true,
+      "invalidated": false,
       "errors": []
     }
   ],

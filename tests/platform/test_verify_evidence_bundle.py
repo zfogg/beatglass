@@ -132,6 +132,8 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertFalse(result["ready"])
             self.assertEqual(result["error_count"], len(result["errors"]))
             self.assertTrue(any("missing manifest" in error for error in result["errors"]))
+            self.assertTrue(result["platforms"][0]["invalidated"])
+            self.assertFalse(result["platforms"][0]["fresh"])
 
 
 if __name__ == "__main__":
