@@ -162,6 +162,23 @@ TEST_CASE("permission-style endpoint failure is recoverable without stale public
   REQUIRE(cache.discard_retryable("endpoint-permission"));
   CHECK(cache.retryable_runs().empty());
 }
+TEST_CASE("endpoint replacement publishes only the new source epoch") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  beatglass::library_detail::CacheKey old_key{"endpoint-a-epoch-1", "engine", "config", "offline"};
+  beatglass::library_detail::CacheKey new_key{"endpoint-b-epoch-2", "engine", "config", "offline"};
+  cache.begin("endpoint-old", old_key, "endpoint://device-a", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("endpoint-old", old_key, "stale-device-a", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  cache.begin("endpoint-new", new_key, "endpoint://device-b", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("endpoint-new", new_key, "fresh-device-b", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+  std::string result;
+  CHECK_FALSE(cache.find(old_key, result));
+  REQUIRE(cache.find(new_key, result));
+  CHECK(result == "fresh-device-b");
+  const auto retryable = cache.retryable_runs();
+  REQUIRE(retryable.size() == 1);
+  CHECK(retryable.front().source_path == "endpoint://device-a");
+  CHECK(retryable.front().key.content == "endpoint-a-epoch-1");
+}
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
     beatglass::AnalysisIdentity identity{"sha256:cached", "engine", "config", "offline"};
