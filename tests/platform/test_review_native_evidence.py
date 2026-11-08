@@ -1,0 +1,21 @@
+import importlib.util
+from pathlib import Path
+import tempfile
+import unittest
+
+spec = importlib.util.spec_from_file_location("review", Path(__file__).with_name("review_native_evidence.py"))
+review = importlib.util.module_from_spec(spec); assert spec.loader
+spec.loader.exec_module(review)
+
+
+class NativeEvidenceReviewTest(unittest.TestCase):
+    def test_fixture_remains_pending_with_unrun_native_scenarios(self):
+        report = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        result = review.assess(report, "release-owner")
+        self.assertEqual(result["decision"], "PENDING")
+        self.assertTrue(any("recovery" in blocker for blocker in result["blockers"]))
+
+    def test_missing_reviewer_is_blocker(self):
+        report = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
+        result = review.assess(report, " ")
+        self.assertIn("reviewer identity is required", result["blockers"])
