@@ -205,6 +205,18 @@ ApplicationWindow {
         window.selectedAudioUrl = ""
         window.metadataStatus = "Choose an audio file to inspect its metadata."
     }
+    function clearVisualizationForCaptureState() {
+        if (typeof visualizationPresentation !== "undefined"
+                && visualizationPresentation.clear)
+            visualizationPresentation.clear()
+    }
+    Connections {
+        target: window.liveBridge
+        function onStatusChanged() {
+            if (window.liveBridge.status === "Stopped" || window.liveBridge.status === "Error")
+                window.clearVisualizationForCaptureState()
+        }
+    }
 
     FolderListModel {
         id: files

@@ -396,6 +396,15 @@ TestCase {
         app.destroy()
     }
 
+    function test_visualizationCaptureStateClearIsSafeWithoutPresentationBridge() {
+        let app = shell.createObject(null)
+        verify(app.clearVisualizationForCaptureState() === undefined)
+        fakeLive.status = "Error"
+        fakeLive.status = "Stopped"
+        verify(findChild(app, "visualizationEmptyState").visible)
+        app.destroy()
+    }
+
     function test_overlayBeatPulseHonorsReducedMotion() {
         let app = shell.createObject(null)
         let pulse = findChild(app, "beatPulse")
