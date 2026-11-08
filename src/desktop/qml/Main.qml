@@ -1364,6 +1364,7 @@ ApplicationWindow {
                                 objectName: "persistedRecoveryStatus"
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
+                                + (visible && storageRecovery.status.indexOf("retryable recovery runs discarded") >= 0 ? " · " + storageRecovery.status : "")
                                 Accessible.name: "Persisted analysis recovery status: " + text
                                 ToolTip.text: "Saved analysis recovery status and retryable runs"
                                 Accessible.role: Accessible.StaticText
