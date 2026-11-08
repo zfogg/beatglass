@@ -26,6 +26,7 @@ MARKERS = {
     "qml no device state": "No output device detected · connect a device and refresh endpoints",
     "qml endpoint stale clear": "Selection cleared because the capture endpoint changed.",
     "qml endpoint retry failure": "Capture endpoint retry failed; check permission and reacquire a device.",
+    "qml overlay recovery": "DJ overlay unavailable; output monitoring remains unavailable until the display recovers.",
 }
 
 

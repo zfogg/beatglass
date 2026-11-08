@@ -597,3 +597,5 @@ The visualization status group explicitly permits zero minimum width, allowing i
 The interaction hint reserves a taller compact-layout line box for wrapped guidance, preventing keyboard/pointer instructions from colliding with adjacent recovery controls.
 
 Endpoint bridge transitions now actively clear source-bound visualization selection, distinguish retry failure from no-device reacquisition, and restore focus to the endpoint selector. A replacement accepted snapshot is therefore required after endpoint replacement rather than reusing stale waveform/FFT state.
+
+Settings endpoint, DJ monitoring, and overlay availability now share the same capture-recovery reset path and no-device/reacquisition language. A failed monitor or unavailable overlay clears stale visualization selection and returns focus to the recovery target.
