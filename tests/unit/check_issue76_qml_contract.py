@@ -434,6 +434,7 @@ def main() -> int:
         "visualization data status theme": 'objectName: "visualizationDataStatus"',
         "visualization selected data theme": 'objectName: "visualizationSelectedDataStatus"',
         "visualization selection status theme": 'objectName: "visualizationSelectionStatus"',
+        "visualization inline clear theme": 'objectName: "clearVisualizationSelection"',
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
