@@ -46,3 +46,10 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertIn("invalid source commit identity", errors)
             self.assertIn("missing capture time", errors)
+
+    def test_rejects_invalid_capture_timestamp(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text("platform=windows\ncommit=" + "0" * 40 + "\ncaptured_at=not-a-time\n", encoding="utf-8")
+            self.assertIn("invalid capture timestamp", ingest.ingest(root, root / "manifest.json"))

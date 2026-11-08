@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+from datetime import datetime
 
 SCENARIOS = ("capture", "recovery", "output", "display", "playback", "overlay")
 
@@ -25,6 +26,11 @@ def ingest(root: Path, output: Path) -> list[str]:
         errors.append("invalid source commit identity")
     if not identity.get("captured_at", "").strip():
         errors.append("missing capture time")
+    else:
+        try:
+            datetime.fromisoformat(identity["captured_at"].replace("Z", "+00:00"))
+        except ValueError:
+            errors.append("invalid capture timestamp")
     artifacts = []
     hashes_path = root / "qualification-artifacts.sha256"
     if not hashes_path.is_file():
