@@ -31,3 +31,6 @@ Use the repository README and CMake presets for current configure/build/CTest co
 The platform handoff is backed by executable preparation and evidence checks. A retained manifest must identify its platform, source commit, UTC capture time and environment; completed scenarios must reference retained, hashed artifacts; and the readiness report remains pending when a row is stale, invalidated, incomplete or inconsistent. This improves traceability but does not establish support: native desktop/audio/overlay runs and their screenshots, logs, exact commands and limitations are still required on each supported platform.
 
 Consumers use `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes`; native qualification remains an open gate and support language remains experimental.
+# Foundation handoff and qualification evidence
+
+Foundation implementation handoff now includes a reproducible evidence path: platform qualification output is hash-checked into a conservative manifest, readiness is generated and validated, and the consumer rejects pending or errored evidence. These tools make the handoff auditable but do not replace native qualification; ownership remains with the platform runs and their retained desktop/audio/overlay observations.

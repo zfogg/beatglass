@@ -1,5 +1,9 @@
 # Progress and handoff
 
+## Qualification handoff pipeline
+
+The merged portable handoff pipeline is now explicit: native platform scripts produce retained artifacts; `tests/platform/ingest_qualification_artifacts.py` verifies their hashes and identity into conservative manifests; `tests/platform/run_readiness_handoff.py` generates and validates the readiness report; and `tests/platform/consume_readiness_handoff.py` is the downstream acceptance boundary. Ingestion, documentation, and readiness failures remain auditable and nonzero, and generated scenarios remain `PENDING` until real native desktop/audio/overlay observations are reviewed. This pipeline is preparation evidence, not native qualification.
+
 Phase 0 is **not complete**. No feature work should start until its exit gate is met.
 
 - [x] Initial repository guidance and README.
