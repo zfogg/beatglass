@@ -53,6 +53,18 @@ TEST_CASE("Core Audio FIFO retains owned samples and host clock validity", "[cor
   CHECK_FALSE(fifo.pop(block));
 }
 
+TEST_CASE("Core Audio FIFO preserves explicit source discontinuity", "[coreaudio]") {
+  CaptureFifo fifo(23, 48000, 2);
+  std::array<float, 2> input{1, 2};
+  REQUIRE(fifo.push(input, 77, true, true));
+  CaptureBlock block;
+  REQUIRE(fifo.pop(block));
+  CHECK(block.discontinuity);
+  CHECK(block.epoch == 23);
+  CHECK(block.first_frame == 0);
+  CHECK(block.host_time == 77);
+}
+
 TEST_CASE("Core Audio FIFO reports loss and advances sample position", "[coreaudio]") {
   CaptureFifo fifo(1, 44100, 2);
   std::array<float, 4> input{};
