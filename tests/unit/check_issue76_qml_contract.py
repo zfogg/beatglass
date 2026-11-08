@@ -84,6 +84,8 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "library search input role": "objectName: \"search\"; placeholderText: \"Filter file names\"; Accessible.name: \"Filter file names\"; Accessible.role: Accessible.EditableText",
+        "clear selection button role": "objectName: \"clearSelectedAudio\"",
         "choose folder button role": "objectName: \"chooseFolder\"; activeFocusOnTab: true; Accessible.name: \"Choose audio folder\"; Accessible.role: Accessible.Button",
         "open playback button role": "objectName: \"openPlayback\"; activeFocusOnTab: true; Accessible.name: \"Open selected playback source\"; Accessible.role: Accessible.Button",
         "sample rate spinbox role": "objectName: \"playbackSampleRate\"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: \"Playback sample rate\"; Accessible.value: value + \" hertz\"; Accessible.role: Accessible.SpinBox",

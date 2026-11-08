@@ -435,7 +435,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
                     Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; onClicked: window.sortDescending = !window.sortDescending }
                 }
                 RowLayout {
@@ -570,6 +570,7 @@ ApplicationWindow {
                             text: "Clear selection"
                             enabled: window.selectedName !== ""
                             Accessible.name: "Clear selected audio"
+                            Accessible.role: Accessible.Button
                             Accessible.description: "Clear the selected audio source and return analysis details to the empty state."
                             onClicked: window.clearSelectedAudio()
                         }
