@@ -272,6 +272,8 @@ The remaining Issue #1 exit gate is explicit: perform supported Windows WASAPI, 
 
 The readiness report contract is versioned as `readiness_report_schema: 1`; `exit_gate_status` and `exit_gate_reason_codes` are the stable handoff fields. Product support language remains experimental while native qualification is open.
 
+The desktop storage bridge now exposes an asynchronous cache lookup (`findCached`) and publishes hit/result state only after the worker responds. This keeps SQLite off the GUI thread and gives the future decoder queue a real UI-owned handoff; no decoder or analysis is started by the lookup, and native UI qualification remains pending.
+
 ## Analysis queue admission handoff
 `admit_analysis` now gives the future file-analysis queue one worker-owned decision: return a completed cache result without decoding, or reserve a run ID before decoding begins. The helper does not fingerprint or revalidate a source; callers must supply the validated identity and publish only after decoder verification. Desktop scheduling and native qualification remain open.
 
