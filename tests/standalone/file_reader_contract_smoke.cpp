@@ -57,6 +57,9 @@ int main() {
     assert(end.status == FileReadStatus::end);
     const auto repeated_end = reader.read(samples);
     assert(repeated_end.status == FileReadStatus::end && repeated_end.block.samples.empty());
+    reader.seek(0, 12);
+    const auto replayed = reader.read(samples);
+    assert(replayed.status == FileReadStatus::data && replayed.block.first_frame == 0 && replayed.block.epoch == 12);
   }
   { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
   { FileReader reader(wav, 8); assert(reader.source_changed()); }
