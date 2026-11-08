@@ -58,6 +58,12 @@ After transferring a qualification output directory, verify its evidence without
 tests/macos/verify_qualification_artifacts.sh /path/to/qualification-output
 ```
 
+Run the fixture regression on a Mac with:
+
+```sh
+tests/macos/verify_qualification_artifacts_test.sh
+```
+
 The verifier requires the manifest identity fields, exactly three relative artifact paths, rejects duplicate or path-escaping entries, and recomputes successful SHA-256 checks for the desktop, tap-smoke, and recovery binaries. The runner writes paths relative to the qualification output so the directory can be transferred and verified on another Mac. It also emits `qualification-cases.tsv`, a fixed ten-case matrix initialized to `UNRUN`; update statuses and evidence paths only after observing each native scenario, then rerun the verifier. For `PASS` rows, the verifier requires a relative evidence path that exists inside the transferred qualification output.
 
 The verifier also requires the three expected desktop, tap-smoke, and recovery executable identities, not merely any three hashed files.
