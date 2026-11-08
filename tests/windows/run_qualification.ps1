@@ -78,7 +78,8 @@ try {
   $manifestPath = Join-Path $OutputDirectory "qualification-artifacts.sha256"
   $hashLines = foreach ($path in $required) {
     $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $path
-    "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), (Resolve-Path -LiteralPath $path -Relative)
+    $relativePath = [IO.Path]::GetRelativePath($OutputDirectory, $path).Replace('\', '/')
+    "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), $relativePath
   }
   $hashLines | Set-Content -LiteralPath $manifestPath -Encoding utf8
   "Artifact SHA-256 manifest: $manifestPath"
