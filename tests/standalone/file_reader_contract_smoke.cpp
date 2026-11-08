@@ -90,6 +90,7 @@ int main() {
   try { FileReader reader(wav, 10); }
   catch (const FileOpenError& error) { rename_failed = error.kind() == FileOpenErrorKind::unreadable; }
   assert(rename_failed);
+  assert(!std::filesystem::exists(wav) && std::filesystem::exists(moved));
   std::filesystem::remove(moved, cleanup);
   bool reopen_failed = false;
   try { FileReader reader(wav, 10); }
