@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
 
 REQUIRED_PROVENANCE = ("platform", "commit", "captured_at", "environment")
 
@@ -20,6 +21,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
         errors.append("artifacts must be a nonempty list")
     if not isinstance(scenarios, list) or not scenarios:
         errors.append("scenarios must be a nonempty list")
+    scenario_ids = {scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)}
+    missing_scenarios = REQUIRED_SCENARIOS - scenario_ids
+    if missing_scenarios:
+        errors.append(f"missing required scenarios: {sorted(missing_scenarios)}")
     seen = set()
     for entry in artifacts or []:
         relative, expected = entry.get("path"), entry.get("sha256", "").lower()
