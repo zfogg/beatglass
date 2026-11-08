@@ -39,7 +39,7 @@ public slots:
   void retryAnalysis() { if (handle_ && handle_->retry()) { emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); } }
   void admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {
     beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
-    const auto admission = coordinator_.storage().admit_analysis(runId.toStdString(), identity);
+    const auto admission = coordinator_.admit_analysis(runId.toStdString(), identity);
     emit admitted(admission.analysis_reserved, QString::fromStdString(admission.cached.value_or(std::string{})));
   }
 signals:
