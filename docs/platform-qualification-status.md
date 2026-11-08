@@ -164,3 +164,5 @@ The merged handoff tooling and this status page distinguish implemented preparat
 The evidence-bundle verifier also rejects incomplete (`UNRUN` or `PENDING`) scenarios that claim retained evidence. Evidence ownership is reserved for completed `PASS` or `FAIL` scenarios, preventing a pending row from being mistaken for a qualified observation.
 
 Completed scenario evidence references are also required to be a single retained path string. Malformed values such as arrays fail closed as unretained evidence rather than being interpreted as a valid artifact reference.
+
+Artifact manifest hashes follow the same fail-closed rule: `sha256` must be a string before normalization or comparison. Structured or otherwise malformed hash values are rejected as invalid artifact entries instead of causing verifier exceptions.
