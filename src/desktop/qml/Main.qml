@@ -201,6 +201,7 @@ ApplicationWindow {
                     objectName: "overlayRetryCapture"
                     visible: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" && window.captureMonitorBridge.start
                     text: "Retry capture"
+                    ToolTip.text: "Retry monitoring the selected output source"
                     Accessible.name: "Retry overlay capture"
                     Accessible.description: "Retry monitoring the selected output source"
                     onClicked: window.captureMonitorBridge.start()

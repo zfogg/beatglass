@@ -337,6 +337,7 @@ TestCase {
         let retry = findChild(app, "overlayRetryCapture")
         verify(retry !== null)
         verify(!retry.visible)
+        compare(retry.ToolTip.text, "Retry monitoring the selected output source")
         app.destroy()
     }
     function test_overlayUnavailableStateIsAccessible() {
