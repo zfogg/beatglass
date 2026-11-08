@@ -1105,6 +1105,7 @@ ApplicationWindow {
                                   : "System audio capture permission is not available yet; monitoring will remain stopped until a device is detected."
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio capture permission guidance"
+                            Accessible.role: Accessible.StaticText
                         }
                     }
                 }
@@ -1118,6 +1119,7 @@ ApplicationWindow {
                             objectName: "appearanceState"
                             text: "Theme: " + window.selectedTheme + " · Motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Accessible.name: "Current appearance settings"
+                            Accessible.role: Accessible.StaticText
                             Accessible.description: text
                             Layout.fillWidth: true
                         }
@@ -1126,6 +1128,8 @@ ApplicationWindow {
                 Label {
                     objectName: "settingsStatus"
                     text: "Settings are saved for this desktop profile. User audio files are never modified."
+                    Accessible.name: "Settings status"
+                    Accessible.role: Accessible.StaticText
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
                 Item { Layout.fillHeight: true }
