@@ -26,7 +26,7 @@
     {
       "platform": "windows",
       "manifest": "tests\\platform\\fixtures\\readiness-bundles\\windows\\manifest.json",
-      "manifest_sha256": "d2285138a8d249877328e8ffaba36fde41f8d4e5192f3efede095d5fb5067e5a",
+      "manifest_sha256": "a5970c4b7b5cd5603c37e7d0ff44c33f89bf4edd18c1af8188cc461ee435187b",
       "retained_artifacts": 1,
       "retained_bytes": 26,
       "artifact_inventory": [
@@ -69,6 +69,7 @@
           "evidence": null
         }
       ],
+      "qualification_command": "fixture-generator --platform windows",
       "manifest_platform": "windows",
       "provenance_complete": true,
       "errors": []
@@ -76,7 +77,7 @@
     {
       "platform": "macos",
       "manifest": "tests\\platform\\fixtures\\readiness-bundles\\macos\\manifest.json",
-      "manifest_sha256": "3a529fd1db352abb0615a3fdeb75892a4bcf3ad536133042e3fa4e6080fcc0e6",
+      "manifest_sha256": "1259e638ad7fb911ef36cd9f54fc05f5f51af65783268430a0ef5808f51e135b",
       "retained_artifacts": 1,
       "retained_bytes": 26,
       "artifact_inventory": [
@@ -119,6 +120,7 @@
           "evidence": null
         }
       ],
+      "qualification_command": "fixture-generator --platform macos",
       "manifest_platform": "macos",
       "provenance_complete": true,
       "errors": []
@@ -126,7 +128,7 @@
     {
       "platform": "linux",
       "manifest": "tests\\platform\\fixtures\\readiness-bundles\\linux\\manifest.json",
-      "manifest_sha256": "b63116356d77306f451d2097c0ce514ad4e8972cf1f08c2b5f280fc093814bce",
+      "manifest_sha256": "08c302403c104c51f6ff00bf2b7fdade94bbc18521a423152bf5bd6ce5619a46",
       "retained_artifacts": 1,
       "retained_bytes": 26,
       "artifact_inventory": [
@@ -169,6 +171,7 @@
           "evidence": null
         }
       ],
+      "qualification_command": "fixture-generator --platform linux",
       "manifest_platform": "linux",
       "provenance_complete": true,
       "errors": []

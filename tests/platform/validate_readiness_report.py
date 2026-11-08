@@ -42,6 +42,8 @@ def validate(report: dict) -> list[str]:
                 errors.append(f"{item.get('platform')}: invalid manifest hash linkage")
             if item.get("provenance_complete") is not True:
                 errors.append(f"{item.get('platform')}: provenance is incomplete")
+            if not isinstance(item.get("qualification_command"), str) or not item["qualification_command"].strip():
+                errors.append(f"{item.get('platform')}: missing qualification command linkage")
             inventory = item.get("artifact_inventory")
             if not isinstance(inventory, list) or not inventory:
                 errors.append(f"{item.get('platform')}: missing artifact inventory")
@@ -70,6 +72,10 @@ def validate_retained_files(report: dict, bundles: Path) -> list[str]:
         for field in ("platform", "commit", "captured_at", "environment"):
             if not isinstance(manifest_data.get(field), str) or not manifest_data[field].strip():
                 errors.append(f"{platform}: manifest provenance field missing: {field}")
+        if not isinstance(manifest_data.get("qualification_command"), str) or not manifest_data["qualification_command"].strip():
+            errors.append(f"{platform}: manifest qualification command is missing")
+        elif row.get("qualification_command") != manifest_data["qualification_command"]:
+            errors.append(f"{platform}: qualification command does not match report")
         if str(manifest_data.get("platform", "")).lower() != platform:
             errors.append(f"{platform}: manifest platform does not match report row")
         actual_manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()

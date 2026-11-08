@@ -78,6 +78,8 @@ Pass `--bundles <retained-bundle-root>` to `validate_readiness_report.py` to rec
 
 To create a conservative report from retained platform bundles, run `python tests/platform/generate_readiness_report.py <retained-bundle-root> <readiness-report.json>`. Generation always emits `PENDING`, keeps support language experimental, and requires a later native-evidence review before any gate can change.
 
+Each retained manifest must include `qualification_command`; the generated platform row echoes it so reviewers can trace report values back to the exact command that produced the bundle. The command string is provenance metadata, not proof that native qualification succeeded.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.
