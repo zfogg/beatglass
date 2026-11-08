@@ -156,19 +156,26 @@ if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
 fi
 
 manifest="$out_dir/qualification-manifest.txt"
+signing_log="$out_dir/codesign-desktop.log"
+signing_state=unverified
+codesign --display --verbose=4 "$out_dir/build/beatglass-desktop.app" >"$signing_log" 2>&1 || true
+if codesign --verify --deep --strict "$out_dir/build/beatglass-desktop.app" 2>>"$signing_log"; then
+  signing_state=verified
+fi
 {
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'macos_version=%s\n' "$(sw_vers -productVersion)"
   printf 'architecture=%s\n' "$(uname -m)"
   printf 'xcode_version=%s\n' "$(xcodebuild -version | tr '\n' ' ')"
   printf 'sdk_version=%s\n' "$(xcrun --sdk macosx --show-sdk-version)"
+  printf 'desktop_signing=%s\ndesktop_signing_log=%s\n' "$signing_state" "$signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'commands=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
   if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
 } > "$manifest"
-if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest"; then
+if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest" || [[ ! -s "$signing_log" ]]; then
   echo "Qualification manifest is missing or empty" >&2
   exit 1
 fi
