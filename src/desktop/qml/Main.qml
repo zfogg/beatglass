@@ -28,6 +28,7 @@ ApplicationWindow {
     property bool overlayDisplayRecoveryPending: false
     property bool overlayWasVisibleBeforeAvailabilityLoss: false
     property bool overlayHiddenByUser: false
+    property bool overlayLaunchFallbackActive: false
     property int overlayPreferredScreenIndex: -1
     property string overlayPreferredDisplayName: ""
     property int overlayPreferredSizeIndex: 1
@@ -293,17 +294,20 @@ ApplicationWindow {
     }
     function syncOverlaySettingsFromBridge() {
         if (!window.overlayBridge) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             return false
         }
         window.restoreOverlayDisplaySelectionFromBridge()
         if (!window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Overlay startup state is unavailable; control-window fallback remains active until a display recovers.")
             return false
         }
         const geometry = window.overlayBridge.geometry
         const visualStateReady = window.restoreOverlayVisualStateFromBridge()
+        window.overlayLaunchFallbackActive = false
         if (visualStateReady)
             window.announceCaptureRecoveryState("Overlay settings synchronized from native state.")
         return visualStateReady || (geometry && geometry.width > 0)
@@ -2663,6 +2667,7 @@ ApplicationWindow {
                         + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex]
                         + " · " + (window.overlayBridge ? Math.round(window.overlayBridge.opacity * 100) : 90) + "% opacity"
                         + (window.overlayHiddenByUser ? " · hidden by user" : "")
+                        + (window.overlayLaunchFallbackActive ? " · launch fallback active" : "")
                         + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
                     Accessible.name: "Overlay settings summary"
                     Accessible.value: text
