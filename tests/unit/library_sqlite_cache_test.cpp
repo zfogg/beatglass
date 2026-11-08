@@ -182,6 +182,14 @@ TEST_CASE("SQLite cache stores and pages collection metadata") {
   REQUIRE(cache.entry("/music/Beta.flac")->size_bytes == 20);
   REQUIRE(cache.remove_entry("/music/Beta.flac")); REQUIRE_FALSE(cache.entry("/music/Beta.flac"));
 }
+TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.put_entry({"/music/a\0.flac", "a.flac", "audio", "hash", 1, 1}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "", 1, 1}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.remove_entry("/music/a\0.flac"), std::invalid_argument);
+  CHECK_THROWS_AS(cache.entries({"a\0", 0, 10}), std::invalid_argument);
+}
 TEST_CASE("SQLite cache invalidates one active identity without deleting its source") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("run", key);
