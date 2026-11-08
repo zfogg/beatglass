@@ -185,7 +185,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Label { text: "Beatglass · " + window.liveBridge.status; color: "white"; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                     Button {
-                        text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.description: "Hide the overlay window and restore the control window"
+                        text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the overlay window and restore the control window"; ToolTip.text: "Hide the overlay and restore the control window"
                         visible: window.overlayBridge && !window.overlayBridge.clickThrough
                         onClicked: window.overlayBridge.hideOverlay()
                     }
@@ -201,8 +201,8 @@ ApplicationWindow {
                     ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
                 }
-                Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: "white"; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
-                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: "white"; Accessible.name: "Overlay harmony: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: "white"; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current live tempo estimate" }
+                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: "white"; Accessible.name: "Overlay harmony: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current live key and chord estimate" }
                 Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : "#cbd5e1"; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output capture status" }
                 Button {
                     objectName: "overlayRetryCapture"
@@ -210,6 +210,7 @@ ApplicationWindow {
                     text: "Retry capture"
                     ToolTip.text: "Retry monitoring the selected output source"
                     Accessible.name: "Retry overlay capture"
+                    Accessible.role: Accessible.Button
                     Accessible.description: "Retry monitoring the selected output source"
                     onClicked: window.captureMonitorBridge.start()
                 }
