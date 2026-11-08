@@ -1,0 +1,25 @@
+# Issue #76 visual implementation audit
+
+This is the current implementation audit against `design/v1/DESIGN.md` and `design/v1/STATES.md`. It records what is implemented in the Qt prototype and keeps the remaining design work explicit rather than treating a mock render as a product guarantee.
+
+## Implemented interaction/state slices
+
+- Appearance: theme selection, preview radio semantics, reduced-motion preference, stateful accessible descriptions, compact-header behavior below 760 px, and keyboard-visible focus rings.
+- Overlay: show/hide/unlock recovery, click-through state, opacity and size controls, display enumeration, empty-display handling, retry capture/overlay actions, and monitor-dependent control disabling.
+- Visualization: waveform/FFT selection, Ctrl+1/Ctrl+2 shortcuts, pointer and keyboard position selection, Home/End seeking, clear selection, focus ring, bounded frame mapping, generation/revision status, empty/loading/error states, and stale-frame clearing on capture/playback discontinuities.
+- Playback: source/epoch-aware presentation clearing, bounded frame seek helpers, state/source/position affordances, and recovery/error presentation.
+
+## Explicitly provisional
+
+- The canvas remains a presentation surface. It does not claim calibrated musical truth or imply a seek unless a validated duration/frame mapping is supplied.
+- The native overlay, capture, playback, and endpoint bridges still require actual platform qualification. Headless QML tests do not establish native monitor, audio, compositor, or permission behavior.
+- Qt QML execution is currently unavailable in this Windows checkout; every QML change records that limitation in its PR.
+
+## Remaining acceptance work
+
+1. Run the QML navigation suite with Qt on a desktop host and capture screenshots at compact and normal widths.
+2. Exercise the overlay on monitor removal/re-add, compositor refusal, click-through recovery, and arbitrary-background legibility on macOS and Windows.
+3. Connect a validated player duration/frame source before exposing a user-facing seek action from the visualization cursor.
+4. Complete native qualification evidence required by issue #1; do not infer completion from this prototype audit.
+
+This audit is intentionally a completion aid, not a claim that issue #76 or issue #1 is closed.
