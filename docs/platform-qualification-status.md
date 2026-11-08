@@ -251,6 +251,8 @@ Strict review also invokes the downstream consumer, so malformed audit trails, u
 
 Use `--json-output <review.json>` alongside the Markdown export for machine-readable review tooling; the packet carries gate state, acceptance diagnostics, platform support, provenance anchors, scenario status, and artifact summaries without changing acceptance semantics.
 
+The handoff command can emit the same packet directly with `--review-json <review.json>`, ensuring Markdown and machine-readable review outputs are derived from the identical generated report.
+
 The equivalent end-to-end invocation is `run_readiness_handoff.py ... --review-output review.md --require-ready`; it writes the checklist and fails the same handoff run when native acceptance has not been reached.
 
 The portable consumer tests cover the eventual transition explicitly: clearing `native_qualification_required` removes only that native-state rejection; all remaining report-contract, provenance, and readiness checks still apply. This is a transition contract, not native evidence.
