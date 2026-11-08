@@ -94,6 +94,7 @@ TEST_CASE("Core Audio control maps only explicit permission denial", "[coreaudio
 TEST_CASE("Core Audio permission denial can recover on a later explicit grant", "[coreaudio]") {
   SourceEpochAllocator epochs;
   auto fake = std::make_unique<FakeBackend>();
+  auto* backend = fake.get();
   fake->start_ok = false;
   SourceAdapter source(epochs, std::move(fake));
 
@@ -102,7 +103,7 @@ TEST_CASE("Core Audio permission denial can recover on a later explicit grant", 
   CHECK(denied.error == SourceError::permission_denied);
   CHECK(source.status().state == SourceState::error);
 
-  fake->start_ok = true;
+  backend->start_ok = true;
   const auto granted = source.start("output", [](const AudioBlock&) {});
   REQUIRE(granted.attempt);
   const auto event = source.take_event();
