@@ -49,6 +49,8 @@ public:
   std::vector<CollectionEntry> entries(const CollectionQuery& query, std::stop_token stop = {});
   /** Insert a uniquely identified running job; throws on invalid identity, invalid run ID, SQLite error, or duplicate ID. */
   void begin(const std::string& id, const CacheKey& key);
+  /** Reopen a recovered retryable run for another analysis attempt. */
+  bool retry(const std::string& id, const CacheKey& key);
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */
   bool find(const CacheKey& key, std::string& result);
   /** Remove the active result for an exact identity; source files and historical runs remain untouched. */

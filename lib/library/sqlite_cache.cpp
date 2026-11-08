@@ -55,6 +55,11 @@ public:
     Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status) VALUES(?,?,?,?,?,'running')");
     bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p);
   }
+  bool retry(const std::string& id, const CacheKey& key) {
+    validate_key(key); if (id.empty()) throw std::invalid_argument("invalid run ID");
+    Statement s(db_, "UPDATE runs SET status='running' WHERE id=? AND content=? AND engine=? AND config=? AND mode=? AND status='retryable'");
+    bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p); return sqlite3_changes(db_) == 1;
+  }
   bool find(const CacheKey& key, std::string& result) {
     validate_key(key);
     Statement s(db_, "SELECT r.result FROM active a JOIN runs r ON r.id=a.run_id WHERE a.content=? AND a.engine=? AND a.config=? AND a.mode=?");
@@ -124,6 +129,7 @@ private:
 SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>(path)) {}
 SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
+bool SqliteCache::retry(const std::string& id, const CacheKey& key) { return impl_->retry(id, key); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
 bool SqliteCache::invalidate(const CacheKey& key) { return impl_->invalidate(key); }
 void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }
