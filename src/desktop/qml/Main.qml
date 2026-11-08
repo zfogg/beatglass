@@ -91,11 +91,11 @@ ApplicationWindow {
         objectName: "persistedRecoveryShortcut"
         sequence: "Ctrl+Shift+R"
         context: Qt.ApplicationShortcut
+        enabled: typeof persistedRecoveryRuns !== "undefined" && persistedRecoveryRuns.enabled
         onActivated: {
             navigation.currentIndex = 0
-            if (typeof persistedRecoveryRuns !== "undefined" && persistedRecoveryRuns.enabled)
-                persistedRecoveryRuns.forceActiveFocus()
-            window.announceVisualizationRecovery("Persisted recovery selector focused; choose a saved run to retry or discard.")
+            persistedRecoveryRuns.forceActiveFocus()
+            window.announceVisualizationRecovery("Persisted recovery selector focused; choose one of " + persistedRecoveryRuns.count + " saved runs to retry or discard.")
         }
     }
     Shortcut {
