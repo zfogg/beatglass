@@ -24,6 +24,8 @@ MARKERS = {
     "qml pause resume bridge sync": "window.syncVisualizationSelectionFromPlayback(window.playbackBridge.currentFrame",
     "qml capture retry state": "Capture retry failed · check permission and selected device",
     "qml no device state": "No output device detected · connect a device and refresh endpoints",
+    "qml endpoint stale clear": "Selection cleared because the capture endpoint changed.",
+    "qml endpoint retry failure": "Capture endpoint retry failed; check permission and reacquire a device.",
 }
 
 
