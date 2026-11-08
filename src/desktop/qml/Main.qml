@@ -512,6 +512,13 @@ ApplicationWindow {
                     Layout.fillWidth: true
                 }
                 Label {
+                    objectName: "visualizationCaptureStatus"
+                    text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
+                    Accessible.name: "Visualization capture status"
+                    Accessible.description: text
+                    Layout.fillWidth: true; wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "djStatus"; text: "Status: " + window.liveBridge.status
                     Accessible.name: "DJ monitoring status"; Accessible.description: text
                 }

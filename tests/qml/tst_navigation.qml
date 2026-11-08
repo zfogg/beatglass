@@ -244,6 +244,8 @@ TestCase {
         let status = findChild(app, "visualizationDataStatus")
         verify(status !== null)
         compare(status.Accessible.name, "Visualization data status")
+        compare(findChild(app, "visualizationCaptureStatus").Accessible.name, "Visualization capture status")
+        verify(findChild(app, "visualizationCaptureStatus").text.indexOf("Capture is stopped") === 0)
         app.destroy()
     }
 
