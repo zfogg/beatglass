@@ -17,6 +17,7 @@ TestCase {
     }
     QtObject {
         id: catalog
+        property string lastDiagnostic: ""
         function browse(folder, search) {
             return search === "drum" ? [{name: "drum.wav", path: "/tmp/drum.wav", folder: false, audio: true}] : []
         }
@@ -43,5 +44,15 @@ TestCase {
         compare(choose.Accessible.name, "Choose a folder")
         compare(choose.Accessible.description, "Choose a local folder to populate the Library.")
         app.destroy()
+    }
+
+    function test_diagnosticIsShownForUnreadableCatalog() {
+        let app = shell.createObject(null)
+        catalog.lastDiagnostic = "permission denied"
+        app.refreshCatalog()
+        let message = findChild(app, "browserEmptyMessage")
+        verify(message.text.indexOf("permission denied") !== -1)
+        app.destroy()
+        catalog.lastDiagnostic = ""
     }
 }
