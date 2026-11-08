@@ -11,7 +11,11 @@ ApplicationWindow {
     width: 1000; height: 700
     minimumWidth: 600; minimumHeight: 440
     title: "Beatglass"
-    onClosing: if (overlayBridge) overlayBridge.hideOverlay()
+    onClosing: {
+        window.overlayWasVisibleBeforeAvailabilityLoss = false
+        window.overlayDisplayRecoveryPending = false
+        if (overlayBridge) overlayBridge.hideOverlay()
+    }
     property var metadataBridge: metadata
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
@@ -276,8 +280,13 @@ ApplicationWindow {
             window.requestActivate()
             return false
         }
-        if (!window.restoreOverlayVisualStateFromBridge())
+        if (!window.restoreOverlayVisualStateFromBridge()) {
+            window.overlayDisplayRecoveryPending = true
+            window.show()
+            window.raise()
+            window.requestActivate()
             return false
+        }
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
         if (!window.overlayBridge.showOverlay()) {
@@ -306,13 +315,28 @@ ApplicationWindow {
     }
     function reapplyOverlaySettingsAndRestore() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
+            window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.")
+            window.show()
+            window.raise()
+            window.requestActivate()
             return false
         }
         if (window.overlayBridge.screenIndex >= 0)
-            window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)
-        if (!window.restoreOverlayVisualStateFromBridge())
+            if (!window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)) {
+                window.overlayDisplayRecoveryPending = true
+                window.show()
+                window.raise()
+                window.requestActivate()
+                return false
+            }
+        if (!window.restoreOverlayVisualStateFromBridge()) {
+            window.overlayDisplayRecoveryPending = true
+            window.show()
+            window.raise()
+            window.requestActivate()
             return false
+        }
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
         return window.showOverlayAndHideControls()
     }
