@@ -84,6 +84,8 @@ def main() -> int:
         "remaining cross-screen values": "Accessible.name: \"DJ estimates\"; Accessible.value: text",
         "final status values": "objectName: \"djStatus\"; text: \"Status: \" + window.liveBridge.status",
         "analysis empty-state values": "objectName: \"visualizationEmptyState\"",
+        "folder browser selection value": "objectName: \"browser\"",
+        "folder item semantics": "Accessible.name: fileName + (fileIsDir ? \", folder\" : \", audio file\")",
         "catalog status values": "objectName: \"catalogStatus\"",
         "folder path current value": "objectName: \"folderPath\"",
         "folder browser list role": "objectName: \"browser\"",

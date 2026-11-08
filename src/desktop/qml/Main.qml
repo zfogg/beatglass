@@ -465,6 +465,8 @@ ApplicationWindow {
                         keyNavigationEnabled: true
                         activeFocusOnTab: true
                         Accessible.name: "Folder contents"
+                        Accessible.value: currentIndex >= 0 ? (currentIndex + 1) + " of " + count : "No entry selected"
+                        Accessible.role: Accessible.List
                         Accessible.role: Accessible.List
                         Accessible.description: "Use Up and Down to select an entry, then Enter or Space to open a folder or select an audio file."
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
@@ -478,6 +480,8 @@ ApplicationWindow {
                             width: ListView.view.width
                             highlighted: ListView.isCurrentItem
                             Accessible.name: fileName + (fileIsDir ? ", folder" : ", audio file")
+                            Accessible.value: fileIsDir ? "folder" : "audio file"
+                            Accessible.role: Accessible.ListItem
                             Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
                             contentItem: RowLayout {
