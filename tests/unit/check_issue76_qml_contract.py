@@ -40,7 +40,7 @@ def main() -> int:
         "browser keyboard guidance": "Use Up and Down to select an entry",
         "library empty state role": "Accessible.role: Accessible.StaticText",
         "visualization status role": "Accessible.name: \"Visualization data status\"",
-        "selected visualization status role": "Accessible.name: \"Selected visualization data status\"",
+        "selected visualization status role": "Accessible.name: \"Selected visualization data status: \" + text",
         "capture status role": "Accessible.name: \"Capture monitor status: \" + text",
         "live monitoring status role": "Accessible.name: \"Live output monitoring\"",
         "metadata status role": "Accessible.name: \"Audio metadata status: \" + text",
@@ -66,6 +66,7 @@ def main() -> int:
         "dynamic visualization status names": "Accessible.name: \"Visualization load state: \" + text",
         "dynamic analysis status names": "Accessible.name: \"Analysis progress: \" + text",
         "dynamic metadata names": "Accessible.name: \"Selected audio file: \" + text",
+        "final dynamic status names": "Accessible.name: \"Visualization mode: \" + text",
     }
     missing = [name for name, marker in required.items() if marker not in qml]
     if missing:

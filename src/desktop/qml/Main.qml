@@ -511,7 +511,7 @@ ApplicationWindow {
                             Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current playback source"; elide: Text.ElideMiddle; Layout.fillWidth: true }
                             Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
                             Label { text: window.playbackBridge && window.playbackBridge.state !== "Stopped" ? "Seek uses audio frames; track duration is not available yet." : ""; objectName: "playbackSeekLimitation"; Accessible.name: "Playback seek limitation"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Playback seek currently uses source audio frames"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                            Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
+                            Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
                         }
                         Label {
                             objectName: "playbackUnavailable"
@@ -775,7 +775,7 @@ ApplicationWindow {
                     Label {
                         text: visualizationCanvas.viewMode === "waveform" ? "Time domain" : "Frequency domain"
                         objectName: "visualizationModeStatus"
-                        Accessible.name: "Visualization mode"
+                        Accessible.name: "Visualization mode: " + text
                         Accessible.role: Accessible.StaticText
                         Accessible.description: text + ". Use Left and Right arrows to switch views, or Ctrl+1 and Ctrl+2."
                     }
@@ -894,7 +894,7 @@ ApplicationWindow {
                     text: visualizationCanvas.viewMode === "waveform"
                         ? ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " samples in selected waveform view")
                         : ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " bins in selected FFT view")
-                    Accessible.name: "Selected visualization data status"
+                    Accessible.name: "Selected visualization data status: " + text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Data available in the selected waveform or FFT view"
@@ -959,7 +959,7 @@ ApplicationWindow {
                          if (state === "Error") return "Output capture error; live evidence is unavailable. Check the selected endpoint and retry monitoring."
                          return "Live evidence is unavailable until output monitoring starts."
                      }
-                     Accessible.name: "DJ evidence status"
+                     Accessible.name: "DJ evidence status: " + text
                      Accessible.role: Accessible.StaticText
                      Accessible.description: text
                      wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -1130,7 +1130,7 @@ ApplicationWindow {
                 Label {
                     objectName: "settingsStatus"
                     text: "Settings are saved for this desktop profile. User audio files are never modified."
-                    Accessible.name: "Settings status"
+                    Accessible.name: "Settings status: " + text
                     Accessible.role: Accessible.StaticText
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                 }
