@@ -217,6 +217,8 @@ Ingestion also imports the native script’s referenced playback, overlay, displ
 
 The readiness report preserves each artifact’s role through generation, allowing downstream review to distinguish topology/audio/playback/overlay evidence from generic qualification outputs.
 
+The final consumer rejects a `READY` report with missing or empty artifact roles, making provenance loss between ingestion and acceptance fail closed.
+
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
