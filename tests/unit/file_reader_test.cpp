@@ -75,6 +75,19 @@ TEST_CASE("cancellation at EOF wins and rewind starts a fresh epoch") {
  CHECK(replay.block.first_frame == 0);
 }
 
+TEST_CASE("normal EOF is repeatable and rewind starts a fresh epoch") {
+ WaveFixture fixture; FileReader reader(fixture.path, 31); std::array<float,4> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ CHECK(reader.read(samples).status == FileReadStatus::end);
+ CHECK(reader.read(samples).status == FileReadStatus::end);
+ reader.seek(0);
+ const auto replay = reader.read(samples);
+ REQUIRE(replay.status == FileReadStatus::data);
+ CHECK(replay.block.epoch == 32);
+ CHECK(replay.block.first_frame == 0);
+}
+
 TEST_CASE("file reader rejects source mutation before the next read") {
  WaveFixture fixture; FileReader reader(fixture.path, 21); std::array<float,2> samples{};
  { std::ofstream out(fixture.path, std::ios::binary | std::ios::app); out.put('\0'); }
