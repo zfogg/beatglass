@@ -313,6 +313,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertFalse(result["all_platforms_ready"])
             self.assertEqual(result["exit_gate_status"], "PENDING")
             self.assertTrue(result["exit_gate_reasons"])
+            self.assertIn("manifest", result["exit_gate_reason_codes"])
             self.assertIn("native_qualification_summary", result)
             self.assertFalse(result["native_qualification_ready"])
             self.assertTrue(result["native_summary_consistent"])
