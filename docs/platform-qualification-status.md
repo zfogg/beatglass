@@ -74,6 +74,8 @@ The consumer check also requires each platform row to link a manifest path and S
 
 Each platform artifact inventory must likewise retain a path, SHA-256, byte count, and `hash_valid: true`. This validates report linkage to retained files; it does not replace review of the actual native screenshots, recordings, logs, and command output.
 
+Pass `--bundles <retained-bundle-root>` to `validate_readiness_report.py` to recompute each manifest and retained artifact hash/byte count locally. A report is not accepted when its recorded provenance or artifact inventory disagrees with the files on disk.
+
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
 
 The same documentation contract covers `platform_support_status` and `native_qualification_required`, ensuring dashboard projections remain explicitly conservative.

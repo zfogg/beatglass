@@ -1,5 +1,6 @@
 """Validate the stable, conservative machine-readable readiness report contract."""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -57,9 +58,40 @@ def validate(report: dict) -> list[str]:
     return errors
 
 
+def validate_retained_files(report: dict, bundles: Path) -> list[str]:
+    errors = []
+    for row in report.get("platforms", []):
+        platform = row.get("platform")
+        manifest = bundles / platform / "manifest.json"
+        if not manifest.is_file():
+            errors.append(f"{platform}: retained manifest is missing")
+            continue
+        manifest_data = json.loads(manifest.read_text(encoding="utf-8"))
+        for field in ("platform", "commit", "captured_at", "environment"):
+            if not isinstance(manifest_data.get(field), str) or not manifest_data[field].strip():
+                errors.append(f"{platform}: manifest provenance field missing: {field}")
+        if str(manifest_data.get("platform", "")).lower() != platform:
+            errors.append(f"{platform}: manifest platform does not match report row")
+        actual_manifest_hash = hashlib.sha256(manifest.read_bytes()).hexdigest()
+        if actual_manifest_hash != row.get("manifest_sha256"):
+            errors.append(f"{platform}: manifest SHA-256 does not match report")
+        for artifact in row.get("artifact_inventory", []):
+            path = bundles / platform / str(artifact.get("path", ""))
+            if not path.is_file():
+                errors.append(f"{platform}: retained artifact is missing: {artifact.get('path')}")
+                continue
+            actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+            if actual_hash != str(artifact.get("sha256", "")).lower():
+                errors.append(f"{platform}: retained artifact hash mismatch: {artifact.get('path')}")
+            if path.stat().st_size != artifact.get("bytes"):
+                errors.append(f"{platform}: retained artifact byte count mismatch: {artifact.get('path')}")
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("report", type=Path)
+    parser.add_argument("--bundles", type=Path, help="retained bundle root for manifest/artifact verification")
     args = parser.parse_args()
     try:
         report = json.loads(args.report.read_text(encoding="utf-8"))
@@ -67,6 +99,8 @@ def main() -> int:
         print(f"invalid readiness report: {exc}", file=sys.stderr)
         return 1
     errors = validate(report)
+    if args.bundles:
+        errors.extend(validate_retained_files(report, args.bundles))
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
