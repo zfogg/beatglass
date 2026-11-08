@@ -14,6 +14,7 @@ The output directory is optional and defaults to `build/standalone-smokes`:
 .\tests/standalone/run-library-smokes.ps1
 tests/standalone/run-library-smokes.ps1 -OutputDir C:/temp/beatglass-smokes
 tests/standalone/run-library-smokes.ps1 -Compiler C:/path/to/g++.exe
+tests/standalone/run-library-smokes.ps1 -ContinueOnFailure
 ```
 
 The generated binaries are build artifacts and should not be committed.
