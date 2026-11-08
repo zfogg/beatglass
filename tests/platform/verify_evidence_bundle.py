@@ -42,7 +42,9 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if not isinstance(entry, dict):
             errors.append(f"invalid artifact entry: {entry}")
             continue
-        relative, expected = entry.get("path"), entry.get("sha256", "").lower()
+        relative = entry.get("path")
+        raw_expected = entry.get("sha256", "")
+        expected = raw_expected.lower() if isinstance(raw_expected, str) else None
         canonical = Path(relative).as_posix() if isinstance(relative, str) else None
         if (
             not isinstance(relative, str)
