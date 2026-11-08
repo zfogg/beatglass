@@ -1053,7 +1053,7 @@ ApplicationWindow {
                     Label { text: "Size" }
                     ComboBox {
                         objectName: "overlaySize"
-                    Accessible.name: "Overlay size"; Accessible.value: currentText; Accessible.description: "Choose the overlay window size; current size " + currentText; ToolTip.text: "Choose Compact, Medium, or Large overlay size"
+                    Accessible.name: "Overlay size"; Accessible.value: currentText; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the overlay window size; current size " + currentText; ToolTip.text: "Choose Compact, Medium, or Large overlay size"
                         model: ["Compact", "Medium", "Large"]; currentIndex: 1
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onActivated: if (window.overlayBridge) {
@@ -1063,7 +1063,7 @@ ApplicationWindow {
                     }
                 }
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; wrapMode: Text.WordWrap }
-                Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; Accessible.name: "Retry DJ overlay"; Accessible.description: "Retry showing the native DJ overlay"; ToolTip.text: "Retry showing the native DJ overlay on the selected display"; onClicked: window.showOverlayAndHideControls() }
+                Button { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Retry showing the native DJ overlay"; ToolTip.text: "Retry showing the native DJ overlay on the selected display"; onClicked: window.showOverlayAndHideControls() }
                 Item { Layout.fillHeight: true }
             }
         }
