@@ -37,7 +37,7 @@ if [[ ! -f "$desktop_plist" ]]; then
   exit 1
 fi
 usage_description="$(/usr/libexec/PlistBuddy -c 'Print :NSAudioCaptureUsageDescription' "$desktop_plist")"
-if [[ -z "$usage_description" ]]; then
+if [[ -z "$usage_description" || "${usage_description,,}" == *microphone* || "${usage_description,,}" == *camera* ]]; then
   echo "NSAudioCaptureUsageDescription is empty in the production bundle" >&2
   exit 1
 fi
@@ -60,7 +60,7 @@ for bundle in "$tap_bundle" "$recovery_bundle"; do
     exit 1
   fi
   bundle_usage="$(/usr/libexec/PlistBuddy -c 'Print :NSAudioCaptureUsageDescription' "$bundle_plist")"
-  if [[ -z "$bundle_usage" ]]; then
+  if [[ -z "$bundle_usage" || "${bundle_usage,,}" == *microphone* || "${bundle_usage,,}" == *camera* ]]; then
     echo "NSAudioCaptureUsageDescription is empty in $bundle_plist" >&2
     exit 1
   fi
