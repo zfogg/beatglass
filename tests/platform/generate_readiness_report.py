@@ -31,8 +31,19 @@ def build_report(root: Path) -> dict:
         if not isinstance(manifest, dict):
             manifest = {}
             errors.append("manifest root must be an object")
+        artifacts = manifest.get("artifacts", [])
+        if not isinstance(artifacts, list):
+            errors.append("manifest artifacts must be an array")
+            artifacts = []
+        scenarios_data = manifest.get("scenarios", [])
+        if not isinstance(scenarios_data, list):
+            errors.append("manifest scenarios must be an array")
+            scenarios_data = []
         inventory = []
-        for item in manifest.get("artifacts", []):
+        for item in artifacts:
+            if not isinstance(item, dict):
+                errors.append(f"invalid artifact entry: {item}")
+                continue
             path = bundle / str(item.get("path", ""))
             if not path.resolve().is_relative_to(bundle_root):
                 errors.append(f"artifact escapes bundle: {item.get('path')}")
@@ -45,10 +56,13 @@ def build_report(root: Path) -> dict:
             inventory.append({"path": item.get("path"), "sha256": digest,
                              "bytes": path.stat().st_size if exists else -1,
                              "hash_valid": exists and digest == item.get("sha256")})
-        scenarios = {str(item.get("id")): item for item in manifest.get("scenarios", [])}
+        scenarios = {str(item.get("id")): item for item in scenarios_data if isinstance(item, dict)}
         scenario_inventory = [{"id": name, "status": scenarios.get(name, {}).get("status", "UNRUN"),
                                "evidence": scenarios.get(name, {}).get("evidence")} for name in SCENARIOS]
         output_name = manifest.get("qualification_output", "")
+        if not isinstance(output_name, str):
+            errors.append("qualification output must be a string")
+            output_name = ""
         output_path = bundle / output_name
         if output_name and not output_path.resolve().is_relative_to(bundle_root):
             errors.append(f"qualification output escapes bundle: {output_name}")
