@@ -10,6 +10,10 @@
 #include <thread>
 #include <limits>
 using namespace beatglass;
+TEST_CASE("empty queue pop leaves consumer output unchanged") {
+  AudioQueue<3, 2> q; AudioQueue<3, 2>::Block out; out.epoch=77; out.sample_count=1;
+  CHECK_FALSE(q.pop(out)); CHECK(out.epoch==77); CHECK(out.sample_count==1);
+}
 TEST_CASE("queue rejects blocks whose frame range overflows") {
   AudioQueue<3, 2> q; std::array<float,1> samples{1};
   AudioBlock input{{44100,1},1,std::numeric_limits<std::uint64_t>::max(),0,false,samples};
