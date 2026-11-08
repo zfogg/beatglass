@@ -1352,6 +1352,7 @@ ApplicationWindow {
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
+                    Layout.preferredHeight: window.compactHeader ? 36 : 28
                     wrapMode: Text.WordWrap
                 }
                 Label {

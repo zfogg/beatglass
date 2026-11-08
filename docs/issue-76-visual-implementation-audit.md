@@ -486,6 +486,8 @@ Waveform sample and FFT-bin counts now wrap within their responsive status width
 
 Selected-view sample/bin summaries now wrap as well, preserving mode-specific evidence when compact layouts narrow the visualization column.
 
+Selected-view summaries reserve responsive line height for wrapped text, keeping mode-specific context separated from the selection controls.
+
 The live waveform/FFT data-status label now permits zero minimum width, keeping its sample/bin evidence inside the responsive visualization column.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
