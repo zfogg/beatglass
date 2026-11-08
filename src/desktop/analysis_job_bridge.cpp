@@ -118,6 +118,7 @@ void AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
   if (accepted) {
+    batchResultsPublished_ = 0;
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged();
   }
