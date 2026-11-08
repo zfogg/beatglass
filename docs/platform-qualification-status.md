@@ -1,5 +1,9 @@
 # Platform qualification status
 
+## Native codec/runtime evidence expectations
+
+Each platform qualification run must record the decoder/runtime build identity, codec feature configuration, exact source fixture hash, decoder snapshot, selected backend/device, and the full command transcript. Evidence must include a successful decode plus a controlled failure or missing-codec case, with retained logs and the resulting readiness artifact. A portable decoder test or headless build is preparation evidence only and cannot advance the native matrix.
+
 Decoder snapshot mismatch/legacy rejection is covered as a portable fail-closed rule. Native codec and runtime compatibility still require retained Windows, macOS, and Linux evidence; a passing mismatch contract is not native qualification.
 
 Retry recovery requires a compatible non-empty `decoder_snapshot`; migrated legacy rows are intentionally rejected until fresh metadata is captured. This fail-closed policy prevents decoder drift from being presented as a valid result, but does not qualify codec/runtime behavior on Windows, macOS, or Linux.
