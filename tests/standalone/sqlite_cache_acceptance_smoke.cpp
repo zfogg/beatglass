@@ -225,6 +225,8 @@ int main() {
     assert(cache.mark_retryable("marked", key));
     assert(cache.discard_retryable("marked"));
     assert(!cache.mark_retryable("marked", key));
+    const CacheKey interrupted_key{"sha256:interrupted", key.engine, key.config, key.mode};
+    cache.begin("zz-crash-recovery", interrupted_key);
   }
   {
     SqliteCache reopened(path.string());
@@ -239,9 +241,10 @@ int main() {
     assert(reopened.find(key, result) && result == "result-a");
     assert(reopened.discard_retryable("m-retry"));
     const auto remaining = reopened.retryable_runs();
-    assert(remaining.size() == 2 && remaining[0].id == "a-retry" && remaining[1].id == "z-retry");
+    assert(remaining.size() == 3 && remaining[0].id == "a-retry" && remaining[1].id == "z-retry" && remaining[2].id == "zz-crash-recovery");
     assert(reopened.discard_retryable("a-retry"));
     assert(reopened.discard_retryable("z-retry"));
+    assert(reopened.discard_retryable("zz-crash-recovery"));
     assert(reopened.retryable_runs().empty());
   }
   std::filesystem::remove(path, ec);
