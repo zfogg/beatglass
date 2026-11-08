@@ -85,6 +85,10 @@ int main() {
   const auto tied = beatglass::library::browse(dir.path, "alpha");
   require(tied.entries.size() >= 2,
           "duplicate sources were not represented");
+  for (const auto& entry : tied.entries) {
+    require(!entry.name.empty() && !entry.path.empty() && entry.format == "MP3",
+            "duplicate catalog entries lost identity metadata");
+  }
   const auto empty = beatglass::library::browse(dir.path, "empty");
   require(empty.entries.size() == 1 && empty.entries[0].bytes == 0 && empty.entries[0].format == "WAV",
           "zero-byte supported source metadata was not retained");
