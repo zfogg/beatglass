@@ -1,5 +1,7 @@
 # Progress and handoff
 
+Native codec/runtime preparation is now explicit: qualification artifacts must bind decoder snapshot, codec feature configuration, fixture hash, backend/device, build identity, and exact commands. Both successful decode and controlled failure evidence are required; portable tests remain preparation evidence and native gates stay open.
+
 Decoder snapshot mismatch handling is explicit: retry provenance requires exact compatibility with the active decoder identity. Empty legacy snapshots and mismatches reject recovery rather than silently decoding with a different runtime; the portable contract does not qualify native codec behavior.
 
 Decoder compatibility is explicit in retry recovery: `decoder_snapshot` travels with the persisted run, and legacy retry rows with an empty snapshot remain rejected rather than silently reusing a changed decoder. Local checks cover this policy; native codec/runtime compatibility is still unqualified.
