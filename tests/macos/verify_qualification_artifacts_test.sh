@@ -17,6 +17,7 @@ cat > "$out_dir/qualification-manifest.txt" <<'EOF'
 commit=test
 macos_version=test
 architecture=x86_64
+hardware_model=fixture
 xcode_version=test
 sdk_version=test
 sdk_path=/sdk

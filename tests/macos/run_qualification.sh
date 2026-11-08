@@ -274,6 +274,7 @@ fi
   printf 'commit=%s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'macos_version=%s\n' "$(sw_vers -productVersion)"
   printf 'architecture=%s\n' "$(uname -m)"
+  printf 'hardware_model=%s\n' "$(system_profiler SPHardwareDataType | awk -F': ' '/Model Name|Model Identifier/ {print $2; exit}')"
   printf 'xcode_version=%s\n' "$(xcodebuild -version | tr '\n' ' ')"
   printf 'sdk_version=%s\n' "$(xcrun --sdk macosx --show-sdk-version)"
   printf 'sdk_path=%s\n' "$sdk_path"
