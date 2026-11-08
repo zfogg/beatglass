@@ -178,3 +178,14 @@ TEST_CASE("catalog reports a file path as an invalid browse root") {
  CHECK(result.entries.empty());
  CHECK_FALSE(result.diagnostic.empty());
 }
+TEST_CASE("catalog skips symlinked files and directories") {
+  TempDir dir; dir.file("real.wav");
+  std::error_code ec;
+  std::filesystem::create_symlink(dir.path / "real.wav", dir.path / "linked.wav", ec);
+  if (ec) return; // Platform qualification may disable symlink creation.
+  std::filesystem::create_directory(dir.path / "nested");
+  std::filesystem::create_directory_symlink(dir.path / "nested", dir.path / "linked-nested", ec);
+  const auto result = beatglass::library::browse(dir.path);
+  REQUIRE(result.entries.size() == 1);
+  CHECK(result.entries.front().name == "real.wav");
+}
