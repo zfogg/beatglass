@@ -817,6 +817,12 @@ ApplicationWindow {
                 window.overlayPreferredDisplayName = window.overlayBridge.displayName
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.syncOverlaySizePreferenceFromGeometry(window.overlayBridge.geometry)
+            if (window.overlayDisplayRecoveryPending && window.overlayBridge
+                    && window.overlayBridge.screenNames.length > 0
+                    && !window.overlayDisplaySelectionRequired) {
+                window.recoverOverlayAfterDisplayChange()
+                retryOverlay.forceActiveFocus()
+            }
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
         }
