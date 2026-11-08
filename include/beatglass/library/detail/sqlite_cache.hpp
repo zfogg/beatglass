@@ -52,7 +52,7 @@ public:
   /** Close the connection. */ ~SqliteCache();
   SqliteCache(const SqliteCache&) = delete;
   SqliteCache& operator=(const SqliteCache&) = delete;
-  /** Insert or replace one index row on the worker; throws on empty, embedded-NUL, or oversized metadata and storage errors. Does not touch the source file. */
+  /** Insert or replace one index row on the worker; throws on invalid text or unrepresentable size metadata and storage errors. Does not touch the source file. */
   void put_entry(const CollectionEntry& entry);
   /** Remove only the index row; rejects an empty or embedded-NUL path and returns whether a row existed. Never removes a source file. */
   bool remove_entry(const std::string& path);

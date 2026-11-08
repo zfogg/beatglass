@@ -199,6 +199,11 @@ TEST_CASE("SQLite catalog prefix queries bound search input") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.entries({std::string(1025, 'a'), 0, 10}), std::invalid_argument);
 }
+TEST_CASE("SQLite collection sizes are checked before signed binding") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "hash",
+    std::numeric_limits<std::uint64_t>::max(), 1}), std::invalid_argument);
+}
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);
