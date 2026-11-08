@@ -113,6 +113,8 @@ public:
   }
   void put_entry(const CollectionEntry& e) {
     validate_collection_entry(e);
+    if (e.size_bytes > static_cast<std::uint64_t>(std::numeric_limits<sqlite3_int64>::max()))
+      throw std::invalid_argument("collection size is not representable");
     Statement s(db_, "INSERT INTO collection_entries(path,name,kind,fingerprint,size_bytes,modified_ns) VALUES(?,?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET name=excluded.name,kind=excluded.kind,fingerprint=excluded.fingerprint,size_bytes=excluded.size_bytes,modified_ns=excluded.modified_ns");
     bind(s.p,1,e.path); bind(s.p,2,e.name); bind(s.p,3,e.kind); bind(s.p,4,e.fingerprint);
     check(sqlite3_bind_int64(s.p,5,static_cast<sqlite3_int64>(e.size_bytes))); check(sqlite3_bind_int64(s.p,6,e.modified_ns)); done(s.p);
