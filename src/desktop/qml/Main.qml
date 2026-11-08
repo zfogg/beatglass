@@ -707,6 +707,7 @@ ApplicationWindow {
                 Canvas {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
                     property string viewMode: "waveform"
+                    property real selectedPosition: -1
                     readonly property bool modeHasData: typeof visualizationPresentation !== "undefined"
                         && (viewMode === "waveform"
                             ? visualizationPresentation.waveform.length > 0
@@ -732,6 +733,17 @@ ApplicationWindow {
                         } else {
                             ctx.fillStyle = "#c084fc"; var bar = width / Math.max(1, spec.length)
                             for (var k = 0; k < spec.length; ++k) ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
+                        }
+                        if (selectedPosition >= 0) {
+                            ctx.strokeStyle = "#facc15"; ctx.lineWidth = 2; ctx.beginPath()
+                            ctx.moveTo(selectedPosition * width, 0); ctx.lineTo(selectedPosition * width, height); ctx.stroke()
+                        }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, mouse.x / visualizationCanvas.width))
+                            visualizationCanvas.requestPaint()
                         }
                     }
                     Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.requestPaint() } }
@@ -783,6 +795,12 @@ ApplicationWindow {
                     Accessible.name: "Selected visualization data status"
                     Accessible.description: text
                     Layout.fillWidth: true
+                }
+                Label {
+                    objectName: "visualizationSelectionStatus"
+                    text: visualizationCanvas.selectedPosition < 0 ? "No visualization position selected" : "Selected visualization position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%"
+                    Accessible.name: "Visualization selection status"
+                    Accessible.description: text
                 }
                 Label {
                     objectName: "visualizationRevisionStatus"
