@@ -29,6 +29,15 @@ callback. Issuance does not order worker completion or install stream formats.
    Attempt to quiesce capture. Return false and retain any callback context if
    the OS refuses to stop it. Call on the control owner, not the audio thread.
 
+Library storage
+---------------
+
+Storage configuration is caller-owned. The desktop owner must choose and
+validate a database file path before constructing worker-owned SQLite storage;
+this interface does not select platform defaults or perform migration.
+
+.. cpp:autodoc:: include/beatglass/library/storage_config.hpp
+
 .. cpp:function:: std::optional<std::int64_t> beatglass::coreaudio::SourceBackend::host_time_ns(std::uint64_t ticks) const noexcept
 
    Convert valid host ticks to backend monotonic nanoseconds, or return empty
