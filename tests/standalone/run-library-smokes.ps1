@@ -20,6 +20,11 @@ $cases = @(
   @{ Name = "executor_explicit_failure"; Sources = @($executorSource, "tests/standalone/job_executor_explicit_fail_smoke.cpp") },
   @{ Name = "executor_progress"; Sources = @($executorSource, "tests/standalone/job_executor_progress_smoke.cpp") },
   @{ Name = "executor_handle_readers"; Sources = @($executorSource, "tests/standalone/job_handle_readers_smoke.cpp") },
+  @{ Name = "executor_after_shutdown"; Sources = @($executorSource, "tests/standalone/job_executor_after_shutdown_smoke.cpp") },
+  @{ Name = "executor_empty"; Sources = @($executorSource, "tests/standalone/job_executor_empty_smoke.cpp") },
+  @{ Name = "executor_exception"; Sources = @($executorSource, "tests/standalone/job_executor_exception_smoke.cpp") },
+  @{ Name = "executor_explicit_cancel"; Sources = @($executorSource, "tests/standalone/job_executor_explicit_cancel_smoke.cpp") },
+  @{ Name = "executor_handle_terminal"; Sources = @($executorSource, "tests/standalone/job_handle_terminal_smoke.cpp") },
   @{ Name = "analysis_runner"; Sources = @($runnerSources + "tests/standalone/analysis_runner_smoke.cpp") },
   @{ Name = "analysis_batch"; Sources = @($runnerSources + "tests/standalone/analysis_batch_smoke.cpp") },
   @{ Name = "analysis_capacity"; Sources = @($runnerSources + "tests/standalone/analysis_capacity_smoke.cpp") },
@@ -57,6 +62,7 @@ $passed = [System.Collections.Generic.List[string]]::new()
 $failed = [System.Collections.Generic.List[string]]::new()
 $log = [System.Collections.Generic.List[string]]::new()
 $records = [System.Collections.Generic.List[object]]::new()
+$runStarted = [DateTime]::UtcNow
 Push-Location $repo
 try {
   foreach ($case in $cases) {
@@ -87,7 +93,7 @@ $selection = if ($SelectedCases.Count -gt 0) { $SelectedCases -join "," } else {
 $summary = "passed=$($passed.Count); failed=$($failed.Count); total=$($cases.Count); selected=$selection"
 $summary | Set-Content -Path (Join-Path $OutputDir "summary.txt")
 $log | Set-Content -Path (Join-Path $OutputDir "commands.log")
-$report = [pscustomobject]@{ selected=$selection; passed=$passed; failed=$failed; cases=$records }
+$report = [pscustomobject]@{ selected=$selection; passed=$passed; failed=$failed; total_seconds=([math]::Round(([DateTime]::UtcNow - $runStarted).TotalSeconds, 2)); cases=$records }
 $report | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $OutputDir "summary.json")
 if ($failed.Count -gt 0) { throw "Standalone library smokes failed: $($failed -join ', ')" }
 Write-Output "Standalone library smokes $summary"
