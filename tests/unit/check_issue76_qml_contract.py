@@ -404,6 +404,7 @@ def main() -> int:
         "visualization retry feedback": "objectName: \"visualizationRetryFeedback\"\n                    visible: window.liveBridge.status === \"Starting\" || window.liveBridge.status === \"Reacquiring\"",
         "visualization responsive status spacing": 'objectName: "visualizationStatusGroup"',
         "visualization status group shrinks": "Layout.minimumWidth: 0",
+        "visualization status group top aligned": "Layout.alignment: Qt.AlignTop",
         "visualization hint responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization status runtime state": "Accessible.value: window.liveBridge.status === \"Error\" ? \"capture error\"",
         "visualization reset reason": "visualizationSelectionResetReason",
