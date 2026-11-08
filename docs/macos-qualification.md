@@ -20,7 +20,8 @@ ssh zachbook-pro 'cd /tmp/beatglass-native-qualification && tests/macos/run_qual
 
 The transfer helper only prepares the bounded `/tmp/beatglass-native-qualification` directory; it does not grant permissions or claim native qualification.
 
-The qualification build enables the aubio-backed slice, so the Mac must have
+The qualification build enables the aubio-backed slice and the production
+desktop analysis bridge, so the Mac must have
 the aubio development headers installed before running the script. On a
 Homebrew Mac, install the pinned formula available from the host's configured
 Homebrew repository with:
