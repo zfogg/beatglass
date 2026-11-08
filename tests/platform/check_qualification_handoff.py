@@ -19,7 +19,8 @@ def main() -> int:
     required_disclaimers = ("does not establish native", "support language must remain experimental")
     required_platform_rows = ("| Windows |", "| macOS |", "| Linux |")
     required_matrix_columns = ("Current integrated/preparation evidence", "Native gates still required")
-    required_evidence_fields = ("build identity", "output device", "display", "audio")
+    platform_rows = tuple(line for line in docs.splitlines() if line.startswith(("| Windows |", "| macOS |", "| Linux |")))
+    required_sections = ("## Issue #76 UI gate", "Linux capture gate")
     missing = [path for path in REQUIRED if not (root / path).is_file()]
     unlinked = [path for path in REQUIRED if path not in docs and path not in ("docs/linux-qualification-plan.md", "docs/windows-qualification.md", "docs/macos-qualification.md")]
     if "docs/linux-qualification-plan.md" not in readme:
@@ -28,7 +29,11 @@ def main() -> int:
         unlinked.append("docs/platform-qualification-status.md (README)")
     unlinked.extend(f"status matrix row: {row}" for row in required_platform_rows if row not in docs)
     unlinked.extend(f"status matrix column: {column}" for column in required_matrix_columns if column not in docs)
-    unlinked.extend(f"evidence requirement: {field}" for field in required_evidence_fields if field.lower() not in docs.lower())
+    for row in platform_rows:
+        cells = [cell.strip() for cell in row.strip("|").split("|")]
+        if len(cells) != 3 or not all(cells):
+            unlinked.append(f"malformed status row: {row}")
+    unlinked.extend(f"status section: {section}" for section in required_sections if section not in docs)
     unlinked.extend(f"status disclaimer: {phrase}" for phrase in required_disclaimers if phrase not in docs)
     if missing or unlinked:
         print(f"missing tools: {missing}; undocumented tools: {unlinked}", file=sys.stderr)
