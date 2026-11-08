@@ -63,7 +63,10 @@ FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::
                                                  const std::string& expected_content,
                                                  std::stop_token stop, std::string* diagnostic) {
   const auto status = revalidate_file_identity(path, expected_content, stop, diagnostic);
-  if (status == FingerprintStatus::changed || status == FingerprintStatus::error) cache.remove_entry(path);
+  // An unreadable path is not proof that the catalog entry is stale. Keep it
+  // available with its diagnostic so a transient permission/device failure can
+  // be retried without losing the user's catalog row.
+  if (status == FingerprintStatus::changed) cache.remove_entry(path);
   return status;
 }
 
