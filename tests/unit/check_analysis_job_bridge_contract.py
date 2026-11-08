@@ -45,6 +45,10 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
         self.assertIn('for (const auto& operation : batch_) if (operation) operation->cancel();\n  batch_.clear();', source)
 
+    def test_batch_submission_cancels_active_single_operation(self):
+        source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
+        self.assertIn('if (retryable_ && canCancel()) retryable_->cancel();\n  retryable_.reset();', source)
+
     def test_batch_submission_retires_single_job_handle(self):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
         self.assertIn('if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }\n  retryable_.reset();\n  if (!sourcePath_.isEmpty())', source)
