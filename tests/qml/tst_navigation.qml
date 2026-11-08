@@ -113,7 +113,9 @@ TestCase {
 
     function test_captureMonitorControlsAreBound() {
         let app = shell.createObject(null)
-        verify(findChild(app, "toggleMonitoring") !== null)
+        let toggle = findChild(app, "toggleMonitoring")
+        verify(toggle !== null)
+        compare(toggle.Accessible.description, "Start monitoring, or retry after a capture error.")
         verify(findChild(app, "captureStatus") !== null)
         app.destroy()
     }

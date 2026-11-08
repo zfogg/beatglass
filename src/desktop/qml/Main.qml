@@ -349,7 +349,7 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 16
                 Label { text: "DJ"; font.pixelSize: 28; font.bold: true }
                 RowLayout {
-                    Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : "Start monitoring"; objectName: "toggleMonitoring"; enabled: window.captureMonitorBridge !== null; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
+                    Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : "Start monitoring"); objectName: "toggleMonitoring"; enabled: window.captureMonitorBridge !== null; Accessible.description: "Start monitoring, or retry after a capture error."; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
                     Label { text: window.captureMonitorBridge ? "Capture: " + window.captureMonitorBridge.status : "Capture unavailable"; objectName: "captureStatus" }
                 }
                 Label { text: "Live output monitoring: " + window.liveBridge.status; font.pixelSize: 18; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Live output monitoring"; Accessible.description: text }
