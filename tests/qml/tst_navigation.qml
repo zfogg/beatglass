@@ -399,6 +399,10 @@ TestCase {
         compare(status.Accessible.name, "Visualization data status")
         compare(findChild(app, "visualizationCaptureStatus").Accessible.name, "Visualization capture status")
         verify(findChild(app, "visualizationCaptureStatus").text.indexOf("Capture is stopped") === 0)
+        let selected = findChild(app, "visualizationSelectedDataStatus")
+        verify(selected !== null)
+        compare(selected.text, "0 samples in selected waveform view")
+        compare(selected.Accessible.name, "Selected visualization data status")
         app.destroy()
     }
 

@@ -776,6 +776,15 @@ ApplicationWindow {
                     Layout.fillWidth: true
                 }
                 Label {
+                    objectName: "visualizationSelectedDataStatus"
+                    text: visualizationCanvas.viewMode === "waveform"
+                        ? ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.waveform.length : 0) + " samples in selected waveform view")
+                        : ((typeof visualizationPresentation !== "undefined" ? visualizationPresentation.spectrum.length : 0) + " bins in selected FFT view")
+                    Accessible.name: "Selected visualization data status"
+                    Accessible.description: text
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "visualizationRevisionStatus"
                     text: typeof visualizationPresentation === "undefined"
                         ? "No visualization generation is active"
