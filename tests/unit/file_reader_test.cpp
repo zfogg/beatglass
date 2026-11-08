@@ -88,15 +88,28 @@ TEST_CASE("path reader classifies AAC and M4A as unsupported instead of unreadab
 }
 
 TEST_CASE("path reader classifies malformed known audio as invalid format") {
-  const auto path = std::filesystem::temp_directory_path() / "beatglass-malformed.wav";
-  { std::ofstream out(path, std::ios::binary); out << "not a wave"; }
+  for (const auto extension : {".wav", ".WAV", ".flac"}) {
+    const auto path = std::filesystem::temp_directory_path() / ("beatglass-malformed" + std::string(extension));
+    { std::ofstream out(path, std::ios::binary); out << "not a wave"; }
+    try {
+      try { FileReader reader(path, 1); FAIL("malformed input opened"); }
+      catch (const FileOpenError& error) {
+        CHECK(error.kind() == FileOpenErrorKind::invalid_format);
+      }
+    } catch (...) { std::filesystem::remove(path); throw; }
+    std::filesystem::remove(path);
+  }
+}
+
+TEST_CASE("path reader keeps missing known audio as unreadable") {
+  const auto path = std::filesystem::temp_directory_path() / "beatglass-missing.wav";
+  std::filesystem::remove(path);
   try {
-    try { FileReader reader(path, 1); FAIL("malformed input opened"); }
+    try { FileReader reader(path, 1); FAIL("missing input opened"); }
     catch (const FileOpenError& error) {
-      CHECK(error.kind() == FileOpenErrorKind::invalid_format);
+      CHECK(error.kind() == FileOpenErrorKind::unreadable);
     }
   } catch (...) { std::filesystem::remove(path); throw; }
-  std::filesystem::remove(path);
 }
 
 TEST_CASE("file source changes sample rate only across distinct epochs") {
