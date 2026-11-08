@@ -57,3 +57,14 @@ class ReadinessHandoffTest(unittest.TestCase):
             self.assertFalse(any("missing qualification-manifest" in error for error in errors))
             self.assertEqual(json.loads((bundles / "windows/manifest.json").read_text())["scenarios"][0]["status"], "PENDING")
 
+    def test_tampered_native_output_is_recorded_in_handoff(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); native = root / "native"; bundles = root / "bundles"; bundles.mkdir()
+            native.mkdir(); (native / "qualification-artifacts.sha256").write_text("0" * 64 + "  missing.bin\n", encoding="utf-8")
+            (native / "qualification-manifest.txt").write_text("platform=windows\n", encoding="utf-8")
+            output = root / "readiness.json"
+            errors = handoff.run(bundles, output, native_output=native, native_platform="windows")
+            self.assertTrue(any("missing or escaping artifact" in error for error in errors))
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(report["ingestion_errors"])
+
