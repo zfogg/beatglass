@@ -120,6 +120,12 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
                     key=lambda item: str(item.get("id", "")))
                 scenario_status_counts = dict(sorted(Counter(item["status"] for item in scenario_inventory).items()))
+                scenario_status_by_id = {item.get("id"): item.get("status") for item in scenario_inventory}
+                unpassed_scenarios = sorted(
+                    scenario_id for scenario_id in verifier.REQUIRED_SCENARIOS
+                    if scenario_status_by_id.get(scenario_id) != "PASS")
+                if unpassed_scenarios:
+                    errors.append(f"{platform}: required scenarios are not PASS: {unpassed_scenarios}")
                 artifact_roles = {entry.get("path"): entry.get("role") for entry in data.get("artifacts", [])
                                   if isinstance(entry, dict)}
                 missing_artifact_roles = sorted(
@@ -134,6 +140,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                 inventory = []
                 scenario_inventory = []
                 scenario_status_counts = {}
+                unpassed_scenarios = []
                 missing_artifacts = []
                 mismatched_artifacts = []
                 invalid_scenarios = []
@@ -146,6 +153,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             inventory = []
             scenario_inventory = []
             scenario_status_counts = {}
+            unpassed_scenarios = sorted(verifier.REQUIRED_SCENARIOS)
             missing_artifacts = []
             mismatched_artifacts = []
             invalid_scenarios = []
@@ -167,6 +175,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                      "artifact_inventory": inventory, "scenario_inventory": scenario_inventory,
                      "scenario_status_counts": scenario_status_counts,
                      "artifact_roles": artifact_roles, "missing_artifact_roles": missing_artifact_roles,
+                     "unpassed_scenarios": unpassed_scenarios,
                      "fresh": manifest_sha256 is not None and not any("stale" in error or "future" in error for error in identity_failures),
                      "freshness_errors": [error for error in identity_failures if "stale" in error or "future" in error or "timestamp" in error],
                      "manifest_platform": manifest_platform, "provenance_complete": provenance_complete,
@@ -214,7 +223,7 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     category_platform_counts = {category: sum(row["failure_categories"].get(category, 0) for row in rows)
                                 for category in sorted(categories)}
     category_counts_consistent = category_platform_counts == dict(categories)
-    required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
+    required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "unpassed": row["unpassed_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
     artifact_roles = [{"platform": row["platform"], "missing": row["missing_artifact_roles"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
     summary_consistent = (len(required) == len(rows) == len(provenance)

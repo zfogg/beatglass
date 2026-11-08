@@ -240,6 +240,7 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
             result = readiness.report(status, bundles)
             self.assertEqual(result["platforms"][0]["scenario_status_counts"], {"PASS": 1, "UNRUN": 1})
+            self.assertIn("recovery", result["platforms"][0]["unpassed_scenarios"])
 
     def test_readiness_reports_freshness_details(self):
         with tempfile.TemporaryDirectory() as tmp:
