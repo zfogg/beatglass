@@ -60,6 +60,20 @@ TEST_CASE("cancellation after playback progress preserves the next frame") {
  auto resumed = reader.read(samples); REQUIRE(resumed.status == FileReadStatus::data);
  CHECK(resumed.block.first_frame == 1); CHECK(resumed.block.epoch == 7);
 }
+
+TEST_CASE("cancellation at EOF wins and rewind starts a fresh epoch") {
+ WaveFixture fixture; FileReader reader(fixture.path, 11); std::array<float,4> samples{};
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::data);
+ REQUIRE(reader.read(samples).status == FileReadStatus::end);
+ std::stop_source stop; stop.request_stop();
+ CHECK(reader.read(samples, stop.get_token()).status == FileReadStatus::cancelled);
+ reader.seek(0);
+ const auto replay = reader.read(samples);
+ REQUIRE(replay.status == FileReadStatus::data);
+ CHECK(replay.block.epoch == 12);
+ CHECK(replay.block.first_frame == 0);
+}
 TEST_CASE("seek refuses epoch overflow") {
  WaveFixture fixture; FileReader reader(fixture.path, std::numeric_limits<std::uint64_t>::max());
  CHECK_THROWS_AS(reader.seek(0), std::overflow_error);
