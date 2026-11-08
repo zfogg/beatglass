@@ -193,6 +193,11 @@ TestCase {
         compare(findChild(app, "seekToFrame").Accessible.description, "Seek playback to the entered audio frame")
         app.destroy()
     }
+    function test_playbackDeviceSelectionControlsArePresent() {
+        verify(findChild(app, "playbackDevice") !== null)
+        compare(findChild(app, "playbackDevice").Accessible.name, "Playback output device")
+        compare(findChild(app, "refreshPlaybackDevices").Accessible.description, "Refresh native playback output devices")
+    }
 
     function test_frameSeekUsesPlaybackBridge() {
         fakePlayback.state = "Playing"; fakePlayback.currentFrame = 0; fakePlayback.epoch = 1
