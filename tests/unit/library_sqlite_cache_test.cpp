@@ -152,6 +152,11 @@ TEST_CASE("SQLite cache discards only retryable runs") {
   REQUIRE_FALSE(cache.discard_retryable("retry"));
   REQUIRE_THROWS_AS(cache.discard_retryable(""), std::invalid_argument);
 }
+TEST_CASE("SQLite retryable run query exposes its bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxRetryableRuns == 10000);
+  CHECK_THROWS_AS(cache.retryable_runs(kMaxRetryableRuns + 1), std::invalid_argument);
+}
 TEST_CASE("SQLite binding lengths are checked before narrowing") {
   auto maximum = static_cast<std::size_t>(std::numeric_limits<int>::max());
   REQUIRE(sqlite_length_representable(maximum));
@@ -197,7 +202,22 @@ TEST_CASE("SQLite exact catalog lookup rejects unsafe paths") {
 }
 TEST_CASE("SQLite catalog prefix queries bound search input") {
   SqliteCache cache(":memory:");
-  CHECK_THROWS_AS(cache.entries({std::string(1025, 'a'), 0, 10}), std::invalid_argument);
+  CHECK(kMaxCollectionSearchBytes == 1024);
+  CHECK_THROWS_AS(cache.entries({std::string(kMaxCollectionSearchBytes + 1, 'a'), 0, 10}), std::invalid_argument);
+}
+TEST_CASE("SQLite collection page size exposes its API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCollectionPageSize == 10000);
+  CHECK_THROWS_AS(cache.entries({"", 0, kMaxCollectionPageSize + 1}), std::invalid_argument);
+}
+TEST_CASE("SQLite collection offset exposes its signed binding bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCollectionOffset == static_cast<std::size_t>(0x7fffffffffffffffULL));
+}
+TEST_CASE("SQLite collection sizes are checked before signed binding") {
+  SqliteCache cache(":memory:");
+  CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "hash",
+    std::numeric_limits<std::uint64_t>::max(), 1}), std::invalid_argument);
 }
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");

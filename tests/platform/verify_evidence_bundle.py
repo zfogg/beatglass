@@ -26,7 +26,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
         errors.append("artifacts must be a nonempty list")
     if not isinstance(scenarios, list) or not scenarios:
         errors.append("scenarios must be a nonempty list")
-    scenario_ids = {scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)}
+    scenario_ids = {
+        scenario.get("id") for scenario in scenarios or []
+        if isinstance(scenario, dict) and isinstance(scenario.get("id"), str)
+    }
     missing_scenarios = REQUIRED_SCENARIOS - scenario_ids
     if missing_scenarios:
         errors.append(f"missing required scenarios: {sorted(missing_scenarios)}")
@@ -34,7 +37,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
     if unknown_scenarios:
         errors.append(f"unknown scenarios: {sorted(unknown_scenarios)}")
     declared_ids = [scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)]
-    duplicate_scenarios = sorted({scenario_id for scenario_id in declared_ids if declared_ids.count(scenario_id) > 1})
+    duplicate_scenarios = sorted({
+        scenario_id for scenario_id in declared_ids
+        if isinstance(scenario_id, str) and declared_ids.count(scenario_id) > 1
+    })
     if duplicate_scenarios:
         errors.append(f"duplicate scenarios: {duplicate_scenarios}")
     seen = set()
@@ -64,9 +70,14 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
     evidence_owners = {}
-    artifact_roles = {entry.get("path"): entry.get("role") for entry in artifacts or [] if isinstance(entry, dict)}
+    artifact_roles = {
+        entry.get("path"): entry.get("role") for entry in artifacts or []
+        if isinstance(entry, dict) and isinstance(entry.get("path"), str)
+    }
     for scenario in scenarios or []:
-        if not isinstance(scenario, dict) or not scenario.get("id") or scenario.get("status") not in {"PASS", "FAIL", "UNRUN", "PENDING"}:
+        if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
+                or not scenario.get("id") or not isinstance(scenario.get("status"), str)
+                or scenario.get("status") not in {"PASS", "FAIL", "UNRUN", "PENDING"}):
             errors.append(f"invalid scenario: {scenario}"); continue
         if scenario["status"] not in {"UNRUN", "PENDING"}:
             evidence = scenario.get("evidence")

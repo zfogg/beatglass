@@ -350,6 +350,20 @@ Each primary navigation tab now updates its tooltip to identify the selected des
 
 The Settings Appearance group now reports its current theme and motion mode as a live group value, keeping the visual preference cluster’s state available before users navigate its individual controls.
 
+The Appearance group tooltip now includes the current theme and motion mode, keeping the grouped settings context synchronized for pointer and keyboard users.
+
+The Appearance group description now carries the same current theme and motion state as its value and tooltip, so assistive technology receives consistent context at group entry.
+
+Theme preview swatches now support Left/Right keyboard navigation while focused, applying the next palette and synchronizing the toolbar selector and persisted preference. This gives the compact preview control a complete keyboard interaction path in addition to direct activation.
+
+Home and End now jump directly to the first and last theme swatches, completing predictable keyboard traversal for the palette preview group while preserving selector and preference synchronization.
+
+Arrow and Home/End palette navigation now moves focus to the newly selected swatch, preventing repeated key presses from operating on a stale delegate and keeping the visible focus ring aligned with the active theme.
+
+The contract checks now cover focus movement for both relative arrow navigation and the Home/End boundary jumps, protecting the complete keyboard palette traversal path.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
+
+The Theme previews group’s accessible description now carries the current palette alongside its selected-swatch guidance, keeping the non-visual group announcement synchronized with the dynamic value and tooltip.

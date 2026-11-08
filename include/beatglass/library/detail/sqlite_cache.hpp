@@ -23,11 +23,15 @@ struct CollectionEntry {
 };
 /** Bounded, case-insensitive name query over indexed entries. */
 /** Case-insensitive name-prefix page; offset is zero-based and limit must be between 1 and 10000. */
-struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; }; /** Search prefixes are limited to 1024 bytes. */
+inline constexpr std::size_t kMaxCollectionSearchBytes = 1024;
+inline constexpr std::size_t kMaxCollectionPageSize = 10000;
+inline constexpr std::size_t kMaxCollectionOffset = static_cast<std::size_t>(0x7fffffffffffffffULL);
+struct CollectionQuery { std::string search; std::size_t offset{}; std::size_t limit{100}; }; /** Search prefixes are limited to kMaxCollectionSearchBytes. */
 /** Return whether a byte length fits SQLite's signed-int binding APIs. */
 bool sqlite_length_representable(std::size_t size) noexcept;
 /** Maximum serialized analysis result accepted by the provisional cache. */
 inline constexpr std::size_t kMaxCachedResultBytes = 8u * 1024u * 1024u;
+inline constexpr std::size_t kMaxRetryableRuns = 10000;
 /** Provisional caller-supplied cache identity. The caller must establish a validated content hash and stable algorithm/configuration versions. */
 struct CacheKey {
   /** Validated content identity. */ std::string content;
@@ -52,7 +56,7 @@ public:
   /** Close the connection. */ ~SqliteCache();
   SqliteCache(const SqliteCache&) = delete;
   SqliteCache& operator=(const SqliteCache&) = delete;
-  /** Insert or replace one index row on the worker; throws on empty, embedded-NUL, or oversized metadata and storage errors. Does not touch the source file. */
+  /** Insert or replace one index row on the worker; throws on invalid text or unrepresentable size metadata and storage errors. Does not touch the source file. */
   void put_entry(const CollectionEntry& entry);
   /** Remove only the index row; rejects an empty or embedded-NUL path and returns whether a row existed. Never removes a source file. */
   bool remove_entry(const std::string& path);

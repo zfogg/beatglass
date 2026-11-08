@@ -43,6 +43,54 @@ class EvidenceBundleTest(unittest.TestCase):
             errors = module.verify(root, manifest)
             self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
 
+    def test_scenario_id_must_be_hashable_string(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0] = {"id": ["capture"], "status": "PENDING"}
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": "capture"}],
+                    "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid scenario" in error for error in errors))
+            self.assertTrue(any("missing required scenarios" in error for error in errors))
+
+    def test_repeated_structured_scenario_ids_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0] = {"id": ["malformed"], "status": "PENDING"}
+            scenarios[1] = {"id": ["malformed"], "status": "PENDING"}
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": "capture"}],
+                    "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertGreaterEqual(sum("invalid scenario" in error for error in errors), 2)
+
+    def test_structured_artifact_path_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": ["capture.txt"], "sha256": "0" * 64, "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
+
+    def test_structured_scenario_status_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0] = {"id": "capture", "status": ["PENDING"]}
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": "capture"}],
+                    "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid scenario" in error for error in errors))
+
     def test_pending_scenario_is_allowed_without_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
@@ -322,6 +370,16 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
             result = readiness.report(status, bundles)
             self.assertEqual(result["platforms"][0]["invalid_scenarios"], ["capture"])
+
+    def test_readiness_malformed_scenario_inventory_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); bundles = root / "bundles"; (bundles / "windows").mkdir(parents=True)
+            status = root / "status.md"; status.write_text("| Windows | prep | gates |\n", encoding="utf-8")
+            data = manifest({"path": "capture.txt", "sha256": "0" * 64})
+            data["scenarios"] = [{"id": ["capture"], "status": ["PASS"]}]
+            (bundles / "windows" / "manifest.json").write_text(json.dumps(data), encoding="utf-8")
+            result = readiness.report(status, bundles)
+            self.assertTrue(result["platforms"][0]["invalid_scenarios"])
 
     def test_readiness_aggregates_required_scenario_summary(self):
         with tempfile.TemporaryDirectory() as tmp:

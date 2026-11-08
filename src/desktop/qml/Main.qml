@@ -369,7 +369,7 @@ ApplicationWindow {
                 Accessible.name: "Theme previews"
                 Accessible.value: window.selectedTheme
                 Accessible.role: Accessible.Grouping
-                Accessible.description: "Choose a color theme preview; the selected swatch is marked as selected."
+                Accessible.description: "Choose a color theme preview; the selected swatch is marked as selected. Current theme: " + window.selectedTheme + "."
                 ToolTip.text: "Theme preview choices; current theme: " + window.selectedTheme
                 Repeater {
                     model: window.themeNames.length
@@ -408,6 +408,41 @@ ApplicationWindow {
                                 border.color: window.themeAccentColors[index]
                                 visible: themePreviewButton.activeFocus
                             }
+                        }
+                        Keys.onLeftPressed: {
+                            const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length
+                            window.selectedThemeIndex = nextIndex
+                            window.selectedTheme = window.themeNames[nextIndex]
+                            themeSelector.currentIndex = nextIndex
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
+                            themePreviews.children[nextIndex].forceActiveFocus()
+                            event.accepted = true
+                        }
+                        Keys.onRightPressed: {
+                            const nextIndex = (index + 1) % window.themeNames.length
+                            window.selectedThemeIndex = nextIndex
+                            window.selectedTheme = window.themeNames[nextIndex]
+                            themeSelector.currentIndex = nextIndex
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
+                            themePreviews.children[nextIndex].forceActiveFocus()
+                            event.accepted = true
+                        }
+                        Keys.onHomePressed: {
+                            window.selectedThemeIndex = 0
+                            window.selectedTheme = window.themeNames[0]
+                            themeSelector.currentIndex = 0
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = 0
+                            themePreviews.children[0].forceActiveFocus()
+                            event.accepted = true
+                        }
+                        Keys.onEndPressed: {
+                            const lastIndex = window.themeNames.length - 1
+                            window.selectedThemeIndex = lastIndex
+                            window.selectedTheme = window.themeNames[lastIndex]
+                            themeSelector.currentIndex = lastIndex
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = lastIndex
+                            themePreviews.children[lastIndex].forceActiveFocus()
+                            event.accepted = true
                         }
                         onClicked: {
                             window.selectedThemeIndex = index
@@ -1350,8 +1385,8 @@ ApplicationWindow {
                     Accessible.name: "Appearance settings"
                     Accessible.value: window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Choose the color theme and motion preference for the desktop."
-                    ToolTip.text: "Configure theme and motion preferences"
+                    Accessible.description: "Choose the color theme and motion preference for the desktop. Current settings: " + window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion") + "."
+                    ToolTip.text: "Configure theme and motion preferences; current: " + window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion")
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8

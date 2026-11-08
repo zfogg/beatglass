@@ -86,17 +86,20 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                                           for field in verifier.REQUIRED_PROVENANCE)
                 missing_provenance = [field for field in verifier.REQUIRED_PROVENANCE
                                       if not isinstance(data.get(field), str) or not data[field].strip()]
-                scenario_ids = {item.get("id") for item in data.get("scenarios", []) if isinstance(item, dict)}
+                scenario_ids = {item.get("id") for item in data.get("scenarios", [])
+                                if isinstance(item, dict) and isinstance(item.get("id"), str)}
                 missing_scenarios = sorted(verifier.REQUIRED_SCENARIOS - scenario_ids)
                 invalid_scenarios = [item.get("id") if isinstance(item, dict) else str(item)
                                      for item in data.get("scenarios", [])
-                                     if not isinstance(item, dict) or item.get("status") not in {"PASS", "FAIL", "UNRUN"}]
+                                     if (not isinstance(item, dict) or not isinstance(item.get("status"), str)
+                                         or item.get("status") not in {"PASS", "FAIL", "UNRUN"})]
                 errors = [f"{platform}: {error}" for error in verifier.verify(bundle, manifest)]
                 if str(data.get("platform", "")).lower() != platform:
                     errors.append(f"{platform}: manifest platform does not match status row")
                 identity_failures = identity_errors(data, max_age_hours)
                 errors.extend(f"{platform}: {error}" for error in identity_failures)
-                scenario_ids = [item.get("id") for item in data.get("scenarios", []) if isinstance(item, dict)]
+                scenario_ids = [item.get("id") for item in data.get("scenarios", [])
+                                if isinstance(item, dict) and isinstance(item.get("id"), str)]
                 if len(scenario_ids) != len(set(scenario_ids)):
                     errors.append(f"{platform}: duplicate scenario id in manifest")
                 retained = len(data.get("artifacts", []))
@@ -123,8 +126,9 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                     [{"id": item.get("id"), "status": item.get("status"), "evidence": item.get("evidence")}
                      for item in data.get("scenarios", []) if isinstance(item, dict)],
                     key=lambda item: str(item.get("id", "")))
-                scenario_status_counts = dict(sorted(Counter(item["status"] for item in scenario_inventory).items()))
-                scenario_status_by_id = {item.get("id"): item.get("status") for item in scenario_inventory}
+                scenario_status_counts = dict(sorted(Counter(str(item["status"]) for item in scenario_inventory).items()))
+                scenario_status_by_id = {item.get("id"): item.get("status") for item in scenario_inventory
+                                         if isinstance(item.get("id"), str)}
                 unpassed_scenarios = sorted(
                     scenario_id for scenario_id in verifier.REQUIRED_SCENARIOS
                     if scenario_status_by_id.get(scenario_id) != "PASS")
