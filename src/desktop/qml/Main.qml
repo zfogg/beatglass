@@ -128,6 +128,18 @@ ApplicationWindow {
                 Accessible.name: "Reduce motion"
                 onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
             }
+            Button {
+                objectName: "resetAppearance"
+                text: "Reset appearance"
+                Accessible.name: "Reset appearance settings"
+                ToolTip.text: "Restore the default theme and motion setting"
+                onClicked: {
+                    if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
+                    window.selectedThemeIndex = 0
+                    window.selectedTheme = window.themeNames[0]
+                    themeSelector.currentIndex = 0
+                }
+            }
             Row {
                 id: themePreviews
                 objectName: "themePreviews"
