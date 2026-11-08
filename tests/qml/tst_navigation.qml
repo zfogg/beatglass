@@ -747,6 +747,7 @@ TestCase {
          if (Qt.platform.os === "osx") verify(guidance.text.indexOf("14.2") >= 0)
         compare(findChild(app, "settingsStatus").text, "Settings are saved for this desktop profile. User audio files are never modified.")
         compare(findChild(app, "resetAppearance").ToolTip.text, "Restore Light theme and full motion")
+        verify(findChild(app, "resetAppearance").activeFocusOnTab)
         let appearance = findChild(app, "appearanceState")
         verify(appearance !== null)
         compare(appearance.text, "Theme: Light · Motion: full")
@@ -779,6 +780,7 @@ TestCase {
             verify(preview.Accessible.name.length > 0)
             verify(preview.Accessible.description.indexOf("Select " + app.themeNames[i] + " theme;") === 0)
             verify(preview.checkable)
+            verify(preview.activeFocusOnTab)
             compare(preview.Accessible.role, Accessible.RadioButton)
         }
         app.destroy()
