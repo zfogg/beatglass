@@ -1176,12 +1176,12 @@ ApplicationWindow {
                     objectName: "clearVisualizationSelection"
                     activeFocusOnTab: true
                     text: "Clear position"
-                    ToolTip.text: "Clear the selected waveform or FFT position"
+                    ToolTip.text: enabled ? "Clear the selected waveform or FFT position; Escape, Enter, Space, right-click, or double-click also clear" : "No visualization position selected"
                     enabled: visualizationCanvas.selectedPosition >= 0
                     Accessible.name: "Clear visualization position"
                     Accessible.value: enabled ? "available" : "no position selected"
                     Accessible.role: Accessible.Button
-                    Accessible.description: "Remove the selected waveform or FFT position"
+                    Accessible.description: "Remove the selected waveform or FFT position. Escape, Enter, Space, right-click, and double-click provide equivalent recovery paths."
                     onClicked: {
                         window.clearVisualizationPositionAndFocus()
                     }
