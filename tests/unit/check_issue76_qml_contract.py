@@ -393,6 +393,7 @@ def main() -> int:
         "theme preview group dynamic description": "Accessible.description: \"Choose a color theme preview; the selected swatch is marked as selected. Current theme: \" + window.selectedTheme",
         "appearance group dynamic description": "Accessible.description: \"Choose the color theme and motion preference for the desktop. Current settings: \" + window.selectedTheme",
         "theme preview keyboard navigation": "Keys.onLeftPressed: {\n                            const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length",
+        "theme preview home end navigation": "Keys.onHomePressed: {\n                            window.selectedThemeIndex = 0",
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }

@@ -425,6 +425,21 @@ ApplicationWindow {
                             if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
                             event.accepted = true
                         }
+                        Keys.onHomePressed: {
+                            window.selectedThemeIndex = 0
+                            window.selectedTheme = window.themeNames[0]
+                            themeSelector.currentIndex = 0
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = 0
+                            event.accepted = true
+                        }
+                        Keys.onEndPressed: {
+                            const lastIndex = window.themeNames.length - 1
+                            window.selectedThemeIndex = lastIndex
+                            window.selectedTheme = window.themeNames[lastIndex]
+                            themeSelector.currentIndex = lastIndex
+                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = lastIndex
+                            event.accepted = true
+                        }
                         onClicked: {
                             window.selectedThemeIndex = index
                             window.selectedTheme = window.themeNames[index]
