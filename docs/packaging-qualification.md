@@ -4,6 +4,13 @@ Beatglass does not currently claim a distributable installer. A native
 qualification build must nevertheless retain enough evidence to distinguish a
 working development tree from a package candidate.
 
+Packaging metadata is opt-in. Configure a desktop build with
+`-DBEATGLASS_ENABLE_PACKAGING=ON`, run `cmake --install <build> --prefix
+<staging>`, and use `cpack --config <build>/CPackConfig.cmake` to produce the
+platform archive. The install step is intentionally limited to the desktop
+target; dependency deployment, signing, notarization, and clean-machine tests
+remain required gates below.
+
 ## Opt-in package metadata
 
 Release candidates can generate a package archive with CPack by configuring
