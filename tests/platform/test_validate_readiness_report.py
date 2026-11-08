@@ -1,4 +1,7 @@
 import importlib.util
+import json
+import shutil
+import tempfile
 from pathlib import Path
 import unittest
 
@@ -76,3 +79,16 @@ class ReadinessReportContractTest(unittest.TestCase):
         report["platforms"][0]["scenario_evidence_sha256"] = []
         errors = "\n".join(module.validate_retained_files(report, root))
         self.assertIn("scenario evidence hashes must be an object", errors)
+
+    def test_missing_scenario_evidence_is_rejected(self):
+        source = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "bundles"
+            shutil.copytree(source, root)
+            manifest_path = root / "windows" / "manifest.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["scenarios"][0]["evidence"] = "missing-evidence.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            report = json.loads((root / "readiness-report.json").read_text(encoding="utf-8"))
+            errors = chr(10).join(module.validate_retained_files(report, root))
+            self.assertIn("retained scenario evidence is missing", errors)
