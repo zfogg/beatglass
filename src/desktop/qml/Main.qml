@@ -1517,7 +1517,9 @@ ApplicationWindow {
                                     : "Discard saved retryable analysis run"
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
                                 ToolTip.text: "Discard the selected saved analysis run"
-                                Accessible.description: "Remove the selected retryable run record without touching the source audio file."
+                                Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
+                                    ? "Open confirmation to remove retry record " + storageRecovery.selectedRunId + ". The source audio file is never changed."
+                                    : "Open confirmation to remove the selected retryable run record. The source audio file is never changed."
                                 onClicked: discardRecoveryDialog.open()
                             }
                             Button {
