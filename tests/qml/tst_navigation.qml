@@ -157,6 +157,13 @@ TestCase {
         compare(details.text, "Select an audio file to inspect its read-only details.")
         app.destroy()
     }
+    function test_analysisControlsAreAccessible() {
+        let app = shell.createObject(null)
+        compare(findChild(app, "startAnalysis").Accessible.description, "Start analysis for the selected source")
+        compare(findChild(app, "cancelAnalysis").Accessible.description, "Cancel the running analysis job")
+        compare(findChild(app, "retryAnalysis").Accessible.description, "Retry cancelled or failed analysis")
+        app.destroy()
+    }
     function test_settingsExposeUnavailableAudioStateAndGuidance() {
         let app = shell.createObject(null)
         let tabs = findChild(app, "navigation")
