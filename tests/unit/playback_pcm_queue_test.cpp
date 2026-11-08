@@ -2,7 +2,12 @@
 #include "beatglass/capture/playback_pcm_queue.hpp"
 #include <array>
 #include <limits>
+#include <limits>
 using namespace beatglass;
+TEST_CASE("playback queue rejects overflowing frame ranges") {
+  PlaybackPcmQueue q(2, 2); std::array<float,1> samples{1};
+  AudioBlock source{{44100,1},1,std::numeric_limits<std::uint64_t>::max(),0,false,samples}; CHECK_FALSE(q.push(source)); CHECK(q.size()==0);
+}
 TEST_CASE("playback queue rejects blocks without a source epoch") {
   PlaybackPcmQueue q(2, 2); std::array<float,1> samples{1};
   AudioBlock source{{44100,1},0,0,0,false,samples}; CHECK_FALSE(q.push(source)); CHECK(q.size()==0);
