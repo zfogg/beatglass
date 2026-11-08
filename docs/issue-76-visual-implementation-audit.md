@@ -164,6 +164,8 @@ The overlay header, native playback state, endpoint-empty message, and platform 
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
 
+Library choose-folder, parent-folder, search, sort-order, and empty-state chooser controls are now explicitly asserted in the static visual contract.
+
 Library folder-path, browser-list, empty-state container, and empty-state message surfaces are now explicitly asserted in the static visual contract.
 
 Overlay interaction mode, opacity value, and display status are now explicitly covered in the static visual contract for live presentation state.
