@@ -3,6 +3,7 @@
 #include "beatglass/library/analysis_operation.hpp"
 #include "beatglass/library/analysis_commit.hpp"
 #include "beatglass/library/analysis_admission.hpp"
+#include "beatglass/library/storage_owner.hpp"
 TEST_CASE("analysis operation retains source identity and bounded callback contract") { beatglass::library::AnalysisOperation op; op.source.size_bytes=12; op.identity.mode="offline"; op.serialize=[] { return std::string("result"); }; REQUIRE(op.serialize()=="result"); REQUIRE(op.identity.mode=="offline"); }
 TEST_CASE("analysis source identity includes a selected catalog path") {
   beatglass::library::AnalysisOperation op;
@@ -29,6 +30,15 @@ TEST_CASE("decoder-only publication uses the stop-aware decoder and preserves ru
     cache.begin("decode-run", key);
     REQUIRE(beatglass::library::publish_operation(cache, "decode-run", op, {}) == beatglass::library_detail::Publish::committed);
     std::string result; REQUIRE(cache.find(key, result)); CHECK(result == "decoded");
+}
+TEST_CASE("storage owner exposes decoder publication boundary") {
+    beatglass::library::StorageOwner owner;
+    beatglass::library::AnalysisOperation operation;
+    operation.source.path = "track.wav"; operation.source.content_hash = "sha256:closed";
+    operation.identity = {"sha256:closed", "engine", "config", "offline"};
+    operation.decode = [](std::stop_token, const auto&) { return std::string("decoded"); };
+    operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+    CHECK(owner.publish_analysis("closed-run", operation) == beatglass::library_detail::Publish::error);
 }
 TEST_CASE("analysis cache reuse checks identity before running work") {
     beatglass::library_detail::SqliteCache cache(":memory:");
