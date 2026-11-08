@@ -417,7 +417,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; onClicked: folderPicker.open() }
+                    Button { text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: folderPicker.open() }
                     Button {
                         text: "Up"; objectName: "parentFolder"
                         activeFocusOnTab: true
@@ -514,7 +514,7 @@ ApplicationWindow {
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
+                            Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; ToolTip.text: "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
                             SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
                             SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
                             Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096) }
