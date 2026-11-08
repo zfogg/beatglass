@@ -77,7 +77,7 @@ For automated review, pair `--review-json review.json --consume-review --decisio
 
 The standalone decision consumer is `tests/platform/review_release_decision.py <bundle-root> <decision.json>` for already-retained canonical bundles.
 
-Release automation may promote only an accepted bundle with `tests/platform/promote_review_bundle.py <bundle-root> <release-root>`. The command refuses `PENDING` decisions and leaves the release destination untouched.
+Release automation may promote only an accepted bundle with `tests/platform/promote_review_bundle.py <bundle-root> <release-root>`. The command refuses `PENDING` decisions, leaves the release destination untouched, and writes `release-manifest.json` with the promoted report and packet SHA-256 values.
 
 ## Qt 6.8.3 prebuilt desktop preset
 

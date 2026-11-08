@@ -1,6 +1,8 @@
 """Promote a retained review bundle only after an accepted release decision."""
 import argparse
+import hashlib
 import importlib.util
+import json
 import shutil
 from pathlib import Path
 
@@ -18,6 +20,13 @@ def promote(source: Path, destination: Path) -> tuple[bool, list[str]]:
     try:
         shutil.copyfile(source / "readiness-report.json", destination / "readiness-report.json")
         shutil.copyfile(source / "review.json", destination / "review.json")
+        manifest = {
+            "release_manifest_schema": 1,
+            "decision": "ACCEPTED",
+            "report_sha256": hashlib.sha256((destination / "readiness-report.json").read_bytes()).hexdigest(),
+            "review_packet_sha256": hashlib.sha256((destination / "review.json").read_bytes()).hexdigest(),
+        }
+        (destination / "release-manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     except OSError as error:
         return False, [f"unable to promote review bundle: {error}"]
     return True, []
