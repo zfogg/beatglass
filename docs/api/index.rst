@@ -83,7 +83,8 @@ reference.
    ../../design/v1/DESIGN.md
    ../../design/v1/STATES.md
    ../../design/v1/REVIEW.md
-   ../experiments.md
+   ../essentia-spike.md
+   ../tonal-experiment.md
    ../issue-76-visual-implementation-audit.md
 
 .. toctree::
@@ -202,13 +203,19 @@ Desktop application internals
    Destroy the private native adapter on the GUI thread. It never owns the Qt
    window passed to its operations.
 
-Experimental internals
-----------------------
+Experimental tonal worker internals
+-----------------------------------
 
 .. cpp:autodoc:: lib/core/tonal_tracker.hpp
 
 
+Experimental virtual file I/O
+-----------------------------
+
 .. cpp:autodoc:: lib/capture/file/virtual_io.hpp
+
+Experimental beat-event worker
+------------------------------
 
 .. cpp:autodoc:: lib/core/beat_tracker.hpp
 
