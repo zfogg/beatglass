@@ -20,6 +20,10 @@ required = {
     "analysis result property": 'Q_PROPERTY(QString analysisResult READ analysisResult',
     "analysis cancel": 'Q_INVOKABLE void cancelAnalysis()',
     "analysis retry": 'Q_INVOKABLE void retryAnalysis()',
+    "admission properties": 'Q_PROPERTY(bool analysisReserved READ analysisReserved NOTIFY analysisAdmissionChanged)',
+    "admission invokable": 'Q_INVOKABLE void admitAnalysis',
+    "worker admission": 'coordinator_.storage().admit_analysis',
+    "admission signal": 'void admitted(bool reserved, QString cachedResult);',
 }
 haystack = header + source + qml
 missing = [name for name, marker in required.items() if marker not in haystack]
