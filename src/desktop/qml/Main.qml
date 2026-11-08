@@ -840,7 +840,7 @@ ApplicationWindow {
                     Label { text: "Display" }
                     ComboBox {
                         objectName: "overlayDisplay"
-                    Accessible.name: "Overlay display"; Accessible.description: "Choose the display where the overlay is shown"
+                    Accessible.name: "Overlay display"; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable")
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
