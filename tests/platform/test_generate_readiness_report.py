@@ -20,6 +20,7 @@ class GenerateReadinessReportTest(unittest.TestCase):
         self.assertTrue(report["native_qualification_required"])
         self.assertEqual({r["platform"] for r in report["platforms"]}, set(module.PLATFORMS))
         self.assertTrue(all(a["hash_valid"] for r in report["platforms"] for a in r["artifact_inventory"]))
+        self.assertTrue(all(row["commit"] and row["captured_at"] and row["environment"] for row in report["platforms"]))
 
     def test_cli_creates_nested_output_directory(self):
         root = Path(__file__).parent / "fixtures/readiness-bundles"

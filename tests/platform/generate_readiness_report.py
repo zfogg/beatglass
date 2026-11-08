@@ -95,6 +95,9 @@ def build_report(root: Path) -> dict:
                      "qualification_output_bytes": output_path.stat().st_size if output_path.is_file() else -1,
                      "scenario_evidence_sha256": evidence_hashes,
                      "manifest_platform": manifest.get("platform"),
+                     "commit": manifest.get("commit", ""),
+                     "captured_at": manifest.get("captured_at", ""),
+                     "environment": manifest.get("environment", ""),
                      "provenance_complete": all(manifest.get(k) for k in ("platform", "commit", "captured_at", "environment")),
                      "errors": errors})
     status = [{"platform": p, "status": "experimental"} for p in PLATFORMS]
