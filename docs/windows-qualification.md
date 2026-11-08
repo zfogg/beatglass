@@ -1,5 +1,8 @@
 # Windows output-monitoring qualification checklist
 
+See [the shared native evidence contract](native-qualification-evidence.md) for
+the transferable bundle schema used by Windows and macOS.
+
 This checklist is required before claiming Windows DJ support. CI and offscreen Qt runs do not qualify native capture or desktop behavior.
 
 The runner also writes `qualification-manifest.txt` with required build identity
