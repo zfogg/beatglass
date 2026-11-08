@@ -3,6 +3,15 @@ project(beatglass VERSION 0.1.0 LANGUAGES C CXX)
 include(CTest)
 
 if(BUILD_TESTING)
+  find_program(BEATGLASS_BASH bash)
+  if(BEATGLASS_BASH)
+    add_test(NAME macos_qualification_script_syntax
+      COMMAND "${BEATGLASS_BASH}" -n
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/macos/run_qualification.sh")
+    add_test(NAME macos_qualification_verifier_syntax
+      COMMAND "${BEATGLASS_BASH}" -n
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/macos/verify_qualification_artifacts.sh")
+  endif()
   if(WIN32)
     find_program(BEATGLASS_PWSH pwsh)
     if(BEATGLASS_PWSH)
