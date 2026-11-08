@@ -235,6 +235,10 @@ ApplicationWindow {
         target: window.playbackBridge
         function onSourceChanged() { window.clearVisualizationForCaptureState() }
         function onEpochChanged() { window.clearVisualizationForCaptureState() }
+        function onStateChanged() {
+            if (window.playbackBridge.state === "Stopped")
+                window.clearVisualizationForCaptureState()
+        }
     }
 
     FolderListModel {
