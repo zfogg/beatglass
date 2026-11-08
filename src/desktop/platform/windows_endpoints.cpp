@@ -82,4 +82,5 @@ EndpointResult enumerate_render_endpoints() {
   }
 }
 bool contains_render_endpoint(const EndpointResult& snapshot, const std::string& id) noexcept { if (id.empty() || !snapshot.error.empty()) return false; for (const auto& endpoint : snapshot.endpoints) if (endpoint.id == id) return true; return false; }
+SelectionResult select_render_endpoint(const EndpointResult& snapshot, const std::string& id) noexcept { if (!snapshot.error.empty()) return SelectionResult::discovery_failed; return contains_render_endpoint(snapshot, id) ? SelectionResult::accepted : SelectionResult::invalid_id; }
 }

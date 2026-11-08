@@ -20,4 +20,7 @@ struct EndpointResult {
 EndpointResult enumerate_render_endpoints();
 /** Validate a user-selected opaque endpoint ID against one discovery snapshot. */
 bool contains_render_endpoint(const EndpointResult& snapshot, const std::string& id) noexcept;
+enum class SelectionResult { accepted, invalid_id, discovery_failed };
+/** Validate a requested endpoint against the latest snapshot; accepted means the caller must reacquire capture. */
+SelectionResult select_render_endpoint(const EndpointResult& snapshot, const std::string& id) noexcept;
 }
