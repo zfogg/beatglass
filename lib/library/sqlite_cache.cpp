@@ -127,7 +127,7 @@ public:
     Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE path=?"); bind(s.p,1,path); const int rc=sqlite3_step(s.p); if(rc==SQLITE_DONE)return std::nullopt; if(rc!=SQLITE_ROW)throw std::runtime_error(sqlite3_errmsg(db_)); return read_entry(s.p);
   }
   std::vector<CollectionEntry> entries(const CollectionQuery& q, std::stop_token stop) {
-    if (q.limit == 0 || q.limit > 10000) throw std::invalid_argument("invalid collection page size");
+    if (q.limit == 0 || q.limit > kMaxCollectionPageSize) throw std::invalid_argument("invalid collection page size");
     if (q.search.size() > kMaxCollectionSearchBytes || q.search.find('\0') != std::string::npos || !sqlite_length_representable(q.search.size()) ||
         q.offset > static_cast<std::size_t>(std::numeric_limits<sqlite3_int64>::max()))
       throw std::invalid_argument("invalid collection query");

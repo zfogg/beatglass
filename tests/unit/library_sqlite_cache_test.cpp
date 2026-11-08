@@ -200,6 +200,11 @@ TEST_CASE("SQLite catalog prefix queries bound search input") {
   CHECK(kMaxCollectionSearchBytes == 1024);
   CHECK_THROWS_AS(cache.entries({std::string(kMaxCollectionSearchBytes + 1, 'a'), 0, 10}), std::invalid_argument);
 }
+TEST_CASE("SQLite collection page size exposes its API bound") {
+  SqliteCache cache(":memory:");
+  CHECK(kMaxCollectionPageSize == 10000);
+  CHECK_THROWS_AS(cache.entries({"", 0, kMaxCollectionPageSize + 1}), std::invalid_argument);
+}
 TEST_CASE("SQLite collection sizes are checked before signed binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "hash",
