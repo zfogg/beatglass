@@ -24,7 +24,7 @@ void validate_collection_entry(const CollectionEntry& e) {
 }
 void validate_key(const CacheKey& key) {
   if (key.content.empty() || key.content.size() > kMaxCacheContentIdentityBytes || key.engine.empty() || key.engine.size() > kMaxCacheEngineVersionBytes ||
-      key.config.empty() || key.config.size() > 4096 || key.mode.empty() || key.mode.size() > 128 ||
+      key.config.empty() || key.config.size() > kMaxCacheConfigurationBytes || key.mode.empty() || key.mode.size() > 128 ||
       key.content.find('\0') != std::string::npos || key.engine.find('\0') != std::string::npos ||
       key.config.find('\0') != std::string::npos || key.mode.find('\0') != std::string::npos)
     throw std::invalid_argument("invalid cache identity");
