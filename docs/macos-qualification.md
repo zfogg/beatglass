@@ -29,10 +29,21 @@ Homebrew repository with:
 brew install aubio
 ```
 
+On Intel Macs, current Homebrew may have no aubio dependency bottles and can
+build NumPy and aubio from source. The install can therefore take many
+minutes; verify completion with `brew list --versions aubio` and locate the
+header with `find "$(brew --prefix aubio)" -name aubio.h` before rerunning the
+qualification script. Do not treat an active Homebrew build or a formula
+prefix printed by `brew --prefix aubio` as proof that aubio is installed.
+
 The runner performs this header preflight and stops with the same remediation
 if `aubio/aubio.h` is absent. A missing header is a dependency blocker, not a
 native qualification result; record the failed command and rerun after the
 dependency is installed.
+
+The runner enables `BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` because the shared
+test target includes storage tests that require the prototype library. Without
+that option, configuration can succeed but the test executable fails to link.
 
 Set `BEATGLASS_MACOS_PERMISSION_RESULT=allowed` or `denied` after observing the System Settings prompt/revocation; `allowed` additionally requires `BEATGLASS_MACOS_TAP_UID`. Omit it to record `UNRUN` without changing permissions.
 
