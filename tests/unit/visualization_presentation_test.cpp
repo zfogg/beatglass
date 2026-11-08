@@ -6,7 +6,7 @@ using namespace beatglass;
 TEST_CASE("visualization presentation accepts only current newer revisions") {
   VisualizationPresentation presentation;
   VisualizationFrame frame;
-  frame.epoch = 4; frame.first_frame = 1024; frame.end_frame = 2048;
+  frame.epoch = 4; frame.sample_rate = 48000; frame.first_frame = 1024; frame.end_frame = 2048;
   const auto generation = presentation.generation();
   REQUIRE(presentation.accept(generation, 1, frame));
   REQUIRE(presentation.current());
@@ -18,6 +18,7 @@ TEST_CASE("visualization presentation accepts only current newer revisions") {
 TEST_CASE("visualization presentation clear removes stale painted frame") {
   VisualizationPresentation presentation;
   VisualizationFrame frame;
+  frame.epoch = 1; frame.sample_rate = 48000; frame.end_frame = 1;
   const auto old_generation = presentation.generation();
   REQUIRE(presentation.accept(old_generation, 1, frame));
   presentation.clear();
