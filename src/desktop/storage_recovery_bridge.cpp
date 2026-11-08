@@ -128,6 +128,10 @@ void StorageRecoveryBridge::invalidateCached(QString content, QString engine, QS
 void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
 }
+void StorageRecoveryBridge::reanalyze(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
+  invalidateCached(contentHash, engine, configuration, mode);
+  submitAnalysis(std::move(runId), std::move(path), std::move(contentHash), std::move(engine), std::move(configuration), std::move(mode));
+}
 void StorageRecoveryBridge::cancelAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); }
 void StorageRecoveryBridge::retryAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); }
 void StorageRecoveryBridge::admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {

@@ -1149,6 +1149,15 @@ ApplicationWindow {
                                     Accessible.description: "Remove this completed cache identity so the next analysis runs again. Source files are not changed."
                                     onClicked: storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
                                 }
+                                Button {
+                                    objectName: "reanalyzeInvalidatedCache"
+                                    text: "Run reanalysis"
+                                    visible: storageRecovery.analysisStatus === "Analysis idle · reanalysis required"
+                                    enabled: visible && cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && window.selectedAudioUrl.toLocalFile() !== ""
+                                    Accessible.name: "Run fresh analysis"
+                                    Accessible.description: "Invalidate this identity and admit fresh analysis work to the queue."
+                                    onClicked: storageRecovery.reanalyze("reanalyze-" + cacheContent.text, window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
+                                }
                             }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
