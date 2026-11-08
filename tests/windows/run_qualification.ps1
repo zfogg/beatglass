@@ -82,6 +82,17 @@ try {
   }
   $hashLines | Set-Content -LiteralPath $manifestPath -Encoding utf8
   "Artifact SHA-256 manifest: $manifestPath"
+  $evidencePath = Join-Path $OutputDirectory "native-playback-evidence.json"
+  $evidence = @(
+    @{ case = "endpoint-selection-start"; status = "UNRUN"; device = ""; observed = ""; log = ""; screenshot = "" },
+    @{ case = "pause-resume"; status = "UNRUN"; device = ""; observed = ""; log = ""; screenshot = "" },
+    @{ case = "seek-epoch-retirement"; status = "UNRUN"; device = ""; observed = ""; log = ""; screenshot = "" },
+    @{ case = "endpoint-disappearance-recovery"; status = "UNRUN"; device = ""; observed = ""; log = ""; screenshot = "" },
+    @{ case = "retry-native-diagnostic"; status = "UNRUN"; device = ""; observed = ""; log = ""; screenshot = "" },
+    @{ case = "stop-cleanup"; status = "UNRUN"; device = ""; observed = ""; log = ""; screenshot = "" }
+  )
+  $evidence | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $evidencePath -Encoding utf8
+  "Native playback evidence template: $evidencePath"
   "UNRUN: native WASAPI routing, endpoint removal/recovery, overlay, DPI, and interactive UI cases require a logged-in Windows session."
 }
 finally {
