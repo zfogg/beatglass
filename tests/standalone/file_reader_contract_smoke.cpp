@@ -60,6 +60,12 @@ int main() {
     reader.seek(0, 12);
     const auto replayed = reader.read(samples);
     assert(replayed.status == FileReadStatus::data && replayed.block.first_frame == 0 && replayed.block.epoch == 12);
+    bool reused_epoch_rejected = false;
+    try { reader.seek(1, 12); } catch (const std::invalid_argument&) { reused_epoch_rejected = true; }
+    assert(reused_epoch_rejected);
+    reader.seek(1, 13);
+    const auto reseeked = reader.read(samples);
+    assert(reseeked.status == FileReadStatus::data && reseeked.block.first_frame == 1 && reseeked.block.epoch == 13);
   }
   { std::fstream mutate(wav, std::ios::in | std::ios::out | std::ios::binary); mutate.seekp(44); mutate.put('\1'); }
   { FileReader reader(wav, 8); assert(reader.source_changed()); }
