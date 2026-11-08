@@ -68,6 +68,7 @@ signals:
   void runsChanged(QStringList ids, QStringList details);
   void cached(bool hit, QString result);
   void analysis(QString status);
+  void analysisProgress(qulonglong frames);
   void analysisResult(QString result);
   void admitted(bool reserved, QString cachedResult);
 private:
@@ -75,6 +76,7 @@ private:
     if (!handle_) return;
     using beatglass::library_detail::TrackedState;
     const auto state = handle_->state();
+    emit analysisProgress(static_cast<qulonglong>(handle_->frames()));
     const auto status = state == TrackedState::queued ? "Analysis queued" : state == TrackedState::running ? "Analysis running" : state == TrackedState::completed ? "Analysis complete" : state == TrackedState::cancelled ? "Analysis cancelled" : "Analysis failed";
     emit analysis(QString::fromLatin1(status));
     if (state == TrackedState::queued || state == TrackedState::running) QTimer::singleShot(50, this, &Worker::pollAnalysis); else refresh();
@@ -103,6 +105,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; emit analysisStatusChanged(); }, Qt::QueuedConnection);
+  connect(worker_, &Worker::analysisProgress, this, [this](qulonglong frames) { analysisFrames_ = frames; emit analysisProgressChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisResult, this, [this](const QString& text) { analysisResult_ = text; emit analysisResultChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; emit analysisAdmissionChanged(); }, Qt::QueuedConnection);
   workerThread_.start();

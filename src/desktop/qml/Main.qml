@@ -1066,6 +1066,13 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "persistedAnalysisProgress"
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisFrames !== undefined
+                                text: visible ? ("Persisted analysis progress: " + storageRecovery.analysisFrames + " frames") : ""
+                                Accessible.name: "Persisted analysis progress"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "analysisCacheStatus"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.cachedResult !== undefined
                                 text: visible ? (storageRecovery.cacheHit ? "Cached analysis ready" : "No cached analysis for the requested identity") : ""
