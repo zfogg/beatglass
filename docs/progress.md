@@ -1,5 +1,7 @@
 # Progress and handoff
 
+Retry decisions are now explicit: a persisted run is resubmitted only when source path, content identity, engine, configuration, mode, and decoder snapshot are present and compatible; cache hits complete without decoder work; missing or mismatched metadata rejects fail-closed. Local checks are `python tests/unit/check_bridge_resubmit_contract.py`, `python tests/unit/check_retry_evidence_docs.py`, and `git diff --check`. These portable checks do not qualify native codecs, devices, or desktop recovery.
+
 Decoder retry evidence now has a paired handoff expectation: compatible snapshot/identity retries may proceed, while changed or legacy decoder snapshots must reject. Both outcomes need retained commands and diagnostics before native qualification can advance.
 
 Native codec/runtime preparation is now explicit: qualification artifacts must bind decoder snapshot, codec feature configuration, fixture hash, backend/device, build identity, and exact commands. Both successful decode and controlled failure evidence are required; portable tests remain preparation evidence and native gates stay open.
