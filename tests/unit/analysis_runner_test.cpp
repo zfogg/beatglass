@@ -19,3 +19,4 @@ TEST_CASE("analysis runner retains cancellable worker operation") {
   beatglass::library::AnalysisOperation op; op.source.size_bytes=10; op.identity.mode="offline"; op.serialize=[] { return std::string("x"); }; op.verify=[](std::stop_token){ return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match,{}}; };
   auto handle=runner.submit(std::move(op)); REQUIRE(handle); handle->cancel(); REQUIRE((handle->state()==beatglass::library_detail::TrackedState::cancelled || handle->state()==beatglass::library_detail::TrackedState::completed));
 }
+TEST_CASE("analysis operation validity requires serialization and verification callbacks") { auto missing=op(true); missing.serialize={}; CHECK_FALSE(missing.valid()); missing=op(true); missing.verify={}; CHECK_FALSE(missing.valid()); }
