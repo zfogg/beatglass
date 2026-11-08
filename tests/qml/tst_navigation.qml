@@ -113,6 +113,16 @@ TestCase {
         compare(app.selectedThemeIndex, 2)
         app.destroy()
     }
+
+    function test_djStatusAndEstimatesAreAccessible() {
+        let app = shell.createObject(null)
+        let status = findChild(app, "djStatus")
+        let estimates = findChild(app, "djEstimates")
+        verify(status !== null); verify(estimates !== null)
+        compare(status.Accessible.name, "DJ monitoring status")
+        compare(estimates.Accessible.name, "DJ estimates")
+        app.destroy()
+    }
     function test_themePreviewsSelectTheirPalette() {
         let app = shell.createObject(null)
         let previews = findChild(app, "themePreviews")
