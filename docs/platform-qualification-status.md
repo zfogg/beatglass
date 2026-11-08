@@ -108,6 +108,10 @@ cross-checked against each retained manifest (status and evidence path), so a
 report cannot silently describe a different scenario state than the captured
 bundle.
 
+The consumer also requires the complete capture, recovery, output, display,
+playback, and overlay scenario set on every manifest; partial bundles remain
+ineligible for acceptance.
+
 For each scenario with an evidence path, generated rows include `scenario_evidence_sha256`. Verification recomputes those hashes so scenario claims remain tied to retained files rather than mutable paths.
 
 The qualification handoff checker treats `readiness_report_schema: 1`, `exit_gate_status`, and `exit_gate_reason_codes` as required documentation contracts; removing any of these descriptions fails the local handoff check before a platform handoff is accepted.
