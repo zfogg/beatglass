@@ -28,7 +28,7 @@ public:
   OverlayController(QQuickWindow* overlay, QWindow* control, QObject* parent = nullptr, QSettings* settings = nullptr);
   // Documented manually in the API reference due to Hawkmoth destructor parsing.
   ~OverlayController() override;
-  /** Set whole-window opacity, clamped to the range zero through one. */
+  /** Set whole-window opacity, clamped to the visible range 0.2 through one. */
   Q_INVOKABLE void setOpacity(qreal opacity);
   /** Return the current whole-window opacity, or one if the overlay no longer exists. */
   qreal opacity() const;
