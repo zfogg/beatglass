@@ -271,7 +271,7 @@ The complete signed release workflow is `python tests/platform/prepare_release_b
 
 After automation accepts a bundle, a release owner records manual acceptance with `python tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`. The signoff is bound to the decision's report and review-packet hashes and refuses `PENDING`; it is an audit record, not a substitute for native desktop/audio/overlay qualification.
 
-The final review checklist is intentionally ordered: retain the pair, emit the decision, record manual signoff, run the signed preparation workflow, then verify the dual-hash release manifest before publication. Each step remains fail-closed and native qualification remains a separate required gate.
+The final review checklist is intentionally ordered: retain the pair, emit the decision, record manual signoff, run the signed preparation workflow (which retains `signoff.json` beside the release artifacts), then verify the dual-hash release manifest before publication. Each step remains fail-closed and native qualification remains a separate required gate.
 
 The machine consumer is `python tests/platform/consume_review_packet.py <review.json>`. It rejects unsupported packet versions, recorded acceptance errors, and non-`READY` gate state; native qualification remains pending until the packet is backed by reviewed hardware evidence.
 
