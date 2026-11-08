@@ -12,6 +12,8 @@ For every native run, record the OS version, kernel or build number, compiler, Q
 
 Each retained evidence bundle must include `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-playback-evidence.json`, and `native-overlay-evidence.json` where those scenarios apply.
 
+Capture and lifecycle scenarios must additionally retain `native-capture-evidence.json` and `native-recovery-evidence.json` for permission, endpoint-loss, reacquisition, and source-epoch observations.
+
 The shared scenario matrix spans permission, capture, output-device selection, recovery, overlay, fullscreen, DPI, monitor changes, reduced motion, and packaged runtime behavior; each applicable row remains `UNRUN` until its evidence bundle is retained.
 
 Accessibility readiness must separately record reduced-motion behavior, click-through recovery, and keyboard-accessible recovery controls.
