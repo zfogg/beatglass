@@ -33,12 +33,16 @@ command -v shasum >/dev/null 2>&1 || { echo "shasum is required" >&2; exit 1; }
 mapfile -t hash_lines < "$hashes"
 [[ "${#hash_lines[@]}" -eq 3 ]] || { echo "expected exactly three artifact hashes" >&2; exit 1; }
 declare -A seen=()
+expected_artifacts=("build/beatglass-desktop.app/Contents/MacOS/beatglass-desktop" "build/beatglass-coreaudio-smoke.app/Contents/MacOS/beatglass-coreaudio-smoke" "build/beatglass-coreaudio-recovery.app/Contents/MacOS/beatglass-coreaudio-recovery")
+declare -A expected_seen=()
 for line in "${hash_lines[@]}"; do
   [[ "$line" =~ ^([[:xdigit:]]{64})[[:space:]][[:space:]](.+)$ ]] || {
     echo "malformed artifact hash line: $line" >&2; exit 1;
   }
   expected="${BASH_REMATCH[1]}"
   relative="${BASH_REMATCH[2]}"
+  normalized_relative="${relative//\\//}"
+  for expected in "${expected_artifacts[@]}"; do [[ "$normalized_relative" == "$expected" ]] && expected_seen[$expected]=1; done
   [[ "$relative" != /* && "$relative" != *$'\n'* ]] || {
     echo "artifact path must be relative: $relative" >&2; exit 1;
   }
@@ -58,4 +62,5 @@ for line in "${hash_lines[@]}"; do
     echo "hash mismatch for $relative (expected $expected, got $actual)" >&2; exit 1;
   }
 done
+for expected in "${expected_artifacts[@]}"; do [[ -n "${expected_seen[$expected]:-}" ]] || { echo "missing expected artifact: $expected" >&2; exit 1; }; done
 echo "qualification artifact hashes verified: $out_dir"
