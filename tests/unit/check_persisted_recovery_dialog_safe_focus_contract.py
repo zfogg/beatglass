@@ -12,7 +12,7 @@ def main() -> None:
         'standardButtons: Dialog.Ok | Dialog.Cancel',
         'onOpened: { window.announceVisualizationRecovery("Confirm discard for persisted recovery run " + storageRecovery.selectedRunId',
         'standardButton(Dialog.Cancel).forceActiveFocus()',
-        'Accessible.description: "Confirm to remove only the selected retry record. Enter confirms; Escape cancels.',
+        'Accessible.description: "Confirm to remove only the selected retry record.',
         'onRejected: { window.announceVisualizationRecovery("Persisted recovery discard canceled; selected run was kept.")',
         'discardPersistedRecoveryButton.forceActiveFocus()',
     ]
