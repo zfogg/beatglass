@@ -426,6 +426,7 @@ def main() -> int:
         "visualization empty state emphasis": 'color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]',
         "visualization recovery theme": 'objectName: "visualizationRetryFeedback"',
         "visualization recovery accent": "color: window.themeAccentColors[window.selectedThemeIndex]",
+        "visualization recovery responsive height": "Layout.preferredHeight: window.compactHeader ? 36 : 28",
         "visualization retry theme": 'objectName: "visualizationRetryCapture"',
         "visualization retry background": "background: Rectangle { color: window.themeAccentColors[window.selectedThemeIndex]",
         "visualization clear themed content": 'objectName: "visualizationClearSelection"',
