@@ -168,3 +168,5 @@ Completed scenario evidence references are also required to be a single retained
 Artifact manifest hashes follow the same fail-closed rule: `sha256` must be a string before normalization or comparison. Structured or otherwise malformed hash values are rejected as invalid artifact entries instead of causing verifier exceptions.
 
 Scenario inventory IDs are validated as strings before set-based completeness checks. Structured IDs fail as invalid scenarios and preserve the missing-required-scenario signal, keeping malformed manifests pending rather than allowing an exception to bypass the consumer decision.
+
+Duplicate-ID checks apply only to validated string IDs; repeated structured IDs are reported as invalid scenarios without allowing the duplicate analysis itself to throw.

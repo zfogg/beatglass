@@ -37,7 +37,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
     if unknown_scenarios:
         errors.append(f"unknown scenarios: {sorted(unknown_scenarios)}")
     declared_ids = [scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)]
-    duplicate_scenarios = sorted({scenario_id for scenario_id in declared_ids if declared_ids.count(scenario_id) > 1})
+    duplicate_scenarios = sorted({
+        scenario_id for scenario_id in declared_ids
+        if isinstance(scenario_id, str) and declared_ids.count(scenario_id) > 1
+    })
     if duplicate_scenarios:
         errors.append(f"duplicate scenarios: {duplicate_scenarios}")
     seen = set()
