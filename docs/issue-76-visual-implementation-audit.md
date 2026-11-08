@@ -92,6 +92,8 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Seek action, overlay display selection, and system output-device status now expose complete control roles and current values.
+
 Seek target and operating-system output selectors now expose explicit current values and a SpinBox role for frame entry.
 
 Overlay size selection now declares its ComboBox role, and the unavailable-display retry action declares its button role for keyboard and assistive-technology transport.
