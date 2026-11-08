@@ -1,5 +1,7 @@
 # Issue #76 visual implementation audit
 
+Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
+
 After fresh source and display selection, a successful recovery clears the persisted retry rejection and stale identity message before presenting the new accepted state. If recovery fails, the rejection remains visible and actionable; the cleanup boundary is covered portably, while native recovery timing remains open.
 
 When overlay recovery is unavailable, persisted retry rejection remains announced and keyboard-focusable even with reduced motion enabled. The message names the blocked identity/decoder/source condition and points to fresh source and display selection; restoring a compatible source/display clears the stale rejection before retry.
