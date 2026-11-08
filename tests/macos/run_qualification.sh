@@ -20,6 +20,11 @@ sw_vers
 system_profiler SPHardwareDataType SPDisplaysDataType
 xcodebuild -version
 cmake --version | head -n 1
+sdk_path="$(xcrun --sdk macosx --show-sdk-path)"
+if [[ ! -d "$sdk_path" ]]; then
+  echo "macOS SDK path is missing: $sdk_path" >&2
+  exit 1
+fi
 
 record_command "cmake -S $repo_root -B $out_dir/build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON -DBEATGLASS_ENABLE_MACOS_NATIVE_OVERLAY_TESTS=ON -DBEATGLASS_BUILD_MACOS_TAP_SMOKE=ON"
 cmake -S "$repo_root" -B "$out_dir/build" \
@@ -185,6 +190,7 @@ if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_lo
   printf 'architecture=%s\n' "$(uname -m)"
   printf 'xcode_version=%s\n' "$(xcodebuild -version | tr '\n' ' ')"
   printf 'sdk_version=%s\n' "$(xcrun --sdk macosx --show-sdk-version)"
+  printf 'sdk_path=%s\n' "$sdk_path"
   printf 'desktop_signing=%s\ntap_signing=%s\nrecovery_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$tap_signing" "$recovery_signing" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'permission_result=%s\n' "$permission_result"
@@ -193,7 +199,7 @@ if codesign --verify --deep --strict "$recovery_bundle" 2>>"$recovery_signing_lo
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
 } > "$manifest"
-if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest" || ! grep -q '^desktop_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^tap_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^recovery_signing=\(verified\|unverified\)$' "$manifest" || [[ ! -s "$signing_log" || ! -s "$tap_signing_log" || ! -s "$recovery_signing_log" ]]; then
+if [[ ! -s "$manifest" ]] || ! grep -q '^commit=.' "$manifest" || ! grep -q '^macos_version=.' "$manifest" || ! grep -q '^architecture=.' "$manifest" || ! grep -q '^xcode_version=.' "$manifest" || ! grep -q '^sdk_version=.' "$manifest" || ! grep -q '^sdk_path=.' "$manifest" || ! grep -q '^desktop_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^tap_signing=\(verified\|unverified\)$' "$manifest" || ! grep -q '^recovery_signing=\(verified\|unverified\)$' "$manifest" || [[ ! -s "$signing_log" || ! -s "$tap_signing_log" || ! -s "$recovery_signing_log" ]]; then
   echo "Qualification manifest is missing or empty" >&2
   exit 1
 fi
