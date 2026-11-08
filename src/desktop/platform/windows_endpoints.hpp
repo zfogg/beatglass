@@ -18,4 +18,6 @@ struct EndpointResult {
 
 /** Enumerate active Windows render endpoints and mark the multimedia default. Call from a non-audio thread; this initializes COM on that thread, retains no interfaces, and returns owned values. A concurrent device change can make the snapshot stale. Failures are returned as diagnostics. */
 EndpointResult enumerate_render_endpoints();
+/** Validate a user-selected opaque endpoint ID against one discovery snapshot. */
+bool contains_render_endpoint(const EndpointResult& snapshot, const std::string& id) noexcept;
 }
