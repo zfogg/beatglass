@@ -3,7 +3,7 @@
 namespace beatglass::library {
 std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_id, AnalysisOperation operation, int priority) {
   if (!storage_.cache() || run_id.empty() || !operation.valid()) return {};
-  const auto admission = storage_.admit_analysis(run_id, operation.identity);
+  const auto admission = storage_.admit_analysis(run_id, operation.identity, operation.source.path.string(), operation.decoder_snapshot);
   if (!admission.analysis_reserved && !admission.cached) return {};
   if (admission.cached) {
     const auto cached = *admission.cached;
@@ -16,7 +16,7 @@ AnalysisCoordinator::Submission AnalysisCoordinator::submit_admitted(std::string
   if (!storage_.cache() || run_id.empty() || !operation.valid()) return {};
   const auto submitted_run = run_id;
   const auto submitted_identity = operation.identity;
-  auto admission = admit_analysis(*storage_.cache(), run_id, operation.identity);
+  auto admission = ::beatglass::library::admit_analysis(*storage_.cache(), run_id, operation.identity, operation.source.path.string(), operation.decoder_snapshot);
   if (admission.cached) return {submitted_run, submitted_identity, std::move(admission.cached), {}, false};
   if (!admission.analysis_reserved) return {};
   return {submitted_run, submitted_identity, {}, submit(std::move(run_id), std::move(operation), priority), true};

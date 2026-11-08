@@ -3,8 +3,8 @@
 #include <array>
 #include <sstream>
 namespace beatglass::library {
-AnalysisOperation make_file_decode_operation(std::filesystem::path path, AnalysisIdentity identity) {
-  AnalysisOperation op; op.source.path = path; op.source.content_hash = identity.content_hash; op.identity = std::move(identity);
+AnalysisOperation make_file_decode_operation(std::filesystem::path path, AnalysisIdentity identity, std::string decoder_snapshot) {
+  AnalysisOperation op; op.source.path = path; op.source.content_hash = identity.content_hash; op.identity = std::move(identity); op.decoder_snapshot = std::move(decoder_snapshot);
   op.verify = [path](std::stop_token stop) {
     if (stop.stop_requested()) return FileVerificationResult{FileVerificationOutcome::cancelled};
     std::error_code ec;

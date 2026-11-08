@@ -19,8 +19,8 @@ library_detail::Publish StorageOwner::publish_analysis(const std::string& run_id
   if (!cache_) return library_detail::Publish::error;
   return publish_operation(*cache_, run_id, operation, stop);
 }
-CacheAdmission StorageOwner::admit_analysis(const std::string& run_id, const AnalysisIdentity& identity) {
+CacheAdmission StorageOwner::admit_analysis(const std::string& run_id, const AnalysisIdentity& identity, const std::string& source_path, const std::string& decoder_snapshot) {
   if (!cache_) return {};
-  return ::beatglass::library::admit_analysis(*cache_, run_id, identity);
+  return ::beatglass::library::admit_analysis(*cache_, run_id, identity, source_path, decoder_snapshot);
 }
 }
