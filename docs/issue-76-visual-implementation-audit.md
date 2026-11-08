@@ -388,6 +388,8 @@ Right-clicking the canvas now clears the selected position and restores canvas f
 
 Ctrl-modified wheel input now provides ten-percent scrubbing, extending the pointer fine/medium/coarse scale (plain, Shift, Ctrl) to match the canvas keyboard controls.
 
+Double-clicking the canvas now clears the selected position and restores focus, complementing right-click and keyboard recovery paths for pointer users who prefer a gesture over a context action.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
