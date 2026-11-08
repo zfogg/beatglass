@@ -127,7 +127,17 @@ void StorageRecoveryBridge::open() {
   QMetaObject::invokeMethod(worker_, "open", Qt::QueuedConnection, Q_ARG(QString, databasePath_));
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
-void StorageRecoveryBridge::close() { if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection); }
+void StorageRecoveryBridge::close() {
+  if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection);
+  if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
+  if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
+  if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
+  if (!resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
+  if (analysisRetryable_) { analysisRetryable_ = false; emit analysisRetryableChanged(); }
+  if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); }
+  analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
+  status_ = QStringLiteral("Storage closed"); emit statusChanged();
+}
 void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
 void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ == id) return; selectedRunId_ = id; emit selectedRunChanged(); }
 void StorageRecoveryBridge::discardSelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
