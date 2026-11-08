@@ -25,6 +25,13 @@ def verify(root: Path, manifest: Path) -> list[str]:
     missing_scenarios = REQUIRED_SCENARIOS - scenario_ids
     if missing_scenarios:
         errors.append(f"missing required scenarios: {sorted(missing_scenarios)}")
+    unknown_scenarios = scenario_ids - REQUIRED_SCENARIOS
+    if unknown_scenarios:
+        errors.append(f"unknown scenarios: {sorted(unknown_scenarios)}")
+    declared_ids = [scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)]
+    duplicate_scenarios = sorted({scenario_id for scenario_id in declared_ids if declared_ids.count(scenario_id) > 1})
+    if duplicate_scenarios:
+        errors.append(f"duplicate scenarios: {duplicate_scenarios}")
     seen = set()
     for entry in artifacts or []:
         relative, expected = entry.get("path"), entry.get("sha256", "").lower()
