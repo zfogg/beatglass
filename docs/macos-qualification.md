@@ -2,6 +2,8 @@
 
 This checklist records native macOS audio and overlay evidence. Do not mark a case passed from a Windows build, a silent buffer, or a successful API call alone.
 
+The repeatable build and evidence setup is `tests/macos/run_qualification.sh`. Run it from a logged-in Mac with an output directory argument; it records the build identity and native test output, then prints the manual cases that still require permission, playback and desktop interaction.
+
 ## Build identity
 
 Record the commit, macOS version, hardware model, Xcode and SDK versions, Qt version, signing state, selected output UID and display arrangement. Record whether the run used the production desktop bundle or a smoke bundle, plus the exact configure, build and CTest commands.
