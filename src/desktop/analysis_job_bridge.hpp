@@ -39,6 +39,8 @@ public:
   /** Cancel the active job, publish Cancelled immediately, and clear stale result presentation. */
   Q_INVOKABLE void cancel();
   Q_INVOKABLE void retry();
+  /** Discard the terminal single-job recovery state without touching source files. */
+  Q_INVOKABLE void discard();
   /** Submit a path-backed provisional decoder operation on the worker queue. */
   Q_INVOKABLE bool submitFile(const QString& path, const QString& contentHash,
                               const QString& engineVersion, const QString& configurationId,
@@ -49,6 +51,8 @@ public:
   Q_INVOKABLE void cancelBatch();
   /** Retry terminal batch jobs and immediately publish the refreshed aggregate state. */
   Q_INVOKABLE void retryBatch();
+  /** Discard terminal batch recovery state without touching source files. */
+  Q_INVOKABLE void discardBatch();
   int batchAcceptedCount() const noexcept { return batchAccepted_; }
   int batchRejectedCount() const noexcept { return batchRejected_; }
   int batchCapacity() const noexcept { return batchCapacity_; }

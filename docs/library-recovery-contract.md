@@ -72,6 +72,12 @@ cancellations expose the same guidance. Native screen-reader timing remains a
 qualification responsibility; the portable bridge contract is checked with
 `python tests/unit/check_bridge_recovery_action_contract.py`.
 
+Terminal recovery can also be discarded explicitly. Single-job `discard()`
+and batch `discardBatch()` clear the retained handles, displayed result,
+diagnostic, progress, counters and terminal status, returning the bridge to
+`Idle`. They never remove source audio or mutate persisted library records;
+discarding a persisted retry remains a storage-owner operation.
+
 The focused CTest remains the authoritative executable regression. On the
 current Windows development host it is not claimed here because rebuilding
 the modified SQLite test binary has exhausted available memory and has also

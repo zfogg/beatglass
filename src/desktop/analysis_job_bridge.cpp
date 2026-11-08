@@ -118,6 +118,16 @@ void AnalysisJobBridge::retry() {
   }
 }
 
+void AnalysisJobBridge::discard() {
+  if (!retryable_ || canCancel()) return;
+  retryable_.reset();
+  poll_timer_.stop();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
+}
+
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
   if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
@@ -175,6 +185,23 @@ void AnalysisJobBridge::retryBatch() {
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged(); poll();
   }
+}
+
+void AnalysisJobBridge::discardBatch() {
+  bool terminal = !batch_.empty();
+  for (const auto& operation : batch_) terminal = terminal && operation && !(
+      operation->state() == beatglass::library_detail::TrackedState::queued ||
+      operation->state() == beatglass::library_detail::TrackedState::running);
+  if (!terminal) return;
+  batch_.clear();
+  batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0;
+  batchLastResult_.clear();
+  poll_timer_.stop();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
+  emit batchChanged();
 }
 
 void AnalysisJobBridge::poll() {
