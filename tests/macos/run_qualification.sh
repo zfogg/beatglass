@@ -35,6 +35,16 @@ if [[ -z "$usage_description" ]]; then
   exit 1
 fi
 echo "Production bundle usage description: $usage_description"
+desktop_binary="$out_dir/build/beatglass-desktop.app/Contents/MacOS/beatglass-desktop"
+tap_bundle="$out_dir/build/beatglass-coreaudio-smoke.app"
+tap_binary="$tap_bundle/Contents/MacOS/beatglass-coreaudio-smoke"
+for required_path in "$desktop_binary" "$tap_bundle" "$tap_binary"; do
+  if [[ ! -e "$required_path" ]]; then
+    echo "Required native qualification artifact not found: $required_path" >&2
+    exit 1
+  fi
+done
+echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary"
 ctest --test-dir "$out_dir/build" -R '^(macos_overlay_|macos_native_overlay$)' --output-on-failure
 
 cat <<'EOF'
