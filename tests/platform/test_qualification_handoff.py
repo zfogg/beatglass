@@ -40,6 +40,12 @@ class QualificationHandoffTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("qualification handoff covers", result.stdout)
 
+    def test_handoff_docs_describe_versioned_report_contract(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        docs = (root / "docs/platform-qualification-status.md").read_text(encoding="utf-8")
+        for phrase in ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes"):
+            self.assertIn(phrase, docs)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -38,6 +38,7 @@ def main() -> int:
     required_scenarios = ("permission", "device", "recovery")
     required_runtime_evidence = ("audio backend", "display server", "exact commands", "limitations")
     required_evidence_schema = ("timestamp", "logs", "screenshot")
+    required_report_contract = ("readiness_report_schema: 1", "exit_gate_status", "exit_gate_reason_codes")
     required_exit_gate = (
         "## Issue #1 exit gate",
         "all_platforms_ready: true",
@@ -65,6 +66,7 @@ def main() -> int:
     unlinked.extend(f"scenario requirement: {scenario}" for scenario in required_scenarios if scenario.lower() not in docs.lower())
     unlinked.extend(f"runtime evidence field: {field}" for field in required_runtime_evidence if field.lower() not in docs.lower())
     unlinked.extend(f"evidence schema field: {field}" for field in required_evidence_schema if field.lower() not in docs.lower())
+    unlinked.extend(f"readiness report contract: {field}" for field in required_report_contract if field.lower() not in docs.lower())
     unlinked.extend(f"issue #1 exit-gate contract: {phrase}" for phrase in required_exit_gate if phrase.lower() not in docs.lower())
     for row in platform_rows:
         cells = [cell.strip() for cell in row.strip("|").split("|")]
