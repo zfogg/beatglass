@@ -542,6 +542,8 @@ The visualization recovery row now exposes direct Resume and Stop playback actio
 
 The same actions now have application-level keyboard parity: Ctrl+Alt+R resumes paused playback, and Ctrl+Alt+Shift+S stops active playback. Shortcut enabled states mirror the buttons, so keyboard users receive the same state and stale-snapshot behavior as pointer users.
 
+The shortcut contract is executable: the focused regression verifies each sequence, enabled-state predicate, bridge action, and matching visualization button action, preventing keyboard and pointer recovery paths from drifting apart.
+
 The selection status/action row now shares top alignment with the evidence group, keeping wrapped status text and its clear action anchored at the same visual edge.
 
 Generation/revision provenance now wraps explicitly alongside its shrinkable width, keeping long identifiers readable in compact layouts.
