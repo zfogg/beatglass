@@ -83,7 +83,7 @@ public:
   std::vector<CollectionEntry> entries(const CollectionQuery& q, std::stop_token stop) {
     if (q.limit == 0 || q.limit > 10000) throw std::invalid_argument("invalid collection page size");
     if (stop.stop_requested()) throw std::runtime_error("collection query cancelled");
-    Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE lower(name) LIKE '%' || lower(?) || '%' ORDER BY lower(name),name,path LIMIT ? OFFSET ?"); bind(s.p,1,q.search); check(sqlite3_bind_int64(s.p,2,static_cast<sqlite3_int64>(q.limit))); check(sqlite3_bind_int64(s.p,3,static_cast<sqlite3_int64>(q.offset))); std::vector<CollectionEntry> out; int rc=SQLITE_ROW; while((rc=sqlite3_step(s.p))==SQLITE_ROW){ if(stop.stop_requested()) throw std::runtime_error("collection query cancelled"); out.push_back(read_entry(s.p)); } if(rc!=SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_)); return out;
+    Statement s(db_, "SELECT path,name,kind,fingerprint,size_bytes,modified_ns FROM collection_entries WHERE lower(name) LIKE lower(?) || '%' ORDER BY lower(name),name,path LIMIT ? OFFSET ?"); bind(s.p,1,q.search); check(sqlite3_bind_int64(s.p,2,static_cast<sqlite3_int64>(q.limit))); check(sqlite3_bind_int64(s.p,3,static_cast<sqlite3_int64>(q.offset))); std::vector<CollectionEntry> out; int rc=SQLITE_ROW; while((rc=sqlite3_step(s.p))==SQLITE_ROW){ if(stop.stop_requested()) throw std::runtime_error("collection query cancelled"); out.push_back(read_entry(s.p)); } if(rc!=SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_)); return out;
   }
   // The worker rechecks evidence inside the transaction. The supplied callback
   // must compare the opened input's current version with its pre-analysis evidence.
