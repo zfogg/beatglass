@@ -43,6 +43,13 @@ TEST_CASE("offline result validation enforces exclusive boundaries and chronolog
  r = example(); r.tonal_windows[0].rolling_key_from.reset();
  CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_window);
 }
+TEST_CASE("offline beats may report a final observed hop beyond analyzed output") {
+ auto r = example();
+ r.beats = {{99, 110, std::nullopt}};
+ CHECK(validate_offline_analysis(r, limits) == OfflineValidation::valid);
+ r.beats[0].observed_through = 111;
+ CHECK(validate_offline_analysis(r, limits) == OfflineValidation::invalid_beat);
+}
 TEST_CASE("offline results bound storage and distinguish absent from invalid estimates") {
  auto r = example(); CHECK(validate_offline_analysis(r, {1, 10, 10, 128}) == OfflineValidation::limit_exceeded);
  CHECK(validate_offline_analysis(r, {10, 2, 10, 128}) == OfflineValidation::limit_exceeded);
