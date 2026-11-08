@@ -92,6 +92,14 @@ Analysis progress, batch queue, persisted recovery, and confirmation text are al
 
 The library/capture accessibility batch also treats catalog status, endpoint empty/unavailable/recovery states, and selected endpoint status as explicit static text with dynamic descriptions.
 
+Catalog status, result counts, and folder-list navigation now have visual tooltips paired with explicit accessible values and roles.
+
+Current-folder context and empty-library recovery now have dedicated visual tooltips matching their accessible state semantics.
+
+Parent-folder navigation, search, and sort controls now pair explicit roles with visual tooltips for library browsing and recovery.
+
+Folder chooser and open-playback controls now pair explicit button semantics with visual tooltips.
+
 Clear-selection and metadata-retry actions now have contextual visual tooltips matching their accessible recovery descriptions.
 
 Selected source path, duration, and metadata status now have visual tooltips alongside their dynamic accessibility announcements.
@@ -155,3 +163,23 @@ The live overlay tempo, harmony, and opacity status surfaces now expose explicit
 The overlay header, native playback state, endpoint-empty message, and platform permission guidance now provide explicit values and descriptions, completing the remaining live/monitoring recovery announcements.
 
 Live monitoring guidance and selected-endpoint announcements now expose explicit values and static-text roles, preserving actionable empty-state context when capture is stopped or no endpoint is selected.
+
+The primary Library navigation tab now exposes explicit keyboard focus, PageTab role, and hover guidance for accessible navigation.
+
+The appearance reset control now declares an explicit button role, completing semantic coverage for the settings recovery action.
+
+The DJ and Settings navigation tabs retain explicit shortcut/focus-return descriptions in the static contract, ensuring keyboard navigation guidance remains part of the visual accessibility audit.
+
+Live overlay tempo and harmony estimates now expose contextual tooltips, while overlay hide and retry-capture actions explicitly declare button roles for assistive technology.
+
+Overlay unlock guidance and capture status now expose contextual recovery tooltips, while platform permission guidance includes explicit value, role, and description semantics.
+
+Native playback state, unavailable-playback recovery, and first-frame analysis waiting now expose contextual tooltips alongside their accessible status semantics.
+
+Analysis queue capacity, persisted recovery status, retryable-run selection, and discard recovery actions now expose contextual tooltips aligned with their dynamic accessibility semantics.
+
+Selected-source identity, analysis detail/uncertainty/freshness, source workflow, and analysis progress now expose contextual tooltips aligned with their dynamic accessible values.
+
+Capture status, endpoint discovery and selection status, permission guidance, and the monitoring action now expose contextual tooltips that mirror their accessible recovery semantics.
+
+Library folder and audio-file entries now expose context-specific tooltips that match their accessible action descriptions, making directory navigation and source selection discoverable on hover as well as through assistive technology.

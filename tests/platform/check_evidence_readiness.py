@@ -173,6 +173,13 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
                           "invalidated": row["invalidated"], "ready": row["error_count"] == 0 and row["fresh"] and row["retention_ok"]}
                          for row in rows]
     ready_platforms = sum(item["ready"] for item in platform_failures)
+    retained_artifact_count = sum(row["retained_artifacts"] for row in rows)
+    retained_artifact_bytes = sum(row["retained_bytes"] for row in rows)
+    retained_artifacts_by_platform = {row["platform"]: row["retained_artifacts"] for row in rows}
+    retained_bytes_by_platform = {row["platform"]: row["retained_bytes"] for row in rows}
+    retained_bytes_consistent = retained_artifact_bytes == sum(row["retained_bytes"] for row in rows)
+    inventory_bytes_consistent = all(row["retained_bytes"] == sum(item["bytes"] or 0 for item in row["artifact_inventory"]) for row in rows)
+    inventory_count_consistent = all(row["retained_artifacts"] == len(row["artifact_inventory"]) for row in rows)
     error_count_consistent = sum(item["errors"] for item in platform_failures) == len(errors)
     not_ready_platforms = [item["platform"] for item in platform_failures if not item["ready"]]
     failure_summary_consistent = [item["platform"] for item in platform_failures] == [row["platform"] for row in rows]
@@ -189,6 +196,13 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
     failure_category_count_consistent = sum(categories.values()) == len(errors)
     category_platforms = {category: [row["platform"] for row in rows if row["failure_categories"].get(category)]
                           for category in sorted(categories)}
+    category_platforms_consistent = set(category_platforms) == set(categories)
+    category_platform_lists_consistent = all(platform in category_platforms.get(category, [])
+                                             for category in category_platforms
+                                             for platform in category_platforms[category])
+    category_platform_counts = {category: sum(row["failure_categories"].get(category, 0) for row in rows)
+                                for category in sorted(categories)}
+    category_counts_consistent = category_platform_counts == dict(categories)
     required = [{"platform": row["platform"], "missing": row["missing_scenarios"], "invalid": row["invalid_scenarios"]} for row in rows]
     provenance = [{"platform": row["platform"], "complete": row["provenance_complete"], "missing": row["missing_provenance"]} for row in rows]
     summary_consistent = (len(required) == len(rows) == len(provenance)
@@ -202,15 +216,26 @@ def report(status: Path, bundles: Path, max_age_hours: float = 168) -> dict:
             "failure_summary_consistent": failure_summary_consistent,
             "error_count_consistent": error_count_consistent,
             "ready_platform_count": ready_platforms,
+            "retained_artifact_count": retained_artifact_count,
+            "retained_artifact_bytes": retained_artifact_bytes,
+            "retained_artifacts_by_platform": retained_artifacts_by_platform,
+            "retained_bytes_by_platform": retained_bytes_by_platform,
+            "retained_bytes_consistent": retained_bytes_consistent,
+            "inventory_bytes_consistent": inventory_bytes_consistent,
+            "inventory_count_consistent": inventory_count_consistent,
             "not_ready_platforms": not_ready_platforms,
             "all_platforms_ready": platform_summary_consistent and ready_platforms == len(rows),
             "error_count": len(errors), "failure_categories": dict(sorted(categories.items())),
             "failure_category_count_consistent": failure_category_count_consistent,
             "failure_category_platforms": category_platforms,
+            "category_platforms_consistent": category_platforms_consistent,
+            "category_platform_lists_consistent": category_platform_lists_consistent,
+            "category_platform_counts": category_platform_counts,
+            "category_counts_consistent": category_counts_consistent,
             "required_scenario_summary": required, "provenance_summary": provenance,
             "summary_consistent": summary_consistent, "errors": errors,
             "aggregate_consistent": aggregate_consistent,
-            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and ready_platforms == len(rows)}
+            "ready": not errors and aggregate_consistent and error_count_consistent and failure_category_count_consistent and category_platforms_consistent and category_platform_lists_consistent and category_counts_consistent and retained_bytes_consistent and inventory_bytes_consistent and inventory_count_consistent and ready_platforms == len(rows)}
 
 
 def main() -> int:

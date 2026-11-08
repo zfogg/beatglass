@@ -30,6 +30,15 @@ int main() {
     FileReader reader(wav, 7);
     assert(reader.metadata().sample_rate == 8000 && reader.metadata().channels == 1);
     assert(reader.metadata().frames == 4 && !reader.source_changed());
+    bool empty_buffer_rejected = false;
+    try { (void)reader.read(std::span<float>{}); }
+    catch (const std::invalid_argument&) { empty_buffer_rejected = true; }
+    assert(empty_buffer_rejected);
+    std::vector<float> partial_samples(2);
+    const auto partial_first = reader.read(partial_samples);
+    assert(partial_first.status == FileReadStatus::data && partial_first.block.samples.size() == 2 && partial_first.block.first_frame == 0);
+    const auto partial_second = reader.read(partial_samples);
+    assert(partial_second.status == FileReadStatus::data && partial_second.block.samples.size() == 2 && partial_second.block.first_frame == 2);
     std::vector<float> samples(4);
     const auto first = reader.read(samples);
     assert(first.status == FileReadStatus::data && first.block.start_frame == 0 && first.block.epoch == 7);

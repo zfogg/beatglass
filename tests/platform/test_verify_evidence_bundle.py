@@ -27,10 +27,56 @@ class EvidenceBundleTest(unittest.TestCase):
         self.assertEqual(module.verify(root, root / "manifest.json"), [])
 
 def manifest(artifact):
+    artifact.setdefault("role", "capture")
     return {"platform": "test", "commit": "0" * 40, "captured_at": "2026-11-08T00:00:00Z", "environment": "unit", "artifacts": [artifact], "scenarios": [{"id": "capture", "status": "UNRUN"}]}
 
 
 class EvidenceBundleNegativeTest(unittest.TestCase):
+    def test_completed_scenario_requires_matching_artifact_role(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
+            digest = __import__("hashlib").sha256(b"actual\n").hexdigest()
+            data = manifest({"path": "capture.txt", "sha256": digest, "role": "output"})
+            data["scenarios"] = [{"id": "capture", "status": "PASS", "evidence": "capture.txt"}]
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("role mismatch" in error for error in module.verify(root, path)))
+
+    def test_unknown_and_duplicate_scenarios_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
+            digest = __import__("hashlib").sha256(b"actual\n").hexdigest()
+            data = manifest({"path": "capture.txt", "sha256": digest})
+            data["scenarios"] = [
+                {"id": "capture", "status": "UNRUN"},
+                {"id": "capture", "status": "UNRUN"},
+                {"id": "overlay-typo", "status": "UNRUN"},
+            ]
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, path)
+            self.assertTrue(any("unknown scenarios" in error for error in errors))
+            self.assertTrue(any("duplicate scenarios" in error for error in errors))
+
+    def test_artifact_path_alias_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
+            digest = __import__("hashlib").sha256(b"actual\n").hexdigest()
+            data = manifest({"path": "capture.txt", "sha256": digest})
+            data["artifacts"].append({"path": "./capture.txt", "sha256": digest})
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, path)))
+
+    def test_passed_scenarios_cannot_share_one_evidence_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "evidence.json").write_text("{}", encoding="utf-8")
+            data = manifest({"path": "evidence.json", "sha256": __import__("hashlib").sha256(b"{}").hexdigest()})
+            data["artifacts"][0].pop("role", None)
+            data["scenarios"] = [
+                {"id": "capture", "status": "PASS", "evidence": "evidence.json"},
+                {"id": "recovery", "status": "PASS", "evidence": "evidence.json"},
+            ]
+            path = root / "manifest.json"; path.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("scenario evidence is shared" in error for error in module.verify(root, path)))
+
     def test_hash_mismatch_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "capture.txt").write_text("actual\n", encoding="utf-8")
@@ -235,6 +281,13 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertTrue(result["platform_failure_summary"][0]["invalidated"])
             self.assertFalse(result["platform_failure_summary"][0]["ready"])
             self.assertEqual(result["ready_platform_count"], 0)
+            self.assertEqual(result["retained_artifact_count"], 0)
+            self.assertEqual(result["retained_artifact_bytes"], 0)
+            self.assertEqual(result["retained_artifacts_by_platform"], {"windows": 0})
+            self.assertEqual(result["retained_bytes_by_platform"], {"windows": 0})
+            self.assertTrue(result["retained_bytes_consistent"])
+            self.assertTrue(result["inventory_bytes_consistent"])
+            self.assertTrue(result["inventory_count_consistent"])
             self.assertFalse(result["all_platforms_ready"])
             self.assertEqual(result["not_ready_platforms"], ["windows"])
             self.assertTrue(result["failure_summary_consistent"])
@@ -243,6 +296,9 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertTrue(result["platforms"][0]["failure_category_count_consistent"])
             self.assertTrue(result["failure_category_count_consistent"])
             self.assertIn("retention", result["failure_category_platforms"])
+            self.assertTrue(result["category_platforms_consistent"])
+            self.assertTrue(result["category_platform_lists_consistent"])
+            self.assertFalse(result["category_counts_consistent"])
 
     def test_readiness_aggregates_failure_categories(self):
         with tempfile.TemporaryDirectory() as tmp:

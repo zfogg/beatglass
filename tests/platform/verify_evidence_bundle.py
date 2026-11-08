@@ -25,13 +25,27 @@ def verify(root: Path, manifest: Path) -> list[str]:
     missing_scenarios = REQUIRED_SCENARIOS - scenario_ids
     if missing_scenarios:
         errors.append(f"missing required scenarios: {sorted(missing_scenarios)}")
+    unknown_scenarios = scenario_ids - REQUIRED_SCENARIOS
+    if unknown_scenarios:
+        errors.append(f"unknown scenarios: {sorted(unknown_scenarios)}")
+    declared_ids = [scenario.get("id") for scenario in scenarios or [] if isinstance(scenario, dict)]
+    duplicate_scenarios = sorted({scenario_id for scenario_id in declared_ids if declared_ids.count(scenario_id) > 1})
+    if duplicate_scenarios:
+        errors.append(f"duplicate scenarios: {duplicate_scenarios}")
     seen = set()
     for entry in artifacts or []:
         relative, expected = entry.get("path"), entry.get("sha256", "").lower()
-        if not isinstance(relative, str) or not isinstance(expected, str) or relative in seen:
+        canonical = Path(relative).as_posix() if isinstance(relative, str) else None
+        if (
+            not isinstance(relative, str)
+            or not isinstance(expected, str)
+            or not canonical
+            or canonical != relative
+            or canonical in seen
+        ):
             errors.append(f"invalid or duplicate artifact entry: {entry}"); continue
-        seen.add(relative)
-        path = (root / relative).resolve()
+        seen.add(canonical)
+        path = (root / canonical).resolve()
         if root.resolve() not in path.parents:
             errors.append(f"artifact escapes bundle: {relative}"); continue
         if not path.is_file():
@@ -39,6 +53,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
+    evidence_owners = {}
+    artifact_roles = {entry.get("path"): entry.get("role") for entry in artifacts or [] if isinstance(entry, dict)}
     for scenario in scenarios or []:
         if not isinstance(scenario, dict) or not scenario.get("id") or scenario.get("status") not in {"PASS", "FAIL", "UNRUN"}:
             errors.append(f"invalid scenario: {scenario}"); continue
@@ -46,6 +62,12 @@ def verify(root: Path, manifest: Path) -> list[str]:
             evidence = scenario.get("evidence")
             if not evidence or evidence not in seen:
                 errors.append(f"scenario evidence is not retained: {scenario.get('id')}")
+            elif "role" in next((entry for entry in artifacts if isinstance(entry, dict) and entry.get("path") == evidence), {} ) and artifact_roles.get(evidence) != scenario.get("id"):
+                errors.append(f"scenario evidence role mismatch: {scenario.get('id')} -> {evidence}")
+            elif evidence in evidence_owners:
+                errors.append(f"scenario evidence is shared: {evidence} ({evidence_owners[evidence]}, {scenario.get('id')})")
+            else:
+                evidence_owners[evidence] = scenario.get("id")
     return errors
 
 
