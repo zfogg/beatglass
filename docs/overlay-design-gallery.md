@@ -60,6 +60,7 @@ screenshots.
 | [Pinned views](overlay-favorite-card.svg) | favorite layouts and outputs |
 | [Tips](overlay-tips-card.svg) | compact guidance for personal workflows |
 | [Command palette](overlay-command-palette-card.svg) | searchable keyboard-first actions |
+| [Update](overlay-update-card.svg) | update review and defer decision |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
