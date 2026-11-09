@@ -91,6 +91,9 @@ try:
             "transition_event_count": summary.get("native_transition_event_count"),
             "transition_schema": transition_schema,
             "transition_commit": transition_commit,
+            "capture_plan": summary.get("capture_plan"),
+            "capture_plan_sha256": summary.get("capture_plan_sha256"),
+            "capture_plan_validated": summary.get("capture_plan_validated", False),
             "artifacts": [
                 {"name": path.name, "size": path.stat().st_size, "sha256": digest(path)}
                 for path in artifacts
