@@ -6,6 +6,7 @@
 | Library multi-selection | Several eligible tracks are selected for a batch action | Show selection count, eligible batch action, and preserve completed evidence and source files. |
 | Library batch queued | Selected sources were admitted to analysis | Show admitted/skipped counts, link to queue, and preserve existing evidence until fresh results are accepted. |
 | Library batch complete | Batch finished with accepted and attention-needed sources | Summarize accepted/review/skipped counts and route to results or recovery without losing attribution. |
+| Library batch attention | Source changed before a fresh result could be accepted | Withhold stale output, explain the identity change, and route to verification/retry without mutating files. |
 | Library import in progress | Folder scan is discovering and checking sources | Show bounded progress, preserve the last catalog snapshot, and make cancellation non-destructive. |
 | Library import complete | Folder scan finished with new, unchanged, and review-needed sources | Summarize identity reuse, offer analysis for new entries, and preserve source files. |
 | Library import review | Scan found unsupported, missing, or unreadable sources | Keep entries recoverable, provide locate/retry/remove actions, and never delete source files implicitly. |
