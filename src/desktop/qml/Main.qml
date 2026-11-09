@@ -836,8 +836,24 @@ ApplicationWindow {
     Connections {
         target: window.overlayBridge
         function onAvailableChanged() {
-            if (window.overlayBridge && !window.overlayBridge.available)
+            if (window.overlayBridge && !window.overlayBridge.available) {
+                window.overlayDisplayRecoveryPending = true
                 window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
+            } else if (window.overlayBridge) {
+                window.syncOverlaySettingsStateFromBridge()
+                if (window.overlayBridge.screenNames.length === 0) {
+                    window.overlayDisplayRecoveryPending = true
+                    window.overlayDisplaySelectionRequired = true
+                    window.announceCaptureRecoveryState("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.")
+                    overlayDisplay.forceActiveFocus()
+                } else if (window.overlayDisplaySelectionRequired) {
+                    window.announceCaptureRecoveryState("DJ overlay recovered; choose a display to re-enable overlay actions.")
+                    overlayDisplay.forceActiveFocus()
+                } else {
+                    window.overlayDisplayRecoveryPending = false
+                    window.announceCaptureRecoveryState("DJ overlay recovered; Show, Restore, and Reapply actions are available.")
+                }
+            }
         }
         function onScreensChanged() {
             if (window.overlayBridge && window.overlayBridge.displayName !== "")
