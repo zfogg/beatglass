@@ -23,4 +23,6 @@ if matrix.get("commit") and f"Commit: `{matrix['commit']}`" not in report:
 for name, entry in matrix.get("platforms", {}).items():
     if f"| {name} | **{entry.get('status')}** |" not in report:
         raise SystemExit(f"qualification report is missing platform: {name}")
+    if entry.get("status") == "pending" and entry.get("pending_reason") not in report:
+        raise SystemExit(f"qualification report is missing pending reason: {name}")
 print("Qualification bundle verified")
