@@ -35,6 +35,8 @@ The completed-summary verifier enforces that schema and requires a non-empty
 commit identity before accepting discovery/JUnit digests.
 When a transition artifact is supplied, it also verifies its digest and runs
 the transition validator before accepting the completed summary.
+Completed summaries carrying transition evidence must identify a Linux host;
+non-Linux summaries remain pending handoffs and cannot pass this verifier.
 The native owner records whether its thread loop actually started, so early
 PipeWire construction failures can tear down safely without locking an
 unstarted loop; native Linux qualification must exercise these failure paths.

@@ -26,6 +26,8 @@ if summary.get("native_junit_sha256") != hashlib.sha256(Path(summary["native_jun
 if summary.get("native_discovery_sha256") != hashlib.sha256(Path(summary["native_discovery_json"]).read_bytes()).hexdigest():
     raise SystemExit("native discovery digest mismatch")
 if summary.get("native_transition_json"):
+    if not str(summary.get("platform", "")).lower().startswith("linux"):
+        raise SystemExit("native transition evidence is not from a Linux host")
     transition = Path(summary["native_transition_json"])
     if not transition.is_file():
         raise SystemExit(f"missing transition evidence artifact: {transition}")
