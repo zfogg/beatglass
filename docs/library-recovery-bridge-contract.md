@@ -29,6 +29,8 @@ therefore leaves storage unconfigured instead of queuing an invalid open.
 Replacing a configured path with an empty path also closes the previous worker
 storage first, preventing a cleared configuration from retaining an open
 database.
+Overlapping open/close requests are rejected with `Storage transition already
+in progress`; callers must wait for `storageTransitionPending` to clear.
 Calling `open()` again while `storageOpen` is true is rejected with `Storage
 already open`; callers must close or change the configured path first.
 Calling `close()` while no storage is open reports `Storage already closed`
