@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / UP NEXT</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Up next</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Keep your place in the listening session without opening the library.</text>
+  <rect x="112" y="258" width="976" height="136" rx="18" fill="#202938"/><text x="144" y="304" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">CURRENT</text><text x="144" y="349" fill="#f2f6fb" font-family="Inter,Arial" font-size="24" font-weight="700">Midnight Drive</text><text x="144" y="378" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Neon Avenue · playing now</text><text x="1048" y="348" fill="#56d38b" font-family="Inter,Arial" font-size="17" font-weight="700" text-anchor="end">01:42</text>
+  <rect x="112" y="420" width="976" height="136" rx="18" fill="#202938"/><text x="144" y="466" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">NEXT</text><text x="144" y="511" fill="#f2f6fb" font-family="Inter,Arial" font-size="24" font-weight="700">Afterglow</text><text x="144" y="540" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Neon Avenue · queued</text><text x="1048" y="510" fill="#b8c4d2" font-family="Inter,Arial" font-size="17" text-anchor="end">03:58</text>
+  <rect x="112" y="610" width="196" height="54" rx="14" fill="#2a3444"/><text x="210" y="644" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Open library</text><text x="1088" y="644" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Queue stays local</text>
+</svg>
