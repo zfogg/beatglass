@@ -10,6 +10,7 @@ class StorageRecoveryBridge::Worker final : public QObject {
 public slots:
   void open(QString path) {
     // Clear the previous database's selection before asynchronous transition work begins.
+    handle_.reset();
     emit runsChanged({}, {});
     emit analysis(QStringLiteral("Analysis idle"));
     beatglass::library::StorageConfig config{path.toStdString()};
@@ -23,6 +24,7 @@ public slots:
     else { emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); }
   }
   void close() {
+    handle_.reset();
     try { coordinator_.close_storage(); emit result(true, QStringLiteral("Storage closed")); }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Storage close failed: ") + QString::fromUtf8(error.what())); }
     catch (...) { emit result(false, QStringLiteral("Storage close failed: unknown storage error")); }
