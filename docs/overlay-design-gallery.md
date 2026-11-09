@@ -163,6 +163,7 @@ screenshots.
 | [Native safe mode settings saved](overlay-native-safe-mode-settings-saved-card.svg) | queued settings while safe mode remains active |
 | [Native safe mode settings applied](overlay-native-safe-mode-settings-applied-card.svg) | applied queued state for next activation |
 | [Native safe mode resume](overlay-native-safe-mode-resume-card.svg) | resume prompt after permission recovery |
+| [Native activation confirmation](overlay-native-activation-confirm-card.svg) | explicit native overlay activation with retained session state |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
