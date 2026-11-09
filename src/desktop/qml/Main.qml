@@ -1932,6 +1932,10 @@ ApplicationWindow {
                 window.overlayDisplayRecoveryPending = true
                 clickThroughToggle.checked = false
                 window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
+                window.show()
+                window.raise()
+                window.requestActivate()
+                retryOverlay.forceActiveFocus()
             } else if (window.overlayBridge) {
                 window.overlayRecoveryAttemptCount = 0
                 window.overlayRecoveryPausedByUser = false
