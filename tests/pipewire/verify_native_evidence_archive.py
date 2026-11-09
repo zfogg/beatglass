@@ -23,6 +23,10 @@ with zipfile.ZipFile(archive_path) as archive:
     artifacts = manifest.get("artifacts", [])
     if len({artifact.get("name") for artifact in artifacts}) != len(artifacts):
         raise SystemExit("duplicate manifest artifact")
+    declared = {artifact["name"] for artifact in artifacts}
+    unexpected = names - declared - {"evidence-manifest.json"}
+    if unexpected:
+        raise SystemExit(f"unlisted archive artifact: {sorted(unexpected)[0]}")
     for artifact in artifacts:
         name = artifact["name"]
         if name not in names:

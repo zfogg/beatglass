@@ -72,3 +72,5 @@ This checks the embedded manifest, artifact presence, byte sizes, and SHA-256
 digests before the archive is accepted as a transferred handoff. It also
 rejects duplicate or traversal-style ZIP entry names so an archive cannot
 silently substitute ambiguous evidence files.
+Unlisted ZIP entries are also rejected, so the manifest remains the complete
+inventory of transferred evidence.
