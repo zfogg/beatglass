@@ -489,6 +489,21 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlayRecoveryCanBeStoppedBeforeSafeMode() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        retry.clicked()
+        let stop = findChild(app, "stopOverlayRecovery")
+        verify(stop.visible)
+        compare(stop.Accessible.description, "Pause native overlay recovery attempts while keeping monitoring available")
+        stop.clicked()
+        compare(app.overlayRecoveryAttemptCount, 0)
+        verify(!stop.visible)
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)
