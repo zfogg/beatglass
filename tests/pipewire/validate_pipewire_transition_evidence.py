@@ -35,8 +35,8 @@ if not isinstance(error_event.get("error_code"), int) or isinstance(error_event.
 start = next(event for event in events if event.get("event") == "start")
 if not isinstance(start.get("serial"), str) or not start["serial"].strip():
     raise SystemExit("start event has no sink serial")
-if not any(isinstance(event.get("sample_count"), int) and event["sample_count"] > 0
-           for event in events if event.get("event") == "process"):
+if not any(isinstance(event.get("sample_count"), int) and not isinstance(event.get("sample_count"), bool) and event["sample_count"] > 0
+           and event.get("epoch") == start.get("epoch") for event in events if event.get("event") == "process"):
     raise SystemExit("process evidence has no captured samples")
 restart = next(event for event in events if event.get("event") == "restart")
 if restart.get("epoch") <= start.get("epoch"):
