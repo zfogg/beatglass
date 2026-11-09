@@ -1940,4 +1940,21 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_displayReorderUsesSavedIdentityAndRetainsGeometry() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Projector", "Laptop"]
+        fakeOverlay.displayName = "Projector"
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 0
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 1)
+        compare(fakeOverlay.requestedWidth, 620)
+        verify(findChild(app, "retryOverlay").activeFocus)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
