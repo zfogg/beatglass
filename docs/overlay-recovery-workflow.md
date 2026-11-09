@@ -199,3 +199,6 @@ If enabling click-through is rejected, the interaction toggle keeps focus and pe
 
 If disabling click-through is rejected, the interaction toggle stays focused and persisted display/geometry settings remain intact while click-through remains active, so Unlock can be retried safely.
 
+
+The Ctrl+Alt+K click-through focus shortcut remains available while the overlay is blocked, returning focus to the interaction control without discarding persisted display or geometry settings.
+
