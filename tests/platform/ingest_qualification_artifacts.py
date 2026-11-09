@@ -13,7 +13,9 @@ def ingest(root: Path, output: Path) -> list[str]:
     errors = []
     identity = {}
     identity_path = root / "qualification-manifest.txt"
-    if identity_path.is_file():
+    if identity_path.is_symlink():
+        errors.append("symlinked qualification-manifest.txt")
+    elif identity_path.is_file():
         for line in identity_path.read_text(encoding="utf-8").splitlines():
             if "=" in line:
                 key, value = line.split("=", 1)
@@ -33,7 +35,9 @@ def ingest(root: Path, output: Path) -> list[str]:
             errors.append("invalid capture timestamp")
     artifacts = []
     hashes_path = root / "qualification-artifacts.sha256"
-    if not hashes_path.is_file():
+    if hashes_path.is_symlink():
+        errors.append("symlinked qualification-artifacts.sha256")
+    elif not hashes_path.is_file():
         errors.append("missing qualification-artifacts.sha256")
     else:
         seen_paths = set()

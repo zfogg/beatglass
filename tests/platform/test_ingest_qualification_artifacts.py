@@ -124,6 +124,22 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertIn("non-canonical artifact path: a/../native.log", errors)
 
+    def test_rejects_symlinked_qualification_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target_manifest = root / "manifest-source.txt"
+            target_manifest.write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            target_hashes = root / "hashes-source.txt"
+            target_hashes.write_text("", encoding="utf-8")
+            try:
+                (root / "qualification-manifest.txt").symlink_to(target_manifest)
+                (root / "qualification-artifacts.sha256").symlink_to(target_hashes)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("symlinked qualification-manifest.txt", errors)
+            self.assertIn("symlinked qualification-artifacts.sha256", errors)
+
     def test_sorts_artifacts_for_reproducible_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
