@@ -69,14 +69,16 @@ OverlayController::OverlayController(QQuickWindow* overlay, QWindow* control, QO
   }
 }
 OverlayController::~OverlayController() { setClickThrough(false); if (overlay_) overlay_->removeEventFilter(this); if (control_) control_->removeEventFilter(this); }
-void OverlayController::setOpacity(qreal opacity) {
+bool OverlayController::setOpacity(qreal opacity) {
   if (overlay_ && std::isfinite(opacity)) {
     const auto value = std::clamp(opacity, qreal(0.2), qreal(1));
     const bool changed = !qFuzzyCompare(overlay_->opacity(), value);
     overlay_->setOpacity(value);
     if (settings_) settings_->setValue(QStringLiteral("overlay/opacity"), value);
     if (changed) emit opacityChanged(value);
+    return true;
   }
+  return false;
 }
 qreal OverlayController::opacity() const { return overlay_ ? overlay_->opacity() : qreal(1); }
 void OverlayController::persistCurrentDisplay() {
