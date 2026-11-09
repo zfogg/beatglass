@@ -9,6 +9,7 @@
  */
 class StorageRecoveryBridge final : public QObject {
   Q_OBJECT
+  Q_DISABLE_COPY(StorageRecoveryBridge)
   Q_PROPERTY(QString databasePath READ databasePath WRITE setDatabasePath NOTIFY databasePathChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
   Q_PROPERTY(QStringList retryableRunIds READ retryableRunIds NOTIFY retryableRunsChanged)
