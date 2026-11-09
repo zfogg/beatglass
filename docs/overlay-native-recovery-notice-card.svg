@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Native overlay recovery notice</title>
+  <desc id="desc">A non-blocking recovery notice tells the user that monitoring continues and provides a path back to overlay settings.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <rect x="96" y="94" width="728" height="72" rx="14" fill="#1b3550" stroke="#6ca8ff" stroke-width="2"/>
+  <circle cx="130" cy="130" r="10" fill="#6ca8ff"/>
+  <text x="154" y="125" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Overlay recovery available</text>
+  <text x="154" y="148" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="15">A display is ready when you want to restore the native window.</text>
+  <text x="96" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Keep working</text>
+  <text x="96" y="258" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Monitoring continues in safe mode until you choose to restore.</text>
+  <rect x="96" y="298" width="728" height="104" rx="16" fill="#17243c"/>
+  <text x="124" y="334" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Current session</text>
+  <text x="124" y="364" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Capture healthy · saved layout retained · no files changed</text>
+  <text x="124" y="388" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Restore later from settings or the tray.</text>
+  <rect x="96" y="438" width="202" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="197" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Open settings</text>
+  <rect x="316" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="393" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Dismiss</text>
+</svg>

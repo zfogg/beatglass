@@ -180,6 +180,7 @@ screenshots.
 | [Native display restore applied](overlay-native-display-restore-applied-card.svg) | healthy live state after restoring the native overlay |
 | [Native display retry](overlay-native-display-retry-card.svg) | bounded display restore retry with safe-mode escape |
 | [Native display retry exhausted](overlay-native-display-retry-exhausted-card.svg) | safe mode after bounded display restore attempts |
+| [Native recovery notice](overlay-native-recovery-notice-card.svg) | non-blocking recovery prompt while monitoring continues |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
