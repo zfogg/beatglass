@@ -1087,6 +1087,7 @@ ApplicationWindow {
         if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             window.overlayPreferredScreenIndex = -1
             window.overlayPreferredDisplayName = ""
             overlayDisplay.forceActiveFocus()
@@ -1096,6 +1097,7 @@ ApplicationWindow {
         if (!window.overlayBridge.moveToScreen(index)) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             window.announceCaptureRecoveryState("Overlay display selection could not be applied; control-window fallback remains active.")
             window.show()
             window.raise()
@@ -1106,6 +1108,7 @@ ApplicationWindow {
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             window.announceCaptureRecoveryState("Overlay display selected, but persisted visual state could not be reapplied.")
             window.show()
             window.raise()
@@ -1116,6 +1119,7 @@ ApplicationWindow {
         if (!window.syncOverlaySettingsStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             window.announceCaptureRecoveryState("Overlay display selected, but settings synchronization failed; choose or reconnect a display.")
             window.show()
             window.raise()
