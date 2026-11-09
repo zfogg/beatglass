@@ -128,8 +128,11 @@ OutputTap::~OutputTap() {
 
 bool OutputTap::start(const std::string& uid, std::uint64_t epoch) {
   if (!stop()) return false;
-  if (uid.empty() || uid.find('\0') != std::string::npos || uid.find_first_not_of(" \t\r\n") == std::string::npos || epoch == 0) {
-    impl_->current = {TapState::error, "Output UID and nonzero epoch required", TapFailure::invalid_argument}; return false;
+  if (uid.empty() || uid.find('\0') != std::string::npos || uid.find_first_not_of(" \t\r\n") == std::string::npos) {
+    impl_->current = {TapState::error, "Output UID required", TapFailure::invalid_argument}; return false;
+  }
+  if (epoch == 0) {
+    impl_->current = {TapState::error, "Nonzero capture epoch required", TapFailure::invalid_argument}; return false;
   }
   if (@available(macOS 14.2, *)) {
     @autoreleasepool {
