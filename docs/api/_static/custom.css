@@ -16,6 +16,16 @@ div.body .highlight {
   box-sizing: border-box;
 }
 
+div.body table.docutils {
+  width: 100%;
+}
+
+div.body table.docutils th:first-child,
+div.body table.docutils td:first-child {
+  min-width: 12rem;
+  width: 18%;
+}
+
 div.body pre,
 div.body .highlight {
   overflow-x: auto;
