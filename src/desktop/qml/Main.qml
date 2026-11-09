@@ -300,6 +300,9 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             overlayOpacityControl.forceActiveFocus()
             window.announceCaptureRecoveryState("Overlay opacity control focused; current value is " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
         }
