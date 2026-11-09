@@ -22,6 +22,8 @@ if type(manifest["schema_version"]) is not int or manifest["schema_version"] != 
 for field in ("host_platform", "python_version", "pipewire_cli_version"):
     if not isinstance(manifest[field], str) or not manifest[field].strip():
         raise SystemExit(f"manifest {field} must be a non-empty string")
+if type(manifest.get("audio_sink_count")) is not int or manifest["audio_sink_count"] < 1:
+    raise SystemExit("manifest audio_sink_count must be a positive integer")
 if not isinstance(manifest["captured_at_utc"], str) or not manifest["captured_at_utc"].strip():
     raise SystemExit("manifest captured_at_utc must be a non-empty string")
 if not str(manifest["host_platform"]).startswith("Linux"):
@@ -46,6 +48,8 @@ if any(not isinstance(item["info"].get("props"), dict) for item in manifest["inv
     raise SystemExit("manifest inventory info must retain props objects")
 if not any(item["info"]["props"].get("media.class") == "Audio/Sink" for item in manifest["inventory"]):
     raise SystemExit("manifest inventory must include an Audio/Sink")
+if manifest["audio_sink_count"] != sum(1 for item in manifest["inventory"] if item["info"]["props"].get("media.class") == "Audio/Sink"):
+    raise SystemExit("manifest audio_sink_count does not match inventory")
 for item in manifest["inventory"]:
     props = item["info"]["props"]
     if "media.class" in props and not isinstance(props["media.class"], str):
