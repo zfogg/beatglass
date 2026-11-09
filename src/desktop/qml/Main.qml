@@ -2526,7 +2526,7 @@ ApplicationWindow {
                                       + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")
                                       + (typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== "" ? (" · recovery: " + storageRecovery.analysisError) : "")) : ""
                                 Accessible.name: "Batch analysis queue status: " + text
-                                Accessible.value: visible ? text : ""
+                                Accessible.value: visible ? text : "unavailable; analysis bridge not reporting"
                                 ToolTip.text: "Accepted, rejected, and capacity limits for the analysis queue"
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: visible ? "Live batch lifecycle and result counts: " + text + ". Rejected work indicates admission limits; terminal failures use Retry or discard recovery." : "Batch queue status is unavailable until the analysis bridge reports it."
