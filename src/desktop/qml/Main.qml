@@ -1123,6 +1123,7 @@ ApplicationWindow {
         const url = files.get(index, "fileUrl")
         if (files.isFolder(index)) {
             browseFolder = url
+            browser.currentIndex = -1
         } else {
             window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
             selectedName = files.get(index, "fileName")
