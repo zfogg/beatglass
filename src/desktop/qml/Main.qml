@@ -4456,7 +4456,7 @@ ApplicationWindow {
                     Button {
                         objectName: "overlaySettingsSummaryReviewAction"
                         visible: window.overlayBridge !== null
-                        text: "Review overlay summary"
+                        text: window.overlayLaunchFallbackActive ? "Review recovery" : "Review overlay summary"
                         activeFocusOnTab: true
                         Accessible.name: text + ", " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "available") + "; settings revision " + window.overlaySettingsRevision
@@ -4467,7 +4467,7 @@ ApplicationWindow {
                         ToolTip.text: Accessible.description
                         onClicked: {
                             overlaySettingsSummary.forceActiveFocus()
-                            window.announceCaptureRecoveryState("Overlay summary reviewed; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+                            window.announceCaptureRecoveryState((window.overlayLaunchFallbackActive ? "Overlay recovery reviewed" : "Overlay summary reviewed") + "; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
                         }
                     }
                 Label {
