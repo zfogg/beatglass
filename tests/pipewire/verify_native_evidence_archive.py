@@ -86,6 +86,10 @@ with zipfile.ZipFile(archive_path) as archive:
         capture_name = manifest["capture_plan"].replace("\\", "/").rsplit("/", 1)[-1]
         if capture_name not in declared:
             raise SystemExit("capture plan is not archived")
+        summary_capture = summary_data.get("capture_plan")
+        if (not isinstance(summary_capture, str) or
+                summary_capture.replace("\\", "/").rsplit("/", 1)[-1] != capture_name):
+            raise SystemExit("summary capture plan path does not match archive")
         if (not isinstance(manifest.get("capture_plan_sha256"), str) or len(manifest["capture_plan_sha256"]) != 64 or
                 manifest["capture_plan_sha256"] != summary_data.get("capture_plan_sha256")):
             raise SystemExit("capture plan digest provenance mismatch")
@@ -115,6 +119,10 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit(f"size mismatch: {name}")
         if hashlib.sha256(payload).hexdigest() != artifact["sha256"]:
             raise SystemExit(f"digest mismatch: {name}")
+    if manifest.get("capture_plan"):
+        capture_name = manifest["capture_plan"].replace("\\", "/").rsplit("/", 1)[-1]
+        if summary_data["capture_plan_sha256"] != hashlib.sha256(archive.read(capture_name)).hexdigest():
+            raise SystemExit("summary capture plan digest does not match archive")
     discovery_name = next(name for name in declared if name.endswith(".json") and "discovery" in name)
     junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
     if not isinstance(summary_data.get("native_discovery_json"), str) or summary_data["native_discovery_json"].replace("\\", "/").rsplit("/", 1)[-1] != discovery_name:
