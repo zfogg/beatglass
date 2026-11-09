@@ -22,6 +22,8 @@ if not isinstance(inventory, list):
     raise SystemExit("pw-dump returned a non-list inventory")
 if args.output.is_symlink():
     raise SystemExit("refusing symlinked evidence output file")
+if args.output.exists():
+    raise SystemExit("refusing to overwrite existing evidence output")
 if args.output.parent.exists() and args.output.parent.is_symlink():
     raise SystemExit("refusing symlinked evidence output directory")
 args.output.parent.mkdir(parents=True, exist_ok=True)
