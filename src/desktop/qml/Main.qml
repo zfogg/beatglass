@@ -1545,6 +1545,7 @@ ApplicationWindow {
             window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
             selectedName = files.get(index, "fileName")
             selectedAudioUrl = url
+            metadataRetryPending = false
             metadataBridge.inspect(url)
             window.announceVisualizationRecovery("Selected source changed; prior analysis presentation is stale until this source is analyzed.")
             analyzeSelectedAudio.forceActiveFocus()
@@ -1553,6 +1554,7 @@ ApplicationWindow {
     function clearSelectedAudio() {
         window.selectedName = ""
         window.selectedAudioUrl = ""
+        window.metadataRetryPending = false
         window.metadataStatus = "Choose an audio file to inspect its metadata."
         window.clearVisualizationForCaptureState("Library selection cleared; choose another source for fresh analysis.")
         window.announceVisualizationRecovery("Library selection cleared; choose another source for fresh analysis.")

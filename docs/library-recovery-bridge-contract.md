@@ -91,6 +91,9 @@ The cache form also provides a clear-identity action that removes all fields and
 returns focus to the control, ensuring stale hits cannot remain actionable.
 The clear action announces that a fresh cache check is required before any
 cache mutation, keeping the keyboard workflow's next step explicit.
+Metadata retry cooldown is reset when Library selection changes or is cleared,
+so a previous file's retry backoff cannot disable recovery for the newly chosen
+source.
 The cache controls are also disabled while the bridge reports closed storage,
 so users cannot invoke actions that will be rejected by the worker boundary.
 The reusable jobs contract exposes explicit terminal-state and known-total
