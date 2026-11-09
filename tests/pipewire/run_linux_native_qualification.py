@@ -1,6 +1,7 @@
 """Run the documented Linux PipeWire configure/build/CTest qualification pass."""
 import argparse
 import json
+import hashlib
 import platform
 import sys
 import subprocess
@@ -77,8 +78,10 @@ if discovery_result:
         discovery_count = 0
 junit_count = None
 junit_failures = junit_errors = junit_skipped = None
+junit_sha256 = None
 junit_path = evidence / "pipewire-tests.xml"
 if junit_path.is_file():
+    junit_sha256 = hashlib.sha256(junit_path.read_bytes()).hexdigest()
     try:
         junit_root = ET.parse(junit_path).getroot()
         cases = list(junit_root.iter("testcase"))
@@ -98,6 +101,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit": str(evidence / "pipewire-tests.xml"),
            "native_junit_exists": (evidence / "pipewire-tests.xml").is_file(),
            "native_junit_test_count": junit_count,
+           "native_junit_sha256": junit_sha256,
            "native_junit_failures": junit_failures,
            "native_junit_errors": junit_errors,
            "native_junit_skipped": junit_skipped,
