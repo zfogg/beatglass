@@ -1396,7 +1396,10 @@ ApplicationWindow {
             }
             const recoveredDisplay = window.overlayPreferredDisplayName !== ""
                 ? window.overlayPreferredDisplayName : "the saved display"
-            window.announceCaptureRecoveryState("DJ overlay recovered on " + recoveredDisplay + " with persisted visual settings, including " + Math.round(window.overlayBridge.opacity * 100) + " percent opacity.")
+            const recoveredGeometry = window.overlayBridge.geometry
+            const geometrySummary = recoveredGeometry && recoveredGeometry.width > 0 && recoveredGeometry.height > 0
+                ? ", size " + recoveredGeometry.width + " by " + recoveredGeometry.height + " pixels" : ""
+            window.announceCaptureRecoveryState("DJ overlay recovered on " + recoveredDisplay + " with persisted visual settings" + geometrySummary + ", including " + Math.round(window.overlayBridge.opacity * 100) + " percent opacity.")
         }
         return true
     }
