@@ -22,6 +22,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("invalid or unqualified evidence manifest")
     if not isinstance(manifest.get("commit"), str) or not manifest["commit"].strip():
         raise SystemExit("evidence manifest has no commit identity")
+    if not isinstance(manifest.get("source_date_epoch"), int) or not manifest.get("archive_timestamp_utc", "").endswith("Z"):
+        raise SystemExit("evidence manifest has invalid reproducibility metadata")
     artifacts = manifest.get("artifacts", [])
     if not artifacts:
         raise SystemExit("evidence manifest contains no artifacts")
