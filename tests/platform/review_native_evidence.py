@@ -13,6 +13,10 @@ def assess(report_path: Path, reviewer: str) -> dict:
     except (OSError, json.JSONDecodeError) as error:
         return {"native_review_schema": 1, "decision": "PENDING", "reviewer": reviewer.strip(), "blockers": [str(error)]}
     blockers = []
+    if "ready" in report and not isinstance(report.get("ready"), bool):
+        blockers.append("report:ready must be boolean")
+    if "native_qualification_required" in report and not isinstance(report.get("native_qualification_required"), bool):
+        blockers.append("report:native qualification requirement must be boolean")
     if report.get("readiness_report_schema") not in (None, 1):
         blockers.append("report:unsupported readiness schema")
     if report.get("native_qualification_required") is False and report.get("ready") is True:
