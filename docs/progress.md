@@ -916,5 +916,7 @@ Visualization selection-reset feedback now names overlay recovery context. Porta
 
 Visualization capture retry status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_retry_name_contract.py`.
 
+Visualization data and capture status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_status_name_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
