@@ -1,12 +1,9 @@
 # Progress and handoff
 
-The FFT view now derives a bounded peak-bin summary from the accepted spectrum
-snapshot and exposes it through the canvas accessibility value, making the
-rendered frequency evidence inspectable without inventing a calibrated pitch.
-
-FFT rendering now clamps negative or malformed magnitudes to zero before
-painting bars, preventing invalid source values from producing inverted
-frequency visuals while preserving the bounded real-spectrum path.
+Core Audio startup failures now preserve the native diagnostic even when
+cleanup also fails, appending the quiescence failure rather than replacing the
+root cause. Portable coverage is in
+`python tests/unit/check_macos_start_failure_diagnostic_contract.py`.
 
 `Ctrl+Alt+Shift+W` focuses Restore overlay, preserving a direct keyboard path
 to bring back a user-hidden overlay with its persisted settings.
