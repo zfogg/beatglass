@@ -21,4 +21,10 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     if result.returncode == 0 or "platform set is incomplete" not in result.stderr + result.stdout:
         raise SystemExit("incomplete platform matrix was accepted")
-print("PipeWire qualification matrix validator behavior passed (2 scenarios)")
+    invalid = json.loads(json.dumps(valid))
+    invalid["platforms"]["Windows"]["evidence"] = []
+    path.write_text(json.dumps(invalid), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    if result.returncode == 0 or "qualified platform has no evidence" not in result.stderr + result.stdout:
+        raise SystemExit("qualified platform without evidence was accepted")
+print("PipeWire qualification matrix validator behavior passed (3 scenarios)")

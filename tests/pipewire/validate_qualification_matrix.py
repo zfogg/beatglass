@@ -18,6 +18,8 @@ if not isinstance(platforms, dict) or set(platforms) != required:
 for name, entry in platforms.items():
     if not isinstance(entry, dict) or entry.get("status") not in {"pending", "qualified"} or not isinstance(entry.get("evidence"), list):
         raise SystemExit(f"invalid qualification matrix entry: {name}")
+    if entry["status"] == "qualified" and not entry["evidence"]:
+        raise SystemExit(f"qualified platform has no evidence: {name}")
     if entry["status"] == "pending" and not isinstance(entry.get("pending_reason"), str):
         raise SystemExit(f"pending qualification lacks reason: {name}")
 print(f"Qualification matrix verified ({len(platforms)} platforms)")
