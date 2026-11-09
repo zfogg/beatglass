@@ -419,3 +419,5 @@ Handoff records should retain verifier warnings (including fixture duplicate-ent
 Treat verifier warnings as review context: they do not turn a pending native qualification into a qualified host result.
 
 Archive-review warnings should be copied verbatim into the evidence handoff, preserving the diagnostic context needed for later native-host review.
+
+A handoff is complete only when both archive integrity diagnostics and native qualification status are present; either record alone is insufficient.
