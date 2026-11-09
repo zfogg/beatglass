@@ -63,6 +63,8 @@ recomputes it to detect post-capture edits and requires the standard 64-digit
 lowercase SHA-256 representation.
 Capture and validation share the same canonical digest and Audio/Sink-count
 helpers, preventing the two qualification paths from drifting.
+The digest uses sorted JSON keys, so equivalent object-key ordering produces
+the same evidence hash.
 Capture also runs the shared inventory-shape gate before writing any artifact.
 Manifest validation runs that same gate before checking metadata, keeping
 capture-time and review-time structural acceptance identical.
