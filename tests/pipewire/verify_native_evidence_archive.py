@@ -132,6 +132,16 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit("transition evidence has no discontinuity")
         if not any(event.get("error_code", 0) != 0 for event in transitions if isinstance(event, dict)):
             raise SystemExit("transition evidence has no error code")
+        start = next(event for event in transitions if event.get("event") == "start")
+        if not isinstance(start.get("serial"), str) or not start["serial"].strip():
+            raise SystemExit("transition evidence has no sink serial")
+        if not any(isinstance(event.get("sample_count"), int) and event["sample_count"] > 0
+                   for event in transitions if event.get("event") == "process"):
+            raise SystemExit("transition evidence has no captured samples")
+        restart = next(event for event in transitions if event.get("event") == "restart")
+        fmt = restart.get("format")
+        if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("channels", 0) <= 0:
+            raise SystemExit("transition evidence has no negotiated format")
     discovery_tests = json.loads(archive.read(discovery_name)).get("tests")
     if not isinstance(discovery_tests, list):
         raise SystemExit("discovery JSON has no tests list")
