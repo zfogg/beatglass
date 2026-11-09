@@ -95,6 +95,7 @@ screenshots.
 | [Scan warnings](overlay-library-scan-warning-card.svg) | completed indexing with transparent skipped-file status |
 | [Folder unavailable](overlay-library-folder-unavailable-card.svg) | offline continuity when a library folder disappears |
 | [Scan scheduled](overlay-library-scan-scheduled-card.svg) | automatic indexing confirmation with immediate scan option |
+| [Scan schedule](overlay-library-scan-schedule-card.svg) | predictable incremental indexing settings |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
