@@ -35,6 +35,8 @@ with zipfile.ZipFile(archive_path) as archive:
         manifest = json.loads(archive.read("evidence-manifest.json"))
     except (json.JSONDecodeError, UnicodeDecodeError):
         raise SystemExit("malformed evidence manifest")
+    if not isinstance(manifest, dict):
+        raise SystemExit("evidence manifest is not an object")
     if manifest.get("format") != "beatglass-native-pipewire-evidence-v1" or manifest.get("qualified") is not True:
         raise SystemExit("invalid or unqualified evidence manifest")
     if not isinstance(manifest.get("commit"), str) or not manifest["commit"].strip():
