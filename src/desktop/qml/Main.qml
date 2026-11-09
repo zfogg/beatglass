@@ -2701,7 +2701,7 @@ ApplicationWindow {
                         ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity, settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending" : "")
                         : "unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Configure pointer click-through and overlay opacity."
+                    Accessible.description: "Configure pointer click-through and overlay opacity." + (window.overlayDisplayRecoveryPending ? " Recovery is pending." : "")
                     ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
                     CheckBox {
                         id: clickThroughToggle
