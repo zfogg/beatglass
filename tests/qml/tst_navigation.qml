@@ -1416,4 +1416,20 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_fallbackReviewKeepsPersistedSettingsKeyboardReady() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        verify(!app.showOverlayAndHideControls())
+        let review = findChild(app, "overlayFallbackReviewAction")
+        let summary = findChild(app, "overlaySettingsSummary")
+        verify(review.visible)
+        review.clicked()
+        verify(summary.activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }

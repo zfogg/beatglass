@@ -145,3 +145,6 @@ When the native overlay is unavailable, invoking Show or Restore is safe from a 
 
 Fallback activation does not discard the selected display or size preference: when the native bridge is unavailable, the tray/taskbar control window announces that those persisted settings remain queued for the next retry.
 
+
+The fallback review action keeps persisted display, geometry, opacity, and interaction settings keyboard-ready: activating it focuses the settings-retention summary without changing or discarding the queued recovery state.
+
