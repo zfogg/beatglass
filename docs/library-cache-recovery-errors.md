@@ -19,6 +19,7 @@ Admission responses synchronize the cached-result presentation, keeping the
 bridge's cache-hit and admission properties consistent for one identity.
 Lookup completion also clears stale retry/error state from a previous job, so
 a fresh identity probe cannot inherit recovery controls from unrelated work.
+Confirmed invalidation also clears retry/error state before reanalysis begins.
 Both transitions also reset stale progress so a completed lookup cannot appear
 to be an active analysis job.
 Lookup completion also publishes an explicit `Cached analysis ready` or `Cache
