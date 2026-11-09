@@ -53,6 +53,8 @@ ownership cannot change underneath an in-flight close or open.
 Lifecycle failures and storage close/open resets clear both retryable run IDs
 and their detail strings, keeping the GUI model from retaining descriptions for
 an unavailable recovery snapshot.
+Cancellation and retry of an analysis handle use the same storage-open guard,
+rather than queueing work against a missing database.
 Refresh requests made while storage is closed are rejected synchronously with
 `Storage error: storage is not open`; callers must reopen storage before asking
 the worker for a new persisted-recovery snapshot.
