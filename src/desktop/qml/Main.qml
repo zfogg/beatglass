@@ -858,8 +858,11 @@ ApplicationWindow {
         return true
     }
     function syncOverlaySizePreferenceFromGeometry(geometry) {
-        if (!geometry || !isFinite(geometry.x) || !isFinite(geometry.y) || !isFinite(geometry.width) || !isFinite(geometry.height) || geometry.width <= 0 || geometry.height <= 0)
+        if (!geometry || !isFinite(geometry.x) || !isFinite(geometry.y) || !isFinite(geometry.width) || !isFinite(geometry.height) || geometry.width <= 0 || geometry.height <= 0) {
+            window.overlayLaunchFallbackActive = true
+            window.overlayDisplayRecoveryPending = true
             return false
+        }
         const sizes = [[250, 110], [310, 130], [430, 180]]
         let best = 0
         let bestDistance = Number.MAX_VALUE
