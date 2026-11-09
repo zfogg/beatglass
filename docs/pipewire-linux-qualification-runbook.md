@@ -102,3 +102,4 @@ JUnit evidence with non-zero failures/errors or failure/error testcase elements 
 Skipped JUnit testcases or non-zero skipped counts are rejected, so pending native scenarios cannot pass the qualification gate.
 JUnit archives must include at least one named testcase; unnamed or testcase-free result documents are rejected.
 Duplicate JUnit testcase names are rejected so each native result remains uniquely attributable.
+CTest discovery entries must also have unique names, preserving an unambiguous native registration inventory.
