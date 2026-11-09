@@ -12,6 +12,10 @@ except (OSError, json.JSONDecodeError, UnicodeDecodeError):
     raise SystemExit("malformed qualification bundle")
 if matrix.get("schema") != "beatglass-native-qualification-matrix-v1" or "# Native qualification matrix" not in report:
     raise SystemExit("invalid qualification bundle schema")
+if matrix.get("host_os") not in {"Linux", "Windows", "Darwin"}:
+    raise SystemExit("qualification bundle has invalid host identity")
+if "commit" in matrix and (not isinstance(matrix["commit"], str) or not matrix["commit"].strip()):
+    raise SystemExit("qualification bundle has invalid commit identity")
 for name, entry in matrix.get("platforms", {}).items():
     if f"| {name} | **{entry.get('status')}** |" not in report:
         raise SystemExit(f"qualification report is missing platform: {name}")

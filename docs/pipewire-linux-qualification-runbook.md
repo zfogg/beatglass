@@ -54,6 +54,8 @@ the ingestion tool rejects conflicting platform entries and incomplete reports.
 Validate the matrix and rendered report together with
 `python tests/pipewire/validate_qualification_bundle.py evidence/qualification-matrix.json evidence/qualification-matrix.md`;
 this keeps portable status and its reviewer-facing rendering synchronized.
+Bundle validation also requires a supported host identity and, when present,
+non-empty source commit provenance before the handoff is accepted.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
