@@ -28,7 +28,7 @@ def main() -> int:
         return 1
     sizes = {name: (root / name).stat().st_size for name in REQUIRED}
     if len(sys.argv) == 3:
-        print(json.dumps({"verified": True, "artifact_dir": str(root), "files": sizes}, sort_keys=True))
+        print(json.dumps({"schema": "pipewire-qualification-v1", "verified": True, "artifact_dir": str(root), "files": sizes}, sort_keys=True))
     else:
         for name, size in sizes.items(): print(f"{name}: {size} bytes")
         print(f"PipeWire qualification artifacts verified ({len(REQUIRED)} files)")
