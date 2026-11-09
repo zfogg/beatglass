@@ -519,6 +519,18 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlayStopRecoveryShowsKeyboardShortcutHint() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        findChild(app, "retryOverlay").clicked()
+        let hint = findChild(app, "overlayStopRecoveryShortcutHint")
+        verify(hint.visible)
+        compare(hint.text, "Shortcut: Ctrl+Alt+Shift+X stops recovery")
+        compare(hint.Accessible.description, "Keyboard shortcut for stopping native overlay recovery")
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)

@@ -41,6 +41,8 @@ Users can choose `Stop recovery` before the limit to pause retries while
 leaving monitoring available; starting a new retry cycle remains explicit.
 The same action is available from the keyboard with `Ctrl+Alt+Shift+X` while
 an active retry cycle is in progress.
+The active recovery card repeats this shortcut next to the Stop recovery action
+so pausing a retry remains discoverable.
 
 ## Screenshot qualification
 
