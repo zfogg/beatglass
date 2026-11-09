@@ -33,6 +33,8 @@ Linux runs use the same schema with `handoff_status: complete` only when the
 qualification predicate passes, and `failed` otherwise.
 The completed-summary verifier enforces that schema and requires a non-empty
 commit identity before accepting discovery/JUnit digests.
+When a transition artifact is supplied, it also verifies its digest and runs
+the transition validator before accepting the completed summary.
 The native owner records whether its thread loop actually started, so early
 PipeWire construction failures can tear down safely without locking an
 unstarted loop; native Linux qualification must exercise these failure paths.
