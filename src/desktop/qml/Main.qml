@@ -401,6 +401,7 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        overlayDisplay.forceActiveFocus()
         if (reason !== "")
             window.announceCaptureRecoveryState(reason)
     }
