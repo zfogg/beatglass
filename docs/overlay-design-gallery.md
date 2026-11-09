@@ -159,6 +159,7 @@ screenshots.
 | [Native activation retrying](overlay-native-activation-retrying-card.svg) | bounded activation retry with safe-mode escape |
 | [Native activation paused](overlay-native-activation-exhausted-card.svg) | safe mode after activation retries are exhausted |
 | [Native safe mode dismissed](overlay-native-safe-mode-dismissed-card.svg) | non-blocking safe-mode continuation state |
+| [Native safe mode settings](overlay-native-safe-mode-settings-card.svg) | settings recovery without session interruption |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
