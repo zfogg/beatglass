@@ -48,6 +48,7 @@ public slots:
     } catch (const std::exception& error) { emit result(false, QStringLiteral("Recovery discard rejected: ") + QString::fromUtf8(error.what())); refresh(); }
   }
   void retry(QString runId) {
+    if (runId.trimmed().isEmpty()) { emit result(false, QStringLiteral("Retry rejected: no persisted run selected")); return; }
     if (runId.isEmpty()) { emit result(false, QStringLiteral("Retry rejected: no persisted run selected")); return; }
     std::optional<beatglass::library_detail::RetryableRun> found;
     try { found = coordinator_.storage().retryable_run(runId.toStdString()); }
