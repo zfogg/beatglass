@@ -71,6 +71,8 @@ Serials and node names must be unique among Audio/Sink entries so selection is
 never ambiguous.
 The schema version is validated as an integer to prevent JSON booleans from
 being accepted through Python's integer-equivalence rules.
+Host, Python, and PipeWire CLI identity fields must remain non-empty strings
+so the evidence record is unambiguous.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
