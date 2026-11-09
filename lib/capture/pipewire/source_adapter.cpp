@@ -61,6 +61,9 @@ bool MonitorSession::on_process(std::span<const float> samples, std::uint64_t ho
   return stream_ && stream_->on_process(samples, host_time, host_time_valid,
                                         source_sample_time, sample_time_valid);
 }
+bool MonitorSession::pop(coreaudio::CaptureBlock& block) noexcept {
+  return stream_ && stream_->pop(block);
+}
 MonitorSession::Status MonitorSession::poll_status() noexcept {
   Status status;
   status.active = static_cast<bool>(stream_);
