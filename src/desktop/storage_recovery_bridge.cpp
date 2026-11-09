@@ -234,8 +234,8 @@ void StorageRecoveryBridge::reanalyze(QString runId, QString path, QString conte
   invalidateCached(contentHash, engine, configuration, mode);
   submitAnalysis(std::move(runId), std::move(path), std::move(contentHash), std::move(engine), std::move(configuration), std::move(mode));
 }
-void StorageRecoveryBridge::cancelAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); }
-void StorageRecoveryBridge::retryAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); }
+void StorageRecoveryBridge::cancelAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
+void StorageRecoveryBridge::retryAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
 void StorageRecoveryBridge::admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "admitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
 }
