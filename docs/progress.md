@@ -818,3 +818,5 @@ Overlay estimate readiness now states that the accepted snapshot remains retaine
 
 Overlay endpoint status now states that the selected endpoint remains retained during pending recovery. Portable coverage is in `python tests/unit/check_overlay_endpoint_retention_contract.py`.
 
+Overlay live-monitoring status now states that the selected endpoint remains retained while capture recovers. Portable coverage is in `python tests/unit/check_overlay_live_retention_contract.py`.
+
