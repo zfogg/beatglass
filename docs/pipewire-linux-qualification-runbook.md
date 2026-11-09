@@ -52,6 +52,7 @@ The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
 are visible in the generated Markdown handoff.
+It also proves malformed matrix schemas are refused before report generation.
 It also refuses to mark a platform qualified unless at least one evidence
 artifact is listed.
 Evidence entries must be non-empty strings, preventing malformed paths from
