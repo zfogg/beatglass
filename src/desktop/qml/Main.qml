@@ -2147,7 +2147,7 @@ ApplicationWindow {
                                     enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== ""
                                     Accessible.name: "Forget cached analysis"
                                     Accessible.description: "Remove this completed cache identity so the next analysis runs again. Source files are not changed."
-                                    onClicked: storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
+                                    onClicked: invalidateCacheDialog.open()
                                 }
                                 Button {
                                     objectName: "reanalyzeInvalidatedCache"
@@ -2158,6 +2158,18 @@ ApplicationWindow {
                                     Accessible.description: "Invalidate this identity and admit fresh analysis work to the queue."
                                     onClicked: storageRecovery.reanalyze("reanalyze-" + cacheContent.text, window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
                                 }
+                            }
+                            Dialog {
+                                id: invalidateCacheDialog
+                                objectName: "invalidateCacheDialog"
+                                title: "Forget cached analysis?"
+                                modal: true
+                                standardButtons: Dialog.Cancel | Dialog.Ok
+                                Accessible.name: "Forget cached analysis confirmation"
+                                Accessible.description: "Confirm removal of the selected completed cache identity. Source audio is not modified."
+                                contentItem: Label { text: "This removes only the completed cached result for the entered identity. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.role: Accessible.StaticText }
+                                onOpened: { window.announceVisualizationRecovery("Confirm forgetting the cached result; source audio remains unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
+                                onAccepted: { storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Cached analysis identity forgotten; source audio was not changed."); invalidateCacheDialog.close() }
                             }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
