@@ -7,6 +7,9 @@ if(BUILD_TESTING)
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_cache_bridge_contract.py)
   set_tests_properties(desktop_cache_bridge_contract PROPERTIES LABELS unit TIMEOUT 10)
   add_test(NAME analysis_coordinator_contract COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_analysis_coordinator_contract.py)
+  add_test(NAME pipewire_linux_adapter_seam_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_linux_adapter_seam_contract.py)
+  set_tests_properties(pipewire_linux_adapter_seam_contract PROPERTIES LABELS unit TIMEOUT 10)
 endif()
 
 if(BUILD_TESTING)
