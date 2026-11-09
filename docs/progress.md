@@ -1,9 +1,12 @@
 # Progress and handoff
 
-Core Audio tap polling now classifies a vanished or replaced output stream as
-`device_lost`, not a generic backend failure, so reacquisition guidance remains
-actionable across stream topology changes. Portable coverage is in
-`python tests/unit/check_macos_stream_loss_classification_contract.py`.
+Overlay shortcut guidance now includes click-through toggling, display focus,
+and retry recovery alongside unlock, hide/restore, and saved-settings reapply,
+so every keyboard recovery path is visible and screen-reader discoverable.
+
+`Ctrl+Alt+I` toggles native overlay click-through from the keyboard. Successful
+changes announce whether interaction is disabled or restored; rejected changes
+retain the current mode and report recovery guidance.
 
 When the native overlay is unavailable but displays are enumerated, `Ctrl+Alt+Y`
 retries recovery while keeping the control window visible until the show call
