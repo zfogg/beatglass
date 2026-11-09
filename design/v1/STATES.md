@@ -4,6 +4,7 @@
 |---|---|---|
 | Library | Browse indexed collection; completed, analyzing and source changed rows; track key unknown | Folder navigation, search, sort, select, individual/batch analysis; preserve files. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
+| Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library multi-selection | Several eligible tracks are selected for a batch action | Show selection count, eligible batch action, and preserve completed evidence and source files. |
 | Library batch queued | Selected sources were admitted to analysis | Show admitted/skipped counts, link to queue, and preserve existing evidence until fresh results are accepted. |
 | Library batch complete | Batch finished with accepted and attention-needed sources | Summarize accepted/review/skipped counts and route to results or recovery without losing attribution. |
