@@ -4,11 +4,27 @@ import json
 import shutil
 import subprocess
 import sys
+import argparse
+from pathlib import Path
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
 from preflight_inventory import validate_sink_inventory
 
+parser = argparse.ArgumentParser(description="Probe Linux PipeWire prerequisites without claiming capture qualification.")
+parser.add_argument("--report", type=Path, help="write a machine-readable probe report")
+args = parser.parse_args()
+
+def finish(status, missing, versions=None):
+    report = {"platform": platform.platform(), "host_os": platform.system(),
+              "target": "Linux/PipeWire", "status": status,
+              "native_execution_attempted": False, "missing": missing,
+              "versions": versions or {}}
+    if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    return report
+
 if platform.system() != "Linux":
-    print("PipeWire native preflight pending: run on Linux with libpipewire-0.3")
+    print(json.dumps(finish("pending", ["Linux host", "PipeWire daemon", "libpipewire-0.3"]), indent=2))
     raise SystemExit(0)
 
 missing = []
@@ -47,6 +63,7 @@ else:
                               stdout=subprocess.PIPE, text=True).returncode:
                 missing.append(f"pkg-config {flag} for libpipewire-0.3")
 if missing:
+    finish("missing", missing)
     print("Missing Linux PipeWire prerequisites: " + ", ".join(missing), file=sys.stderr)
     print("Install PipeWire development headers and rerun CMake with BEATGLASS_BUILD_PIPEWIRE=ON", file=sys.stderr)
     raise SystemExit(1)
@@ -57,5 +74,5 @@ for tool in ("pw-cli", "pw-dump"):
     output = subprocess.run([tool, "--version"], check=False, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT, text=True).stdout.strip().splitlines()
     tool_versions.append(f"{tool}={output[0] if output else 'unknown'}")
-print(f"Linux PipeWire prerequisites available; libpipewire-0.3={version}; "
-      f"{', '.join(tool_versions)}; configure and run pipewire_tests")
+report = finish("ready", [], {"libpipewire-0.3": version, **dict(item.split("=", 1) for item in tool_versions)})
+print(json.dumps(report, indent=2))
