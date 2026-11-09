@@ -1799,6 +1799,7 @@ ApplicationWindow {
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
                         Keys.onEnterPressed: window.activateEntry(currentIndex)
                         Keys.onSpacePressed: window.activateEntry(currentIndex)
+                        Keys.onEscapePressed: { window.clearSelectedAudio(); search.forceActiveFocus() }
                         ScrollBar.vertical: ScrollBar {}
                         delegate: ItemDelegate {
                             required property int index
