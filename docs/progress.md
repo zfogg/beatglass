@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Saved overlay display, size, position, and opacity can be reapplied from the
+keyboard with `Ctrl+Alt+Shift+R`, using the same recovery path as the control
+window and announcing the restoration state.
+
 The overlay can be hidden or restored from the keyboard with `Ctrl+Alt+H`.
 The shortcut uses the same persisted hide/restore path as the control-window
 buttons, keeping monitoring state and the discoverable fallback synchronized.
