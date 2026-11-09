@@ -17,6 +17,8 @@ def validate_inventory_shape(inventory):
         return "inventory entries must be objects"
     if any(not isinstance(item.get("info"), dict) or not isinstance(item["info"].get("props"), dict) for item in inventory):
         return "inventory entries must retain info.props objects"
+    if any("media.class" in item["info"]["props"] and not isinstance(item["info"]["props"]["media.class"], str) for item in inventory):
+        return "inventory media.class values must be strings"
     if any(not isinstance(item.get("id"), int) or item["id"] < 0 for item in inventory):
         return "inventory entries must have non-negative ids"
     ids = [item["id"] for item in inventory]

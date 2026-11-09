@@ -72,6 +72,7 @@ It also rejects duplicate object IDs before publication or review.
 The shared gate requires each Audio/Sink to retain non-empty string serial and
 node-name values before either path proceeds.
 It also enforces decimal serial formatting before publication or review.
+The shared gate requires any `media.class` value to remain string-typed.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a
