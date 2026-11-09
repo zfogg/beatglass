@@ -43,6 +43,7 @@ if summary.get("native_transition_json"):
         raise SystemExit("native transition platform mismatch")
     if transition_payload.get("commit") != summary.get("commit"):
         raise SystemExit("native transition commit mismatch")
-    if summary.get("native_transition_event_count") != len(transition_events):
+    count = summary.get("native_transition_event_count")
+    if not isinstance(count, int) or isinstance(count, bool) or count <= 0 or count != len(transition_events):
         raise SystemExit("native transition event count mismatch")
 print("Native PipeWire qualification summary verified")

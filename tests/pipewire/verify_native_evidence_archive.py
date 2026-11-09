@@ -118,7 +118,10 @@ with zipfile.ZipFile(archive_path) as archive:
         transitions = transitions.get("events")
         if not isinstance(transitions, list) or not transitions:
             raise SystemExit("transition evidence is empty")
-        if summary_data.get("native_transition_event_count") != len(transitions):
+        if (not isinstance(summary_data.get("native_transition_event_count"), int) or
+                isinstance(summary_data.get("native_transition_event_count"), bool) or
+                summary_data["native_transition_event_count"] <= 0 or
+                summary_data["native_transition_event_count"] != len(transitions)):
             raise SystemExit("transition event count does not match summary")
         if manifest.get("transition_event_count") != len(transitions):
             raise SystemExit("transition event count does not match manifest")
