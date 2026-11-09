@@ -10,9 +10,9 @@ output = Path(sys.argv[1])
 summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8")) if len(sys.argv) == 4 else None
 host = platform.system()
 platforms = {
-    "Linux": {"target": "Linux/PipeWire", "status": "pending", "evidence": []},
-    "Windows": {"target": "Windows/native audio/overlay", "status": "pending", "evidence": []},
-    "Darwin": {"target": "macOS/native audio/overlay", "status": "pending", "evidence": []},
+    "Linux": {"target": "Linux/PipeWire", "status": "pending", "evidence": [], "execution_blockers": ["Linux host", "PipeWire daemon", "libpipewire-0.3", "audio sink"]},
+    "Windows": {"target": "Windows/native audio/overlay", "status": "pending", "evidence": [], "execution_blockers": ["Windows host", "desktop audio permission", "overlay session"]},
+    "Darwin": {"target": "macOS/native audio/overlay", "status": "pending", "evidence": [], "execution_blockers": ["macOS host", "Screen Recording permission", "audio capture permission", "overlay session"]},
 }
 for item in platforms.values():
     if item["status"] == "pending":
