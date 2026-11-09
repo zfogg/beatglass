@@ -961,6 +961,12 @@ ApplicationWindow {
         window.catalogDiagnostic = window.libraryCatalogBridge && window.libraryCatalogBridge.lastDiagnostic !== undefined
                 ? window.libraryCatalogBridge.lastDiagnostic : ""
     }
+    function resetLibraryBrowserSelection(message) {
+        window.clearSelectedAudio()
+        browser.currentIndex = -1
+        window.announceVisualizationRecovery(message)
+        browser.forceActiveFocus()
+    }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
         if (files.status === FolderListModel.Error)
@@ -2012,7 +2018,7 @@ ApplicationWindow {
                         Accessible.name: "Refresh folder contents"; Accessible.value: enabled ? "available; clears the current selection" : "unavailable; choose a folder first"; Accessible.role: Accessible.Button
                         Accessible.description: "Re-read the current folder so newly added, removed, or changed audio files are reflected."
                         ToolTip.text: "Refresh the current folder contents"
-                        onClicked: { files.refresh(); window.refreshCatalog(); window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed; entry selection cleared."); browser.forceActiveFocus() }
+                        onClicked: { files.refresh(); window.refreshCatalog(); window.resetLibraryBrowserSelection("Folder contents refreshed; entry selection cleared.") }
                     }
                     Label {
                         id: folderPath
