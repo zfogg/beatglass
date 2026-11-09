@@ -1158,6 +1158,9 @@ TestCase {
         compare(pageShortcut.sequence, "Ctrl+Alt+Shift+P")
         verify(pageShortcut.enabled)
         verify(findChild(app, "overlayPausedRecoveryPageShortcutHint").visible)
+        findChild(app, "resumeOverlayRecovery").clicked()
+        verify(!pageShortcut.enabled)
+        verify(!findChild(app, "overlayPausedRecoveryPageShortcutHint").visible)
         app.destroy()
         fakeOverlay.available = true
     }
