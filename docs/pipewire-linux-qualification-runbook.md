@@ -48,6 +48,9 @@ Validate a transferred matrix independently with
 before treating its cross-platform status as an actionable handoff.
 Render a reviewable report with
 `python tests/pipewire/render_qualification_matrix_report.py evidence/qualification-matrix.json evidence/qualification-matrix.md`.
+Merge per-host evidence as it arrives with
+`python tests/pipewire/merge_qualification_matrices.py evidence/qualification-matrix.json linux.json windows.json macos.json`;
+the ingestion tool rejects conflicting platform entries and incomplete reports.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
