@@ -16,6 +16,10 @@ with tempfile.TemporaryDirectory() as directory:
         raise SystemExit(result.stderr or result.stdout)
     matrix = json.loads(output.read_text(encoding="utf-8"))
     host_entry = matrix["platforms"][matrix["host_os"]]
+    if set(matrix["platforms"]) != {"Linux", "Windows", "Darwin"}:
+        raise SystemExit("qualification matrix omitted a required platform")
+    if any("pending_reason" not in item for name, item in matrix["platforms"].items() if name != matrix["host_os"]):
+        raise SystemExit("pending platform lacks an actionable reason")
     if host_entry["status"] != "pending" or host_entry["evidence"] != ["evidence/native-summary.json"] or host_entry["pending_reason"] != "host unavailable":
         raise SystemExit("runner summary was not merged into host matrix entry")
     summary.write_text(json.dumps({"qualified": True, "native_artifacts": ["evidence/native-qualification.zip"]}), encoding="utf-8")
