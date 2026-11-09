@@ -352,6 +352,16 @@ ApplicationWindow {
         onActivated: window.retryVisualizationAnalysis()
     }
     Shortcut {
+        objectName: "analysisDiscardShortcut"
+        sequence: "Ctrl+Alt+D"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canRetry
+        onActivated: {
+            window.analysisJobBridge.discard()
+            window.announceVisualizationRecovery("Analysis recovery discarded from the keyboard; focus remains on recovery controls.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
