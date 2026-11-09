@@ -1188,6 +1188,8 @@ TestCase {
         findChild(app, "retryOverlay").clicked()
         findChild(app, "stopOverlayRecovery").clicked()
         verify(app.overlayRecoveryPausedByUser)
+        app.showOverlayAndHideControls()
+        verify(app.overlayRecoveryPausedByUser)
         fakeOverlay.available = true
         app.showOverlayAndHideControls()
         verify(!app.overlayRecoveryPausedByUser)
