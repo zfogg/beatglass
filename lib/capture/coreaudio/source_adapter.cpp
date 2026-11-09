@@ -29,6 +29,8 @@ EnumerationResult SourceAdapter::enumerate() {
       result.sources.clear();
       if (!result.error) result.error = SourceError::backend_error;
       if (result.diagnostic.empty()) result.diagnostic = "Core Audio output enumeration failed";
+    } else if (result.outcome == EnumerationOutcome::ok && result.sources.empty() && result.diagnostic.empty()) {
+      result.diagnostic = "No Core Audio output devices available";
     }
     return result;
   }
