@@ -26,6 +26,7 @@
 | Track playback move canceled | Recovery is canceled before a recovered source is confirmed | Keep playback/evidence locked, clear active queue work, and preserve explicit retry/removal without touching files. |
 | Track playback move removed | Unconfirmed recovered source is removed from the playback queue | Clear playback state while retaining source attribution and fail-closed evidence for later Browse recovery. |
 | Track recovery later | Catalog entry remains after queue removal while source recovery is deferred | Preserve provenance, keep playback/evidence inactive, and make locate/remove catalog actions explicit. |
+| Track recovery remove confirmation | Unresolved catalog entry is pending explicit removal | Explain local-entry-only impact, preserve the audio file, and offer cancel/remove actions without queue or playback side effects. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
