@@ -31,6 +31,10 @@ It also records requested summary/archive paths and an empty native artifact
 list, making the host limitation explicit without claiming qualification.
 The pending record includes the host OS and the exact runner command that must
 be rerun on Linux, making the handoff actionable rather than merely advisory.
+Generate the cross-platform gate scaffold with
+`python tests/pipewire/qualification_matrix.py evidence/qualification-matrix.json`;
+it records Linux, Windows, and macOS targets, status, and pending reasons while
+native evidence is collected on each host.
 It also records the runner Python version and working directory for reproducible
 handoff diagnostics.
 It labels the target as `Linux/PipeWire` and the handoff as `pending`, so
