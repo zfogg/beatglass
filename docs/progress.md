@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Cancelled Core Audio enumeration now carries the typed `cancelled` source
+error even when the backend omitted one, alongside its empty source list and
+diagnostic. Portable coverage is in
+`python tests/unit/check_macos_cancel_error_type_contract.py`.
+
 Cancelled Core Audio enumeration now always clears any partial source list,
 preventing stale devices from surviving a cancelled refresh. Portable coverage
 is in `python tests/unit/check_macos_cancel_sources_empty_contract.py`.
