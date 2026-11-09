@@ -78,6 +78,8 @@ They also record the capture-plan SHA-256 when the file is available, allowing
 the native host to prove it used the intended preparation instructions.
 Summaries explicitly record whether that plan passed validation before the
 runner proceeded.
+The pending-runner behavior fixture executes this Windows-safe path and asserts
+that it exits unqualified while preserving the validated-plan provenance.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
