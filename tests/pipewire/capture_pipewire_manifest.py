@@ -25,7 +25,8 @@ if not isinstance(inventory, list):
     raise SystemExit("pw-dump returned a non-list inventory")
 version = subprocess.run(["pw-cli", "--version"], check=False,
                          capture_output=True, text=True).stdout.strip()
-manifest = {"captured_at_utc": datetime.now(timezone.utc).isoformat(),
+manifest = {"schema_version": 1,
+            "captured_at_utc": datetime.now(timezone.utc).isoformat(),
             "host_platform": platform.platform(),
             "python_version": platform.python_version(),
             "pipewire_cli_version": version, "inventory": inventory}
