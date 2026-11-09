@@ -859,6 +859,8 @@ The output endpoint empty state now uses live status semantics alongside endpoin
 
 The output-device selector is explicitly keyboard reachable, keeping monitoring setup usable from the same keyboard recovery path as endpoint refresh and status guidance.
 
+Playback sample-rate and channel controls are explicitly keyboard reachable, keeping native output setup usable without pointer input.
+
 The overlay display empty state now uses live status semantics alongside saved-display recovery, making missing-output remediation discoverable before destination selection.
 
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
