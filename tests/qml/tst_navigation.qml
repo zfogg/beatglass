@@ -2317,7 +2317,22 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
-    function test_selectReplacementDisplayReappliesRetainedVisualState() {
+'    function test_validVisualRestoreIsDirectlyTestable() {
+        fakeOverlay.available = true
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        fakeOverlay.opacity = 0.42
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredScreenIndex = 0
+        verify(app.restoreOverlayVisualStateFromBridge())
+        compare(fakeOverlay.requestedWidth, 620)
+        compare(fakeOverlay.requestedHeight, 280)
+        compare(fakeOverlay.opacity, 0.42)
+        verify(app.overlayRecoveryAnnouncement.indexOf("42 percent opacity") >= 0)
+        app.destroy()
+        fakeOverlay.opacity = 0.9
+    }
+
+'    function test_selectReplacementDisplayReappliesRetainedVisualState() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = ["Projector", "Laptop"]
         fakeOverlay.displayName = "Projector"
