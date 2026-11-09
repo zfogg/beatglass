@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+  <title id="title">Library scan scheduled overlay</title>
+  <desc id="desc">A clear scheduled indexing confirmation with the next scan time and an option to scan now.</desc>
+  <rect width="960" height="600" fill="#0b1220"/><rect x="120" y="84" width="720" height="432" rx="24" fill="#172033" stroke="#2a3852" stroke-width="2"/>
+  <circle cx="184" cy="151" r="28" fill="#214b46"/><circle cx="184" cy="151" r="10" fill="none" stroke="#7ff0c4" stroke-width="4"/><path d="M184 132v8m0 22v8m19-19h-8m-22 0h-8" stroke="#7ff0c4" stroke-width="3" stroke-linecap="round"/>
+  <text x="232" y="145" fill="#f7fafc" font-family="sans-serif" font-size="28" font-weight="700">Library scan scheduled</text><text x="232" y="177" fill="#a7b4c9" font-family="sans-serif" font-size="17">Beatglass will keep your library fresh automatically.</text>
+  <rect x="168" y="220" width="624" height="102" rx="14" fill="#101827"/><text x="192" y="253" fill="#a7b4c9" font-family="sans-serif" font-size="15">NEXT SCAN</text><text x="192" y="286" fill="#f7fafc" font-family="sans-serif" font-size="22" font-weight="700">Tomorrow at 03:00</text><text x="192" y="309" fill="#a7b4c9" font-family="sans-serif" font-size="14">Only changed files will be indexed.</text>
+  <text x="168" y="372" fill="#d8e3f5" font-family="sans-serif" font-size="16">You can scan now if your library changed</text><text x="168" y="400" fill="#a7b4c9" font-family="sans-serif" font-size="15">Scheduled scans never modify your audio files.</text>
+  <rect x="168" y="438" width="142" height="48" rx="12" fill="#56d38b"/><text x="239" y="469" text-anchor="middle" fill="#07130d" font-family="sans-serif" font-size="16" font-weight="700">Scan now</text><rect x="326" y="438" width="148" height="48" rx="12" fill="#24344f" stroke="#3b4d6d"/><text x="400" y="469" text-anchor="middle" fill="#f7fafc" font-family="sans-serif" font-size="16">Close</text><text x="168" y="548" fill="#718096" font-family="sans-serif" font-size="14">Beatglass · Library</text>
+</svg>
