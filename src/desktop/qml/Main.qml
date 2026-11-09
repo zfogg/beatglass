@@ -377,6 +377,19 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "analysisBatchCancelShortcut"
+        sequence: "Ctrl+Alt+K"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null
+            && window.analysisJobBridge.cancelBatch !== undefined
+            && window.analysisJobBridge.batchAcceptedCount > 0
+            && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running")
+        onActivated: {
+            window.analysisJobBridge.cancelBatch()
+            window.announceVisualizationRecovery("Analysis batch cancelled from the keyboard; waiting for a replacement accepted snapshot.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
