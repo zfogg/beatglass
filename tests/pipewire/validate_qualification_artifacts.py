@@ -10,6 +10,9 @@ def main() -> int:
         print("usage: validate_qualification_artifacts.py ARTIFACT_DIR", file=sys.stderr)
         return 2
     root = Path(sys.argv[1])
+    if not root.is_dir():
+        print(f"artifact directory not found: {root}", file=sys.stderr)
+        return 2
     missing = [name for name in REQUIRED if not (root / name).is_file()]
     empty = [name for name in REQUIRED if (root / name).is_file() and not (root / name).read_text(encoding="utf-8").strip()]
     if missing:

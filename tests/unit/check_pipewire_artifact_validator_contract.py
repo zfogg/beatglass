@@ -3,4 +3,5 @@ p = (Path(__file__).parents[2] / "tests/pipewire/validate_qualification_artifact
 for marker in ("REQUIRED =", "build.txt", "lifecycle-trace.txt", "return 1"):
     assert marker in p
 assert "read_text(encoding=\"utf-8\").strip()" in p
+assert "if not root.is_dir()" in p
 print("PipeWire artifact validator contract verified (4 checks)")
