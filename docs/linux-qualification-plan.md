@@ -78,6 +78,7 @@ relative, normalized paths that cannot escape the evidence bundle.
 Dot segments, duplicate separators, and backslash-separated paths are rejected
 to keep manifests portable across host platforms.
 Artifact roles are limited to the six qualification scenario roles.
+Every `PASS` scenario must have a corresponding retained evidence digest.
 Each platform entry must also identify the capture environment and include an
 ISO-8601 capture timestamp with timezone, so evidence cannot be detached from
 its host run or interpreted in an unknown clock context. When a report declares
