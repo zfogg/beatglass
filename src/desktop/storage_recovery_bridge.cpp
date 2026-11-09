@@ -25,6 +25,7 @@ public slots:
   void close() {
     try { coordinator_.close_storage(); emit result(true, QStringLiteral("Storage closed")); }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Storage close failed: ") + QString::fromUtf8(error.what())); }
+    catch (...) { emit result(false, QStringLiteral("Storage close failed: unknown storage error")); }
     emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle"));
   }
   void refresh() {
