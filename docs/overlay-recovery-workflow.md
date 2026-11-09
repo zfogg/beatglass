@@ -28,6 +28,8 @@ Recovery permits three attempts before the retry action enters a safe-mode
 state. Reconnect a display or change recovery settings to leave that state.
 The control window also exposes `Clear safe mode` so a user can deliberately
 start another bounded recovery cycle after checking the display connection.
+While safe mode is active, a status message remains visible and explicitly
+states that monitoring continues without the native overlay.
 
 ## Screenshot qualification
 
