@@ -1,5 +1,8 @@
 # Progress and handoff
 
+`Ctrl+Alt+W` focuses the Show overlay action, providing a direct keyboard path
+to restore the native overlay after recovery or configuration changes.
+
 `Ctrl+Alt+Z` focuses the overlay size selector and announces the active
 Compact, Medium, or Large preset before keyboard adjustment.
 
