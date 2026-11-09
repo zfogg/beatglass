@@ -36,6 +36,8 @@
 | Track analysis in progress | Active worker is processing the selected source | Show stage/progress, keep stale evidence hidden, and expose cancellation without mutating the audio file. |
 | Track analysis canceled | Worker stopped before publishing | Explain cleared evidence, offer retry/discard recovery, and state that audio is unchanged. |
 | Track analysis failed | Worker reported an error | Show actionable guidance, retry/discard recovery, and no stale visualization. |
+| Track reanalysis confirmation | User requests fresh analysis for a verified source | Explain provisional evidence hiding, preserve the audio file, and offer keep/start actions. |
+| Track reanalysis complete | Fresh analysis passed identity checks and was accepted | Show acceptance and updated metrics, preserve source attribution, and distinguish track-level versus provisional evidence. |
 | Analysis queue paused | User paused the worker queue | Preserve accepted progress and completed results, expose resume/cancel actions, and never mutate source audio. |
 | Analysis queue retrying | Recoverable worker or source error is being retried | Show retry progress, preserve completed evidence, and replace it only after a fresh run is accepted for the same source identity. |
 | DJ paused | User paused capture intentionally | Show no new estimates, preserve existing Library evidence, and offer resume/reacquire. |
