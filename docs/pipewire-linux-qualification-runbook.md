@@ -72,6 +72,8 @@ Validate that plan before distributing it with
 the validator refuses fabricated, incomplete, or non-pending host entries.
 Pass that plan to the runner with `--capture-plan` so native execution refuses
 to start from an invalid or fabricated host handoff.
+Pending summaries preserve the same `--capture-plan` argument in their rerun
+command, so the native host receives the exact validated handoff request.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
