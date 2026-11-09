@@ -332,7 +332,7 @@ void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString 
   if (path.trimmed().isEmpty()) { status_ = QStringLiteral("Analysis rejected: source path is required"); emit statusChanged(); return; } if (contentHash.trimmed().isEmpty()) { status_ = QStringLiteral("Analysis rejected: content identity is required"); emit statusChanged(); return; } if (!storageOpen_) { status_ = QStringLiteral("Analysis rejected: storage is not open"); emit statusChanged(); return; } if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
 }
 void StorageRecoveryBridge::reanalyze(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
-  if (path.trimmed().isEmpty() || contentHash.trimmed().isEmpty()) { status_ = QStringLiteral("Reanalysis rejected: source identity is incomplete"); emit statusChanged(); return; }
+  if (path.trimmed().isEmpty() || contentHash.trimmed().isEmpty() || engine.trimmed().isEmpty() || configuration.trimmed().isEmpty() || mode.trimmed().isEmpty()) { status_ = QStringLiteral("Reanalysis rejected: complete source identity is required"); emit statusChanged(); return; }
   if (!storageOpen_) { status_ = QStringLiteral("Reanalysis rejected: storage is not open"); emit statusChanged(); return; }
   invalidateCached(contentHash, engine, configuration, mode);
   submitAnalysis(std::move(runId), std::move(path), std::move(contentHash), std::move(engine), std::move(configuration), std::move(mode));
