@@ -1889,4 +1889,19 @@ TestCase {
         verify(fakeOverlay.shows > 0)
         app.destroy()
     }
+    function test_reapplyFailureKeepsHiddenMarkerAndRetainedSettings() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        app.hideOverlayAndRestoreControls()
+        fakeOverlay.geometry = ({ x: 0, y: 0, width: 0, height: 0 })
+        findChild(app, "reapplyOverlaySettings").clicked()
+        verify(app.overlayHiddenByUser)
+        verify(app.overlayDisplayRecoveryPending)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
+    }
 }
