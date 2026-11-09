@@ -52,6 +52,8 @@ Validate a copied artifact before review with
 Validation also requires every raw inventory entry to remain a JSON object.
 The capture timestamp must be timezone-qualified ISO-8601 so evidence from
 different hosts can be ordered reliably.
+The validator requires the offset to be UTC (`+00:00`), matching the capture
+command and avoiding local-time ambiguity.
 Capture paths are immutable: choose a new output filename for each run. The
 helper writes the dump to a temporary file and publishes it with an atomic
 no-overwrite hard link, then removes the temporary file; it refuses to
