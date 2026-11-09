@@ -3362,7 +3362,7 @@ ApplicationWindow {
                     text: visualizationCanvas.selectedSpectrumBin < 0
                         ? "FFT bin: none selected"
                         : "FFT bin " + visualizationCanvas.selectedSpectrumBin + " · magnitude " + Number(visualizationCanvas.renderedSpectrum[visualizationCanvas.selectedSpectrumBin]).toFixed(3)
-                    Accessible.name: "FFT selection readout: " + text
+                    Accessible.name: "FFT selection readout, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Selected FFT bin and its accepted spectrum magnitude; wheel and keyboard selection update this readout."
