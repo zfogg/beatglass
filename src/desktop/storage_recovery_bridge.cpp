@@ -253,6 +253,7 @@ void StorageRecoveryBridge::open() {
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
 void StorageRecoveryBridge::close() {
+  if (!storageOpen_ && !storageTransitionPending_) { status_ = QStringLiteral("Storage already closed"); emit statusChanged(); return; }
   storageTransitionPending_ = true;
   if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection);
   if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
