@@ -275,3 +275,11 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertIn("report:unsupported readiness schema", result["blockers"])
             self.assertIn("report:ready without native qualification requirement", result["blockers"])
+
+    def test_exit_gate_reason_codes_match_ready_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"ready": True, "exit_gate_status": "ACCEPTED",
+                "exit_gate_reason_codes": ["stale_blocker"], "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:ready report has exit gate blockers", result["blockers"])
