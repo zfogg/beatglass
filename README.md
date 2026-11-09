@@ -1,3 +1,7 @@
+# Prototype screens
+
+<p align="center"><img src="images/screenshots/library.png" alt="Library" width="24%" /> <img src="images/screenshots/track-analysis.png" alt="Track analysis" width="24%" /> <img src="images/screenshots/dj-mode.png" alt="DJ mode" width="24%" /> <img src="images/screenshots/overlay-context.png" alt="Overlay" width="24%" /></p>
+
 # Beatglass
 
 Decoder snapshot validation is fail-closed: a retry is eligible only when the persisted `decoder_snapshot` is non-empty and matches the active decoder identity. Empty legacy snapshots and mismatched snapshots are rejected; they must be re-analyzed to establish fresh provenance.
