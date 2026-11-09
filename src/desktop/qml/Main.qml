@@ -4395,6 +4395,21 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
+                Button {
+                    objectName: "overlayFallbackReviewAction"
+                    visible: window.overlayBridge !== null && (window.overlayLaunchFallbackActive || window.overlayDisplayRecoveryPending)
+                    text: window.overlayBridge && window.overlayBridge.available ? "Review recovery" : "Review recovery when display returns"
+                    activeFocusOnTab: true
+                    Accessible.name: text
+                    Accessible.value: window.overlayDisplayRecoveryPending ? "recovery pending" : "fallback active"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: "Focus the persisted overlay settings summary and review the next recovery action."
+                    ToolTip.text: Accessible.description
+                    onClicked: {
+                        overlaySettingsSummary.forceActiveFocus()
+                        window.announceCaptureRecoveryState("Overlay recovery workflow focused; review persisted display, size, opacity, and recovery state.")
+                    }
+                }
                 Label {
                     objectName: "overlayGeometryStatus"
                     text: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
