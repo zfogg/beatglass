@@ -48,12 +48,15 @@ bool MonitorSession::start(std::string serial, std::uint64_t epoch, std::uint32_
   auto next = std::make_unique<MonitorStream>(epoch, sample_rate, channels);
   serial_ = std::move(serial);
   stream_ = std::move(next);
+  format_ = Format{sample_rate, channels};
   return true;
 }
 void MonitorSession::stop() noexcept { if (stream_) stream_->stop(); }
 bool MonitorSession::needs_restart() const noexcept { return !stream_ || stream_->needs_restart(); }
 bool MonitorSession::restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) {
-  return stream_ && stream_->restart(epoch, sample_rate, channels);
+  const bool restarted = stream_ && stream_->restart(epoch, sample_rate, channels);
+  if (restarted) format_ = Format{sample_rate, channels};
+  return restarted;
 }
 bool MonitorSession::on_process(std::span<const float> samples, std::uint64_t host_time,
                                 bool host_time_valid, double source_sample_time,

@@ -8,6 +8,7 @@
 #include <span>
 #include <atomic>
 #include <string>
+#include <optional>
 
 namespace beatglass::pipewire {
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
@@ -62,6 +63,10 @@ private:
 /** Control-thread owner for one selected output monitor epoch. */
 class MonitorSession {
 public:
+  struct Format {
+    std::uint32_t sample_rate{};
+    std::uint32_t channels{};
+  };
   struct Status {
     bool active{};
     bool needs_restart{};
@@ -78,6 +83,8 @@ public:
   bool needs_restart() const noexcept;
   /** Control-thread restart with a fresh epoch and format. */
   bool restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels);
+  /** Return the format installed for the active epoch, if any. */
+  std::optional<Format> format() const noexcept { return format_; }
   /** Native process seam for the currently selected stream. */
   bool on_process(std::span<const float> samples, std::uint64_t host_time,
                   bool host_time_valid, double source_sample_time,
@@ -90,6 +97,7 @@ public:
 private:
   std::string serial_;
   std::unique_ptr<MonitorStream> stream_;
+  std::optional<Format> format_;
 };
 /** Create the provisional PipeWire monitor boundary; ownership stays with the caller. */
 std::unique_ptr<MonitorBackend> make_monitor_backend();
