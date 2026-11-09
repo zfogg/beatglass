@@ -3006,6 +3006,7 @@ ApplicationWindow {
                                 onClicked: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running")) { window.announceVisualizationRecovery("Analysis batch is no longer active; no batch cancel was dispatched."); retryAnalysisBatchButton.forceActiveFocus() } else { window.analysisJobBridge.cancelBatch(); window.announceVisualizationRecovery("Analysis batch cancelled; waiting for a replacement accepted snapshot."); cancelAnalysisBatch.forceActiveFocus() } }
                             }
                             Button {
+                                id: retryAnalysis
                                 text: "Retry analysis"
                                 objectName: "retryAnalysis"
                                 activeFocusOnTab: true
@@ -3013,7 +3014,7 @@ ApplicationWindow {
                                 enabled: visible && window.analysisJobBridge.canRetry
                                 Accessible.name: "Retry analysis"
                                 Accessible.description: "Retry the last source-attributed analysis operation after cancellation or failure."
-                                onClicked: window.retryVisualizationAnalysis()
+                                onClicked: { window.retryVisualizationAnalysis(); retryAnalysis.forceActiveFocus() }
                                 ToolTip.text: Accessible.description
                             }
                             Button {
