@@ -74,6 +74,8 @@ Pass that plan to the runner with `--capture-plan` so native execution refuses
 to start from an invalid or fabricated host handoff.
 Pending summaries preserve the same `--capture-plan` argument in their rerun
 command, so the native host receives the exact validated handoff request.
+They also record the capture-plan SHA-256 when the file is available, allowing
+the native host to prove it used the intended preparation instructions.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons

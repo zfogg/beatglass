@@ -17,4 +17,5 @@ for marker in ("qualification_matrix_schema", "qualification_matrix_status", "be
 for marker in ("--capture-plan", "validate_native_host_capture_plan.py", "capture_plan"):
     assert marker in source
 assert '"--capture-plan"' in source
+assert "capture_plan_sha256" in source
 print("PipeWire native runner contract verified (5 checks)")

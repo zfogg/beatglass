@@ -34,6 +34,7 @@ if platform.system() != "Linux":
                "requested_summary": str(args.summary) if args.summary else None,
                "requested_archive": str(args.archive) if args.archive else None,
                "capture_plan": str(args.capture_plan) if args.capture_plan else None,
+               "capture_plan_sha256": hashlib.sha256(args.capture_plan.read_bytes()).hexdigest() if args.capture_plan and args.capture_plan.is_file() else None,
                "native_artifacts": [],
                "native_test_discovery": None, "native_test_count": None,
                "native_test_name_match": False, "native_junit_exists": False}
