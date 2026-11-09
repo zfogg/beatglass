@@ -4229,6 +4229,7 @@ ApplicationWindow {
                                 sizes[requestedIndex][0], sizes[requestedIndex][1])
                             if (resized) {
                                 window.overlayPreferredSizeIndex = requestedIndex
+                                window.overlaySettingsRevision += 1
                                 window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
                                 overlayGeometryStatus.forceActiveFocus()
                             } else {
