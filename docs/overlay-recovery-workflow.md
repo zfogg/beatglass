@@ -226,3 +226,6 @@ The Reapply saved settings focus shortcut remains usable during click-through, r
 
 The overlay summary review shortcut remains usable during click-through, returning focus to the persisted display/geometry/opacity summary without changing the saved state.
 
+
+The retained-settings summary action remains directly activatable during click-through: it focuses the full persisted display/geometry/opacity summary without changing the saved settings.
+
