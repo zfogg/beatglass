@@ -32,6 +32,7 @@ screenshots.
 | [Focus](overlay-focus-card.svg) | keyboard focus visibility |
 | [Live status](overlay-live-status-card.svg) | current output and signal health |
 | [Control panel](overlay-control-panel-card.svg) | opacity, placement, and interaction |
+| [Compact mode](overlay-compact-mode-card.svg) | size presets with live preview |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)

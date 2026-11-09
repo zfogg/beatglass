@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / OVERLAY SIZE</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Choose a compact mode</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Keep the signal visible while you make room for your work.</text>
+  <rect x="112" y="258" width="294" height="258" rx="18" fill="#202938" stroke="#56d38b" stroke-width="3"/>
+  <text x="144" y="307" fill="#56d38b" font-family="Inter,Arial" font-size="15" letter-spacing="2">RECOMMENDED</text>
+  <rect x="144" y="337" width="230" height="54" rx="12" fill="#2a3444"/><text x="259" y="371" fill="#f2f6fb" font-family="Inter,Arial" font-size="21" text-anchor="middle">Compact</text>
+  <text x="144" y="433" fill="#f2f6fb" font-family="Inter,Arial" font-size="17">Waveform + status</text><text x="144" y="466" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">480 × 180 px</text>
+  <rect x="452" y="258" width="294" height="258" rx="18" fill="#202938"/>
+  <text x="484" y="307" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">BALANCED</text>
+  <rect x="484" y="337" width="230" height="54" rx="12" fill="#2a3444"/><text x="599" y="371" fill="#f2f6fb" font-family="Inter,Arial" font-size="21" text-anchor="middle">Medium</text>
+  <text x="484" y="433" fill="#f2f6fb" font-family="Inter,Arial" font-size="17">Waveform + analysis</text><text x="484" y="466" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">720 × 300 px</text>
+  <rect x="792" y="258" width="296" height="258" rx="18" fill="#202938"/>
+  <text x="824" y="307" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">FULL DETAIL</text>
+  <rect x="824" y="337" width="232" height="54" rx="12" fill="#2a3444"/><text x="940" y="371" fill="#f2f6fb" font-family="Inter,Arial" font-size="21" text-anchor="middle">Large</text>
+  <text x="824" y="433" fill="#f2f6fb" font-family="Inter,Arial" font-size="17">All visualizations</text><text x="824" y="466" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">960 × 520 px</text>
+  <rect x="112" y="574" width="976" height="86" rx="18" fill="#202938"/><text x="144" y="610" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" font-weight="700">Preview updates instantly</text><text x="144" y="638" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">Your current position and output remain unchanged.</text>
+</svg>
