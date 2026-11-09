@@ -88,6 +88,18 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertIn("duplicate referenced evidence path: native.json", errors)
 
+    def test_rejects_invalid_artifact_hash_before_reading_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            artifact = root / "native.log"
+            artifact.write_text("native output", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text(
+                "not-a-sha256  native.log\n", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text(
+                "commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("invalid artifact hash: native.log", errors)
+
     def test_sorts_artifacts_for_reproducible_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

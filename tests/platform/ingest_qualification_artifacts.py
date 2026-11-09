@@ -42,6 +42,8 @@ def ingest(root: Path, output: Path) -> list[str]:
             if len(parts) != 2:
                 errors.append(f"malformed artifact hash line: {line}"); continue
             digest, relative = parts
+            if not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+                errors.append(f"invalid artifact hash: {relative}"); continue
             candidate = root / relative
             if candidate.is_symlink():
                 errors.append(f"symlinked qualification artifact: {relative}"); continue
