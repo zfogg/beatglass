@@ -800,3 +800,5 @@ Failed native overlay launch paths now explicitly state that the control-window 
 
 The overlay actions accessibility description now states that native-launch fallback retains overlay settings, making persistence explicit while recovery is pending. Portable coverage is in `python tests/unit/check_overlay_fallback_status_contract.py`.
 
+The unavailable-overlay actions tooltip now states that the control-window fallback retains overlay settings. Portable coverage is in `python tests/unit/check_overlay_fallback_tooltip_contract.py`.
+
