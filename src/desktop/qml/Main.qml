@@ -570,7 +570,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryChooseFolderFocusShortcut"; sequence: "Ctrl+Alt+Shift+D"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryFolderChooser() }
     Shortcut { objectName: "libraryCatalogStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+C"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: window.focusLibraryCatalogStatus() }
     Shortcut { objectName: "librarySelectionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+E"; context: Qt.ApplicationShortcut; onActivated: window.focusLibrarySelectionStatus() }
-    Shortcut { objectName: "libraryShortcutHelpFocusShortcut"; sequence: "Ctrl+Alt+Shift+H"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryShortcutHelp.forceActiveFocus(); window.announceVisualizationRecovery("Library keyboard shortcut help focused.") } }
+    Shortcut { objectName: "libraryShortcutHelpFocusShortcut"; sequence: "Ctrl+Alt+Shift+H"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryShortcutHelp() }
     Shortcut { objectName: "libraryAnalyzeShortcut"; sequence: "Ctrl+Alt+A"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"; onActivated: { const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile()); window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry."); analyzeSelectedAudio.forceActiveFocus() } }
     Shortcut { objectName: "libraryAnalysisFocusShortcut"; sequence: "Ctrl+Alt+Shift+N"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: window.focusLibraryAnalysisAction() }
     Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryResults() }
@@ -1069,6 +1069,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         analysisFailureReason.forceActiveFocus()
         window.announceVisualizationRecovery("Library analysis failure status focused.")
+    }
+    function focusLibraryShortcutHelp() {
+        navigation.currentIndex = 0
+        libraryShortcutHelp.forceActiveFocus()
+        window.announceVisualizationRecovery("Library keyboard shortcut help focused.")
     }
     function focusLibraryBatchProgress() {
         navigation.currentIndex = 0
