@@ -9,6 +9,7 @@
 | Track playback retrying | Located source is being checked before queue restoration | Hold the queue, hide evidence during identity verification, and keep cancellation/removal explicit while the source remains untouched. |
 | Track playback restored | Located source matches the queued identity and playback is available again | Restore the queue, expose accepted evidence only after identity checks, and restart playback from a deterministic position. |
 | Track playback canceled | Recovery is canceled after the queued source remains unavailable | Clear pending playback safely, preserve source history, and offer an explicit later retry without deleting or substituting files. |
+| Track source details | Browse selection opens a verified Night Drive detail view with accepted and provisional evidence separated | Keep source identity visible, expose safe playback/reanalysis actions, and never fabricate unavailable track-level values. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
