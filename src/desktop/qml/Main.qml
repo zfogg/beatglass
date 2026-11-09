@@ -1668,7 +1668,11 @@ ApplicationWindow {
                         text: "Up"; objectName: "parentFolder"
                         activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
-                        onClicked: window.browseFolder = files.parentFolder
+                        onClicked: {
+                            window.browseFolder = files.parentFolder
+                            window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
+                            browser.forceActiveFocus()
+                        }
                         Accessible.name: "Go to parent folder"
                         Accessible.role: Accessible.Button
                         Accessible.description: "Go to the parent folder"
