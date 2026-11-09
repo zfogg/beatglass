@@ -3529,6 +3529,7 @@ ApplicationWindow {
                         onClicked: {
                             window.captureMonitorBridge.start()
                             window.announceCaptureRecoveryState("Overlay capture retry requested; waiting for a fresh accepted snapshot.")
+                            overlayLiveMonitoringState.forceActiveFocus()
                         }
                     }
                     Label {
