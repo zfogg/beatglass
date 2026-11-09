@@ -21,6 +21,9 @@ void MonitorStream::on_error(int error_code) noexcept {
 }
 int MonitorStream::error_code() const noexcept { return error_code_.load(std::memory_order_acquire); }
 int MonitorStream::take_error() noexcept { return error_code_.exchange(0, std::memory_order_acq_rel); }
+bool MonitorStream::needs_restart() const noexcept {
+  return stopped_.load(std::memory_order_acquire) || error_code() != 0;
+}
 bool MonitorStream::restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) {
   if (!epoch || !sample_rate || !channels) return false;
   auto next = std::make_unique<coreaudio::CaptureFifo>(epoch, sample_rate, channels);
