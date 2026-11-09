@@ -534,6 +534,7 @@ ApplicationWindow {
         }
         if (!window.overlayBridge.moveToScreen(index)) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             window.announceCaptureRecoveryState("Overlay display selection could not be applied; control-window fallback remains active.")
             window.show()
             window.raise()
@@ -543,6 +544,7 @@ ApplicationWindow {
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             window.announceCaptureRecoveryState("Overlay display selected, but persisted visual state could not be reapplied.")
             window.show()
             window.raise()
