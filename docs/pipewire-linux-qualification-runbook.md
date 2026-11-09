@@ -106,6 +106,8 @@ The runner validates the supplied transition artifact before writing a
 qualified summary, so invalid lifecycle evidence cannot pass the capture gate.
 The packager also writes that count into the manifest; archive verification
 cross-checks all three representations.
+Manifest event counts are required to be positive JSON integers, not booleans
+or coerced values.
 The manifest carries the host platform too, and verification binds it to the
 qualification summary before accepting the archive.
 Transition-bearing manifests also declare the transition schema version, which
