@@ -64,4 +64,6 @@ TEST_CASE("stream owner treats zero error as a teardown boundary") {
   owner.report_error(0, handoff);
   CHECK_FALSE(owner.connected());
   CHECK(handoff.needs_restart());
+  REQUIRE(owner.connect({"sink-9-reacquired", 44100, 2}, handoff));
+  CHECK(owner.connected());
 }
