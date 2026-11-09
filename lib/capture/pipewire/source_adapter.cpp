@@ -20,6 +20,7 @@ bool MonitorStream::push(std::span<const float> samples, std::uint64_t host_time
   const bool accepted = !stopped_ && fifo_->push(samples, host_time, host_time_valid,
       discontinuity || discontinuity_pending_.exchange(false, std::memory_order_acq_rel),
       source_sample_time, sample_time_valid);
+  if (!accepted) discontinuity_pending_.store(true, std::memory_order_release);
   return accepted;
 }
 bool MonitorStream::on_process(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
