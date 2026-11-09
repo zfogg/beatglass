@@ -58,6 +58,7 @@ public:
   }
 private:
   bool finish(JobStatus status) noexcept {
+    if (isTerminal(snapshot_.status)) return false;
     if (snapshot_.status != JobStatus::queued && snapshot_.status != JobStatus::running) return false;
     snapshot_.status = status; return true;
   }

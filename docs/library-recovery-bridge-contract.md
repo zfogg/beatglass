@@ -100,6 +100,8 @@ indeterminate-progress semantics.
 excluding completed jobs, keeping retry admission consistent with queue state.
 Progress and completion use the shared known-total predicate, preserving zero as
 a meaningful known total while treating an absent total as indeterminate.
+Cancellation and failure transitions also consult the terminal predicate before
+mutating state, making terminal jobs immutable to later queue actions.
 The desktop cache controls mirror this contract: lookup, invalidation, and
 reanalysis actions stay disabled until content, engine, configuration, and a
 valid `offline`/`live` mode are present.

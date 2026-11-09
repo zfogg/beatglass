@@ -43,6 +43,10 @@ TEST_CASE("known total predicate distinguishes unknown and zero totals") {
   CHECK_FALSE(hasKnownTotal(std::optional<std::uint64_t>{}));
   CHECK(hasKnownTotal(std::optional<std::uint64_t>{0}));
 }
+TEST_CASE("terminal predicate guards cancellation and failure transitions") {
+  JobLifecycle done; REQUIRE(done.start()); REQUIRE(done.complete());
+  CHECK_FALSE(done.cancel()); CHECK_FALSE(done.fail());
+}
 
 TEST_CASE("commit decision serializes cancellation at the commit boundary") {
  CommitDecision early; CHECK_FALSE(early.begin_commit(true)); CHECK(early.cancelled());
