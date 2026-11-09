@@ -1944,6 +1944,7 @@ ApplicationWindow {
                                 window.selectedAudioUrl = Qt.resolvedUrl(path)
                                 if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
                                 window.announceVisualizationRecovery("Selected recursive audio source " + name + "; prior analysis presentation is stale until this source is analyzed.")
+                                analyzeSelectedAudio.forceActiveFocus()
                             }
                         }
                     }
