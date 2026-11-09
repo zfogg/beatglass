@@ -2221,7 +2221,7 @@ ApplicationWindow {
                     }
                     Accessible.name: "Visualization interaction hint"
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Current visualization selection and recovery hint"
                     color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
@@ -2272,7 +2272,7 @@ ApplicationWindow {
                     text: window.visualizationSelectionResetReason
                     Accessible.name: "Visualization selection reset status"
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Why the visualization selection was cleared"
                     color: window.themeAccentColors[window.selectedThemeIndex]
@@ -2349,7 +2349,7 @@ ApplicationWindow {
                         : "Accepted analysis generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
                     Accessible.name: "Visualization analysis handoff: " + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: "Status of the generation-gated analysis result consumed by waveform and FFT rendering."
                     ToolTip.text: "Accepted analysis generation and revision consumed by the visualization"
                     color: window.themeForegrounds[window.selectedThemeIndex]
@@ -2454,7 +2454,7 @@ ApplicationWindow {
                            : "Playback source/epoch is not aligned with the accepted snapshot")
                     Accessible.name: "Visualization playback epoch feedback: " + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: "Live playback source and epoch alignment for the accepted visualization snapshot."
                     ToolTip.text: "Playback source and epoch alignment for visualization seek"
                     color: window.themeForegrounds[window.selectedThemeIndex]
