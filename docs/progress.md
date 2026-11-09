@@ -894,5 +894,7 @@ Overlay capture endpoint status now names ready versus recovery-pending state. P
 
 The overlay summary review action now names whether recovery is pending or ready. Portable coverage is in `python tests/unit/check_overlay_summary_action_name_contract.py`.
 
+The overlay endpoint refresh action now exposes refresh availability and recovery readiness. Portable coverage is in `python tests/unit/check_overlay_refresh_state_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 

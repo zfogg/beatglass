@@ -3764,6 +3764,7 @@ ApplicationWindow {
                         text: "Refresh overlay endpoint"
                         enabled: visible && window.endpointSelectionBridge !== null
                         Accessible.name: text
+                        Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "refresh available; recovery pending" : "refresh available; ready") : "refresh unavailable"
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring." : "Output endpoint refresh is unavailable."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
