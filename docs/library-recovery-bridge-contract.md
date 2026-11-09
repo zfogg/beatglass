@@ -67,6 +67,8 @@ before invalidating the cache, preventing an incomplete request from deleting a
 valid cached result.
 It also requires engine, configuration, and mode, keeping reanalysis aligned
 with the complete cache identity contract.
+The persisted run identity is required as well, so reanalysis cannot enqueue
+an unaddressable recovery record.
 Refresh requests made while storage is closed are rejected synchronously with
 `Storage error: storage is not open`; callers must reopen storage before asking
 the worker for a new persisted-recovery snapshot.
