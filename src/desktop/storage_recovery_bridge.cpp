@@ -165,6 +165,8 @@ void StorageRecoveryBridge::open() {
   if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
   if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
   if (!resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
+  if (cacheHit_) { cacheHit_ = false; emit cachedResultChanged(); }
+  if (!cachedResult_.isEmpty()) { cachedResult_.clear(); emit cachedResultChanged(); }
   if (analysisReserved_) { analysisReserved_ = false; emit analysisAdmissionChanged(); }
   if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
   if (analysisRetryable_) { analysisRetryable_ = false; emit analysisRetryableChanged(); }
