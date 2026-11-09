@@ -80,7 +80,7 @@
 | DJ recovery | Disconnected source with estimates cleared | Choose source, show unavailable state and reacquire only when capture resumes. |
 | Overlay | Preview and settings, including click-through | Position, size, opacity, monitor, unlock/hide and persistent settings. |
 | Overlay context | Floating panel over an illustrative DJ app | Keep overlay readable and recover control via platform-supported taskbar/tray or normal window; validate actual platform behavior. |
-| Settings | Six themes and overlay preferences | Persist valid selections, support reduced motion and system scaling. |
+| Settings | Light, Dark, High contrast, Purple, Blue, Yellow themes and overlay preferences | Persist valid selections and reduced motion; native QML palette values match these six design tokens while system scaling remains platform-qualified. |
 | Recovery | Library file alert and analysis-stopped toast; device and permissions in Settings | Provide correct platform-specific next steps, notification fallback, and keep stale evidence cleared. |
 
 Additional implementation states to exercise: empty search; no selected track; unsupported/corrupt/inaccessible/moved files; partial/cancelled/failed analysis; unavailable playback device; silence, ambiguous mixed tracks, capture permission revoked, default-device switch and discontinuity; overlay hidden, unlocked, off-screen, monitor removed and compositor refusal. These are specified here but are not all separately rendered. Remove entry must explicitly say the audio file is retained. No fabricated confidence percentages or deck separation.
