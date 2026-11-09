@@ -201,6 +201,8 @@ Malformed summary JSON is rejected with an explicit qualification-summary
 error rather than being treated as an incomplete handoff.
 The manifest itself must also decode to a JSON object before archive fields are
 trusted.
+Malformed transition evidence JSON is likewise rejected explicitly before
+lifecycle validation.
 The decoded summary must also be a JSON object, preventing arrays or scalar
 values from bypassing field-level qualification checks.
 The portable behavior fixture can be run with

@@ -123,7 +123,10 @@ with zipfile.ZipFile(archive_path) as archive:
         transition_payload = archive.read(transition_name)
         if summary_data.get("native_transition_sha256") != hashlib.sha256(transition_payload).hexdigest():
             raise SystemExit("summary transition digest does not match archive")
-        transitions = json.loads(transition_payload)
+        try:
+            transitions = json.loads(transition_payload)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            raise SystemExit("malformed transition evidence")
         if not isinstance(transitions, dict) or transitions.get("schema") != "beatglass-pipewire-transitions-v1":
             raise SystemExit("transition evidence has invalid provenance schema")
         if manifest.get("transition_schema") != transitions["schema"]:
