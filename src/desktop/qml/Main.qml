@@ -881,8 +881,11 @@ ApplicationWindow {
         return true
     }
     function syncOverlaySettingsStateFromBridge() {
-        if (!window.overlayBridge)
+        if (!window.overlayBridge) {
+            window.overlayLaunchFallbackActive = true
+            window.overlayDisplayRecoveryPending = true
             return false
+        }
         const geometryReady = window.syncOverlayGeometryStateFromBridge()
         const opacity = Number(window.overlayBridge.opacity)
         if (!isFinite(opacity) || opacity < 0.2 || opacity > 1.0 || !geometryReady) {
