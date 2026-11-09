@@ -809,6 +809,7 @@ ApplicationWindow {
             : window.overlayPreferredScreenIndex
         window.overlayDisplaySelectionRequired = window.overlayBridge.screenNames.length === 0 || savedIndex < 0
         window.overlayDisplayRecoveryPending = window.overlayBridge.screenNames.length === 0 || window.overlayDisplaySelectionRequired
+        window.overlayLaunchFallbackActive = window.overlayDisplaySelectionRequired
         return savedIndex >= 0
     }
     function restoreOverlayVisualStateFromBridge() {
