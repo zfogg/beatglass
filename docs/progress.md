@@ -1,5 +1,8 @@
 # Progress and handoff
 
+When the native overlay is unavailable, `Ctrl+Alt+Shift+Y` focuses the Retry
+overlay action so recovery remains keyboard reachable.
+
 `Ctrl+Alt+Shift+P` focuses the Reapply saved settings action, providing a
 keyboard-first path to restore persisted display, geometry, size, and opacity.
 
