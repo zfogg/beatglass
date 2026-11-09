@@ -56,6 +56,9 @@ Pressing `Escape` while paused returns focus to `Resume recovery`, providing a
 predictable keyboard path back to the lifecycle action after reviewing status.
 It also announces that the paused recovery action is focused for assistive
 technology users.
+If a display is disconnected and later restored while recovery is paused, focus
+returns to `Resume recovery` rather than the ordinary retry control, preserving
+the intentional pause across the display lifecycle.
 
 ## Screenshot qualification
 

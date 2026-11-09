@@ -1906,7 +1906,10 @@ ApplicationWindow {
                     window.overlayPreferredScreenIndex = savedIndex
                     window.overlayDisplaySelectionRequired = false
                     window.recoverOverlayAfterDisplayChange()
-                    retryOverlay.forceActiveFocus()
+                    if (window.overlayRecoveryPausedByUser)
+                        resumeOverlayRecovery.forceActiveFocus()
+                    else
+                        retryOverlay.forceActiveFocus()
                 } else {
                     window.overlayDisplaySelectionRequired = true
                     window.overlayDisplayRecoveryPending = true
@@ -1938,7 +1941,10 @@ ApplicationWindow {
                     && window.overlayBridge.screenNames.length > 0
                     && !window.overlayDisplaySelectionRequired) {
                 window.recoverOverlayAfterDisplayChange()
-                retryOverlay.forceActiveFocus()
+                if (window.overlayRecoveryPausedByUser)
+                    resumeOverlayRecovery.forceActiveFocus()
+                else
+                    retryOverlay.forceActiveFocus()
             }
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
