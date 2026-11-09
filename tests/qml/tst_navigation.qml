@@ -1592,4 +1592,22 @@ TestCase {
         fakeOverlay.clickThrough = false
         fakeOverlay.available = true
     }
+    function test_unlockShortcutKeepsPausedSettingsAvailable() {
+        fakeOverlay.available = false
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        let shortcut = findChild(app, "overlayUnlockFocusShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        verify(findChild(app, "unlockOverlay").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+        fakeOverlay.available = true
+    }
 }
