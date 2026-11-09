@@ -1635,6 +1635,18 @@ ApplicationWindow {
                             Label { text: window.playbackBridge && window.playbackBridge.state !== "Stopped" ? "Seek uses audio frames; track duration is not available yet." : ""; objectName: "playbackSeekLimitation"; Accessible.name: "Playback seek limitation: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Playback seek currently uses source audio frames"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                             Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
                             Label {
+                                objectName: "playbackSourceIdentityStatus"
+                                visible: window.playbackBridge !== null && window.playbackBridge.source.toString() !== ""
+                                text: visible ? (window.playbackMatchesSelection ? "Playback source identity: selected Library source" : "Playback source identity: differs from selected Library source") : ""
+                                Accessible.name: "Playback source identity: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". Reopen selected playback when the identities differ; source audio remains unchanged." : "No playback source identity is available."
+                                ToolTip.text: "Playback source identity compared with Library selection"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "playbackRecoveryStatus"
                                 visible: window.playbackBridge !== null && (window.playbackBridge.nativeError !== "" || !window.playbackMatchesSelection)
                                 text: visible && window.playbackBridge.nativeError !== "" ? "Playback recovery: " + window.playbackBridge.nativeError : visible ? "Playback recovery: reopen the selected source to align playback with the Library selection" : ""
