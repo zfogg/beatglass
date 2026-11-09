@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Switch native overlay output</title>
+  <desc id="desc">An output switch confirmation summarizes the selected display and preserves overlay appearance while changing the captured output.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <text x="96" y="112" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Switch output?</text>
+  <text x="96" y="144" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">The overlay will follow the selected output after the change.</text>
+  <rect x="96" y="182" width="728" height="92" rx="16" fill="#17243c"/>
+  <text x="124" y="218" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="14">CURRENT → NEW</text>
+  <text x="124" y="252" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="19" font-weight="600">Display 2 → Display 1</text>
+  <text x="420" y="252" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Midnight · Bottom-right · 82% opacity</text>
+  <rect x="96" y="302" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="344" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">What stays the same</text>
+  <text x="96" y="374" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Size, theme, opacity, click-through, and keyboard shortcuts.</text>
+  <text x="96" y="402" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">Capture pauses briefly while the native window moves, then resumes.</text>
+  <rect x="96" y="438" width="176" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="184" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Switch output</text>
+  <rect x="290" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="367" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Cancel</text>
+</svg>
