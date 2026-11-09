@@ -3501,7 +3501,7 @@ ApplicationWindow {
                     Accessible.name: "Visualization recovery announcement, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Live announcement for keyboard or pointer playback recovery actions."
+                    Accessible.description: "Live announcement for keyboard or pointer playback recovery actions; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                     ToolTip.text: "Latest visualization playback recovery action"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
