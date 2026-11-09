@@ -1261,7 +1261,8 @@ ApplicationWindow {
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
-            window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
+            const savedDisplay = window.overlayPreferredDisplayName !== "" ? window.overlayPreferredDisplayName : "the saved display"
+            window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback. Persisted settings for " + savedDisplay + " remain retained for the next retry.")
             overlayDisplay.forceActiveFocus()
             return false
         }

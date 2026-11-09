@@ -142,3 +142,6 @@ Display, geometry, and opacity are treated as one persisted visual bundle: recov
 
 When the native overlay is unavailable, invoking Show or Restore is safe from a hidden control window: the tray/taskbar fallback is made visible and active, recovery remains pending, and focus lands on display recovery so the next action is keyboard-ready.
 
+
+Fallback activation does not discard the selected display or size preference: when the native bridge is unavailable, the tray/taskbar control window announces that those persisted settings remain queued for the next retry.
+
