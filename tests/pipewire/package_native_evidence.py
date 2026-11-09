@@ -35,6 +35,9 @@ for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
     if summary.get(digest_key) != digest(path):
         raise SystemExit(f"{key} digest mismatch")
     if key == "native_transition_json":
+        transition_count = summary.get("native_transition_event_count")
+        if not isinstance(transition_count, int) or isinstance(transition_count, bool) or transition_count <= 0:
+            raise SystemExit("native summary has no positive transition event count")
         transition_payload = json.loads(path.read_text(encoding="utf-8"))
         if not str(transition_payload.get("platform", "")).lower().startswith("linux"):
             raise SystemExit("transition evidence is not from a Linux host")
