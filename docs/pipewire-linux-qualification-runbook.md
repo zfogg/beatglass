@@ -54,3 +54,5 @@ Qualification requires the discovered and executed testcase-name sets to match.
 The raw discovery JSON is preserved as `pipewire-tests-discovery.json` for
 post-run evidence ingestion.
 The summary includes its `native_discovery_sha256` digest for transfer checks.
+After copying evidence, verify the complete handoff with
+`python tests/pipewire/verify_native_run_summary.py evidence/native-summary.json`.
