@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Waveform rendering now clamps accepted min/max PCM extrema to the normalized
+[-1, 1] display range before mapping them into the canvas, preventing malformed
+or transient out-of-range source values from escaping the visual bounds.
+
 The FFT view now derives a bounded peak-bin summary from the accepted spectrum
 snapshot and exposes it through the canvas accessibility value, making the
 rendered frequency evidence inspectable without inventing a calibrated pitch.
