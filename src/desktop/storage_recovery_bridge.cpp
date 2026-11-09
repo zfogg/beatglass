@@ -14,7 +14,9 @@ public slots:
     emit analysis(QStringLiteral("Analysis idle"));
     beatglass::library::StorageConfig config{path.toStdString()};
     std::string diagnostic;
-    const bool ok = coordinator_.open_storage(config, &diagnostic);
+    bool ok = false;
+    try { ok = coordinator_.open_storage(config, &diagnostic); }
+    catch (const std::exception& error) { diagnostic = error.what(); }
     emit result(ok, QString::fromStdString(ok ? "Storage open" : diagnostic));
     if (ok) refresh();
     else { emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); }
