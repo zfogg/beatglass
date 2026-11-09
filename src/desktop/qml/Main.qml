@@ -2138,6 +2138,8 @@ ApplicationWindow {
                     window.selectedThemeIndex = 0
                     window.selectedTheme = window.themeNames[0]
                     themeSelector.currentIndex = 0
+                    window.themePreferenceAnnouncement = "Appearance reset to Light theme with full motion."
+                    resetAppearance.forceActiveFocus()
                 }
             }
             Row {
