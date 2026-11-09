@@ -196,6 +196,7 @@ void StorageRecoveryBridge::open() {
   if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); }
   if (!analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
   analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
+  if (!worker_) { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); return; }
   QMetaObject::invokeMethod(worker_, "open", Qt::QueuedConnection, Q_ARG(QString, databasePath_));
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
