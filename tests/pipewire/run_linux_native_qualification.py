@@ -70,10 +70,12 @@ native_result = next((item for item in results if "--timeout" in item["command"]
 preflight_result = next((item for item in results if "check_linux_native_prerequisites.py" in item["command"]), None)
 discovery_result = next((item for item in results if "--show-only=json-v1" in item["command"]), None)
 discovery_count = None
+discovery_tests = None
 if discovery_result:
     try:
         discovery_json = json.loads(Path(discovery_result["stdout"]).read_text(encoding="utf-8"))
-        discovery_count = len(discovery_json.get("tests", []))
+        discovery_tests = [item.get("name", "") for item in discovery_json.get("tests", [])]
+        discovery_count = len(discovery_tests)
     except (OSError, json.JSONDecodeError, AttributeError):
         discovery_count = 0
 junit_count = None
@@ -98,6 +100,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "failed_command": next((item["command"] for item in results if item["returncode"]), None),
            "native_test_discovery": discovery_result,
            "native_test_count": discovery_count,
+           "native_test_name_match": discovery_tests is not None and junit_tests is not None and set(discovery_tests) == set(junit_tests),
            "daemon_preflight": preflight_result,
            "native_pipewire_tests": native_result,
            "native_junit": str(evidence / "pipewire-tests.xml"),
@@ -108,7 +111,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit_failures": junit_failures,
            "native_junit_errors": junit_errors,
            "native_junit_skipped": junit_skipped,
-           "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and junit_skipped == 0 and all(item["returncode"] == 0 for item in results)}
+           "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and junit_skipped == 0 and discovery_tests is not None and junit_tests is not None and set(discovery_tests) == set(junit_tests) and all(item["returncode"] == 0 for item in results)}
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
