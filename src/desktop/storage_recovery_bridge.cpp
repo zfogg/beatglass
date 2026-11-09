@@ -216,7 +216,7 @@ void StorageRecoveryBridge::close() {
   analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
   status_ = QStringLiteral("Storage closed"); emit statusChanged();
 }
-void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
+void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
 void StorageRecoveryBridge::selectRun(const QString& id) { const auto normalized = id.trimmed(); if (selectedRunId_ == normalized) return; selectedRunId_ = normalized; emit selectedRunChanged(); }
 void StorageRecoveryBridge::discardRuns(const QStringList& ids) { if (worker_) QMetaObject::invokeMethod(worker_, "discardBatch", Qt::QueuedConnection, Q_ARG(QStringList, ids)); }
 void StorageRecoveryBridge::discardSelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (worker_ && !selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
