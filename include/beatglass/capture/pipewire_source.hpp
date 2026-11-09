@@ -44,6 +44,8 @@ struct MonitorStatus {
   }
   /** True when the selected sink identity is present in this snapshot. */
   bool has_serial() const noexcept { return !serial.empty(); }
+  /** True when identity and negotiated format are both available. */
+  bool has_context() const noexcept { return has_serial() && has_format(); }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
