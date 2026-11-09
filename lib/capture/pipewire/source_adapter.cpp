@@ -136,6 +136,7 @@ public:
                  std::uint32_t sample_rate, std::uint32_t channels) override {
     if (!valid_serial(serial) || !epoch || !sample_rate || !channels) return false;
     if (epoch == session_.epoch()) return false;
+    if (owner_) owner_->stop();
     session_.reset();
     if (!session_.start(serial, epoch, sample_rate, channels)) return false;
     if (!owner_ || !session_.native_handoff() ||
