@@ -1,6 +1,7 @@
 """Validate the shape of a captured PipeWire qualification manifest."""
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 if len(sys.argv) != 2:
@@ -14,6 +15,12 @@ if not isinstance(manifest, dict) or any(key not in manifest or manifest[key] is
     raise SystemExit("manifest missing required qualification identity or inventory")
 if manifest["schema_version"] != 1:
     raise SystemExit("unsupported PipeWire qualification manifest schema")
+try:
+    captured_at = datetime.fromisoformat(manifest["captured_at_utc"])
+except ValueError:
+    raise SystemExit("manifest captured_at_utc must be ISO-8601")
+if captured_at.utcoffset() is None:
+    raise SystemExit("manifest captured_at_utc must include a timezone")
 if not isinstance(manifest["inventory"], list):
     raise SystemExit("manifest inventory must be a list")
 if any(not isinstance(item, dict) for item in manifest["inventory"]):

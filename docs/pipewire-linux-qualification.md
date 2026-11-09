@@ -50,6 +50,8 @@ host/Python identity, and `pw-cli` version, use
 Validate a copied artifact before review with
 `python tests/pipewire/validate_pipewire_manifest.py <evidence>/manifest.json`.
 Validation also requires every raw inventory entry to remain a JSON object.
+The capture timestamp must be timezone-qualified ISO-8601 so evidence from
+different hosts can be ordered reliably.
 Capture paths are immutable: choose a new output filename for each run. The
 helper writes the dump to a temporary file and publishes it with an atomic
 no-overwrite hard link, then removes the temporary file; it refuses to

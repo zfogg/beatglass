@@ -24,4 +24,7 @@ with tempfile.TemporaryDirectory() as directory:
     path.write_text(json.dumps({**valid, "inventory": ["not-an-object"]}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
-print("PipeWire manifest validator fixture behavior verified (3 scenarios)")
+    path.write_text(json.dumps({**valid, "captured_at_utc": "not-a-timestamp"}), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    assert result.returncode != 0
+print("PipeWire manifest validator fixture behavior verified (4 scenarios)")
