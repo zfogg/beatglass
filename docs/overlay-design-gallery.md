@@ -93,6 +93,7 @@ screenshots.
 | [Folder access](overlay-library-scan-permission-card.svg) | explicit read-only library permission request |
 | [Duplicate tracks](overlay-library-duplicates-card.svg) | safe duplicate review without destructive defaults |
 | [Scan warnings](overlay-library-scan-warning-card.svg) | completed indexing with transparent skipped-file status |
+| [Folder unavailable](overlay-library-folder-unavailable-card.svg) | offline continuity when a library folder disappears |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
