@@ -178,3 +178,6 @@ While recovery is paused, Escape re-focuses Resume recovery without changing the
 
 The paused recovery page shortcut Ctrl+Alt+Shift+Pause reopens the same paused workflow and focuses Resume recovery without changing persisted display or geometry settings.
 
+
+When click-through remains active during paused recovery, Escape stays reserved for the native unlock workflow; the paused focus action yields without clearing persisted display or geometry settings.
+

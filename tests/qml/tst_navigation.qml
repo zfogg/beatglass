@@ -1576,4 +1576,20 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_clickThroughTakesEscapePrecedenceWithoutClearingPausedSettings() {
+        fakeOverlay.available = false
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        verify(!findChild(app, "overlayPausedRecoveryFocusShortcut").enabled)
+        verify(findChild(app, "overlayUnlockFocusShortcut").enabled)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+        fakeOverlay.available = true
+    }
 }
