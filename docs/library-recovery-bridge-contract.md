@@ -60,6 +60,8 @@ touching the worker, keeping analysis and cache records addressable by the same
 source identity contract.
 Path-backed submission also requires a non-empty source path before enqueueing
 work, so a cache identity cannot create an analysis record without its source.
+Reanalysis rejects a closed storage bridge before attempting cache invalidation,
+so a failed lifecycle transition cannot partially mutate cache state.
 Refresh requests made while storage is closed are rejected synchronously with
 `Storage error: storage is not open`; callers must reopen storage before asking
 the worker for a new persisted-recovery snapshot.
