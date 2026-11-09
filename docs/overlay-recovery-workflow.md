@@ -169,3 +169,6 @@ Clearing overlay safe mode with Ctrl+Alt+Shift+C resets only the bounded retry c
 
 Stopping recovery with Ctrl+Alt+Shift+X pauses retries without clearing persisted display, geometry, opacity, or interaction settings; focus moves to Resume recovery so the same state can be resumed deliberately.
 
+
+Resuming paused recovery with Ctrl+Alt+Shift+R starts a fresh bounded attempt but keeps the saved display and geometry preferences unchanged, so the user can resume the same visual state deliberately.
+
