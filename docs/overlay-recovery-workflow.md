@@ -238,3 +238,6 @@ After reviewing retained settings following Hide, Restore overlay remains an exp
 
 Reapply saved settings is also available from the retained review after Hide; it uses the same saved display and geometry, clears the hidden marker only after a successful native restore, and keeps the fallback visible on failure.
 
+
+If Reapply fails after Hide because persisted geometry is unavailable, the hidden marker and retained display/size settings remain intact while the control-window fallback stays active for correction.
+
