@@ -97,7 +97,10 @@ def ingest(root: Path, output: Path) -> list[str]:
     report = {"platform": identity.get("platform", "unknown"), "commit": identity.get("commit", ""),
               "captured_at": identity.get("captured_at", ""), "environment": identity.get("environment", "native script output"),
               "artifacts": artifacts, "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in SCENARIOS]}
-    output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if output.is_symlink():
+        errors.append("symlinked evidence manifest output")
+    else:
+        output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return errors
 
 
