@@ -1623,7 +1623,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.cachedResult !== undefined
                                 text: visible ? (storageRecovery.cacheHit ? "Cached analysis ready" : "No cached analysis for the requested identity") : ""
                                 Accessible.name: "Analysis cache status"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "Analysis cache status is unavailable."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -1631,7 +1633,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.cacheHit
                                 text: visible ? ("Cached result: " + storageRecovery.cachedResult) : ""
                                 Accessible.name: "Cached analysis result"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No completed cached analysis result is selected."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
@@ -1639,7 +1643,9 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.result !== ""
                                 text: visible ? ("Worker result: " + window.analysisJobBridge.result) : ""
                                 Accessible.name: "Worker analysis result"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No worker analysis result is available."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
@@ -1648,7 +1654,9 @@ ApplicationWindow {
                                 text: visible ? ("Analysis queue: " + window.analysisJobBridge.status
                                       + (window.analysisJobBridge.canRetry ? " · retry available" : "")) : ""
                                 Accessible.name: "Analysis queue outcome"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "Analysis queue outcome is unavailable."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {

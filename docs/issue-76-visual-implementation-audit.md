@@ -803,3 +803,5 @@ The persisted recovery guidance itself is now exposed as a live status value, ca
 Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
 
 Batch result, persisted recovery, retry rejection, admission, and frame-progress diagnostics now expose their live text as status values, completing the accessible readout for persisted analysis lifecycle states.
+
+Cache availability, cached results, worker results, and queue outcomes now expose live accessible status values, completing the result and admission readout across persisted and active analysis paths.
