@@ -2532,7 +2532,8 @@ ApplicationWindow {
                                 if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))
                                     continue
                                 var x = i * width / Math.max(1, wave.length - 1)
-                                var lo = wave[i][0], hi = wave[i][1]
+                                var lo = Math.max(-1, Math.min(1, Number(wave[i][0])))
+                                var hi = Math.max(-1, Math.min(1, Number(wave[i][1])))
                                 ctx.moveTo(x, height * (0.5 - hi * 0.4)); ctx.lineTo(x, height * (0.5 - lo * 0.4))
                             }
                             ctx.stroke()
