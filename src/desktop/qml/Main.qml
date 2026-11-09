@@ -498,6 +498,7 @@ ApplicationWindow {
         if (!window.overlayBridge.moveToScreen(savedIndex)
                 || !window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied.")
             overlayDisplay.forceActiveFocus()
             return false
