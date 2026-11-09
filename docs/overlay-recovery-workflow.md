@@ -268,3 +268,6 @@ After a failed Unlock following display reorder, a later successful Unlock clear
 
 After successful Unlock resolves a reordered display, click-through can be re-enabled without replacing the saved display identity or geometry; the interaction transition remains a separate explicit choice.
 
+
+After click-through is re-enabled on a reordered display, retained-settings summary review remains available and reports the updated settings revision without replacing the resolved display identity.
+
