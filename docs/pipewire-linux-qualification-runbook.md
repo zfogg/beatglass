@@ -43,6 +43,9 @@ It covers both pending and qualified host summaries so the report can advance
 as each native machine supplies evidence.
 The behavior test also requires all three platform entries to remain present
 and every pending platform to carry an actionable reason.
+Validate a transferred matrix independently with
+`python tests/pipewire/validate_qualification_matrix.py evidence/qualification-matrix.json`
+before treating its cross-platform status as an actionable handoff.
 Runner summaries carry the same matrix schema and a per-host matrix status,
 so archived Linux results can be merged into the cross-platform report without
 guessing whether a host was pending or qualified.
