@@ -3143,7 +3143,7 @@ ApplicationWindow {
                             return "Select a " + modeLabel + " position with the pointer or keyboard."
                         return modeLabel.charAt(0).toUpperCase() + modeLabel.slice(1) + " position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
                     }
-                    Accessible.name: "Visualization interaction hint"
+                    Accessible.name: "Visualization interaction hint, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: text
