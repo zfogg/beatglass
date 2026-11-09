@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire discovery now rejects zero or negative control-thread timeouts before
+initializing the runtime, returning a deterministic diagnostic instead of
+running an undefined immediate-deadline loop. Portable coverage is in
+`python tests/unit/check_pipewire_timeout_contract.py`.
+
 PipeWire discovery now pairs each control-thread `pw_init` with scoped
 `pw_deinit`, including early loop/context/registry failures, preventing global
 PipeWire runtime leaks across repeated discovery. Portable coverage is in
