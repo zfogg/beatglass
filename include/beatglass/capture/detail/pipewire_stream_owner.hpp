@@ -18,7 +18,8 @@ public:
   virtual bool connected() const noexcept = 0;
   /** Native callback boundary; implementations copy bounded PCM into handoff. */
   virtual bool process(std::span<const float> samples, std::uint64_t host_time,
-                       bool host_time_valid, MonitorStream& handoff) noexcept = 0;
+                       bool host_time_valid, double source_sample_time,
+                       bool sample_time_valid, MonitorStream& handoff) noexcept = 0;
   virtual void stop() noexcept = 0;
 };
 std::unique_ptr<StreamOwner> make_stream_owner();
