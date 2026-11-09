@@ -25,6 +25,7 @@ markers = (
     "transition evidence validation failed",
     "transition_event_count",
     "platform",
+    "transition_schema",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:

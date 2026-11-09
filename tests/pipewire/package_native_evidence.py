@@ -74,6 +74,7 @@ try:
             "source_date_epoch": epoch,
             "archive_timestamp_utc": archive_time.isoformat() + "Z",
             "transition_event_count": summary.get("native_transition_event_count"),
+            "transition_schema": "beatglass-pipewire-transitions-v1" if summary.get("native_transition_json") else None,
             "artifacts": [
                 {"name": path.name, "size": path.stat().st_size, "sha256": digest(path)}
                 for path in artifacts

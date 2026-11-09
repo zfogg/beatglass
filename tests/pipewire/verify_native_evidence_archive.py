@@ -103,6 +103,8 @@ with zipfile.ZipFile(archive_path) as archive:
         transitions = json.loads(transition_payload)
         if not isinstance(transitions, dict) or transitions.get("schema") != "beatglass-pipewire-transitions-v1":
             raise SystemExit("transition evidence has invalid provenance schema")
+        if manifest.get("transition_schema") != transitions["schema"]:
+            raise SystemExit("transition schema does not match manifest")
         if not isinstance(transitions.get("commit"), str) or not transitions["commit"].strip():
             raise SystemExit("transition evidence has no provenance commit")
         if transitions["commit"] != manifest.get("commit"):
