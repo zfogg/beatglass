@@ -20,14 +20,20 @@ commands = [
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "pipewire"],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "^pipewire_tests$"],
 ]
+evidence = args.summary.parent if args.summary else args.source / "evidence"
+evidence.mkdir(parents=True, exist_ok=True)
 results = []
-for command in commands:
-    result = subprocess.run(command, check=False, text=True)
-    results.append({"command": command, "returncode": result.returncode})
+for index, command in enumerate(commands):
+    result = subprocess.run(command, check=False, text=True, capture_output=True)
+    stdout_path = evidence / f"native-{index}-stdout.log"
+    stderr_path = evidence / f"native-{index}-stderr.log"
+    stdout_path.write_text(result.stdout, encoding="utf-8")
+    stderr_path.write_text(result.stderr, encoding="utf-8")
+    results.append({"command": command, "returncode": result.returncode,
+                    "stdout": str(stdout_path), "stderr": str(stderr_path)})
     if result.returncode:
         break
 if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
-    evidence = args.summary.parent if args.summary else args.source / "evidence"
     capture = ["python", str(args.source / "tests/pipewire/capture_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
     result = subprocess.run(capture, check=False, text=True)
     results.append({"command": capture, "returncode": result.returncode})
