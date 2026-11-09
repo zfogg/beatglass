@@ -48,6 +48,9 @@ device switch is offered to the coordinator; native qualification should
 exercise duplicate-global and remove/re-add scenarios.
 When duplicate globals coexist, the newest registry id wins so updated node
 metadata is used immediately rather than retaining stale device labels.
+Discovery failures preserve the native PipeWire error code alongside the
+diagnostic string; permission/connection recovery logic must use the code,
+not parse human-readable text.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used

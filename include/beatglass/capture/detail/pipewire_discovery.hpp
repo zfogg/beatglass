@@ -8,8 +8,10 @@
 namespace beatglass::pipewire {
 /** Private, provisional PipeWire object identity; serials are server-session scoped. */
 struct Sink { std::string serial, name, description; };
-/** A snapshot or a nonempty diagnostic; an error never carries partial sinks. */
-struct Discovery { std::vector<Sink> sinks; std::string error; };
+/** A snapshot or a nonempty diagnostic; an error never carries partial sinks.
+ * `error_code` preserves the native PipeWire result for permission/recovery
+ * policy while `error` remains suitable for operator-facing diagnostics. */
+struct Discovery { std::vector<Sink> sinks; int error_code{}; std::string error; };
 /** Internal registry accumulator. Own and mutate on one control thread only. */
 class RegistrySnapshot {
 public:
