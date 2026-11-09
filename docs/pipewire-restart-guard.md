@@ -10,3 +10,6 @@ the session lifecycle invariant.
 
 Restart also requires a nonzero epoch different from the current one, making
 each reacquisition boundary explicit and preventing same-epoch reuse.
+
+Starting a new selection is likewise rejected while a healthy stream is
+active; callers must stop/reset or reacquire through the lifecycle boundary.
