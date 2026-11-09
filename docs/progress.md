@@ -949,5 +949,7 @@ Visualization interaction hint tooltip now includes overlay recovery readiness. 
 
 Visualization playback feedback tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_playback_tooltip_contract.py`.
 
+Visualization playback epoch tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_epoch_tooltip_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
