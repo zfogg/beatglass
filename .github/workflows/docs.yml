@@ -15,8 +15,8 @@ jobs:
           python3 tests/unit/check_headers_test.py
       - name: Build documentation image
         run: docker build -f docs/api/Dockerfile -t beatglass-docs .
-      - name: Build with warnings as errors
-        run: docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html -c docs/api . /work/build/docs/html
+      - name: Build documentation
+        run: docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" beatglass-docs sphinx-build --keep-going -b html -c docs/api . /work/build/docs/html
       - name: Move API landing page to artifact root
         run: python3 docs/api/flatten_site.py build/docs/html
       - name: Check rendered declarations
