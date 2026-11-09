@@ -8,6 +8,8 @@ pkg-config --modversion libpipewire-0.3
 cmake -S . -B build-pipewire -DBEATGLASS_BUILD_PIPEWIRE=ON
 cmake --build build-pipewire
 ctest --test-dir build-pipewire --output-on-failure -R pipewire
+# Optional machine-readable artifact summary:
+python tests/pipewire/validate_qualification_artifacts.py <artifact-dir> --json
 ```
 
 Record the commit, compiler, PipeWire version, sink serial, negotiated format,
