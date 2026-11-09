@@ -20,4 +20,6 @@ TEST_CASE("PipeWire source adapter fails closed for an unknown target") {
   unsetenv("PIPEWIRE_REMOTE");
   CHECK_FALSE(backend->selected_active());
   CHECK(backend->poll_status().requires_reacquisition());
+  CHECK_FALSE(backend->reacquire("__beatglass_unknown_target__", 43, 48000, 2));
+  CHECK_FALSE(backend->selected_active());
 }
