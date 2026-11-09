@@ -1846,4 +1846,19 @@ TestCase {
         app.destroy()
         fakeOverlay.clickThrough = false
     }
+    function test_retainedSettingsReviewSurvivesUserHiddenOverlay() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        app.hideOverlayAndRestoreControls()
+        verify(app.overlayHiddenByUser)
+        let review = findChild(app, "overlaySettingsRetentionReviewAction")
+        verify(review.visible)
+        review.clicked()
+        verify(findChild(app, "overlaySettingsRetentionStatus").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+    }
 }

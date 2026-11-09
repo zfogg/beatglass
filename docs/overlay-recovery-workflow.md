@@ -229,3 +229,6 @@ The overlay summary review shortcut remains usable during click-through, returni
 
 The retained-settings summary action remains directly activatable during click-through: it focuses the full persisted display/geometry/opacity summary without changing the saved settings.
 
+
+Retained-settings review remains available after the user hides the overlay: reviewing the status does not unhide or rewrite the saved display and geometry state, so Restore remains an explicit choice.
+
