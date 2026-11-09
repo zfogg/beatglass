@@ -504,6 +504,21 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlayStopRecoveryShortcutPausesActiveCycle() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        retry.clicked()
+        let shortcut = findChild(app, "overlayStopRecoveryShortcut")
+        compare(shortcut.sequence, "Ctrl+Alt+Shift+X")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        compare(app.overlayRecoveryAttemptCount, 0)
+        verify(!shortcut.enabled)
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)
