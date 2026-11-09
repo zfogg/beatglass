@@ -9,3 +9,10 @@ restart/source boundary.
 
 The check is observational and does not alter FIFO state. Call it before
 publishing a popped block to downstream analysis.
+
+`MonitorSession::pop_current()` applies this admission rule while draining the
+bounded callback queue: stale blocks from a previous stream epoch are consumed
+and discarded, and only a block from the active epoch is returned to the
+control thread. Native daemon qualification still requires a real Linux run;
+portable contract tests cover the fail-closed boundary without claiming native
+evidence.

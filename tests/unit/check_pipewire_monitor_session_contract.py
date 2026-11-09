@@ -7,6 +7,7 @@ SOURCE = (ROOT / "lib/capture/pipewire/source_adapter.cpp").read_text(encoding="
 
 def main() -> None:
     assert "class MonitorSession" in HEADER
+    assert "bool pop_current(coreaudio::CaptureBlock& block) noexcept;" in HEADER
     assert "if (!valid_serial(serial) || !epoch || !sample_rate || !channels)" in SOURCE
     assert "stream_->on_process" in SOURCE
     assert "stream_->restart" in SOURCE
