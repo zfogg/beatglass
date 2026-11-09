@@ -5,7 +5,7 @@ QML = (Path(__file__).resolve().parents[2] / "src/desktop/qml/Main.qml").read_te
 
 def main() -> None:
     start = QML.index('objectName: "persistedRecoveryRuns"')
-    block = QML[start:start + 1800]
+    block = QML[start:start + 2600]
     assert 'ToolTip.text: count > 0' in block
     assert '"Choose a saved analysis run to recover"' in block
     assert 'storageRecovery.selectedRunId' in block
