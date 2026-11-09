@@ -1,12 +1,10 @@
 # Progress and handoff
 
-The control window now visibly lists the overlay keyboard shortcuts for
-unlocking click-through, hiding/restoring, and reapplying saved settings, with
-the same text exposed as an accessible status value.
-
-Saved overlay display, size, position, and opacity can be reapplied from the
-keyboard with `Ctrl+Alt+Shift+R`, using the same recovery path as the control
-window and announcing the restoration state.
+Core Audio tap interruption now preserves a typed `device_lost` failure when
+the selected output disappears or its liveness query fails; format and callback
+faults remain backend interruptions. This keeps reacquisition guidance distinct
+from generic failures. Portable coverage is in
+`python tests/unit/check_macos_device_loss_classification_contract.py`.
 
 The overlay can be hidden or restored from the keyboard with `Ctrl+Alt+H`.
 The shortcut uses the same persisted hide/restore path as the control-window
