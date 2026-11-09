@@ -161,6 +161,7 @@ screenshots.
 | [Native safe mode dismissed](overlay-native-safe-mode-dismissed-card.svg) | non-blocking safe-mode continuation state |
 | [Native safe mode settings](overlay-native-safe-mode-settings-card.svg) | settings recovery without session interruption |
 | [Native safe mode settings saved](overlay-native-safe-mode-settings-saved-card.svg) | queued settings while safe mode remains active |
+| [Native safe mode settings applied](overlay-native-safe-mode-settings-applied-card.svg) | applied queued state for next activation |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
