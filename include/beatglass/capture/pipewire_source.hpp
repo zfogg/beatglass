@@ -92,6 +92,8 @@ public:
   virtual bool accepts_epoch(std::uint64_t epoch) const noexcept = 0;
   /** Pop one bounded block on the control thread after start_stream succeeds. */
   virtual bool pop(coreaudio::CaptureBlock& block) noexcept = 0;
+  /** Pop only a block belonging to the currently active epoch. */
+  virtual bool pop_current(coreaudio::CaptureBlock& block) noexcept = 0;
   virtual MonitorStatus poll_status() noexcept = 0;
   /** Stop and quiesce the stream; safe to call repeatedly. */
   virtual bool stop() noexcept = 0;

@@ -120,6 +120,9 @@ public:
   bool selected_active() const noexcept override { return session_.active(); }
   bool accepts_epoch(std::uint64_t epoch) const noexcept override { return session_.accepts_epoch(epoch); }
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
+  bool pop_current(coreaudio::CaptureBlock& block) noexcept override {
+    return session_.pop(block) && session_.accepts_epoch(block.epoch);
+  }
   MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
   bool stop() noexcept override { session_.stop(); return true; }
   void reset() noexcept override { session_.reset(); }
