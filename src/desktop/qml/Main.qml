@@ -2264,6 +2264,7 @@ ApplicationWindow {
                             Accessible.description: text
                         }
                         Button {
+                            id: retryMetadata
                             objectName: "retryMetadata"
                             text: "Retry metadata"
                             visible: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0
@@ -2274,7 +2275,11 @@ ApplicationWindow {
                             Accessible.role: Accessible.Button
                             Accessible.description: "Retry reading metadata for the selected audio source after an error. Current status: " + window.metadataStatus
                             ToolTip.text: "Retry metadata for the selected source"
-                            onClicked: window.metadataBridge.inspect(window.selectedAudioUrl)
+                            onClicked: {
+                                window.metadataBridge.inspect(window.selectedAudioUrl)
+                                window.announceVisualizationRecovery("Metadata retry requested for " + window.selectedName + ".")
+                                retryMetadata.forceActiveFocus()
+                            }
                         }
                         Label {
                             id: metadataErrorGuidance
