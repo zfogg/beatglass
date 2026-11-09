@@ -853,6 +853,10 @@ ApplicationWindow {
                     window.overlayLaunchFallbackActive = true
                     window.overlayDisplayRecoveryPending = true
                     window.announceCaptureRecoveryState("Overlay bridge recovered, but settings remain unavailable; control-window fallback remains active.")
+                    window.show()
+                    window.raise()
+                    window.requestActivate()
+                    retryOverlay.forceActiveFocus()
                 }
                 if (synced && window.overlayWasVisibleBeforeAvailabilityLoss) {
                     window.overlayWasVisibleBeforeAvailabilityLoss = false
