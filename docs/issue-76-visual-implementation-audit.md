@@ -26,6 +26,8 @@ Reopen also clears the bridge's prior `analysisReserved` and `analysisAdmissionR
 
 Cached lookup state is reset at the same boundary: `cacheHit` and `cachedResult` are cleared before reopen, preventing a prior database's completed result from appearing current while the replacement storage connection is opening.
 
+Explicit `StorageRecoveryBridge::close()` applies the same cache, result, admission, and retryability reset immediately. Disconnecting storage therefore removes stale completed-result and queue-admission UI before the user chooses Reopen storage.
+
 Retry and discard reset behavior is consistent across Settings and overlay-unavailable recovery: focus returns to the recovery control, historical retry identity and diagnostics clear after success/discard, and a failed retry keeps the current diagnostic visible. This reset contract is portable; native focus timing remains open.
 
 Overlay-unavailable diagnostics are cleared after successful retry or explicit discard: stale run identity and rejection text disappear before the restored overlay state is announced. Failed recovery keeps diagnostics visible and actionable, preserving a truthful fallback path.
