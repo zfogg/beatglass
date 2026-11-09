@@ -8,7 +8,7 @@ SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").re
 
 
 def main() -> None:
-    start = SOURCE.index("Keys.onEscapePressed: { window.recursiveCatalogActive = false")
+    start = SOURCE.index("Keys.onEscapePressed: { window.clearSelectedAudio(); window.recursiveCatalogActive = false")
     block = SOURCE[start : SOURCE.index(" }", start) + 2]
     assert "recursiveResultsView.currentIndex = -1" in block
     assert 'search.text = ""' in block
