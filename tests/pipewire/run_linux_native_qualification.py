@@ -28,6 +28,7 @@ commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], ch
 if platform.system() != "Linux":
     pending = {"platform": platform.platform(), "host_os": platform.system(), "qualification_target": "Linux/PipeWire",
                "handoff_status": "pending", "commit": commit or None, "pipewire_version": None,
+               "native_execution_attempted": False,
                "commands": [], "failed_command": None, "pending_command": [sys.executable, str(Path(__file__)), "--source", str(args.source)], "qualified": False,
                "pending_reason": "Linux native qualification pending: run on Linux",
                "environment": {"python": sys.version.split()[0], "cwd": str(Path.cwd())},
