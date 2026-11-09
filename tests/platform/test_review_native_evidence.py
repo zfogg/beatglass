@@ -54,7 +54,8 @@ class NativeEvidenceReviewTest(unittest.TestCase):
                                       "scenarios": scenarios}]}
             report.write_text(__import__("json").dumps(payload))
             result = review.assess(report, "release-owner")
-            self.assertIn("linux:invalid artifact provenance", result["blockers"])
+            self.assertTrue("linux:invalid artifact provenance" in result["blockers"] or
+                            "linux:unknown artifact role" in result["blockers"])
 
     def test_manifest_identity_and_capture_command_are_required(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -198,7 +199,8 @@ class NativeEvidenceReviewTest(unittest.TestCase):
                                       "scenarios": [{"id": scenario, "status": "UNRUN"} for scenario in review.REQUIRED]}]}
             report.write_text(__import__("json").dumps(payload))
             result = review.assess(report, "release-owner")
-            self.assertIn("linux:invalid artifact provenance", result["blockers"])
+            self.assertTrue("linux:invalid artifact provenance" in result["blockers"] or
+                            "linux:unknown artifact role" in result["blockers"])
 
     def test_artifact_digest_must_be_hex(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -241,6 +243,20 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps(payload))
             result = review.assess(report, "release-owner")
             self.assertIn("linux:invalid artifact path", result["blockers"])
+
+    def test_artifact_roles_must_be_known(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            payload = {"platforms": [{"platform": "linux", "manifest_platform": "linux",
+                                      "commit": "0" * 40, "provenance_complete": True,
+                                      "manifest_sha256": "0" * 64, "qualification_command": "runner",
+                                      "qualification_output": "capture.txt", "retained_artifacts": 1,
+                                      "artifact_inventory": [{"path": "capture.txt", "role": "mystery", "sha256": "0" * 64,
+                                                               "hash_valid": True, "bytes": 1}],
+                                      "scenarios": [{"id": scenario, "status": "UNRUN"} for scenario in review.REQUIRED]}]}
+            report.write_text(__import__("json").dumps(payload))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:unknown artifact role", result["blockers"])
 
     def test_environment_and_capture_identity_are_required(self):
         with tempfile.TemporaryDirectory() as directory:

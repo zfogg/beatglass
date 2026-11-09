@@ -113,6 +113,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
                         ".." in artifact_path.replace("\\", "/").split("/")):
                     blockers.append(f"{name}:invalid artifact path")
                     break
+                if isinstance(artifact, dict) and artifact.get("role") not in {"capture", "recovery", "output", "display", "playback", "overlay"}:
+                    blockers.append(f"{name}:unknown artifact role")
+                    break
                 if (not isinstance(artifact, dict) or not artifact.get("path") or
                         not isinstance(artifact.get("role"), str) or not artifact["role"].strip() or
                         not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64 or
