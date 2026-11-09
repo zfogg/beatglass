@@ -2082,4 +2082,29 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_reorderedClickThroughReviewKeepsSettingsRevision() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        fakeOverlay.screenNames = ["Projector", "Laptop"]
+        fakeOverlay.displayName = "Projector"
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 0
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        let toggle = findChild(app, "clickThrough")
+        toggle.checked = false
+        toggle.clicked()
+        toggle.checked = true
+        toggle.clicked()
+        let revision = app.overlaySettingsRevision
+        findChild(app, "overlaySettingsSummaryReviewAction").clicked()
+        verify(findChild(app, "overlaySettingsSummary").activeFocus)
+        verify(app.overlaySettingsRevision >= revision)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 1)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
