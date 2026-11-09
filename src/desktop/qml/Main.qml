@@ -74,6 +74,18 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayReapplyShortcut"
+        sequence: "Ctrl+Alt+Shift+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity.")
+            window.reapplyOverlaySettingsAndRestore()
+        }
+    }
+    Shortcut {
         objectName: "overlayHideShortcut"
         sequence: "Ctrl+Alt+H"
         context: Qt.ApplicationShortcut
