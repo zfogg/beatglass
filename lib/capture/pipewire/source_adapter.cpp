@@ -88,6 +88,9 @@ bool MonitorSession::on_process(std::span<const float> samples, std::uint64_t ho
 bool MonitorSession::pop(coreaudio::CaptureBlock& block) noexcept {
   return stream_ && stream_->pop(block);
 }
+bool MonitorSession::pop_current(coreaudio::CaptureBlock& block) noexcept {
+  return pop(block) && accepts_epoch(block.epoch);
+}
 MonitorSession::Status MonitorSession::poll_status() noexcept {
   Status status;
   status.serial = serial_;
@@ -121,7 +124,7 @@ public:
   bool accepts_epoch(std::uint64_t epoch) const noexcept override { return session_.accepts_epoch(epoch); }
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
   bool pop_current(coreaudio::CaptureBlock& block) noexcept override {
-    return session_.pop(block) && session_.accepts_epoch(block.epoch);
+    return session_.pop_current(block);
   }
   MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
   bool stop() noexcept override { session_.stop(); return true; }
