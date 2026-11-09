@@ -36,6 +36,7 @@ def ingest(root: Path, output: Path) -> list[str]:
     if not hashes_path.is_file():
         errors.append("missing qualification-artifacts.sha256")
     else:
+        seen_paths = set()
         for line in hashes_path.read_text(encoding="utf-8").splitlines():
             parts = line.split(None, 1)
             if len(parts) != 2:
@@ -44,10 +45,14 @@ def ingest(root: Path, output: Path) -> list[str]:
             path = (root / relative).resolve()
             if root.resolve() not in path.parents or not path.is_file():
                 errors.append(f"missing or escaping artifact: {relative}"); continue
+            normalized = Path(relative).as_posix()
+            if normalized in seen_paths:
+                errors.append(f"duplicate artifact path: {normalized}"); continue
+            seen_paths.add(normalized)
             actual = hashlib.sha256(path.read_bytes()).hexdigest()
             if actual != digest.lower():
                 errors.append(f"artifact hash mismatch: {relative}")
-            artifacts.append({"path": Path(relative).as_posix(), "sha256": actual, "role": "qualification-artifact"})
+            artifacts.append({"path": normalized, "sha256": actual, "role": "qualification-artifact"})
     referenced = {
         key: identity[key] for key in ("playback_evidence", "overlay_evidence", "display_topology", "audio_inventory")
         if identity.get(key)
