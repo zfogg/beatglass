@@ -223,7 +223,7 @@ StorageRecoveryBridge::~StorageRecoveryBridge() { close(); workerThread_.quit();
 void StorageRecoveryBridge::setDatabasePath(const QString& path) {
   const auto normalized = path.trimmed();
   if (databasePath_ == normalized) return;
-  if (!databasePath_.isEmpty() && !normalized.isEmpty()) close();
+  if (!databasePath_.isEmpty()) close();
   databasePath_ = normalized; emit databasePathChanged();
   if (cacheHit_) { cacheHit_ = false; emit cachedResultChanged(); }
   if (!cachedResult_.isEmpty()) { cachedResult_.clear(); emit cachedResultChanged(); }

@@ -68,6 +68,8 @@ if "storageTransitionPending_" not in bridge or "storageTransitionPending_ = tru
     raise SystemExit("Open-state API must distinguish transition failures")
 if "const auto normalized = path.trimmed()" not in source:
     raise SystemExit("Database paths must be normalized before configuration")
+if "if (!databasePath_.isEmpty()) close();" not in source:
+    raise SystemExit("Clearing database path must close the previous storage")
 if "Storage already open" not in source:
     raise SystemExit("Repeated open must be rejected explicitly")
 if "Storage already closed" not in source:
