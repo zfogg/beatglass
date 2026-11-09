@@ -15,7 +15,13 @@ parser.add_argument("--build", type=Path, default=Path("build-pipewire"))
 parser.add_argument("--summary", type=Path)
 parser.add_argument("--transitions", type=Path, help="validated lifecycle transition JSON captured from the native host")
 parser.add_argument("--archive", type=Path, help="package the qualified summary and evidence into this transfer archive")
+parser.add_argument("--capture-plan", type=Path, help="validated cross-platform native host capture plan")
 args = parser.parse_args()
+if args.capture_plan:
+    validator = Path(__file__).with_name("validate_native_host_capture_plan.py")
+    checked_plan = subprocess.run([sys.executable, str(validator), str(args.capture_plan)], capture_output=True, text=True, check=False)
+    if checked_plan.returncode:
+        raise SystemExit(checked_plan.stderr or checked_plan.stdout or "native host capture plan validation failed")
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
     pending = {"platform": platform.platform(), "host_os": platform.system(), "qualification_target": "Linux/PipeWire",
@@ -27,6 +33,7 @@ if platform.system() != "Linux":
                "qualification_matrix_status": "pending",
                "requested_summary": str(args.summary) if args.summary else None,
                "requested_archive": str(args.archive) if args.archive else None,
+               "capture_plan": str(args.capture_plan) if args.capture_plan else None,
                "native_artifacts": [],
                "native_test_discovery": None, "native_test_count": None,
                "native_test_name_match": False, "native_junit_exists": False}

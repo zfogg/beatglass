@@ -14,4 +14,6 @@ for marker in ("host_os", "pending_command"):
 assert '"environment"' in source
 for marker in ("qualification_matrix_schema", "qualification_matrix_status", "beatglass-native-qualification-matrix-v1"):
     assert marker in source
+for marker in ("--capture-plan", "validate_native_host_capture_plan.py", "capture_plan"):
+    assert marker in source
 print("PipeWire native runner contract verified (5 checks)")

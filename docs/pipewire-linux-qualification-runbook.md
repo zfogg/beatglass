@@ -70,6 +70,8 @@ it lists the Linux, Windows, and macOS commands/permissions still required.
 Validate that plan before distributing it with
 `python tests/pipewire/validate_native_host_capture_plan.py evidence/native-host-capture-plan.json`;
 the validator refuses fabricated, incomplete, or non-pending host entries.
+Pass that plan to the runner with `--capture-plan` so native execution refuses
+to start from an invalid or fabricated host handoff.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
