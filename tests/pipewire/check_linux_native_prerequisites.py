@@ -4,6 +4,8 @@ import json
 import shutil
 import subprocess
 import sys
+sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+from preflight_inventory import validate_sink_inventory
 
 if platform.system() != "Linux":
     print("PipeWire native preflight pending: run on Linux with libpipewire-0.3")
@@ -22,31 +24,9 @@ if not missing:
     dump = subprocess.run(["pw-dump"], check=False, stdout=subprocess.PIPE, text=True)
     try:
         inventory = json.loads(dump.stdout)
-        if not isinstance(inventory, list):
-            missing.append("valid pw-dump JSON")
-        elif not any(
-            (props := item.get("info", {}).get("props", {})).get("media.class") == "Audio/Sink"
-            and str(props.get("object.serial", "")).strip()
-            and str(props.get("node.name", "")).strip()
-            and isinstance(item.get("id"), int) and item["id"] >= 0
-            for item in inventory if isinstance(item, dict)
-        ):
-            missing.append("PipeWire Audio/Sink node")
-        else:
-            sink_serials = [
-                str(item["info"]["props"]["object.serial"]).strip()
-                for item in inventory if isinstance(item, dict)
-                and item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink"
-            ]
-            if len(sink_serials) != len(set(sink_serials)):
-                missing.append("unique PipeWire output sink serials")
-            sink_names = [
-                str(item["info"]["props"]["node.name"]).strip()
-                for item in inventory if isinstance(item, dict)
-                and item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink"
-            ]
-            if len(sink_names) != len(set(sink_names)):
-                missing.append("unique PipeWire output sink node names")
+        failure = validate_sink_inventory(inventory)
+        if failure:
+            missing.append(failure)
     except json.JSONDecodeError:
         missing.append("valid pw-dump JSON")
 else:

@@ -28,6 +28,9 @@ if(BUILD_TESTING)
   add_test(NAME pipewire_inventory_capture_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_inventory_capture_contract.py)
   set_tests_properties(pipewire_inventory_capture_contract PROPERTIES LABELS unit TIMEOUT 10)
+  add_test(NAME pipewire_preflight_inventory_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_preflight_inventory_contract.py)
+  set_tests_properties(pipewire_preflight_inventory_contract PROPERTIES LABELS unit TIMEOUT 10)
 endif()
 
 if(BUILD_TESTING)

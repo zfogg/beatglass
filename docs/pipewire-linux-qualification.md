@@ -33,6 +33,11 @@ The preflight requires an addressable output sink with a numeric object id,
 stable serial, and node name; record the selected serial and id in the native
 qualification manifest before capture.
 
+The preflight validates the complete sink set before qualification: every
+Audio/Sink must have a non-negative numeric object id, a non-empty unique
+`object.serial`, and a non-empty unique `node.name`. This prevents an
+ambiguous inventory from silently selecting the wrong output.
+
 `pipewire_tests` also exercises the portable source-adapter failure boundary;
 native daemon-backed lifecycle cases remain skipped/pending until Linux.
 Run `ctest --test-dir build -R pipewire_tests --output-on-failure` during the
