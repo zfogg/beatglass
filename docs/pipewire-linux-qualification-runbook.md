@@ -51,6 +51,9 @@ metadata is used immediately rather than retaining stale device labels.
 Discovery failures preserve the native PipeWire error code alongside the
 diagnostic string; permission/connection recovery logic must use the code,
 not parse human-readable text.
+The shared discovery contract marks permission, daemon-connection, timeout,
+and broken-pipe errors retryable while treating invalid requests as terminal;
+qualification should verify both branches.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used

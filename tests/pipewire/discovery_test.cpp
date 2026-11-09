@@ -1,6 +1,16 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/capture/detail/pipewire_discovery.hpp"
 #include <cstdlib>
+#include <cerrno>
+
+TEST_CASE("discovery classifies permission and daemon errors as retryable") {
+  beatglass::pipewire::Discovery permission{{}, -EACCES, "permission denied"};
+  beatglass::pipewire::Discovery daemon{{}, -ECONNREFUSED, "daemon unavailable"};
+  beatglass::pipewire::Discovery malformed{{}, -EINVAL, "invalid request"};
+  CHECK(permission.retryable());
+  CHECK(daemon.retryable());
+  CHECK_FALSE(malformed.retryable());
+}
 
 TEST_CASE("registry discovery selects only addressable output sinks") {
   beatglass::pipewire::RegistrySnapshot nodes;

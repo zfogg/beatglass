@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <cerrno>
 
 namespace beatglass::pipewire {
 /** Private, provisional PipeWire object identity; serials are server-session scoped. */
@@ -11,7 +12,16 @@ struct Sink { std::string serial, name, description; };
 /** A snapshot or a nonempty diagnostic; an error never carries partial sinks.
  * `error_code` preserves the native PipeWire result for permission/recovery
  * policy while `error` remains suitable for operator-facing diagnostics. */
-struct Discovery { std::vector<Sink> sinks; int error_code{}; std::string error; };
+struct Discovery {
+  std::vector<Sink> sinks;
+  int error_code{};
+  std::string error;
+  /** True when the control thread can retry discovery after recovery. */
+  bool retryable() const noexcept {
+    return error_code == -EACCES || error_code == -ECONNREFUSED ||
+           error_code == -ETIMEDOUT || error_code == -EPIPE;
+  }
+};
 /** Internal registry accumulator. Own and mutate on one control thread only. */
 class RegistrySnapshot {
 public:
