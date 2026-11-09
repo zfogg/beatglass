@@ -100,6 +100,8 @@ screenshots.
 | [Confirm scan](overlay-library-scan-confirm-card.svg) | scoped scan confirmation with safe cancellation |
 | [Remove folder](overlay-library-remove-folder-confirm-card.svg) | destructive-action guard with file-safety boundary |
 | [Folder removed](overlay-library-folder-removed-card.svg) | non-destructive removal confirmation and re-add path |
+| [Theme picker](overlay-theme-picker-card.svg) | readable theme selection with contrast preview |
+| [Theme applied](overlay-theme-applied-card.svg) | saved appearance confirmation with undo |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
