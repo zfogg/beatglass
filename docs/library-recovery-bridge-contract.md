@@ -96,6 +96,8 @@ so a previous file's retry backoff cannot disable recovery for the newly chosen
 source.
 Visualization seek now requires playback to match the selected Library source;
 an accepted snapshot cannot seek a different open source.
+Direct seek buttons use the same selected-source binding as keyboard and
+visualization seek, keeping every timeline entry point aligned.
 The cache controls are also disabled while the bridge reports closed storage,
 so users cannot invoke actions that will be rejected by the worker boundary.
 The reusable jobs contract exposes explicit terminal-state and known-total

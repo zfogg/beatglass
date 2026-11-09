@@ -150,6 +150,9 @@ ApplicationWindow {
         enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection
         onActivated: { window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * playbackSampleRate.value, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState("Playback sought forward five seconds from the keyboard.") }
     }
+    Binding { target: seekBackPlayback; property: "enabled"; value: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection }
+    Binding { target: seekForwardPlayback; property: "enabled"; value: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection }
+    Binding { target: seekToFrame; property: "enabled"; value: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection }
     Shortcut {
         objectName: "overlayEscapeShortcut"
         sequence: "Escape"
