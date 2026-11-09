@@ -141,6 +141,7 @@ screenshots.
 | [Session resumed](overlay-session-resumed-card.svg) | restored native state after relaunch |
 | [Session resume failed](overlay-session-resume-failed-card.svg) | safe recovery when saved state cannot reopen |
 | [Recovery complete](overlay-recovery-complete-card.svg) | restored native state after recovery |
+| [Native permission pending](overlay-native-permission-pending-card.svg) | explicit native window permission request |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
