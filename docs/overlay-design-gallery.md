@@ -154,6 +154,7 @@ screenshots.
 | [Native available](overlay-native-available-card.svg) | ready state before native overlay activation |
 | [Native activating](overlay-native-activating-card.svg) | native window activation progress |
 | [Native activated](overlay-native-activated-card.svg) | live native overlay ready state |
+| [Native activation blocked](overlay-native-activation-blocked-card.svg) | recoverable native activation collision |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
