@@ -798,6 +798,8 @@ Reopen selected playback now rechecks source identity at click time, preventing 
 
 Seek-to-frame now rechecks the live playback state at click time and announces when a stale seek action is invalidated by playback stopping.
 
+The five-second seek controls now perform the same click-time state admission, preventing stale bridge calls when playback stops between rendering and activation.
+
 Refreshing playback outputs now returns focus to the output-device selector, making the refreshed device list immediately actionable from the keyboard.
 
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
