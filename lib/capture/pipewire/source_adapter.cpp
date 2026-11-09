@@ -170,7 +170,7 @@ public:
   }
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
   bool pop_current(coreaudio::CaptureBlock& block) noexcept override {
-    return session_.pop_current(block);
+    return owner_ && owner_->connected() && session_.pop_current(block);
   }
   MonitorStatus poll_status() noexcept override {
     auto status = session_.poll_status();
