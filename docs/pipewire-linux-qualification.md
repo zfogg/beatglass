@@ -69,6 +69,8 @@ capture-time and review-time structural acceptance identical.
 The shared gate requires every raw object to retain `info.props` before either
 path proceeds to target metadata checks.
 It also rejects duplicate object IDs before publication or review.
+The shared gate requires each Audio/Sink to retain non-empty string serial and
+node-name values before either path proceeds.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a
