@@ -822,21 +822,29 @@ ApplicationWindow {
         }
         const savedGeometry = window.overlayBridge.geometry
         if (!savedGeometry || savedGeometry.width <= 0 || savedGeometry.height <= 0) {
+            window.overlayLaunchFallbackActive = true
+            window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Persisted overlay geometry unavailable; control-window fallback remains active.")
             return false
         }
         if (!window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)) {
+            window.overlayLaunchFallbackActive = true
+            window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Persisted overlay geometry could not be restored; control-window fallback remains active.")
             return false
         }
         const savedOpacity = Number(window.overlayBridge.opacity)
         if (isFinite(savedOpacity) && savedOpacity >= 0.2 && savedOpacity <= 1.0) {
             if (!window.overlayBridge.setOpacity(savedOpacity)) {
+                window.overlayLaunchFallbackActive = true
+                window.overlayDisplayRecoveryPending = true
                 window.announceCaptureRecoveryState("Persisted overlay opacity could not be restored; control-window fallback remains active.")
                 return false
             }
         } else {
             if (!window.overlayBridge.setOpacity(0.9)) {
+                window.overlayLaunchFallbackActive = true
+                window.overlayDisplayRecoveryPending = true
                 window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe opacity could not be applied.")
                 return false
             }
