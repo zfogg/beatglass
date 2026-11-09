@@ -775,6 +775,7 @@ ApplicationWindow {
         if (overlayBridge && !overlayBridge.attach(djOverlay, window)) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             window.announceCaptureRecoveryState("Native overlay attachment failed; control-window fallback remains active.")
         } else {
             const synced = window.syncOverlaySettingsFromBridge()
