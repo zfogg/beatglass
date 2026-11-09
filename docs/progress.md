@@ -854,3 +854,5 @@ Overlay settings-retention status accessible name now includes the current setti
 
 Overlay settings summary now surfaces retained-settings state during pending recovery and launch fallback. Portable coverage is in `python tests/unit/check_overlay_summary_retention_contract.py`.
 
+Consolidated overlay settings summary is now keyboard-focusable for direct inspection of display, size, opacity, and recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_focus_contract.py`.
+
