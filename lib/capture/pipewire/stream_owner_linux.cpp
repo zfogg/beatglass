@@ -4,6 +4,7 @@
 #include "beatglass/capture/detail/pipewire_stream_owner.hpp"
 #include <pipewire/pipewire.h>
 #include <spa/param/audio/format-utils.h>
+#include <cerrno>
 #include <spa/param/param.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/buffer/buffer.h>
@@ -80,7 +81,8 @@ private:
     }
     const auto* sample_data = static_cast<const std::byte*>(data_block.data) + data_block.chunk.offset;
     const auto samples = std::span<const float>(reinterpret_cast<const float*>(sample_data), sample_bytes / sizeof(float));
-    owner.handoff_->push(samples, 0, false, false, 0.0, false);
+    if (!owner.handoff_->push(samples, 0, false, false, 0.0, false))
+      owner.handoff_->on_error(-ENOBUFS);
     pw_stream_queue_buffer(owner.stream_, buffer);
   }
   static constexpr pw_stream_events events_ = {PW_VERSION_STREAM_EVENTS, nullptr, nullptr, process};
