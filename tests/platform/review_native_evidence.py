@@ -60,6 +60,7 @@ def assess(report_path: Path, reviewer: str) -> dict:
                 blockers.append(f"{name}:duplicate artifact path")
             for artifact in inventory:
                 if (not isinstance(artifact, dict) or not artifact.get("path") or
+                        not isinstance(artifact.get("role"), str) or not artifact["role"].strip() or
                         not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64 or
                         artifact.get("hash_valid") is not True or not isinstance(artifact.get("bytes"), int) or
                         artifact["bytes"] <= 0):
