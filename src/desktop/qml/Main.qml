@@ -1126,6 +1126,8 @@ ApplicationWindow {
         const url = files.get(index, "fileUrl")
         if (files.isFolder(index)) {
             window.clearSelectedAudio()
+            window.recursiveCatalogActive = false
+            window.recursiveCatalogRows = []
             browseFolder = url
             browser.currentIndex = -1
             search.text = ""
