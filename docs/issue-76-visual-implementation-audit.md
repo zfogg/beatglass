@@ -837,6 +837,8 @@ Geometry status now repeats hidden-by-user intent alongside its revision and rec
 Successful display selection now synchronizes the accepted native display/geometry/opacity snapshot before publishing the preferred display, keeping settings revision and accessibility summaries atomic.
 
 Failed native display movement or visual-state reapplication now raises display-selection-required as well as recovery-pending, preventing Show/Restore/Reapply from claiming a usable destination until the user chooses a replacement.
+
+Monitor replacement recovery applies the same gate when the display moves but persisted visual state fails, requiring an explicit display selection before actions become available again.
 The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
 
 Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
