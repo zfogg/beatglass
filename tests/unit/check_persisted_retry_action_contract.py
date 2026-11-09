@@ -29,4 +29,6 @@ if source.count("Discarding persisted recovery") < 2:
     raise SystemExit("Single and batch discard must publish a transition status")
 if "Refreshing persisted recovery" not in source:
     raise SystemExit("Recovery refresh must publish a transition status")
+if "Persisted recovery refreshed" not in source:
+    raise SystemExit("Recovery refresh must publish completion status")
 print(f"Persisted retry action contract verified ({len(required)} checks)")
