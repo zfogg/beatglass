@@ -2201,6 +2201,7 @@ ApplicationWindow {
                         ToolTip.text: "Refresh the current folder contents"
                         onClicked: { files.refresh(); window.refreshCatalog(); window.resetLibraryBrowserSelection("Folder contents refreshed; entry selection cleared.") }
                     }
+                    Button { id: clearSavedFolder; objectName: "clearSavedFolder"; text: "Forget folder"; enabled: typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== ""; Accessible.name: "Forget saved Library folder"; Accessible.value: enabled ? "available" : "no saved folder"; Accessible.description: "Clear the persisted Library folder without modifying audio files."; onClicked: { libraryPreferences.clearFolder(); window.clearSelectedAudio(); window.browseFolder = ""; window.announceVisualizationRecovery("Saved Library folder cleared; choose a folder to browse."); clearSavedFolder.forceActiveFocus() } }
                     Label {
                         id: folderPath
                         objectName: "folderPath"
