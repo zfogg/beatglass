@@ -241,3 +241,6 @@ Reapply saved settings is also available from the retained review after Hide; it
 
 If Reapply fails after Hide because persisted geometry is unavailable, the hidden marker and retained display/size settings remain intact while the control-window fallback stays active for correction.
 
+
+After geometry becomes available again, a failed Reapply can be retried through Restore without resetting the hidden marker's saved display or size preference; the corrected persisted geometry is then applied.
+

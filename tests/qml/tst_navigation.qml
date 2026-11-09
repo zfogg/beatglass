@@ -1904,4 +1904,21 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
+    function test_reapplyGeometryRecoveryCanRetryWithoutResettingSettings() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        app.hideOverlayAndRestoreControls()
+        fakeOverlay.geometry = ({ x: 0, y: 0, width: 0, height: 0 })
+        findChild(app, "reapplyOverlaySettings").clicked()
+        verify(app.overlayHiddenByUser)
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        findChild(app, "restoreOverlay").clicked()
+        verify(!app.overlayHiddenByUser)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(fakeOverlay.requestedWidth, 620)
+        app.destroy()
+    }
 }
