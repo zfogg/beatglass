@@ -132,6 +132,7 @@ screenshots.
 | [Always on top](overlay-always-on-top-card.svg) | persistent native window visibility preference |
 | [Fullscreen behavior](overlay-fullscreen-behavior-card.svg) | native overlay behavior over fullscreen apps |
 | [Fullscreen auto-hide](overlay-fullscreen-auto-hide-card.svg) | automatic hide and restore behavior |
+| [Fullscreen transition](overlay-fullscreen-transition-card.svg) | native window transition progress state |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
