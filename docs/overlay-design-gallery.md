@@ -72,6 +72,7 @@ screenshots.
 | [Permission granted](overlay-permission-granted-card.svg) | successful access and next step |
 | [Access changed](overlay-access-revoked-card.svg) | permission loss and recovery action |
 | [Access restored](overlay-access-restored-card.svg) | successful permission recovery state |
+| [Platform support](overlay-platform-card.svg) | per-platform qualification status |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
