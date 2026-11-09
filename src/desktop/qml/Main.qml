@@ -2583,7 +2583,7 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
                                 text: visible ? ("Verified batch publication: " + window.analysisJobBridge.batchResultsPublished + " result(s) published · " + window.analysisJobBridge.batchQueuedCount + " queued · " + window.analysisJobBridge.batchFailedCount + " failed · " + window.analysisJobBridge.batchCancelledCount + " cancelled") : ""
                                 Accessible.name: "Analysis batch publication summary: " + text
-                                Accessible.value: visible ? text : ""
+                                Accessible.value: visible ? text : "unavailable; no accepted items"
                                 Accessible.role: Accessible.Status
                                 Accessible.description: visible ? "Counts distinguish results published after verification from work still queued or terminal without publication. Retry or discard recovery applies only to terminal failures." : "No analysis batch is active; no accepted items are available for publication."
                                 ToolTip.text: "Verified publication and terminal batch counts"
