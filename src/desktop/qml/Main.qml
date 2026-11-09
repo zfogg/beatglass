@@ -3022,6 +3022,7 @@ ApplicationWindow {
                                 ToolTip.text: Accessible.description
                             }
                             Button {
+                                id: discardAnalysisButton
                                 objectName: "discardAnalysis"
                                 activeFocusOnTab: true
                                 text: "Discard recovery"
@@ -3030,7 +3031,7 @@ ApplicationWindow {
                                 Accessible.name: "Discard analysis recovery"
                                 Accessible.description: "Clear the failed or cancelled analysis recovery state without changing source audio. Confirmation is required."
                                 ToolTip.text: Accessible.description
-                                onClicked: discardAnalysisDialog.open()
+                                onClicked: { window.announceVisualizationRecovery("Confirm discard of analysis recovery; source audio will remain unchanged."); discardAnalysisDialog.open() }
                             }
                             Dialog {
                                 id: discardAnalysisDialog
@@ -3038,6 +3039,8 @@ ApplicationWindow {
                                 title: "Discard analysis recovery?"
                                 standardButtons: Dialog.Ok | Dialog.Cancel
                                 contentItem: Label { text: "This clears the retained analysis recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis recovery confirmation"; Accessible.role: Accessible.StaticText }
+                                onOpened: standardButton(Dialog.Cancel).forceActiveFocus()
+                                onRejected: discardAnalysisButton.forceActiveFocus()
                                 onAccepted: { if (!window.analysisJobBridge || !window.analysisJobBridge.canRetry) { window.announceVisualizationRecovery("Analysis recovery changed before discard; no recovery was discarded. Retry remains available when the worker reaches a terminal state."); retryAnalysis.forceActiveFocus() } else { window.analysisJobBridge.discard(); window.announceVisualizationRecovery("Analysis recovery discarded; focus remains on the recovery controls."); retryAnalysis.forceActiveFocus() } }
                             }
                             Button {
