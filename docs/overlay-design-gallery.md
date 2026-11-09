@@ -29,3 +29,8 @@ screenshots.
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
 for the interaction sequence and screenshot qualification checklist.
+
+The qualification matrix below maps the committed renderings to the native
+desktop evidence still required on each platform:
+
+![Overlay qualification matrix](overlay-qualification-matrix.svg)
