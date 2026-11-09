@@ -7,6 +7,7 @@
 #include <memory>
 #include <span>
 #include <atomic>
+#include <string>
 
 namespace beatglass::pipewire {
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
@@ -57,6 +58,27 @@ private:
   std::atomic<bool> stopped_{false};
   std::atomic<bool> discontinuity_pending_{false};
   std::atomic<int> error_code_{0};
+};
+/** Control-thread owner for one selected output monitor epoch. */
+class MonitorSession {
+public:
+  /** Select a validated sink and allocate its bounded stream on the control thread. */
+  bool start(std::string serial, std::uint64_t epoch, std::uint32_t sample_rate,
+             std::uint32_t channels);
+  /** Stop the active stream and publish a discontinuity before quiescing callbacks. */
+  void stop() noexcept;
+  /** True when no stream exists or its callback state requires reacquisition. */
+  bool needs_restart() const noexcept;
+  /** Control-thread restart with a fresh epoch and format. */
+  bool restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels);
+  /** Native process seam for the currently selected stream. */
+  bool on_process(std::span<const float> samples, std::uint64_t host_time,
+                  bool host_time_valid, double source_sample_time,
+                  bool sample_time_valid) noexcept;
+  const std::string& serial() const noexcept { return serial_; }
+private:
+  std::string serial_;
+  std::unique_ptr<MonitorStream> stream_;
 };
 /** Create the provisional PipeWire monitor boundary; ownership stays with the caller. */
 std::unique_ptr<MonitorBackend> make_monitor_backend();

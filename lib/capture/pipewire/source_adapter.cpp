@@ -42,6 +42,25 @@ void MonitorStream::stop() noexcept {
   stopped_.store(true, std::memory_order_release);
 }
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }
+bool MonitorSession::start(std::string serial, std::uint64_t epoch, std::uint32_t sample_rate,
+                           std::uint32_t channels) {
+  if (serial.empty() || !epoch || !sample_rate || !channels) return false;
+  auto next = std::make_unique<MonitorStream>(epoch, sample_rate, channels);
+  serial_ = std::move(serial);
+  stream_ = std::move(next);
+  return true;
+}
+void MonitorSession::stop() noexcept { if (stream_) stream_->stop(); }
+bool MonitorSession::needs_restart() const noexcept { return !stream_ || stream_->needs_restart(); }
+bool MonitorSession::restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) {
+  return stream_ && stream_->restart(epoch, sample_rate, channels);
+}
+bool MonitorSession::on_process(std::span<const float> samples, std::uint64_t host_time,
+                                bool host_time_valid, double source_sample_time,
+                                bool sample_time_valid) noexcept {
+  return stream_ && stream_->on_process(samples, host_time, host_time_valid,
+                                        source_sample_time, sample_time_valid);
+}
 namespace {
 class DiscoveryBoundary final : public MonitorBackend {
 public:
