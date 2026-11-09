@@ -1401,4 +1401,19 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_trayFallbackRetainsPersistedDisplaySelection() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 1
+        app.overlayPreferredSizeIndex = 2
+        verify(!app.showOverlayAndHideControls())
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 1)
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Projector") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("next retry") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
