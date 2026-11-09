@@ -17,6 +17,8 @@ The portable dry-run test also exercises the unavailable-host path and verifies
 that it emits an attributable pending handoff rather than an empty report.
 The pending handoff also enumerates the host, daemon, development-package, and
 audio-sink blockers needed before a native run can start.
+Cross-platform qualification scripts similarly record unrun native steps
+explicitly rather than presenting an incomplete artifact set as success.
 
 ## Runnable preparation checks
 

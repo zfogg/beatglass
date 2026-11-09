@@ -44,3 +44,9 @@ class NativeQualificationDryRunTest(unittest.TestCase):
             self.assertIn("environment", payload)
             self.assertTrue(payload["pending_reason"])
             self.assertIn("Linux host", payload["native_execution_blockers"])
+
+    def test_cross_platform_scripts_mark_unrun_steps_explicitly(self):
+        windows = (ROOT / "tests/windows/run_qualification.ps1").read_text(encoding="utf-8")
+        macos = (ROOT / "tests/macos/run_qualification.sh").read_text(encoding="utf-8")
+        self.assertIn("UNRUN", windows)
+        self.assertIn("UNRUN", macos)
