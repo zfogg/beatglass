@@ -10,7 +10,7 @@ SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").re
 def main() -> None:
     start = SOURCE.index('objectName: "libraryShortcutHelp"')
     block = SOURCE[start : SOURCE.index("                }", start)]
-    for shortcut in ("Ctrl+F", "Ctrl+Alt+L", "Ctrl+Alt+Shift+L", "Ctrl+Alt+R", "Ctrl+Alt+Up", "Ctrl+Alt+S", "Ctrl+Alt+Backspace"):
+    for shortcut in ("Ctrl+F", "Ctrl+Alt+L", "Ctrl+Alt+Shift+L", "Ctrl+Alt+Shift+B return now", "Ctrl+Alt+R", "Ctrl+Alt+Up", "Ctrl+Alt+S", "Ctrl+Alt+Backspace"):
         assert shortcut in block
     assert 'Accessible.role: Accessible.StaticText' in block
     assert "Keyboard shortcuts for filtering" in block
