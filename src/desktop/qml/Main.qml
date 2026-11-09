@@ -74,6 +74,19 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayOpacityFocusShortcut"
+        sequence: "Ctrl+Alt+L"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            overlayOpacityControl.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay opacity control focused; current value is " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
+        }
+    }
+    Shortcut {
         objectName: "overlayClickThroughShortcut"
         sequence: "Ctrl+Alt+I"
         context: Qt.ApplicationShortcut

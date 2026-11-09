@@ -1,5 +1,8 @@
 # Progress and handoff
 
+`Ctrl+Alt+L` focuses the overlay opacity slider and announces its current
+percentage, providing a direct keyboard path to adjust visual prominence.
+
 Shortcut guidance now also lists keyboard size cycling (`Ctrl+Alt+O`) and the
 90% opacity reset (`Ctrl+Alt+Shift+O`), keeping visual overlay controls
 discoverable without requiring pointer access.
