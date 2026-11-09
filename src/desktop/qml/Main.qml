@@ -1976,7 +1976,11 @@ ApplicationWindow {
                         Keys.onSpacePressed: window.activateEntry(currentIndex)
                         Keys.onBackspacePressed: {
                             if (files.parentFolder.toString() !== "") {
+                                window.clearSelectedAudio()
                                 window.browseFolder = files.parentFolder
+                                search.text = ""
+                                window.recursiveCatalogActive = false
+                                window.recursiveCatalogRows = []
                                 window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
                                 browser.currentIndex = -1
                                 event.accepted = true
