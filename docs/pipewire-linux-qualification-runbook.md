@@ -39,6 +39,10 @@ unstarted loop; native Linux qualification must exercise these failure paths.
 The portable transport contract also asserts that callback admission is
 checked before FIFO insertion, preserving the stop/error boundary during
 reacquisition.
+Portable lifecycle coverage now exercises callback failure, discontinuity
+publication, rejection of same-epoch restart, and stale-epoch suppression;
+native Linux qualification must additionally reproduce these transitions with
+the real PipeWire daemon.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used

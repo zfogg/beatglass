@@ -7,7 +7,7 @@ SOURCE = (ROOT / "lib/capture/pipewire/source_adapter.cpp").read_text(encoding="
 
 def main() -> None:
     assert "class MonitorSession" in HEADER
-    assert "if (serial.empty() || !epoch || !sample_rate || !channels)" in SOURCE
+    assert "if (!valid_serial(serial) || !epoch || !sample_rate || !channels)" in SOURCE
     assert "stream_->on_process" in SOURCE
     assert "stream_->restart" in SOURCE
     print("PipeWire monitor session contract verified (4 checks)")
