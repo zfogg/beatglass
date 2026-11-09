@@ -168,6 +168,7 @@ screenshots.
 | [Native tray handoff](overlay-native-tray-handoff-card.svg) | return to a retained overlay without restarting capture |
 | [Native status popover](overlay-native-status-popover-card.svg) | compact health, overlay, and pause controls |
 | [Native pause confirmation](overlay-native-pause-confirm-card.svg) | explicit capture pause with retained overlay settings |
+| [Native paused](overlay-native-paused-card.svg) | paused native overlay with retained settings and resume action |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
