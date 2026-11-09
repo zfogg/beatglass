@@ -44,6 +44,10 @@ def assess(report_path: Path, reviewer: str) -> dict:
             blockers.append(f"{name}:invalid build commit identity")
         if platform.get("provenance_complete") is not True:
             blockers.append(f"{name}:incomplete provenance")
+        if not isinstance(platform.get("environment"), str) or not platform["environment"].strip():
+            blockers.append(f"{name}:missing environment identity")
+        if not isinstance(platform.get("captured_at"), str) or "T" not in platform["captured_at"]:
+            blockers.append(f"{name}:missing capture timestamp")
         manifest_sha = platform.get("manifest_sha256")
         if not isinstance(manifest_sha, str) or len(manifest_sha) != 64 or any(char not in "0123456789abcdefABCDEF" for char in manifest_sha):
             blockers.append(f"{name}:invalid manifest identity")

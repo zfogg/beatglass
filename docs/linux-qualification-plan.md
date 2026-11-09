@@ -55,5 +55,7 @@ Scenario evidence digest maps must reference only `PASS` scenarios and contain
 valid SHA-256 values present in the retained artifact inventory. Artifact paths
 must be unique within a platform bundle and every artifact must declare a
 non-empty provenance role.
+Each platform entry must also identify the capture environment and include an
+ISO-like capture timestamp, so evidence cannot be detached from its host run.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
