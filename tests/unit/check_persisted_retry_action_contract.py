@@ -66,3 +66,5 @@ if "const auto normalized = path.trimmed()" not in source:
     raise SystemExit("Database paths must be normalized before configuration")
 if "Storage already open" not in source:
     raise SystemExit("Repeated open must be rejected explicitly")
+if "Storage already closed" not in source:
+    raise SystemExit("Repeated close must be rejected explicitly")

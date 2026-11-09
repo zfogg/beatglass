@@ -28,3 +28,5 @@ Injected database paths are trimmed before configuration; whitespace-only input
 therefore leaves storage unconfigured instead of queuing an invalid open.
 Calling `open()` again while `storageOpen` is true is rejected with `Storage
 already open`; callers must close or change the configured path first.
+Calling `close()` while no storage is open reports `Storage already closed`
+without enqueueing redundant worker work.
