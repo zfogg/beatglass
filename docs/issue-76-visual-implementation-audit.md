@@ -780,3 +780,5 @@ Restore failures now also return keyboard focus to the display selector after re
 The unavailable-bridge restore path now follows the same focus rule, so every persisted-restore failure leaves keyboard users at the display recovery control.
 
 Invalid persisted visual state now announces the exact recovery action before returning focus to display selection.
+
+Native show failures now restore focus to display recovery as well, keeping the fallback actionable when the platform refuses to present the overlay window.
