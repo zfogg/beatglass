@@ -5,6 +5,7 @@
 #include <pipewire/pipewire.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/param.h>
+#include <spa/buffer/buffer.h>
 
 namespace beatglass::pipewire::detail {
 // This translation unit intentionally isolates PipeWire headers and the future
@@ -28,7 +29,7 @@ public:
     if (!core_) { stop(); return false; }
     props_ = pw_properties_new(PW_KEY_TARGET_OBJECT, config.serial.c_str(), nullptr);
     if (!props_) { stop(); return false; }
-    stream_ = pw_stream_new_simple(pw_thread_loop_get_loop(loop_), "beatglass-monitor", props_, nullptr, this);
+    stream_ = pw_stream_new_simple(pw_thread_loop_get_loop(loop_), "beatglass-monitor", props_, &events, this);
     if (!stream_) { stop(); return false; }
     pw_thread_loop_start(loop_);
     if (pw_stream_connect(stream_, PW_DIRECTION_INPUT, PW_ID_ANY,
@@ -53,6 +54,18 @@ public:
     handoff_ = nullptr;
   }
 private:
+  static void process(void* data) {
+    auto& owner = *static_cast<LinuxStreamOwner*>(data);
+    if (!owner.active_ || !owner.stream_ || !owner.handoff_) return;
+    auto* buffer = pw_stream_dequeue_buffer(owner.stream_);
+    if (!buffer || !buffer->buffer || !buffer->buffer->datas[0].data) return;
+    const auto& data_block = buffer->buffer->datas[0];
+    const auto samples = std::span<const float>(static_cast<const float*>(data_block.data), data_block.maxsize / sizeof(float));
+    owner.handoff_->push(samples, 0, false, false, 0.0, false);
+    pw_stream_queue_buffer(owner.stream_, buffer);
+  }
+  static constexpr pw_stream_events events_ = {PW_VERSION_STREAM_EVENTS, nullptr, nullptr, process};
+  static const pw_stream_events events;
   pw_thread_loop* loop_{};
   pw_context* context_{};
   pw_core* core_{};
@@ -61,6 +74,8 @@ private:
   MonitorStream* handoff_{};
   bool active_ = false;
 };
+
+const pw_stream_events LinuxStreamOwner::events = LinuxStreamOwner::events_;
 
 std::unique_ptr<StreamOwner> make_linux_stream_owner() { return std::make_unique<LinuxStreamOwner>(); }
 }
