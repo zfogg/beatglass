@@ -2,7 +2,11 @@
 from pathlib import Path
 import sys
 
-html = Path(sys.argv[1]).read_text(encoding="utf-8")
+target = Path(sys.argv[1])
+if target.is_dir():
+    html = "\n".join(path.read_text(encoding="utf-8") for path in target.rglob("*.html"))
+else:
+    html = target.read_text(encoding="utf-8")
 expected = ("<h1>Beatglass API reference", "AudioBlock", "AudioClockAnchor", "frame_to_monotonic_ns", "reduce_loudest_channel", "StreamContinuity", "AudioQueue", "AudioSource", 'id="beatglass::AudioSource::stop"', "SourceStatus", "ChannelLayout", "SourceAttempt", "SourceLifecycle",
             'id="beatglass::AcquisitionToken"', 'id="beatglass::AcquisitionToken::epoch__std::uint64_t"',
             'id="beatglass::AcquisitionToken::generation__std::uint64_t"',
