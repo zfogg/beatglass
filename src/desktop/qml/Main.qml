@@ -777,8 +777,10 @@ ApplicationWindow {
         refreshCatalog()
     }
     function restoreOverlayDisplaySelectionFromBridge() {
-        if (!window.overlayBridge)
+        if (!window.overlayBridge) {
+            window.overlayDisplayRecoveryPending = true
             return false
+        }
         if (window.overlayBridge.displayName !== "")
             window.overlayPreferredDisplayName = window.overlayBridge.displayName
         if (window.overlayBridge.screenIndex >= 0)
