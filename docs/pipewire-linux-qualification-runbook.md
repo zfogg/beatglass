@@ -36,6 +36,9 @@ commit identity before accepting discovery/JUnit digests.
 The native owner records whether its thread loop actually started, so early
 PipeWire construction failures can tear down safely without locking an
 unstarted loop; native Linux qualification must exercise these failure paths.
+The portable transport contract also asserts that callback admission is
+checked before FIFO insertion, preserving the stop/error boundary during
+reacquisition.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
