@@ -429,6 +429,7 @@ TestCase {
         clear.clicked()
         compare(app.overlayRecoveryAttemptCount, 0)
         verify(retry.enabled)
+        compare(findChild(app, "navigation").currentIndex, 1)
         app.destroy()
         fakeOverlay.available = true
     }

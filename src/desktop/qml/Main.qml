@@ -1389,6 +1389,7 @@ ApplicationWindow {
     }
     function resetOverlayRecoveryAttempts() {
         window.overlayRecoveryAttemptCount = 0
+        navigation.currentIndex = 1
         window.announceCaptureRecoveryState("DJ overlay safe mode cleared; retry is available when a display is ready.")
         retryOverlay.forceActiveFocus()
     }
