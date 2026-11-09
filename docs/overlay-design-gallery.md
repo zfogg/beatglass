@@ -128,6 +128,7 @@ screenshots.
 | [Overlay reopened](overlay-reopened-card.svg) | restored native window without session interruption |
 | [Startup recovery](overlay-startup-recovery-card.svg) | native state restoration progress |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
+| [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
