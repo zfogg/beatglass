@@ -541,8 +541,8 @@ ApplicationWindow {
     }
     Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; window.focusLibraryFilter("Library filter focused; type to filter the current folder.") } }
     Shortcut { objectName: "libraryClearFilterShortcut"; sequence: "Ctrl+Alt+Shift+Backspace"; context: Qt.ApplicationShortcut; enabled: search.text !== ""; onActivated: window.clearLibraryFilter(browser) }
-    Shortcut { objectName: "libraryFolderPathFocusShortcut"; sequence: "Ctrl+Alt+Shift+I"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; folderPath.forceActiveFocus(); window.announceVisualizationRecovery("Current Library folder path focused.") } }
-    Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; parentFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library parent-folder action focused.") } }
+    Shortcut { objectName: "libraryFolderPathFocusShortcut"; sequence: "Ctrl+Alt+Shift+I"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryFolderPath() }
+    Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: window.focusLibraryParentAction() }
     Shortcut { objectName: "libraryRecursiveFocusShortcut"; sequence: "Ctrl+Alt+Shift+Z"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive; onActivated: window.focusLibraryRecursiveAction() }
     Shortcut { objectName: "libraryRecursiveReturnFocusShortcut"; sequence: "Ctrl+Alt+Shift+J"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; returnToFolderBrowser.forceActiveFocus(); window.announceVisualizationRecovery("Library return-to-folder action focused.") } }
     Shortcut { objectName: "libraryRecursiveAnalyzeFocusShortcut"; sequence: "Ctrl+Alt+Shift+K"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; analyzeRecursiveResults.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library analysis action focused.") } }
@@ -568,8 +568,8 @@ ApplicationWindow {
     Shortcut { objectName: "libraryPlaybackFocusShortcut"; sequence: "Ctrl+Alt+Shift+Y"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { navigation.currentIndex = 0; playSelectedTrack.forceActiveFocus(); window.announceVisualizationRecovery("Selected Library playback action focused.") } }
     Shortcut { objectName: "libraryRefreshFocusShortcut"; sequence: "Ctrl+Alt+Shift+Q"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; refreshFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library refresh action focused.") } }
     Shortcut { objectName: "libraryChooseFolderFocusShortcut"; sequence: "Ctrl+Alt+Shift+D"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryFolderChooser() }
-    Shortcut { objectName: "libraryCatalogStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+C"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; catalogResultCount.forceActiveFocus(); window.announceVisualizationRecovery("Library catalog result count focused.") } }
-    Shortcut { objectName: "librarySelectionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+E"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; librarySelectionStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library selection status focused.") } }
+    Shortcut { objectName: "libraryCatalogStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+C"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: window.focusLibraryCatalogStatus() }
+    Shortcut { objectName: "librarySelectionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+E"; context: Qt.ApplicationShortcut; onActivated: window.focusLibrarySelectionStatus() }
     Shortcut { objectName: "libraryShortcutHelpFocusShortcut"; sequence: "Ctrl+Alt+Shift+H"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryShortcutHelp.forceActiveFocus(); window.announceVisualizationRecovery("Library keyboard shortcut help focused.") } }
     Shortcut { objectName: "libraryAnalyzeShortcut"; sequence: "Ctrl+Alt+A"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"; onActivated: { const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile()); window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry."); analyzeSelectedAudio.forceActiveFocus() } }
     Shortcut { objectName: "libraryAnalysisFocusShortcut"; sequence: "Ctrl+Alt+Shift+N"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { navigation.currentIndex = 0; analyzeSelectedAudio.forceActiveFocus(); window.announceVisualizationRecovery("Selected Library analysis action focused.") } }
@@ -1009,6 +1009,26 @@ ApplicationWindow {
         navigation.currentIndex = 0
         addFolderRecursively.forceActiveFocus()
         window.announceVisualizationRecovery("Library recursive catalog action focused.")
+    }
+    function focusLibraryFolderPath() {
+        navigation.currentIndex = 0
+        folderPath.forceActiveFocus()
+        window.announceVisualizationRecovery("Current Library folder path focused.")
+    }
+    function focusLibraryParentAction() {
+        navigation.currentIndex = 0
+        parentFolder.forceActiveFocus()
+        window.announceVisualizationRecovery("Library parent-folder action focused.")
+    }
+    function focusLibraryCatalogStatus() {
+        navigation.currentIndex = 0
+        catalogResultCount.forceActiveFocus()
+        window.announceVisualizationRecovery("Library catalog result count focused.")
+    }
+    function focusLibrarySelectionStatus() {
+        navigation.currentIndex = 0
+        librarySelectionStatus.forceActiveFocus()
+        window.announceVisualizationRecovery("Library selection status focused.")
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
