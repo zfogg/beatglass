@@ -24,7 +24,7 @@ with zipfile.ZipFile(archive_path) as archive:
     raw_names = archive.namelist()
     if len(raw_names) != len(set(raw_names)):
         raise SystemExit("duplicate archive entry")
-    if any(name.endswith("/") or name.startswith("/") or "/" in name or "\\" in name or ".." in PurePosixPath(name).parts for name in raw_names):
+    if any(name.endswith("/") or name.startswith("/") or "/" in name or "\\" in name or any(ord(char) < 32 for char in name) or ".." in PurePosixPath(name).parts for name in raw_names):
         raise SystemExit("unsafe archive entry name")
     names = set(raw_names)
     if len({name.casefold() for name in raw_names}) != len(raw_names):

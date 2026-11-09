@@ -143,3 +143,5 @@ Archive entries are also checked case-insensitively so extraction remains safe
 on Windows and other case-folding filesystems.
 Both POSIX and Windows path separators are rejected in entry names; archives
 must remain a flat basename-only handoff.
+Control characters are rejected from entry names as well, avoiding ambiguous
+or truncated extraction paths.
