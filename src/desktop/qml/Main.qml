@@ -74,6 +74,17 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayUnlockFocusShortcut"
+        sequence: "Ctrl+Alt+U"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough
+        onActivated: {
+            navigation.currentIndex = 1
+            unlockOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction.")
+        }
+    }
+    Shortcut {
         objectName: "overlayHideFocusShortcut"
         sequence: "Ctrl+Alt+J"
         context: Qt.ApplicationShortcut

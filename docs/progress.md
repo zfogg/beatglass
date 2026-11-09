@@ -1,5 +1,8 @@
 # Progress and handoff
 
+When click-through is active, `Ctrl+Alt+U` focuses the Unlock overlay action
+and announces that Enter will restore keyboard and pointer interaction.
+
 `Ctrl+Alt+J` focuses the Hide overlay action, keeping the control-window
 fallback keyboard reachable during an active overlay session.
 
