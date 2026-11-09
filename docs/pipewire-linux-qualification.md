@@ -62,7 +62,7 @@ Every raw inventory object must also retain its non-negative numeric PipeWire
 object ID for later target selection and audit; IDs must be unique within the
 captured inventory.
 Each object must retain its `info` object so native properties remain
-auditable after capture.
+auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
 interrupted or racing capture cannot leave a partial artifact at the requested
 path.
