@@ -109,14 +109,11 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
         onActivated: {
-            window.clearSelectedAudio()
             window.browseFolder = files.parentFolder
-            browser.currentIndex = -1
             search.text = ""
             window.recursiveCatalogActive = false
             window.recursiveCatalogRows = []
-            window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
-            browser.forceActiveFocus()
+            window.resetLibraryBrowserSelection("Moved to the parent Library folder; choose an audio source to inspect.")
         }
     }
     Shortcut {
