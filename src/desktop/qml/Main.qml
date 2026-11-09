@@ -1907,7 +1907,7 @@ ApplicationWindow {
                                 Accessible.name: "Cancel analysis"
                                 Accessible.description: "Cancel the active source-attributed analysis operation."
                                 ToolTip.text: Accessible.description
-                                onClicked: { window.analysisJobBridge.cancel(); window.announceVisualizationRecovery("Analysis cancelled; waiting for a replacement accepted snapshot.") }
+                                onClicked: { if (!window.analysisJobBridge || !window.analysisJobBridge.canCancel) { window.announceVisualizationRecovery("Analysis is no longer active; cancel was not dispatched."); retryAnalysis.forceActiveFocus() } else { window.analysisJobBridge.cancel(); window.announceVisualizationRecovery("Analysis cancelled; waiting for a replacement accepted snapshot."); cancelAnalysis.forceActiveFocus() } }
                             }
                             BusyIndicator {
                                 objectName: "analysisWaitingIndicator"
