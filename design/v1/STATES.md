@@ -4,6 +4,7 @@
 |---|---|---|
 | Library | Browse indexed collection; completed, analyzing and source changed rows; track key unknown | Folder navigation, search, sort, select, individual/batch analysis; preserve files. |
 | Library empty | First run before folder selection | Offer folder picker and explain source preservation and supported formats accurately. |
+| Library filter empty | Search returns no matches | Explain the query, offer Clear search, and reassure that source files are unchanged. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
 | DJ | Monitoring selected output, activity and combined-mix caveat | Start/stop, select default or explicit output, half/double BPM, reset/reacquire. |
