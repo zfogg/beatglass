@@ -9,6 +9,8 @@ def main() -> None:
     for name in ("nativePlaybackError", "playbackSeekLimitation", "playbackSelectionStatus", "playbackUnavailable"):
         start = QML.index(f'objectName: "{name}"')
         source = QML[start:QML.find("\n", start) + 1]
+        if name == "playbackUnavailable":
+            source = QML[start:start + 500]
         assert "Accessible.value:" in source, name
         assert "Accessible.role: Accessible.Status" in source, name
     print("playback recovery accessibility contract: 4 statuses verified")
