@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio interruption status now distinguishes a disappeared device/stream
+from format or callback faults, making reacquisition guidance actionable.
+Portable coverage is in
+`python tests/unit/check_macos_status_message_contract.py`.
+
 Cancelled Core Audio enumeration now normalizes both its typed error and its
 diagnostic text, replacing stale backend text with a consistent cancellation
 message. Portable coverage is in

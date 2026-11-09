@@ -200,7 +200,10 @@ TapStatus OutputTap::status() {
       format.mBytesPerFrame != impl_->format.mBytesPerFrame || format.mBitsPerChannel != impl_->format.mBitsPerChannel ||
       format.mFramesPerPacket != impl_->format.mFramesPerPacket ||
       format.mBytesPerPacket != impl_->format.mBytesPerPacket) {
-    impl_->current = {TapState::interrupted, "Output disappeared, format changed, or tap callback failed; restart with a fresh epoch",
+    const char* message = (device_lost || stream_lost)
+        ? "Output device or stream disappeared; select it again and restart with a fresh epoch"
+        : "Output format changed or tap callback failed; restart with a fresh epoch";
+    impl_->current = {TapState::interrupted, message,
                       (device_lost || stream_lost) ? TapFailure::device_lost : TapFailure::backend_error};
   }
   return impl_->current;
