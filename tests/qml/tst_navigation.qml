@@ -1626,4 +1626,20 @@ TestCase {
         fakeOverlay.refuseUnlock = false
         fakeOverlay.clickThrough = false
     }
+    function test_successfulUnlockClearsRecoveryMarkersOnly() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        app.overlayDisplayRecoveryPending = true
+        verify(app.unlockOverlayAndRestoreFocus())
+        verify(!fakeOverlay.clickThrough)
+        verify(!app.overlayDisplayRecoveryPending)
+        verify(!app.overlayLaunchFallbackActive)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+    }
 }

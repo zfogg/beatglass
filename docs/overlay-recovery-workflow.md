@@ -187,3 +187,6 @@ When paused recovery and click-through overlap, Ctrl+Alt+U restores the control 
 
 If Unlock overlay fails while click-through is active, focus remains on Unlock overlay and persisted display/geometry settings stay queued for the next retry; the failure does not discard the recovery state.
 
+
+A successful Unlock clears stale click-through recovery markers but does not rewrite persisted display or geometry preferences. The next explicit Show or Restore therefore uses the same saved visual state.
+
