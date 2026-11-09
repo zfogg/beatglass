@@ -11,6 +11,8 @@ except (OSError, json.JSONDecodeError, UnicodeDecodeError):
     raise SystemExit("malformed qualification matrix")
 if not isinstance(matrix, dict) or matrix.get("schema") != "beatglass-native-qualification-matrix-v1":
     raise SystemExit("invalid qualification matrix schema")
+if "commit" in matrix and (not isinstance(matrix["commit"], str) or not matrix["commit"].strip()):
+    raise SystemExit("invalid qualification matrix commit")
 platforms = matrix.get("platforms")
 required = {"Linux", "Windows", "Darwin"}
 if not isinstance(platforms, dict) or set(platforms) != required:

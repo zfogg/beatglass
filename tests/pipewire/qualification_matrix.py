@@ -25,6 +25,8 @@ if summary is not None:
         if current["status"] == "pending":
             current["pending_reason"] = summary.get("pending_reason", "native qualification incomplete")
 matrix = {"schema": "beatglass-native-qualification-matrix-v1", "host_os": host, "python": sys.version.split()[0], "platforms": platforms}
+if summary is not None and isinstance(summary.get("commit"), str) and summary["commit"].strip():
+    matrix["commit"] = summary["commit"]
 output.parent.mkdir(parents=True, exist_ok=True)
 output.write_text(json.dumps(matrix, indent=2) + "\n", encoding="utf-8")
 print(f"Wrote qualification matrix for {len(platforms)} platforms to {output}")
