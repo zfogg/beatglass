@@ -63,10 +63,11 @@ TestCase {
         property int selectedScreen: -1
         property int requestedWidth: 0`n        property int requestedHeight: 0`n        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
         property bool refuseClickThrough: false
+        property bool refuseHide: false
         property bool refuseUnlock: false`n        property bool refuseShow: false
         function attach(overlay, control) { attaches++; return true }
         function showOverlay() { shows++; return !refuseShow }
-        function hideOverlay() { hides++; clickThrough = false }
+        function hideOverlay() { hides++; if (refuseHide) return false; clickThrough = false; return true }
         function setClickThrough(value) { if ((value && refuseClickThrough) || (!value && refuseUnlock)) return false; clickThrough = value; return true }
         function setOpacity(value) { opacity = value }
         function moveToScreen(index) { selectedScreen = index; screenIndex = index; displayName = screenNames[index]; return true }
@@ -1861,6 +1862,19 @@ TestCase {
         app.destroy()
         fakeOverlay.clickThrough = false
     }
+    function test_hideFailureRestoresFocusToOverlayRecoveryControl() {
+        fakeOverlay.available = true
+        fakeOverlay.refuseHide = true
+        let app = shellWithOverlay.createObject(null)
+        app.hideOverlayAndRestoreControls()
+        verify(app.overlayDisplayRecoveryPending)
+        let restore = findChild(app, "restoreOverlay")
+        tryVerify(() => restore.activeFocus)
+        compare(restore.Accessible.name, "Restore DJ overlay")
+        fakeOverlay.refuseHide = false
+        app.destroy()
+    }
+
     function test_retainedSettingsReviewSurvivesUserHiddenOverlay() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)

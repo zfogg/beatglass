@@ -260,7 +260,10 @@ ApplicationWindow {
             window.show()
             window.raise()
             window.requestActivate()
+            if (hidden)
             hideOverlay.forceActiveFocus()
+        else
+            restoreOverlay.forceActiveFocus()
             window.announceCaptureRecoveryState("Hide overlay control focused.")
         }
     }
