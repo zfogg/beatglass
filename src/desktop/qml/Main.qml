@@ -1545,7 +1545,9 @@ ApplicationWindow {
                                       + (window.analysisJobBridge.canRetry ? " · retry available" : "")
                                       + (typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== "" ? (" · recovery: " + storageRecovery.analysisError) : "")) : ""
                                 Accessible.name: "Analysis queue progress"
-                                Accessible.description: visible ? text : "Analysis queue progress is unavailable."
+                                Accessible.value: visible ? text : ""
+                                Accessible.description: visible ? "Live worker progress and retry state: " + text : "Analysis queue progress is unavailable."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {

@@ -46,6 +46,8 @@ Batch Cancel exposes the same live status/count value and switches to an explici
 
 The aggregate Batch analysis queue status now exposes the complete live lifecycle/count string as an accessible value and labels it as live batch lifecycle data, keeping status context available even when individual actions are disabled.
 
+The adjacent Analysis queue progress surface now exposes its live worker status, frame count, retryability, and recovery error as an accessible Status value, with an explicit unavailable description when the bridge is absent.
+
 The C++ storage bridge now resets active analysis retryability, progress, result, and lifecycle status before reopening. Reopen cannot leave a stale active-job Retry enabled while persisted runs are being refreshed; the subsequent worker refresh repopulates only current retryable identities.
 
 Reopen also clears the bridge's prior `analysisReserved` and `analysisAdmissionResult` values before dispatching the open request. Queue admission text is therefore scoped to the prior connection and cannot be mistaken for a fresh reservation after reconnect.
