@@ -2776,7 +2776,7 @@ ApplicationWindow {
                                     enabled: visible && cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && window.selectedAudioUrl.toLocalFile() !== ""
                                     Accessible.name: "Run fresh analysis"
                                     Accessible.description: "Invalidate this identity and admit fresh analysis work to the queue."
-                                    onClicked: reanalyzeCacheDialog.open()
+                                    onClicked: { reanalyzeCacheDialog.open(); window.announceVisualizationRecovery("Confirm fresh analysis for the selected cache identity; source audio remains unchanged.") }
                                 }
                             }
                             Dialog {
@@ -2789,7 +2789,8 @@ ApplicationWindow {
                                 Accessible.description: "Confirm invalidating this cache identity and queueing fresh analysis. Source audio is not changed."
                                 contentItem: Label { text: "This invalidates the selected cached identity and queues fresh analysis. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.role: Accessible.StaticText }
                                 onOpened: { window.announceVisualizationRecovery("Confirm fresh analysis; source audio remains unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
-                                onAccepted: { storageRecovery.reanalyze("reanalyze-" + cacheContent.text, window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Fresh analysis queued; source audio was not changed."); reanalyzeCacheDialog.close() }
+                                onAccepted: { storageRecovery.reanalyze("reanalyze-" + cacheContent.text, window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Fresh analysis queued; source audio was not changed."); reanalyzeCacheDialog.close(); reanalyzeInvalidatedCache.forceActiveFocus() }
+                                onRejected: reanalyzeInvalidatedCache.forceActiveFocus()
                             }
                             Dialog {
                                 id: invalidateCacheDialog
