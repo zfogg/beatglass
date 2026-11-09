@@ -164,6 +164,9 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   worker_->moveToThread(&workerThread_);
   connect(&workerThread_, &QThread::finished, worker_, &QObject::deleteLater);
   connect(worker_, &Worker::result, this, [this](bool ok, const QString& text) {
+    const bool opened = ok && text == QStringLiteral("Storage open");
+    const bool closed = text == QStringLiteral("Storage closed") || (!ok && text.startsWith(QStringLiteral("Storage open")));
+    if ((opened && !storageOpen_) || (closed && storageOpen_)) { storageOpen_ = opened; emit storageStateChanged(); }
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
     if (!ok) {
       if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }

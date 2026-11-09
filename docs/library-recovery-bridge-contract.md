@@ -18,3 +18,7 @@ between windows or threads.
 `storageConfigured` is true only after a non-empty database path is injected;
 it does not claim that SQLite is open. Consumers should continue to use
 `statusChanged` for the asynchronous open/close result.
+
+`storageOpen` is the corresponding asynchronous state: it becomes true only
+after the worker reports `Storage open` and false after `Storage closed` or an
+open failure. Configuration and open state are intentionally separate.
