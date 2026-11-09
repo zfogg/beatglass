@@ -14,3 +14,12 @@ PipeWire support, a Linux host must record:
 5. CTest results plus captured logs/evidence for each scenario.
 
 Until those steps are run on Linux, native PipeWire qualification is unrun.
+
+## Adapter seam preflight
+
+Before the native run, configure with `-DBUILD_TESTING=ON` and run
+`ctest --test-dir build -R pipewire_linux_adapter_seam_contract --output-on-failure`.
+This verifies that the Linux-gated PipeWire/SPA translation unit, callback
+ownership boundary, and provisional format/target-node contract are present.
+It does not replace a Linux build with `libpipewire-0.3`, a running daemon, or
+real capture/recovery evidence.
