@@ -43,6 +43,9 @@ if invalidate.count("emit cached(false, QString{})") < 2:
     raise SystemExit("Cache invalidation must clear stale presentation on failure and success")
 if "analysisResult_.clear()" not in source[source.index('if (ok && text == QStringLiteral("Cached analysis invalidated")'):source.index("emit statusChanged();")]:
     raise SystemExit("Cache invalidation must clear the displayed analysis result")
+invalidation_state = source[source.index('if (ok && text == QStringLiteral("Cached analysis invalidated")'):source.index("emit statusChanged();")]
+if "analysisRetryable_ = false" not in invalidation_state or "analysisError_.clear()" not in invalidation_state:
+    raise SystemExit("Cache invalidation must clear stale recovery state")
 cached_connection = source[source.index("connect(worker_, &Worker::cached,"):source.index("connect(worker_, &Worker::analysis,")]
 if "analysisAdmissionResult_.clear()" not in cached_connection:
     raise SystemExit("Cache lookup must clear stale admission presentation")

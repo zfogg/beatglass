@@ -177,6 +177,8 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     if (ok && text == QStringLiteral("Retry queued") && !resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
     if (ok && text == QStringLiteral("Cached analysis invalidated")) {
       cacheHit_ = false; cachedResult_.clear(); emit cachedResultChanged();
+      if (analysisRetryable_) { analysisRetryable_ = false; emit analysisRetryableChanged(); }
+      if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
       if (!analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
       if (analysisAdmission_) { analysisAdmission_ = false; emit analysisAdmissionChanged(); }
       if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
