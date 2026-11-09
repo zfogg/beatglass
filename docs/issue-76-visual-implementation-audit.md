@@ -823,6 +823,8 @@ Display-change recovery now checks the native show result. If the platform refus
 Display-change recovery now preserves explicit hidden-by-user intent: the saved display and visual state are repaired without auto-showing the overlay, and the user is directed to Restore overlay when ready.
 
 The current-display status now exposes hidden-by-user intent directly, so assistive technology can distinguish a recovered display from an intentionally hidden overlay.
+
+The display-and-size controls group now repeats both hidden-by-user and recovery-pending context before users enter its individual controls.
 The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
 
 Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
