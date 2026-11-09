@@ -72,6 +72,7 @@ ApplicationWindow {
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     readonly property bool analysisCacheIdentityReady: cacheContent.text.trim() !== "" && cacheEngine.text.trim() !== "" && cacheConfig.text.trim() !== "" && cacheMode.acceptableInput
+    property bool analysisCacheIdentityDirty: true
         && cacheEngine.text !== "" && cacheConfig.text !== ""
         && (cacheMode.text === "offline" || cacheMode.text === "live")
     readonly property int recursiveAudioResultCount: {
@@ -3031,10 +3032,10 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.findCached !== undefined
                                 Layout.fillWidth: true
                                 spacing: 6
-                                TextField { id: cacheContent; objectName: "analysisCacheContent"; placeholderText: "content identity"; Accessible.name: "Analysis cache content identity"; Accessible.description: "Content identity used to look up or invalidate a completed analysis cache entry."; Layout.fillWidth: true }
-                                TextField { id: cacheEngine; objectName: "analysisCacheEngine"; placeholderText: "engine"; Accessible.name: "Analysis cache engine"; Accessible.description: "Analysis engine identity used for the cache lookup."; Layout.fillWidth: true }
-                                TextField { id: cacheConfig; objectName: "analysisCacheConfig"; placeholderText: "configuration"; Accessible.name: "Analysis cache configuration"; Accessible.description: "Analysis configuration identity used for the cache lookup."; Layout.fillWidth: true }
-                                TextField { id: cacheMode; objectName: "analysisCacheMode"; placeholderText: "offline/live"; validator: RegularExpressionValidator { regularExpression: /^(offline|live)$/ }; Accessible.name: "Analysis cache mode"; Accessible.value: acceptableInput ? text : "invalid; use offline or live"; Accessible.description: "Cache mode identity. Enter exactly offline or live."; Layout.preferredWidth: 100 }
+                                TextField { id: cacheContent; objectName: "analysisCacheContent"; placeholderText: "content identity"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache content identity"; Accessible.description: "Content identity used to look up or invalidate a completed analysis cache entry."; Layout.fillWidth: true }
+                                TextField { id: cacheEngine; objectName: "analysisCacheEngine"; placeholderText: "engine"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache engine"; Accessible.description: "Analysis engine identity used for the cache lookup."; Layout.fillWidth: true }
+                                TextField { id: cacheConfig; objectName: "analysisCacheConfig"; placeholderText: "configuration"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache configuration"; Accessible.description: "Analysis configuration identity used for the cache lookup."; Layout.fillWidth: true }
+                                TextField { id: cacheMode; objectName: "analysisCacheMode"; placeholderText: "offline/live"; onTextChanged: window.analysisCacheIdentityDirty = true; validator: RegularExpressionValidator { regularExpression: /^(offline|live)$/ }; Accessible.name: "Analysis cache mode"; Accessible.value: acceptableInput ? text : "invalid; use offline or live"; Accessible.description: "Cache mode identity. Enter exactly offline or live."; Layout.preferredWidth: 100 }
                                 Button {
                                     objectName: "lookupAnalysisCache"
                                     text: "Check cache"
@@ -3042,12 +3043,12 @@ ApplicationWindow {
                                     Accessible.name: "Check analysis cache"
                                     Accessible.value: enabled ? "ready; identity fields complete" : "unavailable; enter content, engine, configuration, and mode"
                                     Accessible.description: "Look up a completed result without starting decoder or analysis work."
-                                    onClicked: { storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Cache lookup requested for the selected analysis identity."); lookupAnalysisCache.forceActiveFocus() }
+                                    onClicked: { storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.analysisCacheIdentityDirty = false; window.announceVisualizationRecovery("Cache lookup requested for the selected analysis identity."); lookupAnalysisCache.forceActiveFocus() }
                                 }
                                 Button {
                                     objectName: "invalidateAnalysisCache"
                                     text: "Forget cached result"
-                                    enabled: window.analysisCacheIdentityReady && typeof storageRecovery !== "undefined" && storageRecovery.cacheHit === true
+                                    enabled: window.analysisCacheIdentityReady && !window.analysisCacheIdentityDirty && typeof storageRecovery !== "undefined" && storageRecovery.cacheHit === true
                                     Accessible.name: "Forget cached analysis"
                                     Accessible.value: enabled ? "available; completed cache hit" : "unavailable; run Check cache and confirm a hit"
                                     Accessible.description: enabled ? "Remove this completed cache identity so the next analysis runs again. Source files are not changed." : "Run Check cache and confirm a completed cache hit before forgetting an identity."

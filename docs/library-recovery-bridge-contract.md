@@ -84,6 +84,9 @@ Both operations also reject an empty content identity before touching storage,
 preventing an accidental unscoped cache query or invalidation.
 Engine, configuration, and mode are required alongside content, so every cache
 operation addresses one complete analysis identity.
+The desktop tracks edits to those fields as a dirty identity. A cache hit may
+only be invalidated or reanalyzed while the exact identity last checked remains
+unchanged; editing any field requires another lookup first.
 The desktop cache controls mirror this contract: lookup, invalidation, and
 reanalysis actions stay disabled until content, engine, configuration, and a
 valid `offline`/`live` mode are present.
