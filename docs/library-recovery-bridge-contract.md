@@ -26,6 +26,9 @@ The bridge tracks an in-flight open/close transition so an open failure also
 drives `storageOpen` false without misclassifying unrelated worker errors.
 Injected database paths are trimmed before configuration; whitespace-only input
 therefore leaves storage unconfigured instead of queuing an invalid open.
+Replacing a configured path with an empty path also closes the previous worker
+storage first, preventing a cleared configuration from retaining an open
+database.
 Calling `open()` again while `storageOpen` is true is rejected with `Storage
 already open`; callers must close or change the configured path first.
 Calling `close()` while no storage is open reports `Storage already closed`
