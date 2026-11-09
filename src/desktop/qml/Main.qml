@@ -3006,13 +3006,13 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
-                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Appearance guidance"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Theme and reduced-motion guidance" }
+                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Appearance guidance"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Theme and reduced-motion guidance" }
                         Label {
                             objectName: "appearanceState"
                             text: "Theme: " + window.selectedTheme + " · Motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Accessible.name: "Current appearance settings: " + text
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             ToolTip.text: "Current theme: " + window.selectedTheme + "; motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Layout.fillWidth: true
@@ -3024,7 +3024,7 @@ ApplicationWindow {
                     text: "Settings are saved for this desktop profile. User audio files are never modified."
                     Accessible.name: "Settings status: " + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: "Settings persistence status and user-audio safety guarantee."
                     ToolTip.text: "Settings persistence and source-file safety"
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
