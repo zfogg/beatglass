@@ -158,4 +158,10 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=aggregate_mismatch_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(aggregate_mismatch)], capture_output=True, text=True)
     if result.returncode == 0 or "aggregate test count does not match suites" not in result.stderr + result.stdout: raise SystemExit("aggregate JUnit count mismatch was accepted")
-print("PipeWire evidence archive verifier behavior passed (14 scenarios)")
+    malformed_manifest = root / "malformed-manifest.zip"
+    with zipfile.ZipFile(malformed_manifest, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=[{"name": "nested/path.json"}])))
+    result = subprocess.run([sys.executable, str(verifier), str(malformed_manifest)], capture_output=True, text=True)
+    if result.returncode == 0 or "malformed manifest artifact name" not in result.stderr + result.stdout: raise SystemExit("malformed manifest artifact name was accepted")
+print("PipeWire evidence archive verifier behavior passed (15 scenarios)")
