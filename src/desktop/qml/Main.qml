@@ -2371,7 +2371,7 @@ ApplicationWindow {
                             Accessible.name: "Analysis and playback status: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
-                            Accessible.description: text
+                            Accessible.description: text + (window.libraryAnalysisResultReady ? " Analysis is source-linked and ready." : " Analysis is provisional until an accepted source-linked result is available.")
                         }
                         Label {
                             id: analysisUncertainty
