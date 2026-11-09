@@ -395,3 +395,5 @@ Archive verification also binds the manifest timestamp to the declared SOURCE_DA
 If an imported manifest contains an epoch outside the host datetime range, independent verification rejects it with an explicit unrepresentable-epoch error rather than producing platform-dependent results.
 
 When summaries include source_date_epoch, archive verification validates its type, non-negative range, and exact equality with the manifest before accepting transferred evidence.
+
+If a summary carries rchive_timestamp_utc, verification also cross-checks it against the manifest timestamp to detect provenance drift.
