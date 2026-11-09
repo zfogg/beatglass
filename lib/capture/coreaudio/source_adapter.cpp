@@ -33,6 +33,8 @@ EnumerationResult SourceAdapter::enumerate() {
       result.diagnostic = "No Core Audio output devices available";
     } else if (result.outcome == EnumerationOutcome::ok && !result.sources.empty()) {
       result.diagnostic.clear();
+    } else if (result.outcome == EnumerationOutcome::cancelled && result.diagnostic.empty()) {
+      result.diagnostic = "Core Audio output enumeration cancelled";
     }
     return result;
   }
