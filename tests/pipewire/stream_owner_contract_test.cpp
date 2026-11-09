@@ -56,3 +56,12 @@ TEST_CASE("stream owner rejects incomplete native stream configuration") {
   owner.stop();
   CHECK_FALSE(owner.connected());
 }
+
+TEST_CASE("stream owner treats zero error as a teardown boundary") {
+  FakeOwner owner;
+  beatglass::pipewire::MonitorStream handoff(9, 48000, 2);
+  REQUIRE(owner.connect({"sink-9", 48000, 2}, handoff));
+  owner.report_error(0, handoff);
+  CHECK_FALSE(owner.connected());
+  CHECK(handoff.needs_restart());
+}
