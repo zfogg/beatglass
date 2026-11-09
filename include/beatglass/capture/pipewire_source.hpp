@@ -11,6 +11,13 @@
 #include <optional>
 
 namespace beatglass::pipewire {
+struct MonitorStatus {
+  bool active{};
+  bool needs_restart{};
+  bool discontinuity{};
+  bool overflowed{};
+  int error_code{};
+};
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
  * capture callbacks copy bounded PCM into caller-owned storage. A source
@@ -29,6 +36,7 @@ public:
                             std::uint32_t sample_rate, std::uint32_t channels) = 0;
   /** Pop one bounded block on the control thread after start_stream succeeds. */
   virtual bool pop(coreaudio::CaptureBlock& block) noexcept = 0;
+  virtual MonitorStatus poll_status() noexcept = 0;
   /** Stop and quiesce the stream; safe to call repeatedly. */
   virtual bool stop() noexcept = 0;
 };
@@ -72,13 +80,7 @@ public:
     std::uint32_t sample_rate{};
     std::uint32_t channels{};
   };
-  struct Status {
-    bool active{};
-    bool needs_restart{};
-    bool discontinuity{};
-    bool overflowed{};
-    int error_code{};
-  };
+  using Status = MonitorStatus;
   /** Select a validated sink and allocate its bounded stream on the control thread. */
   bool start(std::string serial, std::uint64_t epoch, std::uint32_t sample_rate,
              std::uint32_t channels);

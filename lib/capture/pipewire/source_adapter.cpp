@@ -105,6 +105,7 @@ public:
     return session_.start(serial, epoch, sample_rate, channels);
   }
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
+  MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
   bool stop() noexcept override { session_.stop(); return true; }
 private:
   MonitorSession session_;
