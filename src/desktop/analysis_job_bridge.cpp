@@ -1,5 +1,6 @@
 #include "analysis_job_bridge.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
+#include "beatglass/library/detail/file_fingerprint.hpp"
 
 namespace {
 constexpr std::size_t kMaxDisplayedResultBytes = 4096;
@@ -36,6 +37,15 @@ bool AnalysisJobBridge::submitFile(const QString& path, const QString& contentHa
   identity.content_hash = contentHash.toStdString(); identity.engine_version = engineVersion.toStdString();
   identity.configuration_id = configurationId.toStdString(); identity.mode = mode.toStdString();
   return static_cast<bool>(submit(beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity))));
+}
+
+bool AnalysisJobBridge::submitSelectedFile(const QString& path) {
+  if (path.isEmpty()) return false;
+  const auto fingerprint = beatglass::library_detail::fingerprint_file(path.toStdString());
+  if (fingerprint.status != beatglass::library_detail::FingerprintStatus::ok) return false;
+  return submitFile(path, QString::fromStdString(fingerprint.digest),
+                    QStringLiteral("beatglass-desktop-v1"),
+                    QStringLiteral("default-offline"));
 }
 
 std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit(beatglass::library::AnalysisOperation op) {

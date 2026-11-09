@@ -1526,6 +1526,20 @@ ApplicationWindow {
                             ToolTip.text: window.selectedName !== "" ? "Clear " + window.selectedName : "No audio source selected"
                             onClicked: window.clearSelectedAudio()
                         }
+                        Button {
+                            objectName: "analyzeSelectedAudio"
+                            text: "Analyze selected file"
+                            activeFocusOnTab: true
+                            enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined
+                            Accessible.name: "Analyze selected audio file"
+                            Accessible.role: Accessible.Button
+                            Accessible.description: enabled ? "Fingerprint the selected local file and queue real offline analysis." : "Select a local audio file before queueing analysis."
+                            ToolTip.text: "Fingerprint and queue analysis for the selected audio file"
+                            onClicked: {
+                                const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile())
+                                window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry.")
+                            }
+                        }
                         Label {
                             objectName: "metadataStatus"; text: window.metadataStatus
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
