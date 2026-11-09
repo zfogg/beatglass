@@ -28,6 +28,7 @@
 | Track recovery later | Catalog entry remains after queue removal while source recovery is deferred | Preserve provenance, keep playback/evidence inactive, and make locate/remove catalog actions explicit. |
 | Track recovery remove confirmation | Unresolved catalog entry is pending explicit removal | Explain local-entry-only impact, preserve the audio file, and offer cancel/remove actions without queue or playback side effects. |
 | Track recovery removed | Unresolved catalog entry and recovery state are removed | Confirm audio preservation, no playback/evidence resurrection, and the explicit folder re-add path for rediscovery. |
+| Track recovery rediscovered | Preserved audio is found again by folder ingestion as a new catalog entry | Do not carry stale evidence forward; require deliberate analysis before playback or source-attributed results. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
