@@ -1126,4 +1126,17 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_overlayRecoveryCanResumeFromPausedState() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        let resume = findChild(app, "resumeOverlayRecovery")
+        verify(resume.visible)
+        resume.clicked()
+        compare(app.overlayRecoveryAttemptCount, 1)
+        verify(!app.overlayRecoveryPausedByUser)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
