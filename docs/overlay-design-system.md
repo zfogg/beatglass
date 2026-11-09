@@ -32,3 +32,8 @@ The ready state keeps the same hierarchy while making the successful restore
 visually quiet:
 
 ![Overlay ready card rendering](overlay-ready-card.svg)
+
+Interaction mode uses the same status-card hierarchy so click-through state is
+visible without competing with recovery actions:
+
+![Overlay interaction mode rendering](overlay-interaction-card.svg)
