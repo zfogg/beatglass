@@ -196,3 +196,6 @@ Turning click-through off from the control window clears stale interaction-recov
 
 If enabling click-through is rejected, the interaction toggle keeps focus and persisted display/geometry settings remain untouched, allowing the user to retry without losing the overlay recovery context.
 
+
+If disabling click-through is rejected, the interaction toggle stays focused and persisted display/geometry settings remain intact while click-through remains active, so Unlock can be retried safely.
+
