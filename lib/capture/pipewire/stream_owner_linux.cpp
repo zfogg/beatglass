@@ -82,6 +82,10 @@ private:
       return;
     }
     const auto* sample_data = static_cast<const std::byte*>(data_block.data) + data_block.chunk.offset;
+    if (reinterpret_cast<std::uintptr_t>(sample_data) % alignof(float) != 0) {
+      pw_stream_queue_buffer(owner.stream_, buffer);
+      return;
+    }
     const auto samples = std::span<const float>(reinterpret_cast<const float*>(sample_data), sample_bytes / sizeof(float));
     if (!owner.handoff_->push(samples, 0, false, false, 0.0, false))
       owner.handoff_->on_error(-ENOBUFS);
