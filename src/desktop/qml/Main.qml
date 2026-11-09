@@ -74,6 +74,18 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayRetryShortcut"
+        sequence: "Ctrl+Alt+Y"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && !window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until recovery succeeds.")
+            window.showOverlayAndHideControls()
+        }
+    }
+    Shortcut {
         objectName: "overlayDisplayFocusShortcut"
         sequence: "Ctrl+Alt+D"
         context: Qt.ApplicationShortcut
