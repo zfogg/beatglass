@@ -128,6 +128,8 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit_errors": junit_errors,
            "native_junit_skipped": junit_skipped,
            "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and junit_skipped == 0 and discovery_tests is not None and junit_tests is not None and set(discovery_tests) == set(junit_tests) and all(item["returncode"] == 0 for item in results)}
+summary["qualification_target"] = "Linux/PipeWire"
+summary["handoff_status"] = "complete" if summary["qualified"] else "failed"
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
