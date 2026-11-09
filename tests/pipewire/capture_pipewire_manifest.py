@@ -1,8 +1,10 @@
 """Capture immutable PipeWire inventory plus qualification tool identity."""
 import json
+import os
 import platform
 import subprocess
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -31,5 +33,14 @@ manifest = {"schema_version": 1,
             "python_version": platform.python_version(),
             "pipewire_cli_version": version, "inventory": inventory}
 output.parent.mkdir(parents=True, exist_ok=True)
-output.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent,
+                                 prefix=f".{output.name}.", suffix=".tmp", delete=False) as temporary:
+    temporary.write(json.dumps(manifest, indent=2) + "\n")
+    temporary_name = temporary.name
+try:
+    os.link(temporary_name, output)
+except FileExistsError:
+    raise SystemExit("refusing to overwrite existing manifest")
+finally:
+    Path(temporary_name).unlink(missing_ok=True)
 print(f"wrote PipeWire qualification manifest: {output}")
