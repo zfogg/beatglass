@@ -17,8 +17,10 @@ namespace beatglass::pipewire {
 void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, const char* serial,
                            const char* name, const char* desc) {
   if (!type || std::strcmp(type, PW_TYPE_INTERFACE_Node) || !cls || std::strcmp(cls, "Audio/Sink") ||
-      !serial || !*serial || std::string(serial).find_first_not_of(" \t\r\n") == std::string::npos ||
-      !name || !*name || std::string(name).find_first_not_of(" \t\r\n") == std::string::npos) return;
+      !serial || !*serial || std::string(serial).find('\0') != std::string::npos ||
+      std::string(serial).find_first_not_of(" \t\r\n") == std::string::npos ||
+      !name || !*name || std::string(name).find('\0') != std::string::npos ||
+      std::string(name).find_first_not_of(" \t\r\n") == std::string::npos) return;
   const std::string description = desc && *desc ? desc : "";
   nodes_[id] = {serial, name, description.find_first_not_of(" \t\r\n") == std::string::npos ? name : description};
 }

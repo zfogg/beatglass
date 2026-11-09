@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire discovery now rejects NUL-containing serial and node-name identities
+before they reach source selection, matching the malformed-identity guards on
+other capture backends. Portable coverage is in
+`python tests/unit/check_pipewire_identity_nul_contract.py`.
+
 PipeWire sink descriptions that are empty or whitespace-only now fall back to
 the validated node name, preventing unusable display labels. Portable coverage
 is in `python tests/unit/check_pipewire_description_validation_contract.py`.
