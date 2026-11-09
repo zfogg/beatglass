@@ -6,6 +6,6 @@ required = ("How is it going?", "How does the overlay feel?", "Choose one", "Opt
 missing = [value for value in required if value not in text]
 if missing:
     raise SystemExit(f"missing feedback rendering copy: {missing}")
-if text.count("★") != 5:
+if text.count("★") + text.count("☆") != 5:
     raise SystemExit("feedback card must show a five-point rating control")
 print("overlay feedback card rendering contract passed")
