@@ -4300,6 +4300,8 @@ ApplicationWindow {
             window.browseFolder = selectedFolder
             search.text = ""
             browser.currentIndex = -1
+            window.recursiveCatalogActive = false
+            window.recursiveCatalogRows = []
             window.announceVisualizationRecovery("Library folder selected; choose an audio file to inspect or analyze.")
             browser.forceActiveFocus()
         }
