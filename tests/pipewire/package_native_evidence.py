@@ -69,6 +69,7 @@ try:
         manifest = {
             "format": "beatglass-native-pipewire-evidence-v1",
             "commit": summary.get("commit"),
+            "platform": summary.get("platform"),
             "qualified": True,
             "source_date_epoch": epoch,
             "archive_timestamp_utc": archive_time.isoformat() + "Z",

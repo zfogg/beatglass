@@ -82,6 +82,8 @@ The runner records the transition event count in the summary, and archive
 verification cross-checks it against the packaged envelope.
 The packager also writes that count into the manifest; archive verification
 cross-checks all three representations.
+The manifest carries the host platform too, and verification binds it to the
+qualification summary before accepting the archive.
 The captured host platform must also match the qualification summary platform,
 preventing cross-host evidence mixing.
 Transition-bearing qualified archives must identify a Linux host; Windows and
