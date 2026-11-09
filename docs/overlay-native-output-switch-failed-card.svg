@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Native overlay output switch failed</title>
+  <desc id="desc">A recoverable error state explains that the selected display is unavailable while keeping the current overlay active.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <circle cx="116" cy="116" r="28" fill="#f26b6b"/>
+  <path d="M107 107l18 18M125 107l-18 18" stroke="#260b0b" stroke-width="5" stroke-linecap="round"/>
+  <text x="168" y="111" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Display unavailable</text>
+  <text x="168" y="142" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">We kept the current overlay running on Display 2.</text>
+  <rect x="96" y="190" width="728" height="104" rx="16" fill="#17243c"/>
+  <text x="124" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Switch was not applied</text>
+  <text x="124" y="258" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Display 1 is disconnected or no longer available.</text>
+  <text x="124" y="282" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Current view · Bottom-right · 82% opacity · capture continues</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">Choose another display or keep the current one.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">No audio files or tags were changed.</text>
+  <rect x="96" y="438" width="202" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="197" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Choose display</text>
+  <rect x="316" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="393" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Keep Display 2</text>
+</svg>
