@@ -955,6 +955,7 @@ ApplicationWindow {
         return "No matching audio files or folders. Try a different search or choose another folder."
     }
     function restoreOverlayFallbackControls(reason) {
+        window.overlayLaunchFallbackActive = true
         window.overlayHiddenByUser = false
         window.show()
         window.raise()
