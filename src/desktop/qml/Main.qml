@@ -3814,8 +3814,8 @@ ApplicationWindow {
                         Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "settings retained") + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Button
                         Accessible.description: window.overlayDisplayRecoveryPending
-                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending."
-                            : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings."
+                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending; current settings revision " + window.overlaySettingsRevision + "."
+                            : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings; current settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             overlaySettingsRetentionStatus.forceActiveFocus()
