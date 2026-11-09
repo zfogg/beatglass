@@ -3,6 +3,8 @@
 The recovery workflow uses a small, state-first vocabulary so the control window
 remains understandable during display and native-bridge failures.
 
+![Overlay design system overview](overlay-design-system-overview.svg)
+
 | Token | Value | Use |
 | --- | --- | --- |
 | `surface.canvas` | `#111827` | dark control-window canvas |
