@@ -52,6 +52,8 @@ The paused card also exposes `Resume recovery`, which starts a fresh bounded
 attempt without requiring the user to rediscover the retry control.
 For keyboard-first recovery, `Ctrl+Alt+Shift+R` performs the same resume action;
 the shortcut is repeated beside the paused action while it is available.
+Pressing `Escape` while paused returns focus to `Resume recovery`, providing a
+predictable keyboard path back to the lifecycle action after reviewing status.
 
 ## Screenshot qualification
 

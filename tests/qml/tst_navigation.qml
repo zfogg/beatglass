@@ -1150,6 +1150,9 @@ TestCase {
         compare(shortcut.sequence, "Ctrl+Alt+Shift+R")
         verify(shortcut.enabled)
         verify(findChild(app, "overlayResumeRecoveryShortcutHint").visible)
+        let focusShortcut = findChild(app, "overlayPausedRecoveryFocusShortcut")
+        compare(focusShortcut.sequence, "Escape")
+        verify(focusShortcut.enabled)
         app.destroy()
         fakeOverlay.available = true
     }

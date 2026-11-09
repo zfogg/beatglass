@@ -359,6 +359,13 @@ ApplicationWindow {
         onActivated: resumeOverlayRecovery.clicked()
     }
     Shortcut {
+        objectName: "overlayPausedRecoveryFocusShortcut"
+        sequence: "Escape"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayRecoveryPausedByUser
+        onActivated: resumeOverlayRecovery.forceActiveFocus()
+    }
+    Shortcut {
         objectName: "overlayDisplayFocusShortcut"
         sequence: "Ctrl+Alt+D"
         context: Qt.ApplicationShortcut
