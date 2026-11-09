@@ -49,3 +49,4 @@ Qualification also requires zero skipped testcases; skipped native stream cases
 remain explicitly pending rather than being treated as success.
 The summary includes `native_junit_sha256` so the archived JUnit evidence can
 be verified after transfer.
+It also records `native_junit_tests`, the concrete testcase names executed.
