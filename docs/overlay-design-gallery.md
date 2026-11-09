@@ -106,6 +106,8 @@ screenshots.
 | [Opacity applied](overlay-opacity-applied-card.svg) | saved opacity confirmation and change path |
 | [Layout control](overlay-layout-control-card.svg) | position and size presets with live desktop preview |
 | [Layout applied](overlay-layout-applied-card.svg) | saved geometry confirmation and change path |
+| [Display picker](overlay-display-picker-card.svg) | monitor selection with preview verification |
+| [Display applied](overlay-display-applied-card.svg) | saved display confirmation with recovery path |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
