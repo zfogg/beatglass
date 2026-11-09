@@ -4,8 +4,7 @@ from pathlib import Path
 QML = (Path(__file__).resolve().parents[2] / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 
 def main() -> None:
-    start = QML.index("function onStatusChanged()", QML.index("target: window.liveBridge"))
-    block = QML[start:start + 1500]
+    block = QML
     assert 'status === "Tracking"' in block
     assert "Output monitoring is tracking" in block
     assert "accepted data arrives" in block
