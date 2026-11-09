@@ -16,6 +16,9 @@ if(BUILD_TESTING)
   add_test(NAME pipewire_native_build_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_native_build_contract.py)
   set_tests_properties(pipewire_native_build_contract PROPERTIES LABELS unit TIMEOUT 10)
+  add_test(NAME pipewire_format_negotiation_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_format_negotiation_contract.py)
+  set_tests_properties(pipewire_format_negotiation_contract PROPERTIES LABELS unit TIMEOUT 10)
 endif()
 
 if(BUILD_TESTING)
