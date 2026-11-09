@@ -49,4 +49,6 @@ if "analysisAdmissionResult_.clear()" not in cached_connection:
 admitted_connection = source[source.index("connect(worker_, &Worker::admitted,"):source.index("workerThread_.start();")]
 if "cacheHit_ = !result.isEmpty()" not in admitted_connection:
     raise SystemExit("Admission results must synchronize cached-result state")
+if "analysisFrames_ = 0" not in cached_connection or "analysisFrames_ = 0" not in admitted_connection:
+    raise SystemExit("Cache/admission transitions must clear stale progress")
 print(f"Desktop cache bridge contract verified ({len(required)} checks)")
