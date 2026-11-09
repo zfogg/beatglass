@@ -314,6 +314,10 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             const requested = !window.overlayBridge.clickThrough
+            if (!requested) {
+                window.unlockOverlayAndRestoreFocus()
+                return
+            }
             const applied = window.overlayBridge.setClickThrough(requested)
             if (!applied) {
                 window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active.")
