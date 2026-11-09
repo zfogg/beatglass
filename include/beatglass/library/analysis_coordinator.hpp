@@ -42,6 +42,7 @@ class AnalysisCoordinator final { public:
   }
   /** Classify persisted retry compatibility before reconstructing decoder work. */
   RetryRejectionReason retry_rejection_reason(const std::string& run_id, const AnalysisOperation& operation) const {
+    if (run_id.empty() || run_id.find_first_not_of(" \t\r\n") == std::string::npos) return RetryRejectionReason::missing_source_snapshot;
     const auto found = storage_.retryable_run(run_id);
     if (!found || found->source_path.empty()) return RetryRejectionReason::missing_source_snapshot;
     if (found->key.content != operation.identity.content_hash || found->key.engine != operation.identity.engine_version || found->key.config != operation.identity.configuration_id || found->key.mode != operation.identity.mode) return RetryRejectionReason::stale_source_identity;
