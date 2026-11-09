@@ -822,3 +822,5 @@ Overlay live-monitoring status now states that the selected endpoint remains ret
 
 Overlay controls now expose a dedicated settings-retention status covering display, geometry, opacity, and interaction mode during recovery and fallback. Portable coverage is in `python tests/unit/check_overlay_settings_retention_status_contract.py`.
 
+Overlay settings-retention status is now keyboard-focusable, allowing non-pointer users to inspect persisted recovery state directly. Portable coverage is in `python tests/unit/check_overlay_retention_focus_contract.py`.
+
