@@ -74,6 +74,19 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayReapplyFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+P"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            reapplyOverlaySettings.forceActiveFocus()
+            window.announceCaptureRecoveryState("Reapply saved settings control focused.")
+        }
+    }
+    Shortcut {
         objectName: "overlayUnlockFocusShortcut"
         sequence: "Ctrl+Alt+U"
         context: Qt.ApplicationShortcut

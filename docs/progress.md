@@ -1,5 +1,8 @@
 # Progress and handoff
 
+`Ctrl+Alt+Shift+P` focuses the Reapply saved settings action, providing a
+keyboard-first path to restore persisted display, geometry, size, and opacity.
+
 Overlay shortcut guidance now covers every keyboard recovery and visual-control
 path: unlock, click-through, show/hide, display selection, retry, size,
 opacity, and saved-settings reapply.
