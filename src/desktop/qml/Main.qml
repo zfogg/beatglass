@@ -1056,13 +1056,11 @@ ApplicationWindow {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
         window.overlayHiddenByUser = true
-        if (window.overlayBridge && !window.overlayBridge.hideOverlay()) {
-            window.overlayHiddenByUser = false
-            window.announceCaptureRecoveryState("DJ overlay could not be hidden; control-window fallback remains active.")
-        }
-        window.announceCaptureRecoveryState(window.overlayBridge
-            ? "DJ overlay hidden; output monitoring remains available in the control window."
-            : "DJ overlay bridge unavailable; control window restored as the fallback.")
+        const hidden = !window.overlayBridge || window.overlayBridge.hideOverlay()
+        window.overlayHiddenByUser = hidden
+        window.announceCaptureRecoveryState(hidden
+            ? (window.overlayBridge ? "DJ overlay hidden; output monitoring remains available in the control window." : "DJ overlay bridge unavailable; control window restored as the fallback.")
+            : "DJ overlay could not be hidden; control-window fallback remains active.")
         window.show()
         window.raise()
         window.requestActivate()
