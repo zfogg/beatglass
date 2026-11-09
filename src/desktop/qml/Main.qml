@@ -3442,7 +3442,7 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: "Playback and seek readiness for the accepted waveform or FFT snapshot."
-                    ToolTip.text: "Playback seek feedback for the accepted visualization snapshot"
+                    ToolTip.text: "Playback seek feedback for the accepted visualization snapshot; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
