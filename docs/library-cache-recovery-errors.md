@@ -19,3 +19,5 @@ Admission responses synchronize the cached-result presentation, keeping the
 bridge's cache-hit and admission properties consistent for one identity.
 Both transitions also reset stale progress so a completed lookup cannot appear
 to be an active analysis job.
+Lookup completion also publishes an explicit `Cached analysis ready` or `Cache
+lookup complete` status rather than leaving the prior job status visible.

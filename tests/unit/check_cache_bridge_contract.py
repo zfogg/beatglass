@@ -51,4 +51,6 @@ if "cacheHit_ = !result.isEmpty()" not in admitted_connection:
     raise SystemExit("Admission results must synchronize cached-result state")
 if "analysisFrames_ = 0" not in cached_connection or "analysisFrames_ = 0" not in admitted_connection:
     raise SystemExit("Cache/admission transitions must clear stale progress")
+if 'Cached analysis ready' not in cached_connection or 'Cache lookup complete' not in cached_connection:
+    raise SystemExit("Cache lookup must expose an explicit lifecycle status")
 print(f"Desktop cache bridge contract verified ({len(required)} checks)")
