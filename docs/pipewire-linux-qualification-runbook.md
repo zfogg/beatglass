@@ -462,3 +462,5 @@ Matrix reports now expose attempt status and blockers directly; review those fie
 Qualification report renderers escape evidence paths, reasons, and blockers for safe Markdown review; raw JSON remains the authoritative handoff.
 
 Markdown reports escape all identity and evidence cells; consume the raw matrix JSON when exact values are required.
+
+Reviewers should validate the raw matrix JSON before accepting a rendered report as qualification evidence.
