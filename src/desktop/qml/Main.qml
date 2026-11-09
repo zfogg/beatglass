@@ -2938,7 +2938,7 @@ ApplicationWindow {
                                 text: "No output endpoints detected. Refresh after connecting an output device."
                                 Accessible.name: "Output endpoint empty state"
                                 Accessible.value: text
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 ToolTip.text: "No output endpoint is available; refresh after connecting a device"
                                 wrapMode: Text.WordWrap
