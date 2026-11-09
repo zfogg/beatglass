@@ -805,6 +805,8 @@ Quit now reports that it is available and will retain persisted overlay settings
 Show now includes recovery-pending context in its accessible value while remaining actionable, matching the surrounding overlay action group state.
 
 Restore now exposes the same recovery-pending context, including when restoring an overlay hidden by the user.
+
+Reapply saved settings now reports recovery-pending context in its accessible value, completing the consistency across Show, Restore, and Reapply actions.
 The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
 
 Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
