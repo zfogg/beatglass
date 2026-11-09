@@ -32,7 +32,9 @@ def ingest(root: Path, output: Path) -> list[str]:
         errors.append("missing capture time")
     else:
         try:
-            datetime.fromisoformat(identity["captured_at"].replace("Z", "+00:00"))
+            captured_at = datetime.fromisoformat(identity["captured_at"].replace("Z", "+00:00"))
+            if captured_at.tzinfo is None:
+                errors.append("capture timestamp must include timezone")
         except ValueError:
             errors.append("invalid capture timestamp")
     artifacts = []
