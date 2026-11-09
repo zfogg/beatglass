@@ -74,7 +74,7 @@ bool SourceAdapter::stop() noexcept {
   quiescence_failed_ = !stopped;
   status_.state = stopped ? SourceState::stopped : SourceState::error;
   status_.error = stopped ? std::optional<SourceError>{} : SourceError::backend_error;
-  status_.message.clear();
+  status_.message = stopped ? std::string{} : "Core Audio backend failed to quiesce";
   return stopped;
 }
 SourceStatus SourceAdapter::status() const { return status_; }
