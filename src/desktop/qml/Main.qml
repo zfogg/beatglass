@@ -1127,6 +1127,7 @@ ApplicationWindow {
         if (files.isFolder(index)) {
             browseFolder = url
             browser.currentIndex = -1
+            window.announceVisualizationRecovery("Opened Library folder " + files.get(index, "fileName") + ".")
         } else {
             window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
             selectedName = files.get(index, "fileName")
