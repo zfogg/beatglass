@@ -191,6 +191,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
+    if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); }
     if (analysisAdmission_) { analysisAdmission_ = false; emit analysisAdmissionChanged(); }
     if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
   }, Qt::QueuedConnection);
@@ -198,7 +199,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(worker_, &Worker::analysisError, this, [this](const QString& text) { analysisError_ = text; emit analysisErrorChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisProgress, this, [this](qulonglong frames) { analysisFrames_ = frames; emit analysisProgressChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisResult, this, [this](const QString& text) { analysisResult_ = text; emit analysisResultChanged(); }, Qt::QueuedConnection);
-  connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; cacheHit_ = !result.isEmpty(); cachedResult_ = result; emit analysisAdmissionChanged(); emit cachedResultChanged(); }, Qt::QueuedConnection);
+  connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; cacheHit_ = !result.isEmpty(); cachedResult_ = result; if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); } emit analysisAdmissionChanged(); emit cachedResultChanged(); }, Qt::QueuedConnection);
   workerThread_.start();
 }
 
