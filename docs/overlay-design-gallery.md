@@ -46,6 +46,7 @@ screenshots.
 | [Privacy](overlay-privacy-card.svg) | local analysis and safe file behavior |
 | [Startup](overlay-startup-card.svg) | saved setup and readiness checklist |
 | [Minimized](overlay-minimized-card.svg) | quiet monitoring with retained layout |
+| [Reconnecting](overlay-reconnecting-card.svg) | retrying a lost selected output |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)

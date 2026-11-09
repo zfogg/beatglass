@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / CONNECTION</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Reconnecting…</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">We lost the selected output. Your layout and settings are being held.</text>
+  <rect x="112" y="258" width="976" height="142" rx="18" fill="#202938"/><circle cx="174" cy="329" r="38" fill="#e3b45b"/><path d="M157 329h34M174 312v34" stroke="#10131a" stroke-width="6" stroke-linecap="round"/><text x="244" y="317" fill="#f2f6fb" font-family="Inter,Arial" font-size="24" font-weight="700">Waiting for Built-in Speakers</text><text x="244" y="355" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Retrying automatically · attempt 2 of 5</text><text x="244" y="383" fill="#e3b45b" font-family="Inter,Arial" font-size="16" font-weight="700">No audio is being captured right now</text>
+  <text x="112" y="464" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">What stays safe</text>
+  <text x="144" y="510" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="510" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Position, size, and opacity</text>
+  <text x="144" y="554" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="554" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Selected output preference</text>
+  <rect x="112" y="618" width="188" height="54" rx="14" fill="#56d38b"/><text x="206" y="652" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Retry now</text><rect x="322" y="618" width="188" height="54" rx="14" fill="#2a3444"/><text x="416" y="652" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Open controls</text>
+</svg>
