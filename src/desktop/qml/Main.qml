@@ -3374,6 +3374,22 @@ ApplicationWindow {
                     }
                     Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.StaticText; Accessible.description: text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Current overlay pointer interaction mode" }
                     Label {
+                        objectName: "overlayKeyboardRecoveryStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (window.overlayBridge.clickThrough ? "Keyboard recovery: press Escape to unlock overlay" : "Keyboard recovery: overlay controls are interactive")
+                            : "Keyboard recovery unavailable"
+                        Accessible.name: "Overlay keyboard recovery status"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.overlayBridge.clickThrough
+                            ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window."
+                            : visible ? text + ". Click-through can be enabled or disabled from the overlay controls." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay keyboard recovery"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
                         objectName: "overlayLiveMonitoringState"
                         visible: window.overlayBridge !== null
                         text: visible ? ("Overlay monitoring: " + window.liveBridge.status
