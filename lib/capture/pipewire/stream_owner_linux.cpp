@@ -68,7 +68,12 @@ private:
     auto* buffer = pw_stream_dequeue_buffer(owner.stream_);
     if (!buffer || !buffer->buffer || !buffer->buffer->datas[0].data) return;
     const auto& data_block = buffer->buffer->datas[0];
-    const auto samples = std::span<const float>(static_cast<const float*>(data_block.data), data_block.maxsize / sizeof(float));
+    const auto sample_bytes = data_block.chunk.size;
+    if (sample_bytes == 0 || data_block.chunk.stride != static_cast<int32_t>(sizeof(float))) {
+      pw_stream_queue_buffer(owner.stream_, buffer);
+      return;
+    }
+    const auto samples = std::span<const float>(static_cast<const float*>(data_block.data), sample_bytes / sizeof(float));
     owner.handoff_->push(samples, 0, false, false, 0.0, false);
     pw_stream_queue_buffer(owner.stream_, buffer);
   }
