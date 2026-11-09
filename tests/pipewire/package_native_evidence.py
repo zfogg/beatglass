@@ -44,6 +44,16 @@ try:
     with zipfile.ZipFile(output_path, "x", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in artifacts:
             archive.write(path, arcname=path.name)
+        manifest = {
+            "format": "beatglass-native-pipewire-evidence-v1",
+            "commit": summary.get("commit"),
+            "qualified": True,
+            "artifacts": [
+                {"name": path.name, "size": path.stat().st_size, "sha256": digest(path)}
+                for path in artifacts
+            ],
+        }
+        archive.writestr("evidence-manifest.json", json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 except FileExistsError:
     raise SystemExit(f"refusing to overwrite existing output: {output_path}")
 print(f"Packaged {len(artifacts)} native evidence files: {output_path}")
