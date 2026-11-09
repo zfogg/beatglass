@@ -1396,7 +1396,7 @@ ApplicationWindow {
                             Accessible.name: "Audio metadata status: " + text
                             ToolTip.text: "Current metadata status"
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                         }
                         Button {
@@ -1418,7 +1418,7 @@ ApplicationWindow {
                             visible: window.metadataStatus.indexOf("Error:") === 0
                             Accessible.name: "Metadata error recovery guidance: " + text
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             ToolTip.text: "Metadata error recovery guidance"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -2487,7 +2487,7 @@ ApplicationWindow {
                              : "Waveform samples: " + visualizationCanvas.renderedWaveform.length + " · Spectrum bins: " + visualizationCanvas.renderedSpectrum.length)
                     Accessible.name: "Visualization data status"
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
@@ -2625,7 +2625,7 @@ ApplicationWindow {
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
                     Accessible.name: "Visualization capture status: " + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
                     color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
