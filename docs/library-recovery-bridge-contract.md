@@ -42,5 +42,8 @@ one retryable persisted run; it is false after close, refresh failure, or an
 empty recovery list.
 The desktop recovery action gate consumes `recoveryAvailable` rather than
 duplicating list-length logic.
+Recovery guidance and persisted retry outcome status use the same property, so
+stale availability text and controls disappear together after refresh, retry,
+or discard clears the saved-run snapshot.
 Changing the database path is subject to the same transition guard; path
 ownership cannot change underneath an in-flight close or open.
