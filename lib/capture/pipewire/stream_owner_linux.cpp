@@ -75,7 +75,8 @@ private:
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
     }
-    if (data_block.chunk.offset > data_block.maxsize ||
+    if (data_block.chunk.offset % sizeof(float) != 0 ||
+        data_block.chunk.offset > data_block.maxsize ||
         sample_bytes > data_block.maxsize - data_block.chunk.offset) {
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
