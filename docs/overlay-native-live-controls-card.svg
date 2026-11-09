@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Native overlay live controls</title>
+  <desc id="desc">The active native overlay shows live signal health and reversible controls for hiding, unlocking, and entering safe mode.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <text x="96" y="112" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Native overlay · Live</text>
+  <text x="96" y="144" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Your session is running while the overlay stays out of the way.</text>
+  <rect x="96" y="182" width="728" height="92" rx="16" fill="#17243c"/>
+  <circle cx="130" cy="220" r="10" fill="#39d98a"/>
+  <text x="154" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Output healthy</text>
+  <text x="154" y="252" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Display 2 · 48 kHz · 3 ms latency · 82% opacity</text>
+  <rect x="96" y="302" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="344" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17" font-weight="600">Quick controls</text>
+  <rect x="96" y="370" width="168" height="52" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="180" y="403" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Hide overlay</text>
+  <rect x="280" y="370" width="168" height="52" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="364" y="403" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Unlock · Ctrl+Shift+O</text>
+  <rect x="464" y="370" width="184" height="52" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="556" y="403" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Open settings</text>
+  <rect x="664" y="370" width="160" height="52" rx="12" fill="#30253b" stroke="#8a668f"/>
+  <text x="744" y="403" text-anchor="middle" fill="#f3d9f0" font-family="Inter,Arial,sans-serif" font-size="16">Safe mode</text>
+  <text x="96" y="466" fill="#7f8da5" font-family="Inter,Arial,sans-serif" font-size="15">All controls are reversible; audio capture continues until you pause it.</text>
+</svg>
