@@ -868,3 +868,5 @@ Shortcut help now exposes summary-review capability in its accessible value. Por
 
 Overlay summary shortcut announcements now include settings revision and pending recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_shortcut_revision_contract.py`.
 
+Overlay summary review action now exposes recovery state and settings revision in its accessible value. Portable coverage is in `python tests/unit/check_overlay_summary_action_value_contract.py`.
+
