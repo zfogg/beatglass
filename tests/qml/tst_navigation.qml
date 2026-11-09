@@ -62,10 +62,11 @@ TestCase {
         property int selectedScreen: -1
         property int requestedWidth: 0
         property bool refuseClickThrough: false
+        property bool refuseUnlock: false
         function attach(overlay, control) { attaches++; return true }
         function showOverlay() { shows++; return true }
         function hideOverlay() { hides++; clickThrough = false }
-        function setClickThrough(value) { if (value && refuseClickThrough) return false; clickThrough = value; return true }
+        function setClickThrough(value) { if ((value && refuseClickThrough) || (!value && refuseUnlock)) return false; clickThrough = value; return true }
         function setOpacity(value) { opacity = value }
         function moveToScreen(index) { selectedScreen = index; screenIndex = index; return true }
         function resizeOverlay(width, height) { requestedWidth = width; return true }
@@ -1199,5 +1200,18 @@ TestCase {
         verify(!app.overlayRecoveryPausedByUser)
         app.destroy()
         fakeOverlay.available = true
+    }
+    function test_unlockFailureKeepsUnlockActionFocused() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        fakeOverlay.refuseUnlock = true
+        let app = shellWithOverlay.createObject(null)
+        let unlock = findChild(app, "unlockOverlay")
+        verify(unlock.enabled)
+        verify(!app.unlockOverlayAndRestoreFocus())
+        verify(unlock.activeFocus)
+        app.destroy()
+        fakeOverlay.refuseUnlock = false
+        fakeOverlay.clickThrough = false
     }
 }
