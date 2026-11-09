@@ -48,6 +48,23 @@ bool AnalysisJobBridge::submitSelectedFile(const QString& path) {
                     QStringLiteral("default-offline"));
 }
 
+int AnalysisJobBridge::submitSelectedFiles(const QStringList& paths) {
+  std::vector<beatglass::library::AnalysisOperation> operations;
+  operations.reserve(static_cast<std::size_t>(paths.size()));
+  for (const auto& path : paths) {
+    if (path.isEmpty()) continue;
+    const auto fingerprint = beatglass::library_detail::fingerprint_file(path.toStdString());
+    if (fingerprint.status != beatglass::library_detail::FingerprintStatus::ok) continue;
+    beatglass::library::AnalysisIdentity identity;
+    identity.content_hash = fingerprint.digest;
+    identity.engine_version = "beatglass-desktop-v1";
+    identity.configuration_id = "default-offline";
+    identity.mode = "offline";
+    operations.push_back(beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity)));
+  }
+  return submitBatch(std::move(operations));
+}
+
 std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit(beatglass::library::AnalysisOperation op) {
   if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
   const auto sourcePath = QString::fromStdString(op.source.path.string());

@@ -1479,6 +1479,25 @@ ApplicationWindow {
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                     }
+                    Button {
+                        objectName: "analyzeRecursiveResults"
+                        anchors.left: parent.left; anchors.bottom: parent.bottom
+                        text: "Analyze first files"
+                        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFiles !== undefined && window.recursiveCatalogRows.length > 0
+                        Accessible.name: "Analyze recursive audio results"
+                        Accessible.role: Accessible.Button
+                        Accessible.description: "Fingerprint and queue the first available recursive audio results; the bounded queue reports accepted and rejected items."
+                        ToolTip.text: "Queue the first recursive audio results for offline analysis"
+                        onClicked: {
+                            const paths = []
+                            for (let i = 0; i < window.recursiveCatalogRows.length && paths.length < 2; ++i) {
+                                const row = window.recursiveCatalogRows[i]
+                                if (row.audio) paths.push(row.path)
+                            }
+                            const accepted = window.analysisJobBridge.submitSelectedFiles(paths)
+                            window.announceVisualizationRecovery(accepted + " recursive audio files accepted for analysis.")
+                        }
+                    }
                 }
                 Frame {
                     objectName: "recursiveResultsFrame"
