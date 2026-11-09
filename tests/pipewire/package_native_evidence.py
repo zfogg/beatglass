@@ -24,7 +24,10 @@ if summary.get("failed_command") is not None:
 
 artifacts = [summary_path]
 for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
-                        ("native_junit", "native_junit_sha256")):
+                        ("native_junit", "native_junit_sha256"),
+                        ("native_transition_json", "native_transition_sha256")):
+    if key not in summary:
+        continue
     path = Path(summary[key]).resolve()
     if path.is_symlink() or not path.is_file():
         raise SystemExit(f"missing evidence artifact: {path}")

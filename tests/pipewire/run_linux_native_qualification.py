@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--source", type=Path, default=Path(__file__).parents[2])
 parser.add_argument("--build", type=Path, default=Path("build-pipewire"))
 parser.add_argument("--summary", type=Path)
+parser.add_argument("--transitions", type=Path, help="validated lifecycle transition JSON captured from the native host")
 args = parser.parse_args()
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
@@ -128,6 +129,11 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit_errors": junit_errors,
            "native_junit_skipped": junit_skipped,
            "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and junit_skipped == 0 and discovery_tests is not None and junit_tests is not None and set(discovery_tests) == set(junit_tests) and all(item["returncode"] == 0 for item in results)}
+if args.transitions:
+    if not args.transitions.is_file():
+        raise SystemExit(f"missing transition evidence: {args.transitions}")
+    summary["native_transition_json"] = str(args.transitions)
+    summary["native_transition_sha256"] = hashlib.sha256(args.transitions.read_bytes()).hexdigest()
 summary["qualification_target"] = "Linux/PipeWire"
 summary["handoff_status"] = "complete" if summary["qualified"] else "failed"
 if args.summary:
