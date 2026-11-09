@@ -38,6 +38,8 @@ for command in summary.get("commands", []):
             path = Path(value).resolve()
             if path.is_file() and not path.is_symlink() and path not in artifacts:
                 artifacts.append(path)
+if len({path.name for path in artifacts}) != len(artifacts):
+    raise SystemExit("evidence artifacts have colliding archive names")
 
 if output_path.exists() or output_path.is_symlink():
     raise SystemExit(f"refusing to overwrite existing output: {output_path}")
