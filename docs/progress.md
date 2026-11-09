@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire sink ordering now uses the display name as a deterministic tie-breaker
+when server serials collide, keeping refresh order stable even for duplicate
+serial metadata. Portable coverage is in
+`python tests/unit/check_pipewire_sink_tie_order_contract.py`.
+
 PipeWire sink discovery now returns sinks in stable server-serial order rather
 than volatile registry object-ID order, preventing UI selection churn across
 refreshes. Portable coverage is in

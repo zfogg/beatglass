@@ -24,7 +24,9 @@ void RegistrySnapshot::remove(std::uint32_t id) { nodes_.erase(id); }
 std::vector<Sink> RegistrySnapshot::sinks() const {
   std::vector<Sink> result;
   for (const auto& [id, sink] : nodes_) result.push_back(sink);
-  std::sort(result.begin(), result.end(), [](const Sink& a, const Sink& b) { return a.serial < b.serial; });
+  std::sort(result.begin(), result.end(), [](const Sink& a, const Sink& b) {
+    return a.serial == b.serial ? a.name < b.name : a.serial < b.serial;
+  });
   return result;
 }
 struct RegistryState {
