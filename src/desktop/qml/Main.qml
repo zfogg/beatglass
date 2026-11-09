@@ -1991,6 +1991,7 @@ ApplicationWindow {
                                 window.announceVisualizationRecovery("Selected recursive audio source " + name + "; prior analysis presentation is stale until this source is analyzed.")
                                 analyzeSelectedAudio.forceActiveFocus()
                             }
+                            onDoubleClicked: if (!folder) { onClicked(); playSelectedTrack.click() }
                         }
                     }
                 }
