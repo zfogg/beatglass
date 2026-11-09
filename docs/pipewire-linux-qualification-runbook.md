@@ -189,6 +189,10 @@ transfers; set `SOURCE_DATE_EPOCH` to the run's chosen epoch when byte-for-byte
 reproducibility is required.
 The exported archive can also be verified without the original checkout:
 `python tests/pipewire/verify_native_evidence_archive.py evidence/native-qualification.zip`.
+The dependency-light end-to-end handoff fixture
+`python tests/unit/check_pipewire_evidence_end_to_end.py` runs the packager and
+independent verifier together, including transition evidence, so changes to
+either side cannot silently drift apart.
 This checks the embedded manifest, artifact presence, byte sizes, and SHA-256
 digests before the archive is accepted as a transferred handoff. It also
 rejects duplicate or traversal-style ZIP entry names so an archive cannot
