@@ -1,5 +1,22 @@
 # Progress and handoff
 
+## Current recovery/cache qualification snapshot
+
+The current storage recovery path persists retryable state for cancellation,
+stale verification, empty publication, oversized publication, and transactional
+publish failures. Portable evidence for this slice is:
+
+```text
+python tests/unit/check_publish_cancellation_recovery_contract.py
+python tests/unit/check_publish_oversize_recovery_contract.py
+python tests/unit/check_publish_empty_recovery_contract.py
+python tests/unit/check_sqlite_publish_contract.py
+```
+
+These checks verify source contracts only; they do not replace Catch2 execution
+or native Windows, macOS, and Linux qualification. Native evidence remains
+required for the issue #1 exit gate.
+
 Shortcut-triggered stop/resume must announce the resulting lifecycle state through the same accessible status surface as pointer actions. Portable contracts cover focus, shortcut dispatch, and state text; native screen-reader timing, focus restoration, and assistive-technology behavior remain unqualified.
 
 Keyboard playback recovery parity is part of the readiness handoff: transport, retry, endpoint refresh, and clear/reacquire actions must be reachable through the same focus order and accessible names as pointer controls. Portable UI contracts document this parity; native assistive-technology and hardware recovery remain unqualified.
