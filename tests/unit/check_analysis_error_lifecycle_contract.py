@@ -15,6 +15,7 @@ assert "catch (const std::exception& error)" in cancel
 admit = source[source.index("void admitAnalysis("):source.index("signals:")]
 assert "Analysis admission rejected:" in admit
 assert "emit admitted(false, QString{})" in admit
+assert "Analysis admission rejected" in admit
 analysis_connection = source[source.index("connect(worker_, &Worker::analysis,"):source.index("connect(worker_, &Worker::analysisError,")]
 assert "Analysis cancelled" in analysis_connection and "analysisResult_.clear()" in analysis_connection
 docs = (root / "docs/progress.md").read_text(encoding="utf-8")

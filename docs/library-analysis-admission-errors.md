@@ -1,7 +1,6 @@
 # Library analysis admission errors
 
-The cache/admission probe is a storage-owner boundary and can reject malformed
-identities or unavailable storage. The desktop bridge now catches those
-failures, emits an empty non-reserved admission result, and reports
-`Analysis admission rejected:`. This prevents a failed probe from being
-interpreted as either a cache hit or a queued analysis.
+Admission failures now publish both the non-reserved empty admission result
+and the stable `Analysis admission rejected` lifecycle status. The UI therefore
+cannot remain on a prior queued or cached state when malformed identity or
+storage errors prevent a new decision.
