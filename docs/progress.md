@@ -1,9 +1,8 @@
 # Progress and handoff
 
-PipeWire control-thread lifecycle code can now atomically consume and clear the
-latest native callback error, preventing repeated handling while preserving
-lock-free callback publication. Portable coverage is in
-`python tests/unit/check_pipewire_error_consume_contract.py`.
+When live capture transitions into Tracking, the control window now announces
+that monitoring is active and visualization will update as accepted data
+arrives, rather than leaving assistive technology on a silent transition.
 
 The visualization now exposes its responsive compact/expanded layout state as
 an accessible status, so width-driven presentation changes are announced
