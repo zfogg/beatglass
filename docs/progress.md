@@ -1,5 +1,9 @@
 # Progress and handoff
 
+The overlay opacity can be reset from the keyboard with `Ctrl+Alt+Shift+O`.
+The shortcut uses the native persistence bridge and announces either the 90%
+reset or a recovery message when the native edit is rejected.
+
 The overlay size presets are keyboard reachable with `Ctrl+Alt+O`, cycling
 Compact, Medium, and Large through the native resize bridge. Rejected resizes
 keep persisted geometry authoritative and announce recovery.

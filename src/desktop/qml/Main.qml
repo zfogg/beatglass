@@ -74,6 +74,27 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayOpacityResetShortcut"
+        sequence: "Ctrl+Alt+Shift+O"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            const resetOpacity = 0.9
+            const applied = window.overlayBridge.setOpacity(resetOpacity)
+            if (applied) {
+                window.overlayOpacityEditInFlight = true
+                window.overlayPendingOpacity = resetOpacity
+                window.overlaySettingsRevision += 1
+                window.announceCaptureRecoveryState("DJ overlay opacity reset to 90 percent.")
+            } else {
+                window.syncOverlaySettingsStateFromBridge()
+                window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active.")
+            }
+        }
+    }
+    Shortcut {
         objectName: "overlaySizeShortcut"
         sequence: "Ctrl+Alt+O"
         context: Qt.ApplicationShortcut
