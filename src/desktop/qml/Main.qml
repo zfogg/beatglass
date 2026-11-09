@@ -465,6 +465,7 @@ ApplicationWindow {
             }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
+            window.announceCaptureRecoveryState("Persisted overlay visual state is unavailable; choose a display and try restoring again.")
             window.show()
             window.raise()
             window.requestActivate()

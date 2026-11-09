@@ -776,3 +776,5 @@ Persisted display restore failures now announce that the saved display is unavai
 Restore failures now also return keyboard focus to the display selector after reactivating the control window, covering both an unavailable persisted display and invalid persisted visual state.
 
 The unavailable-bridge restore path now follows the same focus rule, so every persisted-restore failure leaves keyboard users at the display recovery control.
+
+Invalid persisted visual state now announces the exact recovery action before returning focus to display selection.
