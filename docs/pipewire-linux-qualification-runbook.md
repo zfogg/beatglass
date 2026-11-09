@@ -97,3 +97,4 @@ The archive verifier parses those artifacts and requires a discovery `tests` lis
 and a JUnit `testsuite`/`testsuites` root, catching truncated or mislabeled files.
 The discovery JSON must contain at least one registered test; an empty CTest listing is rejected as insufficient native evidence.
 Each discovered CTest entry must also have a non-empty name; unnamed registrations are rejected as malformed evidence.
+JUnit evidence must report at least one executed testcase; zero-test result documents are rejected.

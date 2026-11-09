@@ -64,6 +64,9 @@ with zipfile.ZipFile(archive_path) as archive:
     if any(not isinstance(test, dict) or not str(test.get("name", "")).strip() for test in discovery_tests):
         raise SystemExit("discovery JSON has an unnamed test")
     junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
-    if ET.fromstring(archive.read(junit_name)).tag not in ("testsuite", "testsuites"):
+    junit_root = ET.fromstring(archive.read(junit_name))
+    if junit_root.tag not in ("testsuite", "testsuites"):
         raise SystemExit("JUnit evidence has invalid root")
+    if junit_root.tag == "testsuite" and int(junit_root.attrib.get("tests", "0")) < 1:
+        raise SystemExit("JUnit evidence has no executed tests")
 print("Native PipeWire evidence archive verified")
