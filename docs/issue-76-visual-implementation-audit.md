@@ -750,3 +750,5 @@ Overlay availability recovery now synchronizes the action surface as a single tr
 Click-through state now follows the same recovery boundary: a disconnected bridge clears the stale toggle, a reconnect hydrates the native mode, and Unlock remains unavailable unless the live bridge is both available and click-through. The routing summary includes the settings revision so assistive technology can correlate interaction mode and visual settings.
 
 Click-through transitions participate in the settings revision as well. The native mode announcement and accessible routing summary therefore advance together whenever pointer interaction changes, including a reconnect-driven mode hydration.
+
+If the native platform rejects a requested click-through transition, the toggle is restored to the actual native state and an actionable recovery announcement keeps the control window discoverable instead of claiming that input mode changed.
