@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Retry native overlay display restore</title>
+  <desc id="desc">A bounded retry state shows the native overlay attempting to restore a display while preserving safe monitoring.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <circle cx="116" cy="116" r="28" fill="#f2b84b"/>
+  <path d="M116 101v17l11 7" fill="none" stroke="#231a08" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="168" y="111" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Restoring overlay…</text>
+  <text x="168" y="142" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Trying Display 1 again while monitoring stays safe.</text>
+  <rect x="96" y="190" width="728" height="104" rx="16" fill="#17243c"/>
+  <text x="124" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Attempt 2 of 3</text>
+  <text x="124" y="258" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Current safe view · Display 2 · capture continues</text>
+  <text x="124" y="282" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Your saved size, theme, opacity, and placement are retained.</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">You can keep monitoring or stop retrying.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">If all attempts fail, Beatglass remains in safe mode.</text>
+  <rect x="96" y="438" width="190" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="191" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Try now</text>
+  <rect x="304" y="438" width="174" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="391" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Stop retrying</text>
+</svg>
