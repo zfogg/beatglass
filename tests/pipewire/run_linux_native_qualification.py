@@ -16,7 +16,8 @@ parser.add_argument("--summary", type=Path)
 args = parser.parse_args()
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
-    pending = {"platform": platform.platform(), "commit": commit or None, "pipewire_version": None,
+    pending = {"platform": platform.platform(), "qualification_target": "Linux/PipeWire",
+               "handoff_status": "pending", "commit": commit or None, "pipewire_version": None,
                "commands": [], "failed_command": None, "qualified": False,
                "pending_reason": "Linux native qualification pending: run on Linux",
                "native_test_discovery": None, "native_test_count": None,
