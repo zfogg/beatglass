@@ -14,7 +14,7 @@ def main() -> None:
     required = [
         'objectName: "retryAnalysisBatch"',
         'Accessible.value: visible ? (window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount) : ""',
-        '"Current state: " + window.analysisJobBridge.status + "; accepted items: " + window.analysisJobBridge.batchAcceptedCount',
+        'Current state: " + window.analysisJobBridge.status',
         'objectName: "discardAnalysisBatch"',
         'Accessible.description: visible ? "Clear the terminal batch recovery state without changing source audio.',
         'window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled"',
