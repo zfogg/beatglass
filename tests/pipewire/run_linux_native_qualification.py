@@ -14,6 +14,8 @@ args = parser.parse_args()
 if platform.system() != "Linux":
     print("Linux native qualification pending: run on Linux")
     raise SystemExit(0)
+commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
+pipewire_version = subprocess.run(["pkg-config", "--modversion", "libpipewire-0.3"], check=False, capture_output=True, text=True).stdout.strip()
 commands = [
     ["python", str(args.source / "tests/pipewire/check_linux_native_prerequisites.py")],
     ["cmake", "-S", str(args.source), "-B", str(args.build), "-DBEATGLASS_BUILD_PIPEWIRE=ON", "-DBUILD_TESTING=ON"],
@@ -49,7 +51,8 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
                     "duration_seconds": round(time.monotonic() - capture_started, 3),
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
 native_result = next((item for item in results if "^pipewire_tests$" in item["command"]), None)
-summary = {"platform": platform.platform(), "commands": results,
+summary = {"platform": platform.platform(), "commit": commit,
+           "pipewire_version": pipewire_version, "commands": results,
            "native_pipewire_tests": native_result,
            "qualified": len(results) == len(commands) and all(item["returncode"] == 0 for item in results)}
 if args.summary:
