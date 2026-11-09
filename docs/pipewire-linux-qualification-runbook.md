@@ -121,3 +121,4 @@ If present, summary `native_test_discovery.count` must match the archived discov
 ative_test_discovery.count must match the archived discovery inventory count.
 Manifest artifact entries must use non-negative sizes and canonical lowercase SHA-256 digests; malformed metadata is rejected explicitly.
 Summary artifact paths are checked against archive basenames to keep provenance tied to the transferred files.
+Evidence archives use a flat basename layout; nested ZIP paths are rejected during verification.
