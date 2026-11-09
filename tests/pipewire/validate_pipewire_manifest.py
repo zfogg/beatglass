@@ -30,6 +30,8 @@ if captured_at.utcoffset().total_seconds() != 0:
     raise SystemExit("manifest captured_at_utc must be UTC")
 if not isinstance(manifest["inventory"], list):
     raise SystemExit("manifest inventory must be a list")
+if not manifest["inventory"]:
+    raise SystemExit("manifest inventory must not be empty")
 if any(not isinstance(item, dict) for item in manifest["inventory"]):
     raise SystemExit("manifest inventory entries must be objects")
 if any(not isinstance(item.get("info"), dict) for item in manifest["inventory"]):

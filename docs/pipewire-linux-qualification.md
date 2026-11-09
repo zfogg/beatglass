@@ -61,6 +61,8 @@ safe pending path and cannot be mistaken for native qualification evidence.
 Every raw inventory object must also retain its non-negative numeric PipeWire
 object ID for later target selection and audit; IDs must be unique within the
 captured inventory.
+An accepted native manifest must contain at least one captured PipeWire object;
+an empty dump is treated as failed qualification evidence.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
