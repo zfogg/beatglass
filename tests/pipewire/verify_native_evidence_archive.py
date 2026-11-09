@@ -61,6 +61,8 @@ with zipfile.ZipFile(archive_path) as archive:
     summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
     if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):
         raise SystemExit("manifest commit does not match qualification summary")
+    if "platform" in summary_data and (not isinstance(summary_data["platform"], str) or not summary_data["platform"].strip()):
+        raise SystemExit("qualification summary has invalid platform identity")
     if "platform" in manifest and (not isinstance(manifest["platform"], str) or not manifest["platform"].strip()):
         raise SystemExit("evidence manifest has invalid platform identity")
     if manifest.get("platform") and manifest.get("platform") != summary_data.get("platform"):
