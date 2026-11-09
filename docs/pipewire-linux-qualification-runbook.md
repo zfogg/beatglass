@@ -405,3 +405,5 @@ Summary archive timestamps, when supplied, must be canonical UTC strings and equ
 UTC provenance checks are case-sensitive: only the canonical uppercase Z suffix is accepted for summary timestamps.
 
 Archive review should report timestamp-schema failures separately from native execution failures so pending host qualification is never confused with transfer-integrity rejection.
+
+Archive verifier output is transfer evidence only; a passing archive does not claim that the underlying Linux/PipeWire native run occurred on the current host.
