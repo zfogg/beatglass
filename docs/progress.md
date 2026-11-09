@@ -1,5 +1,11 @@
 # Progress and handoff
 
+Changing the Library source now clears stale visualization selection before the
+overlay can reuse it, including recursive-browser selection. The overlay waits
+for fresh accepted evidence instead of presenting the previous source's state.
+Portable coverage is in
+`python tests/unit/check_overlay_source_change_clear_contract.py`.
+
 Overlay settings now provide a synchronized start/stop monitoring action. The
 action preserves the control surface during transitions and announces that the
 overlay is waiting for accepted combined-output data. Portable coverage is in

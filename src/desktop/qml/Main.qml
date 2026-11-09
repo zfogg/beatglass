@@ -939,6 +939,7 @@ ApplicationWindow {
         if (files.isFolder(index)) {
             browseFolder = url
         } else {
+            window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
             selectedName = files.get(index, "fileName")
             selectedAudioUrl = url
             metadataBridge.inspect(url)
@@ -1728,6 +1729,7 @@ ApplicationWindow {
                             Accessible.description: folder ? "Folder discovered recursively" : "Select this audio file for metadata and analysis"
                             text: name + (folder ? "  (folder)" : "")
                             onClicked: {
+                                window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
                                 window.selectedName = name
                                 window.selectedAudioUrl = Qt.resolvedUrl(path)
                                 if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
