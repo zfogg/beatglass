@@ -862,12 +862,16 @@ ApplicationWindow {
             window.announceCaptureRecoveryState("Overlay startup state is unavailable; control-window fallback remains active until a display recovers.")
             return false
         }
-        const geometry = window.overlayBridge.geometry
         const visualStateReady = window.restoreOverlayVisualStateFromBridge()
         window.overlayLaunchFallbackActive = false
-        if (visualStateReady)
+        if (visualStateReady) {
             window.announceCaptureRecoveryState("Overlay settings synchronized from native state.")
-        return visualStateReady || (geometry && geometry.width > 0)
+            return true
+        }
+        window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
+        window.announceCaptureRecoveryState("Overlay settings could not be synchronized; control-window fallback remains active.")
+        return false
     }
     function reapplyOverlayVisualState() {
         return window.restoreOverlayVisualStateFromBridge()
