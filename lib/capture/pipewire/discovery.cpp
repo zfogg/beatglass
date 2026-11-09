@@ -22,7 +22,11 @@ void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, 
       !name || !*name || std::string(name).find('\0') != std::string::npos ||
       std::string(name).find_first_not_of(" \t\r\n") == std::string::npos) return;
   const std::string description = desc && *desc ? desc : "";
-  nodes_[id] = {serial, name, description.find_first_not_of(" \t\r\n") == std::string::npos ? name : description};
+  nodes_[id] = {serial, name,
+                description.find('\0') != std::string::npos ||
+                        description.find_first_not_of(" \t\r\n") == std::string::npos
+                    ? name
+                    : description};
 }
 void RegistrySnapshot::remove(std::uint32_t id) { nodes_.erase(id); }
 std::vector<Sink> RegistrySnapshot::sinks() const {
