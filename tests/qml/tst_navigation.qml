@@ -1154,6 +1154,10 @@ TestCase {
         compare(focusShortcut.sequence, "Escape")
         verify(focusShortcut.enabled)
         compare(focusShortcut.context, Qt.ApplicationShortcut)
+        let pageShortcut = findChild(app, "overlayPausedRecoveryPageShortcut")
+        compare(pageShortcut.sequence, "Ctrl+Alt+Shift+P")
+        verify(pageShortcut.enabled)
+        verify(findChild(app, "overlayPausedRecoveryPageShortcutHint").visible)
         app.destroy()
         fakeOverlay.available = true
     }
