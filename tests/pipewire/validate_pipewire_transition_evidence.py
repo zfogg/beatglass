@@ -27,9 +27,10 @@ if positions != sorted(positions):
 epochs = [event.get("epoch") for event in events if isinstance(event, dict) and event.get("epoch") is not None]
 if any(not isinstance(epoch, int) or isinstance(epoch, bool) or epoch <= 0 for epoch in epochs) or epochs != sorted(epochs):
     raise SystemExit("transition epochs must be positive and monotonic")
-if not any(event.get("discontinuity") is True for event in events if isinstance(event, dict)):
+error_event = next(event for event in events if event.get("event") == "error")
+if error_event.get("discontinuity") is not True:
     raise SystemExit("transition evidence has no discontinuity marker")
-if not any(event.get("error_code", 0) != 0 for event in events if isinstance(event, dict)):
+if not isinstance(error_event.get("error_code"), int) or isinstance(error_event.get("error_code"), bool) or error_event["error_code"] == 0:
     raise SystemExit("transition evidence has no native error code")
 start = next(event for event in events if event.get("event") == "start")
 if not isinstance(start.get("serial"), str) or not start["serial"].strip():
