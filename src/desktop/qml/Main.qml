@@ -2253,7 +2253,7 @@ ApplicationWindow {
                                     ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable. Press Tab to reach them."
                                     : (count > 0 ? "Choose one of " + count + " saved analysis runs to recover. Press Tab to reach retry and discard actions after selection." : "No saved analysis runs available.")
                                 ToolTip.text: count > 0
-                                    ? "Choose one of " + count + " saved analysis runs" + (typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== "" ? ". Selected: " + storageRecovery.selectedRunId : "")
+                                    ? "Choose a saved analysis run to recover" + (typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== "" ? ". Selected: " + storageRecovery.selectedRunId : "")
                                     : "No saved analysis runs available"
                                 onActivated: { storageRecovery.selectRun(currentText); window.persistedRecoverySelectionActivated = true; window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Press Tab to reach retry and discard controls when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
                             }
@@ -3316,6 +3316,20 @@ ApplicationWindow {
                             ? text + ". Estimates are attributed to the monitored combined output."
                             : visible ? text + ". The overlay remains available while capture recovers." : text
                         ToolTip.text: visible ? Accessible.description : "Overlay monitoring state"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        objectName: "overlayEstimateAttribution"
+                        visible: window.overlayBridge !== null
+                        text: visible ? "Estimate source: selected system output · combined mix" : "Estimate source unavailable"
+                        Accessible.name: "Overlay estimate attribution"
+                        Accessible.value: text
+                        Accessible.role: Accessible.StaticText
+                        Accessible.description: visible
+                            ? text + ". Track and deck metadata are unavailable unless a separately supported source provides them."
+                            : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay estimate source"
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
