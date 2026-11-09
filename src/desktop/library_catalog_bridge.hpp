@@ -17,6 +17,8 @@ class LibraryCatalogBridge final : public QObject {
 
   /** Browse one local folder, returning name/path/folder/audio role values. */
   Q_INVOKABLE QVariantList browse(const QUrl& folder, const QString& search = {});
+  /** Recursively enumerate supported audio and folders under a local root. */
+  Q_INVOKABLE QVariantList browseRecursive(const QUrl& folder, const QString& search = {});
   QString lastDiagnostic() const { return last_diagnostic_; }
 
  signals:
