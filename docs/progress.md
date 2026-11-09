@@ -1,5 +1,10 @@
 # Progress and handoff
 
+The overlay now exposes a recovery-action status that distinguishes a pending
+display recovery from a safe restore action and preserves the control-window
+fallback. Portable coverage is in
+`python tests/unit/check_overlay_recovery_action_status_contract.py`.
+
 The overlay now exposes whether it is available or hidden by user request,
 with recovery guidance that preserves monitoring and restores persisted overlay
 settings. Portable coverage is in
