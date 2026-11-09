@@ -4042,7 +4042,10 @@ ApplicationWindow {
                         Accessible.role: Accessible.Button
                         Accessible.description: "Focus the consolidated overlay settings summary for display, size, opacity, and recovery state."
                         ToolTip.text: Accessible.description
-                        onClicked: overlaySettingsSummary.forceActiveFocus()
+                        onClicked: {
+                            overlaySettingsSummary.forceActiveFocus()
+                            window.announceCaptureRecoveryState("Overlay summary reviewed; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+                        }
                     }
                 Label {
                     objectName: "overlayPersistedRecoveryDiagnostic"
