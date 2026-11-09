@@ -19,6 +19,11 @@ offers a keyboard-focusable `Review recovery` action that moves focus to the
 persisted display/size/opacity summary. The summary and action announce the
 settings revision and the next recovery step through the accessibility tree.
 
+Each explicit `Retry overlay` request is counted in the control window and
+announced as a numbered attempt. The count resets when a native bridge or
+compatible display becomes available, so retry feedback stays bounded and
+does not imply that capture itself was restarted.
+
 ## Screenshot qualification
 
 When desktop rendering is available, capture these states at the standard desktop
