@@ -79,12 +79,14 @@ if discovery_result:
 junit_count = None
 junit_failures = junit_errors = junit_skipped = None
 junit_sha256 = None
+junit_tests = None
 junit_path = evidence / "pipewire-tests.xml"
 if junit_path.is_file():
     junit_sha256 = hashlib.sha256(junit_path.read_bytes()).hexdigest()
     try:
         junit_root = ET.parse(junit_path).getroot()
         cases = list(junit_root.iter("testcase"))
+        junit_tests = [case.get("name", "") for case in cases]
         junit_count = len(cases)
         junit_failures = sum(1 for case in cases if case.find("failure") is not None)
         junit_errors = sum(1 for case in cases if case.find("error") is not None)
@@ -102,6 +104,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit_exists": (evidence / "pipewire-tests.xml").is_file(),
            "native_junit_test_count": junit_count,
            "native_junit_sha256": junit_sha256,
+           "native_junit_tests": junit_tests,
            "native_junit_failures": junit_failures,
            "native_junit_errors": junit_errors,
            "native_junit_skipped": junit_skipped,
