@@ -475,6 +475,20 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlayRecoveryAttemptStatusShowsBoundedProgress() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        let status = findChild(app, "overlayRecoveryAttemptStatus")
+        verify(!status.visible)
+        retry.clicked()
+        verify(status.visible)
+        compare(status.text, "Recovery attempts: 1/3")
+        compare(status.Accessible.description, "Bounded native overlay recovery attempt progress")
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)
