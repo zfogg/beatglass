@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
-from manifest_contract import audio_sink_count, inventory_digest
+from manifest_contract import audio_sink_count, inventory_digest, validate_inventory_shape
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: validate_pipewire_manifest.py MANIFEST")
@@ -42,6 +42,9 @@ if captured_at.utcoffset().total_seconds() != 0:
     raise SystemExit("manifest captured_at_utc must be UTC")
 if not isinstance(manifest["inventory"], list):
     raise SystemExit("manifest inventory must be a list")
+shape_error = validate_inventory_shape(manifest["inventory"])
+if shape_error:
+    raise SystemExit(f"manifest inventory shape invalid: {shape_error}")
 if not manifest["inventory"]:
     raise SystemExit("manifest inventory must not be empty")
 if any(not isinstance(item, dict) for item in manifest["inventory"]):
