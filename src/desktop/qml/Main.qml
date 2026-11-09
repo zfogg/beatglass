@@ -1857,7 +1857,7 @@ ApplicationWindow {
                                 title: "Discard analysis batch?"
                                 standardButtons: Dialog.Ok | Dialog.Cancel
                                 contentItem: Label { text: "This clears the retained batch recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis batch confirmation"; Accessible.role: Accessible.StaticText }
-                                onAccepted: { window.analysisJobBridge.discardBatch(); window.announceVisualizationRecovery("Analysis batch recovery discarded; focus remains on the recovery controls."); discardAnalysisBatchButton.forceActiveFocus() }
+                                onAccepted: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Failed" && window.analysisJobBridge.status !== "Cancelled")) { window.announceVisualizationRecovery("Analysis batch is no longer discardable; no batch recovery was discarded."); retryAnalysisBatchButton.forceActiveFocus() } else { window.analysisJobBridge.discardBatch(); window.announceVisualizationRecovery("Analysis batch recovery discarded; focus remains on the recovery controls."); discardAnalysisBatchButton.forceActiveFocus() } }
                                 onRejected: discardAnalysisBatchButton.forceActiveFocus()
                             }
                             Button {

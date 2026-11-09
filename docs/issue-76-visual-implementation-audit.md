@@ -36,6 +36,8 @@ The active Cancel control also re-checks the real worker handle at click time. A
 
 Batch Retry and Cancel use the same click-time status guards: stale terminal/active clicks dispatch no request, announce the current state, and restore focus to the relevant batch recovery control.
 
+Batch Discard confirmation also re-checks terminal status on acceptance. If the batch has moved on while the dialog is open, no discard is dispatched and focus returns to Batch Retry with an explicit stale-state announcement.
+
 The C++ storage bridge now resets active analysis retryability, progress, result, and lifecycle status before reopening. Reopen cannot leave a stale active-job Retry enabled while persisted runs are being refreshed; the subsequent worker refresh repopulates only current retryable identities.
 
 Reopen also clears the bridge's prior `analysisReserved` and `analysisAdmissionResult` values before dispatching the open request. Queue admission text is therefore scoped to the prior connection and cannot be mistaken for a fresh reservation after reconnect.
