@@ -67,6 +67,11 @@ with zipfile.ZipFile(archive_path) as archive:
         if hashlib.sha256(payload).hexdigest() != artifact["sha256"]:
             raise SystemExit(f"digest mismatch: {name}")
     discovery_name = next(name for name in declared if name.endswith(".json") and "discovery" in name)
+    junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
+    if summary_data.get("native_discovery_sha256") != hashlib.sha256(archive.read(discovery_name)).hexdigest():
+        raise SystemExit("summary native discovery digest does not match archive")
+    if summary_data.get("native_junit_sha256") != hashlib.sha256(archive.read(junit_name)).hexdigest():
+        raise SystemExit("summary native JUnit digest does not match archive")
     discovery_tests = json.loads(archive.read(discovery_name)).get("tests")
     if not isinstance(discovery_tests, list):
         raise SystemExit("discovery JSON has no tests list")
@@ -79,7 +84,6 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("discovery JSON has duplicate test names")
     if int(summary_data.get("native_test_count", 0)) != len(discovery_tests):
         raise SystemExit("summary native_test_count does not match discovery")
-    junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
     junit_root = ET.fromstring(archive.read(junit_name))
     if junit_root.tag not in ("testsuite", "testsuites"):
         raise SystemExit("JUnit evidence has invalid root")
