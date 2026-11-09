@@ -413,6 +413,7 @@ ApplicationWindow {
             const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
             if (resized) {
                 window.overlayPreferredSizeIndex = nextIndex
+                window.overlaySettingsRevision += 1
                 window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
             } else {
                 window.syncOverlaySettingsStateFromBridge()
