@@ -39,4 +39,12 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(manifest))
     result = subprocess.run([sys.executable, str(verifier), str(tampered)], capture_output=True, text=True)
     if result.returncode == 0 or not any(message in result.stderr + result.stdout for message in ("size mismatch", "digest mismatch")): raise SystemExit("tampered artifact was accepted")
-print("PipeWire evidence archive verifier behavior passed (3 scenarios)")
+
+    duplicate = root / "duplicate.zip"
+    with zipfile.ZipFile(duplicate, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("native-summary.json", summary)
+        archive.writestr("evidence-manifest.json", json.dumps(manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(duplicate)], capture_output=True, text=True)
+    if result.returncode == 0 or "duplicate archive entry" not in result.stderr + result.stdout: raise SystemExit("duplicate archive entry was accepted")
+print("PipeWire evidence archive verifier behavior passed (4 scenarios)")
