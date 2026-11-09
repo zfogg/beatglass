@@ -1225,7 +1225,6 @@ ApplicationWindow {
     }
     function showOverlayAndHideControls() {
         window.overlayHiddenByUser = false
-        window.overlayRecoveryPausedByUser = false
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
@@ -1251,6 +1250,7 @@ ApplicationWindow {
             return false
         }
         const restoredGeometry = window.overlayBridge.geometry
+        window.overlayRecoveryPausedByUser = false
         window.announceCaptureRecoveryState(restoredGeometry && restoredGeometry.width > 0
             ? "DJ overlay relaunched at its persisted position and size."
             : "DJ overlay shown; output monitoring remains bound to the selected display.")

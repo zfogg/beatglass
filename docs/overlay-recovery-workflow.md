@@ -78,6 +78,8 @@ The same manual boundary applies when the native bridge itself returns after an
 availability loss: a previously visible overlay is not silently relaunched.
 Choosing the explicit `Show overlay` action is itself a deliberate resume and
 clears the paused marker before launching the native window.
+If the native bridge is still unavailable, that action keeps the paused marker
+intact while restoring the control-window fallback.
 
 ## Screenshot qualification
 
