@@ -214,9 +214,16 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, source_date_epoch=10**30)))
     result = subprocess.run([sys.executable, str(verifier), str(unrepresentable_epoch)], capture_output=True, text=True)
     if result.returncode == 0 or "unrepresentable source date epoch" not in result.stderr + result.stdout: raise SystemExit("unrepresentable epoch was accepted")
+    summary_epoch_drift = root / "summary-epoch-drift.zip"
+    drifted_summary = json.dumps(dict(json.loads(summary), source_date_epoch=1)).encode()
+    with zipfile.ZipFile(summary_epoch_drift, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, drifted_summary if name == "native-summary.json" else data)
+        archive.writestr("evidence-manifest.json", json.dumps(manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(summary_epoch_drift)], capture_output=True, text=True)
+    if result.returncode == 0 or "manifest source date epoch does not match qualification summary" not in result.stderr + result.stdout: raise SystemExit("summary epoch drift was accepted")
     malformed_json = root / "malformed-manifest-json.zip"
     with zipfile.ZipFile(malformed_json, "w") as archive:
         archive.writestr("evidence-manifest.json", b"{")
     result = subprocess.run([sys.executable, str(verifier), str(malformed_json)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed evidence manifest" not in result.stderr + result.stdout: raise SystemExit("malformed manifest JSON was accepted")
-print("PipeWire evidence archive verifier behavior passed (24 scenarios)")
+print("PipeWire evidence archive verifier behavior passed (25 scenarios)")
