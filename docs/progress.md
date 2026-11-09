@@ -828,3 +828,5 @@ Overlay controls now include a “Review retained settings” action that moves 
 
 The retained-settings review action now has a global `Ctrl+Alt+Shift+S` shortcut that returns focus to overlay recovery context. Portable coverage is in `python tests/unit/check_overlay_retention_shortcut_contract.py`.
 
+In-app overlay shortcut help now documents `Ctrl+Alt+Shift+S` for retained-settings review. Portable coverage is in `python tests/unit/check_overlay_shortcut_help_contract.py`.
+
