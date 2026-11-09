@@ -172,3 +172,6 @@ Stopping recovery with Ctrl+Alt+Shift+X pauses retries without clearing persiste
 
 Resuming paused recovery with Ctrl+Alt+Shift+R starts a fresh bounded attempt but keeps the saved display and geometry preferences unchanged, so the user can resume the same visual state deliberately.
 
+
+While recovery is paused, Escape re-focuses Resume recovery without changing the queued display or geometry settings. This gives keyboard users a stable return path after reviewing the retained visual state.
+
