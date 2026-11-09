@@ -190,3 +190,6 @@ If Unlock overlay fails while click-through is active, focus remains on Unlock o
 
 A successful Unlock clears stale click-through recovery markers but does not rewrite persisted display or geometry preferences. The next explicit Show or Restore therefore uses the same saved visual state.
 
+
+Turning click-through off from the control window clears stale interaction-recovery markers without changing persisted display or geometry settings, keeping the next explicit restore on the same visual state.
+
