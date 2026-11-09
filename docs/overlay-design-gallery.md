@@ -37,6 +37,7 @@ screenshots.
 | [Paused state](overlay-paused-state-card.svg) | safe pause and resume behavior |
 | [No signal](overlay-no-signal-card.svg) | waiting state before playback |
 | [Output picker](overlay-output-picker-card.svg) | selected, available, unavailable outputs |
+| [Quick actions](overlay-quick-actions-card.svg) | high-frequency controls and shortcuts |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
