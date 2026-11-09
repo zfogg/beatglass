@@ -124,6 +124,8 @@ public:
   bool restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels);
   /** Pop the next bounded block on the control thread. */
   bool pop(coreaudio::CaptureBlock& block) noexcept;
+  /** Pop and admit only a block from the active session epoch. */
+  bool pop_current(coreaudio::CaptureBlock& block) noexcept;
   /** Stop accepting callback data and expose overflow state. */
   void stop() noexcept;
   bool overflowed() const noexcept;
