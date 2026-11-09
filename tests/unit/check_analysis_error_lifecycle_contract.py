@@ -9,6 +9,7 @@ assert "handle_.reset(); emit result(false" in submit
 retry = source[source.index("void retryAnalysis()"):source.index("void admitAnalysis(")]
 assert "Analysis retry rejected:" in retry
 assert "handle_.reset(); emit result(false" in retry
+assert "Analysis retry rejected" in retry
 cancel = source[source.index("void cancelAnalysis()"):source.index("void retryAnalysis()")]
 assert "Analysis cancellation rejected:" in cancel
 assert "catch (const std::exception& error)" in cancel
