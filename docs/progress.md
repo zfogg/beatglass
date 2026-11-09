@@ -1,9 +1,10 @@
 # Progress and handoff
 
-The macOS source adapter now preserves an explicit diagnostic when backend stop
-fails, instead of clearing the error while retaining the quiescence-failed
-state. Portable coverage is in
-`python tests/unit/check_macos_stop_diagnostic_contract.py`.
+`Ctrl+Alt+K` focuses the overlay click-through control and announces whether
+pointer passthrough is currently enabled or disabled.
+
+`Ctrl+Alt+L` focuses the overlay opacity slider and announces its current
+percentage, providing a direct keyboard path to adjust visual prominence.
 
 Shortcut guidance now also lists keyboard size cycling (`Ctrl+Alt+O`) and the
 90% opacity reset (`Ctrl+Alt+Shift+O`), keeping visual overlay controls
