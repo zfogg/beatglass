@@ -247,3 +247,6 @@ After geometry becomes available again, a failed Reapply can be retried through 
 
 When a display reconnects after being absent, recovery reuses the retained display identity and geometry rather than resetting to defaults; the control-window fallback stays available until the reconnect is complete.
 
+
+When the operating system reorders displays, recovery matches the saved display by identity rather than stale index, reapplies the retained geometry, and returns focus to Retry overlay for the next explicit action.
+
