@@ -1045,6 +1045,7 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = window.overlayBridge.screenNames[savedIndex]
         window.overlaySettingsRevision += 1
         window.overlayLaunchFallbackActive = false
+        window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplaySelectionRequired = false
         if (window.overlayDisplayRecoveryPending) {
             window.overlayDisplayRecoveryPending = false
