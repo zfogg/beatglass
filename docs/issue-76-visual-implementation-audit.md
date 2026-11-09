@@ -796,7 +796,4 @@ After hiding the overlay, focus returns to the Hide control in the restored cont
 
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
 Active analysis failure reasons, recovery status, and persisted queue errors now expose their live text as accessible status values, so assistive technology receives the same diagnostics visible in the recovery surface.
-
-The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
-
-Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
+The display selector now includes recovery-pending state in its accessible value and description, so assistive technology receives the same recovery context as the surrounding display status.
