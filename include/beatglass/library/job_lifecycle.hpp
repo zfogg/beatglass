@@ -36,7 +36,7 @@ public:
   /** Update running progress; reject regression or counts beyond a known total. */
   bool progress(std::uint64_t frames) noexcept {
     if (snapshot_.status != JobStatus::running || frames < snapshot_.frames_processed ||
-        (snapshot_.total_frames && frames > *snapshot_.total_frames)) return false;
+        (hasKnownTotal(snapshot_.total_frames) && frames > *snapshot_.total_frames)) return false;
     snapshot_.frames_processed = frames; return true;
   }
   /** Cancel queued or running work after the worker observes a request. */
@@ -53,7 +53,7 @@ public:
   /** Mark a running job complete; a known total must have been fully processed. */
   bool complete() noexcept {
     if (snapshot_.status != JobStatus::running ||
-        (snapshot_.total_frames && snapshot_.frames_processed != *snapshot_.total_frames)) return false;
+        (hasKnownTotal(snapshot_.total_frames) && snapshot_.frames_processed != *snapshot_.total_frames)) return false;
     snapshot_.status = JobStatus::complete; return true;
   }
 private:

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <optional>
 #include <string>
 namespace beatglass {
 /** Provisional job states; transitions and cancellation behavior are not implemented by this type. */
@@ -14,4 +15,6 @@ struct AnalysisIdentity { std::string content_hash, engine_version, configuratio
 struct JobProgress { std::uint64_t frames_processed{}, total_frames{}; JobStatus status{JobStatus::queued}; };
 /** Return whether progress includes a meaningful total frame count. */
 constexpr bool hasKnownTotal(const JobProgress& progress) noexcept { return progress.total_frames > 0; }
+/** Return whether an optional total is present, including a known zero total. */
+constexpr bool hasKnownTotal(const std::optional<std::uint64_t>& total) noexcept { return total.has_value(); }
 }
