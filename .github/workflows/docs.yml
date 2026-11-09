@@ -16,11 +16,9 @@ jobs:
       - name: Build documentation image
         run: docker build -f docs/api/Dockerfile -t beatglass-docs .
       - name: Build with warnings as errors
-        run: docker run --rm -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html -c docs/api . /work/build/docs/html
+        run: docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/work" beatglass-docs sphinx-build -W --keep-going -b html -c docs/api . /work/build/docs/html
       - name: Move API landing page to artifact root
-        run: |
-          chmod -R u+rwX build/docs/html
-          python3 docs/api/flatten_site.py build/docs/html
+        run: python3 docs/api/flatten_site.py build/docs/html
       - name: Check rendered declarations
         run: python3 docs/api/check_rendered.py build/docs/html
       - uses: actions/upload-pages-artifact@v3
