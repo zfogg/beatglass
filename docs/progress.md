@@ -1,5 +1,9 @@
 # Progress and handoff
 
+The FFT view now derives a bounded peak-bin summary from the accepted spectrum
+snapshot and exposes it through the canvas accessibility value, making the
+rendered frequency evidence inspectable without inventing a calibrated pitch.
+
 FFT rendering now clamps negative or malformed magnitudes to zero before
 painting bars, preventing invalid source values from producing inverted
 frequency visuals while preserving the bounded real-spectrum path.

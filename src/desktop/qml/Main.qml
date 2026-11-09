@@ -2426,6 +2426,15 @@ ApplicationWindow {
                     property string acceptedPlaybackSource: ""
                     property var renderedWaveform: []
                     property var renderedSpectrum: []
+                    readonly property int spectrumPeakIndex: {
+                        let peak = -1, value = 0
+                        for (let index = 0; index < renderedSpectrum.length; ++index) {
+                            const magnitude = Number(renderedSpectrum[index])
+                            if (isFinite(magnitude) && magnitude > value) { value = magnitude; peak = index }
+                        }
+                        return peak
+                    }
+                    readonly property real spectrumPeakMagnitude: spectrumPeakIndex >= 0 ? Math.max(0, Number(renderedSpectrum[spectrumPeakIndex])) : 0
                     readonly property string acceptedResultIdentity: window.acceptedAnalysisIdentity
                     readonly property bool reducedMotion: window.themePreferencesBridge !== null && window.themePreferencesBridge.reduceMotion
                     readonly property bool playbackSnapshotAligned: presentationReady
@@ -2483,7 +2492,7 @@ ApplicationWindow {
                             : renderedSpectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120; Layout.minimumHeight: window.compactHeader ? 72 : 96
                     Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
-                    Accessible.value: visualizationCanvas.viewMode + ", revision " + visualizationCanvas.renderedRevision + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%")
+                    Accessible.value: visualizationCanvas.viewMode + ", revision " + visualizationCanvas.renderedRevision + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%") + (visualizationCanvas.viewMode === "spectrum" && visualizationCanvas.spectrumPeakIndex >= 0 ? ", peak bin " + visualizationCanvas.spectrumPeakIndex : "")
                     Accessible.role: Accessible.Graphic
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
