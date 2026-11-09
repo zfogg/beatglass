@@ -421,3 +421,5 @@ Treat verifier warnings as review context: they do not turn a pending native qua
 Archive-review warnings should be copied verbatim into the evidence handoff, preserving the diagnostic context needed for later native-host review.
 
 A handoff is complete only when both archive integrity diagnostics and native qualification status are present; either record alone is insufficient.
+
+Keep archive verifier output and native qualification output as separate named artifacts in the handoff bundle to prevent status ambiguity.
