@@ -8,7 +8,7 @@ from pathlib import Path
 validator = Path(__file__).parents[1] / "pipewire" / "validate_qualification_matrix.py"
 valid = {"schema":"beatglass-native-qualification-matrix-v1", "host_os":"Windows", "platforms": {
     "Linux":{"status":"pending","evidence":[],"pending_reason":"host unavailable"},
-    "Windows":{"status":"qualified","evidence":["windows.zip"]},
+    "Windows":{"status":"qualified","evidence":["windows.zip"],"native_execution_attempted":True},
     "Darwin":{"status":"pending","evidence":[],"pending_reason":"host unavailable"}}}
 with tempfile.TemporaryDirectory() as directory:
     path = Path(directory) / "matrix.json"
