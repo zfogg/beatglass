@@ -1225,6 +1225,7 @@ ApplicationWindow {
     }
     function showOverlayAndHideControls() {
         window.overlayHiddenByUser = false
+        window.overlayRecoveryPausedByUser = false
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true

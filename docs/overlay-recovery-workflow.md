@@ -76,6 +76,8 @@ Geometry updates received during that paused interval follow the same rule and
 only refresh persisted state; they do not trigger a hidden retry.
 The same manual boundary applies when the native bridge itself returns after an
 availability loss: a previously visible overlay is not silently relaunched.
+Choosing the explicit `Show overlay` action is itself a deliberate resume and
+clears the paused marker before launching the native window.
 
 ## Screenshot qualification
 
