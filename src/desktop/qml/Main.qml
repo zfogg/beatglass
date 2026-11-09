@@ -1738,7 +1738,7 @@ ApplicationWindow {
                         Accessible.name: "Refresh folder contents"; Accessible.role: Accessible.Button
                         Accessible.description: "Re-read the current folder so newly added, removed, or changed audio files are reflected."
                         ToolTip.text: "Refresh the current folder contents"
-                        onClicked: { files.refresh(); window.refreshCatalog(); window.announceVisualizationRecovery("Folder contents refreshed."); browser.forceActiveFocus() }
+                        onClicked: { files.refresh(); window.refreshCatalog(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed; entry selection cleared."); browser.forceActiveFocus() }
                     }
                     Label {
                         objectName: "folderPath"
