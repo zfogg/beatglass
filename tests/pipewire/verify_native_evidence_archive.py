@@ -49,7 +49,10 @@ with zipfile.ZipFile(archive_path) as archive:
         datetime.fromisoformat(manifest["archive_timestamp_utc"][:-1])
     except ValueError:
         raise SystemExit("evidence manifest has malformed archive timestamp")
-    expected_archive_time = datetime.fromtimestamp(manifest["source_date_epoch"], timezone.utc).replace(tzinfo=None)
+    try:
+        expected_archive_time = datetime.fromtimestamp(manifest["source_date_epoch"], timezone.utc).replace(tzinfo=None)
+    except (OverflowError, OSError, ValueError):
+        raise SystemExit("evidence manifest has unrepresentable source date epoch")
     expected_archive_time = max(expected_archive_time, datetime(1980, 1, 1))
     if manifest["archive_timestamp_utc"] != expected_archive_time.isoformat() + "Z":
         raise SystemExit("archive timestamp does not match source date epoch")
