@@ -787,6 +787,10 @@ ApplicationWindow {
             }
         }
         refreshCatalog()
+        if (typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== "") {
+            browseFolder = libraryPreferences.folder
+            refreshCatalog()
+        }
     }
     function restoreOverlayDisplaySelectionFromBridge() {
         if (!window.overlayBridge) {
@@ -1543,6 +1547,7 @@ ApplicationWindow {
             window.recursiveCatalogActive = false
             window.recursiveCatalogRows = []
             browseFolder = url
+            if (typeof libraryPreferences !== "undefined") libraryPreferences.folder = url.toString()
             browser.currentIndex = -1
             search.text = ""
             window.announceVisualizationRecovery("Opened Library folder " + files.get(index, "fileName") + ".")
