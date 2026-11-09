@@ -69,6 +69,8 @@ python tests/pipewire/run_linux_native_qualification.py --transitions evidence/p
 The validator requires `start`, `process`, `error`, and `restart` events,
 positive monotonic epochs, a sink serial, captured samples, a negotiated
 restart format, a discontinuity marker, and a native error code.
+When present in a packaged summary, the archive verifier rechecks the same
+required lifecycle events and epoch/discontinuity/error invariants.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
