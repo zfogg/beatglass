@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Successful Core Audio enumeration now clears stale error categories for both
+empty and non-empty success, keeping the result contract self-consistent.
+Portable coverage is in
+`python tests/unit/check_macos_success_error_clear_contract.py`.
+
 Cancelled Core Audio enumeration now carries the typed `cancelled` source
 error even when the backend omitted one, alongside its empty source list and
 diagnostic. Portable coverage is in
