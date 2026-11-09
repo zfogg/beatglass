@@ -15,7 +15,19 @@ def assess(report_path: Path, reviewer: str) -> dict:
     blockers = []
     for platform in report.get("platforms", []):
         name = platform.get("platform", "unknown")
+        if platform.get("manifest_platform") != name:
+            blockers.append(f"{name}:manifest platform mismatch")
+        commit = platform.get("commit")
+        if not isinstance(commit, str) or len(commit) != 40 or any(char not in "0123456789abcdefABCDEF" for char in commit):
+            blockers.append(f"{name}:invalid build commit identity")
+        if platform.get("provenance_complete") is not True:
+            blockers.append(f"{name}:incomplete provenance")
+        inventory = platform.get("artifact_inventory")
+        if not isinstance(inventory, list) or platform.get("retained_artifacts") != len(inventory):
+            blockers.append(f"{name}:artifact count mismatch")
         scenarios = {row.get("id"): row for row in platform.get("scenarios", []) if isinstance(row, dict)}
+        if set(scenarios) != REQUIRED:
+            blockers.append(f"{name}:scenario inventory incomplete")
         for scenario in sorted(REQUIRED):
             row = scenarios.get(scenario)
             evidence = row.get("evidence") if isinstance(row, dict) else None

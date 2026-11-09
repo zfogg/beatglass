@@ -30,3 +30,14 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertEqual(result["decision"], "PENDING")
             self.assertTrue(result["blockers"])
+
+    def test_identity_and_artifact_consistency_are_required(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text('{"platforms":[{"platform":"linux","manifest_platform":"windows",'
+                              '"commit":"not-a-commit","provenance_complete":false,'
+                              '"retained_artifacts":2,"artifact_inventory":[],"scenarios":[]}]}')
+            result = review.assess(report, "release-owner")
+            self.assertEqual(result["decision"], "PENDING")
+            self.assertTrue(any("identity" in blocker for blocker in result["blockers"]))
+            self.assertTrue(any("artifact count" in blocker for blocker in result["blockers"]))

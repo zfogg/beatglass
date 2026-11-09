@@ -30,4 +30,8 @@ Review acceptance also verifies that every `PASS` scenario points to a retained,
 non-empty evidence file beneath the submitted report directory; a status string
 alone cannot promote native evidence.
 
+The reviewer additionally requires matching platform/manifest identity, a
+40-character build commit, complete provenance, exact artifact counts, and the
+full six-scenario inventory before a platform can be accepted.
+
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
