@@ -139,11 +139,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+Shift+M"
         context: Qt.ApplicationShortcut
         enabled: window.selectedAudioUrl.toString() !== ""
-        onActivated: {
-            navigation.currentIndex = 0
-            metadataStatusLabel.forceActiveFocus()
-            window.announceVisualizationRecovery("Selected Library metadata status focused.")
-        }
+        onActivated: window.focusLibraryMetadataStatus()
     }
     Shortcut {
         objectName: "libraryActivateEntryShortcut"
@@ -1079,6 +1075,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         refreshFolder.forceActiveFocus()
         window.announceVisualizationRecovery("Library refresh action focused.")
+    }
+    function focusLibraryMetadataStatus() {
+        navigation.currentIndex = 0
+        metadataStatusLabel.forceActiveFocus()
+        window.announceVisualizationRecovery("Selected Library metadata status focused.")
     }
     function focusLibraryBatchProgress() {
         navigation.currentIndex = 0
