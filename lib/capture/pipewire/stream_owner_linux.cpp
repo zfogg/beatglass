@@ -87,7 +87,8 @@ private:
   static void state_changed(void* data, enum pw_stream_state, enum pw_stream_state state,
                             const char* error) {
     auto& owner = *static_cast<LinuxStreamOwner*>(data);
-    if (state == PW_STREAM_STATE_ERROR || state == PW_STREAM_STATE_UNCONNECTED) {
+    if (state == PW_STREAM_STATE_ERROR || state == PW_STREAM_STATE_UNCONNECTED ||
+        state == PW_STREAM_STATE_PAUSED) {
       owner.active_ = false;
       if (owner.handoff_) owner.handoff_->on_error(error ? -EIO : -EPIPE);
     }
