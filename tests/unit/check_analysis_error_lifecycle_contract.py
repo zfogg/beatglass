@@ -17,6 +17,9 @@ admit = source[source.index("void admitAnalysis("):source.index("signals:")]
 assert "Analysis admission rejected:" in admit
 assert "emit admitted(false, QString{})" in admit
 assert "Analysis admission rejected" in admit
+poll = source[source.index("void pollAnalysis()"):source.index("beatglass::library::AnalysisCoordinator coordinator_")]
+assert "TrackedState::cancelled || state == TrackedState::failed" in poll
+assert "emit analysisProgress(0)" in poll
 analysis_connection = source[source.index("connect(worker_, &Worker::analysis,"):source.index("connect(worker_, &Worker::analysisError,")]
 assert "Analysis cancelled" in analysis_connection and "analysisResult_.clear()" in analysis_connection
 docs = (root / "docs/progress.md").read_text(encoding="utf-8")
