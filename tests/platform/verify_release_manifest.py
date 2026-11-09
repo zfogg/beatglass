@@ -18,6 +18,8 @@ def verify(root: Path, signoff_path: Path | None = None) -> list[str]:
         errors.append("release manifest decision is not ACCEPTED")
     if "native_qualification_status" in manifest and manifest["native_qualification_status"] not in {"pending", "qualified"}:
         errors.append("invalid native qualification status")
+    if manifest.get("native_qualification_status") == "qualified" and (not isinstance(manifest.get("native_qualification_commit"), str) or not manifest["native_qualification_commit"].strip()):
+        errors.append("qualified release manifest lacks native qualification provenance")
     for filename, field in (("readiness-report.json", "report_sha256"), ("review.json", "review_packet_sha256")):
         path = root / filename
         try:
