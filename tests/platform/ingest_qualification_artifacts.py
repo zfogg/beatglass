@@ -99,6 +99,8 @@ def ingest(root: Path, output: Path) -> list[str]:
               "artifacts": artifacts, "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in SCENARIOS]}
     if output.is_symlink():
         errors.append("symlinked evidence manifest output")
+    elif output.parent.is_symlink():
+        errors.append("symlinked evidence manifest output parent")
     elif not output.parent.is_dir():
         errors.append("evidence manifest output parent is missing")
     elif output.exists() and not output.is_file():
