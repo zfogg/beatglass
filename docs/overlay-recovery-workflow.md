@@ -277,3 +277,6 @@ The retained-settings status exposes its revision in the accessibility value aft
 
 Successful recovery now announces persisted position as well as size, so users can confirm the overlay returned to the saved coordinates and dimensions on the resolved display.
 
+
+When a user-hidden overlay reconnects, the recovery announcement confirms its persisted position and size while explicitly keeping it hidden until Restore overlay is chosen.
+
