@@ -17,4 +17,9 @@ with tempfile.TemporaryDirectory() as directory:
     payload = json.loads(summary.read_text(encoding="utf-8"))
     if payload.get("handoff_status") != "pending" or payload.get("qualified") is not False or payload.get("capture_plan_validated") is not True:
         raise SystemExit("pending native handoff fields were not recorded honestly")
-print("PipeWire native runner pending behavior passed (1 scenario)")
+    invalid_plan = output / "invalid-plan.json"
+    invalid_plan.write_text("{}", encoding="utf-8")
+    rejected = subprocess.run([sys.executable, str(runner), "--source", str(root.parent), "--capture-plan", str(invalid_plan)], capture_output=True, text=True)
+    if rejected.returncode == 0 or "native host capture plan" not in rejected.stderr + rejected.stdout:
+        raise SystemExit("invalid capture plan was accepted")
+print("PipeWire native runner pending behavior passed (2 scenarios)")
