@@ -32,3 +32,5 @@ It also applies a 30-second per-test timeout to bound stalled stream startup
 or callback delivery while preserving captured failure logs.
 Before execution, the runner captures CTest's JSON test listing to prove the
 native target registered concrete cases.
+The summary exposes that listing as `native_test_discovery`, separately from
+the `native_pipewire_tests` execution result.
