@@ -37,4 +37,8 @@ if summary.get("native_transition_json"):
     result = subprocess.run([sys.executable, str(validator), str(transition)], capture_output=True, text=True, check=False)
     if result.returncode:
         raise SystemExit(result.stderr or result.stdout or "native transition evidence failed validation")
+    transition_payload = json.loads(transition.read_text(encoding="utf-8"))
+    transition_events = transition_payload.get("events", transition_payload)
+    if summary.get("native_transition_event_count") != len(transition_events):
+        raise SystemExit("native transition event count mismatch")
 print("Native PipeWire qualification summary verified")
