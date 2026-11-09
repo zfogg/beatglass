@@ -2521,7 +2521,8 @@ ApplicationWindow {
                             for (var k = 0; k < spec.length; ++k) {
                                 if (!isFinite(spec[k]))
                                     continue
-                                ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
+                                const magnitude = Math.max(0, spec[k])
+                                ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, magnitude * height * 2))
                             }
                         }
                         if (selectedPosition >= 0) {
