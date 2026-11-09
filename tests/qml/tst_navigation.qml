@@ -1434,6 +1434,19 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_bridgeRecoveryWithMissingSettingsRestoresFallbackFocus() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.hide()
+        fakeOverlay.geometry = ({ x: 0, y: 0, width: 0, height: 0 })
+        fakeOverlay.available = true
+        tryVerify(() => app.visible)
+        verify(app.overlayLaunchFallbackActive)
+        verify(findChild(app, "retryOverlay").activeFocus)
+        fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
+        app.destroy()
+    }
+
     function test_trayFallbackRetainsPersistedDisplaySelection() {
         fakeOverlay.available = false
         let app = shellWithOverlay.createObject(null)
