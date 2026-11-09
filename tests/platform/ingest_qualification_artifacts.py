@@ -63,6 +63,7 @@ def ingest(root: Path, output: Path) -> list[str]:
         if identity.get(key)
     }
     known_paths = {item["path"] for item in artifacts}
+    referenced_paths = set()
     for key, relative in referenced.items():
         candidate = root / relative
         if candidate.is_symlink():
@@ -72,7 +73,12 @@ def ingest(root: Path, output: Path) -> list[str]:
         if root.resolve() not in path.parents or not path.is_file():
             errors.append(f"missing or escaping referenced evidence: {relative}"); continue
         if normalized in known_paths:
+            errors.append(f"duplicate referenced evidence path: {normalized}")
             continue
+        if normalized in referenced_paths:
+            errors.append(f"duplicate referenced evidence path: {normalized}")
+            continue
+        referenced_paths.add(normalized)
         artifacts.append({"path": normalized, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "role": key})
     artifacts.sort(key=lambda item: (item["path"], item["role"]))
     report = {"platform": identity.get("platform", "unknown"), "commit": identity.get("commit", ""),
