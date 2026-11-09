@@ -41,6 +41,9 @@ with tempfile.TemporaryDirectory() as directory:
     path.write_text(json.dumps({**valid, "inventory": [{"id": 1, "info": {"props": {"media.class": "Audio/Sink"}}}]}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
+    path.write_text(json.dumps({**valid, "inventory": [{"id": 1, "info": {"props": {"media.class": "Audio/Sink", "object.serial": 1, "node.name": "test"}}}]}), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    assert result.returncode != 0
     path.write_text(json.dumps({**valid, "inventory": ["not-an-object"]}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0

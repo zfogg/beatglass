@@ -51,6 +51,8 @@ for item in manifest["inventory"]:
         raise SystemExit("manifest media.class must be a string")
     if props.get("media.class") == "Audio/Sink" and (not str(props.get("object.serial", "")).strip() or not str(props.get("node.name", "")).strip()):
         raise SystemExit("Audio/Sink must retain serial and node name")
+    if props.get("media.class") == "Audio/Sink" and (not isinstance(props.get("object.serial"), str) or not isinstance(props.get("node.name"), str)):
+        raise SystemExit("Audio/Sink serial and node name must be strings")
 sinks = [item["info"]["props"] for item in manifest["inventory"] if item["info"]["props"].get("media.class") == "Audio/Sink"]
 if len({p["object.serial"] for p in sinks}) != len(sinks) or len({p["node.name"] for p in sinks}) != len(sinks):
     raise SystemExit("Audio/Sink serials and node names must be unique")
