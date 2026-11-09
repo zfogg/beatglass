@@ -1072,7 +1072,16 @@ ApplicationWindow {
             overlayDisplay.forceActiveFocus()
             return false
         }
-        window.syncOverlaySettingsStateFromBridge()
+        if (!window.syncOverlaySettingsStateFromBridge()) {
+            window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
+            window.announceCaptureRecoveryState("Overlay display selected, but settings synchronization failed; choose or reconnect a display.")
+            window.show()
+            window.raise()
+            window.requestActivate()
+            overlayDisplay.forceActiveFocus()
+            return false
+        }
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
         window.overlaySettingsRevision += 1
