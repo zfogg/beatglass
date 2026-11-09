@@ -888,5 +888,7 @@ Overlay estimate readiness now exposes accepted-snapshot readiness alongside rec
 
 Overlay settings retention status now names its ready versus recovery-pending state alongside the settings revision. Portable coverage is in `python tests/unit/check_overlay_retention_state_name_contract.py`.
 
+Overlay interaction mode now names its ready versus recovery-pending state alongside click-through or interactive mode. Portable coverage is in `python tests/unit/check_overlay_interaction_name_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
