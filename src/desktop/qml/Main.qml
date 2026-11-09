@@ -777,7 +777,11 @@ ApplicationWindow {
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Native overlay attachment failed; control-window fallback remains active.")
         } else {
-            window.syncOverlaySettingsFromBridge()
+            const synced = window.syncOverlaySettingsFromBridge()
+            if (!synced) {
+                window.overlayLaunchFallbackActive = true
+                window.overlayDisplayRecoveryPending = true
+            }
         }
         refreshCatalog()
     }
