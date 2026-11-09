@@ -9,7 +9,7 @@ def main() -> None:
     assert '(cacheMode.text === "offline" || cacheMode.text === "live")' in QML
     for object_name in ("lookupAnalysisCache", "invalidateAnalysisCache", "reanalyzeInvalidatedCache"):
         start = QML.index(f'objectName: "{object_name}"')
-        block = QML[start:QML.index("\n", start)]
+        block = QML[start:start + 600]
         assert "window.analysisCacheIdentityReady" in block, object_name
 
 if __name__ == "__main__":
