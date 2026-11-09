@@ -130,6 +130,7 @@ screenshots.
 | [Startup retry](overlay-startup-retry-card.svg) | recoverable native activation failure |
 | [Window chrome](overlay-window-chrome-control-card.svg) | borderless native frame preference |
 | [Always on top](overlay-always-on-top-card.svg) | persistent native window visibility preference |
+| [Fullscreen behavior](overlay-fullscreen-behavior-card.svg) | native overlay behavior over fullscreen apps |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
