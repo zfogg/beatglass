@@ -14,6 +14,8 @@ for source in api.iterdir():
     if source.is_dir():
         shutil.copytree(source, destination, dirs_exist_ok=True)
     else:
+        if destination.exists():
+            destination.unlink()
         shutil.copy2(source, destination)
 
 for page in output.glob("*.html"):
