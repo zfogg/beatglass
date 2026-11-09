@@ -4334,8 +4334,11 @@ ApplicationWindow {
                             checked = window.overlayBridge.clickThrough
                             if (!applied || checked !== requestedClickThrough)
                                 window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again.")
-                            else
+                            else {
                                 window.overlaySettingsRevision += 1
+                                window.overlayLaunchFallbackActive = false
+                                window.overlayDisplayRecoveryPending = false
+                            }
                             overlayInteractionMode.forceActiveFocus()
                         }
                         Connections {
