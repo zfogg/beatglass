@@ -788,3 +788,5 @@ Selecting an overlay size now returns keyboard focus to geometry status after a 
 
 Selecting an overlay destination display now returns keyboard focus to current-display status after persistence, while failed selection keeps focus on the selector. Portable coverage is in `python tests/unit/check_overlay_display_focus_contract.py`.
 
+Showing the native overlay now announces the selected-display launch and persisted-settings restore before the control window transitions away. Portable coverage is in `python tests/unit/check_overlay_show_announce_contract.py`.
+
