@@ -52,11 +52,12 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
     return {{}, error, status_.message};
   }
   std::optional<AudioFormat> format;
+  bool format_query_failed = false;
   try { format = backend_->format(); }
-  catch (...) { format.reset(); }
+  catch (...) { format.reset(); format_query_failed = true; }
   if (!format || !format->sample_rate || !format->channels) {
     const bool stopped = backend_->stop(); quiescence_failed_ = !stopped; lifecycle_.stop();
-    std::string diagnostic = "Invalid capture format";
+    std::string diagnostic = format_query_failed ? "Core Audio format query failed" : "Invalid capture format";
     if (!stopped) diagnostic += "; backend stop also failed";
     status_ = {SourceState::error, SourceError::backend_error, std::move(diagnostic)};
     return {{}, SourceError::backend_error, status_.message};
