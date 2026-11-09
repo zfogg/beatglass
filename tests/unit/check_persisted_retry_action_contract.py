@@ -48,6 +48,8 @@ if "Persisted recovery refreshed" not in source:
     raise SystemExit("Recovery refresh must publish completion status")
 if "Persisted recovery selected" not in source:
     raise SystemExit("Recovery selection must publish a lifecycle status")
+if "Discard rejected: retryable run is active" not in source:
+    raise SystemExit("Active retryable jobs must reject destructive discard explicitly")
 if "Persisted recovery selection cleared" not in source:
     raise SystemExit("Recovery selection clearing must publish a lifecycle status")
 print(f"Persisted retry action contract verified ({len(required)} checks)")
