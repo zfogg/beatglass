@@ -21,7 +21,7 @@ commands = [
     ["cmake", "-S", str(args.source), "-B", str(args.build), "-DBEATGLASS_BUILD_PIPEWIRE=ON", "-DBUILD_TESTING=ON"],
     ["cmake", "--build", str(args.build)],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "pipewire"],
-    ["ctest", "--test-dir", str(args.build), "--output-on-failure", "--no-tests=error", "-R", "^pipewire_tests$"],
+    ["ctest", "--test-dir", str(args.build), "--output-on-failure", "--no-tests=error", "--timeout", "30", "-R", "^pipewire_tests$"],
 ]
 evidence = args.summary.parent if args.summary else args.source / "evidence"
 evidence.mkdir(parents=True, exist_ok=True)
