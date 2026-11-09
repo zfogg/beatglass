@@ -1930,6 +1930,7 @@ ApplicationWindow {
                             }
                             const accepted = window.analysisJobBridge.submitSelectedFiles(paths)
                             window.announceVisualizationRecovery(accepted + " recursive audio files accepted for analysis.")
+                            recursiveResultsView.forceActiveFocus()
                         }
                     }
                 }
