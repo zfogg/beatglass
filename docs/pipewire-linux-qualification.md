@@ -39,3 +39,5 @@ Run `ctest --test-dir build -R pipewire_tests --output-on-failure` during the
 Linux qualification pass and retain the test output with the manifest.
 Capture the runtime node inventory with
 `python tests/pipewire/capture_pipewire_inventory.py <evidence>/pw-dump.json`.
+Capture paths are immutable: choose a new output filename for each run; the
+helper refuses to overwrite existing files or traverse symlinked directories.
