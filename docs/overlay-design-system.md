@@ -50,3 +50,8 @@ Size uses named presets with dimensions so the choice remains legible at a glanc
 Display selection uses the same clear selected/unavailable treatment:
 
 ![Overlay display control rendering](overlay-display-card.svg)
+
+The tray/taskbar fallback keeps monitoring available while native overlay actions
+are unavailable:
+
+![Overlay tray fallback rendering](overlay-tray-fallback.svg)
