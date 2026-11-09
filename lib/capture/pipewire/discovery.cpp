@@ -24,7 +24,7 @@ void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, 
       std::string(name).size() > max_identity_length || std::string(name).find_first_not_of(" \t\r\n") == std::string::npos) return;
   const std::string description = desc && *desc ? desc : "";
   nodes_[id] = {serial, name,
-                description.find('\0') != std::string::npos ||
+                description.size() > max_identity_length || description.find('\0') != std::string::npos ||
                         description.find_first_not_of(" \t\r\n") == std::string::npos
                     ? name
                     : description};

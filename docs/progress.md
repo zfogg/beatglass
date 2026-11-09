@@ -1,5 +1,9 @@
 # Progress and handoff
 
+PipeWire sink descriptions are now bounded to the same 4096-byte identity
+limit, falling back to the validated node name when exceeded. Portable coverage
+is in `python tests/unit/check_pipewire_description_length_contract.py`.
+
 PipeWire sink serials and names are now bounded to 4096 bytes before entering
 the registry snapshot, preventing unbounded metadata from reaching UI/source
 selection. Portable coverage is in
