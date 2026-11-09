@@ -10,4 +10,7 @@ assert "lib/capture/pipewire/stream_owner.cpp" in c
 source = (root / "lib/capture/pipewire/stream_owner.cpp").read_text()
 assert "class UnavailableStreamOwner final" in source
 assert "handoff.on_error(-ENOSYS);" in source
-print("PipeWire native stream owner seam verified (3 checks)")
+linux = (root / "lib/capture/pipewire/stream_owner_linux.cpp").read_text()
+for marker in ("pw_thread_loop_start(loop_)", "loop_started_", "pw_thread_loop_stop(loop_)", "pw_stream_connect"):
+    assert marker in linux
+print("PipeWire native stream owner seam verified (7 checks)")
