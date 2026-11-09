@@ -16,4 +16,6 @@ if manifest["schema_version"] != 1:
     raise SystemExit("unsupported PipeWire qualification manifest schema")
 if not isinstance(manifest["inventory"], list):
     raise SystemExit("manifest inventory must be a list")
+if any(not isinstance(item, dict) for item in manifest["inventory"]):
+    raise SystemExit("manifest inventory entries must be objects")
 print("PipeWire qualification manifest is valid")

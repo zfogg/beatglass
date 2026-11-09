@@ -49,6 +49,7 @@ host/Python identity, and `pw-cli` version, use
 `python tests/pipewire/capture_pipewire_manifest.py <evidence>/manifest.json`.
 Validate a copied artifact before review with
 `python tests/pipewire/validate_pipewire_manifest.py <evidence>/manifest.json`.
+Validation also requires every raw inventory entry to remain a JSON object.
 Capture paths are immutable: choose a new output filename for each run. The
 helper writes the dump to a temporary file and publishes it with an atomic
 no-overwrite hard link, then removes the temporary file; it refuses to
