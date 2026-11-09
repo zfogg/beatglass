@@ -1225,4 +1225,16 @@ TestCase {
         app.destroy()
         fakeOverlay.clickThrough = false
     }
+    function test_unlockFocusShortcutRestoresControlWindow() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        let shortcut = findChild(app, "overlayUnlockFocusShortcut")
+        shortcut.activated()
+        compare(app.navigation.currentIndex, 1)
+        verify(app.visible)
+        verify(findChild(app, "unlockOverlay").activeFocus)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+    }
 }
