@@ -48,6 +48,8 @@ Validate a transferred matrix independently with
 before treating its cross-platform status as an actionable handoff.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
+It also refuses to mark a platform qualified unless at least one evidence
+artifact is listed.
 Runner summaries carry the same matrix schema and a per-host matrix status,
 so archived Linux results can be merged into the cross-platform report without
 guessing whether a host was pending or qualified.
