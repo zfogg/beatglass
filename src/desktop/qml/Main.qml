@@ -2427,6 +2427,20 @@ ApplicationWindow {
                                 onAccepted: { const runId = storageRecovery.selectedRunId; if (window.storageReopenPending || storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0) { window.announceVisualizationRecovery("Storage became unavailable; discard of " + runId + " was canceled. Reopen storage to refresh recovery runs."); reopenStorage.forceActiveFocus() } else { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discard requested for " + runId + "; the status will report if active work prevents removal."); discardPersistedRecoveryButton.forceActiveFocus() } }
                                 onRejected: { const runId = storageRecovery.selectedRunId; window.announceVisualizationRecovery("Persisted recovery discard canceled for " + runId + "; selected run was kept."); discardPersistedRecoveryButton.forceActiveFocus() }
                             }
+                            Label {
+                                objectName: "analysisBatchActionStatus"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                                text: visible ? ("Batch actions: "
+                                      + ((window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "cancel available" : "cancel unavailable")
+                                      + ((window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? " · retry or discard available" : "")) : ""
+                                Accessible.name: "Analysis batch action status: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". Actions retain source audio and return focus after completion." : "No analysis batch actions are available."
+                                ToolTip.text: "Current analysis batch action availability"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
+                            }
                             Button {
                                 objectName: "retryAnalysisBatch"
                                 id: retryAnalysisBatchButton
