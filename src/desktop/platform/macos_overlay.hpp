@@ -44,7 +44,8 @@ public:
   /** Show without requesting focus; false indicates setup failure. */
   Q_INVOKABLE bool showOverlay();
   /** Hide and attempt to unlock the overlay. */
-  Q_INVOKABLE void hideOverlay();
+  /** Hide and attempt to unlock the overlay. Return false when unattached. */
+  Q_INVOKABLE bool hideOverlay();
   /** Set whole-window opacity, clamped to the visible range [0.2,1]. Return false when unavailable or input is non-finite. */
   Q_INVOKABLE bool setOpacity(qreal value);
   /** Return the current overlay opacity or the default before attachment. */
