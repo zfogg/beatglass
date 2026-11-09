@@ -2146,9 +2146,9 @@ ApplicationWindow {
                                 Button {
                                     objectName: "invalidateAnalysisCache"
                                     text: "Forget cached result"
-                                    enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== ""
+                                    enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && typeof storageRecovery !== "undefined" && storageRecovery.cacheHit === true
                                     Accessible.name: "Forget cached analysis"
-                                    Accessible.description: "Remove this completed cache identity so the next analysis runs again. Source files are not changed."
+                                    Accessible.description: enabled ? "Remove this completed cache identity so the next analysis runs again. Source files are not changed." : "Run Check cache and confirm a completed cache hit before forgetting an identity."
                                     onClicked: invalidateCacheDialog.open()
                                 }
                                 Button {
