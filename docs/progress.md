@@ -1,18 +1,8 @@
 # Progress and handoff
 
-The PipeWire transport now exposes explicit native callback seams: `on_process`
-copies bounded PCM through the FIFO, while `on_error` closes callback admission
-and marks the next control-thread restart boundary. This keeps native
-`pw_stream` wiring allocation-free and makes error/discontinuity ownership
-explicit. Portable coverage is in
-`python tests/unit/check_pipewire_callback_seam_contract.py`.
-
-The PipeWire monitor boundary now has a real bounded stream transport using the
-existing preallocated SPSC `CaptureFifo`: callback-side push is nonblocking and
-allocation-free, control-side pop owns blocks, stop closes admission, and FIFO
-overflow remains observable for discontinuity/reacquisition handling. Native
-`pw_stream` event wiring remains the next platform-specific step. Portable
-coverage is in `python tests/unit/check_pipewire_stream_transport_contract.py`.
+The FFT selection cursor now responds to mouse-wheel navigation with one-bin,
+five-bin Shift, and ten-bin Control steps; waveform wheel selection retains
+its time-position behavior.
 
 Linux now has an explicit `MonitorBackend` boundary for PipeWire output
 capture. The provisional adapter wires bounded sink discovery into that

@@ -2655,6 +2655,11 @@ ApplicationWindow {
                                 wheel.accepted = true
                                 return
                             }
+                            if (visualizationCanvas.viewMode === "spectrum") {
+                                const binStep = (wheel.modifiers & Qt.ControlModifier) ? 10 : ((wheel.modifiers & Qt.ShiftModifier) ? 5 : 1)
+                                visualizationCanvas.selectedSpectrumBin = Math.max(0, Math.min(visualizationCanvas.renderedSpectrum.length - 1, (visualizationCanvas.selectedSpectrumBin < 0 ? 0 : visualizationCanvas.selectedSpectrumBin) + Math.sign(wheel.angleDelta.y) * binStep))
+                                visualizationCanvas.forceActiveFocus(); visualizationCanvas.requestPaint(); wheel.accepted = true; return
+                            }
                             const stepDivisor = (wheel.modifiers & Qt.ControlModifier) ? 120 : ((wheel.modifiers & Qt.ShiftModifier) ? 240 : 1200)
                             const delta = wheel.angleDelta.y / stepDivisor
                             visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, (visualizationCanvas.selectedPosition < 0 ? 0 : visualizationCanvas.selectedPosition) + delta))
