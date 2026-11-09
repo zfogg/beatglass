@@ -1,5 +1,10 @@
 # Progress and handoff
 
+The overlay settings surface now exposes truthful live-monitoring state,
+including whether combined-output estimates are updating or capture is waiting
+for accepted data. Portable coverage is in
+`python tests/unit/check_overlay_live_monitoring_state_contract.py`.
+
 Live capture errors now announce a concrete next action—retry monitoring after
 checking the selected output and permission state—alongside the existing error
 status and recovery controls.
