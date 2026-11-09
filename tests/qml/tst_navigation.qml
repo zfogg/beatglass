@@ -1432,4 +1432,14 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_overlayAvailabilityRecoveryFocusesRetainedSettingsReview() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        verify(app.overlayDisplayRecoveryPending)
+        fakeOverlay.available = true
+        tryCompare(app, "visible", true)
+        verify(findChild(app, "overlaySettingsRetentionReviewAction").activeFocus)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Show, Restore, and Reapply") >= 0)
+        app.destroy()
+    }
 }

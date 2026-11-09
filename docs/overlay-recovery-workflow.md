@@ -148,3 +148,6 @@ Fallback activation does not discard the selected display or size preference: wh
 
 The fallback review action keeps persisted display, geometry, opacity, and interaction settings keyboard-ready: activating it focuses the settings-retention summary without changing or discarding the queued recovery state.
 
+
+When the native bridge returns with a usable display, the control window is explicitly reactivated and focus moves to Review retained settings. This makes the persisted display/geometry/opacity state keyboard-discoverable before the user chooses Show, Restore, or Reapply.
+
