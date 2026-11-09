@@ -2964,7 +2964,7 @@ ApplicationWindow {
                         id: waveformView
                         activeFocusOnTab: true
                         text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
-                        Accessible.name: "Waveform view, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.description: checked ? "Waveform view is selected; show the selectable time-domain waveform." : "Show the selectable time-domain waveform."
+                        Accessible.name: "Waveform view, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.description: (checked ? "Waveform view is selected; show the selectable time-domain waveform." : "Show the selectable time-domain waveform.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
                         ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
                         onClicked: visualizationCanvas.viewMode = "waveform"
                         Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; spectrumView.forceActiveFocus(); event.accepted = true }
@@ -2981,7 +2981,7 @@ ApplicationWindow {
                         id: spectrumView
                         activeFocusOnTab: true
                         text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
-                        Accessible.name: "FFT view, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.description: checked ? "FFT view is selected; show the selectable frequency-domain FFT." : "Show the selectable frequency-domain FFT."
+                        Accessible.name: "FFT view, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.description: (checked ? "FFT view is selected; show the selectable frequency-domain FFT." : "Show the selectable frequency-domain FFT.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
                         ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
                         onClicked: visualizationCanvas.viewMode = "spectrum"
                         Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; waveformView.forceActiveFocus(); event.accepted = true }
