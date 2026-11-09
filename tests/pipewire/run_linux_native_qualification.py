@@ -17,11 +17,13 @@ parser.add_argument("--transitions", type=Path, help="validated lifecycle transi
 parser.add_argument("--archive", type=Path, help="package the qualified summary and evidence into this transfer archive")
 parser.add_argument("--capture-plan", type=Path, help="validated cross-platform native host capture plan")
 args = parser.parse_args()
+capture_plan_validated = False
 if args.capture_plan:
     validator = Path(__file__).with_name("validate_native_host_capture_plan.py")
     checked_plan = subprocess.run([sys.executable, str(validator), str(args.capture_plan)], capture_output=True, text=True, check=False)
     if checked_plan.returncode:
         raise SystemExit(checked_plan.stderr or checked_plan.stdout or "native host capture plan validation failed")
+    capture_plan_validated = True
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
     pending = {"platform": platform.platform(), "host_os": platform.system(), "qualification_target": "Linux/PipeWire",
@@ -34,6 +36,7 @@ if platform.system() != "Linux":
                "requested_summary": str(args.summary) if args.summary else None,
                "requested_archive": str(args.archive) if args.archive else None,
                "capture_plan": str(args.capture_plan) if args.capture_plan else None,
+               "capture_plan_validated": capture_plan_validated,
                "capture_plan_sha256": hashlib.sha256(args.capture_plan.read_bytes()).hexdigest() if args.capture_plan and args.capture_plan.is_file() else None,
                "native_artifacts": [],
                "native_test_discovery": None, "native_test_count": None,
@@ -169,6 +172,7 @@ if args.transitions:
 summary["qualification_target"] = "Linux/PipeWire"
 summary["handoff_status"] = "complete" if summary["qualified"] else "failed"
 summary["capture_plan"] = str(args.capture_plan) if args.capture_plan else None
+summary["capture_plan_validated"] = capture_plan_validated
 summary["capture_plan_sha256"] = hashlib.sha256(args.capture_plan.read_bytes()).hexdigest() if args.capture_plan and args.capture_plan.is_file() else None
 summary["qualification_matrix_schema"] = "beatglass-native-qualification-matrix-v1"
 summary["qualification_matrix_status"] = "qualified" if summary["qualified"] else "pending"
