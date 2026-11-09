@@ -6,6 +6,7 @@
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
+| Library folder ready | Folder access was restored and sources rechecked | Summarize recovered identities, defer analysis until explicit action, and preserve files. |
 | Library multi-selection | Several eligible tracks are selected for a batch action | Show selection count, eligible batch action, and preserve completed evidence and source files. |
 | Library batch queued | Selected sources were admitted to analysis | Show admitted/skipped counts, link to queue, and preserve existing evidence until fresh results are accepted. |
 | Library batch complete | Batch finished with accepted and attention-needed sources | Summarize accepted/review/skipped counts and route to results or recovery without losing attribution. |
