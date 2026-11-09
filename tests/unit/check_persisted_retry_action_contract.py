@@ -54,3 +54,5 @@ if "Discard rejected: retryable run is active" not in source:
 if "Persisted recovery selection cleared" not in source:
     raise SystemExit("Recovery selection clearing must publish a lifecycle status")
 print(f"Persisted retry action contract verified ({len(required)} checks)")
+if "Q_DISABLE_COPY(StorageRecoveryBridge)" not in bridge:
+    raise SystemExit("Thread-owning recovery bridge must not be copyable")

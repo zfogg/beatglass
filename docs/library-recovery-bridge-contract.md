@@ -10,3 +10,7 @@ so a database transition cannot expose records from the previous connection.
 The bridge never mutates source audio. Retry and discard operate only on
 persisted recovery records, and all terminal/error paths report through
 `statusChanged`, `analysisStatusChanged`, or `analysisErrorChanged`.
+
+The bridge is non-copyable because it owns a worker thread, queued invocations,
+and GUI-visible state. Pass it by QObject ownership/reference; never copy it
+between windows or threads.
