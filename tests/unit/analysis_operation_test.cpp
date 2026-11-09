@@ -39,6 +39,27 @@ TEST_CASE("analysis admission accepts a compatible snapshot cache hit") {
   CHECK(hit.cached == std::optional<std::string>{"cached"});
   CHECK_FALSE(hit.analysis_reserved);
 }
+
+TEST_CASE("cache acceptance reuses unchanged content and invalidates content or configuration changes") {
+  beatglass::library_detail::SqliteCache cache(":memory:");
+  const beatglass::AnalysisIdentity unchanged{"sha256:file-v1", "engine-v1", "config-a", "offline"};
+  cache.begin("initial-run", {unchanged.content_hash, unchanged.engine_version, unchanged.configuration_id, unchanged.mode}, "/music/acceptance.wav", beatglass::library::kFileDecoderSnapshot);
+  REQUIRE(cache.publish("initial-run", {unchanged.content_hash, unchanged.engine_version, unchanged.configuration_id, unchanged.mode}, "analysis-v1", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
+
+  const auto reused = beatglass::library::admit_analysis(cache, "reuse-run", unchanged, "/music/acceptance.wav", beatglass::library::kFileDecoderSnapshot);
+  CHECK(reused.cached == std::optional<std::string>{"analysis-v1"});
+  CHECK_FALSE(reused.analysis_reserved);
+
+  const beatglass::AnalysisIdentity changed_content{"sha256:file-v2", "engine-v1", "config-a", "offline"};
+  const auto content_miss = beatglass::library::admit_analysis(cache, "content-change", changed_content, "/music/acceptance.wav", beatglass::library::kFileDecoderSnapshot);
+  CHECK_FALSE(content_miss.cached.has_value());
+  CHECK(content_miss.analysis_reserved);
+
+  const beatglass::AnalysisIdentity changed_configuration{"sha256:file-v1", "engine-v1", "config-b", "offline"};
+  const auto config_miss = beatglass::library::admit_analysis(cache, "config-change", changed_configuration, "/music/acceptance.wav", beatglass::library::kFileDecoderSnapshot);
+  CHECK_FALSE(config_miss.cached.has_value());
+  CHECK(config_miss.analysis_reserved);
+}
 TEST_CASE("analysis operation retains source identity and bounded callback contract") { beatglass::library::AnalysisOperation op; op.source.size_bytes=12; op.identity.mode="offline"; op.serialize=[] { return std::string("result"); }; REQUIRE(op.serialize()=="result"); REQUIRE(op.identity.mode=="offline"); }
 TEST_CASE("analysis source identity includes a selected catalog path") {
   beatglass::library::AnalysisOperation op;
