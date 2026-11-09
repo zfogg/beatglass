@@ -21,6 +21,9 @@ required = ("start", "process", "error", "restart")
 missing = [name for name in required if name not in names]
 if missing:
     raise SystemExit(f"transition evidence missing: {', '.join(missing)}")
+positions = [names.index(name) for name in required]
+if positions != sorted(positions):
+    raise SystemExit("transition lifecycle events are out of order")
 epochs = [event.get("epoch") for event in events if isinstance(event, dict) and event.get("epoch") is not None]
 if any(not isinstance(epoch, int) or isinstance(epoch, bool) or epoch <= 0 for epoch in epochs) or epochs != sorted(epochs):
     raise SystemExit("transition epochs must be positive and monotonic")
