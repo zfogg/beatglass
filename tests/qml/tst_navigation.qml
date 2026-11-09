@@ -1248,4 +1248,14 @@ TestCase {
         verify(findChild(app, "clickThrough").activeFocus)
         app.destroy()
     }
+    function test_opacityFocusShortcutRestoresControlWindow() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        let shortcut = findChild(app, "overlayOpacityFocusShortcut")
+        shortcut.activated()
+        compare(app.navigation.currentIndex, 1)
+        verify(app.visible)
+        verify(findChild(app, "overlayOpacity").activeFocus)
+        app.destroy()
+    }
 }
