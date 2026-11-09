@@ -4297,6 +4297,7 @@ ApplicationWindow {
         id: folderPicker
         title: "Choose a folder to browse"
         onAccepted: {
+            window.clearSelectedAudio()
             window.browseFolder = selectedFolder
             search.text = ""
             browser.currentIndex = -1
