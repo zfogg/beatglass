@@ -13,6 +13,7 @@
 | Library batch attention | Source changed before a fresh result could be accepted | Withhold stale output, explain the identity change, and route to verification/retry without mutating files. |
 | Library batch cancellation | User requests cancellation while queued/active work remains | Confirm pending/active/completed counts and stop provisional work without removing accepted results or source files. |
 | Library batch canceled | Pending and active batch work stopped | Summarize canceled/preserved counts, offer queue/browse paths, and preserve files and accepted evidence. |
+| Library batch retry | Canceled/recoverable sources are ready for explicit retry | Show per-source recovery status, verify identity before admission, and publish no evidence until acceptance. |
 | Library import in progress | Folder scan is discovering and checking sources | Show bounded progress, preserve the last catalog snapshot, and make cancellation non-destructive. |
 | Library import complete | Folder scan finished with new, unchanged, and review-needed sources | Summarize identity reuse, offer analysis for new entries, and preserve source files. |
 | Library import review | Scan found unsupported, missing, or unreadable sources | Keep entries recoverable, provide locate/retry/remove actions, and never delete source files implicitly. |
