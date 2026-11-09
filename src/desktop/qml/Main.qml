@@ -959,6 +959,11 @@ ApplicationWindow {
         window.recursiveCatalogRows = []
         window.resetLibraryBrowserSelection("Moved to the parent Library folder; choose an audio source to inspect.")
     }
+    function openLibraryFolderChooser() {
+        window.announceVisualizationRecovery("Choose a Library folder dialog opened.")
+        folderPicker.open()
+        chooseFolder.forceActiveFocus()
+    }
     function toggleLibrarySort(target) {
         window.sortDescending = !window.sortDescending
         window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
@@ -2141,7 +2146,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { id: chooseFolder; text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: { window.announceVisualizationRecovery("Choose a Library folder dialog opened."); folderPicker.open(); chooseFolder.forceActiveFocus() } }
+                    Button { id: chooseFolder; text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: window.openLibraryFolderChooser() }
                     Button {
                         id: addFolderRecursively
                         text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
