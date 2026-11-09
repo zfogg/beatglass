@@ -31,6 +31,14 @@ if not missing:
             for item in inventory if isinstance(item, dict)
         ):
             missing.append("PipeWire Audio/Sink node")
+        else:
+            sink_serials = [
+                str(item["info"]["props"]["object.serial"]).strip()
+                for item in inventory if isinstance(item, dict)
+                and item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink"
+            ]
+            if len(sink_serials) != len(set(sink_serials)):
+                missing.append("unique PipeWire output sink serials")
     except json.JSONDecodeError:
         missing.append("valid pw-dump JSON")
 else:
