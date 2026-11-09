@@ -14,7 +14,8 @@ if matrix.get("commit"):
 lines += ["", "| Platform | Status | Native attempt | Evidence | Pending reason | Blockers |", "| --- | --- | --- | --- | --- | --- |"]
 for name, entry in matrix["platforms"].items():
     evidence = ", ".join(f"`{item}`" for item in entry.get("evidence", [])) or "—"
-    reason = entry.get("pending_reason", "—")
+    evidence = evidence.replace("|", "\\|")
+    reason = str(entry.get("pending_reason", "—")).replace("|", "\\|")
     attempted = "yes" if entry.get("native_execution_attempted") else "no"
     blockers = ", ".join(entry.get("execution_blockers", [])) or "—"
     blockers = blockers.replace("|", "\\|")
