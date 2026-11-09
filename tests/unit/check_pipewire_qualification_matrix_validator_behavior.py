@@ -32,4 +32,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid evidence path" not in result.stderr + result.stdout:
         raise SystemExit("invalid evidence path was accepted")
-print("PipeWire qualification matrix validator behavior passed (4 scenarios)")
+    invalid["platforms"]["Windows"]["evidence"] = ["evidence\u0001.zip"]
+    path.write_text(json.dumps(invalid), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid evidence path" not in result.stderr + result.stdout:
+        raise SystemExit("control-character evidence path was accepted")
+print("PipeWire qualification matrix validator behavior passed (5 scenarios)")

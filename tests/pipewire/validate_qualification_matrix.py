@@ -20,7 +20,7 @@ for name, entry in platforms.items():
         raise SystemExit(f"invalid qualification matrix entry: {name}")
     if entry["status"] == "qualified" and not entry["evidence"]:
         raise SystemExit(f"qualified platform has no evidence: {name}")
-    if any(not isinstance(path, str) or not path.strip() for path in entry["evidence"]):
+    if any(not isinstance(path, str) or not path.strip() or any(ord(char) < 32 for char in path) for path in entry["evidence"]):
         raise SystemExit(f"invalid evidence path: {name}")
     if entry["status"] == "pending" and not isinstance(entry.get("pending_reason"), str):
         raise SystemExit(f"pending qualification lacks reason: {name}")
