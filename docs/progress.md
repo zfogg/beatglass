@@ -830,3 +830,5 @@ The retained-settings review action now has a global `Ctrl+Alt+Shift+S` shortcut
 
 In-app overlay shortcut help now documents `Ctrl+Alt+Shift+S` for retained-settings review. Portable coverage is in `python tests/unit/check_overlay_shortcut_help_contract.py`.
 
+The retained-settings review action now changes to “Review recovery settings” with pending-recovery guidance while the native overlay is unavailable. Portable coverage is in `python tests/unit/check_overlay_review_dynamic_contract.py`.
+

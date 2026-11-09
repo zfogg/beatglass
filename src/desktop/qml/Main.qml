@@ -3786,12 +3786,14 @@ ApplicationWindow {
                     Button {
                         objectName: "overlaySettingsRetentionReviewAction"
                         visible: window.overlayBridge !== null
-                        text: "Review retained settings"
+                        text: window.overlayDisplayRecoveryPending ? "Review recovery settings" : "Review retained settings"
                         activeFocusOnTab: true
                         enabled: visible
                         Accessible.name: text
                         Accessible.role: Accessible.Button
-                        Accessible.description: "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings."
+                        Accessible.description: window.overlayDisplayRecoveryPending
+                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending."
+                            : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings."
                         ToolTip.text: Accessible.description
                         onClicked: overlaySettingsRetentionStatus.forceActiveFocus()
                     }
