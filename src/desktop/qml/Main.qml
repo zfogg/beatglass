@@ -74,6 +74,19 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlaySizeFocusShortcut"
+        sequence: "Ctrl+Alt+Z"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            overlaySize.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + ".")
+        }
+    }
+    Shortcut {
         objectName: "overlayClickThroughFocusShortcut"
         sequence: "Ctrl+Alt+K"
         context: Qt.ApplicationShortcut

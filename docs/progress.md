@@ -1,5 +1,8 @@
 # Progress and handoff
 
+`Ctrl+Alt+Z` focuses the overlay size selector and announces the active
+Compact, Medium, or Large preset before keyboard adjustment.
+
 `Ctrl+Alt+K` focuses the overlay click-through control and announces whether
 pointer passthrough is currently enabled or disabled.
 
