@@ -17,4 +17,10 @@ with tempfile.TemporaryDirectory() as directory:
     assert report["schema"] == "pipewire-qualification-v1"
     assert report["verified"] is True
     assert set(report["files"]) == set(names)
+    incomplete = artifact / "incomplete"
+    incomplete.mkdir()
+    result = subprocess.run([sys.executable, str(validator), str(incomplete), "--json"])
+    assert result.returncode == 1
+missing = subprocess.run([sys.executable, str(validator), str(Path(directory) / "missing"), "--json"])
+assert missing.returncode == 2
 print("PipeWire artifact validator JSON behavior verified")
