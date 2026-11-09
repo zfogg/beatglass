@@ -1,5 +1,12 @@
 # Progress and handoff
 
+The PipeWire monitor boundary now has a real bounded stream transport using the
+existing preallocated SPSC `CaptureFifo`: callback-side push is nonblocking and
+allocation-free, control-side pop owns blocks, stop closes admission, and FIFO
+overflow remains observable for discontinuity/reacquisition handling. Native
+`pw_stream` event wiring remains the next platform-specific step. Portable
+coverage is in `python tests/unit/check_pipewire_stream_transport_contract.py`.
+
 Linux now has an explicit `MonitorBackend` boundary for PipeWire output
 capture. The provisional adapter wires bounded sink discovery into that
 control-thread seam and documents epoch, ownership, stop/quiescence, and
