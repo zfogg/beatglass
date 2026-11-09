@@ -6,7 +6,7 @@ This is a static, illustrative design specification, not the native application.
 
 From this directory, run `npm ci`, then `npm run render` to write 60 PNGs to the ignored `output/` directory. `npm run render -- path/to/directory` writes there instead. Chrome is expected at `C:/Program Files/Google/Chrome/Application/chrome.exe`; set `CHROME_PATH` to a Chromium-compatible executable elsewhere. Open `index.html?screen=library&theme=light` directly in a browser; change the query parameters to any screen and theme below. `npm run check` checks content and desktop overflow, not functional interaction or accessibility compliance.
 
-Screens: `library`, `library-empty`, `library-filter-empty`, `library-storage-recovery`, `track`, `jobs`, `jobs-empty`, `dj`, `dj-recovery`, `overlay`, `overlay-context`, `settings`, `recovery`. Themes: `light`, `dark`, `contrast`, `purple`, `blue`, `yellow`. `snapshots/` contains the tracked 1440×960 reference renders. The overlay-in-context image shows an illustrative DJ application behind the floating panel; it is not a screenshot of a real DJ application.
+Screens: `library`, `library-empty`, `library-filter-empty`, `library-storage-recovery`, `track`, `jobs`, `jobs-empty`, `dj`, `dj-recovery`, `dj-permission`, `overlay`, `overlay-context`, `settings`, `recovery`. Themes: `light`, `dark`, `contrast`, `purple`, `blue`, `yellow`. `snapshots/` contains the tracked 1440×960 reference renders. The overlay-in-context image shows an illustrative DJ application behind the floating panel; it is not a screenshot of a real DJ application.
 
 ## Files
 
