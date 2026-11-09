@@ -507,6 +507,10 @@ ApplicationWindow {
         window.overlayDisplaySelectionRequired = false
         if (window.overlayDisplayRecoveryPending) {
             window.overlayDisplayRecoveryPending = false
+            if (window.overlayHiddenByUser) {
+                window.announceCaptureRecoveryState("DJ overlay display recovered; it remains hidden by user request. Use Restore overlay when ready.")
+                return true
+            }
             if (!window.overlayBridge.showOverlay()) {
                 window.overlayDisplayRecoveryPending = true
                 window.restoreOverlayFallbackControls("DJ overlay could not be restored after display recovery; choose another display or retry.")
