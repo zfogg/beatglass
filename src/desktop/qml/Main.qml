@@ -3668,8 +3668,8 @@ ApplicationWindow {
                         Accessible.value: visible ? text : ""
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.liveBridge.status === "Tracking"
-                            ? text + ". Estimates are attributed to the monitored combined output."
-                            : visible ? text + ". The overlay remains available while capture recovers." : text
+                            ? text + ". Estimates are attributed to the monitored combined output." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
+                            : visible ? text + ". The overlay remains available while capture recovers; the selected endpoint remains retained." : text
                         ToolTip.text: visible ? Accessible.description : "Overlay monitoring state"
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
