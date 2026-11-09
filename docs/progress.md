@@ -866,3 +866,5 @@ In-app shortcut help now documents Ctrl+Alt+Shift+M for overlay summary review. 
 
 Shortcut help now exposes summary-review capability in its accessible value. Portable coverage is in `python tests/unit/check_overlay_summary_help_state_contract.py`.
 
+Overlay summary shortcut announcements now include settings revision and pending recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_shortcut_revision_contract.py`.
+
