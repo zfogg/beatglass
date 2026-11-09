@@ -72,6 +72,26 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlaySizeShortcut"
+        sequence: "Ctrl+Alt+O"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            const sizes = [[250, 110], [310, 130], [430, 180]]
+            const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
+            const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
+            if (resized) {
+                window.overlayPreferredSizeIndex = nextIndex
+                window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
+            } else {
+                window.syncOverlaySettingsStateFromBridge()
+                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
+            }
+        }
+    }
+    Shortcut {
         objectName: "playbackPauseShortcut"
         sequence: "Ctrl+Alt+Space"
         context: Qt.ApplicationShortcut
