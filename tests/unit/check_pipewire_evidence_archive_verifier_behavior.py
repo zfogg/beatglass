@@ -99,4 +99,18 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=malformed_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(malformed)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed tests count" not in result.stderr + result.stdout: raise SystemExit("malformed JUnit count was accepted")
-print("PipeWire evidence archive verifier behavior passed (9 scenarios)")
+
+    per_suite = root / "per-suite-count.zip"
+    per_suite_junit = b"<testsuites tests='2'><testsuite tests='2'><testcase name='capture'/></testsuite><testsuite tests='0'><testcase name='other'/></testsuite></testsuites>\n"
+    per_suite_summary = dict(json.loads(summary), native_test_count=2, native_junit_test_count=2, native_junit_sha256=hashlib.sha256(per_suite_junit).hexdigest())
+    per_suite_discovery = b'{"tests": [{"name": "capture"}, {"name": "other"}]}\n'
+    per_suite_summary["native_discovery_sha256"] = hashlib.sha256(per_suite_discovery).hexdigest()
+    per_suite_summary["native_test_discovery"] = {"count": 2, "tests": [{"name": "capture"}, {"name": "other"}]}
+    per_suite_artifacts = {"native-summary.json": (json.dumps(per_suite_summary) + "\n").encode(), "pipewire-tests-discovery.json": per_suite_discovery, "pipewire-tests.xml": per_suite_junit}
+    per_suite_entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in per_suite_artifacts.items()]
+    with zipfile.ZipFile(per_suite, "w") as archive:
+        for name, data in per_suite_artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=per_suite_entries)))
+    result = subprocess.run([sys.executable, str(verifier), str(per_suite)], capture_output=True, text=True)
+    if result.returncode == 0 or "does not match its testcases" not in result.stderr + result.stdout: raise SystemExit("per-suite JUnit count mismatch was accepted")
+print("PipeWire evidence archive verifier behavior passed (10 scenarios)")
