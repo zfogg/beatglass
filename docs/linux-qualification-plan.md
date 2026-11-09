@@ -73,7 +73,7 @@ manifests cannot under-report or over-report the evidence they contain.
 Scenario evidence digest maps must reference only `PASS` scenarios and contain
 valid SHA-256 values present in the retained artifact inventory. Artifact paths
 must be unique within a platform bundle and every artifact must declare a
-non-empty provenance role.
+non-empty provenance role and hexadecimal SHA-256 digest.
 Each platform entry must also identify the capture environment and include an
 ISO-8601 capture timestamp with timezone, so evidence cannot be detached from
 its host run or interpreted in an unknown clock context. When a report declares
