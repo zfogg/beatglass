@@ -1989,7 +1989,7 @@ ApplicationWindow {
                                 event.accepted = true
                             }
                         }
-                        Keys.onEscapePressed: { window.clearSelectedAudio(); search.text = ""; browser.currentIndex = -1; search.forceActiveFocus(); window.announceVisualizationRecovery("Library selection and filter cleared; all folder entries are visible.") }
+                        Keys.onEscapePressed: { window.clearSelectedAudio(); search.text = ""; browser.currentIndex = -1; search.forceActiveFocus(); window.announceVisualizationRecovery("Library selection and filter cleared; all folder entries are visible."); event.accepted = true }
                         ScrollBar.vertical: ScrollBar {}
                         delegate: ItemDelegate {
                             required property int index
