@@ -58,6 +58,8 @@ Bundle validation also requires a supported host identity and, when present,
 non-empty source commit provenance before the handoff is accepted.
 The rendered report must repeat the matrix host identity, preventing a report
 from being paired with evidence from another machine.
+When commit provenance is available, the report must repeat that identity too;
+native evidence is still explicitly pending until a host supplies a run.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons

@@ -8,7 +8,10 @@ if len(sys.argv) != 3:
 matrix = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 if matrix.get("schema") != "beatglass-native-qualification-matrix-v1":
     raise SystemExit("invalid qualification matrix schema")
-lines = ["# Native qualification matrix", "", f"Host: `{matrix.get('host_os', 'unknown')}`", "", "| Platform | Status | Evidence | Pending reason |", "| --- | --- | --- | --- |"]
+lines = ["# Native qualification matrix", "", f"Host: `{matrix.get('host_os', 'unknown')}`"]
+if matrix.get("commit"):
+    lines.append(f"Commit: `{matrix['commit']}`")
+lines += ["", "| Platform | Status | Evidence | Pending reason |", "| --- | --- | --- | --- |"]
 for name, entry in matrix["platforms"].items():
     evidence = ", ".join(f"`{item}`" for item in entry.get("evidence", [])) or "—"
     reason = entry.get("pending_reason", "—")
