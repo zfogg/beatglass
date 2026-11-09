@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire discovery now pairs each control-thread `pw_init` with scoped
+`pw_deinit`, including early loop/context/registry failures, preventing global
+PipeWire runtime leaks across repeated discovery. Portable coverage is in
+`python tests/unit/check_pipewire_shutdown_contract.py`.
+
 Core Audio stop requests made during PCM delivery now return typed `busy`
 status with an actionable diagnostic instead of a silent false result.
 Portable coverage is in
