@@ -235,3 +235,6 @@ Retained-settings review remains available after the user hides the overlay: rev
 
 After reviewing retained settings following Hide, Restore overlay remains an explicit action: it relaunches using the same saved display and geometry and clears only the user-hidden marker.
 
+
+Reapply saved settings is also available from the retained review after Hide; it uses the same saved display and geometry, clears the hidden marker only after a successful native restore, and keeps the fallback visible on failure.
+
