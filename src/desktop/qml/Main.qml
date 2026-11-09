@@ -2527,7 +2527,7 @@ ApplicationWindow {
                                       + (typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== "" ? (" · recovery: " + storageRecovery.analysisError) : "")) : ""
                                 Accessible.name: "Analysis queue progress"
                                 Accessible.value: visible ? text : ""
-                                Accessible.description: visible ? "Live worker progress and retry state: " + text : "Analysis queue progress is unavailable."
+                                Accessible.description: visible ? "Live worker progress and retry state: " + text + ". Use Cancel, Retry, or discard recovery according to the reported state." : "Analysis queue progress is unavailable."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
