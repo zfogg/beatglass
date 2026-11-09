@@ -41,6 +41,8 @@ with zipfile.ZipFile(archive_path) as archive:
     summary_names = [name for name in declared if name.endswith(".json") and "summary" in name]
     if len(summary_names) != 1 or json.loads(archive.read(summary_names[0])).get("commit") != manifest.get("commit"):
         raise SystemExit("manifest commit does not match qualification summary")
+    if not any((name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml") for name in declared):
+        raise SystemExit("evidence archive has no JUnit results")
     for artifact in artifacts:
         name = artifact["name"]
         if name not in names:
