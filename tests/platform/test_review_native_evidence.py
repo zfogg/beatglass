@@ -68,3 +68,20 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertIn("linux:invalid manifest identity", result["blockers"])
             self.assertIn("linux:missing qualification command", result["blockers"])
+
+    def test_qualification_output_must_match_retained_artifact(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            payload = {"platforms": [{"platform": "linux", "manifest_platform": "linux",
+                                      "commit": "0" * 40, "provenance_complete": True,
+                                      "manifest_sha256": "0" * 64,
+                                      "qualification_command": "native-runner",
+                                      "qualification_output": "capture.txt",
+                                      "qualification_output_sha256": "1" * 64,
+                                      "retained_artifacts": 1,
+                                      "artifact_inventory": [{"path": "capture.txt", "sha256": "2" * 64,
+                                                               "hash_valid": True, "bytes": 4}],
+                                      "scenarios": [{"id": scenario, "status": "UNRUN"} for scenario in review.REQUIRED]}]}
+            report.write_text(__import__("json").dumps(payload))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:qualification output linkage mismatch", result["blockers"])

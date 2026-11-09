@@ -40,6 +40,11 @@ def assess(report_path: Path, reviewer: str) -> dict:
                         artifact["bytes"] <= 0):
                     blockers.append(f"{name}:invalid artifact provenance")
                     break
+            output = platform.get("qualification_output")
+            output_sha = platform.get("qualification_output_sha256")
+            matching = next((item for item in inventory if isinstance(item, dict) and item.get("path") == output), None)
+            if not matching or matching.get("sha256") != output_sha:
+                blockers.append(f"{name}:qualification output linkage mismatch")
         scenarios = {row.get("id"): row for row in platform.get("scenarios", []) if isinstance(row, dict)}
         if set(scenarios) != REQUIRED:
             blockers.append(f"{name}:scenario inventory incomplete")
