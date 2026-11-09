@@ -1100,6 +1100,19 @@ TestCase {
         compare(ring.border.color, app.themeAccentColors[4])
         app.destroy()
     }
+    function test_externalThemeChangeAnnouncesMotionMode() {
+        fakeThemePreferences.themeIndex = 4
+        fakeThemePreferences.reduceMotion = true
+        let app = shellWithPreferences.createObject(null)
+        fakeThemePreferences.themeIndex = 5
+        tryCompare(app, "selectedTheme", "Yellow")
+        compare(findChild(app, "themePreferenceAnnouncement").text, "Theme preference restored: Yellow (reduced motion).")
+        fakeThemePreferences.reduceMotion = false
+        compare(findChild(app, "themePreferenceAnnouncement").text, "Reduced motion disabled; standard presentation transitions restored.")
+        app.destroy()
+        fakeThemePreferences.themeIndex = 0
+    }
+
     function test_themeSelectionFollowsExternalPreferenceChanges() {
         fakeThemePreferences.themeIndex = 0
         let app = shellWithPreferences.createObject(null)
