@@ -953,5 +953,7 @@ Visualization playback epoch tooltip now includes overlay recovery readiness. Po
 
 Visualization analysis handoff tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_handoff_tooltip_contract.py`.
 
+Visualization device recovery tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_device_tooltip_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
