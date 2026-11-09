@@ -144,6 +144,7 @@ screenshots.
 | [Native permission pending](overlay-native-permission-pending-card.svg) | explicit native window permission request |
 | [Native permission granted](overlay-native-permission-granted-card.svg) | ready native overlay after permission |
 | [Native permission revoked](overlay-native-permission-revoked-card.svg) | safe paused overlay when permission is lost |
+| [Native permission restored](overlay-native-permission-restored-card.svg) | resumed overlay after permission recovery |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
