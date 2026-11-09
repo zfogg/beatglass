@@ -7,5 +7,5 @@ assert "virtual void stop() noexcept = 0;" in h
 assert "lib/capture/pipewire/stream_owner.cpp" in c
 source = (root / "lib/capture/pipewire/stream_owner.cpp").read_text()
 assert "class UnavailableStreamOwner final" in source
-assert "std::make_unique<UnavailableStreamOwner>()" in source
+assert "handoff.on_error(-ENOSYS);" in source
 print("PipeWire native stream owner seam verified (3 checks)")
