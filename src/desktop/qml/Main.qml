@@ -1451,7 +1451,7 @@ ApplicationWindow {
                             text: window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? "Analysis freshness: source-linked analysis complete." : "Analysis freshness: waiting for source-linked analysis evidence."
                             Accessible.name: "Analysis freshness: " + text
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
@@ -1463,7 +1463,7 @@ ApplicationWindow {
                                   : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · " + window.metadataStatus
                             Accessible.name: "Selected source workflow status"
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
@@ -1473,7 +1473,8 @@ ApplicationWindow {
                                 objectName: "analysisProgress"
                                 Accessible.name: "Analysis progress: " + text
                                 ToolTip.text: "Current analysis progress and observed frame count"
-                                Accessible.role: Accessible.StaticText
+                                Accessible.value: text
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
