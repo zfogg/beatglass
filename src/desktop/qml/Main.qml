@@ -74,6 +74,19 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayClickThroughFocusShortcut"
+        sequence: "Ctrl+Alt+K"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            clickThroughToggle.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay click-through control focused; current mode is " + (window.overlayBridge.clickThrough ? "enabled" : "disabled") + ".")
+        }
+    }
+    Shortcut {
         objectName: "overlayOpacityFocusShortcut"
         sequence: "Ctrl+Alt+L"
         context: Qt.ApplicationShortcut
