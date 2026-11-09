@@ -491,12 +491,14 @@ ApplicationWindow {
         if (savedIndex < 0 || savedIndex >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            overlayDisplay.forceActiveFocus()
             return false
         }
         if (!window.overlayBridge.moveToScreen(savedIndex)
                 || !window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied.")
+            overlayDisplay.forceActiveFocus()
             return false
         }
         window.overlayPreferredScreenIndex = savedIndex
@@ -527,6 +529,7 @@ ApplicationWindow {
             window.show()
             window.raise()
             window.requestActivate()
+            overlayDisplay.forceActiveFocus()
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
@@ -535,6 +538,7 @@ ApplicationWindow {
             window.show()
             window.raise()
             window.requestActivate()
+            overlayDisplay.forceActiveFocus()
             return false
         }
         window.overlayPreferredScreenIndex = index
