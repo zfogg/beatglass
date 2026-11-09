@@ -86,6 +86,8 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit("qualification summary has invalid source date epoch")
         if summary_epoch != manifest["source_date_epoch"]:
             raise SystemExit("manifest source date epoch does not match qualification summary")
+    if "archive_timestamp_utc" in summary_data and summary_data["archive_timestamp_utc"] != manifest["archive_timestamp_utc"]:
+        raise SystemExit("manifest archive timestamp does not match qualification summary")
     if "platform" in summary_data and (not isinstance(summary_data["platform"], str) or not summary_data["platform"].strip()):
         raise SystemExit("qualification summary has invalid platform identity")
     if "platform" in manifest and (not isinstance(manifest["platform"], str) or not manifest["platform"].strip()):

@@ -6,7 +6,7 @@ markers = ("zipfile", "evidence-manifest.json", "qualified", "size", "sha256", "
 missing = [marker for marker in markers if marker not in source]
 if "malformed manifest artifact name" not in source:
     raise SystemExit("missing archive-verifier contract marker: malformed manifest artifact name")
-for marker in ("invalid capture plan provenance", "capture plan is not archived", "capture plan digest provenance mismatch", "summary capture plan path does not match archive", "summary capture plan digest does not match archive", "archive timestamp does not match source date epoch", "unrepresentable source date epoch", "manifest source date epoch does not match qualification summary", "qualification summary has invalid source date epoch"):
+for marker in ("invalid capture plan provenance", "capture plan is not archived", "capture plan digest provenance mismatch", "summary capture plan path does not match archive", "summary capture plan digest does not match archive", "archive timestamp does not match source date epoch", "unrepresentable source date epoch", "manifest source date epoch does not match qualification summary", "qualification summary has invalid source date epoch", "manifest archive timestamp does not match qualification summary"):
     if marker not in source:
         raise SystemExit(f"missing capture-plan archive marker: {marker}")
 if missing:
