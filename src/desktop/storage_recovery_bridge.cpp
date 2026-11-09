@@ -191,6 +191,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
+    analysisStatus_ = hit ? QStringLiteral("Cached analysis ready") : QStringLiteral("Cache lookup complete"); emit analysisStatusChanged();
     if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); }
     if (analysisAdmission_) { analysisAdmission_ = false; emit analysisAdmissionChanged(); }
     if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
