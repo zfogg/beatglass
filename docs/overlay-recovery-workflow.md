@@ -133,3 +133,6 @@ native desktop screenshots remain required evidence for platform qualification.
 
 The saved display identity is restored by name rather than only by its old index, and a successful recovery announcement names the display that was reconnected. This keeps display continuity understandable when the operating system reorders screens after reconnecting them.
 
+
+Persisted geometry is restored with the saved display and included in the successful recovery announcement as width and height. This gives keyboard and assistive-technology users confirmation that the overlay returned at its saved size, not merely that the native window reopened.
+

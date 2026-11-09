@@ -61,7 +61,7 @@ TestCase {
         property string displayName: "Display"
         property int screenIndex: -1
         property int selectedScreen: -1
-        property int requestedWidth: 0
+        property int requestedWidth: 0`n        property int requestedHeight: 0`n        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
         property bool refuseClickThrough: false
         property bool refuseUnlock: false
         function attach(overlay, control) { attaches++; return true }
@@ -70,7 +70,7 @@ TestCase {
         function setClickThrough(value) { if ((value && refuseClickThrough) || (!value && refuseUnlock)) return false; clickThrough = value; return true }
         function setOpacity(value) { opacity = value }
         function moveToScreen(index) { selectedScreen = index; screenIndex = index; displayName = screenNames[index]; return true }
-        function resizeOverlay(width, height) { requestedWidth = width; return true }
+        function resizeOverlay(width, height) { requestedWidth = width; requestedHeight = height; geometry = ({ x: geometry.x, y: geometry.y, width: width, height: height }); return true }
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
     Component { id: shellWithPlayback; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackBridge: fakePlayback } }
@@ -1351,5 +1351,16 @@ TestCase {
         app.destroy()
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
+    }
+    function test_persistedGeometrySurvivesVisualRecovery() {
+        fakeOverlay.available = true
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        let app = shellWithOverlay.createObject(null)
+        app.overlayDisplayRecoveryPending = true
+        verify(app.recoverOverlayAfterDisplayChange())
+        compare(fakeOverlay.requestedWidth, 620)
+        compare(fakeOverlay.requestedHeight, 280)
+        verify(app.overlayRecoveryAnnouncement.indexOf("620 by 280") >= 0)
+        app.destroy()
     }
 }
