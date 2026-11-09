@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">No native overlay display available</title>
+  <desc id="desc">An empty display picker explains that no outputs are currently available and keeps monitoring in a safe retained state.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <text x="96" y="112" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">No display available</text>
+  <text x="96" y="144" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Connect or enable a display to place the native overlay.</text>
+  <rect x="96" y="182" width="728" height="112" rx="16" fill="#17243c"/>
+  <circle cx="130" cy="226" r="10" fill="#f2b84b"/>
+  <text x="154" y="225" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Overlay safely retained</text>
+  <text x="154" y="254" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Monitoring continues without a native window.</text>
+  <text x="154" y="280" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Saved placement, size, opacity, and theme are unchanged.</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">Reconnect a display, then return here to try again.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">No audio files or tags are changed while the overlay is unavailable.</text>
+  <rect x="96" y="438" width="202" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="197" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Refresh displays</text>
+  <rect x="316" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="393" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Keep monitoring</text>
+</svg>
