@@ -24,6 +24,9 @@ announced as a numbered attempt. The count resets when a native bridge or
 compatible display becomes available, so retry feedback stays bounded and
 does not imply that capture itself was restarted.
 
+Recovery permits three attempts before the retry action enters a safe-mode
+state. Reconnect a display or change recovery settings to leave that state.
+
 ## Screenshot qualification
 
 When desktop rendering is available, capture these states at the standard desktop

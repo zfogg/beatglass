@@ -2,7 +2,7 @@ from pathlib import Path
 
 qml = Path("src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 start = qml.index('objectName: "retryOverlay"')
-block = qml[start:start + 1800]
+block = qml[start:start + 3200]
 assert 'DJ overlay retry requested' in block
 assert 'window.showOverlayAndHideControls()' in block
 assert 'overlayDisplayStatus.forceActiveFocus()' in block
