@@ -283,3 +283,6 @@ When a user-hidden overlay reconnects, the recovery announcement confirms its pe
 
 When persisted geometry is unavailable, the fallback announcement names the saved display whose visual state needs attention, so users know which destination requires correction before retrying.
 
+
+Choosing a valid replacement display is an explicit recovery boundary: persisted geometry and opacity are reapplied, stale selection/fallback markers clear, and Show, Restore, and Reapply become available for that destination.
+
