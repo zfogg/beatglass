@@ -146,6 +146,7 @@ screenshots.
 | [Native permission revoked](overlay-native-permission-revoked-card.svg) | safe paused overlay when permission is lost |
 | [Native permission restored](overlay-native-permission-restored-card.svg) | resumed overlay after permission recovery |
 | [Native permission denied](overlay-native-permission-denied-card.svg) | safe mode when native permission is denied |
+| [Native safe mode](overlay-native-safe-mode-card.svg) | continued session without native overlay activation |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
