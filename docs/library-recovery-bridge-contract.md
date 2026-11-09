@@ -30,3 +30,5 @@ Calling `open()` again while `storageOpen` is true is rejected with `Storage
 already open`; callers must close or change the configured path first.
 Calling `close()` while no storage is open reports `Storage already closed`
 without enqueueing redundant worker work.
+`storageTransitionPending` is true only while an asynchronous open/close is in
+flight, allowing consumers to disable duplicate lifecycle actions safely.
