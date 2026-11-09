@@ -20,6 +20,8 @@ Storage bridge disconnects are an explicit recovery boundary: `Storage closed` a
 
 On reopen, `Opening storage` clears the same keys and marks a pending restoration. The real `retryableRunsChanged` refresh completion then announces the reopened run count, focuses the selector when runs exist, or returns focus to Library with an explicit empty-state announcement.
 
+While `storageReopenPending` is true, the selector, Retry, and Discard controls remain disabled even if a stale binding briefly reports an identity. They become actionable only after the refreshed retryable-run list completes, so keyboard shortcuts cannot act against a disconnected bridge.
+
 The C++ storage bridge now resets active analysis retryability, progress, result, and lifecycle status before reopening. Reopen cannot leave a stale active-job Retry enabled while persisted runs are being refreshed; the subsequent worker refresh repopulates only current retryable identities.
 
 Reopen also clears the bridge's prior `analysisReserved` and `analysisAdmissionResult` values before dispatching the open request. Queue admission text is therefore scoped to the prior connection and cannot be mistaken for a fresh reservation after reconnect.
