@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire discovery now rejects whitespace-only node names as well as malformed
+serials, ensuring every surfaced sink has a usable display identity. Portable
+coverage is in
+`python tests/unit/check_pipewire_sink_name_validation_contract.py`.
+
 PipeWire registry discovery now rejects whitespace-only node serials before
 adding sinks, preventing malformed identities from entering source selection.
 Portable coverage is in
