@@ -78,4 +78,5 @@ The verifier also cross-checks the manifest commit against the archived summary
 commit, preventing evidence from being relabeled under a different build.
 The portable behavior fixture can be run with
 `python tests/unit/check_pipewire_evidence_archive_verifier_behavior.py`; it
-checks a valid archive plus rejection of unlisted, tampered, and duplicate-entry artifacts.
+checks a valid archive plus rejection of unlisted, tampered, duplicate-entry,
+and traversal-style artifacts.
