@@ -1065,6 +1065,7 @@ ApplicationWindow {
         window.syncOverlaySettingsStateFromBridge()
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
+        window.overlaySettingsRevision += 1
         window.overlayDisplaySelectionRequired = false
         window.overlayDisplayRecoveryPending = false
         window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.")
