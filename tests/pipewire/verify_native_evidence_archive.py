@@ -37,7 +37,8 @@ with zipfile.ZipFile(archive_path) as archive:
     if not isinstance(manifest.get("commit"), str) or not manifest["commit"].strip():
         raise SystemExit("evidence manifest has no commit identity")
     if (not isinstance(manifest.get("source_date_epoch"), int) or isinstance(manifest.get("source_date_epoch"), bool) or
-            manifest["source_date_epoch"] < 0 or not manifest.get("archive_timestamp_utc", "").endswith("Z")):
+            manifest["source_date_epoch"] < 0 or not isinstance(manifest.get("archive_timestamp_utc"), str) or
+            not manifest["archive_timestamp_utc"].endswith("Z")):
         raise SystemExit("evidence manifest has invalid reproducibility metadata")
     try:
         datetime.fromisoformat(manifest["archive_timestamp_utc"][:-1])

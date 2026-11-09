@@ -196,4 +196,10 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=boolean_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(boolean_size)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed artifact metadata" not in result.stderr + result.stdout: raise SystemExit("boolean artifact size was accepted")
-print("PipeWire evidence archive verifier behavior passed (20 scenarios)")
+    nonstring_timestamp = root / "nonstring-timestamp.zip"
+    with zipfile.ZipFile(nonstring_timestamp, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, archive_timestamp_utc=123)))
+    result = subprocess.run([sys.executable, str(verifier), str(nonstring_timestamp)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid reproducibility metadata" not in result.stderr + result.stdout: raise SystemExit("non-string archive timestamp was accepted")
+print("PipeWire evidence archive verifier behavior passed (21 scenarios)")
