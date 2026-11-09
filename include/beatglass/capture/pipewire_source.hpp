@@ -37,6 +37,8 @@ public:
   /** Restart the selected stream with a fresh epoch and negotiated format. */
   virtual bool restart_stream(std::uint64_t epoch, std::uint32_t sample_rate,
                               std::uint32_t channels) = 0;
+  /** Return the currently selected sink serial, or an empty value when stopped. */
+  virtual std::string selected_serial() const = 0;
   /** Pop one bounded block on the control thread after start_stream succeeds. */
   virtual bool pop(coreaudio::CaptureBlock& block) noexcept = 0;
   virtual MonitorStatus poll_status() noexcept = 0;
