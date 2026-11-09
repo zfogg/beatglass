@@ -222,10 +222,10 @@ void StorageRecoveryBridge::discardRuns(const QStringList& ids) { if (worker_) Q
 void StorageRecoveryBridge::discardSelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (worker_ && !selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::retrySelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (worker_ && !selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::findCached(QString content, QString engine, QString configuration, QString mode) {
-  if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+  if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
 }
 void StorageRecoveryBridge::invalidateCached(QString content, QString engine, QString configuration, QString mode) {
-  if (worker_) QMetaObject::invokeMethod(worker_, "invalidateCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+  if (worker_) QMetaObject::invokeMethod(worker_, "invalidateCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
 }
 void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
   if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
