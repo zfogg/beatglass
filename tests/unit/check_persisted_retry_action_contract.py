@@ -102,6 +102,8 @@ if 'Analysis rejected: storage is not open' not in source:
     raise SystemExit("Analysis submission must reject closed storage before queueing worker work")
 if 'Analysis admission rejected: storage is not open' not in source:
     raise SystemExit("Analysis admission must reject closed storage before queueing worker work")
+if 'Analysis admission rejected: complete analysis identity is required' not in source:
+    raise SystemExit("Analysis admission must reject incomplete identities")
 if 'Analysis cancellation rejected: storage is not open' not in source or 'Analysis retry rejected: storage is not open' not in source:
     raise SystemExit("Analysis lifecycle actions must reject closed storage before queueing worker work")
 if 'Analysis rejected: content identity is required' not in source or 'Analysis admission rejected: content identity is required' not in source:
