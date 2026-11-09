@@ -17,6 +17,11 @@ Until those steps are run on Linux, native PipeWire qualification is unrun.
 
 ## Adapter seam preflight
 
+Run `ctest --test-dir build -R pipewire_linux_native_prerequisites
+--output-on-failure` first. On Windows this is a safe pending preflight; on
+Linux it verifies `pkg-config` can resolve `libpipewire-0.3` and gives the
+install/configure guidance when headers are missing.
+
 Before the native run, configure with `-DBUILD_TESTING=ON` and run
 `ctest --test-dir build -R pipewire_linux_adapter_seam_contract --output-on-failure`.
 This verifies that the Linux-gated PipeWire/SPA translation unit, callback
