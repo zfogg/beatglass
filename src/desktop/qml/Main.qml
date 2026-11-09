@@ -74,6 +74,25 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayClickThroughShortcut"
+        sequence: "Ctrl+Alt+I"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            const requested = !window.overlayBridge.clickThrough
+            const applied = window.overlayBridge.setClickThrough(requested)
+            if (!applied) {
+                window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active.")
+                return
+            }
+            window.announceCaptureRecoveryState(requested
+                ? "DJ overlay click-through enabled; press Escape to unlock interaction."
+                : "DJ overlay interaction restored; keyboard and pointer input are available.")
+        }
+    }
+    Shortcut {
         objectName: "overlayRetryShortcut"
         sequence: "Ctrl+Alt+Y"
         context: Qt.ApplicationShortcut
