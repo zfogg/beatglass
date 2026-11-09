@@ -102,6 +102,8 @@ screenshots.
 | [Folder removed](overlay-library-folder-removed-card.svg) | non-destructive removal confirmation and re-add path |
 | [Theme picker](overlay-theme-picker-card.svg) | readable theme selection with contrast preview |
 | [Theme applied](overlay-theme-applied-card.svg) | saved appearance confirmation with undo |
+| [Opacity control](overlay-opacity-control-card.svg) | live opacity adjustment with contrast guidance |
+| [Opacity applied](overlay-opacity-applied-card.svg) | saved opacity confirmation and change path |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
