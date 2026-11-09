@@ -18,6 +18,9 @@ def validate_inventory_shape(inventory):
         return "inventory entries must retain info.props objects"
     if any(not isinstance(item.get("id"), int) or item["id"] < 0 for item in inventory):
         return "inventory entries must have non-negative ids"
+    ids = [item["id"] for item in inventory]
+    if len(ids) != len(set(ids)):
+        return "inventory object ids must be unique"
     if audio_sink_count(inventory) < 1:
         return "inventory must include an Audio/Sink"
     return None
