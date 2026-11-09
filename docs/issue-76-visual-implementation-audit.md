@@ -84,6 +84,8 @@ Overlay design states are covered by explicit Show, Unlock, Hide, display-change
 
 Hide failure keeps the control window visible, marks recovery pending, and moves keyboard focus to Restore overlay so the user has an immediate recovery action.
 
+Paused display recovery reactivates the control window before focusing Resume recovery, so a tray/taskbar fallback remains visible and keyboard reachable after a monitor reconnect.
+
 Native overlay availability loss returns keyboard focus to the visible Retry overlay action after restoring the control window. This makes bridge/display recovery actionable without requiring pointer input; successful retry continues to the persisted-state restore path.
 Overlay hide, unlock, display replacement, and retry preserve the reduced-motion contract: announcements and accessible state text remain, while motion is suppressed. Focus returns to a recoverable control after overlay/display changes; native multi-monitor and assistive-technology timing remain qualification gaps.
 
