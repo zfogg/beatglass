@@ -15,7 +15,7 @@ def main() -> None:
     assert "retryAnalysis.forceActiveFocus()" in SOURCE
     function = SOURCE[SOURCE.index("function retryVisualizationAnalysis") :]
     assert "announceVisualizationRecovery" in function
-    assert "canRetry" in line
+    assert "canRetry" in SOURCE[SOURCE.index('objectName: "retryAnalysis"') - 260 : SOURCE.index('objectName: "retryAnalysis"') + 200]
 
 
 if __name__ == "__main__":
