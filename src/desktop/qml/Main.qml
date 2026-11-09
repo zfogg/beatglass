@@ -964,6 +964,10 @@ ApplicationWindow {
         folderPicker.open()
         chooseFolder.forceActiveFocus()
     }
+    function handleLibraryFolderChooserRejected() {
+        window.announceVisualizationRecovery("Library folder selection canceled; the current folder remains open.")
+        chooseFolder.forceActiveFocus()
+    }
     function toggleLibrarySort(target) {
         window.sortDescending = !window.sortDescending
         window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
@@ -4851,9 +4855,6 @@ ApplicationWindow {
             window.recursiveCatalogRows = []
             window.resetLibraryBrowserSelection("Library folder selected; choose an audio file to inspect or analyze.")
         }
-        onRejected: {
-            window.announceVisualizationRecovery("Library folder selection canceled; the current folder remains open.")
-            chooseFolder.forceActiveFocus()
-        }
+        onRejected: window.handleLibraryFolderChooserRejected()
     }
 }
