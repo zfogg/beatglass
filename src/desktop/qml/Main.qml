@@ -2350,7 +2350,7 @@ ApplicationWindow {
                             Accessible.name: "Metadata error recovery guidance: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.Status
-                            Accessible.description: text
+                            Accessible.description: text + " Use Retry metadata to try the selected source again, or Clear selection to choose another source."
                             ToolTip.text: "Metadata error recovery guidance"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
