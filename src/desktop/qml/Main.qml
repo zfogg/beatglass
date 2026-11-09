@@ -560,6 +560,7 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        hideOverlay.forceActiveFocus()
     }
     function quitApplication() {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
