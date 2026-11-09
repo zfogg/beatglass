@@ -3243,7 +3243,7 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
-                    Accessible.name: "Visualization empty state"
+                    Accessible.name: "Visualization empty state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
