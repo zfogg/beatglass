@@ -11,6 +11,9 @@ if platform.system() != "Linux":
 missing = []
 if not shutil.which("pkg-config"):
     missing.append("pkg-config")
+for tool in ("pw-cli", "pw-dump"):
+    if not shutil.which(tool):
+        missing.append(tool)
 else:
     result = subprocess.run(["pkg-config", "--exists", "libpipewire-0.3"], check=False)
     if result.returncode:
