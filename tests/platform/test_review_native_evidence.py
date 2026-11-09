@@ -133,3 +133,13 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertIn("report:duplicate platform support status", result["blockers"])
             self.assertIn("report:invalid platform support status", result["blockers"])
+
+    def test_qualified_status_must_match_scenario_inventory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            scenarios = [{"id": scenario, "status": "UNRUN"} for scenario in review.REQUIRED]
+            payload = {"platforms": [{"platform": "linux", "scenarios": scenarios}],
+                       "platform_support_status": [{"platform": "linux", "status": "qualified"}]}
+            report.write_text(__import__("json").dumps(payload))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:qualified status without all scenarios passing", result["blockers"])

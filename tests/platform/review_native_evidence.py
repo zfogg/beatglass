@@ -74,6 +74,12 @@ def assess(report_path: Path, reviewer: str) -> dict:
         scenarios = {row.get("id"): row for row in rows}
         if set(scenarios) != REQUIRED:
             blockers.append(f"{name}:scenario inventory incomplete")
+        support_status = next((item.get("status") for item in support or []
+                               if isinstance(item, dict) and item.get("platform") == name), None)
+        if support_status == "qualified" and any(row.get("status") != "PASS" for row in rows):
+            blockers.append(f"{name}:qualified status without all scenarios passing")
+        if support_status != "qualified" and rows and all(row.get("status") == "PASS" for row in rows):
+            blockers.append(f"{name}:all scenarios pass but platform is not qualified")
         for scenario in sorted(REQUIRED):
             row = scenarios.get(scenario)
             evidence = row.get("evidence") if isinstance(row, dict) else None
