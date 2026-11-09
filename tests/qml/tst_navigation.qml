@@ -1210,6 +1210,7 @@ TestCase {
         verify(unlock.enabled)
         verify(!app.unlockOverlayAndRestoreFocus())
         verify(unlock.activeFocus)
+        verify(findChild(app, "overlayUnlockFailureStatus") !== null)
         app.destroy()
         fakeOverlay.refuseUnlock = false
         fakeOverlay.clickThrough = false
