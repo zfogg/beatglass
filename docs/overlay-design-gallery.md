@@ -126,6 +126,7 @@ screenshots.
 | [Interaction unlocked](overlay-interaction-unlocked-card.svg) | temporary control access with relock path |
 | [Unexpected close](overlay-unexpected-close-card.svg) | native window recovery with preserved state |
 | [Overlay reopened](overlay-reopened-card.svg) | restored native window without session interruption |
+| [Startup recovery](overlay-startup-recovery-card.svg) | native state restoration progress |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
