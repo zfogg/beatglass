@@ -168,6 +168,8 @@ if args.transitions:
     summary["native_transition_event_count"] = len(transition_events)
 summary["qualification_target"] = "Linux/PipeWire"
 summary["handoff_status"] = "complete" if summary["qualified"] else "failed"
+summary["capture_plan"] = str(args.capture_plan) if args.capture_plan else None
+summary["capture_plan_sha256"] = hashlib.sha256(args.capture_plan.read_bytes()).hexdigest() if args.capture_plan and args.capture_plan.is_file() else None
 summary["qualification_matrix_schema"] = "beatglass-native-qualification-matrix-v1"
 summary["qualification_matrix_status"] = "qualified" if summary["qualified"] else "pending"
 if args.summary:
