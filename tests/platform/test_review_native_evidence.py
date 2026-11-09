@@ -301,6 +301,20 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertIn("linux:missing capture timestamp", result["blockers"])
 
+    def test_capture_timestamp_cannot_be_in_the_future(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            payload = {"platforms": [{"platform": "linux", "manifest_platform": "linux",
+                                      "commit": "0" * 40, "provenance_complete": True,
+                                      "manifest_sha256": "0" * 64, "qualification_command": "runner",
+                                      "qualification_output": "capture.txt", "environment": "host",
+                                      "captured_at": "2999-01-01T00:00:00Z", "retained_artifacts": 0,
+                                      "artifact_inventory": [],
+                                      "scenarios": [{"id": scenario, "status": "UNRUN"} for scenario in review.REQUIRED]}]}
+            report.write_text(__import__("json").dumps(payload))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:missing capture timestamp", result["blockers"])
+
     def test_platform_build_commit_must_match_report_identity(self):
         with tempfile.TemporaryDirectory() as directory:
             report = Path(directory) / "report.json"

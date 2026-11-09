@@ -83,5 +83,7 @@ Each platform entry must also identify the capture environment and include an
 ISO-8601 capture timestamp with timezone, so evidence cannot be detached from
 its host run or interpreted in an unknown clock context. When a report declares
 a build commit, every platform entry must use the same commit identity.
+Capture timestamps later than the verifier clock are rejected as impossible
+provenance.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
