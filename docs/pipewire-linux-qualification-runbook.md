@@ -472,3 +472,5 @@ If rendered output and raw matrix JSON disagree, discard the rendering and resol
 Promoted release manifests may remain explicitly pending native qualification; only a qualified status with native commit provenance can represent accepted host evidence.
 
 Release promotion must preserve the explicit native qualification status from the manifest; replacing pending with an unproven qualified claim is invalid.
+
+Synthetic verifier fixtures may exercise qualified-path logic, but they must never be recorded as native host evidence or used to promote a real qualification claim.
