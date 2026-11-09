@@ -3010,6 +3010,21 @@ ApplicationWindow {
                     Layout.minimumWidth: 0
                     wrapMode: Text.WordWrap
                 }
+                Slider {
+                    id: visualizationPositionSlider
+                    objectName: "visualizationPositionSlider"
+                    from: 0; to: 1
+                    value: visualizationCanvas.selectedPosition < 0 ? 0 : visualizationCanvas.selectedPosition
+                    enabled: visualizationCanvas.presentationReady && visualizationCanvas.viewMode === "waveform"
+                    activeFocusOnTab: true
+                    Accessible.name: "Visualization playhead position"
+                    Accessible.value: enabled ? Math.round(value * 100) + "%" : "unavailable"
+                    Accessible.role: Accessible.Slider
+                    Accessible.description: "Choose a time-aligned waveform position before seeking playback."
+                    ToolTip.text: "Choose the waveform playhead position"
+                    onMoved: { visualizationCanvas.selectedPosition = value; visualizationCanvas.requestPaint() }
+                    Layout.fillWidth: true
+                }
                 Button {
                     objectName: "clearVisualizationSelection"
                     activeFocusOnTab: true
