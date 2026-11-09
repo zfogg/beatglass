@@ -39,6 +39,7 @@ For each session, record the exact distribution, kernel, compositor/session vers
 
 - Verify output-device discovery, permission behavior, selected-sink routing, device removal, replacement, and recovery on real hardware.
 - Verify that graph loss, format change, queue overflow, and discontinuity clear published analysis and require a new acquisition epoch.
+- Transition artifacts may include `timestamp_ns` on every event. When present, the validator requires positive integer timestamps for all events in nondecreasing order, preserving capture timing evidence without inventing timestamps for older artifacts.
 - Exercise an X11 session with a real window manager, including stacking, input-shape behavior, monitor/DPI changes, fullscreen applications, and recovery from an off-screen overlay.
 - Exercise GNOME and KDE Wayland sessions separately. Probe layer-shell availability and compositor refusal; fall back to an ordinary compact window when the required capability is absent.
 - Verify that no fallback silently captures a microphone or a different output sink, and that the user can always recover the main controls.
