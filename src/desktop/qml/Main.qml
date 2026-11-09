@@ -220,6 +220,9 @@ ApplicationWindow {
         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             unlockOverlay.forceActiveFocus()
             window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction.")
         }

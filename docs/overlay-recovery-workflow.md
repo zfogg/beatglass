@@ -80,6 +80,9 @@ Changing click-through successfully from the control window applies the same
 transition and clears stale recovery markers.
 The click-through status also prints `Ctrl+Alt+U` next to the Escape guidance,
 making the keyboard path to the Unlock action visible without opening help.
+Using `Ctrl+Alt+U` also restores and activates the control window before focus
+is moved to Unlock overlay, so the action remains reachable when the overlay
+has hidden the controls.
 The reconnect announcement also states that recovery remains paused, so a
 display reconnect cannot silently restart native retries.
 While the display is still unavailable, the paused card separately reports that
