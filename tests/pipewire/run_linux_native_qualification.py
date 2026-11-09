@@ -22,6 +22,9 @@ if platform.system() != "Linux":
                "handoff_status": "pending", "commit": commit or None, "pipewire_version": None,
                "commands": [], "failed_command": None, "qualified": False,
                "pending_reason": "Linux native qualification pending: run on Linux",
+               "requested_summary": str(args.summary) if args.summary else None,
+               "requested_archive": str(args.archive) if args.archive else None,
+               "native_artifacts": [],
                "native_test_discovery": None, "native_test_count": None,
                "native_test_name_match": False, "native_junit_exists": False}
     if args.summary:
@@ -129,6 +132,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit_failures": junit_failures,
            "native_junit_errors": junit_errors,
            "native_junit_skipped": junit_skipped,
+           "native_artifacts": [str(discovery_artifact), str(junit_path)] + ([str(args.transitions)] if args.transitions else []),
            "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and junit_skipped == 0 and discovery_tests is not None and junit_tests is not None and set(discovery_tests) == set(junit_tests) and all(item["returncode"] == 0 for item in results)}
 if args.transitions:
     if not args.transitions.is_file():
