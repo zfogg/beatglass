@@ -22,3 +22,5 @@ reacquisition. Attach logs or recordings for each case; headless CI does not
 replace native desktop/audio qualification.
 
 The runner JSON records native_pipewire_tests separately; qualification requires that target to return zero.
+It also records the manifest capture command's stdout/stderr alongside the
+native command logs.
