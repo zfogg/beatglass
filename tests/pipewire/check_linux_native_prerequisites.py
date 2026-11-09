@@ -16,6 +16,10 @@ else:
     if result.returncode:
         missing.append("libpipewire-0.3 development package")
     else:
+        version = subprocess.run(["pkg-config", "--modversion", "libpipewire-0.3"], check=False,
+                                 stdout=subprocess.PIPE, text=True).stdout.strip()
+        if not version:
+            missing.append("libpipewire-0.3 version metadata")
         for flag in ("--cflags", "--libs"):
             if subprocess.run(["pkg-config", flag, "libpipewire-0.3"], check=False,
                               stdout=subprocess.PIPE, text=True).returncode:
