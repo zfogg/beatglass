@@ -554,7 +554,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryAnalysisFreshnessFocusShortcut"; sequence: "Ctrl+Alt+Shift+0"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisFreshness.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis freshness focused.") } }
     Shortcut { objectName: "libraryAnalysisProvenanceFocusShortcut"; sequence: "Ctrl+Alt+Shift+9"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisProvenance.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis provenance focused.") } }
     Shortcut { objectName: "libraryAnalysisUncertaintyFocusShortcut"; sequence: "Ctrl+Alt+Shift+8"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisUncertainty.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis uncertainty focused.") } }
-    Shortcut { objectName: "libraryAnalysisFailureFocusShortcut"; sequence: "Ctrl+Alt+Shift+7"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisFailureReason.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis failure status focused.") } }
+    Shortcut { objectName: "libraryAnalysisFailureFocusShortcut"; sequence: "Ctrl+Alt+Shift+7"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryAnalysisFailure() }
     Shortcut { objectName: "libraryAnalysisQueueFocusShortcut"; sequence: "Ctrl+Alt+Shift+6"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryAnalysisQueue() }
     Shortcut { objectName: "libraryBatchProgressFocusShortcut"; sequence: "Ctrl+Alt+Shift+5"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchProgress() }
     Shortcut { objectName: "libraryBatchResultFocusShortcut"; sequence: "Ctrl+Alt+Shift+4"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchResult() }
@@ -1064,6 +1064,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         analysisQueueProgress.forceActiveFocus()
         window.announceVisualizationRecovery("Library analysis queue progress focused.")
+    }
+    function focusLibraryAnalysisFailure() {
+        navigation.currentIndex = 0
+        analysisFailureReason.forceActiveFocus()
+        window.announceVisualizationRecovery("Library analysis failure status focused.")
     }
     function focusLibraryBatchProgress() {
         navigation.currentIndex = 0
