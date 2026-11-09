@@ -99,3 +99,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Library batch cache invalidated | Analysis configuration changes invalidate four previously completed identities | Preserve old results, admit fresh runs, and make configuration mismatch visible without mutating source files. |
 
 | Library batch cache complete | Configuration-refresh batch accepts three fresh results, reuses one, and withholds one mismatch | Reconcile fresh/reused/recovery outcomes without stale evidence or source mutation. |
+
+| Library batch cache recovery | One changed source is withheld after configuration-refresh identity mismatch while four outcomes remain preserved | Recover only the affected source, keep stale evidence hidden, and do not disturb accepted/reused batch results. |
