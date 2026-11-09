@@ -4,6 +4,10 @@ This plan records the evidence still required before Linux support can be claime
 
 Retain `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-capture-evidence.json`, `native-recovery-evidence.json`, `native-output-evidence.json`, and `native-display-evidence.json` with each native run.
 
+The Linux runner records an ISO-8601 UTC `captured_at` value and host environment
+metadata in both pending and attempted summaries, so handoffs remain attributable
+even when the native host is unavailable.
+
 ## Runnable preparation checks
 
 - Run `python tests/pipewire/check_linux_native_prerequisites.py --report evidence/linux-pipewire-preflight.json` to record a machine-readable prerequisite result. On non-Linux hosts this exits successfully with `status: pending`; it never claims native capture evidence.
