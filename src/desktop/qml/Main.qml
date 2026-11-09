@@ -1098,6 +1098,9 @@ ApplicationWindow {
         window.selectedName = ""
         window.selectedAudioUrl = ""
         window.metadataStatus = "Choose an audio file to inspect its metadata."
+        window.clearVisualizationForCaptureState("Library selection cleared; choose another source for fresh analysis.")
+        window.announceVisualizationRecovery("Library selection cleared; choose another source for fresh analysis.")
+        browser.forceActiveFocus()
     }
     function clearVisualizationForCaptureState(reason) {
         window.visualizationSelectionResetReason = reason !== undefined ? reason : (window.liveBridge.status === "Error"
