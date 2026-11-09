@@ -832,3 +832,5 @@ In-app overlay shortcut help now documents `Ctrl+Alt+Shift+S` for retained-setti
 
 The retained-settings review action now changes to “Review recovery settings” with pending-recovery guidance while the native overlay is unavailable. Portable coverage is in `python tests/unit/check_overlay_review_dynamic_contract.py`.
 
+The retained-settings review action now exposes a dynamic accessible value for normal retention versus pending recovery. Portable coverage is in `python tests/unit/check_overlay_review_value_contract.py`.
+

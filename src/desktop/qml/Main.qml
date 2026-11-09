@@ -3790,6 +3790,7 @@ ApplicationWindow {
                         activeFocusOnTab: true
                         enabled: visible
                         Accessible.name: text
+                        Accessible.value: window.overlayDisplayRecoveryPending ? "recovery pending" : "settings retained"
                         Accessible.role: Accessible.Button
                         Accessible.description: window.overlayDisplayRecoveryPending
                             ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending."
