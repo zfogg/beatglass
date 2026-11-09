@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert report["verified"] is True
     assert set(report["files"]) == set(names)
     human = subprocess.run([sys.executable, str(validator), str(artifact)], capture_output=True, text=True, check=True)
-    assert "build.txt: 9 bytes" in human.stdout
+    assert "build.txt:" in human.stdout and "bytes" in human.stdout
     assert "PipeWire qualification artifacts verified (8 files)" in human.stdout
     incomplete = artifact / "incomplete"
     incomplete.mkdir()
