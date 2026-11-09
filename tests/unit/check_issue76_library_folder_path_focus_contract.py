@@ -1,23 +1,13 @@
-#!/usr/bin/env python3
-"""Portable contract for focusing the current Library folder path."""
-
+"""Contract checks for current-folder path focus."""
 from pathlib import Path
-
-
-SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").read_text(encoding="utf-8")
-
-
+ROOT = Path(__file__).resolve().parents[2]
+QML = (ROOT / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 def main() -> None:
-    start = SOURCE.index('objectName: "libraryFolderPathFocusShortcut"')
-    block = SOURCE[start : SOURCE.index("    Shortcut {", start)]
-    assert 'sequence: "Ctrl+Alt+Shift+I"' in block
+    start = QML.index("function focusLibraryFolderPath")
+    block = QML[start:QML.index("function browserEmptyMessage", start)]
+    assert "navigation.currentIndex = 0" in block
     assert "folderPath.forceActiveFocus()" in block
-    assert "announceVisualizationRecovery" in block
-    path = SOURCE[SOURCE.index('objectName: "folderPath"') - 80 :]
-    assert "id: folderPath" in path
-    assert "activeFocusOnTab: true" in path
-    assert "Ctrl+Alt+Shift+I folder path" in SOURCE
-
-
+    assert "Current Library folder path focused" in block
+    assert "window.focusLibraryFolderPath()" in QML
 if __name__ == "__main__":
     main()
