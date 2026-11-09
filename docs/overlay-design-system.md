@@ -69,3 +69,8 @@ The compact overlay chrome keeps the live readout calm while exposing status and
 the current visualization mode:
 
 ![Overlay window chrome rendering](overlay-window-chrome.svg)
+
+Visualization uses a quiet empty/ready treatment with the mode and capture state
+always visible:
+
+![Overlay visualization rendering](overlay-visualization-card.svg)
