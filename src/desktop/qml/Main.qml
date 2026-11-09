@@ -362,6 +362,21 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "analysisBatchRetryShortcut"
+        sequence: "Ctrl+Alt+B"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null
+            && window.analysisJobBridge.retryBatch !== undefined
+            && window.analysisJobBridge.batchAcceptedCount > 0
+            && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
+        onActivated: {
+            const retried = window.analysisJobBridge.retryBatch()
+            window.announceVisualizationRecovery(retried
+                ? "Analysis batch retry queued from the keyboard."
+                : "Analysis batch retry was rejected; no replacement work was queued.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
