@@ -818,3 +818,5 @@ The native overlay-unavailable fallback now uses the same live status semantics 
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
 
 Metadata status, metadata recovery guidance, visualization data, and visualization capture state now use live status semantics, aligning source, analysis, and rendering diagnostics for assistive technology.
+
+Live tempo, harmony, overlay capture, and monitor capture states now use status semantics, keeping the primary overlay and monitoring readouts synchronized for assistive technology.
