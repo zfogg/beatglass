@@ -3221,7 +3221,7 @@ ApplicationWindow {
                     Layout.minimumWidth: 0
                     Layout.alignment: Qt.AlignTop
                     spacing: window.compactHeader ? 4 : 8
-                    Accessible.name: "Visualization data and capture status"
+                    Accessible.name: "Visualization data and capture status, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: window.liveBridge.status === "Error" ? "capture error" : (window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring" ? window.liveBridge.status.toLowerCase() : (visualizationCanvas.modeHasData ? "ready" : "waiting"))
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Current waveform or FFT availability, generation, and capture state."
