@@ -96,6 +96,13 @@ with zipfile.ZipFile(archive_path) as archive:
         if transition_name not in declared:
             raise SystemExit("summary transition path does not match archive")
         transitions = json.loads(archive.read(transition_name))
+        if not isinstance(transitions, dict) or transitions.get("schema") != "beatglass-pipewire-transitions-v1":
+            raise SystemExit("transition evidence has invalid provenance schema")
+        if not isinstance(transitions.get("commit"), str) or not transitions["commit"].strip():
+            raise SystemExit("transition evidence has no provenance commit")
+        if not isinstance(transitions.get("platform"), str) or not transitions["platform"].strip():
+            raise SystemExit("transition evidence has no provenance platform")
+        transitions = transitions.get("events")
         if not isinstance(transitions, list) or not transitions:
             raise SystemExit("transition evidence is empty")
         names = [event.get("event") for event in transitions if isinstance(event, dict)]

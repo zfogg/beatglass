@@ -71,6 +71,9 @@ positive monotonic epochs, a sink serial, captured samples, a negotiated
 restart format, a discontinuity marker, and a native error code.
 When present in a packaged summary, the archive verifier rechecks the same
 required lifecycle events and epoch/discontinuity/error invariants.
+It also requires the transition envelope’s schema, source commit, and host
+platform, preventing raw or detached event lists from being accepted as native
+qualification evidence.
 Capture provenance before validation and packaging:
 
 ```sh
