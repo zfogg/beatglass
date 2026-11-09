@@ -1503,6 +1503,7 @@ ApplicationWindow {
             window.requestActivate()
             return false
         }
+        window.syncOverlaySettingsStateFromBridge()
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
         window.overlaySettingsRevision += 1
