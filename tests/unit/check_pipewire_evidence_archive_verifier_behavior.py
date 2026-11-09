@@ -164,4 +164,10 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=[{"name": "nested/path.json"}])))
     result = subprocess.run([sys.executable, str(verifier), str(malformed_manifest)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed manifest artifact name" not in result.stderr + result.stdout: raise SystemExit("malformed manifest artifact name was accepted")
-print("PipeWire evidence archive verifier behavior passed (15 scenarios)")
+    negative_epoch = root / "negative-epoch.zip"
+    with zipfile.ZipFile(negative_epoch, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, source_date_epoch=-1)))
+    result = subprocess.run([sys.executable, str(verifier), str(negative_epoch)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid reproducibility metadata" not in result.stderr + result.stdout: raise SystemExit("negative source epoch was accepted")
+print("PipeWire evidence archive verifier behavior passed (16 scenarios)")
