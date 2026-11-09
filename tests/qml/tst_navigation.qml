@@ -1363,4 +1363,28 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("620 by 280") >= 0)
         app.destroy()
     }
+    function test_persistedVisualBundleSurvivesDisplayRecovery() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        fakeOverlay.displayName = "Projector"
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        fakeOverlay.opacity = 0.37
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 1
+        app.overlayDisplayRecoveryPending = true
+        verify(app.recoverOverlayAfterDisplayChange())
+        compare(fakeOverlay.selectedScreen, 1)
+        compare(fakeOverlay.requestedWidth, 620)
+        compare(fakeOverlay.requestedHeight, 280)
+        compare(fakeOverlay.opacity, 0.37)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Projector") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("620 by 280") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("37 percent opacity") >= 0)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+        fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
+        fakeOverlay.opacity = 0.9
+    }
 }
