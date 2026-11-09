@@ -199,6 +199,8 @@ The verifier also cross-checks the manifest commit against the archived summary
 commit, preventing evidence from being relabeled under a different build.
 Malformed summary JSON is rejected with an explicit qualification-summary
 error rather than being treated as an incomplete handoff.
+The manifest itself must also decode to a JSON object before archive fields are
+trusted.
 The decoded summary must also be a JSON object, preventing arrays or scalar
 values from bypassing field-level qualification checks.
 The portable behavior fixture can be run with
