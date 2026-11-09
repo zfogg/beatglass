@@ -19,4 +19,7 @@ for marker in ("--capture-plan", "validate_native_host_capture_plan.py", "captur
 assert '"--capture-plan"' in source
 assert "capture_plan_sha256" in source
 assert "capture_plan_validated" in source
+probe = (Path(__file__).parents[2] / "tests/pipewire/check_linux_native_prerequisites.py").read_text(encoding="utf-8")
+for marker in ("--report", "native_execution_attempted", '"status"', '"pending"'):
+    assert marker in probe
 print("PipeWire native runner contract verified (5 checks)")
