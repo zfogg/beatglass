@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Overlay settings now provide a synchronized start/stop monitoring action. The
+action preserves the control surface during transitions and announces that the
+overlay is waiting for accepted combined-output data. Portable coverage is in
+`python tests/unit/check_overlay_monitoring_action_contract.py`.
+
 The overlay now exposes a recovery-action status that distinguishes a pending
 display recovery from a safe restore action and preserves the control-window
 fallback. Portable coverage is in
