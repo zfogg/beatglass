@@ -4,6 +4,15 @@
 
 # Beatglass
 
+<p align="center">
+  <img src="images/screenshots/library.png" alt="Beatglass Library with analyzed tracks" width="49%" />
+  <img src="images/screenshots/track-analysis.png" alt="Beatglass track analysis details" width="49%" />
+  <img src="images/screenshots/dj-mode.png" alt="Beatglass DJ monitoring mode" width="49%" />
+  <img src="images/screenshots/overlay-context.png" alt="Beatglass floating overlay over a DJ workspace" width="49%" />
+</p>
+
+These are the current v1 prototype renderings: a visual design reference for the desktop shell, analysis workflow, DJ mode, and floating overlay. They are illustrative design-system renders, not native-platform qualification evidence. See [`design/v1`](design/v1/) for the source, states, tokens, and reproducible Playwright renderer.
+
 Decoder snapshot validation is fail-closed: a retry is eligible only when the persisted `decoder_snapshot` is non-empty and matches the active decoder identity. Empty legacy snapshots and mismatched snapshots are rejected; they must be re-analyzed to establish fresh provenance.
 
 `decoder_snapshot` is a compatibility anchor for retryable analysis. A persisted run may be resubmitted only when its snapshot matches the active decoder/configuration contract; legacy rows with an empty snapshot are rejected conservatively until re-analysis establishes fresh metadata.
