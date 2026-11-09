@@ -73,6 +73,8 @@ The schema version is validated as an integer to prevent JSON booleans from
 being accepted through Python's integer-equivalence rules.
 Host, Python, and PipeWire CLI identity fields must remain non-empty strings
 so the evidence record is unambiguous.
+The UTC capture timestamp is subject to the same type requirement before its
+ISO-8601 and timezone checks.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an

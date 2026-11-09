@@ -21,6 +21,8 @@ if type(manifest["schema_version"]) is not int or manifest["schema_version"] != 
 for field in ("host_platform", "python_version", "pipewire_cli_version"):
     if not isinstance(manifest[field], str) or not manifest[field].strip():
         raise SystemExit(f"manifest {field} must be a non-empty string")
+if not isinstance(manifest["captured_at_utc"], str) or not manifest["captured_at_utc"].strip():
+    raise SystemExit("manifest captured_at_utc must be a non-empty string")
 if not str(manifest["host_platform"]).startswith("Linux"):
     raise SystemExit("manifest host_platform must identify Linux")
 try:
