@@ -157,6 +157,7 @@ screenshots.
 | [Native activation blocked](overlay-native-activation-blocked-card.svg) | recoverable native activation collision |
 | [Native activation recovered](overlay-native-activation-recovered-card.svg) | restored overlay after activation conflict |
 | [Native activation retrying](overlay-native-activation-retrying-card.svg) | bounded activation retry with safe-mode escape |
+| [Native activation paused](overlay-native-activation-exhausted-card.svg) | safe mode after activation retries are exhausted |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
