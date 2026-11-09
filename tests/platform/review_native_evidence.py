@@ -87,7 +87,13 @@ def assess(report_path: Path, reviewer: str) -> dict:
             matching = next((item for item in inventory if isinstance(item, dict) and item.get("path") == output), None)
             if not matching or matching.get("sha256") != output_sha:
                 blockers.append(f"{name}:qualification output linkage mismatch")
-        rows = [row for row in platform.get("scenarios", []) if isinstance(row, dict)]
+        scenario_rows = platform.get("scenarios")
+        inventory_rows = platform.get("scenario_inventory")
+        if scenario_rows is not None and inventory_rows is not None and scenario_rows != inventory_rows:
+            blockers.append(f"{name}:scenario inventory mismatch")
+        if scenario_rows is None:
+            scenario_rows = inventory_rows
+        rows = [row for row in (scenario_rows or []) if isinstance(row, dict)]
         ids = [row.get("id") for row in rows]
         if len(ids) != len(set(ids)):
             blockers.append(f"{name}:duplicate scenario id")
