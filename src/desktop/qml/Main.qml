@@ -946,6 +946,7 @@ ApplicationWindow {
     function showOverlayAndHideControls() {
         window.overlayHiddenByUser = false
         if (!window.overlayBridge || !window.overlayBridge.available) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             overlayDisplay.forceActiveFocus()
@@ -989,6 +990,7 @@ ApplicationWindow {
     }
     function reapplyOverlaySettingsAndRestore() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.")
             window.show()
@@ -999,6 +1001,7 @@ ApplicationWindow {
         }
         if (window.overlayBridge.screenIndex >= 0)
             if (!window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)) {
+                window.overlayLaunchFallbackActive = true
                 window.overlayDisplayRecoveryPending = true
                 window.announceCaptureRecoveryState("Persisted overlay display is unavailable; choose another display before restoring the overlay.")
                 window.show()
@@ -1008,6 +1011,7 @@ ApplicationWindow {
                 return false
             }
         if (!window.restoreOverlayVisualStateFromBridge()) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Persisted overlay visual state is unavailable; choose a display and try restoring again.")
             window.show()
