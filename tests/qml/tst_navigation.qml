@@ -1295,4 +1295,11 @@ TestCase {
         verify(findChild(app, "overlayDisplay").activeFocus)
         app.destroy()
     }
+    function test_reapplyShortcutDoesNotCollideWithResume() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        compare(findChild(app, "overlayReapplyShortcut").sequence, "Ctrl+Alt+Shift+A")
+        compare(findChild(app, "overlayResumeRecoveryShortcut").sequence, "Ctrl+Alt+Shift+R")
+        app.destroy()
+    }
 }
