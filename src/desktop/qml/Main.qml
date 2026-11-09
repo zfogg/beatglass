@@ -4102,7 +4102,7 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: "Review overlay summary"
                         activeFocusOnTab: true
-                        Accessible.name: text
+                        Accessible.name: text + ", " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "available") + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Button
                         Accessible.description: "Focus the consolidated overlay settings summary for display, size, opacity, and recovery state; "
