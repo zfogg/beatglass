@@ -850,3 +850,5 @@ Retained-settings review accessibility value now includes the current settings r
 
 Retained-settings review descriptions now include the current settings revision for screen-reader diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_description_contract.py`.
 
+Overlay settings-retention status accessible name now includes the current settings revision. Portable coverage is in `python tests/unit/check_overlay_retention_name_contract.py`.
+
