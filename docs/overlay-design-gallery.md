@@ -62,6 +62,7 @@ screenshots.
 | [Command palette](overlay-command-palette-card.svg) | searchable keyboard-first actions |
 | [Update](overlay-update-card.svg) | update review and defer decision |
 | [Reset](overlay-reset-card.svg) | reversible settings reset decision |
+| [Import](overlay-import-card.svg) | saved view import and scope explanation |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
