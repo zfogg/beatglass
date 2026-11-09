@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Successful non-empty Core Audio enumeration now clears any stale diagnostic,
+while empty success retains its explicit empty-state text. Portable coverage is
+in `python tests/unit/check_macos_enumeration_success_clear_contract.py`.
+
 Successful Core Audio enumeration with zero devices now carries an explicit
 empty-state diagnostic, distinct from backend failure. Portable coverage is in
 `python tests/unit/check_macos_empty_enumeration_diagnostic_contract.py`.
