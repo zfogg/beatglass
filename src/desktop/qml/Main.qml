@@ -1265,6 +1265,9 @@ ApplicationWindow {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("DJ overlay could not be unlocked; control-window fallback remains available.")
+            window.show()
+            window.raise()
+            window.requestActivate()
             if (typeof unlockOverlay !== "undefined")
                 unlockOverlay.forceActiveFocus()
             return false
