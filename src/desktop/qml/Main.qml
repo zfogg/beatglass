@@ -88,7 +88,7 @@ ApplicationWindow {
         sequence: "Ctrl+R"
         context: Qt.ApplicationShortcut
         enabled: window.browseFolder.toString() !== ""
-        onActivated: { files.refresh(); window.refreshCatalog(); window.announceVisualizationRecovery("Folder contents refreshed from the keyboard."); browser.forceActiveFocus() }
+        onActivated: { files.refresh(); window.refreshCatalog(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed from the keyboard; entry selection cleared."); browser.forceActiveFocus() }
     }
     Shortcut {
         objectName: "playbackSeekBackShortcut"
