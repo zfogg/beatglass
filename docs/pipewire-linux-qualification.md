@@ -63,6 +63,7 @@ recomputes it to detect post-capture edits and requires the standard 64-digit
 lowercase SHA-256 representation.
 Capture and validation share the same canonical digest and Audio/Sink-count
 helpers, preventing the two qualification paths from drifting.
+Capture also runs the shared inventory-shape gate before writing any artifact.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a
