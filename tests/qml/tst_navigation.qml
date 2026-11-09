@@ -1967,7 +1967,21 @@ TestCase {
         compare(fakeOverlay.requestedWidth, 620)
         app.destroy()
     }
-'    function test_pausedDisplayRecoveryRestoresControlWindowActivation() {
+    function test_displayLossReactivatesControlWindowFallback() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Display"]
+        let app = shellWithOverlay.createObject(null)
+        app.hide()
+        fakeOverlay.screenNames = []
+        tryVerify(() => app.visible)
+        verify(app.overlayDisplayRecoveryPending)
+        verify(app.overlayDisplaySelectionRequired)
+        verify(findChild(app, "overlayDisplay").activeFocus)
+        fakeOverlay.screenNames = ["Display"]
+        app.destroy()
+    }
+
+    function test_pausedDisplayRecoveryRestoresControlWindowActivation() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)

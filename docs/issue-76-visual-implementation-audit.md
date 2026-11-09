@@ -84,6 +84,8 @@ Overlay design states are covered by explicit Show, Unlock, Hide, display-change
 
 Hide failure keeps the control window visible, marks recovery pending, and moves keyboard focus to Restore overlay so the user has an immediate recovery action.
 
+Display loss reactivates the control-window fallback before focusing display selection, keeping recovery visible and keyboard reachable even when the native overlay was hidden.
+
 Reset appearance restores Light/full-motion defaults, announces the resulting state, and returns focus to the reset control so keyboard users can verify the change.
 
 Paused display recovery reactivates the control window before focusing Resume recovery, so a tray/taskbar fallback remains visible and keyboard reachable after a monitor reconnect.
