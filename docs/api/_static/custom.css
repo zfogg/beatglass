@@ -18,12 +18,42 @@ div.body .highlight {
 
 div.body table.docutils {
   width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  overflow: hidden;
 }
 
-div.body table.docutils th:first-child,
-div.body table.docutils td:first-child {
-  min-width: 12rem;
-  width: 18%;
+div.body table.docutils th,
+div.body table.docutils td {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Give the reading column a few hundred extra pixels on wide screens while
+   keeping the sidebar and tables fluid below that width. */
+div.document {
+  width: min(1400px, calc(100vw - 100px));
+  min-width: 0;
+}
+
+div.bodywrapper {
+  width: calc(100% - 220px);
+  min-width: 0;
+}
+
+div.body table.docutils p {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+div.body table.docutils .literal {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 
 div.body pre,
@@ -192,6 +222,14 @@ section:target > h2:first-child a {
 @media screen and (max-width: 940px) {
   body {
     background: var(--surface);
+  }
+
+  div.document {
+    width: auto;
+  }
+
+  div.bodywrapper {
+    width: auto;
   }
 
   div.body .sig,
