@@ -714,6 +714,8 @@ The Windows native bridge now persists the display target after screen-added, sc
 
 The macOS native screen-recovery timer now persists the clamped geometry and emits both geometry and screen-list updates after DPI/layout or monitor changes. QML can therefore refresh its atomic settings revision and focus/action gate from the same post-recovery snapshot on both native paths.
 
+macOS direct display and size edits now explicitly schedule native persistence after clamping, matching the Windows bridge’s immediate persistence semantics and ensuring settings survive a subsequent reconnect even when no additional window signal arrives.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.

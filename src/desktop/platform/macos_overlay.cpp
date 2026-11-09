@@ -172,11 +172,11 @@ bool OverlayController::moveToScreen(int index) {
   const QPoint topLeft(bounds.center().x() - size.width() / 2, bounds.center().y() - size.height() / 2);
   overlay_->setScreen(screen);
   overlay_->setGeometry(QRect(topLeft, size));
-  keepOnScreen(); return true;
+  keepOnScreen(); scheduleSave(); return true;
 }
 bool OverlayController::resizeOverlay(int width, int height) {
   if (!overlay_ || width <= 0 || height <= 0) return false;
-  overlay_->resize(width, height); keepOnScreen(); return true;
+  overlay_->resize(width, height); keepOnScreen(); scheduleSave(); return true;
 }
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||
