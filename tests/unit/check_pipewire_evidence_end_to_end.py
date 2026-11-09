@@ -36,26 +36,26 @@ with tempfile.TemporaryDirectory() as directory:
         "native_transition_sha256":hashlib.sha256(transitions.read_bytes()).hexdigest(),"commands":[]}), encoding="utf-8")
     archive = root / "evidence.zip"
     env = dict(os.environ, SOURCE_DATE_EPOCH="1700000000")
-    packaged = subprocess.run([sys.executable, str(packager), str(summary), str(archive)], env=env, capture_output=True, text=True)
+    packaged = subprocess.run([sys.executable, str(packager), str(summary), str(archive)], env=env, capture_output=True, text=True, cwd=root)
     if packaged.returncode != 0:
         raise SystemExit(packaged.stderr or packaged.stdout)
-    verified = subprocess.run([sys.executable, str(verifier), str(archive)], capture_output=True, text=True)
+    verified = subprocess.run([sys.executable, str(verifier), str(archive)], capture_output=True, text=True, cwd=root)
     if verified.returncode != 0:
         raise SystemExit(verified.stderr or verified.stdout)
     reproducible = root / "evidence-repeat.zip"
-    repeated = subprocess.run([sys.executable, str(packager), str(summary), str(reproducible)], env=env, capture_output=True, text=True)
+    repeated = subprocess.run([sys.executable, str(packager), str(summary), str(reproducible)], env=env, capture_output=True, text=True, cwd=root)
     if repeated.returncode != 0 or archive.read_bytes() != reproducible.read_bytes():
         raise SystemExit("fixed SOURCE_DATE_EPOCH did not reproduce the end-to-end archive")
-    repeated_verified = subprocess.run([sys.executable, str(verifier), str(reproducible)], capture_output=True, text=True)
+    repeated_verified = subprocess.run([sys.executable, str(verifier), str(reproducible)], capture_output=True, text=True, cwd=root)
     if repeated_verified.returncode != 0:
         raise SystemExit(repeated_verified.stderr or repeated_verified.stdout)
-    overwrite = subprocess.run([sys.executable, str(packager), str(summary), str(archive)], env=env, capture_output=True, text=True)
+    overwrite = subprocess.run([sys.executable, str(packager), str(summary), str(archive)], env=env, capture_output=True, text=True, cwd=root)
     if overwrite.returncode == 0 or "refusing to overwrite" not in overwrite.stderr + overwrite.stdout:
         raise SystemExit("existing end-to-end archive was overwritten")
     rejected_summary = json.loads(summary.read_text(encoding="utf-8"))
     rejected_summary["qualified"] = False
     summary.write_text(json.dumps(rejected_summary), encoding="utf-8")
-    rejected = subprocess.run([sys.executable, str(packager), str(summary), str(root / "rejected.zip")], env=env, capture_output=True, text=True)
+    rejected = subprocess.run([sys.executable, str(packager), str(summary), str(root / "rejected.zip")], env=env, capture_output=True, text=True, cwd=root)
     if rejected.returncode == 0 or "summary is not qualified" not in rejected.stderr + rejected.stdout:
         raise SystemExit("unqualified end-to-end handoff was accepted")
 print("PipeWire evidence end-to-end handoff passed (4 scenarios)")
