@@ -62,6 +62,8 @@ validate it before packaging:
 
 ```sh
 python tests/pipewire/validate_pipewire_transition_evidence.py evidence/pipewire-transitions.json
+# Include the validated artifact in the native summary/archive:
+python tests/pipewire/run_linux_native_qualification.py --transitions evidence/pipewire-transitions.json --summary evidence/native-summary.json
 ```
 
 The validator requires `start`, `process`, `error`, and `restart` events,
