@@ -1657,6 +1657,7 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && (storageRecovery.status === "Opening storage" || storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
                                 text: visible ? ("Storage transition: " + storageRecovery.status + ". Persisted recovery controls were refreshed for this database state.") : ""
                                 Accessible.name: "Storage transition status"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No storage transition is active."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -1666,7 +1667,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.retryableRunIds !== undefined && storageRecovery.retryableRunIds.length > 0
                                 text: visible ? ("Persisted retry outcome: " + storageRecovery.retryableRunIds.length + " retryable run(s)") : ""
                                 Accessible.name: "Persisted retry outcome"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No persisted retryable analysis runs are available."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -1674,7 +1677,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 text: visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? "Prior analysis result cleared; retry requires fresh source evidence." : ""
                                 Accessible.name: "Analysis stale-result status"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No stale analysis result is present."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
