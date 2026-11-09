@@ -322,11 +322,13 @@ ApplicationWindow {
             const applied = window.overlayBridge.setClickThrough(requested)
             if (!applied) {
                 window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active.")
+                clickThroughToggle.forceActiveFocus()
                 return
             }
             window.announceCaptureRecoveryState(requested
                 ? "DJ overlay click-through enabled; press Escape to unlock interaction."
                 : "DJ overlay interaction restored; keyboard and pointer input are available.")
+            clickThroughToggle.forceActiveFocus()
         }
     }
     Shortcut {
