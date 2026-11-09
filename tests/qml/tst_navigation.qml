@@ -1695,4 +1695,20 @@ TestCase {
         fakeOverlay.refuseUnlock = false
         fakeOverlay.clickThrough = false
     }
+    function test_clickThroughFocusShortcutRetainsBlockedSettings() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        let shortcut = findChild(app, "overlayClickThroughFocusShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        verify(findChild(app, "clickThrough").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(app.overlayRecoveryAnnouncement.indexOf("click-through") >= 0)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+    }
 }
