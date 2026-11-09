@@ -123,7 +123,13 @@ public:
   bool start(const std::string&, std::uint64_t) override { return false; }
   bool start_stream(const std::string& serial, std::uint64_t epoch,
                     std::uint32_t sample_rate, std::uint32_t channels) override {
-    return session_.start(serial, epoch, sample_rate, channels);
+    if (!session_.start(serial, epoch, sample_rate, channels)) return false;
+    if (!owner_ || !session_.native_handoff() ||
+        !owner_->connect(serial, sample_rate, channels, *session_.native_handoff())) {
+      session_.reset();
+      return false;
+    }
+    return true;
   }
   bool reacquire(const std::string& serial, std::uint64_t epoch,
                  std::uint32_t sample_rate, std::uint32_t channels) override {
