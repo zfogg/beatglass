@@ -1058,6 +1058,21 @@ ApplicationWindow {
             return false
         return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
     }
+
+    function reopenSelectedPlayback() {
+        if (!window.playbackBridge || !window.selectedAudioUrl || window.selectedAudioUrl.toString() === "") {
+            window.announceVisualizationRecovery("Select a Library track before reopening playback.")
+            return false
+        }
+        const nextEpoch = window.playbackBridge.epoch + 1
+        const reopened = window.playbackBridge.state === "Stopped"
+            ? window.playbackBridge.openSource(window.selectedAudioUrl, nextEpoch)
+            : window.playbackBridge.replaceSource(window.selectedAudioUrl, nextEpoch)
+        window.announceVisualizationRecovery(reopened
+            ? "Selected Library track reopened; visualization selection was reset."
+            : "Selected Library track could not be reopened; playback state was unchanged.")
+        return reopened
+    }
     function syncVisualizationSelectionFromPlayback(frame, durationFrames) {
         if (!isFinite(frame) || !isFinite(durationFrames) || durationFrames <= 0
                 || visualizationCanvas.acceptedResultIdentity === ""
@@ -3230,6 +3245,20 @@ ApplicationWindow {
                         : "Select a waveform position and start playback before seeking."
                     ToolTip.text: enabled ? "Seek playback to the selected waveform position" : "Seeking requires an active playback source and waveform data"
                     onClicked: window.seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationCanvas.renderedWaveform.length)
+                }
+                Button {
+                    objectName: "reopenSelectedPlayback"
+                    activeFocusOnTab: true
+                    text: "Reopen selected"
+                    enabled: window.playbackBridge !== null && window.selectedAudioUrl.toString() !== ""
+                    Accessible.name: "Reopen selected Library track"
+                    Accessible.value: enabled ? "available" : "select a Library track"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: enabled
+                        ? "Start or replace playback with the currently selected Library track at frame zero."
+                        : "Select a Library track before reopening playback."
+                    ToolTip.text: enabled ? "Reopen the selected Library track from the beginning" : "Select a Library track first"
+                    onClicked: window.reopenSelectedPlayback()
                 }
                 Button {
                     objectName: "resumeVisualizationPlayback"
