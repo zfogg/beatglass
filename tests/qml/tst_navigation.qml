@@ -2024,6 +2024,18 @@ TestCase {
         compare(fakeOverlay.requestedWidth, 620)
         app.destroy()
     }
+    function test_overlayWindowCloseRestoresControlWindowFallback() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        let overlay = findChild(app, "djOverlay")
+        app.showOverlayAndHideControls()
+        overlay.close()
+        tryVerify(() => app.visible)
+        verify(app.overlayHiddenByUser)
+        verify(findChild(app, "restoreOverlay").activeFocus)
+        app.destroy()
+    }
+
     function test_displayLossReactivatesControlWindowFallback() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = ["Display"]

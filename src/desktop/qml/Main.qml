@@ -1528,6 +1528,10 @@ ApplicationWindow {
         id: djOverlay
         objectName: "djOverlay"
         title: "Beatglass overlay"
+        onClosing: function(close) {
+            close.accepted = false
+            window.hideOverlayAndRestoreControls()
+        }
         visible: false
         width: 310; height: 130
         minimumWidth: 230; minimumHeight: 100
