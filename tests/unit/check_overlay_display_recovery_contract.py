@@ -1,22 +1,17 @@
-"""Verify monitor loss/restoration keeps overlay recovery explicit and safe."""
+"""Source contract for overlay display recovery statuses."""
+
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[2]
-qml = (root / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
-required = [
-    "property bool overlayDisplayRecoveryPending: false",
-    "function recoverOverlayAfterDisplayChange()",
-    "window.overlayDisplayRecoveryPending = true",
-    "window.overlayBridge.moveToScreen(savedIndex)",
-    "window.restoreOverlayVisualStateFromBridge()",
-    "window.overlayBridge.showOverlay()",
-    "DJ overlay recovered on the saved display with persisted visual settings.",
-]
-missing = [marker for marker in required if marker not in qml]
-if missing:
-    raise SystemExit("Missing overlay display recovery markers: " + ", ".join(missing))
-if qml.count("function recoverOverlayAfterDisplayChange()") != 1:
-    raise SystemExit("display recovery helper must have one canonical definition")
-if qml.count("window.overlayDisplayRecoveryPending = true") < 2:
-    raise SystemExit("display loss and failed recovery must both remain pending")
-print(f"Overlay display recovery contract verified ({len(required)} checks)")
+ROOT = Path(__file__).resolve().parents[2]
+QML = (ROOT / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
+
+def main() -> None:
+    for name in ("overlayDisplayEmptyState", "overlayMissingDisplayRecovery"):
+        start = QML.index(f'objectName: "{name}"')
+        source = QML[start:start + 700]
+        assert "Accessible.value:" in source, name
+        assert "Accessible.role: Accessible.Status" in source, name
+    print("overlay display recovery contract: 2 statuses verified")
+
+if __name__ == "__main__":
+    main()

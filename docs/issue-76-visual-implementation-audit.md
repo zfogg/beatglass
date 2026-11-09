@@ -829,6 +829,8 @@ Visualization interaction, selection reset, analysis handoff, and playback-epoch
 
 Overlay interaction mode, opacity, and display destination now expose live status values, keeping pointer routing and display recovery state consistent for assistive technology.
 
+The overlay display empty state now uses live status semantics alongside saved-display recovery, making missing-output remediation discoverable before destination selection.
+
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
 
 Metadata status, metadata recovery guidance, visualization data, and visualization capture state now use live status semantics, aligning source, analysis, and rendering diagnostics for assistive technology.
