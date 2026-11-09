@@ -184,3 +184,6 @@ When click-through remains active during paused recovery, Escape stays reserved 
 
 When paused recovery and click-through overlap, Ctrl+Alt+U restores the control window and focuses Unlock overlay while retaining the queued display and geometry settings for the later resume.
 
+
+If Unlock overlay fails while click-through is active, focus remains on Unlock overlay and persisted display/geometry settings stay queued for the next retry; the failure does not discard the recovery state.
+
