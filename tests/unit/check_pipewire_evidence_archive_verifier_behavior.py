@@ -12,10 +12,16 @@ with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     junit = b"<testsuite tests='1'><testcase name='capture'/></testsuite>\n"
     discovery = b'{"tests": [{"name": "capture"}]}\n'
-    summary = (json.dumps({"commit":"fixture-commit", "qualified":True, "native_test_count":1, "native_test_name_match":True, "native_junit_test_count":1, "native_junit_failures":0, "native_junit_errors":0, "native_junit_skipped":0, "native_junit_exists":True, "native_test_discovery":{"count":1,"tests":[{"name":"capture"}]}, "native_discovery_json":"/evidence/pipewire-tests-discovery.json", "native_junit":"/evidence/pipewire-tests.xml", "native_discovery_sha256":hashlib.sha256(discovery).hexdigest(), "native_junit_sha256":hashlib.sha256(junit).hexdigest()}) + "\n").encode()
-    artifacts = {"native-summary.json": summary, "pipewire-tests-discovery.json": discovery, "pipewire-tests.xml": junit}
+    transitions = (json.dumps({"schema":"beatglass-pipewire-transitions-v1", "platform":"Linux-test", "commit":"fixture-commit", "events":[
+        {"event":"start", "epoch":1, "serial":"sink-a"},
+        {"event":"process", "epoch":1, "sample_count":256},
+        {"event":"error", "epoch":1, "error_code":-32, "discontinuity":True},
+        {"event":"restart", "epoch":2, "serial":"sink-b", "format":{"sample_rate":48000, "channels":2}}
+    ]}) + "\n").encode()
+    summary = (json.dumps({"commit":"fixture-commit", "qualified":True, "native_test_count":1, "native_test_name_match":True, "native_junit_test_count":1, "native_junit_failures":0, "native_junit_errors":0, "native_junit_skipped":0, "native_junit_exists":True, "native_test_discovery":{"count":1,"tests":[{"name":"capture"}]}, "native_discovery_json":"/evidence/pipewire-tests-discovery.json", "native_junit":"/evidence/pipewire-tests.xml", "native_transition_json":"/evidence/pipewire-transitions.json", "native_transition_sha256":hashlib.sha256(transitions).hexdigest(), "native_transition_event_count":4, "native_discovery_sha256":hashlib.sha256(discovery).hexdigest(), "native_junit_sha256":hashlib.sha256(junit).hexdigest()}) + "\n").encode()
+    artifacts = {"native-summary.json": summary, "pipewire-tests-discovery.json": discovery, "pipewire-tests.xml": junit, "pipewire-transitions.json": transitions}
     entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in artifacts.items()]
-    manifest = {"format": "beatglass-native-pipewire-evidence-v1", "commit": "fixture-commit", "qualified": True, "source_date_epoch": 0, "archive_timestamp_utc": "1980-01-01T00:00:00Z", "artifacts": entries}
+    manifest = {"format": "beatglass-native-pipewire-evidence-v1", "commit": "fixture-commit", "qualified": True, "source_date_epoch": 0, "archive_timestamp_utc": "1980-01-01T00:00:00Z", "transition_event_count": 4, "transition_schema": "beatglass-pipewire-transitions-v1", "transition_commit": "fixture-commit", "artifacts": entries}
 
     good = root / "good.zip"
     with zipfile.ZipFile(good, "w") as archive:
@@ -23,6 +29,13 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(manifest))
     result = subprocess.run([sys.executable, str(verifier), str(good)], capture_output=True, text=True)
     if result.returncode != 0: raise SystemExit(result.stderr or result.stdout)
+
+    provenance_tampered = root / "provenance-tampered.zip"
+    with zipfile.ZipFile(provenance_tampered, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, transition_commit="other-commit")))
+    result = subprocess.run([sys.executable, str(verifier), str(provenance_tampered)], capture_output=True, text=True)
+    if result.returncode == 0 or "transition commit does not match manifest" not in result.stderr + result.stdout: raise SystemExit("tampered transition provenance was accepted")
 
     bad = root / "unlisted.zip"
     with zipfile.ZipFile(bad, "w") as archive:
@@ -109,8 +122,10 @@ with tempfile.TemporaryDirectory() as directory:
     if result.returncode == 0 or "malformed tests count" not in result.stderr + result.stdout: raise SystemExit("malformed JUnit count was accepted")
 
     per_suite = root / "per-suite-count.zip"
-    per_suite_junit = b"<testsuites tests='2'><testsuite tests='2'><testcase name='capture'/></testsuite><testsuite tests='0'><testcase name='other'/></testsuite></testsuites>\n"
+    per_suite_junit = b"<testsuites tests='2'><testsuite tests='3'><testcase name='capture'/></testsuite><testsuite tests='0'><testcase name='other'/></testsuite></testsuites>\n"
     per_suite_summary = dict(json.loads(summary), native_test_count=2, native_junit_test_count=2, native_junit_sha256=hashlib.sha256(per_suite_junit).hexdigest())
+    for key in ("native_transition_json", "native_transition_sha256", "native_transition_event_count"):
+        per_suite_summary.pop(key, None)
     per_suite_discovery = b'{"tests": [{"name": "capture"}, {"name": "other"}]}\n'
     per_suite_summary["native_discovery_sha256"] = hashlib.sha256(per_suite_discovery).hexdigest()
     per_suite_summary["native_test_discovery"] = {"count": 2, "tests": [{"name": "capture"}, {"name": "other"}]}
@@ -120,7 +135,7 @@ with tempfile.TemporaryDirectory() as directory:
         for name, data in per_suite_artifacts.items(): archive.writestr(name, data)
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=per_suite_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(per_suite)], capture_output=True, text=True)
-    if result.returncode == 0 or "does not match its testcases" not in result.stderr + result.stdout: raise SystemExit("per-suite JUnit count mismatch was accepted")
+    if result.returncode == 0 or not any(message in result.stderr + result.stdout for message in ("suite test counts do not match testcases", "aggregate test count does not match suites")): raise SystemExit("per-suite JUnit count mismatch was accepted")
 
     malformed_xml = root / "malformed-xml.zip"
     malformed_payload = b"<testsuite><testcase name='capture'>"
@@ -143,4 +158,4 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=aggregate_mismatch_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(aggregate_mismatch)], capture_output=True, text=True)
     if result.returncode == 0 or "aggregate test count does not match suites" not in result.stderr + result.stdout: raise SystemExit("aggregate JUnit count mismatch was accepted")
-print("PipeWire evidence archive verifier behavior passed (13 scenarios)")
+print("PipeWire evidence archive verifier behavior passed (14 scenarios)")
