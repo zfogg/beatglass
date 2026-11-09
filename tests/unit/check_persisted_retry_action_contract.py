@@ -94,6 +94,8 @@ if 'if (!storageOpen_) { status_ = QStringLiteral("Storage error: storage is not
     raise SystemExit("Recovery refresh must reject closed storage before queueing worker work")
 if 'Cache lookup rejected: storage is not open' not in source or 'Cache invalidation rejected: storage is not open' not in source:
     raise SystemExit("Cache operations must reject closed storage before queueing worker work")
+if 'Cache lookup rejected: content identity is required' not in source or 'Cache invalidation rejected: content identity is required' not in source:
+    raise SystemExit("Cache operations must reject empty content identities")
 if 'Analysis rejected: storage is not open' not in source:
     raise SystemExit("Analysis submission must reject closed storage before queueing worker work")
 if 'Analysis admission rejected: storage is not open' not in source:
