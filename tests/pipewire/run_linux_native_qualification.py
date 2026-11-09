@@ -138,6 +138,7 @@ if junit_path.is_file():
     except ET.ParseError:
         junit_count = 0
 summary = {"platform": platform.platform(), "commit": commit,
+           "native_execution_attempted": True,
            "pipewire_version": pipewire_version, "commands": results,
            "failed_command": next((item["command"] for item in results if item["returncode"]), None),
            "native_test_discovery": discovery_result,
