@@ -125,7 +125,7 @@ public:
                     std::uint32_t sample_rate, std::uint32_t channels) override {
     if (!session_.start(serial, epoch, sample_rate, channels)) return false;
     if (!owner_ || !session_.native_handoff() ||
-        !owner_->connect(serial, sample_rate, channels, *session_.native_handoff())) {
+        !owner_->connect({serial, sample_rate, channels}, *session_.native_handoff())) {
       if (owner_) owner_->stop();
       session_.reset();
       return false;
@@ -140,7 +140,7 @@ public:
     session_.reset();
     if (!session_.start(serial, epoch, sample_rate, channels)) return false;
     if (!owner_ || !session_.native_handoff() ||
-        !owner_->connect(serial, sample_rate, channels, *session_.native_handoff())) {
+        !owner_->connect({serial, sample_rate, channels}, *session_.native_handoff())) {
       if (owner_) owner_->stop();
       session_.reset();
       return false;
@@ -151,7 +151,7 @@ public:
                       std::uint32_t channels) override {
     if (!session_.restart(epoch, sample_rate, channels)) return false;
     if (!owner_ || !session_.native_handoff() ||
-        !owner_->connect(session_.serial(), sample_rate, channels,
+        !owner_->connect({session_.serial(), sample_rate, channels},
                          *session_.native_handoff())) {
       if (owner_) owner_->stop();
       session_.reset();

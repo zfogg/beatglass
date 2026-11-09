@@ -4,11 +4,11 @@ namespace beatglass::pipewire::detail {
 namespace {
 class UnavailableStreamOwner final : public StreamOwner {
 public:
-  bool connect(const std::string&, std::uint32_t, std::uint32_t,
-               MonitorStream& handoff) override {
+  bool connect(const Config&, MonitorStream& handoff) override {
     handoff.on_error(-ENOSYS);
     return false;
   }
+  bool connected() const noexcept override { return false; }
   void stop() noexcept override {}
 };
 }
