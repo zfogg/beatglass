@@ -2024,6 +2024,17 @@ TestCase {
         compare(fakeOverlay.requestedWidth, 620)
         app.destroy()
     }
+    function test_overlayCloseHandlerIsDirectlyContractTestable() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        let request = Qt.createQmlObject("import QtQuick; QtObject { property bool accepted: true }", app)
+        app.handleOverlayWindowClosing(request)
+        compare(request.accepted, false)
+        verify(app.overlayHiddenByUser)
+        verify(findChild(app, "restoreOverlay").activeFocus)
+        request.destroy()
+        app.destroy()
+    }
     function test_overlayWindowCloseRestoresControlWindowFallback() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
