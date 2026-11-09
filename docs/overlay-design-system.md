@@ -46,3 +46,7 @@ understandable without relying on color alone:
 Size uses named presets with dimensions so the choice remains legible at a glance:
 
 ![Overlay size control rendering](overlay-size-card.svg)
+
+Display selection uses the same clear selected/unavailable treatment:
+
+![Overlay display control rendering](overlay-display-card.svg)
