@@ -4076,7 +4076,11 @@ ApplicationWindow {
                             : (window.overlayLaunchFallbackActive
                                 ? "The overlay is using its launch fallback while persisted settings remain available."
                                 : "The overlay is ready with persisted settings applied."))
-                    ToolTip.text: "Current overlay display, size, opacity, and recovery state"
+                    ToolTip.text: window.overlayDisplayRecoveryPending
+                        ? "Overlay recovery pending; persisted display settings are retained"
+                        : (window.overlayLaunchFallbackActive
+                            ? "Overlay launch fallback active; persisted display settings are available"
+                            : "Current overlay display, size, opacity, and recovery state")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
