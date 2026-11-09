@@ -31,7 +31,10 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("case-insensitive archive entry collision")
     if "evidence-manifest.json" not in names:
         raise SystemExit("missing evidence-manifest.json")
-    manifest = json.loads(archive.read("evidence-manifest.json"))
+    try:
+        manifest = json.loads(archive.read("evidence-manifest.json"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        raise SystemExit("malformed evidence manifest")
     if manifest.get("format") != "beatglass-native-pipewire-evidence-v1" or manifest.get("qualified") is not True:
         raise SystemExit("invalid or unqualified evidence manifest")
     if not isinstance(manifest.get("commit"), str) or not manifest["commit"].strip():
