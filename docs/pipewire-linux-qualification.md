@@ -59,7 +59,8 @@ follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a
 safe pending path and cannot be mistaken for native qualification evidence.
 Every raw inventory object must also retain its non-negative numeric PipeWire
-object ID for later target selection and audit.
+object ID for later target selection and audit; IDs must be unique within the
+captured inventory.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
 interrupted or racing capture cannot leave a partial artifact at the requested
 path.
