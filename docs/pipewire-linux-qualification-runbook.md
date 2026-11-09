@@ -84,6 +84,8 @@ python tests/pipewire/capture_pipewire_transition_evidence.py raw-events.json ev
 
 The wrapper records the host platform, checkout commit, schema version, and
 raw events so evidence cannot be detached from the build that produced it.
+The archive packager reruns the transition validator before accepting the
+artifact, preventing an unvalidated event file from entering the handoff.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used

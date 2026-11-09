@@ -20,6 +20,9 @@ markers = (
     "source_date_epoch",
     "archive_timestamp_utc",
     "colliding archive names",
+    "native_transition_json",
+    "validate_pipewire_transition_evidence.py",
+    "transition evidence validation failed",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:
