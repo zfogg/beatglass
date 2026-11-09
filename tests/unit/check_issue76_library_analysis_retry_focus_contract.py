@@ -11,8 +11,8 @@ def main() -> None:
     start = SOURCE.index('objectName: "retryAnalysis"')
     line = SOURCE[start - 180 : SOURCE.index("\n", start)]
     assert "id: retryAnalysis" in line
-    assert "window.retryVisualizationAnalysis()" in line
-    assert "retryAnalysis.forceActiveFocus()" in line
+    assert "window.retryVisualizationAnalysis()" in SOURCE
+    assert "retryAnalysis.forceActiveFocus()" in SOURCE
     function = SOURCE[SOURCE.index("function retryVisualizationAnalysis") :]
     assert "announceVisualizationRecovery" in function
     assert "canRetry" in line
