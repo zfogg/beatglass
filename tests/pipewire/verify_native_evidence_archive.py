@@ -95,7 +95,8 @@ with zipfile.ZipFile(archive_path) as archive:
     junit_root = ET.fromstring(archive.read(junit_name))
     if junit_root.tag not in ("testsuite", "testsuites"):
         raise SystemExit("JUnit evidence has invalid root")
-    if junit_root.tag == "testsuite" and int(junit_root.attrib.get("tests", "0")) < 1:
+    suites = [junit_root] if junit_root.tag == "testsuite" else [node for node in junit_root.iter("testsuite")]
+    if not suites or sum(int(node.attrib.get("tests", "0")) for node in suites) < 1:
         raise SystemExit("JUnit evidence has no executed tests")
     if int(junit_root.attrib.get("failures", "0")) or int(junit_root.attrib.get("errors", "0")) or any(node.tag in ("failure", "error") for node in junit_root.iter()):
         raise SystemExit("JUnit evidence reports failures or errors")
@@ -109,6 +110,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("JUnit evidence has duplicate testcase names")
     if int(summary_data.get("native_junit_test_count", 0)) != len(testcases):
         raise SystemExit("summary native_junit_test_count does not match JUnit")
+    if sum(int(node.attrib.get("tests", "0")) for node in suites) != len(testcases):
+        raise SystemExit("JUnit suite test counts do not match testcases")
     if set(discovery_names) != set(testcase_names):
         raise SystemExit("discovery and JUnit test names do not match")
 print("Native PipeWire evidence archive verified")
