@@ -15,6 +15,7 @@ cancel = source[source.index("void cancelAnalysis()"):source.index("void retryAn
 assert "Analysis cancellation rejected:" in cancel
 assert "catch (const std::exception& error)" in cancel
 assert "emit analysisProgress(0)" in cancel
+assert "Analysis cancelling" in cancel
 admit = source[source.index("void admitAnalysis("):source.index("signals:")]
 assert "Analysis admission rejected:" in admit
 assert "emit admitted(false, QString{})" in admit

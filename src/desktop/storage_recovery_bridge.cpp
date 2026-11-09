@@ -114,7 +114,7 @@ public slots:
   }
   void cancelAnalysis() {
     if (!handle_) return;
-    try { emit analysisProgress(0); handle_->cancel(); pollAnalysis(); }
+    try { emit analysisProgress(0); emit analysis(QStringLiteral("Analysis cancelling")); handle_->cancel(); pollAnalysis(); }
     catch (const std::exception& error) { handle_.reset(); emit result(false, QStringLiteral("Analysis cancellation rejected: ") + QString::fromUtf8(error.what())); emit analysis(QStringLiteral("Analysis cancellation rejected")); }
     catch (...) { handle_.reset(); emit result(false, QStringLiteral("Analysis cancellation rejected: unknown error")); emit analysis(QStringLiteral("Analysis cancellation rejected")); }
   }
