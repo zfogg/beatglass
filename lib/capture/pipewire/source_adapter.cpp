@@ -89,7 +89,10 @@ bool MonitorSession::pop(coreaudio::CaptureBlock& block) noexcept {
   return stream_ && stream_->pop(block);
 }
 bool MonitorSession::pop_current(coreaudio::CaptureBlock& block) noexcept {
-  return pop(block) && accepts_epoch(block.epoch);
+  while (pop(block)) {
+    if (accepts_epoch(block.epoch)) return true;
+  }
+  return false;
 }
 MonitorSession::Status MonitorSession::poll_status() noexcept {
   Status status;
