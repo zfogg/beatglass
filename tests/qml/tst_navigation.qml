@@ -1442,4 +1442,17 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("Show, Restore, and Reapply") >= 0)
         app.destroy()
     }
+    function test_retainedSettingsShortcutWorksDuringFallback() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        let shortcut = findChild(app, "overlayRetentionFocusShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        verify(findChild(app, "overlaySettingsRetentionReviewAction").activeFocus)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Retained overlay settings review") >= 0)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
