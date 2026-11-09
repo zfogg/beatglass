@@ -8,7 +8,7 @@ QML = (Path(__file__).resolve().parents[2] / "src/desktop/qml/Main.qml").read_te
 def main() -> None:
     start = QML.index("function reapplyOverlaySettingsAndRestore()")
     block = QML[start:QML.index("    function recoverOverlayAfterDisplayChange()", start)]
-    assert block.count("overlayDisplay.forceActiveFocus()") >= 2
+    assert block.count("overlayDisplay.forceActiveFocus()") >= 3
     assert "Persisted overlay display is unavailable" in block
     assert "restoreOverlayVisualStateFromBridge()" in block
     print("Overlay restore failure focus contract verified (3 checks)")

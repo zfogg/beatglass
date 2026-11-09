@@ -772,3 +772,5 @@ Hide also restores the control window when the native bridge has already disappe
 Persisted display restore failures now announce that the saved display is unavailable and direct keyboard users to choose another display while retaining the control-window fallback.
 
 Restore failures now also return keyboard focus to the display selector after reactivating the control window, covering both an unavailable persisted display and invalid persisted visual state.
+
+The unavailable-bridge restore path now follows the same focus rule, so every persisted-restore failure leaves keyboard users at the display recovery control.

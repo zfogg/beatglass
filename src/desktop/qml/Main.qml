@@ -450,6 +450,7 @@ ApplicationWindow {
             window.show()
             window.raise()
             window.requestActivate()
+            overlayDisplay.forceActiveFocus()
             return false
         }
         if (window.overlayBridge.screenIndex >= 0)
