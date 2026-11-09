@@ -154,6 +154,31 @@ div.footer a {
   color: var(--text);
 }
 
+/* Make anchor navigation feel intentional instead of inheriting Alabaster's
+   cream/yellow target treatment. */
+:target {
+  scroll-margin-top: 1rem;
+}
+
+dt:target,
+span.highlighted,
+section:target > h1:first-child,
+section:target > h2:first-child {
+  background: var(--surface-raised);
+  border-radius: 0.35rem;
+  box-shadow: 0 0 0 2px var(--mint);
+  color: var(--text);
+  outline: none;
+  padding: 0.2rem 0.45rem;
+}
+
+dt:target a,
+span.highlighted a,
+section:target > h1:first-child a,
+section:target > h2:first-child a {
+  color: var(--mint);
+}
+
 @media screen and (max-width: 940px) {
   body {
     background: var(--surface);
