@@ -83,6 +83,8 @@ Each event must also carry a non-empty event name so lifecycle evidence remains
 auditable when new event kinds are added.
 The required lifecycle sequence is ordered as start, process, error, then
 restart; out-of-order evidence is rejected.
+The restart event must carry an epoch greater than the initial start epoch,
+proving that reacquisition crossed a real stream boundary.
 When present in a packaged summary, the archive verifier rechecks the same
 required lifecycle events and epoch/discontinuity/error invariants.
 It also requires the transition envelope’s schema, source commit, and host

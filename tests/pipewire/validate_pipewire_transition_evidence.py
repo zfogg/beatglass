@@ -38,6 +38,8 @@ if not any(isinstance(event.get("sample_count"), int) and event["sample_count"] 
            for event in events if event.get("event") == "process"):
     raise SystemExit("process evidence has no captured samples")
 restart = next(event for event in events if event.get("event") == "restart")
+if restart.get("epoch") <= start.get("epoch"):
+    raise SystemExit("restart does not advance the capture epoch")
 fmt = restart.get("format")
 if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("channels", 0) <= 0:
     raise SystemExit("restart event has no negotiated format")
