@@ -14,3 +14,7 @@ persisted recovery records, and all terminal/error paths report through
 The bridge is non-copyable because it owns a worker thread, queued invocations,
 and GUI-visible state. Pass it by QObject ownership/reference; never copy it
 between windows or threads.
+
+`storageConfigured` is true only after a non-empty database path is injected;
+it does not claim that SQLite is open. Consumers should continue to use
+`statusChanged` for the asynchronous open/close result.
