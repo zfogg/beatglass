@@ -1676,6 +1676,7 @@ ApplicationWindow {
                             window.recursiveCatalogActive = true
                             window.catalogDiagnostic = window.libraryCatalogBridge.lastDiagnostic
                             window.announceVisualizationRecovery(window.recursiveCatalogRows.length + " recursive catalog entries found; use the folder browser to inspect or select a source.")
+                            recursiveResultsView.forceActiveFocus()
                         }
                     }
                     Button {
