@@ -31,4 +31,9 @@ for name, entry in matrix.get("platforms", {}).items():
         raise SystemExit(f"qualification bundle has unattempted platform: {name}")
     if entry.get("status") == "qualified" and entry.get("execution_blockers"):
         raise SystemExit(f"qualification bundle has unresolved blockers: {name}")
+    if entry.get("status") == "pending":
+        if entry.get("native_execution_attempted") is False and "| no |" not in report:
+            raise SystemExit(f"qualification report is missing pending attempt status: {name}")
+        if any(blocker not in report for blocker in entry.get("execution_blockers", [])):
+            raise SystemExit(f"qualification report is missing blocker: {name}")
 print("Qualification bundle verified")
