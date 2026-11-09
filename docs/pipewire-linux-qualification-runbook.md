@@ -464,3 +464,5 @@ Qualification report renderers escape evidence paths, reasons, and blockers for 
 Markdown reports escape all identity and evidence cells; consume the raw matrix JSON when exact values are required.
 
 Reviewers should validate the raw matrix JSON before accepting a rendered report as qualification evidence.
+
+Rendered reports are convenience views; only validated matrix JSON and captured native artifacts support a qualification decision.
