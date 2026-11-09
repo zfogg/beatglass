@@ -320,9 +320,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null
             && (window.playbackBridge.state === "Playing" || window.playbackBridge.state === "Paused")
-        onActivated: window.playbackBridge.state === "Paused"
-            ? window.playbackBridge.resume()
-            : window.playbackBridge.pause()
+        onActivated: window.togglePlaybackPause()
     }
     Shortcut {
         objectName: "visualizationResumeShortcut"
