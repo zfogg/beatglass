@@ -1,5 +1,9 @@
 # Progress and handoff
 
+PipeWire sink descriptions that are empty or whitespace-only now fall back to
+the validated node name, preventing unusable display labels. Portable coverage
+is in `python tests/unit/check_pipewire_description_validation_contract.py`.
+
 PipeWire discovery now rejects whitespace-only node names as well as malformed
 serials, ensuring every surfaced sink has a usable display identity. Portable
 coverage is in

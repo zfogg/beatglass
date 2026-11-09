@@ -19,7 +19,8 @@ void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, 
   if (!type || std::strcmp(type, PW_TYPE_INTERFACE_Node) || !cls || std::strcmp(cls, "Audio/Sink") ||
       !serial || !*serial || std::string(serial).find_first_not_of(" \t\r\n") == std::string::npos ||
       !name || !*name || std::string(name).find_first_not_of(" \t\r\n") == std::string::npos) return;
-  nodes_[id] = {serial, name, desc && *desc ? desc : name};
+  const std::string description = desc && *desc ? desc : "";
+  nodes_[id] = {serial, name, description.find_first_not_of(" \t\r\n") == std::string::npos ? name : description};
 }
 void RegistrySnapshot::remove(std::uint32_t id) { nodes_.erase(id); }
 std::vector<Sink> RegistrySnapshot::sinks() const {
