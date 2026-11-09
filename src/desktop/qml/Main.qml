@@ -1358,11 +1358,13 @@ ApplicationWindow {
         window.activeWorkerOutcomeAnnouncementKey = ""
         if (window.analysisJobBridge && window.analysisJobBridge.retry !== undefined && window.analysisJobBridge.canRetry) {
             window.analysisJobBridge.retry()
+            window.clearVisualizationForCaptureState("Analysis retry queued; previous visualization evidence is stale until completion.")
             window.announceVisualizationRecovery("Analysis retry queued; focus will return after a fresh accepted result.")
             return true
         }
         if (typeof storageRecovery !== "undefined" && storageRecovery.retryAnalysis !== undefined && storageRecovery.analysisRetryable) {
             storageRecovery.retryAnalysis()
+            window.clearVisualizationForCaptureState("Analysis retry admitted; previous visualization evidence is stale until completion.")
             window.announceVisualizationRecovery("Analysis retry admitted; focus will return after a fresh accepted result.")
             return true
         }
