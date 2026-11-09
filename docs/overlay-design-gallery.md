@@ -55,6 +55,7 @@ screenshots.
 | [Level](overlay-level-card.svg) | live audio level and headroom guidance |
 | [Now playing](overlay-track-card.svg) | track context alongside live analysis |
 | [Up next](overlay-queue-card.svg) | current and queued track context |
+| [Session summary](overlay-session-summary-card.svg) | session duration, tracks, health |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
