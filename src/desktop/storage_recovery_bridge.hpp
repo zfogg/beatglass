@@ -32,11 +32,15 @@ public:
   QStringList retryableRunIds() const { return retryableRunIds_; }
   QStringList retryableRunDetails() const { return retryableRunDetails_; }
   QString selectedRunId() const { return selectedRunId_; }
+  /** Queue storage open on the dedicated worker; returns before SQLite work begins. */
   Q_INVOKABLE void open();
+  /** Queue storage close on the dedicated worker and clear GUI-owned state immediately. */
   Q_INVOKABLE void close();
+  /** Queue a durable retryable-run refresh; results are delivered via retryableRunsChanged. */
   Q_INVOKABLE void refreshRetryableRuns();
   /** Discard only terminal persisted recovery; active jobs retain selection and report rejection. */
   Q_INVOKABLE void discardSelectedRun();
+  /** Queue an atomic batch discard; source audio is never modified. */
   Q_INVOKABLE void discardRuns(const QStringList& ids);
   /** Retry the selected persisted run using its stored source and decoder snapshot. */
   Q_INVOKABLE void retrySelectedRun();
@@ -48,7 +52,9 @@ public:
   Q_INVOKABLE void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode);
   /** Invalidate the selected identity and immediately submit a fresh worker-owned analysis. */
   Q_INVOKABLE void reanalyze(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode);
+  /** Request cancellation of the worker-owned active analysis. */
   Q_INVOKABLE void cancelAnalysis();
+  /** Retry the retained active analysis handle after cancellation or failure. */
   Q_INVOKABLE void retryAnalysis();
   bool cacheHit() const { return cacheHit_; }
   QString cachedResult() const { return cachedResult_; }
