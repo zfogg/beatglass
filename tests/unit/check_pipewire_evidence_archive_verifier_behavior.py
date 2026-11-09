@@ -47,4 +47,12 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(manifest))
     result = subprocess.run([sys.executable, str(verifier), str(duplicate)], capture_output=True, text=True)
     if result.returncode == 0 or "duplicate archive entry" not in result.stderr + result.stdout: raise SystemExit("duplicate archive entry was accepted")
-print("PipeWire evidence archive verifier behavior passed (4 scenarios)")
+
+    traversal = root / "traversal.zip"
+    with zipfile.ZipFile(traversal, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("../escape.log", b"unsafe")
+        archive.writestr("evidence-manifest.json", json.dumps(manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(traversal)], capture_output=True, text=True)
+    if result.returncode == 0 or "unsafe archive entry" not in result.stderr + result.stdout: raise SystemExit("unsafe archive entry was accepted")
+print("PipeWire evidence archive verifier behavior passed (5 scenarios)")
