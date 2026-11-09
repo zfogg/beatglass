@@ -1289,6 +1289,8 @@ ApplicationWindow {
             return false
         }
         const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1)
+        if (accepted)
+            window.clearVisualizationForCaptureState("Selected source is playing; previous visualization evidence is stale until fresh accepted analysis.")
         window.announceCaptureRecoveryState(accepted
             ? "Playing selected Library source " + window.selectedName + "."
             : "Selected Library source could not be opened for playback.")
@@ -1305,6 +1307,8 @@ ApplicationWindow {
             return false
         }
         const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1)
+        if (accepted)
+            window.clearVisualizationForCaptureState("Selected source reopened; previous visualization evidence is stale until fresh accepted analysis.")
         window.announceCaptureRecoveryState(accepted
             ? "Selected Library source reopened for playback."
             : "Selected Library source could not be reopened for playback.")
