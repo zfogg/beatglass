@@ -191,7 +191,9 @@ TapStatus OutputTap::status() {
       get(impl_->tap, kAudioTapPropertyFormat, format) != noErr ||
       format.mSampleRate != impl_->format.mSampleRate || format.mChannelsPerFrame != impl_->format.mChannelsPerFrame ||
       format.mFormatID != impl_->format.mFormatID || format.mFormatFlags != impl_->format.mFormatFlags ||
-      format.mBytesPerFrame != impl_->format.mBytesPerFrame || format.mBitsPerChannel != impl_->format.mBitsPerChannel) {
+      format.mBytesPerFrame != impl_->format.mBytesPerFrame || format.mBitsPerChannel != impl_->format.mBitsPerChannel ||
+      format.mFramesPerPacket != impl_->format.mFramesPerPacket ||
+      format.mBytesPerPacket != impl_->format.mBytesPerPacket) {
     impl_->current = {TapState::interrupted, "Output disappeared, format changed, or tap callback failed; restart with a fresh epoch", TapFailure::backend_error};
   }
   return impl_->current;

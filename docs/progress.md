@@ -1,8 +1,11 @@
 # Progress and handoff
 
-The overlay opacity can be reset from the keyboard with `Ctrl+Alt+Shift+O`.
-The shortcut uses the native persistence bridge and announces either the 90%
-reset or a recovery message when the native edit is rejected.
+The macOS Core Audio tap status poll now treats packet geometry changes as a
+stream interruption alongside sample rate, channel, and byte-format changes.
+This prevents a format transition from being consumed under the old epoch.
+Portable coverage is in
+`python tests/unit/check_macos_tap_format_lifecycle_contract.py`; native
+device-format transition qualification remains pending.
 
 The overlay size presets are keyboard reachable with `Ctrl+Alt+O`, cycling
 Compact, Medium, and Large through the native resize bridge. Rejected resizes
