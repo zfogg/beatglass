@@ -9,4 +9,6 @@ for marker in ("verify_native_evidence_archive.py", "archive verification failed
     assert marker in source
 for marker in ("requested_summary", "requested_archive", "native_artifacts", "pending_reason"):
     assert marker in source
+for marker in ("host_os", "pending_command"):
+    assert marker in source
 print("PipeWire native runner contract verified (5 checks)")
