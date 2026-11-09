@@ -18,7 +18,12 @@ public:
   StorageOwner& operator=(const StorageOwner&) = delete;
   /** Validate configuration and open storage; clears a supplied diagnostic on entry and success, and failure leaves the owner closed. */
   bool open(const StorageConfig& config, std::string* diagnostic = nullptr);
-  /** Close storage on the owning worker. */
+  /**
+   * Close storage on the owning worker after submitted jobs are quiescent.
+   * Callers must stop/cancel and join work that can access the cache before
+   * closing; this operation invalidates the cache pointer and does not wait
+   * for executor jobs or marshal across threads.
+   */
   void close() noexcept;
   /** Return the open cache, or null while closed. */
   library_detail::SqliteCache* cache() noexcept { return cache_.get(); }
