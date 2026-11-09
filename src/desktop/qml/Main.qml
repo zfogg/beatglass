@@ -1721,6 +1721,7 @@ ApplicationWindow {
                         ToolTip.text: "Enumerate supported audio files in this folder and all descendant folders"
                         onClicked: {
                             window.clearSelectedAudio()
+                            browser.currentIndex = -1
                             window.recursiveCatalogRows = window.libraryCatalogBridge.browseRecursive(window.browseFolder, search.text)
                             window.recursiveCatalogActive = true
                             window.catalogDiagnostic = window.libraryCatalogBridge.lastDiagnostic
