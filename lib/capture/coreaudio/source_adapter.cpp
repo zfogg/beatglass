@@ -23,7 +23,12 @@ SourceAdapter::SourceAdapter(SourceEpochAllocator& epochs, std::unique_ptr<Sourc
 SourceAdapter::~SourceAdapter() { (void)stop(); }
 EnumerationResult SourceAdapter::enumerate() {
   if (!backend_) return {EnumerationOutcome::error, {}, SourceError::backend_error, "Core Audio backend unavailable"};
-  try { return backend_->enumerate(); }
+  try {
+    auto result = backend_->enumerate();
+    if (result.outcome == EnumerationOutcome::error && result.diagnostic.empty())
+      result.diagnostic = "Core Audio output enumeration failed";
+    return result;
+  }
   catch (...) { return {EnumerationOutcome::error, {}, SourceError::backend_error, "Core Audio enumeration failed"}; }
 }
 SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consumer consumer) {

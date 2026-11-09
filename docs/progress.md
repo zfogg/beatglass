@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio enumeration now guarantees a user-facing fallback diagnostic when a
+backend reports an error without text, avoiding a silent unavailable-device
+state. Portable coverage is in
+`python tests/unit/check_macos_enumeration_diagnostic_contract.py`.
+
 The FFT view now supports direct bin selection: clicking a spectrum bar or
 using Left/Right while focused selects a bounded frequency bin, draws a cursor,
 and exposes the selected bin through accessibility state. Waveform selection
