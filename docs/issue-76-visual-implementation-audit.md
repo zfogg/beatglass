@@ -733,6 +733,8 @@ When the overlay is unavailable, the recovery panel may show the persisted admis
 
 That historical diagnostic is dismissed when retry or discard is invoked, and restored only when a subsequent admission reports a new failed/cancelled result. Successful recovery therefore cannot leave old persisted rejection text visible.
 
+Invalid persisted opacity is covered as a distinct visible recovery state: restore applies the safe 90% fallback and announces the corrected value before any overlay relaunch.
+
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.
