@@ -71,7 +71,7 @@ ApplicationWindow {
     property string overlayRecoveryAnnouncement: ""
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
-    readonly property bool analysisCacheIdentityReady: cacheContent.text !== ""
+    readonly property bool analysisCacheIdentityReady: cacheContent.text.trim() !== "" && cacheEngine.text.trim() !== "" && cacheConfig.text.trim() !== "" && cacheMode.acceptableInput
         && cacheEngine.text !== "" && cacheConfig.text !== ""
         && (cacheMode.text === "offline" || cacheMode.text === "live")
     readonly property int recursiveAudioResultCount: {
