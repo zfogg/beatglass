@@ -940,6 +940,16 @@ TestCase {
         fakeThemePreferences.themeIndex = 0
     }
 
+    function test_themePreviewDescriptionIncludesMotionMode() {
+        fakeThemePreferences.reduceMotion = true
+        let app = shellWithPreferences.createObject(null)
+        let preview = findChild(app, "themePreview4")
+        verify(preview.Accessible.description.indexOf("Motion is reduced.") >= 0)
+        fakeThemePreferences.reduceMotion = false
+        verify(preview.Accessible.description.indexOf("Motion is full.") >= 0)
+        app.destroy()
+    }
+
     function test_themePalettesMatchDesignSystem() {
         let app = shell.createObject(null)
         compare(app.themeBackgrounds, ["#f2f4ef", "#10151c", "#000000", "#251f3e", "#102c43", "#332a1b"])

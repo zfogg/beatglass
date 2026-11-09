@@ -2176,7 +2176,7 @@ ApplicationWindow {
                                               + ". Palette background " + window.themeBackgrounds[index]
                                               + ", accent " + window.themeAccentColors[index]
                                               + ", foreground " + window.themeForegrounds[index]
-                                              + ". Use Left and Right to move, Home and End to jump, or Escape to return to the theme selector."
+                                              + ". Motion is " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full") + ". Use Left and Right to move, Home and End to jump, or Escape to return to the theme selector."
                         Accessible.role: Accessible.RadioButton
                         Accessible.value: (checked ? "selected" : "not selected")
                                               + "; " + window.themeAccentColors[index] + " accent"
