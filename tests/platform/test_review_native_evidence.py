@@ -113,3 +113,13 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertIn("linux:capture:invalid scenario status", result["blockers"])
             self.assertIn("linux:capture:unexpected evidence for non-pass status", result["blockers"])
+
+    def test_report_level_platform_and_gate_consistency_is_required(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"ready": True, "exit_gate_status": "PENDING",
+                "platforms": [{"platform": "linux", "scenarios": []}],
+                "platform_support_status": [{"platform": "windows", "status": "experimental"}]}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:platform identity mismatch", result["blockers"])
+            self.assertIn("report:ready status contradicts exit gate", result["blockers"])

@@ -13,6 +13,19 @@ def assess(report_path: Path, reviewer: str) -> dict:
     except (OSError, json.JSONDecodeError) as error:
         return {"native_review_schema": 1, "decision": "PENDING", "reviewer": reviewer.strip(), "blockers": [str(error)]}
     blockers = []
+    report_platforms = report.get("platforms")
+    if not isinstance(report_platforms, list) or not report_platforms:
+        blockers.append("report:platform inventory missing")
+    support = report.get("platform_support_status")
+    if isinstance(report_platforms, list) and isinstance(support, list):
+        report_names = {item.get("platform") for item in report_platforms if isinstance(item, dict)}
+        support_names = {item.get("platform") for item in support if isinstance(item, dict)}
+        if report_names != support_names:
+            blockers.append("report:platform identity mismatch")
+    if report.get("exit_gate_status") not in {None, "PENDING", "ACCEPTED"}:
+        blockers.append("report:invalid exit gate status")
+    if report.get("ready") is True and report.get("exit_gate_status") != "ACCEPTED":
+        blockers.append("report:ready status contradicts exit gate")
     seen_platforms = set()
     for platform in report.get("platforms", []):
         name = platform.get("platform", "unknown")
