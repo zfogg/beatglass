@@ -87,7 +87,7 @@ bool MonitorSession::pop(coreaudio::CaptureBlock& block) noexcept {
 }
 MonitorSession::Status MonitorSession::poll_status() noexcept {
   Status status;
-  status.active = static_cast<bool>(stream_);
+  status.active = static_cast<bool>(stream_) && !stream_->needs_restart();
   if (!stream_) return status;
   status.needs_restart = stream_->needs_restart();
   status.error_code = stream_->take_error();
