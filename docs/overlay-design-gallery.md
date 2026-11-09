@@ -83,6 +83,7 @@ screenshots.
 | [Feedback failed](overlay-feedback-failed-card.svg) | recoverable feedback failure state |
 | [Library search](overlay-library-search-card.svg) | local track search with overlay continuity |
 | [Library empty](overlay-library-empty-card.svg) | no-results guidance and add-folder action |
+| [Library loading](overlay-library-loading-card.svg) | indexing progress with live overlay continuity |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
