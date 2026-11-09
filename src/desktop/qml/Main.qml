@@ -2120,7 +2120,7 @@ ApplicationWindow {
                             ToolTip.text: "Selected source playback and metadata workflow status"
                             text: window.selectedAudioUrl.toString() === ""
                                   ? "Select an audio source to inspect and play it."
-                                  : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · analysis: " + (window.analysisJobBridge ? window.analysisJobBridge.status : "unavailable") + " · " + window.metadataStatus
+                                  : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · analysis: " + (window.analysisJobBridge === null ? "unavailable" : ((window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "in progress" : (window.analysisJobBridge.status === "Complete" ? "ready" : "retry available"))) + " · " + window.metadataStatus
                             Accessible.name: "Selected source workflow status"
                             Accessible.value: text
                             Accessible.role: Accessible.Status
