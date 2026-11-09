@@ -1729,6 +1729,7 @@ ApplicationWindow {
                         activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
                         onClicked: {
+                            window.clearSelectedAudio()
                             window.browseFolder = files.parentFolder
                             browser.currentIndex = -1
                             search.text = ""
