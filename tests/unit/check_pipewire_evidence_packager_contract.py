@@ -36,6 +36,8 @@ missing = [marker for marker in markers if marker not in source]
 for marker in ("capture_plan", "capture_plan_sha256", "capture_plan_validated"):
     if marker not in source:
         raise SystemExit(f"missing capture-plan manifest marker: {marker}")
+if '"capture_plan", "capture_plan_sha256"' not in source:
+    raise SystemExit("capture plan is not packaged as an artifact")
 if missing:
     raise SystemExit(f"missing evidence-packager contract markers: {missing}")
 print(f"PipeWire evidence packager contract passed ({len(markers)} checks)")
