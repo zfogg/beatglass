@@ -1817,6 +1817,14 @@ ApplicationWindow {
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
                         Keys.onEnterPressed: window.activateEntry(currentIndex)
                         Keys.onSpacePressed: window.activateEntry(currentIndex)
+                        Keys.onBackspacePressed: {
+                            if (files.parentFolder.toString() !== "") {
+                                window.browseFolder = files.parentFolder
+                                window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
+                                browser.currentIndex = -1
+                                event.accepted = true
+                            }
+                        }
                         Keys.onEscapePressed: { window.clearSelectedAudio(); search.forceActiveFocus() }
                         ScrollBar.vertical: ScrollBar {}
                         delegate: ItemDelegate {
