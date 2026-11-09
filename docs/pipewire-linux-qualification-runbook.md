@@ -117,3 +117,5 @@ ative_junit_exists: true for qualified handoffs.
 Qualified summaries must include a non-empty `native_test_discovery` record in addition to the archived discovery JSON.
 ative_test_discovery record in addition to the archived discovery JSON.
 The summary discovery/JUnit digests are cross-checked against the transferred archive bytes.
+If present, summary `native_test_discovery.count` must match the archived discovery inventory count.
+ative_test_discovery.count must match the archived discovery inventory count.
