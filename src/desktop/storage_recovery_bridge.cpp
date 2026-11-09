@@ -186,6 +186,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
       if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
       analysisStatus_ = QStringLiteral("Analysis idle · reanalysis required"); emit analysisStatusChanged();
     }
+    if (ok && text.contains(QStringLiteral("retryable recovery runs discarded"))) { analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged(); }
     emit statusChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids, const QStringList& details) {

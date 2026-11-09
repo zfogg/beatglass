@@ -12,3 +12,5 @@ recovery operation.
 Batch discard applies the same stale-result and progress reset before queueing.
 Both discard paths also clear stale retry/error state before the destructive
 operation begins.
+When batch discard completes successfully, the bridge returns the analysis
+status to `Analysis idle` while the refreshed run list removes discarded rows.
