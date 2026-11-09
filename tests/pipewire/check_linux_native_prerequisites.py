@@ -70,4 +70,6 @@ if missing:
     print("Missing Linux PipeWire prerequisites: " + ", ".join(missing), file=sys.stderr)
     print("Install PipeWire development headers and rerun CMake with BEATGLASS_BUILD_PIPEWIRE=ON", file=sys.stderr)
     raise SystemExit(1)
-print("Linux PipeWire prerequisites available; configure and run pipewire_tests")
+version = subprocess.run(["pkg-config", "--modversion", "libpipewire-0.3"], check=False,
+                         stdout=subprocess.PIPE, text=True).stdout.strip()
+print(f"Linux PipeWire prerequisites available; libpipewire-0.3={version}; configure and run pipewire_tests")
