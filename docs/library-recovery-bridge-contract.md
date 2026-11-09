@@ -40,3 +40,5 @@ flight, allowing consumers to disable duplicate lifecycle actions safely.
 `recoveryAvailable` is true when the latest worker refresh contains at least
 one retryable persisted run; it is false after close, refresh failure, or an
 empty recovery list.
+Changing the database path is subject to the same transition guard; path
+ownership cannot change underneath an in-flight close or open.
