@@ -67,6 +67,8 @@ At least one captured object must be an `Audio/Sink`; unrelated nodes alone do
 not provide native output evidence.
 The Audio/Sink entry must retain non-empty `object.serial` and `node.name` for
 deterministic target selection.
+Serials and node names must be unique among Audio/Sink entries so selection is
+never ambiguous.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an

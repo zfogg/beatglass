@@ -44,6 +44,9 @@ for item in manifest["inventory"]:
     props = item["info"]["props"]
     if props.get("media.class") == "Audio/Sink" and (not str(props.get("object.serial", "")).strip() or not str(props.get("node.name", "")).strip()):
         raise SystemExit("Audio/Sink must retain serial and node name")
+sinks = [item["info"]["props"] for item in manifest["inventory"] if item["info"]["props"].get("media.class") == "Audio/Sink"]
+if len({p["object.serial"] for p in sinks}) != len(sinks) or len({p["node.name"] for p in sinks}) != len(sinks):
+    raise SystemExit("Audio/Sink serials and node names must be unique")
 if any(not isinstance(item.get("id"), int) or item["id"] < 0 for item in manifest["inventory"]):
     raise SystemExit("manifest inventory entries must have non-negative numeric ids")
 ids = [item["id"] for item in manifest["inventory"]]
