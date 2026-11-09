@@ -1422,7 +1422,7 @@ ApplicationWindow {
         window.overlayRecoveryAttemptCount = 0
         window.overlayRecoveryPausedByUser = true
         window.announceCaptureRecoveryState("DJ overlay recovery paused; monitoring continues and retry can be started again from this page.")
-        clearOverlaySafeMode.forceActiveFocus()
+        resumeOverlayRecovery.forceActiveFocus()
     }
     function quitApplication() {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
