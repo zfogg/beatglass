@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Native overlay automatic recovery disabled</title>
+  <desc id="desc">A settings state confirms automatic recovery is disabled and explains how the user can restore the overlay manually.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <text x="96" y="112" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Automatic recovery off</text>
+  <text x="96" y="144" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">The native overlay will wait for your explicit restore action.</text>
+  <rect x="96" y="190" width="728" height="102" rx="16" fill="#17243c"/>
+  <text x="124" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Manual recovery only</text>
+  <text x="124" y="258" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Monitoring continues safely without a native window.</text>
+  <text x="124" y="282" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Display 1 · saved layout retained · no automatic retries.</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">Restore from the tray or turn automatic recovery back on.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">This preference affects the native window only, not capture.</text>
+  <rect x="96" y="438" width="236" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="214" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Enable auto recovery</text>
+  <rect x="350" y="438" width="178" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="439" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Keep manual</text>
+</svg>
