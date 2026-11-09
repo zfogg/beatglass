@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300" role="img" aria-labelledby="title desc">
+  <title id="title">Overlay theme preference card</title>
+  <desc id="desc">A theme preference card showing dark, light, and high-contrast options.</desc>
+  <rect width="760" height="300" rx="22" fill="#0f172a"/><rect x="32" y="28" width="696" height="244" rx="18" fill="#1e293b" stroke="#475569"/>
+  <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Overlay theme</text><text x="60" y="112" fill="#cbd5e1" font-family="sans-serif" font-size="14">Choose a contrast-safe presentation for the live overlay.</text>
+  <rect x="60" y="148" width="180" height="62" rx="10" fill="#0f172a" stroke="#60a5fa" stroke-width="2"/><text x="120" y="176" fill="#f8fafc" font-family="sans-serif" font-size="16" font-weight="700">Dark · selected</text><text x="118" y="197" fill="#cbd5e1" font-family="sans-serif" font-size="13">High contrast</text>
+  <rect x="290" y="148" width="180" height="62" rx="10" fill="#f8fafc" stroke="#cbd5e1"/><text x="356" y="176" fill="#0f172a" font-family="sans-serif" font-size="16" font-weight="700">Light</text><text x="351" y="197" fill="#475569" font-family="sans-serif" font-size="13">Readable</text>
+  <rect x="520" y="148" width="180" height="62" rx="10" fill="#000" stroke="#facc15" stroke-width="2"/><text x="554" y="176" fill="#facc15" font-family="sans-serif" font-size="16" font-weight="700">Contrast</text><text x="565" y="197" fill="#fff" font-family="sans-serif" font-size="13">AAA targets</text>
+</svg>
