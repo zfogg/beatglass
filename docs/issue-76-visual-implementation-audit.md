@@ -794,6 +794,8 @@ Unavailable-bridge and invalid-visual-state show fallbacks now restore the same 
 Display replacement recovery and explicit display selection failures now return focus to the display selector too, covering missing saved displays, native move failures, and visual-state reapply failures.
 After hiding the overlay, focus returns to the Hide control in the restored control window so keyboard users can continue from a stable action surface.
 
+Reopen selected playback now rechecks source identity at click time, preventing stale replacement requests after selection and playback converge.
+
 Refreshing playback outputs now returns focus to the output-device selector, making the refreshed device list immediately actionable from the keyboard.
 
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
