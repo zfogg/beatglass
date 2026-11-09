@@ -1313,4 +1313,15 @@ TestCase {
         verify(!app.overlayDisplayRecoveryPending)
         app.destroy()
     }
+    function test_hiddenOverlayRemainsHiddenAcrossVisualRecovery() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.hideOverlayAndRestoreControls()
+        verify(app.overlayHiddenByUser)
+        app.overlayDisplayRecoveryPending = true
+        verify(app.recoverOverlayAfterDisplayChange())
+        verify(app.overlayHiddenByUser)
+        verify(findChild(app, "restoreOverlay").enabled)
+        app.destroy()
+    }
 }
