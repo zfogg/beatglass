@@ -21,6 +21,8 @@ with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run([sys.executable, str(packager), str(summary), str(root / name)], env=env, capture_output=True, text=True)
         if result.returncode != 0: raise SystemExit(result.stderr or result.stdout)
     if (root / "first.zip").read_bytes() != (root / "second.zip").read_bytes(): raise SystemExit("fixed SOURCE_DATE_EPOCH did not produce reproducible ZIP bytes")
+    result = subprocess.run([sys.executable, str(packager), str(summary), str(root / "first.zip")], env=env, capture_output=True, text=True)
+    if result.returncode == 0 or "refusing to overwrite" not in result.stderr + result.stdout: raise SystemExit("existing output was overwritten")
     left = root / "left"; right = root / "right"; left.mkdir(); right.mkdir()
     left_log = left / "command.log"; right_log = right / "command.log"
     left_log.write_text("left", encoding="utf-8"); right_log.write_text("right", encoding="utf-8")
@@ -29,4 +31,4 @@ with tempfile.TemporaryDirectory() as directory:
     collision_summary.write_text(json.dumps(collision), encoding="utf-8")
     result = subprocess.run([sys.executable, str(packager), str(collision_summary), str(root / "collision.zip")], env=env, capture_output=True, text=True)
     if result.returncode == 0 or "colliding archive names" not in result.stderr + result.stdout: raise SystemExit("colliding evidence names were accepted")
-print("PipeWire evidence packager behavior passed (2 scenarios)")
+print("PipeWire evidence packager behavior passed (3 scenarios)")
