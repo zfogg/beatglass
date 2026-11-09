@@ -31,6 +31,9 @@ if(BUILD_TESTING)
   add_test(NAME pipewire_manifest_capture_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_manifest_contract.py)
   set_tests_properties(pipewire_manifest_capture_contract PROPERTIES LABELS unit TIMEOUT 10)
+  add_test(NAME pipewire_manifest_validator_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_manifest_validator_contract.py)
+  set_tests_properties(pipewire_manifest_validator_contract PROPERTIES LABELS unit TIMEOUT 10)
   add_test(NAME pipewire_preflight_inventory_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_preflight_inventory_contract.py)
   set_tests_properties(pipewire_preflight_inventory_contract PROPERTIES LABELS unit TIMEOUT 10)
