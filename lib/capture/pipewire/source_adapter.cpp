@@ -126,6 +126,7 @@ public:
   bool reacquire(const std::string& serial, std::uint64_t epoch,
                  std::uint32_t sample_rate, std::uint32_t channels) override {
     if (!valid_serial(serial) || !epoch || !sample_rate || !channels) return false;
+    if (epoch == session_.epoch()) return false;
     session_.reset();
     return session_.start(serial, epoch, sample_rate, channels);
   }
