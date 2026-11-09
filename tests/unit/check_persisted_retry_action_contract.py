@@ -11,8 +11,9 @@ required = [
     "Q_PROPERTY(bool analysisRetryable",
     "retrySelectedRun()",
     "retryableRunIds",
+    "dedicated QThread",
 ]
-missing = [marker for marker in required if marker not in qml + bridge]
+missing = [marker for marker in required if marker not in qml + bridge + (root / "docs/library-recovery-bridge-contract.md").read_text(encoding="utf-8")]
 if missing:
     raise SystemExit("Missing persisted retry action markers: " + ", ".join(missing))
 if "Retry rejected: no persisted run selected" not in source:
