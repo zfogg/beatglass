@@ -787,6 +787,7 @@ ApplicationWindow {
             ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName)
             : window.overlayPreferredScreenIndex
         window.overlayDisplaySelectionRequired = window.overlayBridge.screenNames.length > 0 && savedIndex < 0
+        window.overlayDisplayRecoveryPending = window.overlayDisplaySelectionRequired
         return savedIndex >= 0
     }
     function restoreOverlayVisualStateFromBridge() {
