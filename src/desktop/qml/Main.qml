@@ -3330,12 +3330,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled ? "Resume playback while retaining the accepted visualization snapshot." : "Playback must be paused to resume it."
                     ToolTip.text: enabled ? "Resume playback without clearing the accepted snapshot" : "Resume is available when playback is paused"
-                    onClicked: {
-                        const resumed = window.playbackBridge.resume()
-                        window.announceVisualizationRecovery(resumed
-                            ? "Playback resumed; accepted snapshot retained."
-                            : "Playback resume failed; the playback state was unchanged.")
-                    }
+                    onClicked: window.togglePlaybackPause()
                 }
                 Button {
                     objectName: "stopVisualizationPlayback"
