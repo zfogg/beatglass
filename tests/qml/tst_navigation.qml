@@ -2140,4 +2140,16 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_hiddenRecoveryAnnouncementConfirmsGeometry() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.hideOverlayAndRestoreControls()
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        app.overlayDisplayRecoveryPending = true
+        verify(app.recoverOverlayAfterDisplayChange())
+        verify(app.overlayHiddenByUser)
+        verify(app.overlayRecoveryAnnouncement.indexOf("position 640, 120") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("size 620 by 280 pixels") >= 0)
+        app.destroy()
+    }
 }

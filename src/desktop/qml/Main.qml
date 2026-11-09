@@ -1385,7 +1385,10 @@ ApplicationWindow {
         if (window.overlayDisplayRecoveryPending) {
             window.overlayDisplayRecoveryPending = false
             if (window.overlayHiddenByUser) {
-                window.announceCaptureRecoveryState("DJ overlay display recovered; it remains hidden by user request. Use Restore overlay when ready.")
+                const hiddenGeometry = window.overlayBridge.geometry
+                const hiddenGeometrySummary = hiddenGeometry && hiddenGeometry.width > 0 && hiddenGeometry.height > 0
+                    ? " at position " + hiddenGeometry.x + ", " + hiddenGeometry.y + ", size " + hiddenGeometry.width + " by " + hiddenGeometry.height + " pixels" : ""
+                window.announceCaptureRecoveryState("DJ overlay display recovered" + hiddenGeometrySummary + "; it remains hidden by user request. Use Restore overlay when ready.")
                 return true
             }
             if (!window.overlayBridge.showOverlay()) {
