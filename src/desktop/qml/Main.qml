@@ -74,6 +74,20 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayHideShortcut"
+        sequence: "Ctrl+Alt+H"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            if (window.overlayHiddenByUser)
+                window.showOverlayAndHideControls()
+            else
+                window.hideOverlayAndRestoreControls()
+        }
+    }
+    Shortcut {
         objectName: "overlayOpacityResetShortcut"
         sequence: "Ctrl+Alt+Shift+O"
         context: Qt.ApplicationShortcut
