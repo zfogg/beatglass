@@ -23,6 +23,7 @@ TEST_CASE("registry discovery de-duplicates a sink serial across registry global
   const auto sinks = nodes.sinks();
   REQUIRE(sinks.size() == 1);
   CHECK(sinks.front().serial == "same");
+  CHECK(sinks.front().description == "Second");
 }
 TEST_CASE("registry snapshot handles fallback names and removal") {
   beatglass::pipewire::RegistrySnapshot nodes;
