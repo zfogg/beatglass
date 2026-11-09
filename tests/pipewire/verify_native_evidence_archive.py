@@ -43,9 +43,11 @@ with zipfile.ZipFile(archive_path) as archive:
     except ValueError:
         raise SystemExit("evidence manifest has malformed archive timestamp")
     artifacts = manifest.get("artifacts", [])
-    if not artifacts:
+    if not isinstance(artifacts, list) or not artifacts:
         raise SystemExit("evidence manifest contains no artifacts")
-    if len({artifact.get("name") for artifact in artifacts}) != len(artifacts):
+    if any(not isinstance(artifact, dict) or not isinstance(artifact.get("name"), str) or not artifact["name"].strip() or artifact["name"] == "evidence-manifest.json" or "/" in artifact["name"] or "\\" in artifact["name"] for artifact in artifacts):
+        raise SystemExit("malformed manifest artifact name")
+    if len({artifact["name"] for artifact in artifacts}) != len(artifacts):
         raise SystemExit("duplicate manifest artifact")
     declared = {artifact["name"] for artifact in artifacts}
     unexpected = names - declared - {"evidence-manifest.json"}
