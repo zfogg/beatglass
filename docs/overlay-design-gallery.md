@@ -153,6 +153,7 @@ screenshots.
 | [Native unavailable](overlay-native-unavailable-card.svg) | clear fallback when native overlay is unavailable |
 | [Native available](overlay-native-available-card.svg) | ready state before native overlay activation |
 | [Native activating](overlay-native-activating-card.svg) | native window activation progress |
+| [Native activated](overlay-native-activated-card.svg) | live native overlay ready state |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
