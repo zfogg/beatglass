@@ -860,3 +860,5 @@ Overlay recovery controls now include a Review overlay summary action for direct
 
 Reviewing the consolidated overlay summary now announces its settings revision and pending recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_review_announce_contract.py`.
 
+The consolidated overlay summary review action now has a global `Ctrl+Alt+Shift+M` shortcut. Portable coverage is in `python tests/unit/check_overlay_summary_shortcut_contract.py`.
+
