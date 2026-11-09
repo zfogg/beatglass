@@ -3342,7 +3342,7 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
-                    ToolTip.text: "Visualization data availability and next action"
+                    ToolTip.text: "Visualization data availability and next action; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                 }
                 Label {
                     objectName: "visualizationLoadState"
