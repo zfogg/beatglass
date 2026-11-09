@@ -562,7 +562,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryResults() }
     Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryResults() }
     Shortcut { objectName: "libraryRecursiveResultsFocusShortcut"; sequence: "Ctrl+Alt+Shift+R"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: window.focusLibraryResults() }
-    Shortcut { objectName: "libraryRecursiveReturnShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; window.returnFromRecursiveResults() } }
+    Shortcut { objectName: "libraryRecursiveReturnShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: window.returnLibraryFromRecursiveShortcut() }
     Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus(); window.announceVisualizationRecovery("Library tab focused.") } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
@@ -953,6 +953,10 @@ ApplicationWindow {
         recursiveResultsView.currentIndex = -1
         search.text = ""
         window.resetLibraryBrowserSelection("Returned to the current folder browser; the filter, entry selection, and selected source were cleared.")
+    }
+    function returnLibraryFromRecursiveShortcut() {
+        navigation.currentIndex = 0
+        window.returnFromRecursiveResults()
     }
     function toggleLibrarySort(target) {
         window.sortDescending = !window.sortDescending
