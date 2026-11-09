@@ -81,3 +81,4 @@ The portable behavior fixture can be run with
 checks a valid archive plus rejection of unlisted, tampered, duplicate-entry,
 and traversal-style artifacts. Empty evidence manifests are rejected as well,
 so a qualified handoff always contains at least one archived artifact.
+The manifest must also carry a non-empty repository commit identity.

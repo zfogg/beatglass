@@ -20,6 +20,8 @@ with zipfile.ZipFile(archive_path) as archive:
     manifest = json.loads(archive.read("evidence-manifest.json"))
     if manifest.get("format") != "beatglass-native-pipewire-evidence-v1" or not manifest.get("qualified"):
         raise SystemExit("invalid or unqualified evidence manifest")
+    if not isinstance(manifest.get("commit"), str) or not manifest["commit"].strip():
+        raise SystemExit("evidence manifest has no commit identity")
     artifacts = manifest.get("artifacts", [])
     if not artifacts:
         raise SystemExit("evidence manifest contains no artifacts")
