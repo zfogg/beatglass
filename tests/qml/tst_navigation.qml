@@ -1164,7 +1164,7 @@ TestCase {
         verify(focusShortcut.enabled)
         compare(focusShortcut.context, Qt.ApplicationShortcut)
         let pageShortcut = findChild(app, "overlayPausedRecoveryPageShortcut")
-        compare(pageShortcut.sequence, "Ctrl+Alt+Shift+P")
+        compare(pageShortcut.sequence, "Ctrl+Alt+Shift+O")
         verify(pageShortcut.enabled)
         verify(findChild(app, "overlayPausedRecoveryPageShortcutHint").visible)
         compare(app.navigation.currentIndex, 1)
