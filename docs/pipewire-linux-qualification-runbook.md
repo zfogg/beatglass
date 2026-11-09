@@ -35,6 +35,8 @@ Generate the cross-platform gate scaffold with
 `python tests/pipewire/qualification_matrix.py evidence/qualification-matrix.json`;
 it records Linux, Windows, and macOS targets, status, and pending reasons while
 native evidence is collected on each host.
+Pass `--summary evidence/native-summary.json` to merge a runner summary's
+qualified status and artifact paths into the host's matrix entry.
 Runner summaries carry the same matrix schema and a per-host matrix status,
 so archived Linux results can be merged into the cross-platform report without
 guessing whether a host was pending or qualified.
