@@ -33,4 +33,6 @@ if "Persisted recovery refreshed" not in source:
     raise SystemExit("Recovery refresh must publish completion status")
 if "Persisted recovery selected" not in source:
     raise SystemExit("Recovery selection must publish a lifecycle status")
+if "Persisted recovery selection cleared" not in source:
+    raise SystemExit("Recovery selection clearing must publish a lifecycle status")
 print(f"Persisted retry action contract verified ({len(required)} checks)")
