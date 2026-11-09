@@ -449,3 +449,6 @@ Review each blocker before scheduling a native rerun; once satisfied, preserve t
 After blockers are resolved, rerun the native runner from the recorded pending command and replace pending status only with captured host evidence.
 
 The runner's `native_execution_attempted` field distinguishes a real host attempt from a preflight-only pending record; keep it when merging summaries.
+
+A matrix may mark a platform qualified only after its summary records `native_execution_attempted: true`; pending entries retain blockers for scheduling.
+
