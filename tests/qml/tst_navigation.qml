@@ -940,6 +940,15 @@ TestCase {
         fakeThemePreferences.themeIndex = 0
     }
 
+    function test_themePalettesMatchDesignSystem() {
+        let app = shell.createObject(null)
+        compare(app.themeBackgrounds, ["#f2f4ef", "#10151c", "#000000", "#251f3e", "#102c43", "#332a1b"])
+        compare(app.themeForegrounds, ["#142c2c", "#f1f6f7", "#ffffff", "#f9f5ff", "#effaff", "#fff9e8"])
+        compare(app.themeAccentColors, ["#126f60", "#8ee5cc", "#8cffe2", "#d4a8ff", "#75d9ff", "#ffd45e"])
+        compare(findChild(app, "reduceMotion").Accessible.description, "Reduce animation and transition effects in the desktop presentation; currently disabled")
+        app.destroy()
+    }
+
     function test_themeSelectorOffersAllSixThemes() {
         let app = shell.createObject(null)
         let selector = findChild(app, "themeSelector")

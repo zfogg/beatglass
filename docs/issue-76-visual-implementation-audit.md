@@ -86,6 +86,8 @@ Hide failure keeps the control window visible, marks recovery pending, and moves
 
 Bridge recovery with unavailable persisted settings reactivates the control fallback and focuses Retry overlay, keeping recovery actionable until visual state can be restored.
 
+The six native QML theme palettes now match the design/v1 tokens for surfaces, foregrounds, and accents (Light, Dark, High contrast, Purple, Blue, Yellow); reduced-motion remains an explicit accessible preference and suppresses pulse/transition animation without changing focus or status semantics.
+
 Display loss reactivates the control-window fallback before focusing display selection, keeping recovery visible and keyboard reachable even when the native overlay was hidden.
 
 Reset appearance restores Light/full-motion defaults, announces the resulting state, and returns focus to the reset control so keyboard users can verify the change.
