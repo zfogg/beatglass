@@ -1,6 +1,7 @@
 #include "storage_recovery_bridge.hpp"
 #include "beatglass/library/analysis_coordinator.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
+#include "beatglass/library/details.hpp"
 #include <QMetaObject>
 #include <QTimer>
 #include <algorithm>
@@ -90,6 +91,12 @@ public slots:
     emit result(removed, removed ? QStringLiteral("Cached analysis invalidated") : QStringLiteral("No cached analysis found"));
   }
   void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
+    const auto details = beatglass::library::inspect_file(path.toStdString());
+    if (!details || !details->analysis_supported) {
+      emit result(false, QStringLiteral("Analysis rejected: decoder does not support this audio format"));
+      emit analysis(QStringLiteral("Analysis rejected"));
+      return;
+    }
     beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
     operation.publish = [this](const std::string& value) { emit analysisResult(QString::fromStdString(value)); };
