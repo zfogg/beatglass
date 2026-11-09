@@ -46,6 +46,8 @@ so pausing a retry remains discoverable.
 After `Stop recovery`, the card keeps a persistent `Recovery paused · monitoring
 continues` status so an intentional user pause is distinguishable from a native
 bridge failure; the next retry remains an explicit action.
+Focus moves directly to `Resume recovery` when the pause is requested, keeping
+the next lifecycle action keyboard-ready instead of targeting a hidden control.
 The paused card also exposes `Resume recovery`, which starts a fresh bounded
 attempt without requiring the user to rediscover the retry control.
 For keyboard-first recovery, `Ctrl+Alt+Shift+R` performs the same resume action;
