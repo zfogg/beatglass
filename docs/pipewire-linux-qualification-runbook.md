@@ -74,3 +74,5 @@ rejects duplicate or traversal-style ZIP entry names so an archive cannot
 silently substitute ambiguous evidence files.
 Unlisted ZIP entries are also rejected, so the manifest remains the complete
 inventory of transferred evidence.
+The verifier also cross-checks the manifest commit against the archived summary
+commit, preventing evidence from being relabeled under a different build.
