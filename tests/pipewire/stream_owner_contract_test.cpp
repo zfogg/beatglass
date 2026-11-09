@@ -5,6 +5,7 @@ namespace {
 class FakeOwner final : public beatglass::pipewire::detail::StreamOwner {
 public:
   bool connect(const Config& config, beatglass::pipewire::MonitorStream&) override {
+    if (active) return false;
     last = config; active = !config.serial.empty() && config.sample_rate != 0 && config.channels != 0;
     return active;
   }
@@ -25,6 +26,8 @@ TEST_CASE("stream owner contract preserves target and negotiated format lifecycl
   CHECK(owner.last.channels == 2);
   owner.stop();
   CHECK_FALSE(owner.connected());
+  REQUIRE(owner.connect({"sink-8", 44100, 2}, handoff));
+  CHECK(owner.connected());
 }
 
 TEST_CASE("stream owner rejects incomplete native stream configuration") {
