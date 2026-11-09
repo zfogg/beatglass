@@ -301,3 +301,11 @@ class NativeEvidenceReviewTest(unittest.TestCase):
                 "platforms": []}))
             result = review.assess(report, "release-owner")
             self.assertIn("report:ready report has documentation errors", result["blockers"])
+
+    def test_handoff_status_matches_ready_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"ready": True,
+                "handoff_status": "pending", "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:ready status contradicts handoff status", result["blockers"])
