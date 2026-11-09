@@ -923,6 +923,23 @@ TestCase {
         tryCompare(appearance, "text", "Theme: Light · Motion: reduced")
         app.destroy()
     }
+    function test_resetAppearanceRestoresDefaultsAndFocus() {
+        fakeThemePreferences.themeIndex = 4
+        fakeThemePreferences.reduceMotion = true
+        let app = shellWithPreferences.createObject(null)
+        app.selectedThemeIndex = 4
+        app.selectedTheme = "Blue"
+        let reset = findChild(app, "resetAppearance")
+        reset.clicked()
+        compare(app.selectedThemeIndex, 0)
+        compare(app.selectedTheme, "Light")
+        compare(fakeThemePreferences.reduceMotion, false)
+        verify(reset.activeFocus)
+        compare(findChild(app, "themePreferenceAnnouncement").text, "Appearance reset to Light theme with full motion.")
+        app.destroy()
+        fakeThemePreferences.themeIndex = 0
+    }
+
     function test_themeSelectorOffersAllSixThemes() {
         let app = shell.createObject(null)
         let selector = findChild(app, "themeSelector")
