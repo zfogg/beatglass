@@ -60,6 +60,7 @@ public:
   }
   void stop() noexcept override {
     active_ = false;
+    if (handoff_) handoff_->stop();
     if (loop_) pw_thread_loop_lock(loop_);
     if (stream_) {
       pw_stream_disconnect(stream_);
