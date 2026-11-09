@@ -57,6 +57,15 @@ qualification should verify both branches.
 The monitor backend consumes that classification by retrying one discovery
 attempt within the caller’s original timeout budget, allowing a PipeWire user
 daemon or permission session to recover without unbounded blocking.
+For native transition evidence, capture one JSON object per lifecycle event and
+validate it before packaging:
+
+```sh
+python tests/pipewire/validate_pipewire_transition_evidence.py evidence/pipewire-transitions.json
+```
+
+The validator requires `start`, `process`, `error`, and `restart` events,
+positive monotonic epochs, a discontinuity marker, and a native error code.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
