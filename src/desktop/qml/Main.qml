@@ -74,6 +74,19 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayDisplayFocusShortcut"
+        sequence: "Ctrl+Alt+D"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0
+        onActivated: {
+            navigation.currentIndex = 1
+            overlayDisplay.forceActiveFocus()
+            window.announceCaptureRecoveryState(window.overlayDisplaySelectionRequired
+                ? "Overlay display selection required; choose an available display."
+                : "Overlay display selector focused.")
+        }
+    }
+    Shortcut {
         objectName: "overlayReapplyShortcut"
         sequence: "Ctrl+Alt+Shift+R"
         context: Qt.ApplicationShortcut
