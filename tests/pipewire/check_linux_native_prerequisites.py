@@ -15,6 +15,11 @@ else:
     result = subprocess.run(["pkg-config", "--exists", "libpipewire-0.3"], check=False)
     if result.returncode:
         missing.append("libpipewire-0.3 development package")
+    else:
+        for flag in ("--cflags", "--libs"):
+            if subprocess.run(["pkg-config", flag, "libpipewire-0.3"], check=False,
+                              stdout=subprocess.PIPE, text=True).returncode:
+                missing.append(f"pkg-config {flag} for libpipewire-0.3")
 if missing:
     print("Missing Linux PipeWire prerequisites: " + ", ".join(missing), file=sys.stderr)
     print("Install PipeWire development headers and rerun CMake with BEATGLASS_BUILD_PIPEWIRE=ON", file=sys.stderr)
