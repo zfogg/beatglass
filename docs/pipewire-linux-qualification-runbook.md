@@ -429,3 +429,5 @@ Name handoff artifacts with their evidence role (archive-verifier versus native-
 Include the archive verifier version/commit in handoffs so later reviewers can reproduce transfer-integrity decisions.
 
 Record the repository revision used by the verifier alongside its command so archive decisions remain reproducible after subsequent changes.
+
+Record the verifier revision and command in the same handoff entry as the archive path to keep evidence review reproducible.
