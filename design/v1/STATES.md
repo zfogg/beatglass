@@ -14,6 +14,7 @@
 | Track analysis in progress | Active worker is processing the selected source | Show stage/progress, keep stale evidence hidden, and expose cancellation without mutating the audio file. |
 | Track analysis canceled | Worker stopped before publishing | Explain cleared evidence, offer retry/discard recovery, and state that audio is unchanged. |
 | Track analysis failed | Worker reported an error | Show actionable guidance, retry/discard recovery, and no stale visualization. |
+| Analysis queue paused | User paused the worker queue | Preserve accepted progress and completed results, expose resume/cancel actions, and never mutate source audio. |
 | DJ paused | User paused capture intentionally | Show no new estimates, preserve existing Library evidence, and offer resume/reacquire. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
