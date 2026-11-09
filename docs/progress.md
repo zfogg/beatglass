@@ -810,3 +810,5 @@ Pending overlay recovery descriptions now state that persisted settings remain r
 
 Persisted overlay geometry status now states settings retention during pending recovery and fallback. Portable coverage is in `python tests/unit/check_overlay_geometry_retention_contract.py`.
 
+Overlay interaction-mode status now states settings retention while recovery is pending. Portable coverage is in `python tests/unit/check_overlay_interaction_retention_contract.py`.
+
