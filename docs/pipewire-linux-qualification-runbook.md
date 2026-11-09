@@ -415,3 +415,5 @@ Record both verifier output and native-runner output in the handoff so reviewers
 For auditability, preserve the exact archive verifier command, native-runner command, and resulting artifact paths in the handoff record.
 
 Handoff records should retain verifier warnings (including fixture duplicate-entry warnings) alongside pass/fail status rather than discarding diagnostic output.
+
+Treat verifier warnings as review context: they do not turn a pending native qualification into a qualified host result.
