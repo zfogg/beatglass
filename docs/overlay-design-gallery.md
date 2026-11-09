@@ -76,6 +76,7 @@ screenshots.
 | [Release notes](overlay-release-notes-card.svg) | concise update highlights |
 | [Feedback](overlay-feedback-card.svg) | lightweight in-context feedback prompt |
 | [Feedback sent](overlay-feedback-submitted-card.svg) | confirmation and return-to-work state |
+| [Feedback skipped](overlay-feedback-dismissed-card.svg) | non-blocking feedback dismissal state |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
