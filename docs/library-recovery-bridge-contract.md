@@ -56,3 +56,6 @@ an unavailable recovery snapshot.
 Refresh requests made while storage is closed are rejected synchronously with
 `Storage error: storage is not open`; callers must reopen storage before asking
 the worker for a new persisted-recovery snapshot.
+Cache lookup and invalidation follow the same boundary and reject synchronously
+while storage is closed, preserving cache state until a configured database is
+open.

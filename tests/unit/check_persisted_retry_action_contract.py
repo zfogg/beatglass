@@ -92,3 +92,5 @@ if "if (!retryableRunIds_.isEmpty() || !retryableRunDetails_.isEmpty())" not in 
     raise SystemExit("Storage lifecycle resets must clear persisted recovery details with run ids")
 if 'if (!storageOpen_) { status_ = QStringLiteral("Storage error: storage is not open")' not in source:
     raise SystemExit("Recovery refresh must reject closed storage before queueing worker work")
+if 'Cache lookup rejected: storage is not open' not in source or 'Cache invalidation rejected: storage is not open' not in source:
+    raise SystemExit("Cache operations must reject closed storage before queueing worker work")
