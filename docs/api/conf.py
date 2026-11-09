@@ -20,3 +20,4 @@ exclude_patterns = [".worktree-*", "build", ".git", "tests/fixtures/generated"]
 
 hawkmoth_transform_default = "javadoc"
 myst_enable_extensions = ["colon_fence", "deflist", "fieldlist", "substitution"]
+suppress_warnings = ["toc.not_included", "myst.xref_missing", "cpp"]
