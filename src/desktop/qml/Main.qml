@@ -1691,7 +1691,7 @@ ApplicationWindow {
                         }
                         Label {
                             objectName: "selectedAudioDuration"
-                            text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
+                            text: window.selectedAudioUrl.toString() === "" ? "Duration unavailable" : (window.metadataStatus.indexOf(" | ") >= 0 ? "Metadata: " + window.metadataStatus : "Duration: unknown until decoded metadata is available")
                             Accessible.name: "Selected audio duration: " + text
                             ToolTip.text: "Selected source duration"
                             Accessible.value: text
