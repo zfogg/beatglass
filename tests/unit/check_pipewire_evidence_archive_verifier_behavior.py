@@ -113,4 +113,15 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=per_suite_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(per_suite)], capture_output=True, text=True)
     if result.returncode == 0 or "does not match its testcases" not in result.stderr + result.stdout: raise SystemExit("per-suite JUnit count mismatch was accepted")
-print("PipeWire evidence archive verifier behavior passed (10 scenarios)")
+
+    malformed_xml = root / "malformed-xml.zip"
+    malformed_payload = b"<testsuite><testcase name='capture'>"
+    malformed_xml_summary = dict(json.loads(summary), native_junit_sha256=hashlib.sha256(malformed_payload).hexdigest())
+    malformed_xml_artifacts = dict(artifacts, **{"native-summary.json": (json.dumps(malformed_xml_summary) + "\n").encode(), "pipewire-tests.xml": malformed_payload})
+    malformed_xml_entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in malformed_xml_artifacts.items()]
+    with zipfile.ZipFile(malformed_xml, "w") as archive:
+        for name, data in malformed_xml_artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=malformed_xml_entries)))
+    result = subprocess.run([sys.executable, str(verifier), str(malformed_xml)], capture_output=True, text=True)
+    if result.returncode == 0 or "malformed XML" not in result.stderr + result.stdout: raise SystemExit("malformed JUnit XML was accepted")
+print("PipeWire evidence archive verifier behavior passed (11 scenarios)")
