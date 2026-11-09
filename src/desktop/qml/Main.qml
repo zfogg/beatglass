@@ -395,9 +395,11 @@ ApplicationWindow {
                 window.overlayPendingOpacity = resetOpacity
                 window.overlaySettingsRevision += 1
                 window.announceCaptureRecoveryState("DJ overlay opacity reset to 90 percent.")
+                overlayOpacityControl.forceActiveFocus()
             } else {
                 window.syncOverlaySettingsStateFromBridge()
                 window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active.")
+                overlayOpacityControl.forceActiveFocus()
             }
         }
     }
