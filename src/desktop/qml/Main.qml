@@ -760,11 +760,17 @@ ApplicationWindow {
                 if (djOverlay.visible)
                     window.hideOverlayAndRestoreControls()
             } else {
-                window.syncOverlaySettingsFromBridge()
+                const synced = window.syncOverlaySettingsFromBridge()
                 window.overlayOpacityEditInFlight = false
                 window.overlayPendingOpacity = -1
-                window.announceCaptureRecoveryState("Overlay actions restored; native display settings are available.")
-                if (window.overlayWasVisibleBeforeAvailabilityLoss) {
+                if (synced) {
+                    window.announceCaptureRecoveryState("Overlay actions restored; native display settings are available.")
+                } else {
+                    window.overlayLaunchFallbackActive = true
+                    window.overlayDisplayRecoveryPending = true
+                    window.announceCaptureRecoveryState("Overlay bridge recovered, but settings remain unavailable; control-window fallback remains active.")
+                }
+                if (synced && window.overlayWasVisibleBeforeAvailabilityLoss) {
                     window.overlayWasVisibleBeforeAvailabilityLoss = false
                     window.recoverOverlayAfterDisplayChange()
                 }
