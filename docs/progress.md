@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Overlay shortcut guidance now covers every keyboard recovery and visual-control
+path: unlock, click-through, show/hide, display selection, retry, size,
+opacity, and saved-settings reapply.
+
 When click-through is active, `Ctrl+Alt+U` focuses the Unlock overlay action
 and announces that Enter will restore keyboard and pointer interaction.
 
