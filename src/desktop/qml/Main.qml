@@ -39,6 +39,8 @@ ApplicationWindow {
     property bool overlayPersistedDiagnosticDismissed: false
     property url browseFolder: ""
     property var catalogRows: []
+    property var recursiveCatalogRows: []
+    property bool recursiveCatalogActive: false
     property bool sortDescending: false
     property string selectedName: ""
     property url selectedAudioUrl: ""
@@ -403,6 +405,8 @@ ApplicationWindow {
         return window.restoreOverlayVisualStateFromBridge()
     }
     function refreshCatalog() {
+        window.recursiveCatalogActive = false
+        window.recursiveCatalogRows = []
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
             ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
         window.catalogDiagnostic = window.libraryCatalogBridge && window.libraryCatalogBridge.lastDiagnostic !== undefined
@@ -1220,6 +1224,19 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Button { text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: folderPicker.open() }
                     Button {
+                        text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
+                        enabled: window.libraryCatalogBridge !== null && window.browseFolder.toString() !== ""
+                        Accessible.name: "Add folder recursively"; Accessible.role: Accessible.Button
+                        Accessible.description: "Enumerate supported audio files in this folder and all descendant folders without following links."
+                        ToolTip.text: "Enumerate supported audio files in this folder and all descendant folders"
+                        onClicked: {
+                            window.recursiveCatalogRows = window.libraryCatalogBridge.browseRecursive(window.browseFolder, search.text)
+                            window.recursiveCatalogActive = true
+                            window.catalogDiagnostic = window.libraryCatalogBridge.lastDiagnostic
+                            window.announceVisualizationRecovery(window.recursiveCatalogRows.length + " recursive catalog entries found; use the folder browser to inspect or select a source.")
+                        }
+                    }
+                    Button {
                         text: "Up"; objectName: "parentFolder"
                         activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
@@ -1251,7 +1268,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "catalogResultCount"
-                    text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : "Catalog: " + window.catalogRows.length + " matching entries"
+                        text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : window.recursiveCatalogActive ? "Recursive catalog: " + window.recursiveCatalogRows.length + " entries" : "Catalog: " + window.catalogRows.length + " matching entries"
                     Accessible.name: "Catalog results: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
