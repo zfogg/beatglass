@@ -1560,7 +1560,9 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastResult !== ""
                                 text: visible ? ("Latest batch result: " + window.analysisJobBridge.batchLastResult) : ""
                                 Accessible.name: "Latest batch analysis result"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No batch analysis result is available."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
@@ -1569,6 +1571,7 @@ ApplicationWindow {
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
                                 + (visible && storageRecovery.status.indexOf("retryable recovery runs discarded") >= 0 ? " · " + storageRecovery.status : "")
                                 Accessible.name: "Persisted analysis recovery status: " + text
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible && storageRecovery.analysisStatus === "Analysis complete" ? "Analysis completed successfully; persisted retry selection is no longer active." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? storageRecovery.analysisStatus + "; persisted recovery remains retryable and the selected run stays actionable." : visible && storageRecovery.status === "Retryable run is active" && storageRecovery.selectedRunId !== "" ? "Selected run " + storageRecovery.selectedRunId + " is active; discard remains unavailable until it reaches a terminal state." : "Recovery status and persisted retryable runs."
                                 ToolTip.text: "Saved analysis recovery status and retryable runs"
                                 Accessible.role: Accessible.StaticText
@@ -1580,7 +1583,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.status.indexOf("Retry rejected:") >= 0
                                 text: visible ? ("Persisted retry decision: " + storageRecovery.status) : ""
                                 Accessible.name: "Persisted retry rejection reason"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No persisted retry rejection has been reported."
+                                Accessible.role: Accessible.Status
                                 ToolTip.text: "Why persisted analysis was kept retryable instead of being started"
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
@@ -1589,7 +1594,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 text: visible ? ("Analysis admission: " + storageRecovery.analysisStatus) : ""
                                 Accessible.name: "Analysis admission status"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "Analysis admission status is unavailable."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -1607,6 +1614,8 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisFrames !== undefined
                                 text: visible ? ("Persisted analysis progress: " + storageRecovery.analysisFrames + " frames") : ""
                                 Accessible.name: "Persisted analysis progress"
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
