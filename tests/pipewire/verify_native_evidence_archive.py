@@ -79,6 +79,13 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("evidence manifest has invalid platform identity")
     if manifest.get("platform") and manifest.get("platform") != summary_data.get("platform"):
         raise SystemExit("manifest platform does not match qualification summary")
+    if manifest.get("capture_plan"):
+        if (not isinstance(manifest["capture_plan"], str) or not manifest["capture_plan"].strip() or
+                manifest.get("capture_plan_validated") is not True):
+            raise SystemExit("invalid capture plan provenance")
+        capture_name = manifest["capture_plan"].replace("\\", "/").rsplit("/", 1)[-1]
+        if capture_name not in declared:
+            raise SystemExit("capture plan is not archived")
     if summary_data.get("qualified") is not True:
         raise SystemExit("qualification summary is not qualified")
     if summary_data.get("native_test_name_match") is not True:
