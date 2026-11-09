@@ -8,12 +8,12 @@ SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").re
 
 
 def main() -> None:
-    start = SOURCE.index("Keys.onEscapePressed: { window.recursiveCatalogActive = false")
+    start = SOURCE.index("Keys.onEscapePressed: { window.clearSelectedAudio(); window.recursiveCatalogActive = false")
     block = SOURCE[start : SOURCE.index(" }", start) + 2]
     assert "recursiveResultsView.currentIndex = -1" in block
     assert 'search.text = ""' in block
     assert "browser.currentIndex = -1" in block
-    assert "filter and entry selection were cleared" in block
+    assert "filter, entry selection, and selected source were cleared" in block
     assert "browser.forceActiveFocus()" in block
     assert "event.accepted = true" in block
 

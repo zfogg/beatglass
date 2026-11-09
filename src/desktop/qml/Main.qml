@@ -563,7 +563,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library folder browser focused.") } }
     Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; if (window.recursiveCatalogActive) recursiveResultsView.forceActiveFocus(); else browser.forceActiveFocus(); window.announceVisualizationRecovery(window.recursiveCatalogActive ? "Recursive Library results focused." : "Library folder results focused.") } }
     Shortcut { objectName: "libraryRecursiveResultsFocusShortcut"; sequence: "Ctrl+Alt+Shift+R"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; recursiveResultsView.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library results focused.") } }
-    Shortcut { objectName: "libraryRecursiveReturnShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; search.text = ""; browser.currentIndex = -1; navigation.currentIndex = 0; window.announceVisualizationRecovery("Returned to the current folder browser; the filter and entry selection were cleared."); browser.forceActiveFocus() } }
+    Shortcut { objectName: "libraryRecursiveReturnShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { window.clearSelectedAudio(); window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; search.text = ""; browser.currentIndex = -1; navigation.currentIndex = 0; window.announceVisualizationRecovery("Returned to the current folder browser; the filter, entry selection, and selected source were cleared."); browser.forceActiveFocus() } }
     Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus(); window.announceVisualizationRecovery("Library tab focused.") } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
@@ -2144,11 +2144,12 @@ ApplicationWindow {
                     Accessible.description: "Close recursive results and return to the current folder browser."
                     ToolTip.text: "Return to the current folder browser"
                     onClicked: {
+                        window.clearSelectedAudio()
                         window.recursiveCatalogActive = false
                         recursiveResultsView.currentIndex = -1
                         search.text = ""
                         browser.currentIndex = -1
-                        window.announceVisualizationRecovery("Returned to the current folder browser; the filter and entry selection were cleared.")
+                        window.announceVisualizationRecovery("Returned to the current folder browser; the filter, entry selection, and selected source were cleared.")
                         browser.forceActiveFocus()
                     }
                 }
@@ -2163,7 +2164,7 @@ ApplicationWindow {
                         id: recursiveResultsView
                         anchors.fill: parent; clip: true; model: window.recursiveCatalogRows
                         activeFocusOnTab: true; keyNavigationEnabled: true
-                        Keys.onEscapePressed: { window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; search.text = ""; browser.currentIndex = -1; window.announceVisualizationRecovery("Returned to the current folder browser; the filter and entry selection were cleared."); browser.forceActiveFocus(); event.accepted = true }
+                        Keys.onEscapePressed: { window.clearSelectedAudio(); window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; search.text = ""; browser.currentIndex = -1; window.announceVisualizationRecovery("Returned to the current folder browser; the filter, entry selection, and selected source were cleared."); browser.forceActiveFocus(); event.accepted = true }
                         Keys.onReturnPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
                         Keys.onEnterPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
                         Keys.onSpacePressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
