@@ -32,3 +32,6 @@ Calling `close()` while no storage is open reports `Storage already closed`
 without enqueueing redundant worker work.
 `storageTransitionPending` is true only while an asynchronous open/close is in
 flight, allowing consumers to disable duplicate lifecycle actions safely.
+`recoveryAvailable` is true when the latest worker refresh contains at least
+one retryable persisted run; it is false after close, refresh failure, or an
+empty recovery list.
