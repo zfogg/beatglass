@@ -1729,6 +1729,7 @@ ApplicationWindow {
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
                         onClicked: {
                             window.browseFolder = files.parentFolder
+                            browser.currentIndex = -1
                             window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
                             browser.forceActiveFocus()
                         }
