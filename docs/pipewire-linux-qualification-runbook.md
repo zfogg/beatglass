@@ -96,3 +96,4 @@ Qualified archives must include the preserved CTest discovery JSON in addition t
 The archive verifier parses those artifacts and requires a discovery `tests` list
 and a JUnit `testsuite`/`testsuites` root, catching truncated or mislabeled files.
 The discovery JSON must contain at least one registered test; an empty CTest listing is rejected as insufficient native evidence.
+Each discovered CTest entry must also have a non-empty name; unnamed registrations are rejected as malformed evidence.
