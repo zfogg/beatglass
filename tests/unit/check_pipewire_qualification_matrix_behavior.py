@@ -18,4 +18,12 @@ with tempfile.TemporaryDirectory() as directory:
     host_entry = matrix["platforms"][matrix["host_os"]]
     if host_entry["status"] != "pending" or host_entry["evidence"] != ["evidence/native-summary.json"] or host_entry["pending_reason"] != "host unavailable":
         raise SystemExit("runner summary was not merged into host matrix entry")
-print("PipeWire qualification matrix behavior passed (1 scenario)")
+    summary.write_text(json.dumps({"qualified": True, "native_artifacts": ["evidence/native-qualification.zip"]}), encoding="utf-8")
+    qualified = root / "qualified-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(qualified), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise SystemExit(result.stderr or result.stdout)
+    qualified_entry = json.loads(qualified.read_text(encoding="utf-8"))["platforms"][matrix["host_os"]]
+    if qualified_entry["status"] != "qualified" or qualified_entry["evidence"] != ["evidence/native-qualification.zip"]:
+        raise SystemExit("qualified runner summary was not merged into host matrix entry")
+print("PipeWire qualification matrix behavior passed (2 scenarios)")

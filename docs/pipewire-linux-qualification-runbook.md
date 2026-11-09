@@ -39,6 +39,8 @@ Pass `--summary evidence/native-summary.json` to merge a runner summary's
 qualified status and artifact paths into the host's matrix entry.
 The matrix behavior fixture validates this merge, including pending reasons and
 evidence paths, with `python tests/unit/check_pipewire_qualification_matrix_behavior.py`.
+It covers both pending and qualified host summaries so the report can advance
+as each native machine supplies evidence.
 Runner summaries carry the same matrix schema and a per-host matrix status,
 so archived Linux results can be merged into the cross-platform report without
 guessing whether a host was pending or qualified.
