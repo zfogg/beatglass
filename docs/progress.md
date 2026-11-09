@@ -961,5 +961,7 @@ Visualization empty-state tooltip now includes overlay recovery readiness. Porta
 
 Visualization load-state tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_load_tooltip_contract.py`.
 
+Visualization data/capture status description now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_status_description_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
