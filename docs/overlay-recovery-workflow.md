@@ -70,6 +70,8 @@ The reconnect announcement also states that recovery remains paused, so a
 display reconnect cannot silently restart native retries.
 While the display is still unavailable, the paused card separately reports that
 display recovery is pending and that resuming remains a manual choice.
+When the display returns, no native recovery attempt is started automatically
+while paused; the user must choose `Resume recovery`.
 
 ## Screenshot qualification
 
