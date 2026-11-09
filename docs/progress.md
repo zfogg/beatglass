@@ -838,3 +838,5 @@ The retained-settings review action now announces pending versus stable recovery
 
 Overlay settings-retention status now exposes the settings revision in its accessible value for recovery diagnostics. Portable coverage is in `python tests/unit/check_overlay_retention_revision_contract.py`.
 
+Retained-settings review announcements now include the current settings revision for recovery diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_revision_contract.py`.
+
