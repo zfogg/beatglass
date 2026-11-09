@@ -188,8 +188,9 @@ TapStatus OutputTap::status() {
   AudioStreamBasicDescription format{};
   const auto alive_status = get(impl_->device, kAudioDevicePropertyDeviceIsAlive, alive);
   const bool device_lost = alive_status != noErr || !alive;
+  const bool stream_lost = !first_output_stream(impl_->device, stream) || stream != impl_->stream;
   if (impl_->callback_fault.load(std::memory_order_acquire) || device_lost ||
-      !first_output_stream(impl_->device, stream) || stream != impl_->stream ||
+      stream_lost ||
       get(impl_->tap, kAudioTapPropertyFormat, format) != noErr ||
       format.mSampleRate != impl_->format.mSampleRate || format.mChannelsPerFrame != impl_->format.mChannelsPerFrame ||
       format.mFormatID != impl_->format.mFormatID || format.mFormatFlags != impl_->format.mFormatFlags ||
@@ -197,7 +198,7 @@ TapStatus OutputTap::status() {
       format.mFramesPerPacket != impl_->format.mFramesPerPacket ||
       format.mBytesPerPacket != impl_->format.mBytesPerPacket) {
     impl_->current = {TapState::interrupted, "Output disappeared, format changed, or tap callback failed; restart with a fresh epoch",
-                      device_lost ? TapFailure::device_lost : TapFailure::backend_error};
+                      (device_lost || stream_lost) ? TapFailure::device_lost : TapFailure::backend_error};
   }
   return impl_->current;
 }
