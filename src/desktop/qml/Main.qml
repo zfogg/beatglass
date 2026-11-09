@@ -2596,7 +2596,7 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastSource !== ""
                                 text: visible ? "Latest published source: " + window.analysisJobBridge.batchLastSource : ""
                                 Accessible.name: "Latest published analysis source: " + text
-                                Accessible.value: visible ? text : ""
+                                Accessible.value: visible ? text : "unavailable; no verified batch source"
                                 Accessible.role: Accessible.Status
                                 Accessible.description: visible ? "Source path associated with the most recently verified published batch result. The source remains read-only and tags are never written." : "No verified batch source has been published."
                                 ToolTip.text: "Source path for the latest verified batch result"
