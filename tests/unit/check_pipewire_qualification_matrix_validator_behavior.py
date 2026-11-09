@@ -42,10 +42,17 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     if result.returncode == 0 or "duplicate evidence path" not in result.stderr + result.stdout:
         raise SystemExit("duplicate evidence path was accepted")
+    invalid["platforms"]["Windows"]["execution_blockers"] = ["desktop audio permission"]
+    invalid["platforms"]["Windows"]["evidence"] = ["evidence.zip"]
+    invalid["host_os"] = "Windows"
+    path.write_text(json.dumps(invalid), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    if result.returncode == 0 or "qualified platform retains execution blockers" not in result.stderr + result.stdout:
+        raise SystemExit("qualified platform blockers were accepted")
     invalid["platforms"]["Windows"]["evidence"] = ["evidence.zip"]
     invalid["host_os"] = 42
     path.write_text(json.dumps(invalid), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid qualification matrix host" not in result.stderr + result.stdout:
         raise SystemExit("invalid matrix host was accepted")
-print("PipeWire qualification matrix validator behavior passed (7 scenarios)")
+print("PipeWire qualification matrix validator behavior passed (8 scenarios)")
