@@ -2,6 +2,7 @@
 import argparse
 import json
 import platform
+import sys
 import subprocess
 from pathlib import Path
 
@@ -19,4 +20,9 @@ payload = {"schema": "beatglass-pipewire-transitions-v1", "platform": platform.p
            "commit": commit, "events": events}
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+validator = Path(__file__).with_name("validate_pipewire_transition_evidence.py")
+result = subprocess.run([sys.executable, str(validator), str(args.output)], capture_output=True, text=True, check=False)
+if result.returncode:
+    args.output.unlink(missing_ok=True)
+    raise SystemExit(result.stderr or result.stdout or "captured transition evidence failed validation")
 print(f"Captured {len(events)} PipeWire transition events with commit {commit}")
