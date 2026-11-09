@@ -790,3 +790,5 @@ Selecting an overlay destination display now returns keyboard focus to current-d
 
 Showing the native overlay now announces the selected-display launch and persisted-settings restore before the control window transitions away. Portable coverage is in `python tests/unit/check_overlay_show_announce_contract.py`.
 
+Restoring the overlay now announces persisted display, geometry, and opacity reapplication before the control window transitions away. Portable coverage is in `python tests/unit/check_overlay_restore_announce_contract.py`.
+
