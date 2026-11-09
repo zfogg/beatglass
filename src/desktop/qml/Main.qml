@@ -953,6 +953,7 @@ ApplicationWindow {
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             overlayDisplay.forceActiveFocus()
