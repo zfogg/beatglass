@@ -455,6 +455,7 @@ ApplicationWindow {
         if (window.overlayBridge.screenIndex >= 0)
             if (!window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)) {
                 window.overlayDisplayRecoveryPending = true
+                window.announceCaptureRecoveryState("Persisted overlay display is unavailable; choose another display before restoring the overlay.")
                 window.show()
                 window.raise()
                 window.requestActivate()
