@@ -3895,7 +3895,7 @@ ApplicationWindow {
                         text: visible
                             ? (visualizationCanvas.modeHasData ? "Overlay estimates: accepted snapshot ready" : "Overlay estimates: waiting for accepted snapshot")
                             : "Overlay estimates unavailable"
-                        Accessible.name: "Overlay estimate readiness"
+                        Accessible.name: "Overlay estimate readiness, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; snapshot retained" : "; recovery ready")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && visualizationCanvas.modeHasData

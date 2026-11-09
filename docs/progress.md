@@ -900,5 +900,7 @@ Overlay live monitoring status now names ready versus recovery-pending state. Po
 
 Overlay estimate attribution now names ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_attribution_name_contract.py`.
 
+Overlay estimate readiness now names ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_readiness_name_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
