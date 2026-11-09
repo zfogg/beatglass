@@ -870,3 +870,5 @@ Overlay summary shortcut announcements now include settings revision and pending
 
 Overlay summary review action now exposes recovery state and settings revision in its accessible value. Portable coverage is in `python tests/unit/check_overlay_summary_action_value_contract.py`.
 
+Summary review action descriptions now include the current settings revision. Portable coverage is in `python tests/unit/check_overlay_summary_action_description_contract.py`.
+
