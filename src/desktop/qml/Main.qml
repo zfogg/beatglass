@@ -424,6 +424,18 @@ ApplicationWindow {
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
     Shortcut {
+        objectName: "bulkRecoveryDiscardShortcut"
+        sequence: "Ctrl+Alt+Shift+A"
+        context: Qt.ApplicationShortcut
+        enabled: typeof storageRecovery !== "undefined" && storageRecovery.discardRuns !== undefined
+            && storageRecovery.retryableRunIds.length > 0
+            && !window.storageReopenPending
+        onActivated: {
+            storageRecovery.discardRuns(storageRecovery.retryableRunIds)
+            window.announceVisualizationRecovery("All saved recovery runs discarded from the keyboard.")
+        }
+    }
+    Shortcut {
         objectName: "persistedRecoveryShortcut"
         sequence: "Ctrl+Shift+R"
         context: Qt.ApplicationShortcut
