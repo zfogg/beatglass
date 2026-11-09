@@ -101,3 +101,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Library batch cache complete | Configuration-refresh batch accepts three fresh results, reuses one, and withholds one mismatch | Reconcile fresh/reused/recovery outcomes without stale evidence or source mutation. |
 
 | Library batch cache recovery | One changed source is withheld after configuration-refresh identity mismatch while four outcomes remain preserved | Recover only the affected source, keep stale evidence hidden, and do not disturb accepted/reused batch results. |
+| Library batch cache recovery retrying | The verified source is reanalyzed alone while four accepted/reused outcomes remain preserved | Allow cancellation without disturbing completed results and publish refreshed evidence only after identity still matches. |
