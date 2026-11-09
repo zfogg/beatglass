@@ -51,6 +51,7 @@ static void error(void* data, uint32_t, int, int res, const char* message) {
 // Runs on a control thread only. A sync barrier gives a consistent initial
 // registry view; timeout and daemon errors never masquerade as an empty list.
 Discovery discover_sinks(std::chrono::milliseconds timeout) {
+  if (timeout <= std::chrono::milliseconds::zero()) return {{}, "PipeWire discovery timeout must be positive"};
   RegistryState state;
   pw_init(nullptr, nullptr);
   struct PwShutdown { ~PwShutdown() { pw_deinit(); } } pw_shutdown;
