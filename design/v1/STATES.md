@@ -7,6 +7,7 @@
 | Track playback queue | Selected Night Drive source is verified, ready to play, and queued as 1 of 1 | Bind playback and seeking to the verified source, expose queue and accepted-evidence status, and fail closed if the file changes. |
 | Track playback recovery | Queued Night Drive becomes unavailable before playback resumes | Stop playback, preserve source-attributed evidence, and offer locate/retry or explicit queue removal without substituting another file. |
 | Track playback retrying | Located source is being checked before queue restoration | Hold the queue, hide evidence during identity verification, and keep cancellation/removal explicit while the source remains untouched. |
+| Track playback restored | Located source matches the queued identity and playback is available again | Restore the queue, expose accepted evidence only after identity checks, and restart playback from a deterministic position. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
