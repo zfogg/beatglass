@@ -24,6 +24,10 @@ struct MonitorStatus {
   std::string serial;
   std::optional<MonitorFormat> format;
   std::uint64_t epoch{};
+  /** True only for a nonzero epoch that remains active. */
+  bool accepts_epoch(std::uint64_t candidate) const noexcept {
+    return active && candidate != 0 && candidate == epoch;
+  }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
