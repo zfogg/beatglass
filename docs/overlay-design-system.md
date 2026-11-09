@@ -22,3 +22,8 @@ the state, revision, and recovery instruction for assistive technology.
 The settings card keeps the state, retained values, and next action in one scan:
 
 ![Overlay settings card rendering](overlay-settings-card.svg)
+
+When no display is available, the same card keeps the recovery action stable and
+changes only the next-step copy:
+
+![Overlay disconnected card rendering](overlay-disconnected-card.svg)
