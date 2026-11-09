@@ -100,6 +100,7 @@ private:
   QString selectedRunId_;
   bool cacheHit_{};
   bool storageOpen_{};
+  bool storageTransitionPending_{};
   QString cachedResult_;
   QString analysisStatus_{QStringLiteral("Analysis idle")};
   QString analysisError_;
