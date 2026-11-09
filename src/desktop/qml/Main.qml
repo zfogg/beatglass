@@ -2823,9 +2823,17 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onActivated: if (window.overlayBridge) {
                             const sizes = [[250, 110], [310, 130], [430, 180]]
-                            window.overlayPreferredSizeIndex = currentIndex
-                            window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
-                            window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
+                            const requestedIndex = currentIndex
+                            const resized = window.overlayBridge.resizeOverlay(
+                                sizes[requestedIndex][0], sizes[requestedIndex][1])
+                            if (resized) {
+                                window.overlayPreferredSizeIndex = requestedIndex
+                                window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
+                            } else {
+                                window.syncOverlaySettingsStateFromBridge()
+                                currentIndex = window.overlayPreferredSizeIndex
+                                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
+                            }
                         }
                     }
                 }
