@@ -24,6 +24,8 @@ While `storageReopenPending` is true, the selector, Retry, and Discard controls 
 
 The same pending gate covers bulk Discard all: a reconnect cannot open a destructive confirmation against a stale pre-refresh run list. Bulk discard becomes available only after current retryable identities are restored.
 
+Both selected-run and bulk discard dialogs re-check storage availability on acceptance. If the bridge closes while confirmation is open, the destructive request is canceled, the user is told to reopen storage, and focus returns to Reopen storage.
+
 The C++ storage bridge now resets active analysis retryability, progress, result, and lifecycle status before reopening. Reopen cannot leave a stale active-job Retry enabled while persisted runs are being refreshed; the subsequent worker refresh repopulates only current retryable identities.
 
 Reopen also clears the bridge's prior `analysisReserved` and `analysisAdmissionResult` values before dispatching the open request. Queue admission text is therefore scoped to the prior connection and cannot be mistaken for a fresh reservation after reconnect.
