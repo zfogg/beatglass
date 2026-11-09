@@ -160,3 +160,6 @@ The Retry overlay focus shortcut Ctrl+Alt+Shift+Y remains available while the br
 
 A native bridge loss now restores the control window and focuses Retry overlay immediately, while retaining the saved display and size settings. This makes the next recovery action keyboard-ready without discarding the pending visual state.
 
+
+If a retry reaches the native bridge but Show fails, focus stays on Retry overlay after the control-window fallback is restored. The saved display and geometry remain queued, so the user can retry without reselecting settings.
+

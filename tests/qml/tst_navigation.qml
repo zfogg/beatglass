@@ -63,9 +63,9 @@ TestCase {
         property int selectedScreen: -1
         property int requestedWidth: 0`n        property int requestedHeight: 0`n        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
         property bool refuseClickThrough: false
-        property bool refuseUnlock: false
+        property bool refuseUnlock: false`n        property bool refuseShow: false
         function attach(overlay, control) { attaches++; return true }
-        function showOverlay() { shows++; return true }
+        function showOverlay() { shows++; return !refuseShow }
         function hideOverlay() { hides++; clickThrough = false }
         function setClickThrough(value) { if ((value && refuseClickThrough) || (!value && refuseUnlock)) return false; clickThrough = value; return true }
         function setOpacity(value) { opacity = value }
@@ -1483,5 +1483,18 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("unavailable") >= 0)
         app.destroy()
         fakeOverlay.available = true
+    }
+    function test_failedOverlayShowKeepsRetryKeyboardReady() {
+        fakeOverlay.available = true
+        fakeOverlay.refuseShow = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        verify(!app.showOverlayAndHideControls())
+        verify(findChild(app, "retryOverlay").activeFocus)
+        verify(app.overlayDisplayRecoveryPending)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        verify(app.overlayRecoveryAnnouncement.indexOf("could not be restored") >= 0)
+        app.destroy()
+        fakeOverlay.refuseShow = false
     }
 }
