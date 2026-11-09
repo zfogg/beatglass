@@ -6,7 +6,7 @@ SOURCE = (Path(__file__).resolve().parents[2] / "lib/capture/pipewire/source_ada
 def main() -> None:
     assert "class MonitorStream" in HEADER
     assert "coreaudio::CaptureFifo" in HEADER
-    assert "return !stopped_ && fifo_->push" in SOURCE
+    assert "const bool accepted = !stopped_ && fifo_->push" in SOURCE
     assert "fifo_->exhausted()" in SOURCE
     print("PipeWire stream transport contract verified (4 checks)")
 
