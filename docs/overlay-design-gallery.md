@@ -104,6 +104,8 @@ screenshots.
 | [Theme applied](overlay-theme-applied-card.svg) | saved appearance confirmation with undo |
 | [Opacity control](overlay-opacity-control-card.svg) | live opacity adjustment with contrast guidance |
 | [Opacity applied](overlay-opacity-applied-card.svg) | saved opacity confirmation and change path |
+| [Layout control](overlay-layout-control-card.svg) | position and size presets with live desktop preview |
+| [Layout applied](overlay-layout-applied-card.svg) | saved geometry confirmation and change path |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
