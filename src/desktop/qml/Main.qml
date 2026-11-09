@@ -3345,7 +3345,7 @@ ApplicationWindow {
                         : (window.playbackBridge && window.playbackBridge.state !== "Stopped"
                            ? "Selected " + Math.round(visualizationCanvas.selectedPosition * 100) + "% · seek uses accepted snapshot"
                            : "Selected " + Math.round(visualizationCanvas.selectedPosition * 100) + "% · start playback to seek")
-                    Accessible.name: "Visualization playback feedback: " + text
+                    Accessible.name: "Visualization playback feedback, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: "Playback and seek readiness for the accepted waveform or FFT snapshot."
