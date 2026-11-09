@@ -87,6 +87,7 @@ screenshots.
 | [Library ready](overlay-library-complete-card.svg) | completed indexing and continuation actions |
 | [Add folder](overlay-library-add-folder-card.svg) | local library folder selection and scope |
 | [Scan options](overlay-library-scan-options-card.svg) | full or incremental local indexing |
+| [Scan paused](overlay-library-scan-paused-card.svg) | resumable indexing with live monitoring |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
