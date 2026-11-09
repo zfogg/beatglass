@@ -184,6 +184,7 @@ screenshots.
 | [Native recovery settings](overlay-native-recovery-settings-card.svg) | preferred display and automatic safe-mode recovery choice |
 | [Native recovery saved](overlay-native-recovery-saved-card.svg) | confirmed recovery preference without session interruption |
 | [Native recovery disabled](overlay-native-recovery-disabled-card.svg) | explicit manual recovery preference with capture retained |
+| [Native recovery enabled](overlay-native-recovery-enabled-card.svg) | automatic restore with bounded safe fallback |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
