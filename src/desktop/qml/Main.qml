@@ -3403,7 +3403,7 @@ ApplicationWindow {
                         ? (window.visualizationSelectionResetReason !== "" ? "Waiting for replacement analysis result; " + window.visualizationSelectionResetReason : "Waiting for an accepted analysis result")
                         : "Accepted analysis generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
                     Accessible.name: "Visualization analysis handoff, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Status
                     Accessible.description: "Status of the generation-gated analysis result consumed by waveform and FFT rendering."
                     ToolTip.text: "Accepted analysis generation and revision consumed by the visualization; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
