@@ -75,6 +75,7 @@ screenshots.
 | [Platform support](overlay-platform-card.svg) | per-platform qualification status |
 | [Release notes](overlay-release-notes-card.svg) | concise update highlights |
 | [Feedback](overlay-feedback-card.svg) | lightweight in-context feedback prompt |
+| [Feedback sent](overlay-feedback-submitted-card.svg) | confirmation and return-to-work state |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
