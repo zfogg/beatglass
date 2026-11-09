@@ -58,3 +58,5 @@ if "Q_DISABLE_COPY(StorageRecoveryBridge)" not in bridge:
     raise SystemExit("Thread-owning recovery bridge must not be copyable")
 if "Q_PROPERTY(bool storageConfigured READ storageConfigured NOTIFY databasePathChanged)" not in bridge or "bool storageConfigured() const" not in bridge:
     raise SystemExit("Recovery bridge must expose configured-storage state")
+if "Q_PROPERTY(bool storageOpen READ storageOpen NOTIFY storageStateChanged)" not in bridge or "bool storageOpen() const" not in bridge:
+    raise SystemExit("Recovery bridge must expose open-storage state")

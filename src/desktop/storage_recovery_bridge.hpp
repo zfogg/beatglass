@@ -12,6 +12,7 @@ class StorageRecoveryBridge final : public QObject {
   Q_DISABLE_COPY(StorageRecoveryBridge)
   Q_PROPERTY(QString databasePath READ databasePath WRITE setDatabasePath NOTIFY databasePathChanged)
   Q_PROPERTY(bool storageConfigured READ storageConfigured NOTIFY databasePathChanged)
+  Q_PROPERTY(bool storageOpen READ storageOpen NOTIFY storageStateChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
   Q_PROPERTY(QStringList retryableRunIds READ retryableRunIds NOTIFY retryableRunsChanged)
   Q_PROPERTY(QStringList retryableRunDetails READ retryableRunDetails NOTIFY retryableRunsChanged)
@@ -31,6 +32,7 @@ public:
   ~StorageRecoveryBridge() override;
   QString databasePath() const { return databasePath_; }
   bool storageConfigured() const { return !databasePath_.isEmpty(); }
+  bool storageOpen() const { return storageOpen_; }
   QString status() const { return status_; }
   QStringList retryableRunIds() const { return retryableRunIds_; }
   QStringList retryableRunDetails() const { return retryableRunDetails_; }
@@ -75,6 +77,7 @@ public slots:
   void selectRun(const QString& id);
 signals:
   void databasePathChanged();
+  void storageStateChanged();
   void statusChanged();
   void retryableRunsChanged();
   void selectedRunChanged();
@@ -96,6 +99,7 @@ private:
   QStringList retryableRunDetails_;
   QString selectedRunId_;
   bool cacheHit_{};
+  bool storageOpen_{};
   QString cachedResult_;
   QString analysisStatus_{QStringLiteral("Analysis idle")};
   QString analysisError_;
