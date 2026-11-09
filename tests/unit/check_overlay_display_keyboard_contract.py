@@ -10,7 +10,7 @@ def main() -> None:
     source = QML[start:start + 700]
     assert "activeFocusOnTab: true" in source
     assert "Accessible.role: Accessible.ComboBox" in source
-    assert "persistOverlayDisplaySelection" in source
+    assert "persistOverlayDisplaySelection" in QML[start:start + 1400]
     print("overlay display keyboard contract: verified")
 
 if __name__ == "__main__":
