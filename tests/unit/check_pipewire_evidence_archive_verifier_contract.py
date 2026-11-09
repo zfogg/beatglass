@@ -6,6 +6,9 @@ markers = ("zipfile", "evidence-manifest.json", "qualified", "size", "sha256", "
 missing = [marker for marker in markers if marker not in source]
 if "malformed manifest artifact name" not in source:
     raise SystemExit("missing archive-verifier contract marker: malformed manifest artifact name")
+for marker in ("invalid capture plan provenance", "capture plan is not archived"):
+    if marker not in source:
+        raise SystemExit(f"missing capture-plan archive marker: {marker}")
 if missing:
     raise SystemExit(f"missing archive-verifier contract markers: {missing}")
 print(f"PipeWire evidence archive verifier contract passed ({len(markers)} checks)")
