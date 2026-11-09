@@ -50,6 +50,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("malformed manifest artifact name")
     if len({artifact["name"] for artifact in artifacts}) != len(artifacts):
         raise SystemExit("duplicate manifest artifact")
+    if len({artifact["name"].casefold() for artifact in artifacts}) != len(artifacts):
+        raise SystemExit("case-insensitive duplicate manifest artifact")
     declared = {artifact["name"] for artifact in artifacts}
     unexpected = names - declared - {"evidence-manifest.json"}
     if unexpected:

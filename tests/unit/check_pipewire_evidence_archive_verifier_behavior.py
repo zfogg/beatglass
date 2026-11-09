@@ -182,4 +182,11 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, qualified=1)))
     result = subprocess.run([sys.executable, str(verifier), str(non_boolean_qualified)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid or unqualified evidence manifest" not in result.stderr + result.stdout: raise SystemExit("non-boolean qualification was accepted")
-print("PipeWire evidence archive verifier behavior passed (18 scenarios)")
+    casefold_manifest = root / "casefold-manifest.zip"
+    duplicate_entries = list(manifest["artifacts"]) + [dict(manifest["artifacts"][0], name=manifest["artifacts"][0]["name"].upper())]
+    with zipfile.ZipFile(casefold_manifest, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=duplicate_entries)))
+    result = subprocess.run([sys.executable, str(verifier), str(casefold_manifest)], capture_output=True, text=True)
+    if result.returncode == 0 or "case-insensitive duplicate manifest artifact" not in result.stderr + result.stdout: raise SystemExit("case-insensitive manifest duplicate was accepted")
+print("PipeWire evidence archive verifier behavior passed (19 scenarios)")
