@@ -14,3 +14,4 @@ Both discard paths also clear stale retry/error state before the destructive
 operation begins.
 When batch discard completes successfully, the bridge returns the analysis
 status to `Analysis idle` while the refreshed run list removes discarded rows.
+Single discard completion follows the same idle transition.
