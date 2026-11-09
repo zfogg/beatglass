@@ -152,6 +152,7 @@ screenshots.
 | [Native safe mode banner](overlay-native-safe-mode-banner-card.svg) | persistent safe-mode status while session continues |
 | [Native unavailable](overlay-native-unavailable-card.svg) | clear fallback when native overlay is unavailable |
 | [Native available](overlay-native-available-card.svg) | ready state before native overlay activation |
+| [Native activating](overlay-native-activating-card.svg) | native window activation progress |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
