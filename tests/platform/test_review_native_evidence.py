@@ -309,3 +309,11 @@ class NativeEvidenceReviewTest(unittest.TestCase):
                 "handoff_status": "pending", "platforms": []}))
             result = review.assess(report, "release-owner")
             self.assertIn("report:ready status contradicts handoff status", result["blockers"])
+
+    def test_accepted_gate_requires_ready_status(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"ready": False,
+                "exit_gate_status": "ACCEPTED", "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:accepted gate without ready status", result["blockers"])

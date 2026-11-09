@@ -37,6 +37,8 @@ def assess(report_path: Path, reviewer: str) -> dict:
         blockers.append("report:invalid exit gate status")
     if report.get("ready") is True and report.get("exit_gate_status") != "ACCEPTED":
         blockers.append("report:ready status contradicts exit gate")
+    if report.get("exit_gate_status") == "ACCEPTED" and report.get("ready") is not True:
+        blockers.append("report:accepted gate without ready status")
     reasons = report.get("exit_gate_reason_codes")
     if report.get("ready") is True and isinstance(reasons, list) and reasons:
         blockers.append("report:ready report has exit gate blockers")
