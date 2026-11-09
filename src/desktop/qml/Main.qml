@@ -771,6 +771,7 @@ ApplicationWindow {
     function refreshCatalog() {
         window.recursiveCatalogActive = false
         window.recursiveCatalogRows = []
+        if (typeof recursiveResultsView !== "undefined") recursiveResultsView.currentIndex = -1
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
             ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
         window.catalogDiagnostic = window.libraryCatalogBridge && window.libraryCatalogBridge.lastDiagnostic !== undefined
