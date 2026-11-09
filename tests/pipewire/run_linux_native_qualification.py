@@ -7,6 +7,7 @@ import sys
 import subprocess
 import time
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
@@ -27,6 +28,7 @@ if args.capture_plan:
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
     pending = {"platform": platform.platform(), "host_os": platform.system(), "qualification_target": "Linux/PipeWire",
+               "captured_at": datetime.now(timezone.utc).isoformat(),
                "handoff_status": "pending", "commit": commit or None, "pipewire_version": None,
                "native_execution_attempted": False,
                "commands": [], "failed_command": None, "pending_command": [sys.executable, str(Path(__file__)), "--source", str(args.source)], "qualified": False,
@@ -138,6 +140,9 @@ if junit_path.is_file():
     except ET.ParseError:
         junit_count = 0
 summary = {"platform": platform.platform(), "commit": commit,
+           "captured_at": datetime.now(timezone.utc).isoformat(),
+           "environment": {"python": sys.version.split()[0], "cwd": str(Path.cwd()),
+                           "platform": platform.platform()},
            "native_execution_attempted": True,
            "pipewire_version": pipewire_version, "commands": results,
            "failed_command": next((item["command"] for item in results if item["returncode"]), None),
