@@ -1,4 +1,5 @@
 #include "beatglass/library/storage_owner.hpp"
+#include <stdexcept>
 namespace beatglass::library {
 bool StorageOwner::open(const StorageConfig& config, std::string* diagnostic) {
   close();
@@ -17,7 +18,9 @@ std::vector<library_detail::RetryableRun> StorageOwner::retryable_runs(std::size
   return cache_ ? cache_->retryable_runs(limit) : std::vector<library_detail::RetryableRun>{};
 }
 std::optional<library_detail::RetryableRun> StorageOwner::retryable_run(const std::string& id) const {
-  return cache_ ? cache_->retryable_run(id) : std::nullopt;
+  if (!cache_) return std::nullopt;
+  try { return cache_->retryable_run(id); }
+  catch (const std::invalid_argument&) { return std::nullopt; }
 }
 bool StorageOwner::discard_retryable(const std::string& id) { return cache_ ? cache_->discard_retryable(id) : false; }
 std::size_t StorageOwner::discard_retryable(const std::vector<std::string>& ids) { return cache_ ? cache_->discard_retryable(ids) : 0; }
