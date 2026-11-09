@@ -2759,7 +2759,7 @@ ApplicationWindow {
                                     enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== ""
                                     Accessible.name: "Check analysis cache"
                                     Accessible.description: "Look up a completed result without starting decoder or analysis work."
-                                    onClicked: storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
+                                    onClicked: { storageRecovery.findCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Cache lookup requested for the selected analysis identity."); lookupAnalysisCache.forceActiveFocus() }
                                 }
                                 Button {
                                     objectName: "invalidateAnalysisCache"
