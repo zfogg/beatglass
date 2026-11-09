@@ -1043,6 +1043,7 @@ ApplicationWindow {
         }
         window.overlayPreferredScreenIndex = savedIndex
         window.overlayPreferredDisplayName = window.overlayBridge.screenNames[savedIndex]
+        window.overlaySettingsRevision += 1
         window.overlayDisplaySelectionRequired = false
         if (window.overlayDisplayRecoveryPending) {
             window.overlayDisplayRecoveryPending = false
