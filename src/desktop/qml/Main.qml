@@ -545,7 +545,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: window.focusLibraryParentAction() }
     Shortcut { objectName: "libraryRecursiveFocusShortcut"; sequence: "Ctrl+Alt+Shift+Z"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive; onActivated: window.focusLibraryRecursiveAction() }
     Shortcut { objectName: "libraryRecursiveReturnFocusShortcut"; sequence: "Ctrl+Alt+Shift+J"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; returnToFolderBrowser.forceActiveFocus(); window.announceVisualizationRecovery("Library return-to-folder action focused.") } }
-    Shortcut { objectName: "libraryRecursiveAnalyzeFocusShortcut"; sequence: "Ctrl+Alt+Shift+K"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; analyzeRecursiveResults.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library analysis action focused.") } }
+    Shortcut { objectName: "libraryRecursiveAnalyzeFocusShortcut"; sequence: "Ctrl+Alt+Shift+K"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: window.focusLibraryRecursiveAnalysisAction() }
     Shortcut { objectName: "libraryBatchStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+U"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch status focused.") } }
     Shortcut { objectName: "libraryRecoveryStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+V"; context: Qt.ApplicationShortcut; enabled: typeof storageRecovery !== "undefined"; onActivated: { navigation.currentIndex = 0; analysisRecoveryStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis recovery status focused.") } }
     Shortcut { objectName: "libraryAdmissionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+X"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisAdmissionStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis admission status focused.") } }
@@ -1024,6 +1024,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         catalogResultCount.forceActiveFocus()
         window.announceVisualizationRecovery("Library catalog result count focused.")
+    }
+    function focusLibraryRecursiveAnalysisAction() {
+        navigation.currentIndex = 0
+        analyzeRecursiveResults.forceActiveFocus()
+        window.announceVisualizationRecovery("Recursive Library analysis action focused.")
     }
     function focusLibrarySelectionStatus() {
         navigation.currentIndex = 0
