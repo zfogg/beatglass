@@ -335,6 +335,16 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "analysisCancelShortcut"
+        sequence: "Ctrl+Alt+C"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canCancel
+        onActivated: {
+            window.analysisJobBridge.cancel()
+            window.announceVisualizationRecovery("Analysis cancelled from the keyboard; waiting for a replacement accepted snapshot.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
