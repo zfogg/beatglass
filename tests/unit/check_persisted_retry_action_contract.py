@@ -112,6 +112,8 @@ if 'Analysis rejected: source path is required' not in source:
     raise SystemExit("Analysis submission must reject an empty source path")
 if 'Analysis rejected: run identity is required' not in source:
     raise SystemExit("Analysis submission must reject an empty run identity")
+if 'Analysis rejected: complete analysis identity is required' not in source:
+    raise SystemExit("Analysis submission must reject incomplete analysis identity")
 if 'Reanalysis rejected: storage is not open' not in source:
     raise SystemExit("Reanalysis must reject closed storage before invalidating cache")
 if 'Reanalysis rejected: complete source identity is required' not in source:

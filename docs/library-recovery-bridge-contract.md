@@ -63,6 +63,8 @@ fields before reserving analysis work.
 Path-backed submission also requires a non-empty source path before enqueueing
 work, so a cache identity cannot create an analysis record without its source.
 Submission requires a non-empty persisted run identity as well.
+Engine, configuration, and mode are required before submitting work, matching
+the complete cache and admission identity contract.
 Reanalysis rejects a closed storage bridge before attempting cache invalidation,
 so a failed lifecycle transition cannot partially mutate cache state.
 Reanalysis also validates that both source path and content identity are present
