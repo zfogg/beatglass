@@ -2012,7 +2012,7 @@ ApplicationWindow {
                         id: recursiveResultsView
                         anchors.fill: parent; clip: true; model: window.recursiveCatalogRows
                         activeFocusOnTab: true; keyNavigationEnabled: true
-                        Keys.onEscapePressed: { window.recursiveCatalogActive = false; window.announceVisualizationRecovery("Returned to the current folder browser."); browser.forceActiveFocus() }
+                        Keys.onEscapePressed: { window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; window.announceVisualizationRecovery("Returned to the current folder browser."); browser.forceActiveFocus() }
                         Keys.onReturnPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
                         Keys.onEnterPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
                         Keys.onSpacePressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
