@@ -42,6 +42,7 @@ EnumerationResult SourceAdapter::enumerate() {
     } else if (result.outcome == EnumerationOutcome::cancelled) {
       result.sources.clear();
       result.error = SourceError::cancelled;
+      result.diagnostic = "Core Audio output enumeration cancelled";
     }
     return result;
   }
