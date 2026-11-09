@@ -7,6 +7,8 @@ Retain `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-c
 The Linux runner records an ISO-8601 UTC `captured_at` value and host environment
 metadata in both pending and attempted summaries, so handoffs remain attributable
 even when the native host is unavailable.
+Attempted summaries also record the host operating-system label alongside the
+platform identity.
 
 ## Runnable preparation checks
 
