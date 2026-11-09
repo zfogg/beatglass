@@ -1059,6 +1059,8 @@ ApplicationWindow {
                     || window.liveBridge.status === "Starting"
                     || window.liveBridge.status === "Reacquiring")
                 window.clearVisualizationForCaptureState()
+            else if (window.liveBridge.status === "Tracking")
+                window.announceVisualizationRecovery("Output monitoring is tracking; visualization updates will appear as accepted data arrives.")
         }
     }
     Connections {
