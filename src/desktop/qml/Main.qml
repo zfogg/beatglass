@@ -2400,7 +2400,7 @@ ApplicationWindow {
                             Accessible.name: "Analysis freshness: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.Status
-                            Accessible.description: text
+                            Accessible.description: text + (window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? " This result is ready for source-linked presentation." : " Wait for accepted source-linked analysis before treating details as current.")
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         Label {
