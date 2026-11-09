@@ -2546,7 +2546,7 @@ ApplicationWindow {
                                 Accessible.name: "Analysis batch completion"
                                 Accessible.value: visible ? Math.round(value * 100) + "% complete" : "unavailable"
                                 Accessible.role: Accessible.ProgressBar
-                                Accessible.description: visible ? "Completed, failed, or cancelled items out of the accepted analysis batch." : "Batch progress is unavailable."
+                                Accessible.description: visible ? "Completed, failed, or cancelled items out of the accepted analysis batch. Cancel is available while running; retry or discard recovery is available after terminal failure." : "Batch progress is unavailable."
                                 ToolTip.text: visible ? "Batch completion: " + Math.round(value * 100) + "%" : "Batch progress unavailable"
                             }
                             Label {
