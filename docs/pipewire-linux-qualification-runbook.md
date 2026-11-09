@@ -104,3 +104,5 @@ JUnit archives must include at least one named testcase; unnamed or testcase-fre
 Duplicate JUnit testcase names are rejected so each native result remains uniquely attributable.
 CTest discovery entries must also have unique names, preserving an unambiguous native registration inventory.
 The discovery and JUnit testcase-name sets must match exactly, tying registered native tests to executed results.
+The verifier cross-checks summary `native_test_count` against the discovery inventory count.
+ative_test_count against the discovery inventory count.

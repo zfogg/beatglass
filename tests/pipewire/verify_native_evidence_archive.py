@@ -40,7 +40,8 @@ with zipfile.ZipFile(archive_path) as archive:
     if unexpected:
         raise SystemExit(f"unlisted archive artifact: {sorted(unexpected)[0]}")
     summary_names = [name for name in declared if name.endswith(".json") and "summary" in name]
-    if len(summary_names) != 1 or json.loads(archive.read(summary_names[0])).get("commit") != manifest.get("commit"):
+    summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
+    if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):
         raise SystemExit("manifest commit does not match qualification summary")
     if not any((name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml") for name in declared):
         raise SystemExit("evidence archive has no JUnit results")
@@ -66,6 +67,8 @@ with zipfile.ZipFile(archive_path) as archive:
     discovery_names = [test["name"] for test in discovery_tests]
     if len(discovery_names) != len(set(discovery_names)):
         raise SystemExit("discovery JSON has duplicate test names")
+    if int(summary_data.get("native_test_count", 0)) != len(discovery_tests):
+        raise SystemExit("summary native_test_count does not match discovery")
     junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
     junit_root = ET.fromstring(archive.read(junit_name))
     if junit_root.tag not in ("testsuite", "testsuites"):
