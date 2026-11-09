@@ -366,6 +366,7 @@ ApplicationWindow {
         onActivated: {
             window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity.")
             window.reapplyOverlaySettingsAndRestore()
+            reapplyOverlaySettings.forceActiveFocus()
         }
     }
     Shortcut {
