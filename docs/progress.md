@@ -13,6 +13,15 @@ Live Starting and Reacquiring transitions now announce their next action:
 waiting for the first accepted snapshot or waiting for reacquisition after the
 previous visualization selection was cleared.
 
+Stopping a PipeWire monitor now marks the next restart boundary discontinuous
+before closing callback admission. Portable coverage is in
+`python tests/unit/check_pipewire_stop_discontinuity_contract.py`.
+
+PipeWire control code now exposes a `needs_restart` predicate combining native
+callback errors and closed admission, so lifecycle code can force a fresh epoch
+instead of consuming stale transport state. Portable coverage is in
+`python tests/unit/check_pipewire_restart_status_contract.py`.
+
 When live capture transitions into Tracking, the control window now announces
 that monitoring is active and visualization will update as accepted data
 arrives, rather than leaving assistive technology on a silent transition.
