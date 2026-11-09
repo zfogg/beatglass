@@ -58,6 +58,7 @@ void MonitorStream::stop() noexcept {
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }
 bool MonitorSession::start(std::string serial, std::uint64_t epoch, std::uint32_t sample_rate,
                            std::uint32_t channels) {
+  if (stream_ && !stream_->needs_restart()) return false;
   if (!valid_serial(serial) || !epoch || !sample_rate || !channels) return false;
   auto next = std::make_unique<MonitorStream>(epoch, sample_rate, channels);
   serial_ = std::move(serial);
