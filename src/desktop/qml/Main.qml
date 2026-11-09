@@ -915,12 +915,14 @@ ApplicationWindow {
         }
         const savedGeometry = window.overlayBridge.geometry
         if (!savedGeometry || !isFinite(savedGeometry.x) || !isFinite(savedGeometry.y)
+                || !isFinite(savedGeometry.width) || !isFinite(savedGeometry.height)
                 || savedGeometry.width <= 0 || savedGeometry.height <= 0) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             const geometryDisplay = window.overlayPreferredDisplayName !== "" ? window.overlayPreferredDisplayName : "the saved display"
             const geometryReason = savedGeometry && (!isFinite(savedGeometry.x) || !isFinite(savedGeometry.y))
-                    ? "position" : "geometry"
+                    ? "position" : (savedGeometry && (!isFinite(savedGeometry.width) || !isFinite(savedGeometry.height))
+                        ? "size" : "geometry")
             window.announceCaptureRecoveryState("Persisted overlay " + geometryReason + " unavailable for " + geometryDisplay + "; control-window fallback remains active.")
             return false
         }

@@ -737,6 +737,8 @@ Invalid persisted opacity is covered as a distinct visible recovery state: resto
 
 Invalid persisted position is a separate visible recovery state: restore rejects non-finite native coordinates, keeps the control-window fallback visible, and names the saved display in the recovery announcement instead of presenting an unpositioned overlay.
 
+Invalid persisted size is also a separate visible recovery state: restore rejects non-finite native width or height, keeps the control-window fallback visible, and announces that the saved overlay size is unavailable before any native presentation.
+
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.

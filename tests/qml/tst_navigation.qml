@@ -2343,6 +2343,20 @@ TestCase {
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
 
+    function test_invalidPersistedSizeKeepsControlFallbackVisible() {
+        fakeOverlay.available = true
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: NaN, height: 280 })
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        verify(!app.restoreOverlayVisualStateFromBridge())
+        verify(app.overlayLaunchFallbackActive)
+        verify(app.overlayDisplayRecoveryPending)
+        verify(app.overlayRecoveryAnnouncement.indexOf("size unavailable") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Projector") >= 0)
+        app.destroy()
+        fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
+    }
+
 '    function test_validVisualRestoreIsDirectlyTestable() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
