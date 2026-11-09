@@ -768,3 +768,5 @@ Successful selected-run retry, explicit discard, and cache invalidation clear th
 Batch status now includes persisted recovery errors when present, while successful retry/discard transitions clear that suffix through the shared bridge error lifecycle. This keeps batch operators aware of recovery work without leaving resolved diagnostics visible.
 
 Windows output endpoint discovery now adopts the native render default on the first successful refresh when the user has not selected an endpoint. A later refresh never overrides an explicit selection; if that endpoint disappears, the bridge clears it and reports selection loss so capture must be reacquired. The portable source contract is checked by python tests/unit/check_windows_endpoint_default_selection_contract.py.
+Overlay monitoring controls now return keyboard focus to the live overlay status after a start/stop/retry request, so the resulting Starting, Reacquiring, Tracking, or Error state is immediately available to keyboard and assistive-technology users. Portable coverage is in `python tests/unit/check_overlay_live_feedback_focus_contract.py`.
+
