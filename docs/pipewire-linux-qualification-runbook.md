@@ -468,3 +468,5 @@ Reviewers should validate the raw matrix JSON before accepting a rendered report
 Rendered reports are convenience views; only validated matrix JSON and captured native artifacts support a qualification decision.
 
 If rendered output and raw matrix JSON disagree, discard the rendering and resolve the underlying matrix before handoff.
+
+Promoted release manifests may remain explicitly pending native qualification; only a qualified status with native commit provenance can represent accepted host evidence.
