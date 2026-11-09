@@ -2854,7 +2854,7 @@ ApplicationWindow {
                                 TextField { id: cacheContent; objectName: "analysisCacheContent"; placeholderText: "content identity"; Accessible.name: "Analysis cache content identity"; Accessible.description: "Content identity used to look up or invalidate a completed analysis cache entry."; Layout.fillWidth: true }
                                 TextField { id: cacheEngine; objectName: "analysisCacheEngine"; placeholderText: "engine"; Accessible.name: "Analysis cache engine"; Accessible.description: "Analysis engine identity used for the cache lookup."; Layout.fillWidth: true }
                                 TextField { id: cacheConfig; objectName: "analysisCacheConfig"; placeholderText: "configuration"; Accessible.name: "Analysis cache configuration"; Accessible.description: "Analysis configuration identity used for the cache lookup."; Layout.fillWidth: true }
-                                TextField { id: cacheMode; objectName: "analysisCacheMode"; placeholderText: "offline/live"; Accessible.name: "Analysis cache mode"; Accessible.description: "Cache mode identity, such as offline or live."; Layout.preferredWidth: 100 }
+                                TextField { id: cacheMode; objectName: "analysisCacheMode"; placeholderText: "offline/live"; validator: RegularExpressionValidator { regularExpression: /^(offline|live)$/ }; Accessible.name: "Analysis cache mode"; Accessible.value: acceptableInput ? text : "invalid; use offline or live"; Accessible.description: "Cache mode identity. Enter exactly offline or live."; Layout.preferredWidth: 100 }
                                 Button {
                                     objectName: "lookupAnalysisCache"
                                     text: "Check cache"
