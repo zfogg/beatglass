@@ -539,7 +539,7 @@ ApplicationWindow {
         enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped"
         onActivated: window.stopPlaybackWithRecovery("Playback stopped from keyboard shortcut; accepted snapshot cleared.")
     }
-    Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused; type to filter the current folder.") } }
+    Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; window.focusLibraryFilter("Library filter focused; type to filter the current folder.") } }
     Shortcut { objectName: "libraryClearFilterShortcut"; sequence: "Ctrl+Alt+Shift+Backspace"; context: Qt.ApplicationShortcut; enabled: search.text !== ""; onActivated: window.clearLibraryFilter(browser) }
     Shortcut { objectName: "libraryFolderPathFocusShortcut"; sequence: "Ctrl+Alt+Shift+I"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; folderPath.forceActiveFocus(); window.announceVisualizationRecovery("Current Library folder path focused.") } }
     Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; parentFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library parent-folder action focused.") } }
@@ -978,10 +978,10 @@ ApplicationWindow {
         target.forceActiveFocus()
         window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.")
     }
-    function focusLibraryFilter() {
+    function focusLibraryFilter(message) {
         search.forceActiveFocus()
         search.selectAll()
-        window.announceVisualizationRecovery("Library filter focused.")
+        window.announceVisualizationRecovery(message === undefined ? "Library filter focused." : message)
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."

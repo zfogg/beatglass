@@ -9,5 +9,6 @@ def main() -> None:
     assert "search.selectAll()" in block
     assert "Library filter focused" in block
     assert "window.focusLibraryFilter()" in QML
+    assert 'window.focusLibraryFilter("Library filter focused; type to filter the current folder.")' in QML
 if __name__ == "__main__":
     main()
