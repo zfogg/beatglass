@@ -89,6 +89,8 @@ The `Ctrl+Alt+L` opacity focus shortcut follows the same rule before focusing
 the opacity control.
 The `Ctrl+Alt+Z` size focus shortcut also restores and activates the control
 window before focusing the overlay size control.
+The Show and Hide overlay focus shortcuts restore and activate the control
+window before focusing their respective lifecycle actions as well.
 The reconnect announcement also states that recovery remains paused, so a
 display reconnect cannot silently restart native retries.
 While the display is still unavailable, the paused card separately reports that
