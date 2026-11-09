@@ -1957,4 +1957,23 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_pausedDisplayReorderRetainsIdentityUntilResume() {
+        fakeOverlay.available = false
+        fakeOverlay.screenNames = ["Projector", "Laptop"]
+        fakeOverlay.displayName = "Projector"
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 0
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 1)
+        verify(app.overlayRecoveryPausedByUser)
+        verify(findChild(app, "resumeOverlayRecovery").activeFocus)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+        fakeOverlay.available = true
+    }
 }

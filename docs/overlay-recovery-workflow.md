@@ -250,3 +250,6 @@ When a display reconnects after being absent, recovery reuses the retained displ
 
 When the operating system reorders displays, recovery matches the saved display by identity rather than stale index, reapplies the retained geometry, and returns focus to Retry overlay for the next explicit action.
 
+
+If displays reorder while recovery is paused, the saved display identity and geometry remain retained, Resume recovery stays focused, and no native retry starts until the user explicitly resumes.
+
