@@ -136,6 +136,7 @@ screenshots.
 | [Fullscreen restored](overlay-fullscreen-restored-card.svg) | overlay return after fullscreen ends |
 | [Window minimized](overlay-window-minimized-card.svg) | native minimize with preserved session state |
 | [Window restored](overlay-window-restored-card.svg) | native restore with preserved session state |
+| [Quit confirmation](overlay-quit-confirm-card.svg) | safe native shutdown with saved settings |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
