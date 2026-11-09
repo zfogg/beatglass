@@ -1733,6 +1733,8 @@ ApplicationWindow {
                             window.browseFolder = files.parentFolder
                             browser.currentIndex = -1
                             search.text = ""
+                            window.recursiveCatalogActive = false
+                            window.recursiveCatalogRows = []
                             window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
                             browser.forceActiveFocus()
                         }
