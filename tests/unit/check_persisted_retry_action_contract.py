@@ -96,3 +96,5 @@ if 'Cache lookup rejected: storage is not open' not in source or 'Cache invalida
     raise SystemExit("Cache operations must reject closed storage before queueing worker work")
 if 'Analysis rejected: storage is not open' not in source:
     raise SystemExit("Analysis submission must reject closed storage before queueing worker work")
+if 'Analysis admission rejected: storage is not open' not in source:
+    raise SystemExit("Analysis admission must reject closed storage before queueing worker work")
