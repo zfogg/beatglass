@@ -2037,4 +2037,28 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_successfulUnlockAfterReorderClearsPriorFailureMarkers() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        fakeOverlay.refuseUnlock = true
+        fakeOverlay.screenNames = ["Projector", "Laptop"]
+        fakeOverlay.displayName = "Projector"
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 0
+        app.overlayDisplayRecoveryPending = true
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        verify(!app.unlockOverlayAndRestoreFocus())
+        verify(app.overlayDisplayRecoveryPending)
+        fakeOverlay.refuseUnlock = false
+        verify(app.unlockOverlayAndRestoreFocus())
+        verify(!app.overlayDisplayRecoveryPending)
+        verify(!app.overlayLaunchFallbackActive)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 1)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
