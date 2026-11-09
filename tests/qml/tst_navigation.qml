@@ -1139,4 +1139,17 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_overlayRecoveryResumeShortcutIsDiscoverable() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        let shortcut = findChild(app, "overlayResumeRecoveryShortcut")
+        verify(shortcut !== null)
+        compare(shortcut.sequence, "Ctrl+Alt+Shift+R")
+        verify(shortcut.enabled)
+        verify(findChild(app, "overlayResumeRecoveryShortcutHint").visible)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
