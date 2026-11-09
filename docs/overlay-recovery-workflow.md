@@ -30,6 +30,8 @@ The control window also exposes `Clear safe mode` so a user can deliberately
 start another bounded recovery cycle after checking the display connection.
 While safe mode is active, a status message remains visible and explicitly
 states that monitoring continues without the native overlay.
+Clearing safe mode returns focus to the overlay recovery page so the next
+retry is visible and keyboard-ready immediately.
 
 ## Screenshot qualification
 
