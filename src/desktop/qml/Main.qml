@@ -2843,6 +2843,17 @@ ApplicationWindow {
                     Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "already hidden" : "available") : "unavailable"; Accessible.description: enabled ? "Hide the DJ overlay window and restore the control window" : "Native overlay unavailable; control-window fallback is active"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
                     Button { text: "Quit Beatglass"; objectName: "quitBeatglass"; Accessible.name: "Quit Beatglass"; Accessible.role: Accessible.Button; Accessible.value: "available; overlay settings retained"; Accessible.description: "Hide the DJ overlay and quit Beatglass while retaining persisted settings"; ToolTip.text: "Quit Beatglass and retain overlay settings"; onClicked: window.quitApplication() }
                 }
+                Label {
+                    objectName: "overlayShortcutHelp"
+                    text: "Keyboard: Esc unlocks click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+Shift+R reapplies saved settings"
+                    Accessible.name: "Overlay keyboard shortcuts"
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Keyboard shortcuts for unlocking, hiding, restoring, and reapplying overlay settings."
+                    ToolTip.text: text
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
                 RowLayout {
                     visible: window.overlayBridge !== null
                     objectName: "overlayRoutingControls"

@@ -1,0 +1,14 @@
+"""Verify overlay keyboard shortcuts are discoverable in the control window."""
+from pathlib import Path
+
+QML = (Path(__file__).resolve().parents[2] / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
+
+def main() -> None:
+    start = QML.index('objectName: "overlayShortcutHelp"')
+    block = QML[start:start + 700]
+    for marker in ("Esc unlocks click-through", "Ctrl+Alt+H hides/restores", "Ctrl+Alt+Shift+R reapplies saved settings", "Accessible.role: Accessible.Status"):
+        assert marker in block, marker
+    print("Overlay shortcut help contract verified (4 checks)")
+
+if __name__ == "__main__":
+    main()
