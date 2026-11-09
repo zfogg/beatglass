@@ -49,6 +49,7 @@ ApplicationWindow {
     property string selectedName: ""
     property url selectedAudioUrl: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
+    property bool metadataRetryPending: false
     property string visualizationSelectionResetReason: ""
     property string visualizationRecoveryAnnouncement: ""
     property string persistedRecoveryOutcomeAnnouncementKey: ""
@@ -2308,13 +2309,15 @@ ApplicationWindow {
                             text: "Retry metadata"
                             visible: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0
                             activeFocusOnTab: true
-                            enabled: visible
+                            enabled: visible && !window.metadataRetryPending
                             Accessible.name: "Retry metadata"
                             Accessible.value: window.metadataStatus
                             Accessible.role: Accessible.Button
                             Accessible.description: "Retry reading metadata for the selected audio source after an error. Current status: " + window.metadataStatus
                             ToolTip.text: "Retry metadata for the selected source"
                             onClicked: {
+                                window.metadataRetryPending = true
+                                metadataRetryCooldown.restart()
                                 window.metadataBridge.inspect(window.selectedAudioUrl)
                                 window.announceVisualizationRecovery("Metadata retry requested for " + window.selectedName + ".")
                                 retryMetadata.forceActiveFocus()
@@ -4512,6 +4515,13 @@ ApplicationWindow {
         target: window.metadataBridge
         function onStatusChanged(text) { window.metadataStatus = text }
     }
+    Timer {
+        id: metadataRetryCooldown
+        interval: 750
+        repeat: false
+        onTriggered: window.metadataRetryPending = false
+    }
+
     FolderDialog {
         id: folderPicker
         title: "Choose a folder to browse"
