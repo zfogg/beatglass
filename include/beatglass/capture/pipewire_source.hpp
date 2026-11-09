@@ -62,6 +62,13 @@ private:
 /** Control-thread owner for one selected output monitor epoch. */
 class MonitorSession {
 public:
+  struct Status {
+    bool active{};
+    bool needs_restart{};
+    bool discontinuity{};
+    bool overflowed{};
+    int error_code{};
+  };
   /** Select a validated sink and allocate its bounded stream on the control thread. */
   bool start(std::string serial, std::uint64_t epoch, std::uint32_t sample_rate,
              std::uint32_t channels);
@@ -75,6 +82,8 @@ public:
   bool on_process(std::span<const float> samples, std::uint64_t host_time,
                   bool host_time_valid, double source_sample_time,
                   bool sample_time_valid) noexcept;
+  /** Consume callback error/discontinuity markers for one control-thread poll. */
+  Status poll_status() noexcept;
   const std::string& serial() const noexcept { return serial_; }
 private:
   std::string serial_;
