@@ -74,6 +74,17 @@ class QualificationIngestTest(unittest.TestCase):
             data = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(data["artifacts"][0]["role"], "playback_evidence")
 
+    def test_rejects_empty_referenced_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "playback.json").write_bytes(b"")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text(
+                "commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n"
+                "playback_evidence=playback.json\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("empty referenced evidence: playback.json", errors)
+
     def test_rejects_referenced_evidence_path_already_hashed(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

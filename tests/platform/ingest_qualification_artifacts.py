@@ -74,6 +74,8 @@ def ingest(root: Path, output: Path) -> list[str]:
         normalized = Path(relative).as_posix()
         if root.resolve() not in path.parents or not path.is_file():
             errors.append(f"missing or escaping referenced evidence: {relative}"); continue
+        if path.stat().st_size == 0:
+            errors.append(f"empty referenced evidence: {normalized}"); continue
         if normalized in known_paths:
             errors.append(f"duplicate referenced evidence path: {normalized}")
             continue
