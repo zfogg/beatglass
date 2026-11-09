@@ -211,3 +211,6 @@ The Ctrl+Alt+Z size focus shortcut remains usable while click-through is active,
 
 The display focus shortcut remains usable during click-through, returning focus to saved display selection without changing the persisted display, geometry, or opacity state.
 
+
+The Restore overlay focus shortcut remains usable during click-through, returning focus to the explicit restore action while preserving the saved display, geometry, and opacity settings.
+
