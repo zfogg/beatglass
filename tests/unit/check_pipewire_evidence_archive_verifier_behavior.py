@@ -124,4 +124,15 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=malformed_xml_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(malformed_xml)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed XML" not in result.stderr + result.stdout: raise SystemExit("malformed JUnit XML was accepted")
-print("PipeWire evidence archive verifier behavior passed (11 scenarios)")
+
+    aggregate_mismatch = root / "aggregate-mismatch.zip"
+    aggregate_mismatch_junit = b"<testsuites tests='3'><testsuite tests='1'><testcase name='capture'/></testsuite></testsuites>\n"
+    aggregate_mismatch_summary = dict(json.loads(summary), native_junit_sha256=hashlib.sha256(aggregate_mismatch_junit).hexdigest())
+    aggregate_mismatch_artifacts = dict(artifacts, **{"native-summary.json": (json.dumps(aggregate_mismatch_summary) + "\n").encode(), "pipewire-tests.xml": aggregate_mismatch_junit})
+    aggregate_mismatch_entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in aggregate_mismatch_artifacts.items()]
+    with zipfile.ZipFile(aggregate_mismatch, "w") as archive:
+        for name, data in aggregate_mismatch_artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=aggregate_mismatch_entries)))
+    result = subprocess.run([sys.executable, str(verifier), str(aggregate_mismatch)], capture_output=True, text=True)
+    if result.returncode == 0 or "aggregate test count does not match suites" not in result.stderr + result.stdout: raise SystemExit("aggregate JUnit count mismatch was accepted")
+print("PipeWire evidence archive verifier behavior passed (12 scenarios)")
