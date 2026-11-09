@@ -45,7 +45,7 @@ Linux qualification pass and retain the test output with the manifest.
 Capture the runtime node inventory with
 `python tests/pipewire/capture_pipewire_inventory.py <evidence>/pw-dump.json`.
 For a single immutable artifact containing the raw inventory, UTC capture time,
-and `pw-cli` version, use
+host/Python identity, and `pw-cli` version, use
 `python tests/pipewire/capture_pipewire_manifest.py <evidence>/manifest.json`.
 Capture paths are immutable: choose a new output filename for each run. The
 helper writes the dump to a temporary file and publishes it with an atomic
