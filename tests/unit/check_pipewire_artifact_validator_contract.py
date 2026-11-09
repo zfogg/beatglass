@@ -6,4 +6,6 @@ assert "read_text(encoding=\"utf-8\").strip()" in p
 assert "if not root.is_dir()" in p
 assert "bytes" in p
 assert "is_symlink()" in p
+assert "--json" in p
+assert "json.dumps" in p
 print("PipeWire artifact validator contract verified (4 checks)")

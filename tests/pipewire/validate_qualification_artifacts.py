@@ -1,13 +1,14 @@
 from pathlib import Path
 import sys
+import json
 
 REQUIRED = ("build.txt", "ctest.txt", "daemon-status.txt", "discovery.txt",
             "stream-format.txt", "callback-trace.txt", "lifecycle-trace.txt",
             "limitations.txt")
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: validate_qualification_artifacts.py ARTIFACT_DIR", file=sys.stderr)
+    if len(sys.argv) not in (2, 3) or (len(sys.argv) == 3 and sys.argv[2] != "--json"):
+        print("usage: validate_qualification_artifacts.py ARTIFACT_DIR [--json]", file=sys.stderr)
         return 2
     root = Path(sys.argv[1])
     if not root.is_dir():
@@ -25,9 +26,12 @@ def main() -> int:
     if empty:
         print("empty: " + ", ".join(empty), file=sys.stderr)
         return 1
-    for name in REQUIRED:
-        print(f"{name}: {(root / name).stat().st_size} bytes")
-    print(f"PipeWire qualification artifacts verified ({len(REQUIRED)} files)")
+    sizes = {name: (root / name).stat().st_size for name in REQUIRED}
+    if len(sys.argv) == 3:
+        print(json.dumps({"verified": True, "files": sizes}, sort_keys=True))
+    else:
+        for name, size in sizes.items(): print(f"{name}: {size} bytes")
+        print(f"PipeWire qualification artifacts verified ({len(REQUIRED)} files)")
     return 0
 
 if __name__ == "__main__":
