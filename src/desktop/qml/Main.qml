@@ -71,6 +71,13 @@ ApplicationWindow {
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     Shortcut {
+        objectName: "libraryRefreshShortcut"
+        sequence: "Ctrl+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.browseFolder.toString() !== ""
+        onActivated: { files.refresh(); window.refreshCatalog(); window.announceVisualizationRecovery("Folder contents refreshed from the keyboard."); browser.forceActiveFocus() }
+    }
+    Shortcut {
         objectName: "playbackSeekBackShortcut"
         sequence: "Alt+Left"
         context: Qt.ApplicationShortcut
