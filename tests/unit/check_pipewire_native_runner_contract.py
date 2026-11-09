@@ -22,4 +22,5 @@ assert "capture_plan_validated" in source
 probe = (Path(__file__).parents[2] / "tests/pipewire/check_linux_native_prerequisites.py").read_text(encoding="utf-8")
 for marker in ("--report", "native_execution_attempted", '"status"', '"pending"'):
     assert marker in probe
+assert "linker" in probe and "pkg-config" in probe
 print("PipeWire native runner contract verified (5 checks)")

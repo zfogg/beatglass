@@ -62,6 +62,16 @@ else:
             if subprocess.run(["pkg-config", flag, "libpipewire-0.3"], check=False,
                               stdout=subprocess.PIPE, text=True).returncode:
                 missing.append(f"pkg-config {flag} for libpipewire-0.3")
+# A running daemon does not imply that the development headers and linker
+# metadata are installed. Always probe the build capability independently.
+if not any(item.startswith("libpipewire-0.3") or item.startswith("pkg-config") for item in missing):
+    if not shutil.which("pkg-config") or subprocess.run(["pkg-config", "--exists", "libpipewire-0.3"], check=False).returncode:
+        missing.append("libpipewire-0.3 development package")
+    else:
+        for flag in ("--cflags", "--libs"):
+            if subprocess.run(["pkg-config", flag, "libpipewire-0.3"], check=False,
+                              stdout=subprocess.PIPE, text=True).returncode:
+                missing.append(f"pkg-config {flag} for libpipewire-0.3")
 if missing:
     finish("missing", missing)
     print("Missing Linux PipeWire prerequisites: " + ", ".join(missing), file=sys.stderr)
