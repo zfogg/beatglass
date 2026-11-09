@@ -1,5 +1,10 @@
 # Progress and handoff
 
+The overlay now exposes dynamic keyboard recovery guidance for click-through
+mode, including Escape and the control-window unlock shortcut, while keeping
+interactive-mode guidance explicit. Portable coverage is in
+`python tests/unit/check_overlay_keyboard_recovery_contract.py`.
+
 Changing the Library source now clears stale visualization selection before the
 overlay can reuse it, including recursive-browser selection. The overlay waits
 for fresh accepted evidence instead of presenting the previous source's state.
