@@ -4358,6 +4358,7 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
+                    Label { objectName: "overlayUnlockFailureStatus"; visible: window.overlayLaunchFallbackActive && window.overlayBridge !== null && window.overlayBridge.clickThrough; text: "Unlock failed · control window fallback active"; Accessible.name: "Overlay unlock failure status"; Accessible.role: Accessible.Status; Accessible.value: text; Accessible.description: "Native overlay unlock failed; the control window is active so Unlock overlay can be retried."; ToolTip.text: "Unlock failed; retry from the control window"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                     Label {
                         objectName: "overlayEndpointStatus"
                         visible: window.overlayBridge !== null
