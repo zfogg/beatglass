@@ -77,6 +77,13 @@ ApplicationWindow {
         onActivated: { search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused.") }
     }
     Shortcut {
+        objectName: "libraryRecursiveCatalogShortcut"
+        sequence: "Ctrl+Alt+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive
+        onActivated: addFolderRecursively.click()
+    }
+    Shortcut {
         objectName: "libraryRefreshShortcut"
         sequence: "Ctrl+R"
         context: Qt.ApplicationShortcut
@@ -1697,6 +1704,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Button { text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: folderPicker.open() }
                     Button {
+                        id: addFolderRecursively
                         text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
                         enabled: window.libraryCatalogBridge !== null && window.browseFolder.toString() !== ""
                         Accessible.name: "Add folder recursively"; Accessible.role: Accessible.Button
