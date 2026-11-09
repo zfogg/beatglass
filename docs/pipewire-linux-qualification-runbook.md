@@ -67,6 +67,9 @@ qualified status always points reviewers to concrete handoff artifacts.
 Prepare an explicit, non-fabricating host capture plan with
 `python tests/pipewire/prepare_native_host_capture.py evidence/native-host-capture-plan.json`;
 it lists the Linux, Windows, and macOS commands/permissions still required.
+Validate that plan before distributing it with
+`python tests/pipewire/validate_native_host_capture_plan.py evidence/native-host-capture-plan.json`;
+the validator refuses fabricated, incomplete, or non-pending host entries.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
