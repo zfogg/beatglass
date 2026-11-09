@@ -408,11 +408,13 @@ ApplicationWindow {
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayDisplayRecoveryPending = true
             window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
+            overlayDisplay.forceActiveFocus()
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
             window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback.")
+            overlayDisplay.forceActiveFocus()
             return false
         }
         window.overlayWasVisibleBeforeAvailabilityLoss = false
