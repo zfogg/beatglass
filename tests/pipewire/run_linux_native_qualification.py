@@ -3,6 +3,7 @@ import argparse
 import json
 import platform
 import subprocess
+import time
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
@@ -24,17 +25,20 @@ evidence = args.summary.parent if args.summary else args.source / "evidence"
 evidence.mkdir(parents=True, exist_ok=True)
 results = []
 for index, command in enumerate(commands):
+    started = time.monotonic()
     result = subprocess.run(command, check=False, text=True, capture_output=True)
     stdout_path = evidence / f"native-{index}-stdout.log"
     stderr_path = evidence / f"native-{index}-stderr.log"
     stdout_path.write_text(result.stdout, encoding="utf-8")
     stderr_path.write_text(result.stderr, encoding="utf-8")
     results.append({"command": command, "returncode": result.returncode,
+                    "duration_seconds": round(time.monotonic() - started, 3),
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
     if result.returncode:
         break
 if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
     capture = ["python", str(args.source / "tests/pipewire/capture_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
+    capture_started = time.monotonic()
     result = subprocess.run(capture, check=False, text=True, capture_output=True)
     capture_index = len(results)
     stdout_path = evidence / f"native-{capture_index}-stdout.log"
@@ -42,6 +46,7 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
     stdout_path.write_text(result.stdout, encoding="utf-8")
     stderr_path.write_text(result.stderr, encoding="utf-8")
     results.append({"command": capture, "returncode": result.returncode,
+                    "duration_seconds": round(time.monotonic() - capture_started, 3),
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
 native_result = next((item for item in results if "^pipewire_tests$" in item["command"]), None)
 summary = {"platform": platform.platform(), "commands": results,
