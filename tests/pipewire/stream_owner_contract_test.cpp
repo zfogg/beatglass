@@ -39,6 +39,7 @@ TEST_CASE("stream owner contract preserves target and negotiated format lifecycl
   CHECK(owner.last.channels == 2);
   owner.stop();
   CHECK_FALSE(owner.connected());
+  CHECK_FALSE(owner.process(std::array<float, 2>{0.1F, 0.2F}, 43, true, 13.5, true, false, handoff));
   owner.report_error(-32, handoff);
   CHECK_FALSE(owner.connected());
   CHECK(handoff.needs_restart());
