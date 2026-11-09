@@ -154,3 +154,6 @@ When the native bridge returns with a usable display, the control window is expl
 
 The retained-settings shortcut Ctrl+Alt+Shift+S remains enabled during fallback, restores the control window, and focuses the review action without changing persisted display, geometry, opacity, or interaction settings.
 
+
+The Retry overlay focus shortcut Ctrl+Alt+Shift+Y remains available while the bridge is unavailable. It restores the control window, focuses Retry overlay, and leaves persisted display and geometry preferences untouched for the retry.
+
