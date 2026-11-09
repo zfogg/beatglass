@@ -1659,4 +1659,21 @@ TestCase {
         app.destroy()
         fakeOverlay.clickThrough = false
     }
+    function test_clickThroughFailureRetainsPersistedSettings() {
+        fakeOverlay.available = true
+        fakeOverlay.refuseClickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        let toggle = findChild(app, "clickThrough")
+        toggle.checked = true
+        toggle.clicked()
+        verify(!fakeOverlay.clickThrough)
+        verify(toggle.activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(app.overlayRecoveryAnnouncement.indexOf("could not be enabled") >= 0)
+        app.destroy()
+        fakeOverlay.refuseClickThrough = false
+    }
 }
