@@ -55,6 +55,9 @@ and their detail strings, keeping the GUI model from retaining descriptions for
 an unavailable recovery snapshot.
 Cancellation and retry of an analysis handle use the same storage-open guard,
 rather than queueing work against a missing database.
+Submission and admission also require a non-empty content identity before
+touching the worker, keeping analysis and cache records addressable by the same
+source identity contract.
 Refresh requests made while storage is closed are rejected synchronously with
 `Storage error: storage is not open`; callers must reopen storage before asking
 the worker for a new persisted-recovery snapshot.
