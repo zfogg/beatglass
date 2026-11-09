@@ -280,3 +280,6 @@ Successful recovery now announces persisted position as well as size, so users c
 
 When a user-hidden overlay reconnects, the recovery announcement confirms its persisted position and size while explicitly keeping it hidden until Restore overlay is chosen.
 
+
+When persisted geometry is unavailable, the fallback announcement names the saved display whose visual state needs attention, so users know which destination requires correction before retrying.
+

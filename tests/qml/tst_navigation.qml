@@ -2152,4 +2152,15 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("size 620 by 280 pixels") >= 0)
         app.destroy()
     }
+    function test_geometryFailureNamesSavedDisplayInFallback() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        fakeOverlay.geometry = ({ x: 0, y: 0, width: 0, height: 0 })
+        verify(!app.restoreOverlayVisualStateFromBridge())
+        verify(app.overlayLaunchFallbackActive)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Projector") >= 0)
+        app.destroy()
+        fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
+    }
 }
