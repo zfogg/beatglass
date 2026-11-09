@@ -28,6 +28,7 @@ if not missing:
             (props := item.get("info", {}).get("props", {})).get("media.class") == "Audio/Sink"
             and str(props.get("object.serial", "")).strip()
             and str(props.get("node.name", "")).strip()
+            and isinstance(item.get("id"), int) and item["id"] >= 0
             for item in inventory if isinstance(item, dict)
         ):
             missing.append("PipeWire Audio/Sink node")
