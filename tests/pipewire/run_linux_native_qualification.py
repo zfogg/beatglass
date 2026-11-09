@@ -139,7 +139,7 @@ if junit_path.is_file():
         junit_skipped = sum(1 for case in cases if case.find("skipped") is not None)
     except ET.ParseError:
         junit_count = 0
-summary = {"platform": platform.platform(), "commit": commit,
+summary = {"platform": platform.platform(), "host_os": platform.system(), "commit": commit,
            "captured_at": datetime.now(timezone.utc).isoformat(),
            "environment": {"python": sys.version.split()[0], "cwd": str(Path.cwd()),
                            "platform": platform.platform()},
