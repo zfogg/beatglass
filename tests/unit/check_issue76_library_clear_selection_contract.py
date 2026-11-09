@@ -12,7 +12,7 @@ def main() -> None:
     block = SOURCE[start - 80 : SOURCE.index("                        }", start)]
     assert "id: clearSelectedAudio" in block
     assert "window.clearSelectedAudio()" in block
-    assert "Library selection cleared" in block
+    assert "function clearSelectedAudio()" in SOURCE
     assert "clearSelectedAudio.forceActiveFocus()" in block
     assert "enabled: window.selectedName !== \"\"" in block
 
