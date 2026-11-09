@@ -20,4 +20,14 @@ if not any(event.get("discontinuity") is True for event in events if isinstance(
     raise SystemExit("transition evidence has no discontinuity marker")
 if not any(event.get("error_code", 0) != 0 for event in events if isinstance(event, dict)):
     raise SystemExit("transition evidence has no native error code")
+start = next(event for event in events if event.get("event") == "start")
+if not isinstance(start.get("serial"), str) or not start["serial"].strip():
+    raise SystemExit("start event has no sink serial")
+if not any(isinstance(event.get("sample_count"), int) and event["sample_count"] > 0
+           for event in events if event.get("event") == "process"):
+    raise SystemExit("process evidence has no captured samples")
+restart = next(event for event in events if event.get("event") == "restart")
+fmt = restart.get("format")
+if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("channels", 0) <= 0:
+    raise SystemExit("restart event has no negotiated format")
 print(f"PipeWire transition evidence verified ({len(events)} events)")

@@ -65,7 +65,8 @@ python tests/pipewire/validate_pipewire_transition_evidence.py evidence/pipewire
 ```
 
 The validator requires `start`, `process`, `error`, and `restart` events,
-positive monotonic epochs, a discontinuity marker, and a native error code.
+positive monotonic epochs, a sink serial, captured samples, a negotiated
+restart format, a discontinuity marker, and a native error code.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
