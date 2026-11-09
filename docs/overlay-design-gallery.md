@@ -149,6 +149,7 @@ screenshots.
 | [Native safe mode](overlay-native-safe-mode-card.svg) | continued session without native overlay activation |
 | [Exit native safe mode](overlay-native-safe-mode-exit-card.svg) | restore prompt after permission recovery |
 | [Native safe mode restored](overlay-native-safe-mode-persisted-card.svg) | persisted safe mode at startup |
+| [Native safe mode banner](overlay-native-safe-mode-banner-card.svg) | persistent safe-mode status while session continues |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
