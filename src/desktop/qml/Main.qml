@@ -4070,7 +4070,12 @@ ApplicationWindow {
                     Accessible.name: "Overlay settings summary, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                     Accessible.value: text
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Current overlay display, size, opacity, recovery state, and whether persisted settings are retained."
+                    Accessible.description: "Current overlay display, size, opacity, and settings revision. "
+                        + (window.overlayDisplayRecoveryPending
+                            ? "Recovery is pending; persisted settings are retained while the display is restored."
+                            : (window.overlayLaunchFallbackActive
+                                ? "The overlay is using its launch fallback while persisted settings remain available."
+                                : "The overlay is ready with persisted settings applied."))
                     ToolTip.text: "Current overlay display, size, opacity, and recovery state"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
