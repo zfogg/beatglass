@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Live capture errors now announce a concrete next action—retry monitoring after
+checking the selected output and permission state—alongside the existing error
+status and recovery controls.
+
 Live Starting and Reacquiring transitions now announce their next action:
 waiting for the first accepted snapshot or waiting for reacquisition after the
 previous visualization selection was cleared.

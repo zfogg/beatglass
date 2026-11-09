@@ -1063,6 +1063,8 @@ ApplicationWindow {
                 window.announceVisualizationRecovery("Output monitoring is starting; waiting for the first accepted visualization snapshot.")
             else if (window.liveBridge.status === "Reacquiring")
                 window.announceVisualizationRecovery("Output monitoring is reacquiring; previous visualization selection was cleared.")
+            else if (window.liveBridge.status === "Error")
+                window.announceVisualizationRecovery("Output monitoring reported an error; retry monitoring after checking the selected output and permission state.")
             else if (window.liveBridge.status === "Tracking")
                 window.announceVisualizationRecovery("Output monitoring is tracking; visualization updates will appear as accepted data arrives.")
         }
