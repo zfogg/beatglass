@@ -49,7 +49,9 @@ EnumerationResult SourceAdapter::enumerate() {
   catch (...) { return {EnumerationOutcome::error, {}, SourceError::backend_error, "Core Audio enumeration failed"}; }
 }
 SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consumer consumer) {
-  if (!backend_ || !consumer || id.empty()) return {{}, SourceError::backend_error, "Invalid source request"};
+  if (!backend_) return {{}, SourceError::backend_error, "Core Audio backend unavailable"};
+  if (!consumer) return {{}, SourceError::backend_error, "Audio consumer required"};
+  if (id.empty()) return {{}, SourceError::not_found, "Output source id required"};
   if (quiescence_failed_) return {{}, SourceError::backend_error, "Previous capture has not quiesced"};
   if (lifecycle_.state() != SourceState::stopped) return {{}, SourceError::busy, "Source already active"};
   auto epoch = epochs_.next();

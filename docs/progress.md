@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio start requests now distinguish missing source IDs (`not_found`) and
+missing consumers from an unavailable backend, giving callers actionable typed
+diagnostics. Portable coverage is in
+`python tests/unit/check_macos_invalid_source_contract.py`.
+
 Core Audio startup now preserves the original typed failure (including
 permission or device loss) even if backend cleanup also fails; the diagnostic
 still appends the cleanup failure. Portable coverage is in
