@@ -55,3 +55,16 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps(payload))
             result = review.assess(report, "release-owner")
             self.assertIn("linux:invalid artifact provenance", result["blockers"])
+
+    def test_manifest_identity_and_capture_command_are_required(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            payload = {"platforms": [{"platform": "linux", "manifest_platform": "linux",
+                                      "commit": "0" * 40, "provenance_complete": True,
+                                      "manifest_sha256": "bad", "qualification_command": "",
+                                      "qualification_output": "", "retained_artifacts": 0,
+                                      "artifact_inventory": [], "scenarios": []}]}
+            report.write_text(__import__("json").dumps(payload))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:invalid manifest identity", result["blockers"])
+            self.assertIn("linux:missing qualification command", result["blockers"])
