@@ -3040,7 +3040,7 @@ ApplicationWindow {
                                 Button {
                                     objectName: "lookupAnalysisCache"
                                     text: "Check cache"
-                                    enabled: window.analysisCacheIdentityReady
+                                    enabled: window.analysisCacheIdentityReady && typeof storageRecovery !== "undefined" && storageRecovery.storageOpen === true
                                     Accessible.name: "Check analysis cache"
                                     Accessible.value: enabled ? "ready; identity fields complete" : "unavailable; enter content, engine, configuration, and mode"
                                     Accessible.description: "Look up a completed result without starting decoder or analysis work."
@@ -3049,7 +3049,7 @@ ApplicationWindow {
                                 Button {
                                     objectName: "invalidateAnalysisCache"
                                     text: "Forget cached result"
-                                    enabled: window.analysisCacheIdentityReady && !window.analysisCacheIdentityDirty && typeof storageRecovery !== "undefined" && storageRecovery.cacheHit === true
+                                    enabled: window.analysisCacheIdentityReady && !window.analysisCacheIdentityDirty && typeof storageRecovery !== "undefined" && storageRecovery.storageOpen === true && storageRecovery.cacheHit === true
                                     Accessible.name: "Forget cached analysis"
                                     Accessible.value: enabled ? "available; completed cache hit" : "unavailable; run Check cache and confirm a hit"
                                     Accessible.description: enabled ? "Remove this completed cache identity so the next analysis runs again. Source files are not changed." : "Run Check cache and confirm a completed cache hit before forgetting an identity."
@@ -3059,7 +3059,7 @@ ApplicationWindow {
                                     objectName: "reanalyzeInvalidatedCache"
                                     text: "Run reanalysis"
                                     visible: storageRecovery.analysisStatus === "Analysis idle · reanalysis required"
-                                    enabled: visible && window.analysisCacheIdentityReady && window.selectedAudioUrl.toLocalFile() !== ""
+                                    enabled: visible && window.analysisCacheIdentityReady && typeof storageRecovery !== "undefined" && storageRecovery.storageOpen === true && window.selectedAudioUrl.toLocalFile() !== ""
                                     Accessible.name: "Run fresh analysis"
                                     Accessible.value: enabled ? "available; reanalysis required" : "unavailable; select a source and complete cache identity"
                                     Accessible.description: "Invalidate this identity and admit fresh analysis work to the queue."

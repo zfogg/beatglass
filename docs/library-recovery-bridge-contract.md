@@ -91,6 +91,8 @@ The cache form also provides a clear-identity action that removes all fields and
 returns focus to the control, ensuring stale hits cannot remain actionable.
 The clear action announces that a fresh cache check is required before any
 cache mutation, keeping the keyboard workflow's next step explicit.
+The cache controls are also disabled while the bridge reports closed storage,
+so users cannot invoke actions that will be rejected by the worker boundary.
 The desktop cache controls mirror this contract: lookup, invalidation, and
 reanalysis actions stay disabled until content, engine, configuration, and a
 valid `offline`/`live` mode are present.
