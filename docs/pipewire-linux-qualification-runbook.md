@@ -111,3 +111,4 @@ ative_test_name_match: true in the summary after discovery/execution reconciliat
 The archived summary must itself report qualified: true; the manifest cannot promote an unqualified run.
 The verifier also cross-checks summary `native_junit_test_count` against parsed JUnit testcases.
 ative_junit_test_count against parsed JUnit testcases.
+Summary JUnit status fields for failures, errors, and skips must all be zero and are cross-checked against parsed results.
