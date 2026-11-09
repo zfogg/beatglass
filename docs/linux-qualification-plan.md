@@ -9,6 +9,8 @@ metadata in both pending and attempted summaries, so handoffs remain attributabl
 even when the native host is unavailable.
 Attempted summaries also record the host operating-system label alongside the
 platform identity.
+Pending and attempted summaries use the explicit
+`beatglass-native-runner-summary-v1` schema identifier for downstream validators.
 
 ## Runnable preparation checks
 
