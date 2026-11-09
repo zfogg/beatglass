@@ -91,6 +91,7 @@ screenshots.
 | [Scan canceled](overlay-library-scan-canceled-card.svg) | safe canceled indexing and resume action |
 | [Scan failed](overlay-library-scan-failed-card.svg) | recoverable indexing failure with diagnostics |
 | [Folder access](overlay-library-scan-permission-card.svg) | explicit read-only library permission request |
+| [Duplicate tracks](overlay-library-duplicates-card.svg) | safe duplicate review without destructive defaults |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
