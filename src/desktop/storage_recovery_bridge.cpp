@@ -216,7 +216,7 @@ void StorageRecoveryBridge::close() {
   status_ = QStringLiteral("Storage closed"); emit statusChanged();
 }
 void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
-void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ == id) return; selectedRunId_ = id; emit selectedRunChanged(); }
+void StorageRecoveryBridge::selectRun(const QString& id) { const auto normalized = id.trimmed(); if (selectedRunId_ == normalized) return; selectedRunId_ = normalized; emit selectedRunChanged(); }
 void StorageRecoveryBridge::discardRuns(const QStringList& ids) { if (!ids.isEmpty()) QMetaObject::invokeMethod(worker_, "discardBatch", Qt::QueuedConnection, Q_ARG(QStringList, ids)); }
 void StorageRecoveryBridge::discardSelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::retrySelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
