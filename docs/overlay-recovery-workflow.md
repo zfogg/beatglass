@@ -136,3 +136,6 @@ The saved display identity is restored by name rather than only by its old index
 
 Persisted geometry is restored with the saved display and included in the successful recovery announcement as width and height. This gives keyboard and assistive-technology users confirmation that the overlay returned at its saved size, not merely that the native window reopened.
 
+
+Display, geometry, and opacity are treated as one persisted visual bundle: recovery confirms all three in a single announcement, while the control window remains the tray/taskbar fallback if any part cannot be reapplied.
+
