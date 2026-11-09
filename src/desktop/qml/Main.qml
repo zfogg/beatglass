@@ -339,7 +339,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped"
-        onActivated: { window.playbackBridge.stop(); window.announceVisualizationRecovery("Playback stopped from keyboard shortcut; accepted snapshot cleared.") }
+        onActivated: window.stopPlaybackWithRecovery("Playback stopped from keyboard shortcut; accepted snapshot cleared.")
     }
     Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus() } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
@@ -1060,6 +1060,14 @@ ApplicationWindow {
                 || !window.playbackBridge || window.playbackBridge.state === "Stopped")
             return false
         return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
+    }
+
+    function stopPlaybackWithRecovery(message) {
+        if (!window.playbackBridge || window.playbackBridge.state === "Stopped")
+            return false
+        window.playbackBridge.stop()
+        window.announceVisualizationRecovery(message)
+        return true
     }
 
     function togglePlaybackPause() {
