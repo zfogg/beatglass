@@ -2781,6 +2781,7 @@ ApplicationWindow {
                                     text: "Forget cached result"
                                     enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && typeof storageRecovery !== "undefined" && storageRecovery.cacheHit === true
                                     Accessible.name: "Forget cached analysis"
+                                    Accessible.value: enabled ? "available; completed cache hit" : "unavailable; run Check cache and confirm a hit"
                                     Accessible.description: enabled ? "Remove this completed cache identity so the next analysis runs again. Source files are not changed." : "Run Check cache and confirm a completed cache hit before forgetting an identity."
                                     onClicked: { invalidateCacheDialog.open(); window.announceVisualizationRecovery("Confirm forgetting the cached result; source audio remains unchanged.") }
                                 }
