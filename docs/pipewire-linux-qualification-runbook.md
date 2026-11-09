@@ -60,6 +60,8 @@ The rendered report must repeat the matrix host identity, preventing a report
 from being paired with evidence from another machine.
 When commit provenance is available, the report must repeat that identity too;
 native evidence is still explicitly pending until a host supplies a run.
+Pending platform reasons must also appear in the rendered report, so reviewers
+can act on the missing-host requirement without opening the raw JSON.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons

@@ -2,6 +2,6 @@
 from pathlib import Path
 
 source = (Path(__file__).parents[1] / "pipewire" / "validate_qualification_bundle.py").read_text(encoding="utf-8")
-for marker in ("qualification bundle", "Native qualification matrix", "missing platform", "beatglass-native-qualification-matrix-v1", "invalid host identity", "invalid commit identity", "host identity does not match", "commit identity does not match"):
+for marker in ("qualification bundle", "Native qualification matrix", "missing platform", "beatglass-native-qualification-matrix-v1", "invalid host identity", "invalid commit identity", "host identity does not match", "commit identity does not match", "missing pending reason"):
     if marker not in source: raise SystemExit(f"missing qualification bundle marker: {marker}")
 print("PipeWire qualification bundle contract passed (4 checks)")
