@@ -21,6 +21,8 @@ except ValueError:
     raise SystemExit("manifest captured_at_utc must be ISO-8601")
 if captured_at.utcoffset() is None:
     raise SystemExit("manifest captured_at_utc must include a timezone")
+if captured_at.utcoffset().total_seconds() != 0:
+    raise SystemExit("manifest captured_at_utc must be UTC")
 if not isinstance(manifest["inventory"], list):
     raise SystemExit("manifest inventory must be a list")
 if any(not isinstance(item, dict) for item in manifest["inventory"]):
