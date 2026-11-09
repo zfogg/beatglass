@@ -151,3 +151,6 @@ The fallback review action keeps persisted display, geometry, opacity, and inter
 
 When the native bridge returns with a usable display, the control window is explicitly reactivated and focus moves to Review retained settings. This makes the persisted display/geometry/opacity state keyboard-discoverable before the user chooses Show, Restore, or Reapply.
 
+
+The retained-settings shortcut Ctrl+Alt+Shift+S remains enabled during fallback, restores the control window, and focuses the review action without changing persisted display, geometry, opacity, or interaction settings.
+
