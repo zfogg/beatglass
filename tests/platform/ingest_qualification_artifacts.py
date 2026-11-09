@@ -51,6 +51,9 @@ def ingest(root: Path, output: Path) -> list[str]:
             if root.resolve() not in path.parents or not path.is_file():
                 errors.append(f"missing or escaping artifact: {relative}"); continue
             normalized = Path(relative).as_posix()
+            canonical = path.relative_to(root.resolve()).as_posix()
+            if normalized != canonical:
+                errors.append(f"non-canonical artifact path: {relative}"); continue
             if normalized in seen_paths:
                 errors.append(f"duplicate artifact path: {normalized}"); continue
             seen_paths.add(normalized)
@@ -74,6 +77,8 @@ def ingest(root: Path, output: Path) -> list[str]:
         normalized = Path(relative).as_posix()
         if root.resolve() not in path.parents or not path.is_file():
             errors.append(f"missing or escaping referenced evidence: {relative}"); continue
+        if normalized != path.relative_to(root.resolve()).as_posix():
+            errors.append(f"non-canonical referenced evidence path: {relative}"); continue
         if path.stat().st_size == 0:
             errors.append(f"empty referenced evidence: {normalized}"); continue
         if normalized in known_paths:
