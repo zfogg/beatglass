@@ -112,3 +112,5 @@ if 'Reanalysis rejected: storage is not open' not in source:
     raise SystemExit("Reanalysis must reject closed storage before invalidating cache")
 if 'Reanalysis rejected: complete source identity is required' not in source:
     raise SystemExit("Reanalysis must reject incomplete cache identity before invalidating cache")
+if 'runId.trimmed().isEmpty() || path.trimmed().isEmpty()' not in source:
+    raise SystemExit("Reanalysis must require a persisted run identity")
