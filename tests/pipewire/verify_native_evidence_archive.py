@@ -63,6 +63,9 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("discovery JSON has no registered tests")
     if any(not isinstance(test, dict) or not str(test.get("name", "")).strip() for test in discovery_tests):
         raise SystemExit("discovery JSON has an unnamed test")
+    discovery_names = [test["name"] for test in discovery_tests]
+    if len(discovery_names) != len(set(discovery_names)):
+        raise SystemExit("discovery JSON has duplicate test names")
     junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
     junit_root = ET.fromstring(archive.read(junit_name))
     if junit_root.tag not in ("testsuite", "testsuites"):
