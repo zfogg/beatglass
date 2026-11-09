@@ -1560,7 +1560,9 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastResult !== ""
                                 text: visible ? ("Latest batch result: " + window.analysisJobBridge.batchLastResult) : ""
                                 Accessible.name: "Latest batch analysis result"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No batch analysis result is available."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
@@ -1569,9 +1571,10 @@ ApplicationWindow {
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
                                 + (visible && storageRecovery.status.indexOf("retryable recovery runs discarded") >= 0 ? " · " + storageRecovery.status : "")
                                 Accessible.name: "Persisted analysis recovery status: " + text
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible && storageRecovery.analysisStatus === "Analysis complete" ? "Analysis completed successfully; persisted retry selection is no longer active." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? storageRecovery.analysisStatus + "; persisted recovery remains retryable and the selected run stays actionable." : visible && storageRecovery.status === "Retryable run is active" && storageRecovery.selectedRunId !== "" ? "Selected run " + storageRecovery.selectedRunId + " is active; discard remains unavailable until it reaches a terminal state." : "Recovery status and persisted retryable runs."
                                 ToolTip.text: "Saved analysis recovery status and retryable runs"
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
@@ -1580,7 +1583,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.status.indexOf("Retry rejected:") >= 0
                                 text: visible ? ("Persisted retry decision: " + storageRecovery.status) : ""
                                 Accessible.name: "Persisted retry rejection reason"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No persisted retry rejection has been reported."
+                                Accessible.role: Accessible.Status
                                 ToolTip.text: "Why persisted analysis was kept retryable instead of being started"
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
@@ -1589,7 +1594,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 text: visible ? ("Analysis admission: " + storageRecovery.analysisStatus) : ""
                                 Accessible.name: "Analysis admission status"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "Analysis admission status is unavailable."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -1607,6 +1614,8 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisFrames !== undefined
                                 text: visible ? ("Persisted analysis progress: " + storageRecovery.analysisFrames + " frames") : ""
                                 Accessible.name: "Persisted analysis progress"
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -1614,7 +1623,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.cachedResult !== undefined
                                 text: visible ? (storageRecovery.cacheHit ? "Cached analysis ready" : "No cached analysis for the requested identity") : ""
                                 Accessible.name: "Analysis cache status"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "Analysis cache status is unavailable."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -1622,7 +1633,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.cacheHit
                                 text: visible ? ("Cached result: " + storageRecovery.cachedResult) : ""
                                 Accessible.name: "Cached analysis result"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No completed cached analysis result is selected."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
@@ -1630,7 +1643,9 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.result !== ""
                                 text: visible ? ("Worker result: " + window.analysisJobBridge.result) : ""
                                 Accessible.name: "Worker analysis result"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No worker analysis result is available."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
@@ -1639,7 +1654,9 @@ ApplicationWindow {
                                 text: visible ? ("Analysis queue: " + window.analysisJobBridge.status
                                       + (window.analysisJobBridge.canRetry ? " · retry available" : "")) : ""
                                 Accessible.name: "Analysis queue outcome"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "Analysis queue outcome is unavailable."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -2727,7 +2744,7 @@ ApplicationWindow {
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"
-                    Accessible.name: "Overlay display"; Accessible.value: currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable"); ToolTip.text: "Choose the display where the overlay is shown"
+                    Accessible.name: "Overlay display"; Accessible.value: (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Choose the display where the overlay is shown"
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
@@ -2912,14 +2929,14 @@ ApplicationWindow {
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
-                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output endpoint discovery status" }
+                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current output endpoint discovery status" }
                             Label {
                                 objectName: "endpointUnavailableState"
                                 visible: window.endpointSelectionBridge === null
                                 text: "Output endpoint discovery is unavailable in this build."
                                 Accessible.name: "Output endpoint discovery availability"
                                 Accessible.value: text
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 ToolTip.text: "Output endpoint discovery is unavailable in this build"
                                 wrapMode: Text.WordWrap
@@ -2931,7 +2948,7 @@ ApplicationWindow {
                                 text: "Output endpoint recovery is available: connect an output device and refresh the endpoint list."
                                 Accessible.name: "Output endpoint recovery guidance"
                                 Accessible.value: text
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 ToolTip.text: "Connect an output device and refresh endpoint discovery"
                                 wrapMode: Text.WordWrap
@@ -2951,7 +2968,7 @@ ApplicationWindow {
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
-                            Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current selected output endpoint"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current selected output endpoint"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         ComboBox {
                             id: outputDevice
                             objectName: "outputDevice"
@@ -2973,7 +2990,7 @@ ApplicationWindow {
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio capture permission guidance"
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             ToolTip.text: "Audio capture permission and recovery guidance"
                         }
