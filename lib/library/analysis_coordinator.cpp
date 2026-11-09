@@ -2,7 +2,7 @@
 #include "beatglass/library/analysis_commit.hpp"
 namespace beatglass::library {
 std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_id, AnalysisOperation operation, int priority) {
-  if (!storage_.cache() || run_id.empty() || !operation.valid()) return {};
+  if (!storage_.cache() || run_id.empty() || run_id.find_first_not_of(" \t\r\n") == std::string::npos || !operation.valid()) return {};
   const auto admission = storage_.admit_analysis(run_id, operation.identity, operation.source.path.string(), operation.decoder_snapshot);
   if (!admission.decoder_compatible || (!admission.analysis_reserved && !admission.cached)) return {};
   if (admission.cached) {
