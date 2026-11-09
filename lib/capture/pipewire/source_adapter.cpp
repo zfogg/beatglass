@@ -123,6 +123,11 @@ public:
                     std::uint32_t sample_rate, std::uint32_t channels) override {
     return session_.start(serial, epoch, sample_rate, channels);
   }
+  bool reacquire(const std::string& serial, std::uint64_t epoch,
+                 std::uint32_t sample_rate, std::uint32_t channels) override {
+    session_.reset();
+    return session_.start(serial, epoch, sample_rate, channels);
+  }
   bool restart_stream(std::uint64_t epoch, std::uint32_t sample_rate,
                       std::uint32_t channels) override {
     return session_.restart(epoch, sample_rate, channels);

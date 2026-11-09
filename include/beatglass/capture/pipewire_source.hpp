@@ -77,6 +77,9 @@ public:
   /** Start a stream after the negotiated native format is known. */
   virtual bool start_stream(const std::string& serial, std::uint64_t epoch,
                             std::uint32_t sample_rate, std::uint32_t channels) = 0;
+  /** Replace the selected stream at a source boundary with a fresh epoch. */
+  virtual bool reacquire(const std::string& serial, std::uint64_t epoch,
+                         std::uint32_t sample_rate, std::uint32_t channels) = 0;
   /** Restart the selected stream with a fresh epoch and negotiated format. */
   virtual bool restart_stream(std::uint64_t epoch, std::uint32_t sample_rate,
                               std::uint32_t channels) = 0;
