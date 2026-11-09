@@ -21,6 +21,7 @@ commands = [
     ["cmake", "-S", str(args.source), "-B", str(args.build), "-DBEATGLASS_BUILD_PIPEWIRE=ON", "-DBUILD_TESTING=ON"],
     ["cmake", "--build", str(args.build)],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "pipewire"],
+    ["ctest", "--test-dir", str(args.build), "--show-only=json-v1", "--no-tests=error", "-R", "^pipewire_tests$"],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "--no-tests=error", "--timeout", "30", "-R", "^pipewire_tests$"],
 ]
 evidence = args.summary.parent if args.summary else args.source / "evidence"
@@ -50,7 +51,7 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
     results.append({"command": capture, "returncode": result.returncode,
                     "duration_seconds": round(time.monotonic() - capture_started, 3),
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
-native_result = next((item for item in results if "^pipewire_tests$" in item["command"]), None)
+native_result = next((item for item in results if "--timeout" in item["command"] and "^pipewire_tests$" in item["command"]), None)
 summary = {"platform": platform.platform(), "commit": commit,
            "pipewire_version": pipewire_version, "commands": results,
            "native_pipewire_tests": native_result,
