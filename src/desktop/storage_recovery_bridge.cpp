@@ -151,6 +151,8 @@ private:
     emit analysis(QString::fromLatin1(status));
     if (state != TrackedState::queued && state != TrackedState::running)
       emit result(state == TrackedState::completed, QString::fromLatin1(status));
+    if (state == TrackedState::cancelled || state == TrackedState::failed)
+      emit analysisProgress(0);
     if (state == TrackedState::failed) emit analysisError(QStringLiteral("Analysis failed; retryable work was preserved for recovery."));
     if (state == TrackedState::queued || state == TrackedState::running) QTimer::singleShot(50, this, &Worker::pollAnalysis); else { refresh(); if (state == TrackedState::completed) handle_.reset(); }
   }
