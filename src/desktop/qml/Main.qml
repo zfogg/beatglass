@@ -808,10 +808,11 @@ ApplicationWindow {
         const savedIndex = window.overlayPreferredDisplayName !== ""
             ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName)
             : window.overlayPreferredScreenIndex
-        window.overlayDisplaySelectionRequired = window.overlayBridge.screenNames.length === 0 || savedIndex < 0
+        window.overlayDisplaySelectionRequired = !window.overlayBridge.available
+            || window.overlayBridge.screenNames.length === 0 || savedIndex < 0
         window.overlayDisplayRecoveryPending = window.overlayBridge.screenNames.length === 0 || window.overlayDisplaySelectionRequired
         window.overlayLaunchFallbackActive = window.overlayDisplaySelectionRequired
-        return savedIndex >= 0
+        return window.overlayBridge.available && savedIndex >= 0
     }
     function restoreOverlayVisualStateFromBridge() {
         if (!window.overlayBridge) {
