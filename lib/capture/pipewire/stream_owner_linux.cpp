@@ -5,6 +5,7 @@
 #include <pipewire/pipewire.h>
 #include <spa/param/audio/format-utils.h>
 #include <spa/param/param.h>
+#include <spa/param/audio/format-utils.h>
 #include <spa/buffer/buffer.h>
 
 namespace beatglass::pipewire::detail {
@@ -32,9 +33,16 @@ public:
     stream_ = pw_stream_new_simple(pw_thread_loop_get_loop(loop_), "beatglass-monitor", props_, &events, this);
     if (!stream_) { stop(); return false; }
     pw_thread_loop_start(loop_);
+    std::uint8_t pod_buffer[1024];
+    spa_pod_builder builder = SPA_POD_BUILDER_INIT(pod_buffer, sizeof(pod_buffer));
+    spa_audio_info_raw audio{};
+    audio.format = SPA_AUDIO_FORMAT_F32;
+    audio.rate = config.sample_rate;
+    audio.channels = config.channels;
+    const spa_pod* params[] = {spa_format_audio_raw_build(&builder, SPA_PARAM_EnumFormat, &audio)};
     if (pw_stream_connect(stream_, PW_DIRECTION_INPUT, PW_ID_ANY,
                           static_cast<pw_stream_flags>(PW_STREAM_FLAG_AUTOCONNECT | PW_STREAM_FLAG_MAP_BUFFERS),
-                          nullptr, 0) < 0) { stop(); return false; }
+                          params, 1) < 0) { stop(); return false; }
     active_ = true;
     return true;
   }
