@@ -68,6 +68,8 @@ returns to `Resume recovery` rather than the ordinary retry control, preserving
 the intentional pause across the display lifecycle.
 The reconnect announcement also states that recovery remains paused, so a
 display reconnect cannot silently restart native retries.
+While the display is still unavailable, the paused card separately reports that
+display recovery is pending and that resuming remains a manual choice.
 
 ## Screenshot qualification
 
