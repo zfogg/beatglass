@@ -55,7 +55,11 @@ public:
   }
   void stop() noexcept override {
     active_ = false;
-    if (stream_) { pw_stream_destroy(stream_); stream_ = nullptr; }
+    if (stream_) {
+      pw_stream_disconnect(stream_);
+      pw_stream_destroy(stream_);
+      stream_ = nullptr;
+    }
     if (props_) { pw_properties_free(props_); props_ = nullptr; }
     if (core_) { pw_core_disconnect(core_); core_ = nullptr; }
     if (context_) { pw_context_destroy(context_); context_ = nullptr; }
