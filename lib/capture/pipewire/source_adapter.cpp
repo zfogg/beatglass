@@ -100,7 +100,13 @@ class DiscoveryBoundary final : public MonitorBackend {
 public:
   Discovery enumerate(std::chrono::milliseconds timeout) override { return discover_sinks(timeout); }
   bool start(const std::string&, std::uint64_t) override { return false; }
-  bool stop() noexcept override { return true; }
+  bool start_stream(const std::string& serial, std::uint64_t epoch,
+                    std::uint32_t sample_rate, std::uint32_t channels) override {
+    return session_.start(serial, epoch, sample_rate, channels);
+  }
+  bool stop() noexcept override { session_.stop(); return true; }
+private:
+  MonitorSession session_;
 };
 }
 std::unique_ptr<MonitorBackend> make_monitor_backend() { return std::make_unique<DiscoveryBoundary>(); }
