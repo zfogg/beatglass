@@ -1976,6 +1976,9 @@ ApplicationWindow {
                 {
                     window.overlayDisplayRecoveryPending = true
                     window.overlayDisplaySelectionRequired = true
+                    window.show()
+                    window.raise()
+                    window.requestActivate()
                     window.announceCaptureRecoveryState("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.")
                     overlayDisplay.forceActiveFocus()
                 }
