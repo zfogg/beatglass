@@ -3,6 +3,8 @@
 The control window keeps one predictable recovery path visible whenever the native
 overlay is unavailable or its persisted settings need attention.
 
+![Overlay recovery workflow rendering](overlay-recovery-workflow.svg)
+
 ```text
 Ready ── display/bridge loss ──> Fallback visible + Review recovery
   ▲                                  │
