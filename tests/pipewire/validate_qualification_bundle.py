@@ -14,6 +14,8 @@ if matrix.get("schema") != "beatglass-native-qualification-matrix-v1" or "# Nati
     raise SystemExit("invalid qualification bundle schema")
 if matrix.get("host_os") not in {"Linux", "Windows", "Darwin"}:
     raise SystemExit("qualification bundle has invalid host identity")
+if f"Host: `{matrix['host_os']}`" not in report:
+    raise SystemExit("qualification report host identity does not match matrix")
 if "commit" in matrix and (not isinstance(matrix["commit"], str) or not matrix["commit"].strip()):
     raise SystemExit("qualification bundle has invalid commit identity")
 for name, entry in matrix.get("platforms", {}).items():
