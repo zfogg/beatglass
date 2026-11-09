@@ -822,3 +822,5 @@ Appearance guidance, current theme/motion state, and settings persistence safety
 Metadata status, metadata recovery guidance, visualization data, and visualization capture state now use live status semantics, aligning source, analysis, and rendering diagnostics for assistive technology.
 
 Live tempo, harmony, overlay capture, and monitor capture states now use status semantics, keeping the primary overlay and monitoring readouts synchronized for assistive technology.
+
+Analysis freshness, selected-source workflow, and frame progress now expose live status values, aligning source selection and active analysis lifecycle feedback.
