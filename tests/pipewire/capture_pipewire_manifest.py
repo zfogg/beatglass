@@ -6,6 +6,9 @@ import platform
 import subprocess
 import sys
 import tempfile
+import sys
+sys.path.insert(0, str(Path(__file__).parent))
+from manifest_contract import audio_sink_count, inventory_digest
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,9 +38,9 @@ manifest = {"schema_version": 1,
             "host_platform": platform.platform(),
             "python_version": platform.python_version(),
             "pipewire_cli_version": version,
-            "audio_sink_count": sum(1 for item in inventory if isinstance(item, dict) and item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink"),
+            "audio_sink_count": audio_sink_count(inventory),
             "inventory": inventory}
-manifest["inventory_sha256"] = hashlib.sha256(json.dumps(inventory, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+manifest["inventory_sha256"] = inventory_digest(inventory)
 output.parent.mkdir(parents=True, exist_ok=True)
 with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent,
                                  prefix=f".{output.name}.", suffix=".tmp", delete=False) as temporary:

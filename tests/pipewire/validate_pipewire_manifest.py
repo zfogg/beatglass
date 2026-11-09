@@ -3,8 +3,11 @@ import json
 import hashlib
 import re
 import sys
+import sys
 from datetime import datetime
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent))
+from manifest_contract import audio_sink_count, inventory_digest
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: validate_pipewire_manifest.py MANIFEST")
@@ -49,9 +52,9 @@ if any(not isinstance(item["info"].get("props"), dict) for item in manifest["inv
     raise SystemExit("manifest inventory info must retain props objects")
 if not any(item["info"]["props"].get("media.class") == "Audio/Sink" for item in manifest["inventory"]):
     raise SystemExit("manifest inventory must include an Audio/Sink")
-if manifest["audio_sink_count"] != sum(1 for item in manifest["inventory"] if item["info"]["props"].get("media.class") == "Audio/Sink"):
+if manifest["audio_sink_count"] != audio_sink_count(manifest["inventory"]):
     raise SystemExit("manifest audio_sink_count does not match inventory")
-expected_digest = hashlib.sha256(json.dumps(manifest["inventory"], sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+expected_digest = inventory_digest(manifest["inventory"])
 if not isinstance(manifest.get("inventory_sha256"), str) or not re.fullmatch(r"[0-9a-f]{64}", manifest["inventory_sha256"]):
     raise SystemExit("manifest inventory_sha256 must be 64 lowercase hex characters")
 if manifest.get("inventory_sha256") != expected_digest:

@@ -61,6 +61,8 @@ misleading empty qualification artifact.
 They include an `inventory_sha256` digest over canonical JSON; validation
 recomputes it to detect post-capture edits and requires the standard 64-digit
 lowercase SHA-256 representation.
+Capture and validation share the same canonical digest and Audio/Sink-count
+helpers, preventing the two qualification paths from drifting.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a
