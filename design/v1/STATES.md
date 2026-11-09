@@ -16,6 +16,7 @@
 | Track reanalysis running | Verified Night Drive track-only reanalysis is 68% complete | Keep stale evidence hidden, expose progress and cancel semantics, and hold playback/queue actions until identity-checked completion. |
 | Track reanalysis canceled | Active verified-source reanalysis is canceled before publishing | Keep evidence clear, preserve the source, and offer explicit retry or queue actions without modifying audio. |
 | Track reanalysis rejected | Completed run fingerprint no longer matches the verified source | Fail closed, keep the result hidden, preserve expected/observed provenance, and require locate/retry or discard. |
+| Track source located | A possible replacement path is found and awaits explicit identity confirmation | Compare expected and observed paths, require fingerprint confirmation, and keep evidence/playback unavailable until confirmed. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
