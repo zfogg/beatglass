@@ -42,6 +42,8 @@ The batch discard dialog exposes an explicit accessible Dialog role, announces i
 
 Batch Retry and Discard controls expose the live worker status and accepted-item count as accessible values/descriptions, so their enabled state and recovery scope remain truthful while the batch transitions.
 
+Batch Cancel exposes the same live status/count value and switches to an explicit unavailable description after the batch leaves Queued/Running, matching its click-time guard and preventing stale cancellation expectations.
+
 The C++ storage bridge now resets active analysis retryability, progress, result, and lifecycle status before reopening. Reopen cannot leave a stale active-job Retry enabled while persisted runs are being refreshed; the subsequent worker refresh repopulates only current retryable identities.
 
 Reopen also clears the bridge's prior `analysisReserved` and `analysisAdmissionResult` values before dispatching the open request. Queue admission text is therefore scoped to the prior connection and cannot be mistaken for a fresh reservation after reconnect.
