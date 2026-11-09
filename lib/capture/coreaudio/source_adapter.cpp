@@ -6,6 +6,7 @@ namespace {
 SourceError source_error(const TapStatus& status) {
   if (!status.failure) return SourceError::backend_error;
   switch (*status.failure) {
+    case TapFailure::invalid_argument: return SourceError::not_found;
     case TapFailure::not_found: return SourceError::not_found;
     case TapFailure::permission_denied: return SourceError::permission_denied;
     case TapFailure::unsupported: return SourceError::unsupported;
