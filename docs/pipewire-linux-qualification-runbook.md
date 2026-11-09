@@ -71,6 +71,14 @@ positive monotonic epochs, a sink serial, captured samples, a negotiated
 restart format, a discontinuity marker, and a native error code.
 When present in a packaged summary, the archive verifier rechecks the same
 required lifecycle events and epoch/discontinuity/error invariants.
+Capture provenance before validation and packaging:
+
+```sh
+python tests/pipewire/capture_pipewire_transition_evidence.py raw-events.json evidence/pipewire-transitions.json
+```
+
+The wrapper records the host platform, checkout commit, schema version, and
+raw events so evidence cannot be detached from the build that produced it.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
