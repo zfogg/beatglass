@@ -15,6 +15,8 @@ if not isinstance(events, list) or not events:
 if any(not isinstance(event, dict) for event in events):
     raise SystemExit("transition evidence contains a non-object event")
 names = [event.get("event") for event in events if isinstance(event, dict)]
+if any(not isinstance(name, str) or not name.strip() for name in names):
+    raise SystemExit("transition evidence contains an unnamed event")
 required = ("start", "process", "error", "restart")
 missing = [name for name in required if name not in names]
 if missing:
