@@ -960,6 +960,7 @@ ApplicationWindow {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
         if (!window.overlayBridge.showOverlay()) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             window.restoreOverlayFallbackControls("")
