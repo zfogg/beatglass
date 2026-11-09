@@ -795,4 +795,5 @@ Display replacement recovery and explicit display selection failures now return 
 After hiding the overlay, focus returns to the Hide control in the restored control window so keyboard users can continue from a stable action surface.
 
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
-Active analysis failure reasons, recovery status, and persisted queue errors now expose their live text as accessible status values, so assistive technology receives the same diagnostics visible in the recovery surface.
+
+Successful display replacement also returns focus to the selector after persisting the native choice, keeping the next Show, Restore, or Reapply action discoverable without a focus jump.
