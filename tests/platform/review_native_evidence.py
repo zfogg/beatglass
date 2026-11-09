@@ -55,6 +55,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
         if not isinstance(inventory, list) or platform.get("retained_artifacts") != len(inventory):
             blockers.append(f"{name}:artifact count mismatch")
         else:
+            artifact_paths = [item.get("path") for item in inventory if isinstance(item, dict)]
+            if len(artifact_paths) != len(set(artifact_paths)):
+                blockers.append(f"{name}:duplicate artifact path")
             for artifact in inventory:
                 if (not isinstance(artifact, dict) or not artifact.get("path") or
                         not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64 or
@@ -89,7 +92,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
         else:
             for scenario_id, digest in evidence_hashes.items():
                 row = scenarios.get(scenario_id)
-                if row is None or row.get("status") != "PASS" or not isinstance(digest, str) or len(digest) != 64:
+                matching = next((item for item in inventory if isinstance(item, dict) and item.get("sha256") == digest), None)
+                if (row is None or row.get("status") != "PASS" or not isinstance(digest, str) or len(digest) != 64
+                        or matching is None):
                     blockers.append(f"{name}:{scenario_id}:invalid scenario evidence hash")
         for scenario in sorted(REQUIRED):
             row = scenarios.get(scenario)
