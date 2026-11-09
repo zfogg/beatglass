@@ -70,6 +70,10 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit(f"digest mismatch: {name}")
     discovery_name = next(name for name in declared if name.endswith(".json") and "discovery" in name)
     junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
+    if summary_data.get("native_discovery_json", "").replace("\\", "/").rsplit("/", 1)[-1] != discovery_name:
+        raise SystemExit("summary discovery path does not match archive")
+    if summary_data.get("native_junit", "").replace("\\", "/").rsplit("/", 1)[-1] != junit_name:
+        raise SystemExit("summary JUnit path does not match archive")
     if summary_data.get("native_discovery_sha256") != hashlib.sha256(archive.read(discovery_name)).hexdigest():
         raise SystemExit("summary native discovery digest does not match archive")
     if summary_data.get("native_junit_sha256") != hashlib.sha256(archive.read(junit_name)).hexdigest():

@@ -120,3 +120,4 @@ The summary discovery/JUnit digests are cross-checked against the transferred ar
 If present, summary `native_test_discovery.count` must match the archived discovery inventory count.
 ative_test_discovery.count must match the archived discovery inventory count.
 Manifest artifact entries must use non-negative sizes and canonical lowercase SHA-256 digests; malformed metadata is rejected explicitly.
+Summary artifact paths are checked against archive basenames to keep provenance tied to the transferred files.
