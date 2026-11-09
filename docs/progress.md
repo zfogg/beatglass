@@ -772,3 +772,5 @@ Overlay monitoring controls now return keyboard focus to the live overlay status
 
 Overlay capture retry now returns keyboard focus to the live monitoring status after requesting a fresh accepted snapshot, keeping recovery feedback visible without requiring pointer interaction. Portable coverage is in `python tests/unit/check_overlay_capture_retry_focus_contract.py`.
 
+Native overlay retry now returns keyboard focus to the display status after requesting restoration, keeping display recovery feedback available when the overlay remains unavailable. Portable coverage is in `python tests/unit/check_overlay_native_retry_focus_contract.py`.
+
