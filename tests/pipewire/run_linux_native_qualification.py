@@ -14,6 +14,7 @@ parser.add_argument("--source", type=Path, default=Path(__file__).parents[2])
 parser.add_argument("--build", type=Path, default=Path("build-pipewire"))
 parser.add_argument("--summary", type=Path)
 parser.add_argument("--transitions", type=Path, help="validated lifecycle transition JSON captured from the native host")
+parser.add_argument("--archive", type=Path, help="package the qualified summary and evidence into this transfer archive")
 args = parser.parse_args()
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
@@ -148,5 +149,12 @@ summary["handoff_status"] = "complete" if summary["qualified"] else "failed"
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+if args.archive and summary["qualified"]:
+    if not args.summary:
+        raise SystemExit("--archive requires --summary")
+    package = [sys.executable, str(args.source / "tests/pipewire/package_native_evidence.py"), str(args.summary), str(args.archive)]
+    packaged = subprocess.run(package, check=False, capture_output=True, text=True)
+    if packaged.returncode:
+        raise SystemExit(packaged.stderr or packaged.stdout or "native evidence archive packaging failed")
 print(json.dumps(summary, indent=2))
 raise SystemExit(0 if summary["qualified"] else 1)
