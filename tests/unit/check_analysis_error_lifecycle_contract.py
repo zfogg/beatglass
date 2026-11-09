@@ -12,6 +12,9 @@ assert "handle_.reset(); emit result(false" in retry
 cancel = source[source.index("void cancelAnalysis()"):source.index("void retryAnalysis()")]
 assert "Analysis cancellation rejected:" in cancel
 assert "catch (const std::exception& error)" in cancel
+admit = source[source.index("void admitAnalysis("):source.index("signals:")]
+assert "Analysis admission rejected:" in admit
+assert "emit admitted(false, QString{})" in admit
 docs = (root / "docs/progress.md").read_text(encoding="utf-8")
 required = [
     'text != QStringLiteral("Analysis failed")',

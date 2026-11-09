@@ -125,9 +125,12 @@ public slots:
     catch (...) { handle_.reset(); emit result(false, QStringLiteral("Analysis retry rejected: unknown error")); emit analysis(QStringLiteral("Analysis retry rejected")); }
   }
   void admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {
-    beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
-    const auto admission = coordinator_.admit_analysis(runId.toStdString(), identity);
-    emit admitted(admission.analysis_reserved, QString::fromStdString(admission.cached.value_or(std::string{})));
+    try {
+      beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+      const auto admission = coordinator_.admit_analysis(runId.toStdString(), identity);
+      emit admitted(admission.analysis_reserved, QString::fromStdString(admission.cached.value_or(std::string{})));
+    } catch (const std::exception& error) { emit admitted(false, QString{}); emit result(false, QStringLiteral("Analysis admission rejected: ") + QString::fromUtf8(error.what())); }
+    catch (...) { emit admitted(false, QString{}); emit result(false, QStringLiteral("Analysis admission rejected: unknown error")); }
   }
 signals:
   void result(bool ok, QString status);
