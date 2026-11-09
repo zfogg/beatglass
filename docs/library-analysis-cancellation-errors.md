@@ -1,8 +1,7 @@
 # Library analysis cancellation errors
 
-Cancellation is issued to the worker-owned job handle and then polled for its
-terminal state. If that lifecycle boundary rejects cancellation, the bridge
-now clears the stale handle and emits `Analysis cancellation rejected:` rather
-than leaving the UI attached to an unknown job. A normal cancellation still
-flows through the existing cancelled/retryable state and preserves the source
-and cache records.
+Cancellation resets displayed progress before requesting stop on the worker
+handle. The bridge then polls the terminal state and preserves the existing
+cancelled/retryable lifecycle. If cancellation is rejected, it clears the
+stale handle and emits `Analysis cancellation rejected:` instead of leaving an
+old progress value attached to an unknown job.
