@@ -70,6 +70,7 @@ screenshots.
 | [Permission denied](overlay-permission-denied-card.svg) | actionable access recovery state |
 | [Permission pending](overlay-permission-pending-card.svg) | in-progress access confirmation state |
 | [Permission granted](overlay-permission-granted-card.svg) | successful access and next step |
+| [Access changed](overlay-access-revoked-card.svg) | permission loss and recovery action |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
