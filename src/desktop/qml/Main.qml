@@ -811,7 +811,7 @@ ApplicationWindow {
                                                window.themePreferencesBridge.themeIndex))
             window.selectedThemeIndex = index
             window.selectedTheme = window.themeNames[index]
-            window.themePreferenceAnnouncement = "Theme preference restored: " + window.selectedTheme + "."
+            window.themePreferenceAnnouncement = "Theme preference restored: " + window.selectedTheme + " (" + (window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion") + ")."
             if (typeof visualizationCanvas !== "undefined")
                 visualizationCanvas.requestPaint()
         }
