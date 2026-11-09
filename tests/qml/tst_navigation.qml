@@ -1497,4 +1497,20 @@ TestCase {
         app.destroy()
         fakeOverlay.refuseShow = false
     }
+    function test_safeModeClearRestoresRetryFocusWithoutDroppingSettings() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        app.overlayRecoveryAttemptCount = app.overlayRecoveryAttemptLimit
+        let shortcut = findChild(app, "overlayClearSafeModeShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        compare(app.overlayRecoveryAttemptCount, 0)
+        verify(findChild(app, "retryOverlay").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
