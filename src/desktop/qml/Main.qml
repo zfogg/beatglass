@@ -1984,6 +1984,9 @@ ApplicationWindow {
                                 window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
                                 browser.currentIndex = -1
                                 event.accepted = true
+                            } else {
+                                window.announceVisualizationRecovery("Already at the top Library folder; parent navigation is unavailable.")
+                                event.accepted = true
                             }
                         }
                         Keys.onEscapePressed: { window.clearSelectedAudio(); browser.currentIndex = -1; search.forceActiveFocus() }
