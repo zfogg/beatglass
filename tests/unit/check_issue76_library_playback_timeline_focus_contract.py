@@ -9,7 +9,7 @@ SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").re
 
 def line(name: str) -> str:
     start = SOURCE.index('objectName: "' + name + '"')
-    return SOURCE[start - 80 : SOURCE.index("\n", start)]
+    return SOURCE[start - 180 : SOURCE.index("\n", start)]
 
 
 def main() -> None:
