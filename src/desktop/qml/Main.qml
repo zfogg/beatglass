@@ -4411,6 +4411,20 @@ ApplicationWindow {
                     }
                 }
                 Label {
+                    objectName: "overlayRecoveryStep"
+                    visible: window.overlayBridge !== null && window.overlayDisplayRecoveryPending
+                    text: window.overlayBridge.available
+                        ? "Recovery steps: 1. Review settings  →  2. Restore overlay"
+                        : "Recovery steps: 1. Reconnect a display  →  2. Retry overlay"
+                    Accessible.name: "Overlay recovery steps"
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: text
+                    ToolTip.text: text
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
+                Label {
                     objectName: "overlayGeometryStatus"
                     text: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
                         ? "Overlay position/size: " + window.overlayBridge.geometry.x + "," + window.overlayBridge.geometry.y + " · " + window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height
