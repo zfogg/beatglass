@@ -163,3 +163,6 @@ A native bridge loss now restores the control window and focuses Retry overlay i
 
 If a retry reaches the native bridge but Show fails, focus stays on Retry overlay after the control-window fallback is restored. The saved display and geometry remain queued, so the user can retry without reselecting settings.
 
+
+Clearing overlay safe mode with Ctrl+Alt+Shift+C resets only the bounded retry counter: focus returns to Retry overlay while saved display and geometry preferences remain intact for the next attempt.
+
