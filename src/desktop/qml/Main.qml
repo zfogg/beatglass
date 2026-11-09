@@ -2878,7 +2878,7 @@ ApplicationWindow {
                                 Accessible.description: typeof storageRecovery !== "undefined" && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running") ? "The selected run is active; discard is unavailable until terminal resolution." : typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus === "Analysis complete" ? "The selected analysis is complete; no persisted retry record can be discarded." : typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Open confirmation to remove retry record " + storageRecovery.selectedRunId + ". The source audio file is never changed."
                                     : "Open confirmation to remove the selected retryable run record. The source audio file is never changed."
-                                onClicked: discardRecoveryDialog.open()
+                                onClicked: { discardRecoveryDialog.open(); window.announceVisualizationRecovery("Confirm discarding the selected saved recovery run; source audio remains unchanged.") }
                             }
                             Button {
                                 objectName: "retryPersistedRecovery"
