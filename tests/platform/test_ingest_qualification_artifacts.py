@@ -31,6 +31,15 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertTrue(any("hash mismatch" in error for error in errors))
 
+    def test_rejects_duplicate_artifact_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "build" / "app.bin"; artifact.parent.mkdir(); artifact.write_bytes(b"fixture")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  build/app.bin\n{digest}  ./build/app.bin\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("duplicate artifact path" in error for error in errors))
+
     def test_rejects_escaping_artifact_entry(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "qualification-artifacts.sha256").write_text("0" * 64 + "  ../escape.bin\n", encoding="utf-8")
