@@ -19,3 +19,14 @@ class NativeEvidenceReviewTest(unittest.TestCase):
         report = Path(__file__).parent / "fixtures/readiness-bundles/readiness-report.json"
         result = review.assess(report, " ")
         self.assertIn("reviewer identity is required", result["blockers"])
+
+    def test_pass_cannot_reference_missing_or_escaping_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            report = root / "report.json"
+            scenarios = [{"id": scenario, "status": "PASS", "evidence": "missing.json"}
+                         for scenario in review.REQUIRED]
+            report.write_text('{"platforms":[{"platform":"Linux","scenarios":' + __import__("json").dumps(scenarios) + '}]}')
+            result = review.assess(report, "release-owner")
+            self.assertEqual(result["decision"], "PENDING")
+            self.assertTrue(result["blockers"])
