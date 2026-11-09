@@ -101,6 +101,16 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "libraryActivateEntryShortcut"
+        sequence: "Ctrl+Alt+Enter"
+        context: Qt.ApplicationShortcut
+        enabled: !window.recursiveCatalogActive && browser.currentIndex >= 0
+        onActivated: {
+            window.activateEntry(browser.currentIndex)
+            window.announceVisualizationRecovery("Activated the focused Library entry.")
+        }
+    }
+    Shortcut {
         objectName: "playbackSeekBackShortcut"
         sequence: "Alt+Left"
         context: Qt.ApplicationShortcut
