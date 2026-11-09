@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / SESSION</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Session summary</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">A simple readout of the listening session so far.</text>
+  <rect x="112" y="258" width="294" height="164" rx="18" fill="#202938"/><text x="144" y="303" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">SESSION TIME</text><text x="144" y="367" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">42:18</text><text x="144" y="398" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">active listening</text>
+  <rect x="452" y="258" width="294" height="164" rx="18" fill="#202938"/><text x="484" y="303" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">TRACKS</text><text x="484" y="367" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">12</text><text x="484" y="398" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">analyzed locally</text>
+  <rect x="792" y="258" width="296" height="164" rx="18" fill="#202938"/><text x="824" y="303" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">HEALTH</text><text x="824" y="367" fill="#56d38b" font-family="Inter,Arial" font-size="34" font-weight="700">Healthy</text><text x="824" y="398" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">0 interruptions</text>
+  <text x="112" y="486" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">Session settings</text><text x="112" y="522" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Built-in Speakers · Compact · 75% opacity · local only</text>
+  <rect x="112" y="610" width="204" height="54" rx="14" fill="#2a3444"/><text x="214" y="644" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Open details</text><text x="1088" y="644" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Updated live</text>
+</svg>
