@@ -182,6 +182,7 @@ screenshots.
 | [Native display retry exhausted](overlay-native-display-retry-exhausted-card.svg) | safe mode after bounded display restore attempts |
 | [Native recovery notice](overlay-native-recovery-notice-card.svg) | non-blocking recovery prompt while monitoring continues |
 | [Native recovery settings](overlay-native-recovery-settings-card.svg) | preferred display and automatic safe-mode recovery choice |
+| [Native recovery saved](overlay-native-recovery-saved-card.svg) | confirmed recovery preference without session interruption |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 

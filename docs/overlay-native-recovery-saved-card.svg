@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Native overlay recovery settings saved</title>
+  <desc id="desc">A success state confirms recovery preferences were saved without interrupting the current monitoring session.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <circle cx="116" cy="116" r="28" fill="#39d98a"/>
+  <path d="M104 116l8 8 16-18" fill="none" stroke="#08141a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="168" y="111" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Recovery saved</text>
+  <text x="168" y="142" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Beatglass will try Display 1 when it becomes available.</text>
+  <rect x="96" y="190" width="728" height="104" rx="16" fill="#17243c"/>
+  <text x="124" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Automatic safe-mode recovery</text>
+  <text x="124" y="258" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">If recovery fails, monitoring remains active without a native window.</text>
+  <text x="124" y="282" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Current appearance and capture settings are retained.</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">No restart is needed for this preference.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">You can change the display or recovery behavior later in settings.</text>
+  <rect x="96" y="438" width="202" height="46" rx="12" fill="#39d98a"/>
+  <text x="197" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Return to overlay</text>
+  <rect x="316" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="393" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Done</text>
+</svg>
