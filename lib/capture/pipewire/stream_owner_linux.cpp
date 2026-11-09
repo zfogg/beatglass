@@ -69,6 +69,7 @@ private:
     auto* buffer = pw_stream_dequeue_buffer(owner.stream_);
     if (!buffer) return;
     if (!buffer->buffer || buffer->buffer->n_datas == 0 || !buffer->buffer->datas[0].data) {
+      if (owner.handoff_) owner.handoff_->on_error(-EINVAL);
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
     }
