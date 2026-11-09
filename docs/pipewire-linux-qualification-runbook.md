@@ -46,6 +46,8 @@ and every pending platform to carry an actionable reason.
 Validate a transferred matrix independently with
 `python tests/pipewire/validate_qualification_matrix.py evidence/qualification-matrix.json`
 before treating its cross-platform status as an actionable handoff.
+Render a reviewable report with
+`python tests/pipewire/render_qualification_matrix_report.py evidence/qualification-matrix.json evidence/qualification-matrix.md`.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 It also refuses to mark a platform qualified unless at least one evidence
