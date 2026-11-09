@@ -34,6 +34,7 @@
 | Track rediscovered accepted | Fresh analysis passes identity checks for a rediscovered catalog entry | Publish new source-attributed evidence, enable queue/playback, and make clear that no prior result was restored. |
 | Track rediscovered queued | Freshly accepted rediscovered source is added to playback queue | Bind queue identity to recovered path/fingerprint and stop on future changes rather than substituting another file. |
 | Track rediscovered playing | Freshly accepted rediscovered source is actively playing | Monitor confirmed source identity, show accepted evidence, and stop/hide evidence immediately on change. |
+| Track rediscovered seek | Active playback seeks within the accepted rediscovered source | Bind timeline bounds to the verified source and discard the seek on mismatch rather than transferring state to another file. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
