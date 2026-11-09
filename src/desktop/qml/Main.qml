@@ -797,7 +797,7 @@ ApplicationWindow {
         const savedIndex = window.overlayPreferredDisplayName !== ""
             ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName)
             : window.overlayPreferredScreenIndex
-        window.overlayDisplaySelectionRequired = window.overlayBridge.screenNames.length > 0 && savedIndex < 0
+        window.overlayDisplaySelectionRequired = window.overlayBridge.screenNames.length === 0 || savedIndex < 0
         window.overlayDisplayRecoveryPending = window.overlayBridge.screenNames.length === 0 || window.overlayDisplaySelectionRequired
         return savedIndex >= 0
     }
