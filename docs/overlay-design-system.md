@@ -27,3 +27,8 @@ When no display is available, the same card keeps the recovery action stable and
 changes only the next-step copy:
 
 ![Overlay disconnected card rendering](overlay-disconnected-card.svg)
+
+The ready state keeps the same hierarchy while making the successful restore
+visually quiet:
+
+![Overlay ready card rendering](overlay-ready-card.svg)
