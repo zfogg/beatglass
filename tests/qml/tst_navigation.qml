@@ -462,6 +462,19 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlaySafeModeShowsKeyboardShortcutHint() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        retry.clicked(); retry.clicked(); retry.clicked()
+        let hint = findChild(app, "overlaySafeModeShortcutHint")
+        verify(hint.visible)
+        compare(hint.text, "Shortcut: Ctrl+Alt+Shift+C clears safe mode")
+        compare(hint.Accessible.description, "Keyboard shortcut for clearing native overlay safe mode")
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)
