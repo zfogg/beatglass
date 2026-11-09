@@ -35,8 +35,14 @@ for index, command in enumerate(commands):
         break
 if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
     capture = ["python", str(args.source / "tests/pipewire/capture_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
-    result = subprocess.run(capture, check=False, text=True)
-    results.append({"command": capture, "returncode": result.returncode})
+    result = subprocess.run(capture, check=False, text=True, capture_output=True)
+    capture_index = len(results)
+    stdout_path = evidence / f"native-{capture_index}-stdout.log"
+    stderr_path = evidence / f"native-{capture_index}-stderr.log"
+    stdout_path.write_text(result.stdout, encoding="utf-8")
+    stderr_path.write_text(result.stderr, encoding="utf-8")
+    results.append({"command": capture, "returncode": result.returncode,
+                    "stdout": str(stdout_path), "stderr": str(stderr_path)})
 native_result = next((item for item in results if "^pipewire_tests$" in item["command"]), None)
 summary = {"platform": platform.platform(), "commands": results,
            "native_pipewire_tests": native_result,
