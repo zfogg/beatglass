@@ -119,7 +119,7 @@ public slots:
     catch (...) { handle_.reset(); emit result(false, QStringLiteral("Analysis cancellation rejected: unknown error")); emit analysis(QStringLiteral("Analysis cancellation rejected")); }
   }
   void retryAnalysis() {
-    try { if (handle_ && handle_->retry()) { emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); }
+    try { if (handle_ && handle_->retry()) { emit analysisProgress(0); emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); }
       else if (handle_) { emit result(false, QStringLiteral("Analysis retry rejected: job is no longer retryable")); emit analysis(QStringLiteral("Analysis retry rejected")); } }
     catch (const std::exception& error) { handle_.reset(); emit result(false, QStringLiteral("Analysis retry rejected: ") + QString::fromUtf8(error.what())); emit analysis(QStringLiteral("Analysis retry rejected")); }
     catch (...) { handle_.reset(); emit result(false, QStringLiteral("Analysis retry rejected: unknown error")); emit analysis(QStringLiteral("Analysis retry rejected")); }
