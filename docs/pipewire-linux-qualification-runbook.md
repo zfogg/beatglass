@@ -56,3 +56,10 @@ post-run evidence ingestion.
 The summary includes its `native_discovery_sha256` digest for transfer checks.
 After copying evidence, verify the complete handoff with
 `python tests/pipewire/verify_native_run_summary.py evidence/native-summary.json`.
+Then create a transfer-safe archive (the command refuses unqualified summaries,
+digest mismatches, symlinked evidence, and accidental overwrites):
+`python tests/pipewire/package_native_evidence.py evidence/native-summary.json evidence/native-qualification.zip`.
+The archive contains the summary, discovery JSON, JUnit results, and any
+captured command stdout/stderr files that exist. Review the ZIP contents before
+attaching it to the qualification record; it is the auditable handoff artifact,
+not a replacement for native desktop/audio evidence.
