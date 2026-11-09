@@ -466,3 +466,5 @@ Markdown reports escape all identity and evidence cells; consume the raw matrix 
 Reviewers should validate the raw matrix JSON before accepting a rendered report as qualification evidence.
 
 Rendered reports are convenience views; only validated matrix JSON and captured native artifacts support a qualification decision.
+
+If rendered output and raw matrix JSON disagree, discard the rendering and resolve the underlying matrix before handoff.
