@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Core Audio start requests now reject source IDs containing NUL bytes before
+native NSString conversion, avoiding malformed identity lookups. Portable
+coverage is in `python tests/unit/check_macos_source_id_nul_contract.py`.
+
 Core Audio start requests now reject whitespace-only source IDs as
 `not_found`, preventing malformed selections from reaching native tap setup.
 Portable coverage is in
