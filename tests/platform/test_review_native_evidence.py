@@ -85,3 +85,16 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps(payload))
             result = review.assess(report, "release-owner")
             self.assertIn("linux:qualification output linkage mismatch", result["blockers"])
+
+    def test_duplicate_platform_and_scenario_entries_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            platform = {"platform": "linux", "manifest_platform": "linux", "commit": "0" * 40,
+                        "provenance_complete": True, "manifest_sha256": "0" * 64,
+                        "qualification_command": "runner", "qualification_output": "capture.txt",
+                        "retained_artifacts": 0, "artifact_inventory": [],
+                        "scenarios": [{"id": "capture", "status": "UNRUN"}, {"id": "capture", "status": "UNRUN"}]}
+            report.write_text(__import__("json").dumps({"platforms": [platform, dict(platform)]}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:duplicate platform entry", result["blockers"])
+            self.assertIn("linux:duplicate scenario id", result["blockers"])

@@ -39,4 +39,7 @@ validated SHA-256 identity plus the exact qualification command and output
 artifact used to produce the handoff. The declared output path and digest must
 also resolve to the same retained artifact entry.
 
+Reports must contain one entry per platform and one entry per scenario; duplicate
+platform or scenario identifiers are rejected rather than silently overwritten.
+
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
