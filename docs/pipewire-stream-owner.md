@@ -7,4 +7,6 @@ negotiated format and binds callback delivery to the bounded `MonitorStream`;
 
 The concrete owner remains blocked on Linux PipeWire headers and a live daemon.
 Windows validation covers only this seam contract; Linux compile, callback,
-and runtime qualification remain explicitly unrun.
+and runtime qualification remain explicitly unrun. Until then the factory
+returns a concrete fail-closed owner rather than a null object, so callers
+cannot accidentally treat an unavailable native stream as connected.
