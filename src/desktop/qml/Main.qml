@@ -814,8 +814,11 @@ ApplicationWindow {
         return savedIndex >= 0
     }
     function restoreOverlayVisualStateFromBridge() {
-        if (!window.overlayBridge)
+        if (!window.overlayBridge) {
+            window.overlayLaunchFallbackActive = true
+            window.overlayDisplayRecoveryPending = true
             return false
+        }
         const savedGeometry = window.overlayBridge.geometry
         if (!savedGeometry || savedGeometry.width <= 0 || savedGeometry.height <= 0) {
             window.announceCaptureRecoveryState("Persisted overlay geometry unavailable; control-window fallback remains active.")
