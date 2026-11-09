@@ -21,4 +21,6 @@ if "Discard rejected: no persisted run selected" not in source:
     raise SystemExit("Discard without selection must report a rejection")
 if "Discard rejected: no persisted runs selected" not in source:
     raise SystemExit("Batch discard without selection must report a rejection")
+if "Discarding persisted recovery" not in source:
+    raise SystemExit("Batch discard must publish a transition status")
 print(f"Persisted retry action contract verified ({len(required)} checks)")
