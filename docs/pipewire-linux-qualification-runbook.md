@@ -54,6 +54,8 @@ Evidence entries must be non-empty strings, preventing malformed paths from
 being presented as transferable qualification artifacts.
 Control characters are rejected from evidence paths as well, keeping report
 entries visible and safe to transfer between hosts.
+Duplicate evidence paths are rejected so each listed artifact contributes a
+distinct handoff record.
 Runner summaries carry the same matrix schema and a per-host matrix status,
 so archived Linux results can be merged into the cross-platform report without
 guessing whether a host was pending or qualified.
