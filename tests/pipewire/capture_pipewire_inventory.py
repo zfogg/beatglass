@@ -1,8 +1,10 @@
 """Capture a timestamped pw-dump inventory for native qualification evidence."""
 import argparse
 import json
+import os
 import platform
 import subprocess
+import tempfile
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
@@ -27,5 +29,18 @@ if args.output.exists():
 if args.output.parent.exists() and args.output.parent.is_symlink():
     raise SystemExit("refusing symlinked evidence output directory")
 args.output.parent.mkdir(parents=True, exist_ok=True)
-args.output.write_text(result.stdout, encoding="utf-8")
+with tempfile.NamedTemporaryFile(
+    "w", encoding="utf-8", dir=args.output.parent,
+    prefix=f".{args.output.name}.", suffix=".tmp", delete=False,
+) as temporary:
+    temporary.write(result.stdout)
+    temporary_name = temporary.name
+try:
+    # A hard link creates the final evidence path without replacing a file
+    # created by another qualification process between our preflight checks.
+    os.link(temporary_name, args.output)
+except FileExistsError:
+    raise SystemExit("refusing to overwrite existing evidence output")
+finally:
+    Path(temporary_name).unlink(missing_ok=True)
 print(f"wrote PipeWire inventory: {args.output}")

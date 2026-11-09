@@ -39,5 +39,8 @@ Run `ctest --test-dir build -R pipewire_tests --output-on-failure` during the
 Linux qualification pass and retain the test output with the manifest.
 Capture the runtime node inventory with
 `python tests/pipewire/capture_pipewire_inventory.py <evidence>/pw-dump.json`.
-Capture paths are immutable: choose a new output filename for each run; the
-helper refuses to overwrite existing files or traverse symlinked directories.
+Capture paths are immutable: choose a new output filename for each run. The
+helper writes the dump to a temporary file and publishes it with an atomic
+no-overwrite hard link, then removes the temporary file; it refuses to
+overwrite existing files or traverse symlinked directories, including when a
+second qualification process races the preflight check.
