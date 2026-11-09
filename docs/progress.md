@@ -1,5 +1,11 @@
 # Progress and handoff
 
+The PipeWire callback seam now records native error codes in an atomic status
+slot, allowing control-thread lifecycle code to distinguish callback failure
+from ordinary stop and restart. No allocation occurs on the callback path.
+Portable coverage is in
+`python tests/unit/check_pipewire_callback_error_status_contract.py`.
+
 The FFT selection cursor now responds to mouse-wheel navigation with one-bin,
 five-bin Shift, and ten-bin Control steps; waveform wheel selection retains
 its time-position behavior.
