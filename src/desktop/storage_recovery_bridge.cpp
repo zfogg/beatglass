@@ -82,13 +82,17 @@ public slots:
   }
   void findCached(QString content, QString engine, QString configuration, QString mode) {
     beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
-    std::string result; emit cached(coordinator_.storage().find_cached(identity, result), QString::fromStdString(result));
+    try { std::string result; emit cached(coordinator_.storage().find_cached(identity, result), QString::fromStdString(result)); }
+    catch (const std::exception& error) { emit cached(false, QString{}); emit result(false, QStringLiteral("Cache lookup rejected: ") + QString::fromUtf8(error.what())); }
+    catch (...) { emit cached(false, QString{}); emit result(false, QStringLiteral("Cache lookup rejected: unknown storage error")); }
   }
   void invalidateCached(QString content, QString engine, QString configuration, QString mode) {
     beatglass::library::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
-    const bool removed = coordinator_.storage().invalidate_cached(identity);
-    if (removed) emit cached(false, QString{});
-    emit result(removed, removed ? QStringLiteral("Cached analysis invalidated") : QStringLiteral("No cached analysis found"));
+    try { const bool removed = coordinator_.storage().invalidate_cached(identity);
+      if (removed) emit cached(false, QString{});
+      emit result(removed, removed ? QStringLiteral("Cached analysis invalidated") : QStringLiteral("No cached analysis found"));
+    } catch (const std::exception& error) { emit result(false, QStringLiteral("Cache invalidation rejected: ") + QString::fromUtf8(error.what())); }
+    catch (...) { emit result(false, QStringLiteral("Cache invalidation rejected: unknown storage error")); }
   }
   void submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
     const auto details = beatglass::library::inspect_file(path.toStdString());
