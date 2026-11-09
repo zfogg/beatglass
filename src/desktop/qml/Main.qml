@@ -4343,7 +4343,7 @@ ApplicationWindow {
                         objectName: "overlayKeyboardRecoveryStatus"
                         visible: window.overlayBridge !== null
                         text: visible
-                            ? (window.overlayBridge.clickThrough ? "Keyboard recovery: press Escape to unlock overlay" : "Keyboard recovery: overlay controls are interactive")
+                            ? (window.overlayBridge.clickThrough ? "Keyboard recovery: press Escape to unlock overlay (Ctrl+Alt+U focuses Unlock)" : "Keyboard recovery: overlay controls are interactive")
                             : "Keyboard recovery unavailable"
                         Accessible.name: "Overlay keyboard recovery status"
                         Accessible.value: text
