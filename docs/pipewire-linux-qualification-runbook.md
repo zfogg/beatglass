@@ -114,3 +114,5 @@ ative_junit_test_count against parsed JUnit testcases.
 Summary JUnit status fields for failures, errors, and skips must all be zero and are cross-checked against parsed results.
 The summary must explicitly record `native_junit_exists: true` for qualified handoffs.
 ative_junit_exists: true for qualified handoffs.
+Qualified summaries must include a non-empty `native_test_discovery` record in addition to the archived discovery JSON.
+ative_test_discovery record in addition to the archived discovery JSON.
