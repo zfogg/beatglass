@@ -1,5 +1,11 @@
 # Progress and handoff
 
+macOS Core Audio discovery now places the system-selected output first after a
+successful enumeration, without changing the neutral `SourceInfo` contract or
+overriding a later explicit user selection. The portable source contract is
+checked by `python tests/unit/check_macos_default_output_order_contract.py`;
+native Core Audio permission and tap qualification remain required.
+
 ## Current recovery/cache qualification snapshot
 
 The current storage recovery path persists retryable state for cancellation,
