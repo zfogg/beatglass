@@ -22,3 +22,5 @@ it does not claim that SQLite is open. Consumers should continue to use
 `storageOpen` is the corresponding asynchronous state: it becomes true only
 after the worker reports `Storage open` and false after `Storage closed` or an
 open failure. Configuration and open state are intentionally separate.
+The bridge tracks an in-flight open/close transition so an open failure also
+drives `storageOpen` false without misclassifying unrelated worker errors.

@@ -165,7 +165,8 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(&workerThread_, &QThread::finished, worker_, &QObject::deleteLater);
   connect(worker_, &Worker::result, this, [this](bool ok, const QString& text) {
     const bool opened = ok && text == QStringLiteral("Storage open");
-    const bool closed = text == QStringLiteral("Storage closed") || (!ok && text.startsWith(QStringLiteral("Storage open")));
+    const bool closed = text == QStringLiteral("Storage closed") || (storageTransitionPending_ && !ok);
+    if (storageTransitionPending_) storageTransitionPending_ = false;
     if ((opened && !storageOpen_) || (closed && storageOpen_)) { storageOpen_ = opened; emit storageStateChanged(); }
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
     if (!ok) {
@@ -245,10 +246,12 @@ void StorageRecoveryBridge::open() {
   if (!analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
   analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
   if (!worker_) { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); return; }
+  storageTransitionPending_ = true;
   QMetaObject::invokeMethod(worker_, "open", Qt::QueuedConnection, Q_ARG(QString, databasePath_));
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
 void StorageRecoveryBridge::close() {
+  storageTransitionPending_ = true;
   if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection);
   if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
   if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
