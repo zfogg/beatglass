@@ -72,3 +72,13 @@ class ReleaseManifestVerifierTest(unittest.TestCase):
                         "review_packet_sha256": hashlib.sha256(packet.read_bytes()).hexdigest()}
             (root / "release-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             self.assertEqual(verifier.verify(root), [])
+
+    def test_qualified_native_status_with_commit_is_accepted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); report = root / "readiness-report.json"; packet = root / "review.json"
+            report.write_text("report", encoding="utf-8"); packet.write_text("packet", encoding="utf-8")
+            import hashlib
+            manifest = {"release_manifest_schema": 1, "decision": "ACCEPTED", "native_qualification_status": "qualified", "native_qualification_commit": "linux-native-commit",
+                        "report_sha256": hashlib.sha256(report.read_bytes()).hexdigest(), "review_packet_sha256": hashlib.sha256(packet.read_bytes()).hexdigest()}
+            (root / "release-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            self.assertEqual(verifier.verify(root), [])
