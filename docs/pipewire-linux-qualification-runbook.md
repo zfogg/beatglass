@@ -46,6 +46,8 @@ the real PipeWire daemon.
 Registry enumeration de-duplicates repeated globals by object serial before a
 device switch is offered to the coordinator; native qualification should
 exercise duplicate-global and remove/re-add scenarios.
+When duplicate globals coexist, the newest registry id wins so updated node
+metadata is used immediately rather than retaining stale device labels.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
