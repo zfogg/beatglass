@@ -26,6 +26,8 @@ does not imply that capture itself was restarted.
 
 Recovery permits three attempts before the retry action enters a safe-mode
 state. Reconnect a display or change recovery settings to leave that state.
+The control window also exposes `Clear safe mode` so a user can deliberately
+start another bounded recovery cycle after checking the display connection.
 
 ## Screenshot qualification
 
