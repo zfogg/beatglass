@@ -2317,6 +2317,18 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
+''    function test_invalidPersistedOpacityUsesSafeFallback() {
+        fakeOverlay.available = true
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        fakeOverlay.opacity = 0.1
+        let app = shellWithOverlay.createObject(null)
+        verify(app.restoreOverlayVisualStateFromBridge())
+        compare(fakeOverlay.opacity, 0.9)
+        verify(app.overlayRecoveryAnnouncement.indexOf("90 percent opacity") >= 0)
+        app.destroy()
+        fakeOverlay.opacity = 0.9
+    }
+
 '    function test_validVisualRestoreIsDirectlyTestable() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
