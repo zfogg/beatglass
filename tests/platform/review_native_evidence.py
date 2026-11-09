@@ -46,7 +46,13 @@ def assess(report_path: Path, reviewer: str) -> dict:
             blockers.append(f"{name}:incomplete provenance")
         if not isinstance(platform.get("environment"), str) or not platform["environment"].strip():
             blockers.append(f"{name}:missing environment identity")
-        if not isinstance(platform.get("captured_at"), str) or "T" not in platform["captured_at"]:
+        captured_at = platform.get("captured_at")
+        try:
+            parsed_capture = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
+            valid_capture_time = parsed_capture.tzinfo is not None
+        except (AttributeError, TypeError, ValueError):
+            valid_capture_time = False
+        if not valid_capture_time:
             blockers.append(f"{name}:missing capture timestamp")
         manifest_sha = platform.get("manifest_sha256")
         if not isinstance(manifest_sha, str) or len(manifest_sha) != 64 or any(char not in "0123456789abcdefABCDEF" for char in manifest_sha):
