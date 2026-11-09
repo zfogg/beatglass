@@ -943,5 +943,7 @@ Waveform and FFT mode button descriptions now include overlay recovery readiness
 
 Waveform and FFT mode button tooltips now include overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_mode_buttons_tooltip_contract.py`.
 
+Visualization clear-selection tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_clear_tooltip_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
