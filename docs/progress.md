@@ -1,5 +1,11 @@
 # Progress and handoff
 
+Core Audio discovery now filters devices that are no longer alive before
+exposing them to the UI, reducing a stale-device start race. The portable
+contract is checked by
+`python tests/unit/check_macos_live_device_filter_contract.py`; native hot-plug
+qualification remains pending.
+
 Overlay size changes now treat native resize failure as a rejected edit: the
 persisted geometry remains authoritative, the size selector is synchronized
 back to that geometry, and the control window announces the recovery instead

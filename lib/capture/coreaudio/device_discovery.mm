@@ -67,6 +67,12 @@ std::vector<SourceInfo> enumerate_outputs(std::string& error) {
   for (const auto device : devices) {
     AudioObjectPropertyAddress streams{kAudioDevicePropertyStreams, kAudioDevicePropertyScopeOutput, kAudioObjectPropertyElementMain};
     UInt32 stream_bytes = 0;
+    UInt32 alive = 0;
+    AudioObjectPropertyAddress alive_address{kAudioDevicePropertyDeviceIsAlive,
+                                             kAudioObjectPropertyScopeGlobal,
+                                             kAudioObjectPropertyElementMain};
+    UInt32 alive_size = sizeof(alive);
+    if (AudioObjectGetPropertyData(device, &alive_address, 0, nullptr, &alive_size, &alive) != noErr || !alive) continue;
     // A disappearing or unreadable device cannot safely be offered as a source.
     if (AudioObjectGetPropertyDataSize(device, &streams, 0, nullptr, &stream_bytes) != noErr || stream_bytes == 0) continue;
     std::string uid, name;
