@@ -8,7 +8,7 @@ import sys
 import tempfile
 import sys
 sys.path.insert(0, str(Path(__file__).parent))
-from manifest_contract import audio_sink_count, inventory_digest
+from manifest_contract import audio_sink_count, inventory_digest, validate_inventory_shape
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -29,6 +29,9 @@ except json.JSONDecodeError as exc:
     raise SystemExit(f"pw-dump returned invalid JSON: {exc}")
 if not isinstance(inventory, list):
     raise SystemExit("pw-dump returned a non-list inventory")
+shape_error = validate_inventory_shape(inventory)
+if shape_error:
+    raise SystemExit(f"pw-dump returned invalid inventory: {shape_error}")
 if not any(isinstance(item, dict) and item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink" for item in inventory):
     raise SystemExit("pw-dump returned no Audio/Sink")
 version = subprocess.run(["pw-cli", "--version"], check=False,
