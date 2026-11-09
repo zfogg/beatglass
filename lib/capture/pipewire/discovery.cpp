@@ -53,6 +53,7 @@ static void error(void* data, uint32_t, int, int res, const char* message) {
 Discovery discover_sinks(std::chrono::milliseconds timeout) {
   RegistryState state;
   pw_init(nullptr, nullptr);
+  struct PwShutdown { ~PwShutdown() { pw_deinit(); } } pw_shutdown;
   auto* loop = pw_loop_new(nullptr);
   if (!loop) return {{}, "Could not create PipeWire loop"};
   auto* context = pw_context_new(loop, nullptr, 0);
