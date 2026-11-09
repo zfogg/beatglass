@@ -7,6 +7,7 @@ Retain `qualification-manifest.txt`, `qualification-artifacts.sha256`, `native-c
 ## Runnable preparation checks
 
 - Run `python tests/pipewire/check_linux_native_prerequisites.py --report evidence/linux-pipewire-preflight.json` to record a machine-readable prerequisite result. On non-Linux hosts this exits successfully with `status: pending`; it never claims native capture evidence.
+- The probe checks daemon reachability and the independent `pkg-config` headers/linker capability, so a host with a running daemon but no development package cannot be mistaken for a build-ready qualification host.
 - Build with `-DBEATGLASS_BUILD_PIPEWIRE=ON` and run the complete CTest suite.
 - Run the isolated virtual-sink graph tests for capture, source replacement, wrong-link injection, interruption, and bounded queue overflow.
 - Run the strict API documentation checks and record the indexed header count.
