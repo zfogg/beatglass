@@ -456,3 +456,5 @@ A matrix may mark a platform qualified only after its summary records `native_ex
 Keep the matrix report's native-attempt column visible during review; a qualified status without an attempted run is invalid.
 
 Merged matrices retain platform blocker lists and attempt flags verbatim; conflicting per-host entries are rejected rather than silently reconciled.
+
+Matrix reports now expose attempt status and blockers directly; review those fields before scheduling or accepting a host qualification.
