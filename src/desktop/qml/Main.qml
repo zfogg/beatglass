@@ -4334,7 +4334,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
-                        Label { text: "Output device"; font.bold: true; Accessible.name: "Output device settings"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the system output device used for monitoring; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
+                        Label { text: "Output device"; font.bold: true; Accessible.name: "Output device settings, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.role: Accessible.Heading; ToolTip.text: "Choose the system output device used for monitoring; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                             RowLayout {
                                 ComboBox {
                                     objectName: "endpointSelector"
