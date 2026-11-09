@@ -63,6 +63,8 @@ object ID for later target selection and audit; IDs must be unique within the
 captured inventory.
 An accepted native manifest must contain at least one captured PipeWire object;
 an empty dump is treated as failed qualification evidence.
+At least one captured object must be an `Audio/Sink`; unrelated nodes alone do
+not provide native output evidence.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an

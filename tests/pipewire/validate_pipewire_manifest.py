@@ -38,6 +38,8 @@ if any(not isinstance(item.get("info"), dict) for item in manifest["inventory"])
     raise SystemExit("manifest inventory entries must retain info objects")
 if any(not isinstance(item["info"].get("props"), dict) for item in manifest["inventory"]):
     raise SystemExit("manifest inventory info must retain props objects")
+if not any(item["info"]["props"].get("media.class") == "Audio/Sink" for item in manifest["inventory"]):
+    raise SystemExit("manifest inventory must include an Audio/Sink")
 if any(not isinstance(item.get("id"), int) or item["id"] < 0 for item in manifest["inventory"]):
     raise SystemExit("manifest inventory entries must have non-negative numeric ids")
 ids = [item["id"] for item in manifest["inventory"]]
