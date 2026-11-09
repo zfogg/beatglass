@@ -1214,4 +1214,14 @@ TestCase {
         fakeOverlay.refuseUnlock = false
         fakeOverlay.clickThrough = false
     }
+    function test_clickThroughKeyboardRecoveryStatusNamesUnlockShortcut() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        let status = findChild(app, "overlayKeyboardRecoveryStatus")
+        verify(status.visible)
+        verify(status.text.indexOf("Ctrl+Alt+U") >= 0)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+    }
 }
