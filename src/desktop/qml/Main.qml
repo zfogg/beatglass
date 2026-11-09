@@ -1930,6 +1930,17 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisBatchLastSource"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastSource !== ""
+                                text: visible ? "Latest published source: " + window.analysisJobBridge.batchLastSource : ""
+                                Accessible.name: "Latest published analysis source: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? "Source path associated with the most recently verified published batch result." : "No verified batch source has been published."
+                                ToolTip.text: "Source path for the latest verified batch result"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideMiddle
+                            }
+                            Label {
                                 objectName: "persistedRecoveryStatus"
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""

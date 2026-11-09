@@ -86,7 +86,7 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   result_.clear();
   emit resultChanged();
   for (const auto& operation : batch_) if (operation) operation->cancel();
-  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); emit batchChanged();
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear(); emit batchChanged();
   auto progress = op.progress;
   auto publish = op.publish;
   op.publish = [weak_self = weak_self_, publish](const std::string& value) {
@@ -168,20 +168,22 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
   if (retryable_ && canCancel()) retryable_->cancel();
   retryable_.reset();
   if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }
-  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   for (auto& operation : operations) {
     if (static_cast<int>(batch_.size()) >= batchCapacity_) { ++batchRejected_; continue; }
+    const auto sourcePath = QString::fromStdString(operation.source.path.string());
     auto publish = operation.publish;
-    operation.publish = [weak_self = weak_self_, publish](const std::string& value) {
+    operation.publish = [weak_self = weak_self_, publish, sourcePath](const std::string& value) {
       if (publish) publish(value);
       if (!weak_self) return;
       const auto displayed = displayedResult(value);
       const auto result = QString::fromUtf8(displayed.data(), static_cast<int>(displayed.size()));
-      QMetaObject::invokeMethod(weak_self, [weak_self, result] {
+      QMetaObject::invokeMethod(weak_self, [weak_self, result, sourcePath] {
         if (!weak_self) return;
         ++weak_self->batchResultsPublished_;
         weak_self->batchLastResult_ = result;
+        weak_self->batchLastSource_ = sourcePath;
         emit weak_self->batchChanged();
       }, Qt::QueuedConnection);
     };
@@ -201,7 +203,7 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
 
 void AnalysisJobBridge::cancelBatch() {
   for (const auto& operation : batch_) if (operation) operation->cancel();
-  batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+  batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear();
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   emit batchChanged();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
@@ -216,7 +218,7 @@ void AnalysisJobBridge::retryBatch() {
     if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
     if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
-    batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+    batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged(); poll();
   }
@@ -230,7 +232,7 @@ void AnalysisJobBridge::discardBatch() {
   if (!terminal) return;
   batch_.clear();
   batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0;
-  batchLastResult_.clear();
+  batchLastResult_.clear(); batchLastSource_.clear();
   poll_timer_.stop();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
