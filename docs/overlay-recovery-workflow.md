@@ -208,3 +208,6 @@ The Ctrl+Alt+L opacity focus shortcut remains usable while click-through is acti
 
 The Ctrl+Alt+Z size focus shortcut remains usable while click-through is active, restoring the control window and focusing the saved size control without changing persisted display or geometry state.
 
+
+The display focus shortcut remains usable during click-through, returning focus to saved display selection without changing the persisted display, geometry, or opacity state.
+

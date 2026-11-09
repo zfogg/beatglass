@@ -1741,4 +1741,19 @@ TestCase {
         app.destroy()
         fakeOverlay.clickThrough = false
     }
+    function test_displayFocusShortcutRetainsClickThroughSettings() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        let shortcut = findChild(app, "overlayDisplayFocusShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        verify(findChild(app, "overlayDisplay").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.clickThrough = false
+    }
 }
