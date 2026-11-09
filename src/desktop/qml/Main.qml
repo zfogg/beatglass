@@ -1066,6 +1066,7 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = ""
         window.overlayPreferredScreenIndex = -1
         window.overlaySettingsRevision += 1
+        window.overlayLaunchFallbackActive = true
         window.overlayDisplaySelectionRequired = true
         window.overlayDisplayRecoveryPending = true
         window.announceCaptureRecoveryState("Saved overlay display cleared; choose an available display to restore monitoring.")
