@@ -3818,8 +3818,11 @@ ApplicationWindow {
                         text: "Retry overlay capture"
                         enabled: visible && window.captureMonitorBridge.start !== undefined
                         Accessible.name: text
+                        Accessible.value: enabled ? "retry available; capture status error" : "retry unavailable"
                         Accessible.role: Accessible.Button
-                        Accessible.description: enabled ? "Retry the selected output capture for the overlay and wait for a fresh accepted snapshot." : "Overlay capture retry is unavailable."
+                        Accessible.description: enabled
+                            ? "Retry the selected output capture for the overlay and wait for a fresh accepted snapshot; settings revision " + window.overlaySettingsRevision + "."
+                            : "Overlay capture retry is unavailable; settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description
                         onClicked: {
                             window.captureMonitorBridge.start()
