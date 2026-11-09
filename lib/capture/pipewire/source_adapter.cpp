@@ -61,6 +61,16 @@ bool MonitorSession::on_process(std::span<const float> samples, std::uint64_t ho
   return stream_ && stream_->on_process(samples, host_time, host_time_valid,
                                         source_sample_time, sample_time_valid);
 }
+MonitorSession::Status MonitorSession::poll_status() noexcept {
+  Status status;
+  status.active = static_cast<bool>(stream_);
+  if (!stream_) return status;
+  status.needs_restart = stream_->needs_restart();
+  status.error_code = stream_->take_error();
+  status.discontinuity = stream_->take_discontinuity();
+  status.overflowed = stream_->overflowed();
+  return status;
+}
 namespace {
 class DiscoveryBoundary final : public MonitorBackend {
 public:
