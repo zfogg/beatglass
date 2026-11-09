@@ -64,6 +64,7 @@ screenshots.
 | [Reset](overlay-reset-card.svg) | reversible settings reset decision |
 | [Import](overlay-import-card.svg) | saved view import and scope explanation |
 | [Export](overlay-export-card.svg) | saved view export and local scope |
+| [Rename](overlay-rename-card.svg) | favorite view naming and scope |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
