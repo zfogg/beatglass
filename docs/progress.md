@@ -1,5 +1,10 @@
 # Progress and handoff
 
+The overlay now exposes whether an accepted visualization snapshot is ready,
+distinguishing a live estimate surface from a waiting/replacement state.
+Portable coverage is in
+`python tests/unit/check_overlay_data_readiness_contract.py`.
+
 The overlay settings surface now exposes truthful live-monitoring state,
 including whether combined-output estimates are updating or capture is waiting
 for accepted data. Portable coverage is in
