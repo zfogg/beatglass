@@ -21,6 +21,10 @@ public:
 };
 }
 std::unique_ptr<StreamOwner> make_stream_owner() {
+#if defined(BEATGLASS_HAS_PIPEWIRE)
+  return make_linux_stream_owner();
+#else
   return std::make_unique<UnavailableStreamOwner>();
+#endif
 }
 }
