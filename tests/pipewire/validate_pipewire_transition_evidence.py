@@ -12,13 +12,15 @@ if isinstance(payload, dict):
         raise SystemExit("transition evidence has incomplete provenance")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
+if any(not isinstance(event, dict) for event in events):
+    raise SystemExit("transition evidence contains a non-object event")
 names = [event.get("event") for event in events if isinstance(event, dict)]
 required = ("start", "process", "error", "restart")
 missing = [name for name in required if name not in names]
 if missing:
     raise SystemExit(f"transition evidence missing: {', '.join(missing)}")
 epochs = [event.get("epoch") for event in events if isinstance(event, dict) and event.get("epoch") is not None]
-if any(not isinstance(epoch, int) or epoch <= 0 for epoch in epochs) or epochs != sorted(epochs):
+if any(not isinstance(epoch, int) or isinstance(epoch, bool) or epoch <= 0 for epoch in epochs) or epochs != sorted(epochs):
     raise SystemExit("transition epochs must be positive and monotonic")
 if not any(event.get("discontinuity") is True for event in events if isinstance(event, dict)):
     raise SystemExit("transition evidence has no discontinuity marker")

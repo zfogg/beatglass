@@ -77,6 +77,8 @@ python tests/pipewire/run_linux_native_qualification.py --transitions evidence/p
 The validator requires `start`, `process`, `error`, and `restart` events,
 positive monotonic epochs, a sink serial, captured samples, a negotiated
 restart format, a discontinuity marker, and a native error code.
+Every event must be a JSON object; malformed event shapes are rejected before
+the artifact can be packaged.
 When present in a packaged summary, the archive verifier rechecks the same
 required lifecycle events and epoch/discontinuity/error invariants.
 It also requires the transition envelope’s schema, source commit, and host
