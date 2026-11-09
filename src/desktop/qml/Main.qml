@@ -1063,6 +1063,8 @@ ApplicationWindow {
                 window.announceVisualizationRecovery("Output monitoring is starting; waiting for the first accepted visualization snapshot.")
             else if (window.liveBridge.status === "Reacquiring")
                 window.announceVisualizationRecovery("Output monitoring is reacquiring; previous visualization selection was cleared.")
+            else if (window.liveBridge.status === "Error")
+                window.announceVisualizationRecovery("Output monitoring reported an error; retry monitoring after checking the selected output and permission state.")
             else if (window.liveBridge.status === "Tracking")
                 window.announceVisualizationRecovery("Output monitoring is tracking; visualization updates will appear as accepted data arrives.")
         }
@@ -3302,6 +3304,21 @@ ApplicationWindow {
                         }
                     }
                     Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.StaticText; Accessible.description: text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Current overlay pointer interaction mode" }
+                    Label {
+                        objectName: "overlayLiveMonitoringState"
+                        visible: window.overlayBridge !== null
+                        text: visible ? ("Overlay monitoring: " + window.liveBridge.status
+                            + (window.liveBridge.status === "Tracking" ? " · live estimates updating" : " · waiting for accepted output")) : "Overlay monitoring unavailable"
+                        Accessible.name: "Overlay live monitoring state"
+                        Accessible.value: visible ? text : ""
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.liveBridge.status === "Tracking"
+                            ? text + ". Estimates are attributed to the monitored combined output."
+                            : visible ? text + ". The overlay remains available while capture recovers." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay monitoring state"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
                     Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
                     Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlayBridge.setOpacity(value); window.overlaySettingsRevision += 1 } } }
                     Connections {
