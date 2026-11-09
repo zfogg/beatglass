@@ -134,6 +134,7 @@ screenshots.
 | [Fullscreen auto-hide](overlay-fullscreen-auto-hide-card.svg) | automatic hide and restore behavior |
 | [Fullscreen transition](overlay-fullscreen-transition-card.svg) | native window transition progress state |
 | [Fullscreen restored](overlay-fullscreen-restored-card.svg) | overlay return after fullscreen ends |
+| [Window minimized](overlay-window-minimized-card.svg) | native minimize with preserved session state |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
