@@ -56,6 +56,8 @@ Validate the matrix and rendered report together with
 this keeps portable status and its reviewer-facing rendering synchronized.
 Bundle validation also requires a supported host identity and, when present,
 non-empty source commit provenance before the handoff is accepted.
+The rendered report must repeat the matrix host identity, preventing a report
+from being paired with evidence from another machine.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
