@@ -5,6 +5,7 @@
 | Library | Browse indexed collection; completed, analyzing and source changed rows; track key unknown | Folder navigation, search, sort, select, individual/batch analysis; preserve files. |
 | Library search results | Search for “night” returns three source-attributed matches with mixed analysis states | Keep query/sort context visible, preserve verified source paths, and make actions target the selected file identity. |
 | Track playback queue | Selected Night Drive source is verified, ready to play, and queued as 1 of 1 | Bind playback and seeking to the verified source, expose queue and accepted-evidence status, and fail closed if the file changes. |
+| Track playback recovery | Queued Night Drive becomes unavailable before playback resumes | Stop playback, preserve source-attributed evidence, and offer locate/retry or explicit queue removal without substituting another file. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
