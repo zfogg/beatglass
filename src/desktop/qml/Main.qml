@@ -3189,7 +3189,7 @@ ApplicationWindow {
                     objectName: "visualizationClearSelection"
                     enabled: visualizationCanvas.selectedPosition >= 0
                     text: enabled ? "Clear selection" : "No selection"
-                    Accessible.name: "Clear visualization selection"
+                    Accessible.name: "Clear visualization selection, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: enabled ? "available" : "unavailable"
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled
