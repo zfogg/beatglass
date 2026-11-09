@@ -104,6 +104,7 @@ public:
                     std::uint32_t sample_rate, std::uint32_t channels) override {
     return session_.start(serial, epoch, sample_rate, channels);
   }
+  bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
   bool stop() noexcept override { session_.stop(); return true; }
 private:
   MonitorSession session_;
