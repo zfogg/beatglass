@@ -4013,6 +4013,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "overlaySettingsSummary"
+                        activeFocusOnTab: true
                     text: "Overlay settings: "
                         + (window.overlayBridge && window.overlayBridge.displayName !== "" ? window.overlayBridge.displayName : "display unavailable")
                         + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex]
