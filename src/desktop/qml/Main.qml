@@ -3071,6 +3071,24 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
                 Label {
+                    objectName: "selectedAnalysisActionStatus"
+                    visible: window.selectedName !== ""
+                    text: window.analysisJobBridge === null
+                        ? "Selected track · analysis unavailable"
+                        : (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running"
+                           ? "Selected track · analysis in progress"
+                           : (window.libraryAnalysisResultReady ? "Selected track · analysis ready" : "Selected track · analysis needs retry"))
+                    Accessible.name: "Selected track analysis action status: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Action-oriented status for the selected Library track analysis."
+                    ToolTip.text: "Selected Library track analysis action status"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "visualizationMotionState"
                     text: visualizationCanvas.reducedMotion
                         ? "Reduced motion · static accepted snapshot"
