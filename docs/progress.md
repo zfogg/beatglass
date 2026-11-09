@@ -804,3 +804,5 @@ The unavailable-overlay actions tooltip now states that the control-window fallb
 
 The overlay actions accessible value now reports that settings are retained during native-overlay fallback. Portable coverage is in `python tests/unit/check_overlay_fallback_value_contract.py`.
 
+The available overlay actions accessibility value now states that persisted settings are retained, alongside the settings revision. Portable coverage is in `python tests/unit/check_overlay_available_value_contract.py`.
+
