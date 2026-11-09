@@ -1,14 +1,13 @@
 # Progress and handoff
 
-Core Audio format-query exceptions now retain a distinct diagnostic from an
-invalid format value, while both paths still quiesce the backend before
-returning. Portable coverage is in
-`python tests/unit/check_macos_format_query_failure_contract.py`.
+The FFT view now supports direct bin selection: clicking a spectrum bar or
+using Left/Right while focused selects a bounded frequency bin, draws a cursor,
+and exposes the selected bin through accessibility state. Waveform selection
+continues to control playback position independently.
 
-Invalid Core Audio capture formats now preserve their root diagnostic when
-cleanup also fails, appending the quiescence failure instead of replacing it.
-Portable coverage is in
-`python tests/unit/check_macos_invalid_format_diagnostic_contract.py`.
+Waveform rendering now clamps accepted min/max PCM extrema to the normalized
+[-1, 1] display range before mapping them into the canvas, preventing malformed
+or transient out-of-range source values from escaping the visual bounds.
 
 The FFT view now derives a bounded peak-bin summary from the accepted spectrum
 snapshot and exposes it through the canvas accessibility value, making the
