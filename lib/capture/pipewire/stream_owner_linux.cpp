@@ -41,9 +41,12 @@ public:
     audio.rate = config.sample_rate;
     audio.channels = config.channels;
     const spa_pod* params[] = {spa_format_audio_raw_build(&builder, SPA_PARAM_EnumFormat, &audio)};
-    if (pw_stream_connect(stream_, PW_DIRECTION_INPUT, PW_ID_ANY,
+    pw_thread_loop_lock(loop_);
+    const int connect_result = pw_stream_connect(stream_, PW_DIRECTION_INPUT, PW_ID_ANY,
                           static_cast<pw_stream_flags>(PW_STREAM_FLAG_AUTOCONNECT | PW_STREAM_FLAG_MAP_BUFFERS),
-                          params, 1) < 0) { stop(); return false; }
+                          params, 1);
+    pw_thread_loop_unlock(loop_);
+    if (connect_result < 0) { stop(); return false; }
     active_ = true;
     return true;
   }
