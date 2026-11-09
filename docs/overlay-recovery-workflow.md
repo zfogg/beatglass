@@ -274,3 +274,6 @@ After click-through is re-enabled on a reordered display, retained-settings summ
 
 The retained-settings status exposes its revision in the accessibility value after reordered-display recovery, giving assistive-technology users a stable confirmation of which persisted bundle they are reviewing.
 
+
+Successful recovery now announces persisted position as well as size, so users can confirm the overlay returned to the saved coordinates and dimensions on the resolved display.
+

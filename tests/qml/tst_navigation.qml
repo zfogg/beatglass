@@ -2125,4 +2125,19 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_recoveryAnnouncementConfirmsPersistedPositionAndSize() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Projector"]
+        fakeOverlay.displayName = "Projector"
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayDisplayRecoveryPending = true
+        verify(app.recoverOverlayAfterDisplayChange())
+        verify(app.overlayRecoveryAnnouncement.indexOf("position 640, 120") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("size 620 by 280 pixels") >= 0)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
