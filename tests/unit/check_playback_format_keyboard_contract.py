@@ -11,6 +11,8 @@ def main() -> None:
         source = QML[start:start + 600]
         assert "activeFocusOnTab: true" in source, name
         assert "Accessible.role: Accessible.SpinBox" in source, name
+    start = QML.index('objectName: "startNativePlayback"')
+    assert "playbackDevice.currentIndex >= 0" in QML[start:start + 700]
     print("playback format keyboard contract: 2 controls verified")
 
 if __name__ == "__main__":
