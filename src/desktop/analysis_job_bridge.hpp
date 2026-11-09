@@ -27,6 +27,7 @@ class AnalysisJobBridge final : public QObject {
   Q_PROPERTY(int batchCapacity READ batchCapacity CONSTANT)
   Q_PROPERTY(int batchResultsPublished READ batchResultsPublished NOTIFY batchChanged)
   Q_PROPERTY(QString batchLastResult READ batchLastResult NOTIFY batchChanged)
+  Q_PROPERTY(QString batchLastSource READ batchLastSource NOTIFY batchChanged)
   Q_PROPERTY(int batchFailedCount READ batchFailedCount NOTIFY batchChanged)
   Q_PROPERTY(int batchCancelledCount READ batchCancelledCount NOTIFY batchChanged)
   Q_PROPERTY(int batchCompletedCount READ batchCompletedCount NOTIFY batchChanged)
@@ -71,6 +72,7 @@ public:
   int batchCapacity() const noexcept { return batchCapacity_; }
   int batchResultsPublished() const noexcept { return batchResultsPublished_; }
   QString batchLastResult() const { return batchLastResult_; }
+  QString batchLastSource() const { return batchLastSource_; }
   int batchFailedCount() const noexcept { return batchFailedCount_; }
   int batchCancelledCount() const noexcept { return batchCancelledCount_; }
   int batchCompletedCount() const noexcept { return batchCompletedCount_; }
@@ -94,6 +96,7 @@ private:
   int batchRejected_{};
   int batchResultsPublished_{};
   QString batchLastResult_;
+  QString batchLastSource_;
   int batchFailedCount_{};
   int batchCancelledCount_{};
   int batchCompletedCount_{};
