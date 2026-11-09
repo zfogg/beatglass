@@ -19,6 +19,7 @@ markers = (
     "ZipInfo",
     "source_date_epoch",
     "archive_timestamp_utc",
+    "colliding archive names",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:
