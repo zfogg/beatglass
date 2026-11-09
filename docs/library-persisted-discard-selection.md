@@ -10,3 +10,5 @@ Single selected discard publishes the same transition status as batch discard.
 It clears stale displayed result and progress before requesting the destructive
 recovery operation.
 Batch discard applies the same stale-result and progress reset before queueing.
+Both discard paths also clear stale retry/error state before the destructive
+operation begins.
