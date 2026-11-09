@@ -23,10 +23,10 @@ commands = [
     ["cmake", "--build", str(args.build)],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "pipewire"],
     ["ctest", "--test-dir", str(args.build), "--show-only=json-v1", "--no-tests=error", "-R", "^pipewire_tests$"],
-    ["ctest", "--test-dir", str(args.build), "--output-on-failure", "--no-tests=error", "--timeout", "30", "-R", "^pipewire_tests$"],
 ]
 evidence = args.summary.parent if args.summary else args.source / "evidence"
 evidence.mkdir(parents=True, exist_ok=True)
+commands.append(["ctest", "--test-dir", str(args.build), "--output-on-failure", "--output-junit", str(evidence / "pipewire-tests.xml"), "--no-tests=error", "--timeout", "30", "-R", "^pipewire_tests$"])
 results = []
 for index, command in enumerate(commands):
     started = time.monotonic()
@@ -81,6 +81,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_test_count": discovery_count,
            "daemon_preflight": preflight_result,
            "native_pipewire_tests": native_result,
+           "native_junit": str(evidence / "pipewire-tests.xml"),
            "qualified": discovery_count is not None and discovery_count > 0 and all(item["returncode"] == 0 for item in results)}
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)

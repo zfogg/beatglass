@@ -42,3 +42,5 @@ Qualification additionally requires `native_test_count` to be positive.
 The summary exposes the prerequisite/daemon result separately as
 `daemon_preflight`.
 When a stage fails, `failed_command` identifies the first failing command.
+The native test run also writes `pipewire-tests.xml` via CTest's JUnit output
+for machine-readable ingestion of individual stream cases.
