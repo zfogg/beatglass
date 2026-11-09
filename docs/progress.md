@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio startup now preserves the original typed failure (including
+permission or device loss) even if backend cleanup also fails; the diagnostic
+still appends the cleanup failure. Portable coverage is in
+`python tests/unit/check_macos_start_error_preservation_contract.py`.
+
 Core Audio interruption status now distinguishes a disappeared device/stream
 from format or callback faults, making reacquisition guidance actionable.
 Portable coverage is in
