@@ -35,6 +35,8 @@ retry is visible and keyboard-ready immediately.
 The same action is available from the keyboard with `Ctrl+Alt+Shift+C`.
 The safe-mode card repeats that shortcut next to the status so recovery remains
 discoverable without opening a separate help view.
+During an active retry cycle, the card also shows bounded progress such as
+`Recovery attempts: 1/3` so the next action and remaining budget are clear.
 
 ## Screenshot qualification
 
