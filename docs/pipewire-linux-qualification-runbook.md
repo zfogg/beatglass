@@ -411,3 +411,5 @@ Archive verifier output is transfer evidence only; a passing archive does not cl
 Use the archive verifier after copying evidence between hosts, then run the native qualification gate separately; do not substitute one result for the other.
 
 Record both verifier output and native-runner output in the handoff so reviewers can distinguish archive integrity from host qualification status.
+
+For auditability, preserve the exact archive verifier command, native-runner command, and resulting artifact paths in the handoff record.
