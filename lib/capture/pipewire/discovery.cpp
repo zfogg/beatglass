@@ -62,25 +62,26 @@ static void done(void* data, uint32_t id, int seq) {
 }
 static void error(void* data, uint32_t, int, int res, const char* message) {
   auto& state = *static_cast<RegistryState*>(data);
+  state.result.error_code = res;
   state.result.error = message ? message : spa_strerror(res);
 }
 
 // Runs on a control thread only. A sync barrier gives a consistent initial
 // registry view; timeout and daemon errors never masquerade as an empty list.
 Discovery discover_sinks(std::chrono::milliseconds timeout) {
-  if (timeout <= std::chrono::milliseconds::zero()) return {{}, "PipeWire discovery timeout must be positive"};
-  if (timeout.count() > std::numeric_limits<int>::max()) return {{}, "PipeWire discovery timeout is too large"};
+  if (timeout <= std::chrono::milliseconds::zero()) return {{}, -EINVAL, "PipeWire discovery timeout must be positive"};
+  if (timeout.count() > std::numeric_limits<int>::max()) return {{}, -EINVAL, "PipeWire discovery timeout is too large"};
   RegistryState state;
   pw_init(nullptr, nullptr);
   struct PwShutdown { ~PwShutdown() { pw_deinit(); } } pw_shutdown;
   auto* loop = pw_loop_new(nullptr);
-  if (!loop) return {{}, "Could not create PipeWire loop"};
+  if (!loop) return {{}, -ENOMEM, "Could not create PipeWire loop"};
   auto* context = pw_context_new(loop, nullptr, 0);
-  if (!context) { pw_loop_destroy(loop); return {{}, "Could not create PipeWire context"}; }
+  if (!context) { pw_loop_destroy(loop); return {{}, -ENOMEM, "Could not create PipeWire context"}; }
   auto* core = pw_context_connect(context, nullptr, 0);
-  if (!core) { pw_context_destroy(context); pw_loop_destroy(loop); return {{}, "Could not connect to PipeWire"}; }
+  if (!core) { pw_context_destroy(context); pw_loop_destroy(loop); return {{}, -ECONNREFUSED, "Could not connect to PipeWire"}; }
   auto* registry = pw_core_get_registry(core, PW_VERSION_REGISTRY, 0);
-  if (!registry) { pw_core_disconnect(core); pw_context_destroy(context); pw_loop_destroy(loop); return {{}, "Could not get PipeWire registry"}; }
+  if (!registry) { pw_core_disconnect(core); pw_context_destroy(context); pw_loop_destroy(loop); return {{}, -ENODEV, "Could not get PipeWire registry"}; }
   spa_hook core_hook{}, registry_hook{};
   pw_core_events core_events{};
   core_events.version = PW_VERSION_CORE_EVENTS;
@@ -98,7 +99,7 @@ Discovery discover_sinks(std::chrono::milliseconds timeout) {
   pw_loop_enter(loop);
   while (!state.done && state.result.error.empty()) {
     const auto now = std::chrono::steady_clock::now();
-    if (now >= deadline) { state.result.error = "PipeWire registry discovery timed out"; break; }
+    if (now >= deadline) { state.result.error_code = -ETIMEDOUT; state.result.error = "PipeWire registry discovery timed out"; break; }
     const auto wait = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - now).count();
     const int rc = pw_loop_iterate(loop, static_cast<int>(wait > 100 ? 100 : wait + 1));
     if (rc < 0 && rc != -EINTR) state.result.error = spa_strerror(rc);

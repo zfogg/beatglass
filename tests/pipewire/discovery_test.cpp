@@ -38,5 +38,6 @@ TEST_CASE("unreachable PipeWire daemon is an error, not an empty success") {
   auto result = beatglass::pipewire::discover_sinks(std::chrono::milliseconds(500));
   unsetenv("PIPEWIRE_REMOTE");
   CHECK_FALSE(result.error.empty());
+  CHECK(result.error_code != 0);
   CHECK(result.sinks.empty());
 }
