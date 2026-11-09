@@ -2524,7 +2524,7 @@ ApplicationWindow {
                                 Accessible.value: visible ? text : ""
                                 ToolTip.text: "Accepted, rejected, and capacity limits for the analysis queue"
                                 Accessible.role: Accessible.StaticText
-                                Accessible.description: visible ? "Live batch lifecycle and result counts: " + text : "Batch queue status is unavailable until the analysis bridge reports it."
+                                Accessible.description: visible ? "Live batch lifecycle and result counts: " + text + ". Rejected work indicates admission limits; terminal failures use Retry or discard recovery." : "Batch queue status is unavailable until the analysis bridge reports it."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
