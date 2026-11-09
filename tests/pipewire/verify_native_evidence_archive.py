@@ -51,6 +51,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("summary reports JUnit failures, errors, or skips")
     if summary_data.get("native_junit_exists") is not True:
         raise SystemExit("summary does not confirm native JUnit existence")
+    if not isinstance(summary_data.get("native_test_discovery"), dict) or not summary_data["native_test_discovery"].get("tests"):
+        raise SystemExit("summary has no native test discovery record")
     if not any((name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml") for name in declared):
         raise SystemExit("evidence archive has no JUnit results")
     if not any(name.endswith(".json") and "discovery" in name for name in declared):
