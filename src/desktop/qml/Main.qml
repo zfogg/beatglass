@@ -3391,6 +3391,22 @@ ApplicationWindow {
                         wrapMode: Text.WordWrap
                     }
                     Label {
+                        objectName: "overlayEndpointStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
+                            ? "Overlay endpoint: " + window.endpointSelectionBridge.selectedEndpoint
+                            : "Overlay endpoint: none selected"
+                        Accessible.name: "Overlay capture endpoint status"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
+                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks."
+                            : text + ". Choose an output endpoint before starting monitoring."
+                        ToolTip.text: visible ? Accessible.description : "Overlay capture endpoint"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
                         objectName: "overlayLiveMonitoringState"
                         visible: window.overlayBridge !== null
                         text: visible ? ("Overlay monitoring: " + window.liveBridge.status
