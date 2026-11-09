@@ -6,3 +6,6 @@ active filter, announces the reset, and returns focus to the browser.
 
 Portable coverage lives in
 `tests/unit/check_issue76_library_recursive_return_shortcut_reset_contract.py`.
+
+The in-app Library shortcut help now lists `Ctrl+Alt+Shift+B` explicitly as
+the immediate recursive-results return action.
