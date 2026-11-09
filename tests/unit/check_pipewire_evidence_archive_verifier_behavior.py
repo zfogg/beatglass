@@ -176,4 +176,10 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, platform=42)))
     result = subprocess.run([sys.executable, str(verifier), str(invalid_platform)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid platform identity" not in result.stderr + result.stdout: raise SystemExit("invalid manifest platform was accepted")
-print("PipeWire evidence archive verifier behavior passed (17 scenarios)")
+    non_boolean_qualified = root / "non-boolean-qualified.zip"
+    with zipfile.ZipFile(non_boolean_qualified, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, qualified=1)))
+    result = subprocess.run([sys.executable, str(verifier), str(non_boolean_qualified)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid or unqualified evidence manifest" not in result.stderr + result.stdout: raise SystemExit("non-boolean qualification was accepted")
+print("PipeWire evidence archive verifier behavior passed (18 scenarios)")

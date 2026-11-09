@@ -227,6 +227,8 @@ ative_test_count against the discovery inventory count.
 Qualified handoffs must explicitly record `native_test_name_match: true` in the summary after discovery/execution reconciliation.
 ative_test_name_match: true in the summary after discovery/execution reconciliation.
 The archived summary must itself report qualified: true; the manifest cannot promote an unqualified run.
+The archive manifest must carry the literal boolean `qualified: true`, not a
+truthy substitute, so qualification status cannot be ambiguous on transfer.
 The verifier also cross-checks summary `native_junit_test_count` against parsed JUnit testcases.
 ative_junit_test_count against parsed JUnit testcases.
 Summary JUnit status fields for failures, errors, and skips must all be zero and are cross-checked against parsed results.
