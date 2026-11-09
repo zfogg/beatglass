@@ -2767,7 +2767,7 @@ ApplicationWindow {
                                     enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && typeof storageRecovery !== "undefined" && storageRecovery.cacheHit === true
                                     Accessible.name: "Forget cached analysis"
                                     Accessible.description: enabled ? "Remove this completed cache identity so the next analysis runs again. Source files are not changed." : "Run Check cache and confirm a completed cache hit before forgetting an identity."
-                                    onClicked: invalidateCacheDialog.open()
+                                    onClicked: { invalidateCacheDialog.open(); window.announceVisualizationRecovery("Confirm forgetting the cached result; source audio remains unchanged.") }
                                 }
                                 Button {
                                     objectName: "reanalyzeInvalidatedCache"
@@ -2802,7 +2802,8 @@ ApplicationWindow {
                                 Accessible.description: "Confirm removal of the selected completed cache identity. Source audio is not modified."
                                 contentItem: Label { text: "This removes only the completed cached result for the entered identity. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.role: Accessible.StaticText }
                                 onOpened: { window.announceVisualizationRecovery("Confirm forgetting the cached result; source audio remains unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
-                                onAccepted: { storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Cached analysis identity forgotten; source audio was not changed."); invalidateCacheDialog.close() }
+                                onAccepted: { storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Cached analysis identity forgotten; source audio was not changed."); invalidateCacheDialog.close(); invalidateAnalysisCache.forceActiveFocus() }
+                                onRejected: invalidateAnalysisCache.forceActiveFocus()
                             }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
