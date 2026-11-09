@@ -419,6 +419,9 @@ ApplicationWindow {
         enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             overlayDisplay.forceActiveFocus()
             window.announceCaptureRecoveryState(window.overlayDisplaySelectionRequired
                 ? "Overlay display selection required; choose an available display."
