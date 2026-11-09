@@ -774,3 +774,5 @@ Overlay capture retry now returns keyboard focus to the live monitoring status a
 
 Native overlay retry now returns keyboard focus to the display status after requesting restoration, keeping display recovery feedback available when the overlay remains unavailable. Portable coverage is in `python tests/unit/check_overlay_native_retry_focus_contract.py`.
 
+Hiding the native overlay now returns keyboard focus to the control-window restore action, making the hide/restore recovery loop keyboard-completable. Portable coverage is in `python tests/unit/check_overlay_hide_focus_contract.py`.
+
