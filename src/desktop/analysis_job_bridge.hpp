@@ -47,6 +47,8 @@ public:
   Q_INVOKABLE bool submitFile(const QString& path, const QString& contentHash,
                               const QString& engineVersion, const QString& configurationId,
                               const QString& mode = QStringLiteral("offline"));
+  /** Fingerprint and queue one selected local file using the desktop defaults. */
+  Q_INVOKABLE bool submitSelectedFile(const QString& path);
   /** Submit a bounded batch, publish Queued/Failed aggregate state, and retain accepted operations for retry. */
   int submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority = 0);
   /** Cancel active batch jobs, publish Cancelled immediately, and clear stale result/batch presentation. */
