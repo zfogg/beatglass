@@ -1527,4 +1527,20 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_resumeRecoveryShortcutKeepsPersistedSettings() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        findChild(app, "overlayResumeRecoveryShortcut").activated()
+        compare(app.overlayRecoveryAttemptCount, 1)
+        verify(!app.overlayRecoveryPausedByUser)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(app.overlayRecoveryAnnouncement.indexOf("recovery resumed") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
