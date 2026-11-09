@@ -831,6 +831,8 @@ The current-display status now exposes hidden-by-user intent directly, so assist
 The display-and-size controls group now repeats both hidden-by-user and recovery-pending context before users enter its individual controls.
 
 Geometry status now repeats hidden-by-user intent alongside its revision and recovery state, so persisted position/size announcements do not imply that the overlay is currently visible.
+
+Successful display selection now synchronizes the accepted native display/geometry/opacity snapshot before publishing the preferred display, keeping settings revision and accessibility summaries atomic.
 The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
 
 Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
