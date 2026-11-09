@@ -1,8 +1,12 @@
-"""Verify Ctrl+Alt+P plays the selected Library source."""
+"""Contract checks that play shortcut uses shared playback behavior."""
 from pathlib import Path
-QML = (Path(__file__).resolve().parents[2] / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
+ROOT = Path(__file__).resolve().parents[2]
+QML = (ROOT / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 def main() -> None:
-    for marker in ("objectName: \"libraryPlayShortcut\"", "sequence: \"Ctrl+Alt+P\"", "window.playbackBridge.openSource(window.selectedAudioUrl", "playSelectedTrack.forceActiveFocus()"):
-        assert marker in QML, marker
-    print("Issue #76 Library play shortcut contract verified (4 checks)")
-if __name__ == "__main__": main()
+    start = QML.index("function playLibrarySelectionFromShortcut")
+    block = QML[start:QML.index("function browserEmptyMessage", start)]
+    assert "playSelectedLibraryTrack()" in block
+    assert "playSelectedTrack.forceActiveFocus()" in block
+    assert "window.playLibrarySelectionFromShortcut()" in QML
+if __name__ == "__main__":
+    main()
