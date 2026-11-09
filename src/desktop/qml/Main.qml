@@ -3797,7 +3797,12 @@ ApplicationWindow {
                             ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending."
                             : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings."
                         ToolTip.text: Accessible.description
-                        onClicked: overlaySettingsRetentionStatus.forceActiveFocus()
+                        onClicked: {
+                            overlaySettingsRetentionStatus.forceActiveFocus()
+                            window.announceCaptureRecoveryState(window.overlayDisplayRecoveryPending
+                                ? "Reviewing retained overlay settings while recovery is pending."
+                                : "Reviewing retained overlay settings; native overlay recovery is available.")
+                        }
                     }
                     Label {
                         objectName: "overlayDataReadiness"

@@ -834,3 +834,5 @@ The retained-settings review action now changes to â€œReview recovery settingsâ€
 
 The retained-settings review action now exposes a dynamic accessible value for normal retention versus pending recovery. Portable coverage is in `python tests/unit/check_overlay_review_value_contract.py`.
 
+The retained-settings review action now announces pending versus stable recovery context when focused. Portable coverage is in `python tests/unit/check_overlay_review_announce_contract.py`.
+
