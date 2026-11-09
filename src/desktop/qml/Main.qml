@@ -565,7 +565,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+Shift+A"
         context: Qt.ApplicationShortcut
         enabled: typeof storageRecovery !== "undefined" && storageRecovery.discardRuns !== undefined
-            && storageRecovery.retryableRunIds.length > 0
+            && storageRecovery.recoveryAvailable
             && !window.storageReopenPending
         onActivated: {
             storageRecovery.discardRuns(storageRecovery.retryableRunIds)
