@@ -104,3 +104,5 @@ if 'Analysis cancellation rejected: storage is not open' not in source or 'Analy
     raise SystemExit("Analysis lifecycle actions must reject closed storage before queueing worker work")
 if 'Analysis rejected: content identity is required' not in source or 'Analysis admission rejected: content identity is required' not in source:
     raise SystemExit("Analysis submission and admission must reject empty content identities")
+if 'Analysis rejected: source path is required' not in source:
+    raise SystemExit("Analysis submission must reject an empty source path")

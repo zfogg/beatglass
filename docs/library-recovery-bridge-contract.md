@@ -58,6 +58,8 @@ rather than queueing work against a missing database.
 Submission and admission also require a non-empty content identity before
 touching the worker, keeping analysis and cache records addressable by the same
 source identity contract.
+Path-backed submission also requires a non-empty source path before enqueueing
+work, so a cache identity cannot create an analysis record without its source.
 Refresh requests made while storage is closed are rejected synchronously with
 `Storage error: storage is not open`; callers must reopen storage before asking
 the worker for a new persisted-recovery snapshot.
