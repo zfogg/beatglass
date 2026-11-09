@@ -58,6 +58,8 @@ if 'Cached analysis ready' not in cached_connection or 'Cache lookup complete' n
     raise SystemExit("Cache lookup must expose an explicit lifecycle status")
 if "if (!hit && !analysisResult_.isEmpty())" not in cached_connection:
     raise SystemExit("Cache misses must clear stale analysis results")
+if "const auto displayed = hit ? result : QString{}" not in cached_connection:
+    raise SystemExit("Cache hits must publish the cached result to the analysis display")
 if "analysisRetryable_ = false" not in cached_connection or "analysisError_.clear()" not in cached_connection:
     raise SystemExit("Cache lookup must clear stale recovery state")
 print(f"Desktop cache bridge contract verified ({len(required)} checks)")
