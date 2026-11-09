@@ -1,6 +1,7 @@
 #include "beatglass/capture/pipewire_source.hpp"
 #include "beatglass/capture/detail/pipewire_stream_owner.hpp"
 #include <cctype>
+#include <chrono>
 
 namespace beatglass::pipewire {
 namespace {
@@ -119,7 +120,15 @@ namespace {
 class DiscoveryBoundary final : public MonitorBackend {
 public:
   DiscoveryBoundary() : owner_(detail::make_stream_owner()) {}
-  Discovery enumerate(std::chrono::milliseconds timeout) override { return discover_sinks(timeout); }
+  Discovery enumerate(std::chrono::milliseconds timeout) override {
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+    auto result = discover_sinks(timeout);
+    if (!result.retryable()) return result;
+    const auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
+        deadline - std::chrono::steady_clock::now());
+    if (remaining <= std::chrono::milliseconds::zero()) return result;
+    return discover_sinks(remaining);
+  }
   bool start(const std::string&, std::uint64_t) override { return false; }
   bool start_stream(const std::string& serial, std::uint64_t epoch,
                     std::uint32_t sample_rate, std::uint32_t channels) override {
