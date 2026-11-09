@@ -116,6 +116,8 @@ screenshots.
 | [Settings reset](overlay-settings-reset-card.svg) | safe-default reset with undo path |
 | [Activation shortcut](overlay-activation-shortcut-card.svg) | shortcut editor with conflict guidance |
 | [Shortcut saved](overlay-activation-shortcut-applied-card.svg) | persisted activation confirmation |
+| [Tray disconnected](overlay-tray-disconnected-card.svg) | recoverable tray loss with preserved overlay state |
+| [Tray reconnected](overlay-tray-reconnected-card.svg) | restored tray actions without playback interruption |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
