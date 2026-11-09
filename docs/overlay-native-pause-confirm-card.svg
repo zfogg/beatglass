@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Pause native overlay monitoring</title>
+  <desc id="desc">An explicit pause confirmation preserves the overlay layout while clearly explaining that capture will stop until resumed.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <circle cx="116" cy="116" r="28" fill="#f2b84b"/>
+  <path d="M110 103v26M122 103v26" stroke="#231a08" stroke-width="6" stroke-linecap="round"/>
+  <text x="168" y="111" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Pause monitoring?</text>
+  <text x="168" y="142" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">The overlay will stay configured and can resume safely.</text>
+  <rect x="96" y="190" width="728" height="104" rx="16" fill="#17243c"/>
+  <text x="124" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">What changes</text>
+  <text x="124" y="258" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Audio capture and live analysis pause immediately.</text>
+  <text x="124" y="282" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Display 2 · Bottom-right · 82% opacity settings are retained.</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">Resume from the tray or press Ctrl+Shift+P.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">No audio files or tags are changed by pausing.</text>
+  <rect x="96" y="438" width="176" height="46" rx="12" fill="#f2b84b"/>
+  <text x="184" y="468" text-anchor="middle" fill="#231a08" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Pause now</text>
+  <rect x="290" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="367" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Keep running</text>
+</svg>
