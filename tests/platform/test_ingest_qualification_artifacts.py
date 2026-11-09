@@ -157,6 +157,17 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertIn("symlinked evidence manifest output", errors)
             self.assertEqual(target.read_text(encoding="utf-8"), "sentinel")
 
+    def test_rejects_directory_manifest_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text(
+                "commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            output = root / "manifest.json"
+            output.mkdir()
+            errors = ingest.ingest(root, output)
+            self.assertIn("evidence manifest output is not a file", errors)
+
     def test_sorts_artifacts_for_reproducible_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

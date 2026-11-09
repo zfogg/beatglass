@@ -99,6 +99,8 @@ def ingest(root: Path, output: Path) -> list[str]:
               "artifacts": artifacts, "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in SCENARIOS]}
     if output.is_symlink():
         errors.append("symlinked evidence manifest output")
+    elif output.exists() and not output.is_file():
+        errors.append("evidence manifest output is not a file")
     else:
         output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return errors
