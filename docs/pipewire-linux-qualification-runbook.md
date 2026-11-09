@@ -108,3 +108,4 @@ The verifier cross-checks summary `native_test_count` against the discovery inve
 ative_test_count against the discovery inventory count.
 Qualified handoffs must explicitly record `native_test_name_match: true` in the summary after discovery/execution reconciliation.
 ative_test_name_match: true in the summary after discovery/execution reconciliation.
+The archived summary must itself report qualified: true; the manifest cannot promote an unqualified run.
