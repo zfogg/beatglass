@@ -802,3 +802,5 @@ The overlay actions accessibility description now states that native-launch fall
 
 The unavailable-overlay actions tooltip now states that the control-window fallback retains overlay settings. Portable coverage is in `python tests/unit/check_overlay_fallback_tooltip_contract.py`.
 
+The overlay actions accessible value now reports that settings are retained during native-overlay fallback. Portable coverage is in `python tests/unit/check_overlay_fallback_value_contract.py`.
+
