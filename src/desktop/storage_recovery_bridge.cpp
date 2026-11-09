@@ -38,6 +38,7 @@ public slots:
   }
   void discard(QString id) { if (handle_ && (handle_->state() == beatglass::library_detail::TrackedState::queued || handle_->state() == beatglass::library_detail::TrackedState::running)) { emit result(false, QStringLiteral("Retryable run is active")); return; } try { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) { handle_.reset(); emit analysis(QStringLiteral("Analysis idle")); refresh(); } } catch (const std::exception& error) { emit result(false, QStringLiteral("Recovery discard rejected: ") + QString::fromUtf8(error.what())); refresh(); } }
   void discardBatch(QStringList ids) {
+    if (ids.isEmpty()) { emit result(false, QStringLiteral("No retryable recovery runs selected")); refresh(); return; }
     if (handle_ && (handle_->state() == beatglass::library_detail::TrackedState::queued || handle_->state() == beatglass::library_detail::TrackedState::running)) { emit result(false, QStringLiteral("Retryable run is active")); return; }
     try {
       std::vector<std::string> values; for (const auto& id : ids) values.push_back(id.toStdString());
