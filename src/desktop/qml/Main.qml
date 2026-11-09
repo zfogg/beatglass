@@ -3637,7 +3637,7 @@ ApplicationWindow {
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
                         onActivated: {
                             if (window.persistOverlayDisplaySelection(currentIndex, currentText))
-                                retryOverlay.forceActiveFocus()
+                                overlayDisplayStatus.forceActiveFocus()
                             else
                                 forceActiveFocus()
                         }
