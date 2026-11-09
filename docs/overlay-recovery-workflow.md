@@ -139,3 +139,6 @@ Persisted geometry is restored with the saved display and included in the succes
 
 Display, geometry, and opacity are treated as one persisted visual bundle: recovery confirms all three in a single announcement, while the control window remains the tray/taskbar fallback if any part cannot be reapplied.
 
+
+When the native overlay is unavailable, invoking Show or Restore is safe from a hidden control window: the tray/taskbar fallback is made visible and active, recovery remains pending, and focus lands on display recovery so the next action is keyboard-ready.
+

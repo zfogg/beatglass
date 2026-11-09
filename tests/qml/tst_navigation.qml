@@ -1387,4 +1387,18 @@ TestCase {
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
         fakeOverlay.opacity = 0.9
     }
+    function test_trayFallbackRestoresControlWindowWhenOverlayUnavailable() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.hide()
+        verify(!app.visible)
+        verify(!app.showOverlayAndHideControls())
+        verify(app.visible)
+        verify(app.overlayLaunchFallbackActive)
+        verify(app.overlayDisplayRecoveryPending)
+        verify(app.overlayRecoveryAnnouncement.indexOf("tray/taskbar fallback") >= 0)
+        verify(findChild(app, "overlayDisplay").activeFocus)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
