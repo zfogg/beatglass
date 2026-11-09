@@ -140,7 +140,14 @@ public:
   }
   bool restart_stream(std::uint64_t epoch, std::uint32_t sample_rate,
                       std::uint32_t channels) override {
-    return session_.restart(epoch, sample_rate, channels);
+    if (!session_.restart(epoch, sample_rate, channels)) return false;
+    if (!owner_ || !session_.native_handoff() ||
+        !owner_->connect(session_.serial(), sample_rate, channels,
+                         *session_.native_handoff())) {
+      session_.reset();
+      return false;
+    }
+    return true;
   }
   std::string selected_serial() const override { return session_.serial(); }
   std::optional<MonitorFormat> selected_format() const noexcept override { return session_.format(); }
