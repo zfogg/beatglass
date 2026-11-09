@@ -11,10 +11,12 @@ if matrix.get("schema") != "beatglass-native-qualification-matrix-v1":
 lines = ["# Native qualification matrix", "", f"Host: `{matrix.get('host_os', 'unknown')}`"]
 if matrix.get("commit"):
     lines.append(f"Commit: `{matrix['commit']}`")
-lines += ["", "| Platform | Status | Evidence | Pending reason |", "| --- | --- | --- | --- |"]
+lines += ["", "| Platform | Status | Native attempt | Evidence | Pending reason | Blockers |", "| --- | --- | --- | --- | --- | --- |"]
 for name, entry in matrix["platforms"].items():
     evidence = ", ".join(f"`{item}`" for item in entry.get("evidence", [])) or "—"
     reason = entry.get("pending_reason", "—")
-    lines.append(f"| {name} | **{entry['status']}** | {evidence} | {reason} |")
+    attempted = "yes" if entry.get("native_execution_attempted") else "no"
+    blockers = ", ".join(entry.get("execution_blockers", [])) or "—"
+    lines.append(f"| {name} | **{entry['status']}** | {attempted} | {evidence} | {reason} | {blockers} |")
 Path(sys.argv[2]).write_text("\n".join(lines) + "\n", encoding="utf-8")
 print(f"Rendered qualification matrix report to {sys.argv[2]}")
