@@ -61,6 +61,7 @@ bool MonitorSession::start(std::string serial, std::uint64_t epoch, std::uint32_
   serial_ = std::move(serial);
   stream_ = std::move(next);
   format_ = Format{sample_rate, channels};
+  epoch_ = epoch;
   return true;
 }
 void MonitorSession::stop() noexcept { if (stream_) stream_->stop(); }
@@ -69,11 +70,13 @@ void MonitorSession::reset() noexcept {
   stream_.reset();
   serial_.clear();
   format_.reset();
+  epoch_ = 0;
 }
 bool MonitorSession::needs_restart() const noexcept { return !stream_ || stream_->needs_restart(); }
 bool MonitorSession::restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) {
   const bool restarted = stream_ && stream_->restart(epoch, sample_rate, channels);
   if (restarted) format_ = Format{sample_rate, channels};
+  if (restarted) epoch_ = epoch;
   return restarted;
 }
 bool MonitorSession::on_process(std::span<const float> samples, std::uint64_t host_time,
@@ -89,6 +92,7 @@ MonitorSession::Status MonitorSession::poll_status() noexcept {
   Status status;
   status.serial = serial_;
   status.format = format_;
+  status.epoch = epoch_;
   status.active = static_cast<bool>(stream_) && !stream_->needs_restart();
   if (!stream_) return status;
   status.needs_restart = stream_->needs_restart();
