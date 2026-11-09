@@ -3497,7 +3497,7 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Visible no-device, permission, retry-failure, and reacquisition guidance for visualization capture."
-                    ToolTip.text: "Capture device and permission recovery state"
+                    ToolTip.text: "Capture device and permission recovery state; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
