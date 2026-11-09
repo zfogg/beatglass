@@ -49,5 +49,7 @@ Support summaries must use one known status per platform: `experimental`,
 `qualified`, `unsupported`, or `pending`.
 `qualified` requires every scenario in that platform's inventory to be `PASS`;
 an all-`PASS` inventory cannot remain marked non-qualified.
+Retained-byte totals must equal the sum of the recorded artifact sizes, so
+manifests cannot under-report or over-report the evidence they contain.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.

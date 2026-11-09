@@ -62,6 +62,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
                         artifact["bytes"] <= 0):
                     blockers.append(f"{name}:invalid artifact provenance")
                     break
+            if isinstance(platform.get("retained_bytes"), int) and platform["retained_bytes"] != sum(
+                    item.get("bytes", 0) for item in inventory if isinstance(item, dict)):
+                blockers.append(f"{name}:retained byte count mismatch")
             output = platform.get("qualification_output")
             output_sha = platform.get("qualification_output_sha256")
             matching = next((item for item in inventory if isinstance(item, dict) and item.get("path") == output), None)
