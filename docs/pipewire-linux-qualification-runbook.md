@@ -110,6 +110,8 @@ Manifest event counts are required to be positive JSON integers, not booleans
 or coerced values.
 The manifest carries the host platform too, and verification binds it to the
 qualification summary before accepting the archive.
+When present, that platform identity must be a non-empty string; malformed
+typed metadata is rejected before any evidence is trusted.
 Transition-bearing manifests also declare the transition schema version, which
 the verifier matches against the captured envelope.
 They also carry the transition source commit, independently bound to the
