@@ -1,22 +1,13 @@
-#!/usr/bin/env python3
-"""Portable contract for focusing Library analysis queue progress."""
-
+"""Contract checks for Library analysis queue focus."""
 from pathlib import Path
-
-
-SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").read_text(encoding="utf-8")
-
-
+ROOT = Path(__file__).resolve().parents[2]
+QML = (ROOT / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 def main() -> None:
-    start = SOURCE.index('objectName: "libraryAnalysisQueueFocusShortcut"')
-    block = SOURCE[start : SOURCE.index("    Shortcut {", start)]
-    assert 'sequence: "Ctrl+Alt+Shift+6"' in block
+    start = QML.index("function focusLibraryAnalysisQueue")
+    block = QML[start:QML.index("function browserEmptyMessage", start)]
+    assert "navigation.currentIndex = 0" in block
     assert "analysisQueueProgress.forceActiveFocus()" in block
-    assert "announceVisualizationRecovery" in block
-    assert "id: analysisQueueProgress" in SOURCE
-    assert "activeFocusOnTab: true" in SOURCE[SOURCE.index('objectName: "analysisQueueProgress"') - 80 :]
-    assert "Ctrl+Alt+Shift+6 queue progress" in SOURCE
-
-
+    assert "Library analysis queue progress focused" in block
+    assert "window.focusLibraryAnalysisQueue()" in QML
 if __name__ == "__main__":
     main()

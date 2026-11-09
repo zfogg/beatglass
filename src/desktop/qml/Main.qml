@@ -555,7 +555,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryAnalysisProvenanceFocusShortcut"; sequence: "Ctrl+Alt+Shift+9"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisProvenance.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis provenance focused.") } }
     Shortcut { objectName: "libraryAnalysisUncertaintyFocusShortcut"; sequence: "Ctrl+Alt+Shift+8"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisUncertainty.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis uncertainty focused.") } }
     Shortcut { objectName: "libraryAnalysisFailureFocusShortcut"; sequence: "Ctrl+Alt+Shift+7"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisFailureReason.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis failure status focused.") } }
-    Shortcut { objectName: "libraryAnalysisQueueFocusShortcut"; sequence: "Ctrl+Alt+Shift+6"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisQueueProgress.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis queue progress focused.") } }
+    Shortcut { objectName: "libraryAnalysisQueueFocusShortcut"; sequence: "Ctrl+Alt+Shift+6"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryAnalysisQueue() }
     Shortcut { objectName: "libraryBatchProgressFocusShortcut"; sequence: "Ctrl+Alt+Shift+5"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchProgressBar.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch progress focused.") } }
     Shortcut { objectName: "libraryBatchResultFocusShortcut"; sequence: "Ctrl+Alt+Shift+4"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchLastResult.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch result focused.") } }
     Shortcut { objectName: "libraryBatchPublicationFocusShortcut"; sequence: "Ctrl+Alt+Shift+3"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchPublicationSummary.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch publication summary focused.") } }
@@ -1059,6 +1059,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         analysisRecoveryNextAction.forceActiveFocus()
         window.announceVisualizationRecovery("Library recovery next action focused.")
+    }
+    function focusLibraryAnalysisQueue() {
+        navigation.currentIndex = 0
+        analysisQueueProgress.forceActiveFocus()
+        window.announceVisualizationRecovery("Library analysis queue progress focused.")
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
