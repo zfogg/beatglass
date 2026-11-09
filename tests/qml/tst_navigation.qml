@@ -1470,4 +1470,18 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_bridgeLossRestoresRetryFocusAndRetainsSettings() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        fakeOverlay.available = false
+        tryCompare(app, "visible", true)
+        verify(findChild(app, "retryOverlay").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(app.overlayRecoveryAnnouncement.indexOf("unavailable") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }

@@ -157,3 +157,6 @@ The retained-settings shortcut Ctrl+Alt+Shift+S remains enabled during fallback,
 
 The Retry overlay focus shortcut Ctrl+Alt+Shift+Y remains available while the bridge is unavailable. It restores the control window, focuses Retry overlay, and leaves persisted display and geometry preferences untouched for the retry.
 
+
+A native bridge loss now restores the control window and focuses Retry overlay immediately, while retaining the saved display and size settings. This makes the next recovery action keyboard-ready without discarding the pending visual state.
+
