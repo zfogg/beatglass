@@ -798,6 +798,7 @@ ApplicationWindow {
         if (!window.overlayBridge) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             return false
         }
         if (window.overlayBridge.displayName !== "")
