@@ -431,3 +431,5 @@ Include the archive verifier version/commit in handoffs so later reviewers can r
 Record the repository revision used by the verifier alongside its command so archive decisions remain reproducible after subsequent changes.
 
 Record the verifier revision and command in the same handoff entry as the archive path to keep evidence review reproducible.
+
+If a handoff is regenerated, update its verifier revision and command together with the archive path; stale command metadata invalidates reproducibility.
