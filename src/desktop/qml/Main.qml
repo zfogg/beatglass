@@ -2774,7 +2774,7 @@ ApplicationWindow {
                         text: "No displays are available for the overlay."
                         Accessible.name: "Overlay display empty state"
                         Accessible.value: text
-                        Accessible.role: Accessible.StaticText
+                        Accessible.role: Accessible.Status
                         Accessible.description: text + " Connect a display before choosing an overlay destination."
                         ToolTip.text: "Connect a display before choosing an overlay destination"
                     }
