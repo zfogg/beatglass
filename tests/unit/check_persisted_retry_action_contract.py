@@ -25,6 +25,8 @@ if "Discarding persisted recovery" not in source:
     raise SystemExit("Batch discard must publish a transition status")
 if "Retrying persisted recovery" not in source:
     raise SystemExit("Persisted retry must publish a transition status")
+if "analysisResult_.clear()" not in source[source.index("void StorageRecoveryBridge::retrySelectedRun"):]:
+    raise SystemExit("Persisted retry must clear stale result before requeue")
 if source.count("Discarding persisted recovery") < 2:
     raise SystemExit("Single and batch discard must publish a transition status")
 if "Refreshing persisted recovery" not in source:
