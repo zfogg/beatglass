@@ -4345,7 +4345,7 @@ ApplicationWindow {
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
                                     Accessible.name: "Output capture endpoint"
-                                    Accessible.value: currentText
+                                    Accessible.value: currentText + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                                     Accessible.role: Accessible.ComboBox
                                     Accessible.description: (currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
                                     ToolTip.text: "Choose the output endpoint used for live capture; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
