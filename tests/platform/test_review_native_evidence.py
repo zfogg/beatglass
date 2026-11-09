@@ -243,3 +243,12 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps(payload))
             result = review.assess(report, "release-owner")
             self.assertIn("linux:build commit differs from report", result["blockers"])
+
+    def test_scenario_and_inventory_views_must_agree(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            payload = {"platforms": [{"platform": "linux", "scenarios": [],
+                                      "scenario_inventory": [{"id": "capture", "status": "UNRUN"}]}]}
+            report.write_text(__import__("json").dumps(payload))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:scenario inventory mismatch", result["blockers"])

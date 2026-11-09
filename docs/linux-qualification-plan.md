@@ -47,6 +47,8 @@ The report-level platform inventory must match its platform-support summary, and
 `ready: true` is only valid with an `ACCEPTED` exit-gate status.
 Support summaries must use one known status per platform: `experimental`,
 `qualified`, `unsupported`, or `pending`.
+If both `scenarios` and `scenario_inventory` are present, they must be identical;
+the reviewer will not silently choose one view over the other.
 `qualified` requires every scenario in that platform's inventory to be `PASS`;
 an all-`PASS` inventory cannot remain marked non-qualified.
 Retained-byte totals must equal the sum of the recorded artifact sizes, so
