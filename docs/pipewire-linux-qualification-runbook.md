@@ -458,3 +458,5 @@ Keep the matrix report's native-attempt column visible during review; a qualifie
 Merged matrices retain platform blocker lists and attempt flags verbatim; conflicting per-host entries are rejected rather than silently reconciled.
 
 Matrix reports now expose attempt status and blockers directly; review those fields before scheduling or accepting a host qualification.
+
+Qualification report renderers escape evidence paths, reasons, and blockers for safe Markdown review; raw JSON remains the authoritative handoff.
