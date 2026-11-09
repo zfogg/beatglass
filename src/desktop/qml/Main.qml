@@ -363,7 +363,10 @@ ApplicationWindow {
         sequence: "Escape"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryPausedByUser
-        onActivated: resumeOverlayRecovery.forceActiveFocus()
+        onActivated: {
+            window.announceCaptureRecoveryState("Paused overlay recovery; Resume recovery focused.")
+            resumeOverlayRecovery.forceActiveFocus()
+        }
     }
     Shortcut {
         objectName: "overlayDisplayFocusShortcut"

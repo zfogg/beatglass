@@ -1153,6 +1153,7 @@ TestCase {
         let focusShortcut = findChild(app, "overlayPausedRecoveryFocusShortcut")
         compare(focusShortcut.sequence, "Escape")
         verify(focusShortcut.enabled)
+        compare(focusShortcut.context, Qt.ApplicationShortcut)
         app.destroy()
         fakeOverlay.available = true
     }

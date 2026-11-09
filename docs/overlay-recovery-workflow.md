@@ -54,6 +54,8 @@ For keyboard-first recovery, `Ctrl+Alt+Shift+R` performs the same resume action;
 the shortcut is repeated beside the paused action while it is available.
 Pressing `Escape` while paused returns focus to `Resume recovery`, providing a
 predictable keyboard path back to the lifecycle action after reviewing status.
+It also announces that the paused recovery action is focused for assistive
+technology users.
 
 ## Screenshot qualification
 
