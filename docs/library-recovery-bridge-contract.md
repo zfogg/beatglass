@@ -98,6 +98,8 @@ predicates so UI and persistence code do not duplicate cancellation/failure or
 indeterminate-progress semantics.
 `JobLifecycle::retry` now uses the shared terminal predicate while explicitly
 excluding completed jobs, keeping retry admission consistent with queue state.
+Progress and completion use the shared known-total predicate, preserving zero as
+a meaningful known total while treating an absent total as indeterminate.
 The desktop cache controls mirror this contract: lookup, invalidation, and
 reanalysis actions stay disabled until content, engine, configuration, and a
 valid `offline`/`live` mode are present.

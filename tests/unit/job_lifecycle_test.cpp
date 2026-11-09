@@ -39,6 +39,10 @@ TEST_CASE("job lifecycle retry uses shared terminal predicate") {
   CHECK(isTerminal(JobStatus::complete));
   CHECK_FALSE(isTerminal(JobStatus::running));
 }
+TEST_CASE("known total predicate distinguishes unknown and zero totals") {
+  CHECK_FALSE(hasKnownTotal(std::optional<std::uint64_t>{}));
+  CHECK(hasKnownTotal(std::optional<std::uint64_t>{0}));
+}
 
 TEST_CASE("commit decision serializes cancellation at the commit boundary") {
  CommitDecision early; CHECK_FALSE(early.begin_commit(true)); CHECK(early.cancelled());
