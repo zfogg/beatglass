@@ -580,3 +580,7 @@ if(BUILD_TESTING)
   endif()
 endif()
 
+if(TARGET beatglass_desktop_metadata)
+  target_sources(beatglass_desktop_metadata PRIVATE src/desktop/library_preferences.cpp src/desktop/library_preferences.hpp)
+endif()
+
