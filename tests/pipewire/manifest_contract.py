@@ -1,6 +1,7 @@
 """Shared canonical operations for PipeWire qualification manifests."""
 import hashlib
 import json
+import re
 
 def inventory_digest(inventory):
     return hashlib.sha256(json.dumps(inventory, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
@@ -24,6 +25,6 @@ def validate_inventory_shape(inventory):
     if audio_sink_count(inventory) < 1:
         return "inventory must include an Audio/Sink"
     sinks = [item["info"]["props"] for item in inventory if item["info"]["props"].get("media.class") == "Audio/Sink"]
-    if any(not isinstance(p.get("object.serial"), str) or not p["object.serial"].strip() or not isinstance(p.get("node.name"), str) or not p["node.name"].strip() for p in sinks):
+    if any(not isinstance(p.get("object.serial"), str) or not re.fullmatch(r"[0-9]+", p["object.serial"]) or not isinstance(p.get("node.name"), str) or not p["node.name"].strip() for p in sinks):
         return "Audio/Sink entries must retain serial and node name strings"
     return None
