@@ -2901,7 +2901,7 @@ ApplicationWindow {
                                 text: "Discard all saved runs"
                                 Accessible.name: "Discard all saved retryable analysis runs"
                                 Accessible.description: "Remove every persisted retry record currently shown. Source audio files are never changed."
-                                onClicked: discardAllRecoveryDialog.open()
+                                onClicked: { discardAllRecoveryDialog.open(); window.announceVisualizationRecovery("Confirm discarding all saved recovery runs; source audio remains unchanged.") }
                             }
                             Dialog {
                                 id: discardAllRecoveryDialog
