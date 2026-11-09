@@ -26,7 +26,8 @@ if not missing:
             missing.append("valid pw-dump JSON")
         elif not any(
             (props := item.get("info", {}).get("props", {})).get("media.class") == "Audio/Sink"
-            and props.get("object.serial") and props.get("node.name")
+            and str(props.get("object.serial", "")).strip()
+            and str(props.get("node.name", "")).strip()
             for item in inventory if isinstance(item, dict)
         ):
             missing.append("PipeWire Audio/Sink node")
