@@ -1,5 +1,8 @@
 # Progress and handoff
 
+`Ctrl+Alt+J` focuses the Hide overlay action, keeping the control-window
+fallback keyboard reachable during an active overlay session.
+
 `Ctrl+Alt+W` focuses the Show overlay action, providing a direct keyboard path
 to restore the native overlay after recovery or configuration changes.
 

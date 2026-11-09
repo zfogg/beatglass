@@ -74,6 +74,17 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayHideFocusShortcut"
+        sequence: "Ctrl+Alt+J"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+        onActivated: {
+            navigation.currentIndex = 1
+            hideOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Hide overlay control focused.")
+        }
+    }
+    Shortcut {
         objectName: "overlayShowFocusShortcut"
         sequence: "Ctrl+Alt+W"
         context: Qt.ApplicationShortcut
