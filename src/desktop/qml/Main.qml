@@ -415,9 +415,11 @@ ApplicationWindow {
                 window.overlayPreferredSizeIndex = nextIndex
                 window.overlaySettingsRevision += 1
                 window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
+                overlaySize.forceActiveFocus()
             } else {
                 window.syncOverlaySettingsStateFromBridge()
                 window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
+                overlaySize.forceActiveFocus()
             }
         }
     }
