@@ -3,7 +3,7 @@ import hashlib
 import json
 import sys
 import zipfile
-from datetime import datetime
+from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 from pathlib import PurePosixPath
 
@@ -49,6 +49,10 @@ with zipfile.ZipFile(archive_path) as archive:
         datetime.fromisoformat(manifest["archive_timestamp_utc"][:-1])
     except ValueError:
         raise SystemExit("evidence manifest has malformed archive timestamp")
+    expected_archive_time = datetime.fromtimestamp(manifest["source_date_epoch"], timezone.utc).replace(tzinfo=None)
+    expected_archive_time = max(expected_archive_time, datetime(1980, 1, 1))
+    if manifest["archive_timestamp_utc"] != expected_archive_time.isoformat() + "Z":
+        raise SystemExit("archive timestamp does not match source date epoch")
     artifacts = manifest.get("artifacts", [])
     if not isinstance(artifacts, list) or not artifacts:
         raise SystemExit("evidence manifest contains no artifacts")
