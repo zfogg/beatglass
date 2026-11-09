@@ -1455,4 +1455,19 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_retryFocusShortcutPreservesPersistedSettings() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 1
+        let shortcut = findChild(app, "overlayRetryFocusShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        verify(findChild(app, "retryOverlay").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 1)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Retry overlay control focused") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
