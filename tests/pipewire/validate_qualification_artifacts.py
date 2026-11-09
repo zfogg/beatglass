@@ -21,6 +21,8 @@ def main() -> int:
     if empty:
         print("empty: " + ", ".join(empty), file=sys.stderr)
         return 1
+    for name in REQUIRED:
+        print(f"{name}: {(root / name).stat().st_size} bytes")
     print(f"PipeWire qualification artifacts verified ({len(REQUIRED)} files)")
     return 0
 
