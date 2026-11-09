@@ -81,6 +81,8 @@ Every event must be a JSON object; malformed event shapes are rejected before
 the artifact can be packaged.
 Each event must also carry a non-empty event name so lifecycle evidence remains
 auditable when new event kinds are added.
+The required lifecycle sequence is ordered as start, process, error, then
+restart; out-of-order evidence is rejected.
 When present in a packaged summary, the archive verifier rechecks the same
 required lifecycle events and epoch/discontinuity/error invariants.
 It also requires the transition envelope’s schema, source commit, and host
