@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 #include <span>
+#include <atomic>
 
 namespace beatglass::pipewire {
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
@@ -35,7 +36,9 @@ public:
   bool on_process(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
                   double source_sample_time, bool sample_time_valid) noexcept;
   /** Native state/error callback seam; closes callback admission until control-thread restart. */
-  void on_error() noexcept;
+  void on_error(int error_code) noexcept;
+  /** Read the last native callback error code on the control thread; zero means none. */
+  int error_code() const noexcept;
   /** Pop the next bounded block on the control thread. */
   bool pop(coreaudio::CaptureBlock& block) noexcept;
   /** Stop accepting callback data and expose overflow state. */
@@ -43,8 +46,9 @@ public:
   bool overflowed() const noexcept;
 private:
   std::unique_ptr<coreaudio::CaptureFifo> fifo_;
-  bool stopped_{};
+  std::atomic<bool> stopped_{false};
   bool discontinuity_pending_{};
+  std::atomic<int> error_code_{0};
 };
 /** Create the provisional PipeWire monitor boundary; ownership stays with the caller. */
 std::unique_ptr<MonitorBackend> make_monitor_backend();

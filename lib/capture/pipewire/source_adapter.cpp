@@ -14,9 +14,14 @@ bool MonitorStream::on_process(std::span<const float> samples, std::uint64_t hos
                                double source_sample_time, bool sample_time_valid) noexcept {
   return push(samples, host_time, host_time_valid, false, source_sample_time, sample_time_valid);
 }
-void MonitorStream::on_error() noexcept { discontinuity_pending_ = true; stopped_ = true; }
+void MonitorStream::on_error(int error_code) noexcept {
+  error_code_.store(error_code, std::memory_order_release);
+  discontinuity_pending_ = true;
+  stopped_ = true;
+}
+int MonitorStream::error_code() const noexcept { return error_code_.load(std::memory_order_acquire); }
 bool MonitorStream::pop(coreaudio::CaptureBlock& block) noexcept { return fifo_ && fifo_->pop(block); }
-void MonitorStream::stop() noexcept { stopped_ = true; }
+void MonitorStream::stop() noexcept { stopped_.store(true, std::memory_order_release); }
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }
 namespace {
 class DiscoveryBoundary final : public MonitorBackend {
