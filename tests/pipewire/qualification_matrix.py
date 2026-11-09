@@ -22,6 +22,9 @@ if summary is not None:
     if current is not None:
         current["status"] = "qualified" if summary.get("qualified") is True else "pending"
         current["evidence"] = summary.get("native_artifacts", [])
+        current["native_execution_attempted"] = summary.get("native_execution_attempted", False)
+        if current["status"] == "pending":
+            current["execution_blockers"] = summary.get("native_execution_blockers", [])
         if current["status"] == "pending":
             current["pending_reason"] = summary.get("pending_reason", "native qualification incomplete")
 matrix = {"schema": "beatglass-native-qualification-matrix-v1", "host_os": host, "python": sys.version.split()[0], "platforms": platforms}

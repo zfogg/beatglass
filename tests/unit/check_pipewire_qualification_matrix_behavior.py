@@ -10,7 +10,7 @@ with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     summary = root / "summary.json"
     output = root / "matrix.json"
-    summary.write_text(json.dumps({"qualified": False, "pending_reason": "host unavailable", "native_artifacts": ["evidence/native-summary.json"]}), encoding="utf-8")
+    summary.write_text(json.dumps({"qualified": False, "pending_reason": "host unavailable", "native_artifacts": ["evidence/native-summary.json"], "native_execution_attempted": False, "native_execution_blockers": ["Linux host"]}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(script), str(output), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode != 0:
         raise SystemExit(result.stderr or result.stdout)
@@ -20,7 +20,7 @@ with tempfile.TemporaryDirectory() as directory:
         raise SystemExit("qualification matrix omitted a required platform")
     if any("pending_reason" not in item for name, item in matrix["platforms"].items() if name != matrix["host_os"]):
         raise SystemExit("pending platform lacks an actionable reason")
-    if host_entry["status"] != "pending" or host_entry["evidence"] != ["evidence/native-summary.json"] or host_entry["pending_reason"] != "host unavailable":
+    if host_entry["status"] != "pending" or host_entry["evidence"] != ["evidence/native-summary.json"] or host_entry["pending_reason"] != "host unavailable" or host_entry["native_execution_attempted"] is not False or host_entry["execution_blockers"] != ["Linux host"]:
         raise SystemExit("runner summary was not merged into host matrix entry")
     summary.write_text(json.dumps({"qualified": True, "native_artifacts": ["evidence/native-qualification.zip"]}), encoding="utf-8")
     qualified = root / "qualified-matrix.json"
