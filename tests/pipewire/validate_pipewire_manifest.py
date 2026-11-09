@@ -32,4 +32,6 @@ if not isinstance(manifest["inventory"], list):
     raise SystemExit("manifest inventory must be a list")
 if any(not isinstance(item, dict) for item in manifest["inventory"]):
     raise SystemExit("manifest inventory entries must be objects")
+if any(not isinstance(item.get("id"), int) or item["id"] < 0 for item in manifest["inventory"]):
+    raise SystemExit("manifest inventory entries must have non-negative numeric ids")
 print("PipeWire qualification manifest is valid")
