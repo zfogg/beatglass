@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / COMMANDS</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">What do you want to do?</text>
+  <rect x="112" y="220" width="976" height="62" rx="14" fill="#202938" stroke="#56d38b" stroke-width="2"/><text x="144" y="259" fill="#f2f6fb" font-family="Inter,Arial" font-size="19">Type a command…</text><text x="1048" y="259" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Esc</text>
+  <rect x="112" y="316" width="976" height="72" rx="14" fill="#2a3444"/><text x="144" y="347" fill="#56d38b" font-family="Inter,Arial" font-size="15" font-weight="700">SHOW OVERLAY</text><text x="144" y="373" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">Bring the live overlay back</text><text x="1048" y="358" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" text-anchor="end">Enter</text>
+  <rect x="112" y="400" width="976" height="72" rx="14" fill="#202938"/><text x="144" y="431" fill="#f2f6fb" font-family="Inter,Arial" font-size="15" font-weight="700">OPEN CONTROLS</text><text x="144" y="457" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">Adjust output, size, and opacity</text><text x="1048" y="442" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" text-anchor="end">↓ Enter</text>
+  <rect x="112" y="484" width="976" height="72" rx="14" fill="#202938"/><text x="144" y="515" fill="#f2f6fb" font-family="Inter,Arial" font-size="15" font-weight="700">RUN DIAGNOSTICS</text><text x="144" y="541" fill="#b8c4d2" font-family="Inter,Arial" font-size="15">Check output, capture, and permissions</text><text x="1048" y="526" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" text-anchor="end">↓ ↓ Enter</text>
+  <text x="112" y="624" fill="#7f8da0" font-family="Inter,Arial" font-size="15">↑↓ Navigate</text><text x="286" y="624" fill="#7f8da0" font-family="Inter,Arial" font-size="15">Enter Select</text><text x="464" y="624" fill="#7f8da0" font-family="Inter,Arial" font-size="15">Esc Close</text>
+</svg>
