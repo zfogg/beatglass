@@ -64,6 +64,14 @@ class QualificationIngestTest(unittest.TestCase):
                 "platform=\ncommit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
             self.assertIn("empty platform identity", ingest.ingest(root, root / "manifest.json"))
 
+    def test_rejects_empty_environment_identity(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text(
+                "platform=linux\nenvironment=\ncommit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            self.assertIn("empty environment identity", ingest.ingest(root, root / "manifest.json"))
+
     def test_rejects_invalid_capture_timestamp(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

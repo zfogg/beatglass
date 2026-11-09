@@ -30,6 +30,8 @@ def ingest(root: Path, output: Path) -> list[str]:
         errors.append("invalid source commit identity")
     if "platform" in identity and not identity["platform"].strip():
         errors.append("empty platform identity")
+    if "environment" in identity and not identity["environment"].strip():
+        errors.append("empty environment identity")
     if not identity.get("captured_at", "").strip():
         errors.append("missing capture time")
     else:
