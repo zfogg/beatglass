@@ -203,6 +203,8 @@ checks a valid archive plus rejection of unlisted, tampered, duplicate-entry,
 and traversal-style artifacts. Empty evidence manifests are rejected as well,
 so a qualified handoff always contains at least one archived artifact.
 The manifest must also carry a non-empty repository commit identity.
+The archived summary commit identity is independently required to be a
+non-empty string before it can be matched to the manifest.
 It records the `SOURCE_DATE_EPOCH` and UTC archive timestamp used for the ZIP,
 so recipients can audit the reproducibility policy without the original host.
 Run `python tests/unit/check_pipewire_evidence_packager_behavior.py` to verify
