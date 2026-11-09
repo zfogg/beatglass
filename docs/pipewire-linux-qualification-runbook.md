@@ -397,3 +397,5 @@ If an imported manifest contains an epoch outside the host datetime range, indep
 When summaries include source_date_epoch, archive verification validates its type, non-negative range, and exact equality with the manifest before accepting transferred evidence.
 
 If a summary carries rchive_timestamp_utc, verification also cross-checks it against the manifest timestamp to detect provenance drift.
+
+Malformed optional summary timestamp provenance is rejected before artifact acceptance, keeping archive transfer failures explicit and auditable.
