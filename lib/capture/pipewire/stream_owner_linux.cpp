@@ -67,7 +67,8 @@ private:
     auto& owner = *static_cast<LinuxStreamOwner*>(data);
     if (!owner.active_ || !owner.stream_ || !owner.handoff_) return;
     auto* buffer = pw_stream_dequeue_buffer(owner.stream_);
-    if (!buffer || !buffer->buffer || !buffer->buffer->datas[0].data) return;
+    if (!buffer || !buffer->buffer || buffer->buffer->n_datas == 0 ||
+        !buffer->buffer->datas[0].data) return;
     const auto& data_block = buffer->buffer->datas[0];
     const auto sample_bytes = data_block.chunk.size;
     if (sample_bytes == 0 || sample_bytes % sizeof(float) != 0 ||
