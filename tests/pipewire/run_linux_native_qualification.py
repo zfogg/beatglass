@@ -31,7 +31,9 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
     capture = ["python", str(args.source / "tests/pipewire/capture_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
     result = subprocess.run(capture, check=False, text=True)
     results.append({"command": capture, "returncode": result.returncode})
+native_result = next((item for item in results if "^pipewire_tests$" in item["command"]), None)
 summary = {"platform": platform.platform(), "commands": results,
+           "native_pipewire_tests": native_result,
            "qualified": len(results) == len(commands) and all(item["returncode"] == 0 for item in results)}
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
