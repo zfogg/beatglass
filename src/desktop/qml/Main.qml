@@ -492,6 +492,7 @@ ApplicationWindow {
         if (savedIndex < 0 || savedIndex >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
             overlayDisplay.forceActiveFocus()
             return false
         }
@@ -533,6 +534,7 @@ ApplicationWindow {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
             overlayDisplay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
             return false
         }
         if (!window.overlayBridge.moveToScreen(index)) {
