@@ -1,7 +1,9 @@
 """Verify and package a qualified native PipeWire run for transfer."""
 import hashlib
 import json
+import os
 import sys
+from datetime import datetime, timezone
 import zipfile
 from pathlib import Path
 
@@ -40,10 +42,15 @@ for command in summary.get("commands", []):
 if output_path.exists() or output_path.is_symlink():
     raise SystemExit(f"refusing to overwrite existing output: {output_path}")
 output_path.parent.mkdir(parents=True, exist_ok=True)
+epoch = max(0, int(os.environ.get("SOURCE_DATE_EPOCH", "0")))
+archive_time = datetime.fromtimestamp(epoch, timezone.utc).replace(tzinfo=None)
+archive_time = max(archive_time, datetime(1980, 1, 1))
 try:
     with zipfile.ZipFile(output_path, "x", compression=zipfile.ZIP_DEFLATED) as archive:
-        for path in artifacts:
-            archive.write(path, arcname=path.name)
+        for path in sorted(artifacts, key=lambda item: item.name):
+            info = zipfile.ZipInfo(path.name, archive_time.timetuple()[:6])
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, path.read_bytes())
         manifest = {
             "format": "beatglass-native-pipewire-evidence-v1",
             "commit": summary.get("commit"),
@@ -53,7 +60,9 @@ try:
                 for path in artifacts
             ],
         }
-        archive.writestr("evidence-manifest.json", json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+        info = zipfile.ZipInfo("evidence-manifest.json", archive_time.timetuple()[:6])
+        info.compress_type = zipfile.ZIP_DEFLATED
+        archive.writestr(info, json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 except FileExistsError:
     raise SystemExit(f"refusing to overwrite existing output: {output_path}")
 print(f"Packaged {len(artifacts)} native evidence files: {output_path}")

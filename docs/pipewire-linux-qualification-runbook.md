@@ -66,6 +66,9 @@ not a replacement for native desktop/audio evidence.
 It also contains `evidence-manifest.json`, which records the qualified commit,
 each archived file's byte size, and its SHA-256 digest for independent transfer
 verification.
+Archive entries are sorted and use a stable timestamp for reproducible
+transfers; set `SOURCE_DATE_EPOCH` to the run's chosen epoch when byte-for-byte
+reproducibility is required.
 The exported archive can also be verified without the original checkout:
 `python tests/pipewire/verify_native_evidence_archive.py evidence/native-qualification.zip`.
 This checks the embedded manifest, artifact presence, byte sizes, and SHA-256
