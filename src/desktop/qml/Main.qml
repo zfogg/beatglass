@@ -893,6 +893,7 @@ ApplicationWindow {
         const geometryReady = window.syncOverlayGeometryStateFromBridge()
         const opacity = Number(window.overlayBridge.opacity)
         if (!isFinite(opacity) || opacity < 0.2 || opacity > 1.0 || !geometryReady) {
+            window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             return false
         }
