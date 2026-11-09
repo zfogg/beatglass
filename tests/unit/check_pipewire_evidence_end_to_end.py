@@ -48,4 +48,10 @@ with tempfile.TemporaryDirectory() as directory:
     repeated_verified = subprocess.run([sys.executable, str(verifier), str(reproducible)], capture_output=True, text=True)
     if repeated_verified.returncode != 0:
         raise SystemExit(repeated_verified.stderr or repeated_verified.stdout)
-print("PipeWire evidence end-to-end handoff passed (2 scenarios)")
+    rejected_summary = json.loads(summary.read_text(encoding="utf-8"))
+    rejected_summary["qualified"] = False
+    summary.write_text(json.dumps(rejected_summary), encoding="utf-8")
+    rejected = subprocess.run([sys.executable, str(packager), str(summary), str(root / "rejected.zip")], env=env, capture_output=True, text=True)
+    if rejected.returncode == 0 or "summary is not qualified" not in rejected.stderr + rejected.stdout:
+        raise SystemExit("unqualified end-to-end handoff was accepted")
+print("PipeWire evidence end-to-end handoff passed (3 scenarios)")

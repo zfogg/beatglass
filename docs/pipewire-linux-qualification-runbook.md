@@ -193,6 +193,8 @@ The dependency-light end-to-end handoff fixture
 `python tests/unit/check_pipewire_evidence_end_to_end.py` runs the packager and
 independent verifier together, including transition evidence, so changes to
 either side cannot silently drift apart.
+The fixture also proves that an unqualified summary is refused before an
+archive is created.
 This checks the embedded manifest, artifact presence, byte sizes, and SHA-256
 digests before the archive is accepted as a transferred handoff. It also
 rejects duplicate or traversal-style ZIP entry names so an archive cannot
