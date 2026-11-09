@@ -162,6 +162,8 @@ public:
                   bool sample_time_valid) noexcept;
   /** Pop one bounded PCM block on the control thread; callback memory never escapes. */
   bool pop(coreaudio::CaptureBlock& block) noexcept;
+  /** Pop and admit only a block tagged with the currently active session epoch. */
+  bool pop_current(coreaudio::CaptureBlock& block) noexcept;
   /** Consume callback error/discontinuity markers for one control-thread poll. */
   Status poll_status() noexcept;
   const std::string& serial() const noexcept { return serial_; }
