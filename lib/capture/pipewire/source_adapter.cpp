@@ -137,7 +137,14 @@ public:
     if (!valid_serial(serial) || !epoch || !sample_rate || !channels) return false;
     if (epoch == session_.epoch()) return false;
     session_.reset();
-    return session_.start(serial, epoch, sample_rate, channels);
+    if (!session_.start(serial, epoch, sample_rate, channels)) return false;
+    if (!owner_ || !session_.native_handoff() ||
+        !owner_->connect(serial, sample_rate, channels, *session_.native_handoff())) {
+      if (owner_) owner_->stop();
+      session_.reset();
+      return false;
+    }
+    return true;
   }
   bool restart_stream(std::uint64_t epoch, std::uint32_t sample_rate,
                       std::uint32_t channels) override {
