@@ -3395,7 +3395,7 @@ ApplicationWindow {
                            : (window.captureMonitorBridge.status === "Error"
                               ? "Capture retry failed · check permission and selected device"
                               : (window.captureMonitorBridge.status === "Reacquiring" ? "Capture reacquiring after a device transition" : "Capture device ready")))
-                    Accessible.name: "Visualization device recovery state: " + text
+                    Accessible.name: "Visualization device recovery state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Visible no-device, permission, retry-failure, and reacquisition guidance for visualization capture."
