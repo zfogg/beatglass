@@ -69,6 +69,8 @@ The Audio/Sink entry must retain non-empty `object.serial` and `node.name` for
 deterministic target selection.
 Serials and node names must be unique among Audio/Sink entries so selection is
 never ambiguous.
+The schema version is validated as an integer to prevent JSON booleans from
+being accepted through Python's integer-equivalence rules.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
