@@ -778,3 +778,5 @@ Hiding the native overlay now returns keyboard focus to the control-window resto
 
 Reapplying saved overlay settings now returns keyboard focus to the current-display status, keeping persisted display recovery feedback available without pointer interaction. Portable coverage is in `python tests/unit/check_overlay_reapply_focus_contract.py`.
 
+Unlocking click-through overlay input now returns keyboard focus to the interaction-mode status, keeping the restored input state immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_unlock_focus_contract.py`.
+
