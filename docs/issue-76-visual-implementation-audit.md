@@ -804,6 +804,8 @@ Pause/resume now rechecks the live playback state at activation time, preventing
 
 Stop playback now rechecks the live state before clearing the source, making repeated or stale stop activations harmless and explicitly announced.
 
+After a real stop admission, the playback surface announces that the source is ready to reopen or replace, giving keyboard and screen-reader users a clear next state.
+
 Refreshing playback outputs now returns focus to the output-device selector, making the refreshed device list immediately actionable from the keyboard.
 
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
