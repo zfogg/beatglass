@@ -177,6 +177,7 @@ screenshots.
 | [Native display picker](overlay-native-display-picker-card.svg) | explicit available-output selection with retained appearance |
 | [Native display none](overlay-native-display-none-card.svg) | empty display selection with safe retained monitoring |
 | [Native display restored](overlay-native-display-restored-card.svg) | recovered display with preserved overlay settings |
+| [Native display restore applied](overlay-native-display-restore-applied-card.svg) | healthy live state after restoring the native overlay |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
