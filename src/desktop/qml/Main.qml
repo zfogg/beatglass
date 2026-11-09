@@ -1806,6 +1806,7 @@ ApplicationWindow {
                             required property bool fileIsDir
                             width: ListView.view.width
                             highlighted: ListView.isCurrentItem
+                            activeFocusOnTab: true
                             Accessible.name: fileName + (fileIsDir ? ", folder" : ", audio file")
                             Accessible.value: fileIsDir ? "folder" : "audio file"
                             Accessible.role: Accessible.ListItem
