@@ -114,6 +114,8 @@ screenshots.
 | [Tray hidden](overlay-tray-hidden-card.svg) | hidden overlay with preserved restore state |
 | [Settings restored](overlay-settings-restored-card.svg) | startup persistence confirmation |
 | [Settings reset](overlay-settings-reset-card.svg) | safe-default reset with undo path |
+| [Activation shortcut](overlay-activation-shortcut-card.svg) | shortcut editor with conflict guidance |
+| [Shortcut saved](overlay-activation-shortcut-applied-card.svg) | persisted activation confirmation |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
