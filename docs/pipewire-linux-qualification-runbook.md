@@ -427,3 +427,5 @@ Keep archive verifier output and native qualification output as separate named a
 Name handoff artifacts with their evidence role (archive-verifier versus native-qualification) so downstream reviewers can audit each independently.
 
 Include the archive verifier version/commit in handoffs so later reviewers can reproduce transfer-integrity decisions.
+
+Record the repository revision used by the verifier alongside its command so archive decisions remain reproducible after subsequent changes.
