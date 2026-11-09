@@ -435,3 +435,5 @@ Record the verifier revision and command in the same handoff entry as the archiv
 If a handoff is regenerated, update its verifier revision and command together with the archive path; stale command metadata invalidates reproducibility.
 
 Do not merge regenerated handoff metadata from a different verifier revision without rerunning the local contract and behavior checks.
+
+Attach local contract/behavior test output to regenerated handoffs so metadata edits remain independently reviewable.
