@@ -18,3 +18,7 @@ while `Accessible.name`, `Accessible.value`, and `Accessible.description` carry
 the state, revision, and recovery instruction for assistive technology.
 
 ![Overlay recovery design tokens](overlay-design-tokens.svg)
+
+The settings card keeps the state, retained values, and next action in one scan:
+
+![Overlay settings card rendering](overlay-settings-card.svg)
