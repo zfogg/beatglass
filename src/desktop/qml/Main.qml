@@ -1932,6 +1932,17 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisRecoveryNextAction"
+                                visible: window.analysisJobBridge !== null && (window.analysisJobBridge.status === "Cancelled" || window.analysisJobBridge.status === "Failed")
+                                text: visible ? (window.analysisJobBridge.status + " analysis retained for recovery. Use Retry batch to resume accepted work or Discard batch to clear the terminal state.") : ""
+                                Accessible.name: "Analysis recovery next action: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? "The terminal analysis state remains actionable; retry preserves accepted work and discard clears recovery metadata without changing source audio." : "No terminal analysis recovery action is pending."
+                                ToolTip.text: "Retry or discard the retained analysis recovery state"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "persistedRecoveryRejectionReason"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.status.indexOf("Retry rejected:") >= 0
                                 text: visible ? ("Persisted retry decision: " + storageRecovery.status) : ""
