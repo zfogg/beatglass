@@ -1,5 +1,12 @@
 # Progress and handoff
 
+Linux now has an explicit `MonitorBackend` boundary for PipeWire output
+capture. The provisional adapter wires bounded sink discovery into that
+control-thread seam and documents epoch, ownership, stop/quiescence, and
+discontinuity contracts; stream transport remains the next implementation
+slice. Portable coverage is in
+`python tests/unit/check_pipewire_monitor_boundary_contract.py`.
+
 PipeWire sink descriptions are now bounded to the same 4096-byte identity
 limit, falling back to the validated node name when exceeded. Portable coverage
 is in `python tests/unit/check_pipewire_description_length_contract.py`.
