@@ -389,3 +389,5 @@ The packager applies the same case-folded collision check before writing the
 archive, so invalid evidence is rejected at its source.
 It also rejects control characters in source filenames before creating the
 archive, keeping packager and verifier policies identical.
+
+Archive verification also binds the manifest timestamp to the declared SOURCE_DATE_EPOCH (with the packager's ZIP-compatible 1980 floor), so reproducibility metadata cannot drift during transfer.
