@@ -58,9 +58,6 @@ public:
   qulonglong analysisFrames() const { return analysisFrames_; }
   QString analysisResult() const { return analysisResult_; }
   Q_INVOKABLE void admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode);
-  bool cacheHit() const { return cacheHit_; }
-  QString cachedResult() const { return cachedResult_; }
-  QString analysisStatus() const { return analysisStatus_; }
   bool analysisReserved() const { return analysisReserved_; }
   QString analysisAdmissionResult() const { return analysisAdmissionResult_; }
   QString resetStatus() const { return resetStatus_; }
