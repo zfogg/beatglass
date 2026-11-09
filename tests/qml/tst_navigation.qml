@@ -1126,6 +1126,7 @@ TestCase {
         verify(findChild(app, "resumeOverlayRecovery").activeFocus)
         compare(findChild(app, "overlayRecoveryPausedStatus").Accessible.description, "Native overlay recovery is paused by user choice; start another retry when ready.")
         verify(findChild(app, "overlayRecoveryPausedDisplayStatus") !== null)
+        verify(app.overlayRecoveryPausedByUser)
         app.destroy()
         fakeOverlay.available = true
     }
