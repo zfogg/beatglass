@@ -18,6 +18,7 @@
 | Track reanalysis rejected | Completed run fingerprint no longer matches the verified source | Fail closed, keep the result hidden, preserve expected/observed provenance, and require locate/retry or discard. |
 | Track source located | A possible replacement path is found and awaits explicit identity confirmation | Compare expected and observed paths, require fingerprint confirmation, and keep evidence/playback unavailable until confirmed. |
 | Track source confirmed | Located file matches the expected identity after a path change | Restore provenance and playback eligibility, permit deliberate reanalysis, and fail closed on future changes. |
+| Track reanalysis after move | Confirmed moved source completes a new accepted analysis | Link moved path to original catalog identity before restoring evidence/playback, preserving provenance and no-tag guarantees. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
