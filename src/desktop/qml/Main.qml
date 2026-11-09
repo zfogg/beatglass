@@ -146,10 +146,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+Enter"
         context: Qt.ApplicationShortcut
         enabled: !window.recursiveCatalogActive && browser.currentIndex >= 0
-        onActivated: {
-            window.activateEntry(browser.currentIndex)
-            window.announceVisualizationRecovery("Activated the focused Library entry.")
-        }
+        onActivated: window.activateLibraryFocusedEntry()
     }
     Shortcut {
         objectName: "playbackSeekBackShortcut"
@@ -1098,6 +1095,11 @@ ApplicationWindow {
         window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry.")
         analyzeSelectedAudio.forceActiveFocus()
         return accepted
+    }
+    function activateLibraryFocusedEntry() {
+        window.activateEntry(browser.currentIndex)
+        window.announceVisualizationRecovery("Activated the focused Library entry.")
+        browser.forceActiveFocus()
     }
     function focusLibraryBatchProgress() {
         navigation.currentIndex = 0
