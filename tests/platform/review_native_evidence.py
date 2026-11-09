@@ -32,6 +32,7 @@ def assess(report_path: Path, reviewer: str) -> dict:
     if report.get("ready") is True and report.get("exit_gate_status") != "ACCEPTED":
         blockers.append("report:ready status contradicts exit gate")
     seen_platforms = set()
+    report_commit = report.get("commit")
     for platform in report.get("platforms", []):
         name = platform.get("platform", "unknown")
         if name in seen_platforms:
@@ -42,6 +43,8 @@ def assess(report_path: Path, reviewer: str) -> dict:
         commit = platform.get("commit")
         if not isinstance(commit, str) or len(commit) != 40 or any(char not in "0123456789abcdefABCDEF" for char in commit):
             blockers.append(f"{name}:invalid build commit identity")
+        if isinstance(report_commit, str) and commit != report_commit:
+            blockers.append(f"{name}:build commit differs from report")
         if platform.get("provenance_complete") is not True:
             blockers.append(f"{name}:incomplete provenance")
         if not isinstance(platform.get("environment"), str) or not platform["environment"].strip():
