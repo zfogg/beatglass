@@ -48,6 +48,8 @@ public:
   virtual std::string selected_serial() const = 0;
   /** Return the negotiated format for the selected stream, if active. */
   virtual std::optional<MonitorFormat> selected_format() const noexcept = 0;
+  /** Return the epoch currently owned by the selected session, or zero when stopped. */
+  virtual std::uint64_t selected_epoch() const noexcept = 0;
   /** Return whether a block tagged with epoch belongs to the selected stream. */
   virtual bool accepts_epoch(std::uint64_t epoch) const noexcept = 0;
   /** Pop one bounded block on the control thread after start_stream succeeds. */
