@@ -98,3 +98,4 @@ and a JUnit `testsuite`/`testsuites` root, catching truncated or mislabeled file
 The discovery JSON must contain at least one registered test; an empty CTest listing is rejected as insufficient native evidence.
 Each discovered CTest entry must also have a non-empty name; unnamed registrations are rejected as malformed evidence.
 JUnit evidence must report at least one executed testcase; zero-test result documents are rejected.
+JUnit evidence with non-zero failures/errors or failure/error testcase elements is rejected, keeping qualified archives failure-free.
