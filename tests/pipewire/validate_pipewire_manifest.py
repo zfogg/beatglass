@@ -47,6 +47,8 @@ if not any(item["info"]["props"].get("media.class") == "Audio/Sink" for item in 
     raise SystemExit("manifest inventory must include an Audio/Sink")
 for item in manifest["inventory"]:
     props = item["info"]["props"]
+    if "media.class" in props and not isinstance(props["media.class"], str):
+        raise SystemExit("manifest media.class must be a string")
     if props.get("media.class") == "Audio/Sink" and (not str(props.get("object.serial", "")).strip() or not str(props.get("node.name", "")).strip()):
         raise SystemExit("Audio/Sink must retain serial and node name")
 sinks = [item["info"]["props"] for item in manifest["inventory"] if item["info"]["props"].get("media.class") == "Audio/Sink"]

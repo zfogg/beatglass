@@ -75,6 +75,8 @@ Host, Python, and PipeWire CLI identity fields must remain non-empty strings
 so the evidence record is unambiguous.
 The UTC capture timestamp is subject to the same type requirement before its
 ISO-8601 and timezone checks.
+Captured `media.class` metadata must remain string-typed before native sink
+classification.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an

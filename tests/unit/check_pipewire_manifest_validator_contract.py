@@ -28,6 +28,9 @@ with tempfile.TemporaryDirectory() as directory:
     path.write_text(json.dumps({**valid, "python_version": 312}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
+    path.write_text(json.dumps({**valid, "inventory": [{"id": 1, "info": {"props": {"media.class": 1}}}]}), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    assert result.returncode != 0
     path.write_text(json.dumps({**valid, "captured_at_utc": 123}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
