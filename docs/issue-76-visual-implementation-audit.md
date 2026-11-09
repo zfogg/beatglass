@@ -841,6 +841,8 @@ The overlay fallback status now includes the concrete Retry overlay recovery act
 
 For a missing saved display, Forget saved display is keyboard reachable, announces the replacement-display next step, and restores focus to the display selector after clearing stale destination state.
 
+Retry overlay is now explicitly included in the keyboard tab order while display recovery is pending, so users can reach the actionable retry control without pointer input.
+
 The overlay display empty state now uses live status semantics alongside saved-display recovery, making missing-output remediation discoverable before destination selection.
 
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
