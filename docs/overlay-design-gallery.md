@@ -57,6 +57,7 @@ screenshots.
 | [Up next](overlay-queue-card.svg) | current and queued track context |
 | [Session summary](overlay-session-summary-card.svg) | session duration, tracks, health |
 | [History](overlay-history-card.svg) | local recent listening record |
+| [Pinned views](overlay-favorite-card.svg) | favorite layouts and outputs |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
