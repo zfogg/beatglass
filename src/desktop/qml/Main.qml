@@ -2235,6 +2235,17 @@ ApplicationWindow {
                                 onActivated: { storageRecovery.selectRun(currentText); window.persistedRecoverySelectionActivated = true; window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Press Tab to reach retry and discard controls when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
                             }
                             Label {
+                                objectName: "persistedRecoverySelectionStatus"
+                                visible: typeof storageRecovery !== "undefined"
+                                text: visible && storageRecovery.selectedRunId !== "" ? ("Recovery selection: " + storageRecovery.selectedRunId + (storageRecovery.analysisRetryable ? " · retry available" : " · waiting for terminal recovery state")) : "No persisted recovery run selected"
+                                Accessible.name: "Persisted recovery selection status"
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible && storageRecovery.selectedRunId !== "" ? text + ". Retry and discard actions follow this status; source audio is never modified." : "Select a saved run to expose its recovery actions."
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "persistedRecoveryRunDetails"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.retryableRunDetails !== undefined && storageRecovery.retryableRunDetails.length > 0
                                 text: visible ? storageRecovery.retryableRunDetails.join("\n") : ""
