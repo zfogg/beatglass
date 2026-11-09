@@ -50,3 +50,6 @@ so a stale run-list representation cannot keep recovery actionable after the
 bridge has cleared its snapshot.
 Changing the database path is subject to the same transition guard; path
 ownership cannot change underneath an in-flight close or open.
+Lifecycle failures and storage close/open resets clear both retryable run IDs
+and their detail strings, keeping the GUI model from retaining descriptions for
+an unavailable recovery snapshot.
