@@ -156,5 +156,9 @@ if args.archive and summary["qualified"]:
     packaged = subprocess.run(package, check=False, capture_output=True, text=True)
     if packaged.returncode:
         raise SystemExit(packaged.stderr or packaged.stdout or "native evidence archive packaging failed")
+    verify = [sys.executable, str(args.source / "tests/pipewire/verify_native_evidence_archive.py"), str(args.archive)]
+    verified = subprocess.run(verify, check=False, capture_output=True, text=True)
+    if verified.returncode:
+        raise SystemExit(verified.stderr or verified.stdout or "native evidence archive verification failed")
 print(json.dumps(summary, indent=2))
 raise SystemExit(0 if summary["qualified"] else 1)

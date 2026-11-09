@@ -5,4 +5,6 @@ for marker in ("check_linux_native_prerequisites.py", "sys.executable", "daemon_
     assert marker in source
 for marker in ("--archive", "package_native_evidence.py", "archive packaging failed"):
     assert marker in source
+for marker in ("verify_native_evidence_archive.py", "archive verification failed"):
+    assert marker in source
 print("PipeWire native runner contract verified (5 checks)")
