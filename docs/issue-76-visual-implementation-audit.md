@@ -811,6 +811,8 @@ Reapply saved settings now reports recovery-pending context in its accessible va
 Unlock now reports the same recovery-pending context when click-through interaction is active, keeping every overlay action’s accessible state coherent.
 
 The Click through checkbox now exposes recovery-pending context directly, not only through its parent routing group.
+
+The opacity slider now carries the same recovery-pending state in its value and description, keeping direct visual controls aligned with the overlay action surface.
 The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
 
 Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
