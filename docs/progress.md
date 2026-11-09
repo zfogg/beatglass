@@ -876,5 +876,7 @@ Consolidated overlay settings summary accessible name now includes ready versus 
 
 The consolidated overlay settings summary tooltip now distinguishes recovery-pending and launch-fallback states. Portable coverage is in `python tests/unit/check_overlay_summary_tooltip_contract.py`.
 
+The overlay summary review action now describes whether recovery is pending or ready alongside its settings revision. Portable coverage is in `python tests/unit/check_overlay_summary_review_description_state_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
