@@ -3466,6 +3466,7 @@ ApplicationWindow {
                     }
                     Label {
                         objectName: "overlayLiveMonitoringState"
+                        activeFocusOnTab: true
                         visible: window.overlayBridge !== null
                         text: visible ? ("Overlay monitoring: " + window.liveBridge.status
                             + (window.liveBridge.status === "Tracking" ? " · live estimates updating" : " · waiting for accepted output")) : "Overlay monitoring unavailable"
@@ -3501,6 +3502,7 @@ ApplicationWindow {
                                 window.captureMonitorBridge.start()
                                 window.announceCaptureRecoveryState("Overlay monitoring requested; waiting for accepted output data.")
                             }
+                            overlayLiveMonitoringState.forceActiveFocus()
                         }
                     }
                     Button {
