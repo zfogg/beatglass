@@ -193,3 +193,6 @@ A successful Unlock clears stale click-through recovery markers but does not rew
 
 Turning click-through off from the control window clears stale interaction-recovery markers without changing persisted display or geometry settings, keeping the next explicit restore on the same visual state.
 
+
+If enabling click-through is rejected, the interaction toggle keeps focus and persisted display/geometry settings remain untouched, allowing the user to retry without losing the overlay recovery context.
+
