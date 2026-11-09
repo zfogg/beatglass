@@ -64,6 +64,12 @@ bool MonitorSession::start(std::string serial, std::uint64_t epoch, std::uint32_
   return true;
 }
 void MonitorSession::stop() noexcept { if (stream_) stream_->stop(); }
+void MonitorSession::reset() noexcept {
+  if (stream_) stream_->stop();
+  stream_.reset();
+  serial_.clear();
+  format_.reset();
+}
 bool MonitorSession::needs_restart() const noexcept { return !stream_ || stream_->needs_restart(); }
 bool MonitorSession::restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) {
   const bool restarted = stream_ && stream_->restart(epoch, sample_rate, channels);

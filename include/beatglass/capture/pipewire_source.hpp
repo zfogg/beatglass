@@ -79,6 +79,8 @@ public:
              std::uint32_t channels);
   /** Stop the active stream and publish a discontinuity before quiescing callbacks. */
   void stop() noexcept;
+  /** Stop and release the selected stream, identity, and format on the control thread. */
+  void reset() noexcept;
   /** True when no stream exists or its callback state requires reacquisition. */
   bool needs_restart() const noexcept;
   /** Control-thread restart with a fresh epoch and format. */
