@@ -808,6 +808,8 @@ After a real stop admission, the playback surface announces that the source is r
 
 Successful seek-to-frame admission now announces the requested frame, making the resulting playback transition observable without relying on visual position updates alone.
 
+Native playback start now announces the selected-output admission request, making the transition observable while the bridge moves to its running state.
+
 Refreshing playback outputs now returns focus to the output-device selector, making the refreshed device list immediately actionable from the keyboard.
 
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
