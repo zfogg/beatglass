@@ -1272,6 +1272,8 @@ ApplicationWindow {
                 unlockOverlay.forceActiveFocus()
             return false
         }
+        window.overlayLaunchFallbackActive = false
+        window.overlayDisplayRecoveryPending = false
         window.announceCaptureRecoveryState("DJ overlay unlocked; keyboard and pointer interaction restored.")
         if (typeof unlockOverlay !== "undefined")
             unlockOverlay.forceActiveFocus()
