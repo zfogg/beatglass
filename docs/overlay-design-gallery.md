@@ -77,6 +77,7 @@ screenshots.
 | [Feedback](overlay-feedback-card.svg) | lightweight in-context feedback prompt |
 | [Feedback sent](overlay-feedback-submitted-card.svg) | confirmation and return-to-work state |
 | [Feedback skipped](overlay-feedback-dismissed-card.svg) | non-blocking feedback dismissal state |
+| [Feedback privacy](overlay-feedback-privacy-card.svg) | explicit data-sharing boundary |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
