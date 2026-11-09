@@ -174,6 +174,7 @@ screenshots.
 | [Native output switch](overlay-native-output-switch-card.svg) | explicit display change with retained overlay appearance |
 | [Native output switched](overlay-native-output-switched-card.svg) | confirmed display change with resumed capture and preserved presentation |
 | [Native output switch failed](overlay-native-output-switch-failed-card.svg) | recoverable unavailable-display state with current overlay retained |
+| [Native display picker](overlay-native-display-picker-card.svg) | explicit available-output selection with retained appearance |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
