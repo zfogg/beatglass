@@ -1918,7 +1918,7 @@ TestCase {
         verify(!app.overlayHiddenByUser)
         compare(app.overlayPreferredDisplayName, "Projector")
         compare(app.overlayPreferredSizeIndex, 2)
-        verify(fakeOverlay.requestedWidth, 620)
+        compare(fakeOverlay.requestedWidth, 620)
         app.destroy()
     }
 }
