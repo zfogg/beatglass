@@ -4371,6 +4371,9 @@ ApplicationWindow {
                                 window.overlaySettingsRevision += 1
                                 window.overlayLaunchFallbackActive = false
                                 window.overlayDisplayRecoveryPending = false
+                                window.announceCaptureRecoveryState(requestedClickThrough
+                                    ? "DJ overlay click-through enabled; press Escape or use Unlock overlay to restore interaction."
+                                    : "DJ overlay interaction restored; keyboard and pointer input are available.")
                             }
                             overlayInteractionMode.forceActiveFocus()
                         }

@@ -1302,4 +1302,15 @@ TestCase {
         compare(findChild(app, "overlayResumeRecoveryShortcut").sequence, "Ctrl+Alt+Shift+R")
         app.destroy()
     }
+    function test_clickThroughToggleAnnouncesRestoredInteraction() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        let toggle = findChild(app, "clickThrough")
+        toggle.checked = false
+        toggle.clicked()
+        verify(!fakeOverlay.clickThrough)
+        verify(!app.overlayDisplayRecoveryPending)
+        app.destroy()
+    }
 }
