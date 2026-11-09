@@ -2459,6 +2459,7 @@ ApplicationWindow {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
                     property string viewMode: "waveform"
                     property real selectedPosition: -1
+                    property int selectedSpectrumBin: -1
                     property int renderedRevision: -1
                     property int acceptedPlaybackEpoch: -1
                     property string acceptedPlaybackSource: ""
@@ -2482,12 +2483,20 @@ ApplicationWindow {
                         && window.playbackMatchesSelection
                     activeFocusOnTab: true
                     Keys.onLeftPressed: {
+                        if (viewMode === "spectrum") {
+                            selectedSpectrumBin = Math.max(0, (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) - 1)
+                            requestPaint(); event.accepted = true; return
+                        }
                         const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
                         selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - step)
                         requestPaint()
                         event.accepted = true
                     }
                     Keys.onRightPressed: {
+                        if (viewMode === "spectrum") {
+                            selectedSpectrumBin = Math.min(Math.max(0, renderedSpectrum.length - 1), (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) + 1)
+                            requestPaint(); event.accepted = true; return
+                        }
                         const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
                         selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + step)
                         requestPaint()
@@ -2530,7 +2539,7 @@ ApplicationWindow {
                             : renderedSpectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120; Layout.minimumHeight: window.compactHeader ? 72 : 96
                     Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
-                    Accessible.value: visualizationCanvas.viewMode + ", revision " + visualizationCanvas.renderedRevision + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%") + (visualizationCanvas.viewMode === "spectrum" && visualizationCanvas.spectrumPeakIndex >= 0 ? ", peak bin " + visualizationCanvas.spectrumPeakIndex : "")
+                    Accessible.value: visualizationCanvas.viewMode + ", revision " + visualizationCanvas.renderedRevision + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%") + (visualizationCanvas.viewMode === "spectrum" && visualizationCanvas.selectedSpectrumBin >= 0 ? ", selected bin " + visualizationCanvas.selectedSpectrumBin : "") + (visualizationCanvas.viewMode === "spectrum" && visualizationCanvas.spectrumPeakIndex >= 0 ? ", peak bin " + visualizationCanvas.spectrumPeakIndex : "")
                     Accessible.role: Accessible.Graphic
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
@@ -2572,6 +2581,11 @@ ApplicationWindow {
                                 const magnitude = Math.max(0, spec[k])
                                 ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, magnitude * height * 2))
                             }
+                            if (selectedSpectrumBin >= 0 && selectedSpectrumBin < spec.length) {
+                                ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]; ctx.lineWidth = 2; ctx.beginPath()
+                                ctx.moveTo((selectedSpectrumBin + 0.5) * width / spec.length, 0)
+                                ctx.lineTo((selectedSpectrumBin + 0.5) * width / spec.length, height); ctx.stroke()
+                            }
                         }
                         if (selectedPosition >= 0) {
                             ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]; ctx.lineWidth = window.compactHeader ? 1 : 2; ctx.beginPath()
@@ -2589,6 +2603,10 @@ ApplicationWindow {
                         onClicked: {
                             if (!visualizationCanvas.presentationReady)
                                 return
+                            if (visualizationCanvas.viewMode === "spectrum") {
+                                visualizationCanvas.selectedSpectrumBin = Math.max(0, Math.min(visualizationCanvas.renderedSpectrum.length - 1, Math.floor(mouse.x * visualizationCanvas.renderedSpectrum.length / visualizationCanvas.width)))
+                                visualizationCanvas.forceActiveFocus(); visualizationCanvas.requestPaint(); return
+                            }
                             visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, mouse.x / visualizationCanvas.width))
                             visualizationCanvas.forceActiveFocus()
                             visualizationCanvas.requestPaint()
