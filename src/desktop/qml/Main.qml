@@ -2914,6 +2914,7 @@ ApplicationWindow {
                                 enabled: visible && !window.storageReopenPending && storageRecovery.retryableRunIds.length > 0
                                 text: "Discard all saved runs"
                                 Accessible.name: "Discard all saved retryable analysis runs"
+                                Accessible.value: enabled ? "available; " + storageRecovery.retryableRunIds.length + " runs" : "unavailable; no retryable runs"
                                 Accessible.description: "Remove every persisted retry record currently shown. Source audio files are never changed."
                                 onClicked: { discardAllRecoveryDialog.open(); window.announceVisualizationRecovery("Confirm discarding all saved recovery runs; source audio remains unchanged.") }
                             }
