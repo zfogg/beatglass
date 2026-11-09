@@ -1028,6 +1028,7 @@ ApplicationWindow {
                 || window.overlayBridge.screenNames.length === 0) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             return false
         }
         const savedNameIndex = window.overlayPreferredDisplayName !== ""
@@ -1036,6 +1037,7 @@ ApplicationWindow {
         if (savedIndex < 0 || savedIndex >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
             overlayDisplay.forceActiveFocus()
             return false
@@ -1044,6 +1046,7 @@ ApplicationWindow {
                 || !window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied.")
             overlayDisplay.forceActiveFocus()
             return false
@@ -1063,6 +1066,7 @@ ApplicationWindow {
             if (!window.overlayBridge.showOverlay()) {
                 window.overlayDisplayRecoveryPending = true
                 window.overlayDisplaySelectionRequired = true
+                window.overlayLaunchFallbackActive = true
                 window.restoreOverlayFallbackControls("DJ overlay could not be restored after display recovery; choose another display or retry.")
                 return false
             }
