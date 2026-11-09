@@ -59,6 +59,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit(f"unlisted archive artifact: {sorted(unexpected)[0]}")
     summary_names = [name for name in declared if name.endswith(".json") and "summary" in name]
     summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
+    if "commit" in summary_data and (not isinstance(summary_data["commit"], str) or not summary_data["commit"].strip()):
+        raise SystemExit("qualification summary has invalid commit identity")
     if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):
         raise SystemExit("manifest commit does not match qualification summary")
     if "platform" in summary_data and (not isinstance(summary_data["platform"], str) or not summary_data["platform"].strip()):
