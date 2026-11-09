@@ -2651,8 +2651,11 @@ ApplicationWindow {
                         ToolTip.text: "Toggle pointer click-through for the overlay"
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onClicked: if (window.overlayBridge) {
-                            window.overlayBridge.setClickThrough(checked)
+                            const requestedClickThrough = checked
+                            window.overlayBridge.setClickThrough(requestedClickThrough)
                             checked = window.overlayBridge.clickThrough
+                            if (checked !== requestedClickThrough)
+                                window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again.")
                         }
                         Connections {
                             target: window.overlayBridge
