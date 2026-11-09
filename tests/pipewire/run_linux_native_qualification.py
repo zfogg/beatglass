@@ -76,10 +76,16 @@ if discovery_result:
     except (OSError, json.JSONDecodeError, AttributeError):
         discovery_count = 0
 junit_count = None
+junit_failures = junit_errors = junit_skipped = None
 junit_path = evidence / "pipewire-tests.xml"
 if junit_path.is_file():
     try:
-        junit_count = len(ET.parse(junit_path).getroot().iter("testcase"))
+        junit_root = ET.parse(junit_path).getroot()
+        cases = list(junit_root.iter("testcase"))
+        junit_count = len(cases)
+        junit_failures = sum(1 for case in cases if case.find("failure") is not None)
+        junit_errors = sum(1 for case in cases if case.find("error") is not None)
+        junit_skipped = sum(1 for case in cases if case.find("skipped") is not None)
     except ET.ParseError:
         junit_count = 0
 summary = {"platform": platform.platform(), "commit": commit,
@@ -92,7 +98,10 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit": str(evidence / "pipewire-tests.xml"),
            "native_junit_exists": (evidence / "pipewire-tests.xml").is_file(),
            "native_junit_test_count": junit_count,
-           "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and all(item["returncode"] == 0 for item in results)}
+           "native_junit_failures": junit_failures,
+           "native_junit_errors": junit_errors,
+           "native_junit_skipped": junit_skipped,
+           "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and all(item["returncode"] == 0 for item in results)}
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
