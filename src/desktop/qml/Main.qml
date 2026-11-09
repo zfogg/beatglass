@@ -3459,7 +3459,7 @@ ApplicationWindow {
                         : "unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: window.overlayLaunchFallbackActive
-                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active and the control window remains available."
+                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained."
                         : window.overlayDisplayRecoveryPending
                         ? "Show, unlock, or hide the DJ overlay window; recovery is pending and the control-window fallback remains available."
                         : "Show, unlock, or hide the DJ overlay window."
