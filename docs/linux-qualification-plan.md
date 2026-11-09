@@ -52,6 +52,7 @@ an all-`PASS` inventory cannot remain marked non-qualified.
 Retained-byte totals must equal the sum of the recorded artifact sizes, so
 manifests cannot under-report or over-report the evidence they contain.
 Scenario evidence digest maps must reference only `PASS` scenarios and contain
-valid SHA-256 values.
+valid SHA-256 values present in the retained artifact inventory. Artifact paths
+must be unique within a platform bundle.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
