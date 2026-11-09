@@ -8,6 +8,7 @@ pkg-config --modversion libpipewire-0.3
 cmake -S . -B build-pipewire -DBEATGLASS_BUILD_PIPEWIRE=ON
 cmake --build build-pipewire
 ctest --test-dir build-pipewire --output-on-failure -R pipewire
+# The runner also invokes the daemon-backed pipewire_tests target explicitly.
 # Or run the complete configure/build/CTest pass with a JSON summary:
 python tests/pipewire/run_linux_native_qualification.py --summary evidence/native-summary.json
 # Optional machine-readable artifact summary:
