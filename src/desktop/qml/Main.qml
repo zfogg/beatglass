@@ -125,11 +125,7 @@ ApplicationWindow {
         objectName: "librarySortFocusShortcut"
         sequence: "Ctrl+Alt+Shift+O"
         context: Qt.ApplicationShortcut
-        onActivated: {
-            navigation.currentIndex = 0
-            sortOrder.forceActiveFocus()
-            window.announceVisualizationRecovery("Library sort control focused; activate to reverse name order.")
-        }
+        onActivated: window.focusLibrarySortControl()
     }
     Shortcut {
         objectName: "libraryMetadataFocusShortcut"
@@ -962,6 +958,11 @@ ApplicationWindow {
         window.sortDescending = !window.sortDescending
         window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
         target.forceActiveFocus()
+    }
+    function focusLibrarySortControl() {
+        navigation.currentIndex = 0
+        sortOrder.forceActiveFocus()
+        window.announceVisualizationRecovery("Library sort control focused; activate to reverse name order.")
     }
     function clearLibraryFilter(target) {
         search.text = ""

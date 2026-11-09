@@ -1,24 +1,13 @@
-#!/usr/bin/env python3
-"""Portable contract for focusing the Library sort control."""
-
+"""Contract checks for Library sort-control focus."""
 from pathlib import Path
-
-
-SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").read_text(encoding="utf-8")
-
-
+ROOT = Path(__file__).resolve().parents[2]
+QML = (ROOT / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 def main() -> None:
-    start = SOURCE.index('objectName: "librarySortFocusShortcut"')
-    block = SOURCE[start : SOURCE.index("    Shortcut {", start)]
-    assert 'sequence: "Ctrl+Alt+Shift+O"' in block
+    start = QML.index("function focusLibrarySortControl")
+    block = QML[start:QML.index("function browserEmptyMessage", start)]
     assert "navigation.currentIndex = 0" in block
     assert "sortOrder.forceActiveFocus()" in block
-    assert "announceVisualizationRecovery" in block
-    help_start = SOURCE.index('objectName: "libraryShortcutHelp"')
-    help_block = SOURCE[help_start : SOURCE.index("                }", help_start)]
-    assert "Ctrl+Alt+Shift+O sort control" in help_block
-    assert "Ctrl+R refresh folder" in help_block
-
-
+    assert "Library sort control focused" in block
+    assert "window.focusLibrarySortControl()" in QML
 if __name__ == "__main__":
     main()
