@@ -566,7 +566,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryReopenShortcut"; sequence: "Ctrl+Alt+Shift+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null && !window.playbackMatchesSelection; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Selected Library source reopened for playback." : "Selected Library source could not be reopened for playback."); reopenSelectedPlayback.forceActiveFocus() } }
     Shortcut { objectName: "libraryPlayShortcut"; sequence: "Ctrl+Alt+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Playing selected Library source " + window.selectedName + "." : "Selected Library source could not be opened for playback."); playSelectedTrack.forceActiveFocus() } }
     Shortcut { objectName: "libraryPlaybackFocusShortcut"; sequence: "Ctrl+Alt+Shift+Y"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: window.focusLibraryPlaybackAction() }
-    Shortcut { objectName: "libraryRefreshFocusShortcut"; sequence: "Ctrl+Alt+Shift+Q"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; refreshFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library refresh action focused.") } }
+    Shortcut { objectName: "libraryRefreshFocusShortcut"; sequence: "Ctrl+Alt+Shift+Q"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: window.focusLibraryRefreshAction() }
     Shortcut { objectName: "libraryChooseFolderFocusShortcut"; sequence: "Ctrl+Alt+Shift+D"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryFolderChooser() }
     Shortcut { objectName: "libraryCatalogStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+C"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: window.focusLibraryCatalogStatus() }
     Shortcut { objectName: "librarySelectionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+E"; context: Qt.ApplicationShortcut; onActivated: window.focusLibrarySelectionStatus() }
@@ -1074,6 +1074,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         libraryShortcutHelp.forceActiveFocus()
         window.announceVisualizationRecovery("Library keyboard shortcut help focused.")
+    }
+    function focusLibraryRefreshAction() {
+        navigation.currentIndex = 0
+        refreshFolder.forceActiveFocus()
+        window.announceVisualizationRecovery("Library refresh action focused.")
     }
     function focusLibraryBatchProgress() {
         navigation.currentIndex = 0
