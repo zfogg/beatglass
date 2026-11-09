@@ -1647,7 +1647,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible && storageRecovery.status.indexOf("error") >= 0 ? "Analysis recovery unavailable: check storage configuration." : visible && storageRecovery.retryableRunIds.length > 0 ? "Analysis recovery available: retryable persisted work is waiting." : "Analysis recovery is clear."
                                 Accessible.name: "Analysis recovery guidance"
+                                Accessible.value: text
                                 Accessible.description: text
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
