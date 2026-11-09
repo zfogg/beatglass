@@ -1971,9 +1971,9 @@ ApplicationWindow {
                         Accessible.role: Accessible.List
                         Accessible.description: "Use Up and Down to select an entry, then Enter or Space to open a folder or select an audio file."
                         ToolTip.text: "Folder contents; use arrow keys to navigate"
-                        Keys.onReturnPressed: window.activateEntry(currentIndex)
-                        Keys.onEnterPressed: window.activateEntry(currentIndex)
-                        Keys.onSpacePressed: window.activateEntry(currentIndex)
+                        Keys.onReturnPressed: { window.activateEntry(currentIndex); event.accepted = true }
+                        Keys.onEnterPressed: { window.activateEntry(currentIndex); event.accepted = true }
+                        Keys.onSpacePressed: { window.activateEntry(currentIndex); event.accepted = true }
                         Keys.onBackspacePressed: {
                             if (files.parentFolder.toString() !== "") {
                                 window.clearSelectedAudio()
