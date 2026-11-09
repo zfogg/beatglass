@@ -244,3 +244,6 @@ If Reapply fails after Hide because persisted geometry is unavailable, the hidde
 
 After geometry becomes available again, a failed Reapply can be retried through Restore without resetting the hidden marker's saved display or size preference; the corrected persisted geometry is then applied.
 
+
+When a display reconnects after being absent, recovery reuses the retained display identity and geometry rather than resetting to defaults; the control-window fallback stays available until the reconnect is complete.
+
