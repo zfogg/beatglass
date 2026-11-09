@@ -3571,7 +3571,7 @@ ApplicationWindow {
                     Accessible.name: "Visualization device recovery state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Visible no-device, permission, retry-failure, and reacquisition guidance for visualization capture."
+                    Accessible.description: "Visible no-device, permission, retry-failure, and reacquisition guidance for visualization capture. " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.")
                     ToolTip.text: "Capture device and permission recovery state; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
