@@ -13,7 +13,7 @@ if not isinstance(matrix, dict) or matrix.get("schema") != "beatglass-native-qua
     raise SystemExit("invalid qualification matrix schema")
 if "commit" in matrix and (not isinstance(matrix["commit"], str) or not matrix["commit"].strip()):
     raise SystemExit("invalid qualification matrix commit")
-if not isinstance(matrix.get("host_os"), str) or not matrix["host_os"].strip():
+if not isinstance(matrix.get("host_os"), str) or matrix["host_os"] not in {"Linux", "Windows", "Darwin"}:
     raise SystemExit("invalid qualification matrix host")
 platforms = matrix.get("platforms")
 required = {"Linux", "Windows", "Darwin"}
