@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Overlay settings now expose a focused retry action when output capture errors,
+with explicit guidance that recovery waits for a fresh accepted snapshot.
+Portable coverage is in
+`python tests/unit/check_overlay_capture_recovery_action_contract.py`.
+
 The overlay now reports the selected output endpoint and explicitly states that
 combined-output monitoring does not identify individual decks. Portable coverage
 is in `python tests/unit/check_overlay_endpoint_status_contract.py`.

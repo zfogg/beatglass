@@ -3445,6 +3445,20 @@ ApplicationWindow {
                             }
                         }
                     }
+                    Button {
+                        objectName: "overlayCaptureRecoveryAction"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && window.captureMonitorBridge.status === "Error"
+                        text: "Retry overlay capture"
+                        enabled: visible && window.captureMonitorBridge.start !== undefined
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled ? "Retry the selected output capture for the overlay and wait for a fresh accepted snapshot." : "Overlay capture retry is unavailable."
+                        ToolTip.text: Accessible.description
+                        onClicked: {
+                            window.captureMonitorBridge.start()
+                            window.announceCaptureRecoveryState("Overlay capture retry requested; waiting for a fresh accepted snapshot.")
+                        }
+                    }
                     Label {
                         objectName: "overlayEstimateAttribution"
                         visible: window.overlayBridge !== null
