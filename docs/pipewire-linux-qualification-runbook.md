@@ -95,3 +95,4 @@ The producer also rejects evidence paths with colliding archive basenames before
 Qualified archives must include the preserved CTest discovery JSON in addition to summary and JUnit results, proving both registration and execution.
 The archive verifier parses those artifacts and requires a discovery `tests` list
 and a JUnit `testsuite`/`testsuites` root, catching truncated or mislabeled files.
+The discovery JSON must contain at least one registered test; an empty CTest listing is rejected as insufficient native evidence.

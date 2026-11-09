@@ -2,7 +2,7 @@
 from pathlib import Path
 
 source = (Path(__file__).parents[1] / "pipewire" / "verify_native_evidence_archive.py").read_text(encoding="utf-8")
-markers = ("zipfile", "evidence-manifest.json", "qualified", "size", "sha256", "digest mismatch", "unsafe archive entry", "duplicate archive entry", "unlisted archive artifact", "manifest commit does not match", "contains no artifacts", "no commit identity", "reproducibility metadata", "malformed archive timestamp", "no JUnit results", "no CTest discovery JSON", "no tests list", "invalid root")
+markers = ("zipfile", "evidence-manifest.json", "qualified", "size", "sha256", "digest mismatch", "unsafe archive entry", "duplicate archive entry", "unlisted archive artifact", "manifest commit does not match", "contains no artifacts", "no commit identity", "reproducibility metadata", "malformed archive timestamp", "no JUnit results", "no CTest discovery JSON", "no tests list", "no registered tests", "invalid root")
 missing = [marker for marker in markers if marker not in source]
 if missing:
     raise SystemExit(f"missing archive-verifier contract markers: {missing}")
