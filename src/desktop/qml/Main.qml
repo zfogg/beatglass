@@ -2325,6 +2325,15 @@ ApplicationWindow {
                                     Accessible.description: "The selected retry record will be removed; source audio remains unchanged."
                                     Accessible.role: Accessible.StaticText
                                 }
+                    Label {
+                        objectName: "visualizationLayoutState"
+                        text: window.compactHeader ? "Compact visualization layout" : "Expanded visualization layout"
+                        Accessible.name: "Visualization layout: " + text
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: "Responsive visualization layout selected from the current control-window width."
+                        ToolTip.text: text
+                    }
                                 onOpened: { window.announceVisualizationRecovery("Confirm discard for persisted recovery run " + storageRecovery.selectedRunId + ". Source audio will remain unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
                                 onAccepted: { const runId = storageRecovery.selectedRunId; if (window.storageReopenPending || storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0) { window.announceVisualizationRecovery("Storage became unavailable; discard of " + runId + " was canceled. Reopen storage to refresh recovery runs."); reopenStorage.forceActiveFocus() } else { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discard requested for " + runId + "; the status will report if active work prevents removal."); discardPersistedRecoveryButton.forceActiveFocus() } }
                                 onRejected: { const runId = storageRecovery.selectedRunId; window.announceVisualizationRecovery("Persisted recovery discard canceled for " + runId + "; selected run was kept."); discardPersistedRecoveryButton.forceActiveFocus() }
