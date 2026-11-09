@@ -8,4 +8,5 @@ assert "bytes" in p
 assert "is_symlink()" in p
 assert "--json" in p
 assert "json.dumps" in p
+assert "artifact_dir" in p
 print("PipeWire artifact validator contract verified (4 checks)")
