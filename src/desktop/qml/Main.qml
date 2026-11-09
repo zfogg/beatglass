@@ -2160,7 +2160,7 @@ ApplicationWindow {
                             Accessible.name: "Playback availability: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.Status
-                            Accessible.description: text
+                            Accessible.description: text + " Treat this as provisional evidence until source-linked analysis is accepted."
                             ToolTip.text: "Playback controls unavailable; metadata remains read-only"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
@@ -2388,7 +2388,7 @@ ApplicationWindow {
                             Accessible.name: "Analysis uncertainty: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
-                            Accessible.description: text
+                            Accessible.description: text + " Treat this as provisional evidence until source-linked analysis is accepted."
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         Label {
