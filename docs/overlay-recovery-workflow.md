@@ -32,6 +32,7 @@ While safe mode is active, a status message remains visible and explicitly
 states that monitoring continues without the native overlay.
 Clearing safe mode returns focus to the overlay recovery page so the next
 retry is visible and keyboard-ready immediately.
+The same action is available from the keyboard with `Ctrl+Alt+Shift+C`.
 
 ## Screenshot qualification
 

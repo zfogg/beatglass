@@ -335,6 +335,13 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "overlayClearSafeModeShortcut"
+        sequence: "Ctrl+Alt+Shift+C"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit
+        onActivated: window.resetOverlayRecoveryAttempts()
+    }
+    Shortcut {
         objectName: "overlayDisplayFocusShortcut"
         sequence: "Ctrl+Alt+D"
         context: Qt.ApplicationShortcut
