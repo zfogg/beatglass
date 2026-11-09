@@ -140,6 +140,7 @@ screenshots.
 | [Session ended](overlay-session-ended-card.svg) | saved-settings confirmation after shutdown |
 | [Session resumed](overlay-session-resumed-card.svg) | restored native state after relaunch |
 | [Session resume failed](overlay-session-resume-failed-card.svg) | safe recovery when saved state cannot reopen |
+| [Recovery complete](overlay-recovery-complete-card.svg) | restored native state after recovery |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
