@@ -1483,6 +1483,8 @@ ApplicationWindow {
         const reopened = window.playbackBridge.state === "Stopped"
             ? window.playbackBridge.openSource(window.selectedAudioUrl, nextEpoch)
             : window.playbackBridge.replaceSource(window.selectedAudioUrl, nextEpoch)
+        if (reopened)
+            window.clearVisualizationForCaptureState("Playback source reopened; previous visualization evidence is stale until fresh accepted analysis.")
         window.announceVisualizationRecovery(reopened
             ? "Selected Library track reopened; visualization selection was reset."
             : "Selected Library track could not be reopened; playback state was unchanged.")
