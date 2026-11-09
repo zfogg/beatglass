@@ -725,6 +725,9 @@ ApplicationWindow {
             window.announceVisualizationRecovery("Analysis retry admitted; focus will return after a fresh accepted result.")
             return true
         }
+        window.announceVisualizationRecovery("Analysis retry is no longer available; the worker state changed before admission.")
+        if (typeof retryAnalysis !== "undefined")
+            retryAnalysis.forceActiveFocus()
         return false
     }
     Connections {
