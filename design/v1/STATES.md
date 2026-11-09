@@ -11,6 +11,7 @@
 | Track metadata loading | Selected source is being decoded | Show a non-fabricated loading state, keep prior evidence hidden, and provide cancellation. |
 | Track metadata error | Decoder cannot read selected source | Explain cleared evidence, offer retry/another track, and state that files are unchanged. |
 | Track analysis queued | Verified source admitted to analysis queue | Hide prior evidence, show worker status and cancellation, and link to queue. |
+| Track analysis in progress | Active worker is processing the selected source | Show stage/progress, keep stale evidence hidden, and expose cancellation without mutating the audio file. |
 | Track analysis canceled | Worker stopped before publishing | Explain cleared evidence, offer retry/discard recovery, and state that audio is unchanged. |
 | Track analysis failed | Worker reported an error | Show actionable guidance, retry/discard recovery, and no stale visualization. |
 | DJ paused | User paused capture intentionally | Show no new estimates, preserve existing Library evidence, and offer resume/reacquire. |
