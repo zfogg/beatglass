@@ -15,6 +15,8 @@ The completed-summary verifier requires that schema, a timezone-aware capture
 timestamp, Python environment identity, and host OS before accepting evidence.
 The portable dry-run test also exercises the unavailable-host path and verifies
 that it emits an attributable pending handoff rather than an empty report.
+The pending handoff also enumerates the host, daemon, development-package, and
+audio-sink blockers needed before a native run can start.
 
 ## Runnable preparation checks
 
