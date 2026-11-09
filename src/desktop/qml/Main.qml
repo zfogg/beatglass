@@ -71,6 +71,12 @@ ApplicationWindow {
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     Shortcut {
+        objectName: "libraryFilterFocusShortcut"
+        sequence: "Ctrl+L"
+        context: Qt.ApplicationShortcut
+        onActivated: { search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused.") }
+    }
+    Shortcut {
         objectName: "libraryRefreshShortcut"
         sequence: "Ctrl+R"
         context: Qt.ApplicationShortcut
