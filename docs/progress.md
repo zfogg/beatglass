@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire sink discovery now returns sinks in stable server-serial order rather
+than volatile registry object-ID order, preventing UI selection churn across
+refreshes. Portable coverage is in
+`python tests/unit/check_pipewire_sink_order_contract.py`.
+
 PipeWire discovery now rejects timeout durations that cannot be represented by
 the loop's bounded integer wait, avoiding overflow in control-thread iteration.
 Portable coverage is in
