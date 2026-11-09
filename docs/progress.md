@@ -782,3 +782,5 @@ Unlocking click-through overlay input now returns keyboard focus to the interact
 
 Changing overlay click-through mode now returns keyboard focus to the interaction-mode status, keeping the resulting input state immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_click_focus_contract.py`.
 
+Releasing the overlay opacity slider now returns focus to the interaction-mode status, keeping the final applied overlay setting immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_opacity_focus_contract.py`.
+
