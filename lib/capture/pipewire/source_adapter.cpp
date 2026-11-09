@@ -1,4 +1,5 @@
 #include "beatglass/capture/pipewire_source.hpp"
+#include "beatglass/capture/detail/pipewire_stream_owner.hpp"
 #include <cctype>
 
 namespace beatglass::pipewire {
@@ -117,6 +118,7 @@ MonitorSession::Status MonitorSession::poll_status() noexcept {
 namespace {
 class DiscoveryBoundary final : public MonitorBackend {
 public:
+  DiscoveryBoundary() : owner_(detail::make_stream_owner()) {}
   Discovery enumerate(std::chrono::milliseconds timeout) override { return discover_sinks(timeout); }
   bool start(const std::string&, std::uint64_t) override { return false; }
   bool start_stream(const std::string& serial, std::uint64_t epoch,
@@ -145,9 +147,13 @@ public:
   }
   MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
   bool stop() noexcept override { session_.stop(); return true; }
-  void reset() noexcept override { session_.reset(); }
+  void reset() noexcept override {
+    if (owner_) owner_->stop();
+    session_.reset();
+  }
 private:
   MonitorSession session_;
+  std::unique_ptr<detail::StreamOwner> owner_;
 };
 }
 std::unique_ptr<MonitorBackend> make_monitor_backend() { return std::make_unique<DiscoveryBoundary>(); }
