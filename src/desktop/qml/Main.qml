@@ -1115,6 +1115,7 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = name
         window.overlaySettingsRevision += 1
         window.overlayLaunchFallbackActive = false
+        window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplaySelectionRequired = false
         window.overlayDisplayRecoveryPending = false
         window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.")
