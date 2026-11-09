@@ -202,9 +202,15 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, archive_timestamp_utc=123)))
     result = subprocess.run([sys.executable, str(verifier), str(nonstring_timestamp)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid reproducibility metadata" not in result.stderr + result.stdout: raise SystemExit("non-string archive timestamp was accepted")
+    mismatched_timestamp = root / "mismatched-timestamp.zip"
+    with zipfile.ZipFile(mismatched_timestamp, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, archive_timestamp_utc="1980-01-01T00:01:00Z")))
+    result = subprocess.run([sys.executable, str(verifier), str(mismatched_timestamp)], capture_output=True, text=True)
+    if result.returncode == 0 or "archive timestamp does not match source date epoch" not in result.stderr + result.stdout: raise SystemExit("epoch/timestamp drift was accepted")
     malformed_json = root / "malformed-manifest-json.zip"
     with zipfile.ZipFile(malformed_json, "w") as archive:
         archive.writestr("evidence-manifest.json", b"{")
     result = subprocess.run([sys.executable, str(verifier), str(malformed_json)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed evidence manifest" not in result.stderr + result.stdout: raise SystemExit("malformed manifest JSON was accepted")
-print("PipeWire evidence archive verifier behavior passed (22 scenarios)")
+print("PipeWire evidence archive verifier behavior passed (23 scenarios)")
