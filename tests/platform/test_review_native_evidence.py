@@ -41,3 +41,17 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             self.assertEqual(result["decision"], "PENDING")
             self.assertTrue(any("identity" in blocker for blocker in result["blockers"]))
             self.assertTrue(any("artifact count" in blocker for blocker in result["blockers"]))
+
+    def test_artifact_hash_and_size_provenance_are_required(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            scenarios = [{"id": scenario, "status": "UNRUN"} for scenario in review.REQUIRED]
+            payload = {"platforms": [{"platform": "linux", "manifest_platform": "linux",
+                                      "commit": "0" * 40, "provenance_complete": True,
+                                      "retained_artifacts": 1,
+                                      "artifact_inventory": [{"path": "capture.txt", "sha256": "0" * 64,
+                                                               "hash_valid": False, "bytes": 0}],
+                                      "scenarios": scenarios}]}
+            report.write_text(__import__("json").dumps(payload))
+            result = review.assess(report, "release-owner")
+            self.assertIn("linux:invalid artifact provenance", result["blockers"])
