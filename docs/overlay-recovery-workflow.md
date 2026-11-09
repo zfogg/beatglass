@@ -166,3 +166,6 @@ If a retry reaches the native bridge but Show fails, focus stays on Retry overla
 
 Clearing overlay safe mode with Ctrl+Alt+Shift+C resets only the bounded retry counter: focus returns to Retry overlay while saved display and geometry preferences remain intact for the next attempt.
 
+
+Stopping recovery with Ctrl+Alt+Shift+X pauses retries without clearing persisted display, geometry, opacity, or interaction settings; focus moves to Resume recovery so the same state can be resumed deliberately.
+
