@@ -74,3 +74,5 @@ if "Storage already open" not in source:
     raise SystemExit("Repeated open must be rejected explicitly")
 if "Storage already closed" not in source:
     raise SystemExit("Repeated close must be rejected explicitly")
+if "Storage transition already in progress" not in source:
+    raise SystemExit("Open/close must reject overlapping transitions")

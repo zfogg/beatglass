@@ -234,6 +234,7 @@ void StorageRecoveryBridge::setDatabasePath(const QString& path) {
 }
 void StorageRecoveryBridge::open() {
   if (databasePath_.isEmpty()) { status_ = QStringLiteral("Storage error: database path is required"); emit statusChanged(); return; }
+  if (storageTransitionPending_) { status_ = QStringLiteral("Storage transition already in progress"); emit statusChanged(); return; }
   if (storageOpen_) { status_ = QStringLiteral("Storage already open"); emit statusChanged(); return; }
   if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
   if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
@@ -253,6 +254,7 @@ void StorageRecoveryBridge::open() {
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
 void StorageRecoveryBridge::close() {
+  if (storageTransitionPending_) { status_ = QStringLiteral("Storage transition already in progress"); emit statusChanged(); return; }
   if (!storageOpen_ && !storageTransitionPending_) { status_ = QStringLiteral("Storage already closed"); emit statusChanged(); return; }
   storageTransitionPending_ = true; emit storageStateChanged();
   if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection);
