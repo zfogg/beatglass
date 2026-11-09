@@ -166,6 +166,7 @@ public:
   Status poll_status() noexcept;
   const std::string& serial() const noexcept { return serial_; }
   std::uint64_t epoch() const noexcept { return epoch_; }
+  MonitorStream* native_handoff() noexcept { return stream_.get(); }
   bool accepts_epoch(std::uint64_t epoch) const noexcept {
     return epoch != 0 && epoch == epoch_ && stream_ && !stream_->needs_restart();
   }
