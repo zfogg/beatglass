@@ -46,6 +46,8 @@ and every pending platform to carry an actionable reason.
 Validate a transferred matrix independently with
 `python tests/pipewire/validate_qualification_matrix.py evidence/qualification-matrix.json`
 before treating its cross-platform status as an actionable handoff.
+The validator behavior fixture covers both an actionable mixed-status matrix
+and rejection of incomplete platform coverage.
 Runner summaries carry the same matrix schema and a per-host matrix status,
 so archived Linux results can be merged into the cross-platform report without
 guessing whether a host was pending or qualified.
