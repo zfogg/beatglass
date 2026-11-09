@@ -67,6 +67,8 @@ At least one captured object must be an `Audio/Sink`; unrelated nodes alone do
 not provide native output evidence.
 The Audio/Sink entry must retain non-empty `object.serial` and `node.name` for
 deterministic target selection.
+Serial and node-name values must remain strings; numeric values are not
+coerced into target identifiers.
 Serials and node names must be unique among Audio/Sink entries so selection is
 never ambiguous.
 The schema version is validated as an integer to prevent JSON booleans from
