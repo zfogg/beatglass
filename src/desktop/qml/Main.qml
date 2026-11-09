@@ -74,6 +74,19 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayRestoreFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+W"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            restoreOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Restore overlay control focused.")
+        }
+    }
+    Shortcut {
         objectName: "overlayRetryFocusShortcut"
         sequence: "Ctrl+Alt+Shift+Y"
         context: Qt.ApplicationShortcut
