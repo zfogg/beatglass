@@ -828,7 +828,8 @@ ApplicationWindow {
     }
     function syncOverlayGeometryStateFromBridge() {
         if (!window.overlayBridge || !window.overlayBridge.geometry
-                || window.overlayBridge.geometry.width <= 0)
+                || window.overlayBridge.geometry.width <= 0
+                || window.overlayBridge.geometry.height <= 0)
             return false
         const geometry = window.overlayBridge.geometry
         if (window.overlayBridge.displayName !== "")
