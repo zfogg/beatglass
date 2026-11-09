@@ -73,3 +73,18 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertEqual(ingest.ingest(root, root / "manifest.json"), [])
             data = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(data["artifacts"][0]["role"], "playback_evidence")
+
+    def test_sorts_artifacts_for_reproducible_reports(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            first = root / "z-last.log"; second = root / "a-first.log"
+            first.write_bytes(b"z"); second.write_bytes(b"a")
+            first_hash = hashlib.sha256(first.read_bytes()).hexdigest()
+            second_hash = hashlib.sha256(second.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(
+                f"{first_hash}  z-last.log\n{second_hash}  a-first.log\n", encoding="utf-8")
+            output = root / "manifest.json"
+            self.assertEqual(ingest.ingest(root, output), [])
+            data = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual([item["path"] for item in data["artifacts"]], ["a-first.log", "z-last.log"])

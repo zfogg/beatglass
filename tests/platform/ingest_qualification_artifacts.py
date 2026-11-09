@@ -66,6 +66,7 @@ def ingest(root: Path, output: Path) -> list[str]:
         if normalized in known_paths:
             continue
         artifacts.append({"path": normalized, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "role": key})
+    artifacts.sort(key=lambda item: (item["path"], item["role"]))
     report = {"platform": identity.get("platform", "unknown"), "commit": identity.get("commit", ""),
               "captured_at": identity.get("captured_at", ""), "environment": identity.get("environment", "native script output"),
               "artifacts": artifacts, "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in SCENARIOS]}
