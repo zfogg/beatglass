@@ -39,6 +39,7 @@ screenshots.
 | [Output picker](overlay-output-picker-card.svg) | selected, available, unavailable outputs |
 | [Quick actions](overlay-quick-actions-card.svg) | high-frequency controls and shortcuts |
 | [Diagnostics](overlay-diagnostics-card.svg) | overlay, capture, and permissions health |
+| [Help](overlay-help-card.svg) | shortcuts, troubleshooting, and about |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
