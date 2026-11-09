@@ -1560,4 +1560,20 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_pausedRecoveryPageShortcutRetainsSettings() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        let shortcut = findChild(app, "overlayPausedRecoveryPageShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        verify(findChild(app, "resumeOverlayRecovery").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }

@@ -175,3 +175,6 @@ Resuming paused recovery with Ctrl+Alt+Shift+R starts a fresh bounded attempt bu
 
 While recovery is paused, Escape re-focuses Resume recovery without changing the queued display or geometry settings. This gives keyboard users a stable return path after reviewing the retained visual state.
 
+
+The paused recovery page shortcut Ctrl+Alt+Shift+Pause reopens the same paused workflow and focuses Resume recovery without changing persisted display or geometry settings.
+
