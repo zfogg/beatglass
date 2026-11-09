@@ -83,6 +83,8 @@ with its digest checked alongside native summaries and transition evidence.
 Independent archive verification requires that plan to be present and marked
 validated, preventing a manifest from claiming instructions that were not
 actually transferred.
+The archive verifier also cross-checks the plan digest against the qualification
+summary, preventing provenance fields from drifting during packaging.
 Summaries explicitly record whether that plan passed validation before the
 runner proceeded.
 The pending-runner behavior fixture executes this Windows-safe path and asserts

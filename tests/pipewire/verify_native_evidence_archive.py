@@ -86,6 +86,9 @@ with zipfile.ZipFile(archive_path) as archive:
         capture_name = manifest["capture_plan"].replace("\\", "/").rsplit("/", 1)[-1]
         if capture_name not in declared:
             raise SystemExit("capture plan is not archived")
+        if (not isinstance(manifest.get("capture_plan_sha256"), str) or len(manifest["capture_plan_sha256"]) != 64 or
+                manifest["capture_plan_sha256"] != summary_data.get("capture_plan_sha256")):
+            raise SystemExit("capture plan digest provenance mismatch")
     if summary_data.get("qualified") is not True:
         raise SystemExit("qualification summary is not qualified")
     if summary_data.get("native_test_name_match") is not True:
