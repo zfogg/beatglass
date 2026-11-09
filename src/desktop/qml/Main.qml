@@ -1961,6 +1961,7 @@ ApplicationWindow {
                         id: recursiveResultsView
                         anchors.fill: parent; clip: true; model: window.recursiveCatalogRows
                         activeFocusOnTab: true; keyNavigationEnabled: true
+                        Keys.onEscapePressed: { window.recursiveCatalogActive = false; window.announceVisualizationRecovery("Returned to the current folder browser."); browser.forceActiveFocus() }
                         Accessible.name: "Recursive audio results"
                         Accessible.role: Accessible.List
                         delegate: ItemDelegate {
