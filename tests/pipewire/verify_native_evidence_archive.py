@@ -90,6 +90,24 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("summary native discovery digest does not match archive")
     if summary_data.get("native_junit_sha256") != hashlib.sha256(archive.read(junit_name)).hexdigest():
         raise SystemExit("summary native JUnit digest does not match archive")
+    transition_path = summary_data.get("native_transition_json")
+    if transition_path:
+        transition_name = transition_path.replace("\\", "/").rsplit("/", 1)[-1]
+        if transition_name not in declared:
+            raise SystemExit("summary transition path does not match archive")
+        transitions = json.loads(archive.read(transition_name))
+        if not isinstance(transitions, list) or not transitions:
+            raise SystemExit("transition evidence is empty")
+        names = [event.get("event") for event in transitions if isinstance(event, dict)]
+        if any(required not in names for required in ("start", "process", "error", "restart")):
+            raise SystemExit("transition evidence is missing lifecycle events")
+        epochs = [event.get("epoch") for event in transitions if isinstance(event, dict) and event.get("epoch") is not None]
+        if any(not isinstance(epoch, int) or epoch <= 0 for epoch in epochs) or epochs != sorted(epochs):
+            raise SystemExit("transition evidence epochs are not monotonic")
+        if not any(event.get("discontinuity") is True for event in transitions if isinstance(event, dict)):
+            raise SystemExit("transition evidence has no discontinuity")
+        if not any(event.get("error_code", 0) != 0 for event in transitions if isinstance(event, dict)):
+            raise SystemExit("transition evidence has no error code")
     discovery_tests = json.loads(archive.read(discovery_name)).get("tests")
     if not isinstance(discovery_tests, list):
         raise SystemExit("discovery JSON has no tests list")
