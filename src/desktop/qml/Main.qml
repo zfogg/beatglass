@@ -74,6 +74,12 @@ ApplicationWindow {
     readonly property bool analysisCacheIdentityReady: cacheContent.text !== ""
         && cacheEngine.text !== "" && cacheConfig.text !== ""
         && (cacheMode.text === "offline" || cacheMode.text === "live")
+    readonly property int recursiveAudioResultCount: {
+        let count = 0
+        for (let i = 0; i < recursiveCatalogRows.length; ++i)
+            if (recursiveCatalogRows[i].audio) ++count
+        return count
+    }
     Shortcut {
         objectName: "libraryFilterFocusShortcut"
         sequence: "Ctrl+L"
@@ -2241,7 +2247,8 @@ ApplicationWindow {
                         objectName: "analyzeRecursiveResults"
                         anchors.left: parent.left; anchors.bottom: parent.bottom
                         text: "Analyze first files"
-                        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFiles !== undefined && window.recursiveCatalogRows.length > 0 && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
+                        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFiles !== undefined && window.recursiveAudioResultCount > 0 && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
+                        Accessible.value: enabled ? "available; " + window.recursiveAudioResultCount + " audio results found" : "unavailable; no audio results or analysis is active"
                         Accessible.name: "Analyze recursive audio results"
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled ? "Fingerprint and queue the first available recursive audio results; the bounded queue reports accepted and rejected items." : "An analysis batch is already active; wait for completion or cancel before submitting another batch."
