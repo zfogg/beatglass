@@ -2199,7 +2199,9 @@ ApplicationWindow {
                                 color: "transparent"
                                 border.width: 3
                                 border.color: window.themeAccentColors[index]
-                                visible: themePreviewButton.activeFocus
+                                opacity: themePreviewButton.activeFocus ? 1 : 0
+                                visible: opacity > 0
+                                Behavior on opacity { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 120 } }
                             }
                             Rectangle {
                                 objectName: "themePreviewAccent" + index
