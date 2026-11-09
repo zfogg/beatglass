@@ -1059,6 +1059,10 @@ ApplicationWindow {
                     || window.liveBridge.status === "Starting"
                     || window.liveBridge.status === "Reacquiring")
                 window.clearVisualizationForCaptureState()
+            if (window.liveBridge.status === "Starting")
+                window.announceVisualizationRecovery("Output monitoring is starting; waiting for the first accepted visualization snapshot.")
+            else if (window.liveBridge.status === "Reacquiring")
+                window.announceVisualizationRecovery("Output monitoring is reacquiring; previous visualization selection was cleared.")
             else if (window.liveBridge.status === "Tracking")
                 window.announceVisualizationRecovery("Output monitoring is tracking; visualization updates will appear as accepted data arrives.")
         }
