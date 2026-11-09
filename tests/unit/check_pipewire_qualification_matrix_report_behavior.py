@@ -21,4 +21,9 @@ with tempfile.TemporaryDirectory() as directory:
     for marker in ("Native qualification matrix", "Linux", "Windows", "qualified", "windows.zip", "Linux host required"):
         if marker not in rendered:
             raise SystemExit(f"missing rendered report marker: {marker}")
-print("PipeWire qualification matrix report behavior passed (1 scenario)")
+    matrix["schema"] = "invalid"
+    source.write_text(json.dumps(matrix), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(renderer), str(source), str(report)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid qualification matrix schema" not in result.stderr + result.stdout:
+        raise SystemExit("invalid matrix schema was rendered")
+print("PipeWire qualification matrix report behavior passed (2 scenarios)")
