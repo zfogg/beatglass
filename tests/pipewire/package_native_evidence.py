@@ -42,6 +42,8 @@ if len({path.name for path in artifacts}) != len(artifacts):
     raise SystemExit("evidence artifacts have colliding archive names")
 if len({path.name.casefold() for path in artifacts}) != len(artifacts):
     raise SystemExit("evidence artifacts have case-insensitive archive name collisions")
+if any(any(ord(char) < 32 for char in path.name) for path in artifacts):
+    raise SystemExit("evidence artifacts have control characters in archive names")
 
 if output_path.exists() or output_path.is_symlink():
     raise SystemExit(f"refusing to overwrite existing output: {output_path}")
