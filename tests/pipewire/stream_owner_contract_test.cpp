@@ -13,9 +13,10 @@ public:
   bool connected() const noexcept override { return active; }
   bool process(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
                double source_sample_time, bool sample_time_valid,
+               bool discontinuity,
                beatglass::pipewire::MonitorStream& handoff) noexcept override {
-    return active && handoff.on_process(samples, host_time, host_time_valid,
-                                        source_sample_time, sample_time_valid);
+    return active && handoff.push(samples, host_time, host_time_valid, discontinuity,
+                                  source_sample_time, sample_time_valid);
   }
   void stop() noexcept override { active = false; }
   Config last;
@@ -28,7 +29,7 @@ TEST_CASE("stream owner contract preserves target and negotiated format lifecycl
   beatglass::pipewire::MonitorStream handoff(7, 48000, 2);
   REQUIRE(owner.connect({"sink-7", 48000, 2}, handoff));
   CHECK(owner.connected());
-  CHECK(owner.process(std::array<float, 2>{0.25F, -0.25F}, 42, true, 12.5, true, handoff));
+  CHECK(owner.process(std::array<float, 2>{0.25F, -0.25F}, 42, true, 12.5, true, false, handoff));
   CHECK(owner.last.serial == "sink-7");
   CHECK(owner.last.sample_rate == 48000);
   CHECK(owner.last.channels == 2);

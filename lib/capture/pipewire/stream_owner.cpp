@@ -9,7 +9,7 @@ public:
     return false;
   }
   bool connected() const noexcept override { return false; }
-  bool process(std::span<const float>, std::uint64_t, bool, double, bool,
+  bool process(std::span<const float>, std::uint64_t, bool, double, bool, bool,
                MonitorStream& handoff) noexcept override {
     handoff.on_error(-ENOSYS);
     return false;
