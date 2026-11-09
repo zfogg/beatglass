@@ -3275,7 +3275,7 @@ ApplicationWindow {
                         return modeLabel.charAt(0).toUpperCase() + modeLabel.slice(1) + " position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
                     }
                     Accessible.name: "Visualization interaction hint, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Current visualization selection and recovery hint; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
