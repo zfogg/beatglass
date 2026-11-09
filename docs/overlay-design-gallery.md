@@ -165,6 +165,7 @@ screenshots.
 | [Native safe mode resume](overlay-native-safe-mode-resume-card.svg) | resume prompt after permission recovery |
 | [Native activation confirmation](overlay-native-activation-confirm-card.svg) | explicit native overlay activation with retained session state |
 | [Native live controls](overlay-native-live-controls-card.svg) | healthy native overlay with reversible quick actions |
+| [Native tray handoff](overlay-native-tray-handoff-card.svg) | return to a retained overlay without restarting capture |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
