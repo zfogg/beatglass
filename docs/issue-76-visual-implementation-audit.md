@@ -86,6 +86,8 @@ Hide failure keeps the control window visible, marks recovery pending, and moves
 
 Bridge recovery with unavailable persisted settings reactivates the control fallback and focuses Retry overlay, keeping recovery actionable until visual state can be restored.
 
+Theme preview keyboard focus rings now animate only in full-motion mode; reduced motion keeps the ring immediately visible without changing contrast, focus, or selection semantics.
+
 Reduced-motion changes now include the active theme name in their announcement, making combined appearance state verifiable without relying on visual inspection.
 
 Theme changes announce the selected palette together with full/reduced motion mode, while reduced-motion toggles retain the same focus and status semantics.

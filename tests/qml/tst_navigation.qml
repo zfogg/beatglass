@@ -1087,6 +1087,18 @@ TestCase {
         verify(findChild(app, "resetAppearance").visible)
         app.destroy()
     }
+    function test_reducedMotionFocusRingAppearsWithoutTransition() {
+        fakeThemePreferences.reduceMotion = true
+        let app = shellWithPreferences.createObject(null)
+        let preview = findChild(app, "themePreview4")
+        let ring = findChild(app, "themePreviewFocusRing4")
+        preview.forceActiveFocus()
+        tryVerify(() => ring.visible)
+        compare(ring.opacity, 1)
+        fakeThemePreferences.reduceMotion = false
+        app.destroy()
+    }
+
     function test_themePreviewKeyboardFocusHasVisibleRing() {
         let app = shell.createObject(null)
         let preview = findChild(app, "themePreview4")
