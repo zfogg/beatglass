@@ -10,5 +10,6 @@ current; failed invalidation also clears the stale presentation
 conservatively.
 
 Successful invalidation continues to clear the cached result only after the
-storage owner confirms removal. These paths do not mutate source audio or
-reserve analysis work.
+storage owner confirms removal. It also clears the displayed analysis and
+admission state, making reanalysis an explicit next action. These paths do not
+mutate source audio or reserve analysis work.
