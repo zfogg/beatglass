@@ -11,6 +11,8 @@ SCENARIOS = ("capture", "recovery", "output", "display", "playback", "overlay")
 
 def ingest(root: Path, output: Path) -> list[str]:
     errors = []
+    if root.is_symlink():
+        errors.append("symlinked qualification root")
     identity = {}
     identity_path = root / "qualification-manifest.txt"
     if identity_path.is_symlink():
