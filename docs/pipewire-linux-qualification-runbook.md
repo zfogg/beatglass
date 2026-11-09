@@ -53,3 +53,4 @@ It also records `native_junit_tests`, the concrete testcase names executed.
 Qualification requires the discovered and executed testcase-name sets to match.
 The raw discovery JSON is preserved as `pipewire-tests-discovery.json` for
 post-run evidence ingestion.
+The summary includes its `native_discovery_sha256` digest for transfer checks.
