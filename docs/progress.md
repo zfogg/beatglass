@@ -784,3 +784,5 @@ Changing overlay click-through mode now returns keyboard focus to the interactio
 
 Releasing the overlay opacity slider now returns focus to the interaction-mode status, keeping the final applied overlay setting immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_opacity_focus_contract.py`.
 
+Selecting an overlay size now returns keyboard focus to geometry status after a successful resize, keeping the resulting dimensions immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_size_focus_contract.py`.
+

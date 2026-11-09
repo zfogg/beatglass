@@ -3730,6 +3730,7 @@ ApplicationWindow {
                             if (resized) {
                                 window.overlayPreferredSizeIndex = requestedIndex
                                 window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
+                                overlayGeometryStatus.forceActiveFocus()
                             } else {
                                 window.syncOverlaySettingsStateFromBridge()
                                 currentIndex = window.overlayPreferredSizeIndex
