@@ -352,5 +352,23 @@ void StorageRecoveryBridge::reanalyze(QString runId, QString path, QString conte
 void StorageRecoveryBridge::cancelAnalysis() { if (!storageOpen_) { status_ = QStringLiteral("Analysis cancellation rejected: storage is not open"); emit statusChanged(); return; } if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
 void StorageRecoveryBridge::retryAnalysis() { if (!storageOpen_) { status_ = QStringLiteral("Analysis retry rejected: storage is not open"); emit statusChanged(); return; } if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
 void StorageRecoveryBridge::admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {
-  if (content.trimmed().isEmpty()) { status_ = QStringLiteral("Analysis admission rejected: content identity is required"); emit statusChanged(); return; } if (!storageOpen_) { status_ = QStringLiteral("Analysis admission rejected: storage is not open"); emit statusChanged(); return; } if (worker_) QMetaObject::invokeMethod(worker_, "admitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
+  if (runId.trimmed().isEmpty() || content.trimmed().isEmpty() || engine.trimmed().isEmpty() || configuration.trimmed().isEmpty() || mode.trimmed().isEmpty()) {
+    status_ = QStringLiteral("Analysis admission rejected: complete analysis identity is required");
+    emit statusChanged();
+    return;
+  }
+  if (!storageOpen_) {
+    status_ = QStringLiteral("Analysis admission rejected: storage is not open");
+    emit statusChanged();
+    return;
+  }
+  if (worker_) {
+    QMetaObject::invokeMethod(worker_, "admitAnalysis", Qt::QueuedConnection,
+                              Q_ARG(QString, runId), Q_ARG(QString, content),
+                              Q_ARG(QString, engine), Q_ARG(QString, configuration),
+                              Q_ARG(QString, mode));
+  } else {
+    status_ = QStringLiteral("Storage error: worker unavailable");
+    emit statusChanged();
+  }
 }
