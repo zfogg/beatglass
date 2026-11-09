@@ -34,6 +34,7 @@ screenshots.
 | [Control panel](overlay-control-panel-card.svg) | opacity, placement, and interaction |
 | [Compact mode](overlay-compact-mode-card.svg) | size presets with live preview |
 | [First run](overlay-first-run-card.svg) | output, size, and start workflow |
+| [Paused state](overlay-paused-state-card.svg) | safe pause and resume behavior |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
