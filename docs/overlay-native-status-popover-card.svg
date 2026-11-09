@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Native overlay status popover</title>
+  <desc id="desc">A compact status popover exposes live health, current display, and a path to the full settings panel.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <text x="96" y="112" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Beatglass status</text>
+  <text x="96" y="144" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">A quick glance before returning to your work.</text>
+  <rect x="96" y="182" width="728" height="74" rx="14" fill="#17243c"/>
+  <circle cx="130" cy="219" r="10" fill="#39d98a"/>
+  <text x="154" y="225" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Monitoring normally</text>
+  <text x="154" y="248" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="15">Output healthy · 48 kHz · 3 ms latency</text>
+  <text x="96" y="302" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="15">CURRENT OVERLAY</text>
+  <text x="96" y="335" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Display 2 · Bottom-right · 82% opacity</text>
+  <text x="96" y="365" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Click-through on · Ctrl+Shift+O to unlock</text>
+  <rect x="96" y="402" width="242" height="52" rx="12" fill="#6ca8ff"/>
+  <text x="217" y="435" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Open overlay</text>
+  <rect x="356" y="402" width="214" height="52" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="463" y="435" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Settings</text>
+  <rect x="588" y="402" width="236" height="52" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="706" y="435" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Pause monitoring</text>
+</svg>
