@@ -74,6 +74,8 @@ required lifecycle events and epoch/discontinuity/error invariants.
 It also requires the transition envelope’s schema, source commit, and host
 platform, preventing raw or detached event lists from being accepted as native
 qualification evidence.
+The transition envelope commit must match the archive manifest commit; mixing
+events from another checkout is rejected.
 Capture provenance before validation and packaging:
 
 ```sh
