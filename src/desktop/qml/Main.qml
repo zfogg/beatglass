@@ -2484,7 +2484,7 @@ ApplicationWindow {
                                 text: visible ? ("Recovery status: " + window.analysisJobBridge.recoveryStatus) : ""
                                 Accessible.name: "Analysis recovery status"
                                 Accessible.value: visible ? text : ""
-                                Accessible.description: visible ? text : "No recovery reset has been performed."
+                                Accessible.description: visible ? text + ". Review admission and queue status before choosing Retry or discard recovery." : "No recovery reset has been performed."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
