@@ -11,8 +11,9 @@ public:
     return active;
   }
   bool connected() const noexcept override { return active; }
-  bool process(std::span<const float> samples, beatglass::pipewire::MonitorStream& handoff) noexcept override {
-    return active && handoff.on_process(samples, 0, false, 0.0, false);
+  bool process(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
+               beatglass::pipewire::MonitorStream& handoff) noexcept override {
+    return active && handoff.on_process(samples, host_time, host_time_valid, 0.0, false);
   }
   void stop() noexcept override { active = false; }
   Config last;
@@ -25,7 +26,7 @@ TEST_CASE("stream owner contract preserves target and negotiated format lifecycl
   beatglass::pipewire::MonitorStream handoff(7, 48000, 2);
   REQUIRE(owner.connect({"sink-7", 48000, 2}, handoff));
   CHECK(owner.connected());
-  CHECK(owner.process(std::array<float, 2>{0.25F, -0.25F}, handoff));
+  CHECK(owner.process(std::array<float, 2>{0.25F, -0.25F}, 42, true, handoff));
   CHECK(owner.last.serial == "sink-7");
   CHECK(owner.last.sample_rate == 48000);
   CHECK(owner.last.channels == 2);
