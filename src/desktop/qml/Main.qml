@@ -797,9 +797,9 @@ ApplicationWindow {
     property string selectedTheme: "Light"
     readonly property bool compactHeader: width < 760
     readonly property var themeNames: ["Light", "Dark", "High contrast", "Purple", "Blue", "Yellow"]
-    readonly property var themeBackgrounds: ["#f7f8fb", "#171a21", "#000000", "#21152f", "#10243d", "#342b08"]
-    readonly property var themeForegrounds: ["#20242b", "#f4f6fb", "#ffffff", "#f4eaff", "#eaf4ff", "#fffbe6"]
-    readonly property var themeAccentColors: ["#3f51b5", "#90caf9", "#ffff00", "#c084fc", "#60a5fa", "#facc15"]
+    readonly property var themeBackgrounds: ["#f2f4ef", "#10151c", "#000000", "#251f3e", "#102c43", "#332a1b"]
+    readonly property var themeForegrounds: ["#142c2c", "#f1f6f7", "#ffffff", "#f9f5ff", "#effaff", "#fff9e8"]
+    readonly property var themeAccentColors: ["#126f60", "#8ee5cc", "#8cffe2", "#d4a8ff", "#75d9ff", "#ffd45e"]
     property int selectedThemeIndex: themePreferencesBridge ? themePreferencesBridge.themeIndex : 0
     // Keep the visual selection synchronized when preferences are restored or
     // changed by another settings surface. Assignments from the controls below
