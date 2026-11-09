@@ -45,7 +45,7 @@ public:
   bool fail() noexcept { return finish(JobStatus::failed); }
   /** Requeue cancelled or failed work and discard its partial progress. */
   bool retry() noexcept {
-    if (snapshot_.status != JobStatus::cancelled && snapshot_.status != JobStatus::failed) return false;
+    if (!isTerminal(snapshot_.status) || snapshot_.status == JobStatus::complete) return false;
     snapshot_.status = JobStatus::queued;
     snapshot_.frames_processed = 0;
     return true;
