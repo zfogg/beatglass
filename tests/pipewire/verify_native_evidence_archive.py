@@ -76,4 +76,7 @@ with zipfile.ZipFile(archive_path) as archive:
     testcases = [node for node in junit_root.iter() if node.tag == "testcase"]
     if not testcases or any(not node.attrib.get("name", "").strip() for node in testcases):
         raise SystemExit("JUnit evidence has unnamed testcases")
+    testcase_names = [node.attrib["name"] for node in testcases]
+    if len(testcase_names) != len(set(testcase_names)):
+        raise SystemExit("JUnit evidence has duplicate testcase names")
 print("Native PipeWire evidence archive verified")
