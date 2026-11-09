@@ -34,6 +34,8 @@ struct MonitorStatus {
   }
   /** True when the native stream reported an error for this snapshot. */
   bool has_error() const noexcept { return error_code != 0; }
+  /** True when this snapshot crossed a stream boundary. */
+  bool has_boundary() const noexcept { return discontinuity || overflowed || needs_restart; }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
