@@ -241,7 +241,7 @@ with tempfile.TemporaryDirectory() as directory:
         for name, data in artifacts.items(): archive.writestr(name, invalid_timestamp_summary if name == "native-summary.json" else data)
         archive.writestr("evidence-manifest.json", json.dumps(manifest))
     result = subprocess.run([sys.executable, str(verifier), str(invalid_summary_timestamp)], capture_output=True, text=True)
-    if result.returncode == 0 or "manifest archive timestamp does not match qualification summary" not in result.stderr + result.stdout: raise SystemExit("invalid summary timestamp was accepted")
+    if result.returncode == 0 or "qualification summary has invalid archive timestamp" not in result.stderr + result.stdout: raise SystemExit("invalid summary timestamp was accepted")
     malformed_json = root / "malformed-manifest-json.zip"
     with zipfile.ZipFile(malformed_json, "w") as archive:
         archive.writestr("evidence-manifest.json", b"{")
