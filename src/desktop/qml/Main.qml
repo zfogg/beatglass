@@ -1771,7 +1771,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "libraryShortcutHelp"
-                    text: "Shortcuts: Ctrl+F filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
+                    text: "Shortcuts: Ctrl+F filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     Accessible.name: "Library keyboard shortcut help"

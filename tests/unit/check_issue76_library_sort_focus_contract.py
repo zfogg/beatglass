@@ -17,6 +17,7 @@ def main() -> None:
     help_start = SOURCE.index('objectName: "libraryShortcutHelp"')
     help_block = SOURCE[help_start : SOURCE.index("                }", help_start)]
     assert "Ctrl+Alt+Shift+O sort control" in help_block
+    assert "Ctrl+R refresh folder" in help_block
 
 
 if __name__ == "__main__":
