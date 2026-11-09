@@ -903,6 +903,7 @@ ApplicationWindow {
         const visualStateReady = window.restoreOverlayVisualStateFromBridge()
         window.overlayLaunchFallbackActive = false
         if (visualStateReady) {
+            window.overlayDisplayRecoveryPending = false
             window.announceCaptureRecoveryState("Overlay settings synchronized from native state.")
             return true
         }
