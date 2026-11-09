@@ -573,8 +573,8 @@ ApplicationWindow {
     Shortcut { objectName: "libraryShortcutHelpFocusShortcut"; sequence: "Ctrl+Alt+Shift+H"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryShortcutHelp.forceActiveFocus(); window.announceVisualizationRecovery("Library keyboard shortcut help focused.") } }
     Shortcut { objectName: "libraryAnalyzeShortcut"; sequence: "Ctrl+Alt+A"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"; onActivated: { const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile()); window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry."); analyzeSelectedAudio.forceActiveFocus() } }
     Shortcut { objectName: "libraryAnalysisFocusShortcut"; sequence: "Ctrl+Alt+Shift+N"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { navigation.currentIndex = 0; analyzeSelectedAudio.forceActiveFocus(); window.announceVisualizationRecovery("Selected Library analysis action focused.") } }
-    Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library folder browser focused.") } }
-    Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; if (window.recursiveCatalogActive) recursiveResultsView.forceActiveFocus(); else browser.forceActiveFocus(); window.announceVisualizationRecovery(window.recursiveCatalogActive ? "Recursive Library results focused." : "Library folder results focused.") } }
+    Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryResults() }
+    Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryResults() }
     Shortcut { objectName: "libraryRecursiveResultsFocusShortcut"; sequence: "Ctrl+Alt+Shift+R"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; recursiveResultsView.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library results focused.") } }
     Shortcut { objectName: "libraryRecursiveReturnShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; window.returnFromRecursiveResults() } }
     Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus(); window.announceVisualizationRecovery("Library tab focused.") } }
@@ -982,6 +982,16 @@ ApplicationWindow {
         search.forceActiveFocus()
         search.selectAll()
         window.announceVisualizationRecovery(message === undefined ? "Library filter focused." : message)
+    }
+    function focusLibraryResults() {
+        navigation.currentIndex = 0
+        if (window.recursiveCatalogActive) {
+            recursiveResultsView.forceActiveFocus()
+            window.announceVisualizationRecovery("Recursive Library results focused.")
+        } else {
+            browser.forceActiveFocus()
+            window.announceVisualizationRecovery("Library folder results focused.")
+        }
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
