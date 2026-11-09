@@ -132,6 +132,10 @@ summary = {"platform": platform.platform(), "commit": commit,
 if args.transitions:
     if not args.transitions.is_file():
         raise SystemExit(f"missing transition evidence: {args.transitions}")
+    transition_validator = Path(__file__).with_name("validate_pipewire_transition_evidence.py")
+    transition_check = subprocess.run([sys.executable, str(transition_validator), str(args.transitions)], capture_output=True, text=True, check=False)
+    if transition_check.returncode:
+        raise SystemExit(transition_check.stderr or transition_check.stdout or "transition evidence failed validation")
     transition_payload = json.loads(args.transitions.read_text(encoding="utf-8"))
     transition_events = transition_payload.get("events", transition_payload) if isinstance(transition_payload, (dict, list)) else []
     if not isinstance(transition_events, list) or not transition_events:
