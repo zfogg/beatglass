@@ -31,6 +31,7 @@ screenshots.
 | [Theme](overlay-theme-card.svg) | contrast-safe visual preference |
 | [Focus](overlay-focus-card.svg) | keyboard focus visibility |
 | [Live status](overlay-live-status-card.svg) | current output and signal health |
+| [Control panel](overlay-control-panel-card.svg) | opacity, placement, and interaction |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
