@@ -39,6 +39,9 @@ for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
         if not isinstance(transition_count, int) or isinstance(transition_count, bool) or transition_count <= 0:
             raise SystemExit("native summary has no positive transition event count")
         transition_payload = json.loads(path.read_text(encoding="utf-8"))
+        transition_events = transition_payload.get("events", transition_payload)
+        if not isinstance(transition_events, list) or len(transition_events) != transition_count:
+            raise SystemExit("transition event count does not match native summary")
         if not str(transition_payload.get("platform", "")).lower().startswith("linux"):
             raise SystemExit("transition evidence is not from a Linux host")
         if transition_payload.get("commit") != summary.get("commit"):

@@ -130,6 +130,8 @@ It also rejects non-Linux transition provenance or a transition commit that
 does not match the qualification summary before creating the archive.
 Packaging also requires the summary’s positive transition event count before
 it creates an archive.
+It cross-checks that count against the actual transition payload before
+writing any archive bytes.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
