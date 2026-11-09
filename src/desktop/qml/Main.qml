@@ -3496,7 +3496,7 @@ ApplicationWindow {
                     text: window.visualizationRecoveryAnnouncement
                     visible: text !== ""
                     Accessible.name: "Visualization recovery announcement, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Status
                     Accessible.description: "Live announcement for keyboard or pointer playback recovery actions."
                     ToolTip.text: "Latest visualization playback recovery action"
