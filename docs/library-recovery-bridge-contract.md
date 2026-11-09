@@ -94,6 +94,8 @@ cache mutation, keeping the keyboard workflow's next step explicit.
 Metadata retry cooldown is reset when Library selection changes or is cleared,
 so a previous file's retry backoff cannot disable recovery for the newly chosen
 source.
+Visualization seek now requires playback to match the selected Library source;
+an accepted snapshot cannot seek a different open source.
 The cache controls are also disabled while the bridge reports closed storage,
 so users cannot invoke actions that will be rejected by the worker boundary.
 The reusable jobs contract exposes explicit terminal-state and known-total

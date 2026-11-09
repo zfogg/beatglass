@@ -1651,7 +1651,8 @@ ApplicationWindow {
         const frame = visualizationPositionToFrame(position, durationFrames)
         if (frame < 0 || visualizationCanvas.acceptedResultIdentity === ""
                 || !visualizationCanvas.presentationReady
-                || !window.playbackBridge || window.playbackBridge.state === "Stopped")
+                || !window.playbackBridge || !window.playbackMatchesSelection
+                || window.playbackBridge.state === "Stopped")
             return false
         return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
     }
