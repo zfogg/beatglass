@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / PRIVACY</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Your audio stays yours</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">See exactly what Beatglass uses while it is monitoring.</text>
+  <rect x="112" y="258" width="976" height="100" rx="16" fill="#202938"/><circle cx="158" cy="308" r="14" fill="#56d38b"/><text x="198" y="305" fill="#f2f6fb" font-family="Inter,Arial" font-size="20" font-weight="700">Live analysis</text><text x="198" y="335" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Audio is analyzed in memory to draw the overlay.</text>
+  <rect x="112" y="378" width="976" height="100" rx="16" fill="#202938"/><circle cx="158" cy="428" r="14" fill="#56d38b"/><text x="198" y="425" fill="#f2f6fb" font-family="Inter,Arial" font-size="20" font-weight="700">No file changes</text><text x="198" y="455" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Beatglass never writes tags or modifies your audio files.</text>
+  <rect x="112" y="498" width="976" height="100" rx="16" fill="#202938"/><circle cx="158" cy="548" r="14" fill="#56d38b"/><text x="198" y="545" fill="#f2f6fb" font-family="Inter,Arial" font-size="20" font-weight="700">Local by default</text><text x="198" y="575" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Your selected output and settings remain on this device.</text>
+  <rect x="112" y="630" width="212" height="50" rx="14" fill="#2a3444"/><text x="218" y="662" fill="#f2f6fb" font-family="Inter,Arial" font-size="17" text-anchor="middle">Read privacy notes</text><text x="1088" y="662" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Esc to close</text>
+</svg>
