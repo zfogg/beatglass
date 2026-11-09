@@ -2658,7 +2658,7 @@ ApplicationWindow {
                                 text: visible ? ("Analysis admission: " + storageRecovery.analysisStatus) : ""
                                 Accessible.name: "Analysis admission status"
                                 Accessible.value: visible ? text : ""
-                                Accessible.description: visible ? text : "Analysis admission status is unavailable."
+                                Accessible.description: visible ? text + ". Queued or running work can be cancelled; terminal failures can be retried or discarded." : "Analysis admission status is unavailable."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
