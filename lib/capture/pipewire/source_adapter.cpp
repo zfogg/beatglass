@@ -160,7 +160,9 @@ public:
     return true;
   }
   std::string selected_serial() const override { return session_.serial(); }
-  std::optional<MonitorFormat> selected_format() const noexcept override { return session_.format(); }
+  std::optional<MonitorFormat> selected_format() const noexcept override {
+    return owner_ && owner_->connected() ? session_.format() : std::nullopt;
+  }
   std::uint64_t selected_epoch() const noexcept override { return session_.epoch(); }
   bool selected_active() const noexcept override {
     return session_.active() && owner_ && owner_->connected();
