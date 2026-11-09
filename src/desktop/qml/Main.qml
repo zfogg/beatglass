@@ -907,7 +907,8 @@ ApplicationWindow {
         if (!savedGeometry || savedGeometry.width <= 0 || savedGeometry.height <= 0) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("Persisted overlay geometry unavailable; control-window fallback remains active.")
+            const geometryDisplay = window.overlayPreferredDisplayName !== "" ? window.overlayPreferredDisplayName : "the saved display"
+            window.announceCaptureRecoveryState("Persisted overlay geometry unavailable for " + geometryDisplay + "; control-window fallback remains active.")
             return false
         }
         if (!window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)) {
