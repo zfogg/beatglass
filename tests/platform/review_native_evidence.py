@@ -37,6 +37,11 @@ def assess(report_path: Path, reviewer: str) -> dict:
         blockers.append("report:invalid exit gate status")
     if report.get("ready") is True and report.get("exit_gate_status") != "ACCEPTED":
         blockers.append("report:ready status contradicts exit gate")
+    reasons = report.get("exit_gate_reason_codes")
+    if report.get("ready") is True and isinstance(reasons, list) and reasons:
+        blockers.append("report:ready report has exit gate blockers")
+    if report.get("ready") is False and reasons is not None and (not isinstance(reasons, list) or not reasons):
+        blockers.append("report:pending report lacks exit gate reason codes")
     seen_platforms = set()
     report_commit = report.get("commit")
     for platform in report.get("platforms", []):
