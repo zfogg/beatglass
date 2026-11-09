@@ -425,3 +425,5 @@ A handoff is complete only when both archive integrity diagnostics and native qu
 Keep archive verifier output and native qualification output as separate named artifacts in the handoff bundle to prevent status ambiguity.
 
 Name handoff artifacts with their evidence role (archive-verifier versus native-qualification) so downstream reviewers can audit each independently.
+
+Include the archive verifier version/commit in handoffs so later reviewers can reproduce transfer-integrity decisions.
