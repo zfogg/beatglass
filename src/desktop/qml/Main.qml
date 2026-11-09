@@ -1299,6 +1299,7 @@ ApplicationWindow {
                 Frame {
                     objectName: "browserFrame"
                     Layout.fillWidth: true; Layout.fillHeight: true
+                    visible: !window.recursiveCatalogActive
                     Accessible.name: "Library folder browser"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Browse folders and audio files in the current location."
@@ -1406,6 +1407,38 @@ ApplicationWindow {
                             Accessible.description: text
                             ToolTip.text: "Playback controls unavailable; metadata remains read-only"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                    }
+                }
+                Frame {
+                    objectName: "recursiveResultsFrame"
+                    visible: window.recursiveCatalogActive
+                    Layout.fillWidth: true; Layout.preferredHeight: 220
+                    Accessible.name: "Recursive library results"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Supported audio files found below the selected folder. Select an audio file to inspect its metadata and queue analysis."
+                    ListView {
+                        id: recursiveResultsView
+                        anchors.fill: parent; clip: true; model: window.recursiveCatalogRows
+                        activeFocusOnTab: true; keyNavigationEnabled: true
+                        Accessible.name: "Recursive audio results"
+                        Accessible.role: Accessible.List
+                        delegate: ItemDelegate {
+                            required property string name
+                            required property string path
+                            required property bool folder
+                            width: ListView.view.width
+                            enabled: !folder
+                            Accessible.name: name + (folder ? ", folder" : ", audio file")
+                            Accessible.role: Accessible.ListItem
+                            Accessible.description: folder ? "Folder discovered recursively" : "Select this audio file for metadata and analysis"
+                            text: name + (folder ? "  (folder)" : "")
+                            onClicked: {
+                                window.selectedName = name
+                                window.selectedAudioUrl = Qt.resolvedUrl(path)
+                                if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
+                                window.announceVisualizationRecovery("Selected recursive audio source " + name + ".")
+                            }
                         }
                     }
                 }
