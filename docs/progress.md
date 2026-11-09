@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire discovery now rejects timeout durations that cannot be represented by
+the loop's bounded integer wait, avoiding overflow in control-thread iteration.
+Portable coverage is in
+`python tests/unit/check_pipewire_timeout_upper_bound_contract.py`.
+
 PipeWire discovery now rejects zero or negative control-thread timeouts before
 initializing the runtime, returning a deterministic diagnostic instead of
 running an undefined immediate-deadline loop. Portable coverage is in
