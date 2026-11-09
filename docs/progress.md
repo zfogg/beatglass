@@ -937,5 +937,7 @@ Visualization mode control descriptions now include overlay recovery readiness. 
 
 Visualization mode control tooltips now include overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_mode_tooltip_contract.py`.
 
+Waveform and FFT mode buttons now name overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_mode_buttons_name_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
