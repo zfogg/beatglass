@@ -41,6 +41,7 @@ screenshots.
 | [Diagnostics](overlay-diagnostics-card.svg) | overlay, capture, and permissions health |
 | [Help](overlay-help-card.svg) | shortcuts, troubleshooting, and about |
 | [Performance](overlay-latency-card.svg) | latency, sample rate, and dropped frames |
+| [Notifications](overlay-notifications-card.svg) | restore, output, and pause activity |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
