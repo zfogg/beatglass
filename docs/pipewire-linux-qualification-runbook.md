@@ -35,6 +35,9 @@ Generate the cross-platform gate scaffold with
 `python tests/pipewire/qualification_matrix.py evidence/qualification-matrix.json`;
 it records Linux, Windows, and macOS targets, status, and pending reasons while
 native evidence is collected on each host.
+Runner summaries carry the same matrix schema and a per-host matrix status,
+so archived Linux results can be merged into the cross-platform report without
+guessing whether a host was pending or qualified.
 It also records the runner Python version and working directory for reproducible
 handoff diagnostics.
 It labels the target as `Linux/PipeWire` and the handoff as `pending`, so
