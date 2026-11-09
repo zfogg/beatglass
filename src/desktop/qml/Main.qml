@@ -94,6 +94,22 @@ ApplicationWindow {
         onActivated: { files.refresh(); window.refreshCatalog(); window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed from the keyboard; entry selection cleared."); browser.forceActiveFocus() }
     }
     Shortcut {
+        objectName: "libraryParentFolderShortcut"
+        sequence: "Ctrl+Alt+Up"
+        context: Qt.ApplicationShortcut
+        enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
+        onActivated: {
+            window.clearSelectedAudio()
+            window.browseFolder = files.parentFolder
+            browser.currentIndex = -1
+            search.text = ""
+            window.recursiveCatalogActive = false
+            window.recursiveCatalogRows = []
+            window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
+            browser.forceActiveFocus()
+        }
+    }
+    Shortcut {
         objectName: "librarySortShortcut"
         sequence: "Ctrl+Alt+S"
         context: Qt.ApplicationShortcut
