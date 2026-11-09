@@ -49,6 +49,14 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(verifier), str(duplicate)], capture_output=True, text=True)
     if result.returncode == 0 or "duplicate archive entry" not in result.stderr + result.stdout: raise SystemExit("duplicate archive entry was accepted")
 
+    case_collision = root / "case-collision.zip"
+    with zipfile.ZipFile(case_collision, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("Native-Summary.json", b"collision")
+        archive.writestr("evidence-manifest.json", json.dumps(manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(case_collision)], capture_output=True, text=True)
+    if result.returncode == 0 or "case-insensitive archive entry collision" not in result.stderr + result.stdout: raise SystemExit("case-insensitive collision was accepted")
+
     traversal = root / "traversal.zip"
     with zipfile.ZipFile(traversal, "w") as archive:
         for name, data in artifacts.items(): archive.writestr(name, data)
@@ -135,4 +143,4 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=aggregate_mismatch_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(aggregate_mismatch)], capture_output=True, text=True)
     if result.returncode == 0 or "aggregate test count does not match suites" not in result.stderr + result.stdout: raise SystemExit("aggregate JUnit count mismatch was accepted")
-print("PipeWire evidence archive verifier behavior passed (12 scenarios)")
+print("PipeWire evidence archive verifier behavior passed (13 scenarios)")

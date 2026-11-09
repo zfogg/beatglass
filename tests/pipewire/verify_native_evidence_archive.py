@@ -27,6 +27,8 @@ with zipfile.ZipFile(archive_path) as archive:
     if any(name.endswith("/") or name.startswith("/") or "/" in name or ".." in PurePosixPath(name).parts for name in raw_names):
         raise SystemExit("unsafe archive entry name")
     names = set(raw_names)
+    if len({name.casefold() for name in raw_names}) != len(raw_names):
+        raise SystemExit("case-insensitive archive entry collision")
     if "evidence-manifest.json" not in names:
         raise SystemExit("missing evidence-manifest.json")
     manifest = json.loads(archive.read("evidence-manifest.json"))

@@ -139,3 +139,5 @@ can be marked qualified.
 For `testsuites` roots, the declared failure, error, and skipped totals must
 also equal the corresponding nested-suite totals.
 Each suite’s status total cannot exceed its declared test count.
+Archive entries are also checked case-insensitively so extraction remains safe
+on Windows and other case-folding filesystems.
