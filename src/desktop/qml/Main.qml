@@ -2908,7 +2908,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "overlayShortcutHelp"
-                    text: "Keyboard: Esc unlocks · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+Shift+R reapplies saved settings"
+                    text: "Keyboard: Esc unlocks · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+O cycles size · Ctrl+Alt+Shift+O resets opacity · Ctrl+Alt+Shift+R reapplies saved settings"
                     Accessible.name: "Overlay keyboard shortcuts"
                     Accessible.value: text
                     Accessible.role: Accessible.Status
