@@ -10,7 +10,7 @@ def main() -> None:
     checks = (
         'objectName: "playSelectedTrack"',
         'Accessible.name: "Play selected Library track"',
-        "window.playbackBridge.openSource",
+        "window.playSelectedLibraryTrack()",
         "window.selectedAudioUrl",
         "playSelectedTrack.forceActiveFocus()",
     )
