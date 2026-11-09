@@ -181,6 +181,11 @@ Before accepting a handoff, run `python tests/platform/check_evidence_readiness.
 
 The DJ workflow must remain usable when overlay capability is unavailable or denied. Native checks must verify that the main controls stay recoverable, the selected output device and capture state remain visible, stale analysis is cleared after loss, and an unavailable overlay never causes an invisible or stranded window. Click-through, tray/menu-bar recovery, fullscreen behavior, monitor changes, and reduced-motion behavior are separate platform observations; a mockup or window flag alone does not satisfy them.
 
+The committed design evidence and state/component gallery are documented in
+[`docs/overlay-design-gallery.md`](overlay-design-gallery.md), including the
+native screenshot qualification matrix. These renderings organize the evidence
+but do not change any platform row to READY.
+
 The Linux capture gate also requires a documented sample-position clock mapping. A PipeWire graph-clock snapshot or callback arrival time is diagnostic evidence only; it must not be exposed as a frame-accurate anchor until buffer timing, converter/queue delay, clock domain, drift, and uncertainty have been measured on the target backend and device.
 
 ## Local evidence audit (2026-11-08)
