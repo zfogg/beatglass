@@ -84,6 +84,8 @@ Successful click-through changes also announce the resulting interaction mode,
 so keyboard and pointer availability is explicit to assistive technology.
 The persisted visibility choice is also retained across visual-state recovery:
 an overlay hidden by the user remains hidden until Restore overlay is chosen.
+Persisted opacity is likewise reapplied during visual-state recovery and remains
+part of the settings revision announced to the control window.
 The click-through status also prints `Ctrl+Alt+U` next to the Escape guidance,
 making the keyboard path to the Unlock action visible without opening help.
 Using `Ctrl+Alt+U` also restores and activates the control window before focus
