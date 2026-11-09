@@ -21,4 +21,6 @@ assert 'window.handleOverlayWindowClosing(close)' in qml
 assert 'test_overlayCloseHandlerIsDirectlyContractTestable' in qml_tests
 assert 'test_displayLossReactivatesControlWindowFallback' in qml_tests
 assert 'test_pausedDisplayRecoveryRestoresControlWindowActivation' in qml_tests
-print('Overlay native retry focus contract verified (15 checks)')
+assert 'test_overlayAvailabilityLossRestoresKeyboardFocusToRetry' in qml_tests
+assert 'test_hideFailureRestoresFocusToOverlayRecoveryControl' in qml_tests
+print('Overlay native retry focus contract verified (17 checks)')
