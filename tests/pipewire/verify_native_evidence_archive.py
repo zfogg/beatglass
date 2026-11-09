@@ -56,8 +56,11 @@ with zipfile.ZipFile(archive_path) as archive:
         if hashlib.sha256(payload).hexdigest() != artifact["sha256"]:
             raise SystemExit(f"digest mismatch: {name}")
     discovery_name = next(name for name in declared if name.endswith(".json") and "discovery" in name)
-    if not isinstance(json.loads(archive.read(discovery_name)).get("tests"), list):
+    discovery_tests = json.loads(archive.read(discovery_name)).get("tests")
+    if not isinstance(discovery_tests, list):
         raise SystemExit("discovery JSON has no tests list")
+    if not discovery_tests:
+        raise SystemExit("discovery JSON has no registered tests")
     junit_name = next(name for name in declared if (name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml"))
     if ET.fromstring(archive.read(junit_name)).tag not in ("testsuite", "testsuites"):
         raise SystemExit("JUnit evidence has invalid root")
