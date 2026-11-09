@@ -27,6 +27,9 @@ with zipfile.ZipFile(archive_path) as archive:
     unexpected = names - declared - {"evidence-manifest.json"}
     if unexpected:
         raise SystemExit(f"unlisted archive artifact: {sorted(unexpected)[0]}")
+    summary_names = [name for name in declared if name.endswith(".json") and "summary" in name]
+    if len(summary_names) != 1 or json.loads(archive.read(summary_names[0])).get("commit") != manifest.get("commit"):
+        raise SystemExit("manifest commit does not match qualification summary")
     for artifact in artifacts:
         name = artifact["name"]
         if name not in names:
