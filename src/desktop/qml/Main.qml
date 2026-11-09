@@ -430,7 +430,7 @@ ApplicationWindow {
     }
     Shortcut {
         objectName: "overlayReapplyShortcut"
-        sequence: "Ctrl+Alt+Shift+R"
+        sequence: "Ctrl+Alt+Shift+A"
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
