@@ -27,6 +27,8 @@ This repository is beyond initial groundwork but is not yet a completed v1. Shar
 
 Production implementation belongs in `src/` for applications and `lib/` for reusable libraries, with library headers in `include/beatglass/`, tests and fixtures in `tests/`, and documentation in `docs/`. See issue #1 for the complete specification, acceptance criteria and phased execution plan.
 
+The desktop shell currently exposes six persisted appearance themes (Light, Dark, High contrast, Purple, Blue, and Yellow) plus a reduced-motion preference; native QML palette values are aligned with the `design/v1` tokens, while native desktop qualification remains pending.
+
 The current `main` branch includes the bounded analysis queue and retry lifecycle, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, and Windows endpoint-loss recovery. These are implemented slices, not a v1 completion claim: native capture, playback, full persistence workflows, and interactive qualification remain open.
 
 ## Build and test the groundwork
