@@ -794,10 +794,71 @@ Unavailable-bridge and invalid-visual-state show fallbacks now restore the same 
 Display replacement recovery and explicit display selection failures now return focus to the display selector too, covering missing saved displays, native move failures, and visual-state reapply failures.
 After hiding the overlay, focus returns to the Hide control in the restored control window so keyboard users can continue from a stable action surface.
 
+Reopen selected playback now rechecks source identity at click time, preventing stale replacement requests after selection and playback converge.
+
+Seek-to-frame now rechecks the live playback state at click time and announces when a stale seek action is invalidated by playback stopping.
+
+The five-second seek controls now perform the same click-time state admission, preventing stale bridge calls when playback stops between rendering and activation.
+
+Pause/resume now rechecks the live playback state at activation time, preventing stale bridge calls and announcing when a concurrent transition invalidates the control.
+
+Stop playback now rechecks the live state before clearing the source, making repeated or stale stop activations harmless and explicitly announced.
+
+After a real stop admission, the playback surface announces that the source is ready to reopen or replace, giving keyboard and screen-reader users a clear next state.
+
+Successful seek-to-frame admission now announces the requested frame, making the resulting playback transition observable without relying on visual position updates alone.
+
+Native playback start now announces the selected-output admission request, making the transition observable while the bridge moves to its running state.
+
+Refreshing playback outputs now returns focus to the output-device selector, making the refreshed device list immediately actionable from the keyboard.
+
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
 Active analysis failure reasons, recovery status, and persisted queue errors now expose their live text as accessible status values, so assistive technology receives the same diagnostics visible in the recovery surface.
 The display selector now includes recovery-pending state in its accessible value and description, so assistive technology receives the same recovery context as the surrounding display status.
 
+The Hide action now reports whether it is available or already hidden, and explains the control-window fallback when native overlay availability is lost.
+
+Quit now reports that it is available and will retain persisted overlay settings, making the shutdown contract explicit to assistive technology.
+
+Show now includes recovery-pending context in its accessible value while remaining actionable, matching the surrounding overlay action group state.
+
+Restore now exposes the same recovery-pending context, including when restoring an overlay hidden by the user.
+
+Reapply saved settings now reports recovery-pending context in its accessible value, completing the consistency across Show, Restore, and Reapply actions.
+
+Unlock now reports the same recovery-pending context when click-through interaction is active, keeping every overlay action’s accessible state coherent.
+
+The Click through checkbox now exposes recovery-pending context directly, not only through its parent routing group.
+
+The opacity slider now carries the same recovery-pending state in its value and description, keeping direct visual controls aligned with the overlay action surface.
+
+The interaction-mode status now carries recovery-pending context directly, so click-through and interactive states remain understandable while display recovery is in progress.
+
+The routing-controls group description now announces recovery-pending state too, giving screen readers context before they enter its individual controls.
+
+Display-change recovery now checks the native show result. If the platform refuses to present the overlay after the saved display is restored, recovery remains pending and the control-window fallback gives an actionable retry/display-selection path.
+
+Display-change recovery now preserves explicit hidden-by-user intent: the saved display and visual state are repaired without auto-showing the overlay, and the user is directed to Restore overlay when ready.
+
+The current-display status now exposes hidden-by-user intent directly, so assistive technology can distinguish a recovered display from an intentionally hidden overlay.
+
+The display-and-size controls group now repeats both hidden-by-user and recovery-pending context before users enter its individual controls.
+
+Geometry status now repeats hidden-by-user intent alongside its revision and recovery state, so persisted position/size announcements do not imply that the overlay is currently visible.
+
+Successful display selection now synchronizes the accepted native display/geometry/opacity snapshot before publishing the preferred display, keeping settings revision and accessibility summaries atomic.
+
+Failed native display movement or visual-state reapplication now raises display-selection-required as well as recovery-pending, preventing Show/Restore/Reapply from claiming a usable destination until the user chooses a replacement.
+
+Monitor replacement recovery applies the same gate when the display moves but persisted visual state fails, requiring an explicit display selection before actions become available again.
+
+Programmatic or stale display indices now enter the same selection-required gate and return focus to the display selector before any overlay action can proceed.
+
+Stale display selections now announce that replacement is required, so the selection gate is both actionable and discoverable to assistive technology.
+
+If presentation fails after display recovery, the app now raises the same selection-required gate before retrying, preventing actions from claiming the recovered destination is usable.
+
+Stale display selections now clear the preferred index and name as part of that gate, preventing later recovery attempts from reusing invalid monitor identity.
 The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
 
 Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
@@ -807,3 +868,41 @@ Batch result, persisted recovery, retry rejection, admission, and frame-progress
 Cache availability, cached results, worker results, and queue outcomes now expose live accessible status values, completing the result and admission readout across persisted and active analysis paths.
 
 Output endpoint discovery, selected endpoint state, and capture-permission guidance now use live status semantics, so device recovery and permission instructions are announced consistently.
+
+The native overlay-unavailable fallback now uses the same live status semantics as geometry, persisted restore, settings, and historical recovery diagnostics, making display loss consistently discoverable.
+
+Visualization interaction, selection reset, analysis handoff, and playback-epoch feedback now expose live status semantics for capture recovery and generation alignment.
+
+Overlay interaction mode, opacity, and display destination now expose live status values, keeping pointer routing and display recovery state consistent for assistive technology.
+
+DJ monitoring status and BPM/key/chord estimates now use live status semantics, completing the overlay telemetry readout.
+
+The overlay fallback status now includes the concrete Retry overlay recovery action, so assistive technology receives both the fallback availability and the next step.
+
+For a missing saved display, Forget saved display is keyboard reachable, announces the replacement-display next step, and restores focus to the display selector after clearing stale destination state.
+
+Retry overlay is now explicitly included in the keyboard tab order while display recovery is pending, so users can reach the actionable retry control without pointer input.
+
+The overlay display selector is now explicitly keyboard reachable as well, ensuring recovery can proceed from destination selection through retry without pointer input.
+
+The output endpoint empty state now uses live status semantics alongside endpoint discovery and recovery guidance, so missing-device remediation is announced consistently.
+
+The output-device selector is explicitly keyboard reachable, keeping monitoring setup usable from the same keyboard recovery path as endpoint refresh and status guidance.
+
+Playback sample-rate and channel controls are explicitly keyboard reachable, keeping native output setup usable without pointer input.
+
+Start native playback now requires a selected output device, preventing an unusable admission attempt and keeping the recovery path aligned with the actual playback bridge state.
+
+The overlay display empty state now uses live status semantics alongside saved-display recovery, making missing-output remediation discoverable before destination selection.
+
+Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
+
+Metadata status, metadata recovery guidance, visualization data, and visualization capture state now use live status semantics, aligning source, analysis, and rendering diagnostics for assistive technology.
+
+Live tempo, harmony, overlay capture, and monitor capture states now use status semantics, keeping the primary overlay and monitoring readouts synchronized for assistive technology.
+
+Analysis freshness, selected-source workflow, and frame progress now expose live status values, aligning source selection and active analysis lifecycle feedback.
+
+Native playback state, source, position, and output-running state now expose live status values, making playback and analysis source identity consistent for assistive technology.
+
+Native playback errors, seek limitations, source-selection mismatch, and unavailable-control guidance now use live status semantics, keeping playback recovery actionable.

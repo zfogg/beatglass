@@ -1,5 +1,6 @@
 #include "analysis_job_bridge.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
+#include "beatglass/library/detail/file_fingerprint.hpp"
 
 namespace {
 constexpr std::size_t kMaxDisplayedResultBytes = 4096;
@@ -32,10 +33,39 @@ AnalysisJobBridge::AnalysisJobBridge(beatglass::library_detail::JobExecutor& exe
 bool AnalysisJobBridge::submitFile(const QString& path, const QString& contentHash,
                                    const QString& engineVersion, const QString& configurationId,
                                    const QString& mode) {
+  if (engineVersion_ != engineVersion || configurationId_ != configurationId || analysisMode_ != mode) {
+    engineVersion_ = engineVersion; configurationId_ = configurationId; analysisMode_ = mode; emit provenanceChanged();
+  }
   beatglass::library::AnalysisIdentity identity;
   identity.content_hash = contentHash.toStdString(); identity.engine_version = engineVersion.toStdString();
   identity.configuration_id = configurationId.toStdString(); identity.mode = mode.toStdString();
   return static_cast<bool>(submit(beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity))));
+}
+
+bool AnalysisJobBridge::submitSelectedFile(const QString& path) {
+  if (path.isEmpty()) return false;
+  const auto fingerprint = beatglass::library_detail::fingerprint_file(path.toStdString());
+  if (fingerprint.status != beatglass::library_detail::FingerprintStatus::ok) return false;
+  return submitFile(path, QString::fromStdString(fingerprint.digest),
+                    QStringLiteral("beatglass-desktop-v1"),
+                    QStringLiteral("default-offline"));
+}
+
+int AnalysisJobBridge::submitSelectedFiles(const QStringList& paths) {
+  std::vector<beatglass::library::AnalysisOperation> operations;
+  operations.reserve(static_cast<std::size_t>(paths.size()));
+  for (const auto& path : paths) {
+    if (path.isEmpty()) continue;
+    const auto fingerprint = beatglass::library_detail::fingerprint_file(path.toStdString());
+    if (fingerprint.status != beatglass::library_detail::FingerprintStatus::ok) continue;
+    beatglass::library::AnalysisIdentity identity;
+    identity.content_hash = fingerprint.digest;
+    identity.engine_version = "beatglass-desktop-v1";
+    identity.configuration_id = "default-offline";
+    identity.mode = "offline";
+    operations.push_back(beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity)));
+  }
+  return submitBatch(std::move(operations));
 }
 
 std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit(beatglass::library::AnalysisOperation op) {
@@ -56,7 +86,7 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   result_.clear();
   emit resultChanged();
   for (const auto& operation : batch_) if (operation) operation->cancel();
-  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); emit batchChanged();
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear(); emit batchChanged();
   auto progress = op.progress;
   auto publish = op.publish;
   op.publish = [weak_self = weak_self_, publish](const std::string& value) {
@@ -138,20 +168,22 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
   if (retryable_ && canCancel()) retryable_->cancel();
   retryable_.reset();
   if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }
-  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   for (auto& operation : operations) {
     if (static_cast<int>(batch_.size()) >= batchCapacity_) { ++batchRejected_; continue; }
+    const auto sourcePath = QString::fromStdString(operation.source.path.string());
     auto publish = operation.publish;
-    operation.publish = [weak_self = weak_self_, publish](const std::string& value) {
+    operation.publish = [weak_self = weak_self_, publish, sourcePath](const std::string& value) {
       if (publish) publish(value);
       if (!weak_self) return;
       const auto displayed = displayedResult(value);
       const auto result = QString::fromUtf8(displayed.data(), static_cast<int>(displayed.size()));
-      QMetaObject::invokeMethod(weak_self, [weak_self, result] {
+      QMetaObject::invokeMethod(weak_self, [weak_self, result, sourcePath] {
         if (!weak_self) return;
         ++weak_self->batchResultsPublished_;
         weak_self->batchLastResult_ = result;
+        weak_self->batchLastSource_ = sourcePath;
         emit weak_self->batchChanged();
       }, Qt::QueuedConnection);
     };
@@ -171,7 +203,7 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
 
 void AnalysisJobBridge::cancelBatch() {
   for (const auto& operation : batch_) if (operation) operation->cancel();
-  batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+  batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear();
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   emit batchChanged();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
@@ -179,17 +211,18 @@ void AnalysisJobBridge::cancelBatch() {
   poll();
 }
 
-void AnalysisJobBridge::retryBatch() {
+bool AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
   if (accepted) {
     if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
     if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
     if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
-    batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+    batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged(); poll();
   }
+  return accepted;
 }
 
 void AnalysisJobBridge::discardBatch() {
@@ -200,7 +233,7 @@ void AnalysisJobBridge::discardBatch() {
   if (!terminal) return;
   batch_.clear();
   batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0;
-  batchLastResult_.clear();
+  batchLastResult_.clear(); batchLastSource_.clear();
   poll_timer_.stop();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }

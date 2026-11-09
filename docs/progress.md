@@ -1,5 +1,373 @@
 # Progress and handoff
 
+Overlay settings now provide a focused endpoint refresh action that keeps
+selection and retry recovery in one workflow. Portable coverage is in
+`python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
+
+Overlay settings now expose a focused retry action when output capture errors,
+with explicit guidance that recovery waits for a fresh accepted snapshot.
+Portable coverage is in
+`python tests/unit/check_overlay_capture_recovery_action_contract.py`.
+
+The overlay now reports the selected output endpoint and explicitly states that
+combined-output monitoring does not identify individual decks. Portable coverage
+is in `python tests/unit/check_overlay_endpoint_status_contract.py`.
+
+The overlay now exposes dynamic keyboard recovery guidance for click-through
+mode, including Escape and the control-window unlock shortcut, while keeping
+interactive-mode guidance explicit. Portable coverage is in
+`python tests/unit/check_overlay_keyboard_recovery_contract.py`.
+
+Changing the Library source now clears stale visualization selection before the
+overlay can reuse it, including recursive-browser selection. The overlay waits
+for fresh accepted evidence instead of presenting the previous source's state.
+Portable coverage is in
+`python tests/unit/check_overlay_source_change_clear_contract.py`.
+
+Overlay settings now provide a synchronized start/stop monitoring action. The
+action preserves the control surface during transitions and announces that the
+overlay is waiting for accepted combined-output data. Portable coverage is in
+`python tests/unit/check_overlay_monitoring_action_contract.py`.
+
+The overlay now exposes a recovery-action status that distinguishes a pending
+display recovery from a safe restore action and preserves the control-window
+fallback. Portable coverage is in
+`python tests/unit/check_overlay_recovery_action_status_contract.py`.
+
+The overlay now exposes whether it is available or hidden by user request,
+with recovery guidance that preserves monitoring and restores persisted overlay
+settings. Portable coverage is in
+`python tests/unit/check_overlay_visibility_status_contract.py`.
+
+The overlay now exposes whether an accepted visualization snapshot is ready,
+distinguishing a live estimate surface from a waiting/replacement state.
+Portable coverage is in
+`python tests/unit/check_overlay_data_readiness_contract.py`.
+
+The overlay settings surface now exposes truthful live-monitoring state,
+including whether combined-output estimates are updating or capture is waiting
+for accepted data. Portable coverage is in
+`python tests/unit/check_overlay_live_monitoring_state_contract.py`.
+
+Live capture errors now announce a concrete next action—retry monitoring after
+checking the selected output and permission state—alongside the existing error
+status and recovery controls.
+
+Live Starting and Reacquiring transitions now announce their next action:
+waiting for the first accepted snapshot or waiting for reacquisition after the
+previous visualization selection was cleared.
+
+Stopping a PipeWire monitor now marks the next restart boundary discontinuous
+before closing callback admission. Portable coverage is in
+`python tests/unit/check_pipewire_stop_discontinuity_contract.py`.
+
+PipeWire control code now exposes a `needs_restart` predicate combining native
+callback errors and closed admission, so lifecycle code can force a fresh epoch
+instead of consuming stale transport state. Portable coverage is in
+`python tests/unit/check_pipewire_restart_status_contract.py`.
+
+When live capture transitions into Tracking, the control window now announces
+that monitoring is active and visualization will update as accepted data
+arrives, rather than leaving assistive technology on a silent transition.
+
+The visualization now exposes its responsive compact/expanded layout state as
+an accessible status, so width-driven presentation changes are announced
+without implying a change to the underlying accepted analysis data.
+
+The selected FFT bin now has a visible and screen-reader readout showing its
+accepted magnitude. Wheel, keyboard, source-change, and result-reset paths all
+update or clear the same readout state.
+
+The PipeWire callback seam now records native error codes in an atomic status
+slot, allowing control-thread lifecycle code to distinguish callback failure
+from ordinary stop and restart. No allocation occurs on the callback path.
+Portable coverage is in
+`python tests/unit/check_pipewire_callback_error_status_contract.py`.
+
+The FFT selection cursor now responds to mouse-wheel navigation with one-bin,
+five-bin Shift, and ten-bin Control steps; waveform wheel selection retains
+its time-position behavior.
+
+Linux now has an explicit `MonitorBackend` boundary for PipeWire output
+capture. The provisional adapter wires bounded sink discovery into that
+control-thread seam and documents epoch, ownership, stop/quiescence, and
+discontinuity contracts; stream transport remains the next implementation
+slice. Portable coverage is in
+`python tests/unit/check_pipewire_monitor_boundary_contract.py`.
+
+PipeWire sink descriptions are now bounded to the same 4096-byte identity
+limit, falling back to the validated node name when exceeded. Portable coverage
+is in `python tests/unit/check_pipewire_description_length_contract.py`.
+
+PipeWire sink serials and names are now bounded to 4096 bytes before entering
+the registry snapshot, preventing unbounded metadata from reaching UI/source
+selection. Portable coverage is in
+`python tests/unit/check_pipewire_identity_length_contract.py`.
+
+PipeWire descriptions containing NUL bytes now fall back to the validated node
+name, preventing malformed display labels from reaching the UI. Portable
+coverage is in `python tests/unit/check_pipewire_description_nul_contract.py`.
+
+PipeWire discovery now rejects NUL-containing serial and node-name identities
+before they reach source selection, matching the malformed-identity guards on
+other capture backends. Portable coverage is in
+`python tests/unit/check_pipewire_identity_nul_contract.py`.
+
+PipeWire sink descriptions that are empty or whitespace-only now fall back to
+the validated node name, preventing unusable display labels. Portable coverage
+is in `python tests/unit/check_pipewire_description_validation_contract.py`.
+
+PipeWire discovery now rejects whitespace-only node names as well as malformed
+serials, ensuring every surfaced sink has a usable display identity. Portable
+coverage is in
+`python tests/unit/check_pipewire_sink_name_validation_contract.py`.
+
+PipeWire registry discovery now rejects whitespace-only node serials before
+adding sinks, preventing malformed identities from entering source selection.
+Portable coverage is in
+`python tests/unit/check_pipewire_serial_validation_contract.py`.
+
+PipeWire sink ordering now uses the display name as a deterministic tie-breaker
+when server serials collide, keeping refresh order stable even for duplicate
+serial metadata. Portable coverage is in
+`python tests/unit/check_pipewire_sink_tie_order_contract.py`.
+
+PipeWire sink discovery now returns sinks in stable server-serial order rather
+than volatile registry object-ID order, preventing UI selection churn across
+refreshes. Portable coverage is in
+`python tests/unit/check_pipewire_sink_order_contract.py`.
+
+PipeWire discovery now rejects timeout durations that cannot be represented by
+the loop's bounded integer wait, avoiding overflow in control-thread iteration.
+Portable coverage is in
+`python tests/unit/check_pipewire_timeout_upper_bound_contract.py`.
+
+PipeWire discovery now rejects zero or negative control-thread timeouts before
+initializing the runtime, returning a deterministic diagnostic instead of
+running an undefined immediate-deadline loop. Portable coverage is in
+`python tests/unit/check_pipewire_timeout_contract.py`.
+
+PipeWire discovery now pairs each control-thread `pw_init` with scoped
+`pw_deinit`, including early loop/context/registry failures, preventing global
+PipeWire runtime leaks across repeated discovery. Portable coverage is in
+`python tests/unit/check_pipewire_shutdown_contract.py`.
+
+Core Audio stop requests made during PCM delivery now return typed `busy`
+status with an actionable diagnostic instead of a silent false result.
+Portable coverage is in
+`python tests/unit/check_macos_stop_delivery_contract.py`.
+
+Core Audio stop failures now expose an explicit retry-before-restart diagnostic
+instead of retaining stale startup text. Portable coverage is in
+`python tests/unit/check_macos_stop_failure_message_contract.py`.
+
+Core Audio tap startup now reports distinct diagnostics for malformed output
+UIDs versus a zero capture epoch, making invalid lifecycle requests actionable.
+Portable coverage is in
+`python tests/unit/check_macos_epoch_diagnostic_contract.py`.
+
+The Core Audio tap now independently rejects empty, whitespace-only, and
+NUL-containing UIDs before native setup, protecting direct backend callers as
+well as the source adapter. Portable coverage is in
+`python tests/unit/check_macos_tap_id_validation_contract.py`.
+
+Invalid Core Audio tap arguments now map to the public `not_found` source
+category instead of an opaque backend error, matching malformed source-ID
+handling. Portable coverage is in
+`python tests/unit/check_macos_invalid_argument_mapping_contract.py`.
+
+Core Audio start requests now reject source IDs containing NUL bytes before
+native NSString conversion, avoiding malformed identity lookups. Portable
+coverage is in `python tests/unit/check_macos_source_id_nul_contract.py`.
+
+Core Audio start requests now reject whitespace-only source IDs as
+`not_found`, preventing malformed selections from reaching native tap setup.
+Portable coverage is in
+`python tests/unit/check_macos_source_id_whitespace_contract.py`.
+
+Core Audio start requests now distinguish missing source IDs (`not_found`) and
+missing consumers from an unavailable backend, giving callers actionable typed
+diagnostics. Portable coverage is in
+`python tests/unit/check_macos_invalid_source_contract.py`.
+
+Core Audio startup now preserves the original typed failure (including
+permission or device loss) even if backend cleanup also fails; the diagnostic
+still appends the cleanup failure. Portable coverage is in
+`python tests/unit/check_macos_start_error_preservation_contract.py`.
+
+Core Audio interruption status now distinguishes a disappeared device/stream
+from format or callback faults, making reacquisition guidance actionable.
+Portable coverage is in
+`python tests/unit/check_macos_status_message_contract.py`.
+
+Cancelled Core Audio enumeration now normalizes both its typed error and its
+diagnostic text, replacing stale backend text with a consistent cancellation
+message. Portable coverage is in
+`python tests/unit/check_macos_cancel_diagnostic_normalization_contract.py`.
+
+Cancelled Core Audio enumeration now normalizes any stale backend error code to
+the typed `cancelled` category, keeping outcome and error semantics aligned.
+Portable coverage is in
+`python tests/unit/check_macos_cancel_error_normalization_contract.py`.
+
+Successful Core Audio enumeration now clears stale error categories for both
+empty and non-empty success, keeping the result contract self-consistent.
+Portable coverage is in
+`python tests/unit/check_macos_success_error_clear_contract.py`.
+
+Cancelled Core Audio enumeration now carries the typed `cancelled` source
+error even when the backend omitted one, alongside its empty source list and
+diagnostic. Portable coverage is in
+`python tests/unit/check_macos_cancel_error_type_contract.py`.
+
+Cancelled Core Audio enumeration now always clears any partial source list,
+preventing stale devices from surviving a cancelled refresh. Portable coverage
+is in `python tests/unit/check_macos_cancel_sources_empty_contract.py`.
+
+Cancelled Core Audio enumeration now carries an explicit diagnostic when the
+backend omits one, keeping cancellation distinct from failure and empty state.
+Portable coverage is in
+`python tests/unit/check_macos_enumeration_cancel_contract.py`.
+
+Successful non-empty Core Audio enumeration now clears any stale diagnostic,
+while empty success retains its explicit empty-state text. Portable coverage is
+in `python tests/unit/check_macos_enumeration_success_clear_contract.py`.
+
+Successful Core Audio enumeration with zero devices now carries an explicit
+empty-state diagnostic, distinct from backend failure. Portable coverage is in
+`python tests/unit/check_macos_empty_enumeration_diagnostic_contract.py`.
+
+Core Audio enumeration errors now always carry a typed `backend_error` when a
+backend omits its category, alongside the empty source list and fallback text.
+Portable coverage is in
+`python tests/unit/check_macos_enumeration_error_type_contract.py`.
+
+Enumeration errors now clear any backend-provided source list before reaching
+the UI, preventing stale devices from being offered alongside an error.
+Portable coverage is in
+`python tests/unit/check_macos_enumeration_error_empty_contract.py`.
+
+Core Audio enumeration now guarantees a user-facing fallback diagnostic when a
+backend reports an error without text, avoiding a silent unavailable-device
+state. Portable coverage is in
+`python tests/unit/check_macos_enumeration_diagnostic_contract.py`.
+
+The FFT view now supports direct bin selection: clicking a spectrum bar or
+using Left/Right while focused selects a bounded frequency bin, draws a cursor,
+and exposes the selected bin through accessibility state. Waveform selection
+continues to control playback position independently.
+
+Waveform rendering now clamps accepted min/max PCM extrema to the normalized
+[-1, 1] display range before mapping them into the canvas, preventing malformed
+or transient out-of-range source values from escaping the visual bounds.
+
+The FFT view now derives a bounded peak-bin summary from the accepted spectrum
+snapshot and exposes it through the canvas accessibility value, making the
+rendered frequency evidence inspectable without inventing a calibrated pitch.
+
+FFT rendering now clamps negative or malformed magnitudes to zero before
+painting bars, preventing invalid source values from producing inverted
+frequency visuals while preserving the bounded real-spectrum path.
+
+`Ctrl+Alt+Shift+W` focuses Restore overlay, preserving a direct keyboard path
+to bring back a user-hidden overlay with its persisted settings.
+
+When the native overlay is unavailable, `Ctrl+Alt+Shift+Y` focuses the Retry
+overlay action so recovery remains keyboard reachable.
+
+`Ctrl+Alt+Shift+P` focuses the Reapply saved settings action, providing a
+keyboard-first path to restore persisted display, geometry, size, and opacity.
+
+Overlay shortcut guidance now covers every keyboard recovery and visual-control
+path: unlock, click-through, show/hide, display selection, retry, size,
+opacity, and saved-settings reapply.
+
+When click-through is active, `Ctrl+Alt+U` focuses the Unlock overlay action
+and announces that Enter will restore keyboard and pointer interaction.
+
+`Ctrl+Alt+J` focuses the Hide overlay action, keeping the control-window
+fallback keyboard reachable during an active overlay session.
+
+`Ctrl+Alt+W` focuses the Show overlay action, providing a direct keyboard path
+to restore the native overlay after recovery or configuration changes.
+
+`Ctrl+Alt+Z` focuses the overlay size selector and announces the active
+Compact, Medium, or Large preset before keyboard adjustment.
+
+`Ctrl+Alt+K` focuses the overlay click-through control and announces whether
+pointer passthrough is currently enabled or disabled.
+
+`Ctrl+Alt+L` focuses the overlay opacity slider and announces its current
+percentage, providing a direct keyboard path to adjust visual prominence.
+
+Shortcut guidance now also lists keyboard size cycling (`Ctrl+Alt+O`) and the
+90% opacity reset (`Ctrl+Alt+Shift+O`), keeping visual overlay controls
+discoverable without requiring pointer access.
+
+Overlay shortcut guidance now includes click-through toggling, display focus,
+and retry recovery alongside unlock, hide/restore, and saved-settings reapply,
+so every keyboard recovery path is visible and screen-reader discoverable.
+
+`Ctrl+Alt+I` toggles native overlay click-through from the keyboard. Successful
+changes announce whether interaction is disabled or restored; rejected changes
+retain the current mode and report recovery guidance.
+
+When the native overlay is unavailable but displays are enumerated, `Ctrl+Alt+Y`
+retries recovery while keeping the control window visible until the show call
+succeeds, matching the button-based fallback path.
+
+`Ctrl+Alt+D` focuses the overlay display selector and announces whether a
+replacement display is required, providing a direct keyboard recovery path
+when a monitor disappears or a saved destination becomes stale.
+
+The control window now visibly lists the overlay keyboard shortcuts for
+unlocking click-through, hiding/restoring, and reapplying saved settings, with
+the same text exposed as an accessible status value.
+
+Saved overlay display, size, position, and opacity can be reapplied from the
+keyboard with `Ctrl+Alt+Shift+R`, using the same recovery path as the control
+window and announcing the restoration state.
+
+The overlay can be hidden or restored from the keyboard with `Ctrl+Alt+H`.
+The shortcut uses the same persisted hide/restore path as the control-window
+buttons, keeping monitoring state and the discoverable fallback synchronized.
+
+The overlay opacity can be reset from the keyboard with `Ctrl+Alt+Shift+O`.
+The shortcut uses the native persistence bridge and announces either the 90%
+reset or a recovery message when the native edit is rejected.
+
+The overlay size presets are keyboard reachable with `Ctrl+Alt+O`, cycling
+Compact, Medium, and Large through the native resize bridge. Rejected resizes
+keep persisted geometry authoritative and announce recovery.
+
+Overlay size changes now treat native resize failure as a rejected edit: the
+persisted geometry remains authoritative, the size selector is synchronized
+back to that geometry, and the control window announces the recovery instead
+of reporting a size that was not applied.
+
+macOS Core Audio discovery now places the system-selected output first after a
+successful enumeration, without changing the neutral `SourceInfo` contract or
+overriding a later explicit user selection. The portable source contract is
+checked by `python tests/unit/check_macos_default_output_order_contract.py`;
+native Core Audio permission and tap qualification remain required.
+
+## Current recovery/cache qualification snapshot
+
+The current storage recovery path persists retryable state for cancellation,
+stale verification, empty publication, oversized publication, and transactional
+publish failures. Portable evidence for this slice is:
+
+```text
+python tests/unit/check_publish_cancellation_recovery_contract.py
+python tests/unit/check_publish_oversize_recovery_contract.py
+python tests/unit/check_publish_empty_recovery_contract.py
+python tests/unit/check_sqlite_publish_contract.py
+```
+
+These checks verify source contracts only; they do not replace Catch2 execution
+or native Windows, macOS, and Linux qualification. Native evidence remains
+required for the issue #1 exit gate.
+
 Shortcut-triggered stop/resume must announce the resulting lifecycle state through the same accessible status surface as pointer actions. Portable contracts cover focus, shortcut dispatch, and state text; native screen-reader timing, focus restoration, and assistive-technology behavior remain unqualified.
 
 Keyboard playback recovery parity is part of the readiness handoff: transport, retry, endpoint refresh, and clear/reacquire actions must be reachable through the same focus order and accessible names as pointer controls. Portable UI contracts document this parity; native assistive-technology and hardware recovery remain unqualified.
@@ -398,3 +766,208 @@ Persisted retry now retains its worker handle after admission, so the same progr
 Analysis failure diagnostics are transient lifecycle state: queued, running, cancelled, completed, and restart-recovery transitions clear the previous error, while a failed attempt keeps its retryable explanation visible until the next transition.
 Successful selected-run retry, explicit discard, and cache invalidation clear the shared queue-error diagnostic before refresh. This keeps single-run and adjacent batch/recovery controls from showing an error after the underlying persisted state has been resolved.
 Batch status now includes persisted recovery errors when present, while successful retry/discard transitions clear that suffix through the shared bridge error lifecycle. This keeps batch operators aware of recovery work without leaving resolved diagnostics visible.
+
+Windows output endpoint discovery now adopts the native render default on the first successful refresh when the user has not selected an endpoint. A later refresh never overrides an explicit selection; if that endpoint disappears, the bridge clears it and reports selection loss so capture must be reacquired. The portable source contract is checked by python tests/unit/check_windows_endpoint_default_selection_contract.py.
+Overlay monitoring controls now return keyboard focus to the live overlay status after a start/stop/retry request, so the resulting Starting, Reacquiring, Tracking, or Error state is immediately available to keyboard and assistive-technology users. Portable coverage is in `python tests/unit/check_overlay_live_feedback_focus_contract.py`.
+
+Overlay capture retry now returns keyboard focus to the live monitoring status after requesting a fresh accepted snapshot, keeping recovery feedback visible without requiring pointer interaction. Portable coverage is in `python tests/unit/check_overlay_capture_retry_focus_contract.py`.
+
+Native overlay retry now returns keyboard focus to the display status after requesting restoration, keeping display recovery feedback available when the overlay remains unavailable. Portable coverage is in `python tests/unit/check_overlay_native_retry_focus_contract.py`.
+
+Hiding the native overlay now returns keyboard focus to the control-window restore action, making the hide/restore recovery loop keyboard-completable. Portable coverage is in `python tests/unit/check_overlay_hide_focus_contract.py`.
+
+Reapplying saved overlay settings now returns keyboard focus to the current-display status, keeping persisted display recovery feedback available without pointer interaction. Portable coverage is in `python tests/unit/check_overlay_reapply_focus_contract.py`.
+
+Unlocking click-through overlay input now returns keyboard focus to the interaction-mode status, keeping the restored input state immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_unlock_focus_contract.py`.
+
+Changing overlay click-through mode now returns keyboard focus to the interaction-mode status, keeping the resulting input state immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_click_focus_contract.py`.
+
+Releasing the overlay opacity slider now returns focus to the interaction-mode status, keeping the final applied overlay setting immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_opacity_focus_contract.py`.
+
+Selecting an overlay size now returns keyboard focus to geometry status after a successful resize, keeping the resulting dimensions immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_size_focus_contract.py`.
+
+Selecting an overlay destination display now returns keyboard focus to current-display status after persistence, while failed selection keeps focus on the selector. Portable coverage is in `python tests/unit/check_overlay_display_focus_contract.py`.
+
+Showing the native overlay now announces the selected-display launch and persisted-settings restore before the control window transitions away. Portable coverage is in `python tests/unit/check_overlay_show_announce_contract.py`.
+
+Restoring the overlay now announces persisted display, geometry, and opacity reapplication before the control window transitions away. Portable coverage is in `python tests/unit/check_overlay_restore_announce_contract.py`.
+
+Hiding the native overlay now announces the control-window fallback transition while retaining overlay settings. Portable coverage is in `python tests/unit/check_overlay_hide_announce_contract.py`.
+
+Quitting Beatglass now announces that overlay display, geometry, size, opacity, and interaction settings are retained before shutdown. Portable coverage is in `python tests/unit/check_overlay_quit_announce_contract.py`.
+
+Failed native overlay launch paths now explicitly state that the control-window fallback preserves overlay settings while recovery remains pending. Portable coverage is in `python tests/unit/check_overlay_fallback_detail_contract.py`.
+
+The overlay actions accessibility description now states that native-launch fallback retains overlay settings, making persistence explicit while recovery is pending. Portable coverage is in `python tests/unit/check_overlay_fallback_status_contract.py`.
+
+The unavailable-overlay actions tooltip now states that the control-window fallback retains overlay settings. Portable coverage is in `python tests/unit/check_overlay_fallback_tooltip_contract.py`.
+
+The overlay actions accessible value now reports that settings are retained during native-overlay fallback. Portable coverage is in `python tests/unit/check_overlay_fallback_value_contract.py`.
+
+The available overlay actions accessibility value now states that persisted settings are retained, alongside the settings revision. Portable coverage is in `python tests/unit/check_overlay_available_value_contract.py`.
+
+Pending overlay recovery descriptions now state that persisted settings remain retained while the control-window fallback is available. Portable coverage is in `python tests/unit/check_overlay_recovery_description_contract.py`.
+
+Persisted overlay geometry status now states settings retention during pending recovery and fallback. Portable coverage is in `python tests/unit/check_overlay_geometry_retention_contract.py`.
+
+Overlay interaction-mode status now states settings retention while recovery is pending. Portable coverage is in `python tests/unit/check_overlay_interaction_retention_contract.py`.
+
+Overlay estimate attribution now states that the selected combined-output source remains retained during pending recovery. Portable coverage is in `python tests/unit/check_overlay_attribution_retention_contract.py`.
+
+Overlay estimate readiness now states that the accepted snapshot remains retained while display recovery is pending. Portable coverage is in `python tests/unit/check_overlay_readiness_retention_contract.py`.
+
+Overlay endpoint status now states that the selected endpoint remains retained during pending recovery. Portable coverage is in `python tests/unit/check_overlay_endpoint_retention_contract.py`.
+
+Overlay live-monitoring status now states that the selected endpoint remains retained while capture recovers. Portable coverage is in `python tests/unit/check_overlay_live_retention_contract.py`.
+
+Overlay controls now expose a dedicated settings-retention status covering display, geometry, opacity, and interaction mode during recovery and fallback. Portable coverage is in `python tests/unit/check_overlay_settings_retention_status_contract.py`.
+
+Overlay settings-retention status is now keyboard-focusable, allowing non-pointer users to inspect persisted recovery state directly. Portable coverage is in `python tests/unit/check_overlay_retention_focus_contract.py`.
+
+Overlay controls now include a “Review retained settings” action that moves focus to the settings-retention status for keyboard recovery review. Portable coverage is in `python tests/unit/check_overlay_settings_retention_review_contract.py`.
+
+The retained-settings review action now has a global `Ctrl+Alt+Shift+S` shortcut that returns focus to overlay recovery context. Portable coverage is in `python tests/unit/check_overlay_retention_shortcut_contract.py`.
+
+In-app overlay shortcut help now documents `Ctrl+Alt+Shift+S` for retained-settings review. Portable coverage is in `python tests/unit/check_overlay_shortcut_help_contract.py`.
+
+The retained-settings review action now changes to “Review recovery settings” with pending-recovery guidance while the native overlay is unavailable. Portable coverage is in `python tests/unit/check_overlay_review_dynamic_contract.py`.
+
+The retained-settings review action now exposes a dynamic accessible value for normal retention versus pending recovery. Portable coverage is in `python tests/unit/check_overlay_review_value_contract.py`.
+
+The retained-settings review action now announces pending versus stable recovery context when focused. Portable coverage is in `python tests/unit/check_overlay_review_announce_contract.py`.
+
+Overlay settings-retention status now exposes the settings revision in its accessible value for recovery diagnostics. Portable coverage is in `python tests/unit/check_overlay_retention_revision_contract.py`.
+
+Retained-settings review announcements now include the current settings revision for recovery diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_revision_contract.py`.
+
+Retained-settings review tooltip now includes the current settings revision for at-a-glance diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_tooltip_contract.py`.
+
+Overlay shortcut help now exposes retained-settings review as an explicit accessible capability. Portable coverage is in `python tests/unit/check_overlay_shortcut_capability_contract.py`.
+
+Shortcut-help accessibility now reports whether retained-settings review is available with the native overlay bridge. Portable coverage is in `python tests/unit/check_overlay_shortcut_state_contract.py`.
+
+Retained-settings review accessibility value now includes the current settings revision. Portable coverage is in `python tests/unit/check_overlay_review_value_revision_contract.py`.
+
+Retained-settings review descriptions now include the current settings revision for screen-reader diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_description_contract.py`.
+
+Overlay settings-retention status accessible name now includes the current settings revision. Portable coverage is in `python tests/unit/check_overlay_retention_name_contract.py`.
+
+Overlay settings summary now surfaces retained-settings state during pending recovery and launch fallback. Portable coverage is in `python tests/unit/check_overlay_summary_retention_contract.py`.
+
+Consolidated overlay settings summary is now keyboard-focusable for direct inspection of display, size, opacity, and recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_focus_contract.py`.
+
+Overlay recovery controls now include a Review overlay summary action for direct inspection of consolidated display, size, opacity, and recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_review_contract.py`.
+
+Reviewing the consolidated overlay summary now announces its settings revision and pending recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_review_announce_contract.py`.
+
+The consolidated overlay summary review action now has a global `Ctrl+Alt+Shift+M` shortcut. Portable coverage is in `python tests/unit/check_overlay_summary_shortcut_contract.py`.
+
+In-app shortcut help now documents Ctrl+Alt+Shift+M for overlay summary review. Portable coverage is in `python tests/unit/check_overlay_summary_help_contract.py`.
+
+Shortcut help now exposes summary-review capability in its accessible value. Portable coverage is in `python tests/unit/check_overlay_summary_help_state_contract.py`.
+
+Overlay summary shortcut announcements now include settings revision and pending recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_shortcut_revision_contract.py`.
+
+Overlay summary review action now exposes recovery state and settings revision in its accessible value. Portable coverage is in `python tests/unit/check_overlay_summary_action_value_contract.py`.
+
+Summary review action descriptions now include the current settings revision. Portable coverage is in `python tests/unit/check_overlay_summary_action_description_contract.py`.
+
+Consolidated overlay settings summary accessible name now includes ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_summary_name_contract.py`.
+
+The consolidated overlay settings summary tooltip now distinguishes recovery-pending and launch-fallback states. Portable coverage is in `python tests/unit/check_overlay_summary_tooltip_contract.py`.
+
+The overlay summary review action now describes whether recovery is pending or ready alongside its settings revision. Portable coverage is in `python tests/unit/check_overlay_summary_review_description_state_contract.py`.
+
+The overlay monitoring action now exposes the capture-monitor status and recovery-pending state as an accessible value. Portable coverage is in `python tests/unit/check_overlay_monitoring_action_state_contract.py`.
+
+The overlay capture-retry action now exposes retry availability and the settings revision in its accessible value and description. Portable coverage is in `python tests/unit/check_overlay_capture_recovery_action_contract.py`.
+
+Overlay estimate attribution now exposes whether the selected combined-output source is ready or retained during recovery. Portable coverage is in `python tests/unit/check_overlay_attribution_state_contract.py`.
+
+Overlay estimate readiness now exposes accepted-snapshot readiness alongside recovery-pending retention. Portable coverage is in `python tests/unit/check_overlay_readiness_state_contract.py`.
+
+Overlay settings retention status now names its ready versus recovery-pending state alongside the settings revision. Portable coverage is in `python tests/unit/check_overlay_retention_state_name_contract.py`.
+
+Overlay interaction mode now names its ready versus recovery-pending state alongside click-through or interactive mode. Portable coverage is in `python tests/unit/check_overlay_interaction_name_contract.py`.
+
+Overlay capture endpoint status now names ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_endpoint_name_contract.py`.
+
+The overlay summary review action now names whether recovery is pending or ready. Portable coverage is in `python tests/unit/check_overlay_summary_action_name_contract.py`.
+
+The overlay endpoint refresh action now exposes refresh availability and recovery readiness. Portable coverage is in `python tests/unit/check_overlay_refresh_state_contract.py`.
+
+Overlay live monitoring status now names ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_live_name_contract.py`.
+
+Overlay estimate attribution now names ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_attribution_name_contract.py`.
+
+Overlay estimate readiness now names ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_readiness_name_contract.py`.
+
+Visualization device recovery status now names whether overlay recovery is pending or ready. Portable coverage is in `python tests/unit/check_visualization_device_name_contract.py`.
+
+Visualization recovery announcements now name whether overlay recovery is pending or ready. Portable coverage is in `python tests/unit/check_visualization_announcement_name_contract.py`.
+
+FFT selection readouts now name overlay recovery context. Portable coverage is in `python tests/unit/check_spectrum_readout_name_contract.py`.
+
+Visualization playback feedback now names overlay recovery context. Portable coverage is in `python tests/unit/check_playback_feedback_name_contract.py`.
+
+Playback epoch feedback now names overlay recovery context. Portable coverage is in `python tests/unit/check_playback_epoch_name_contract.py`.
+
+Visualization selection-reset feedback now names overlay recovery context. Portable coverage is in `python tests/unit/check_selection_reset_name_contract.py`.
+
+Visualization capture retry status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_retry_name_contract.py`.
+
+Visualization data and capture status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_status_name_contract.py`.
+
+Visualization mode status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_mode_name_contract.py`.
+
+Visualization mode controls now name overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_mode_controls_name_contract.py`.
+
+Visualization empty state now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_empty_name_contract.py`.
+
+Visualization load state now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_load_name_contract.py`.
+
+Visualization analysis handoff now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_handoff_name_contract.py`.
+
+Visualization interaction hints now name overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_interaction_hint_name_contract.py`.
+
+Visualization clear-selection action now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_clear_name_contract.py`.
+
+Visualization clear-selection descriptions now include overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_clear_description_contract.py`.
+Visualization mode control descriptions now include overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_mode_description_contract.py`.
+
+Visualization mode control tooltips now include overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_mode_tooltip_contract.py`.
+
+Waveform and FFT mode buttons now name overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_mode_buttons_name_contract.py`.
+
+Waveform and FFT mode button descriptions now include overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_mode_buttons_description_contract.py`.
+
+Waveform and FFT mode button tooltips now include overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_mode_buttons_tooltip_contract.py`.
+
+Visualization clear-selection tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_clear_tooltip_contract.py`.
+
+Visualization interaction hint tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_interaction_tooltip_contract.py`.
+
+Visualization playback feedback tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_playback_tooltip_contract.py`.
+
+Visualization playback epoch tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_epoch_tooltip_contract.py`.
+
+Visualization analysis handoff tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_handoff_tooltip_contract.py`.
+
+Visualization device recovery tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_device_tooltip_contract.py`.
+
+Visualization data/capture status tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_status_tooltip_contract.py`.
+
+Visualization empty-state tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_empty_tooltip_contract.py`.
+
+Visualization load-state tooltip now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_load_tooltip_contract.py`.
+
+Visualization data/capture status description now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_status_description_contract.py`.
+
+Visualization empty-state description now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_empty_description_contract.py`.
+
+Visualization load-state description now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_load_description_contract.py`.
+
+Visualization load-state description now includes overlay recovery readiness. Portable coverage is in `python tests/unit/check_visualization_load_description_contract.py`.
+
+Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
+

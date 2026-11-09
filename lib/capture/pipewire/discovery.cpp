@@ -9,19 +9,33 @@
 #include <cstring>
 #include <string>
 #include <map>
+#include <limits>
 #include <vector>
+#include <algorithm>
 
 namespace beatglass::pipewire {
 void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, const char* serial,
                            const char* name, const char* desc) {
+  constexpr std::size_t max_identity_length = 4096;
   if (!type || std::strcmp(type, PW_TYPE_INTERFACE_Node) || !cls || std::strcmp(cls, "Audio/Sink") ||
-      !serial || !*serial || !name || !*name) return;
-  nodes_[id] = {serial, name, desc && *desc ? desc : name};
+      !serial || !*serial || std::string(serial).find('\0') != std::string::npos ||
+      std::string(serial).size() > max_identity_length || std::string(serial).find_first_not_of(" \t\r\n") == std::string::npos ||
+      !name || !*name || std::string(name).find('\0') != std::string::npos ||
+      std::string(name).size() > max_identity_length || std::string(name).find_first_not_of(" \t\r\n") == std::string::npos) return;
+  const std::string description = desc && *desc ? desc : "";
+  nodes_[id] = {serial, name,
+                description.size() > max_identity_length || description.find('\0') != std::string::npos ||
+                        description.find_first_not_of(" \t\r\n") == std::string::npos
+                    ? name
+                    : description};
 }
 void RegistrySnapshot::remove(std::uint32_t id) { nodes_.erase(id); }
 std::vector<Sink> RegistrySnapshot::sinks() const {
   std::vector<Sink> result;
   for (const auto& [id, sink] : nodes_) result.push_back(sink);
+  std::sort(result.begin(), result.end(), [](const Sink& a, const Sink& b) {
+    return a.serial == b.serial ? a.name < b.name : a.serial < b.serial;
+  });
   return result;
 }
 struct RegistryState {
@@ -51,8 +65,11 @@ static void error(void* data, uint32_t, int, int res, const char* message) {
 // Runs on a control thread only. A sync barrier gives a consistent initial
 // registry view; timeout and daemon errors never masquerade as an empty list.
 Discovery discover_sinks(std::chrono::milliseconds timeout) {
+  if (timeout <= std::chrono::milliseconds::zero()) return {{}, "PipeWire discovery timeout must be positive"};
+  if (timeout.count() > std::numeric_limits<int>::max()) return {{}, "PipeWire discovery timeout is too large"};
   RegistryState state;
   pw_init(nullptr, nullptr);
+  struct PwShutdown { ~PwShutdown() { pw_deinit(); } } pw_shutdown;
   auto* loop = pw_loop_new(nullptr);
   if (!loop) return {{}, "Could not create PipeWire loop"};
   auto* context = pw_context_new(loop, nullptr, 0);

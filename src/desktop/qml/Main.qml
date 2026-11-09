@@ -20,6 +20,10 @@ ApplicationWindow {
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
     property var analysisJobBridge: typeof analysisJob !== "undefined" ? analysisJob : null
+    readonly property bool analysisResultMatchesSelection: analysisJobBridge !== null
+        && selectedAudioUrl.toString() !== ""
+        && analysisJobBridge.sourcePath !== ""
+        && analysisJobBridge.sourcePath === selectedAudioUrl.toLocalFile()
     property var captureMonitorBridge: typeof captureMonitor !== "undefined" ? captureMonitor : null
     property var endpointSelectionBridge: typeof endpointSelection !== "undefined" ? endpointSelection : null
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
@@ -39,6 +43,8 @@ ApplicationWindow {
     property bool overlayPersistedDiagnosticDismissed: false
     property url browseFolder: ""
     property var catalogRows: []
+    property var recursiveCatalogRows: []
+    property bool recursiveCatalogActive: false
     property bool sortDescending: false
     property string selectedName: ""
     property url selectedAudioUrl: ""
@@ -65,6 +71,100 @@ ApplicationWindow {
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     Shortcut {
+        objectName: "libraryFilterFocusShortcut"
+        sequence: "Ctrl+L"
+        context: Qt.ApplicationShortcut
+        onActivated: { search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused.") }
+    }
+    Shortcut {
+        objectName: "libraryRecursiveCatalogShortcut"
+        sequence: "Ctrl+Alt+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive
+        onActivated: {
+            addFolderRecursively.click()
+            window.announceVisualizationRecovery("Recursive Library catalog requested; results will receive focus when ready.")
+        }
+    }
+    Shortcut {
+        objectName: "libraryRefreshShortcut"
+        sequence: "Ctrl+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.browseFolder.toString() !== ""
+        onActivated: { files.refresh(); window.refreshCatalog(); window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed from the keyboard; entry selection cleared."); browser.forceActiveFocus() }
+    }
+    Shortcut {
+        objectName: "libraryParentFolderShortcut"
+        sequence: "Ctrl+Alt+Up"
+        context: Qt.ApplicationShortcut
+        enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
+        onActivated: {
+            window.clearSelectedAudio()
+            window.browseFolder = files.parentFolder
+            browser.currentIndex = -1
+            search.text = ""
+            window.recursiveCatalogActive = false
+            window.recursiveCatalogRows = []
+            window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
+            browser.forceActiveFocus()
+        }
+    }
+    Shortcut {
+        objectName: "librarySortShortcut"
+        sequence: "Ctrl+Alt+S"
+        context: Qt.ApplicationShortcut
+        onActivated: {
+            window.sortDescending = !window.sortDescending
+            window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
+            sortOrder.forceActiveFocus()
+        }
+    }
+    Shortcut {
+        objectName: "librarySortFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+O"
+        context: Qt.ApplicationShortcut
+        onActivated: {
+            navigation.currentIndex = 0
+            sortOrder.forceActiveFocus()
+            window.announceVisualizationRecovery("Library sort control focused; activate to reverse name order.")
+        }
+    }
+    Shortcut {
+        objectName: "libraryMetadataFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+M"
+        context: Qt.ApplicationShortcut
+        enabled: window.selectedAudioUrl.toString() !== ""
+        onActivated: {
+            navigation.currentIndex = 0
+            metadataStatusLabel.forceActiveFocus()
+            window.announceVisualizationRecovery("Selected Library metadata status focused.")
+        }
+    }
+    Shortcut {
+        objectName: "libraryActivateEntryShortcut"
+        sequence: "Ctrl+Alt+Enter"
+        context: Qt.ApplicationShortcut
+        enabled: !window.recursiveCatalogActive && browser.currentIndex >= 0
+        onActivated: {
+            window.activateEntry(browser.currentIndex)
+            window.announceVisualizationRecovery("Activated the focused Library entry.")
+        }
+    }
+    Shortcut {
+        objectName: "playbackSeekBackShortcut"
+        sequence: "Alt+Left"
+        context: Qt.ApplicationShortcut
+        enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection
+        onActivated: { window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - 5 * playbackSampleRate.value), window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState("Playback sought backward five seconds from the keyboard.") }
+    }
+    Shortcut {
+        objectName: "playbackSeekForwardShortcut"
+        sequence: "Alt+Right"
+        context: Qt.ApplicationShortcut
+        enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection
+        onActivated: { window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * playbackSampleRate.value, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState("Playback sought forward five seconds from the keyboard.") }
+    }
+    Shortcut {
         objectName: "overlayEscapeShortcut"
         sequence: "Escape"
         context: Qt.ApplicationShortcut
@@ -72,32 +172,397 @@ ApplicationWindow {
                          window.unlockOverlayAndRestoreFocus()
     }
     Shortcut {
+        objectName: "overlayRestoreFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+W"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            restoreOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Restore overlay control focused.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayRetryFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+Y"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && !window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+        onActivated: {
+            navigation.currentIndex = 1
+            retryOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Retry overlay control focused.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayReapplyFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+P"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            reapplyOverlaySettings.forceActiveFocus()
+            window.announceCaptureRecoveryState("Reapply saved settings control focused.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayRetentionFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+S"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge !== null
+        onActivated: {
+            navigation.currentIndex = 1
+            overlaySettingsRetentionReviewAction.forceActiveFocus()
+            window.announceCaptureRecoveryState("Retained overlay settings review control focused.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayUnlockFocusShortcut"
+        sequence: "Ctrl+Alt+U"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough
+        onActivated: {
+            navigation.currentIndex = 1
+            unlockOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction.")
+        }
+    }
+    Shortcut {
+        objectName: "overlaySummaryReviewShortcut"
+        sequence: "Ctrl+Alt+Shift+M"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge !== null
+        onActivated: {
+            navigation.currentIndex = 1
+            overlaySettingsSummaryReviewAction.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+        }
+    }
+    Shortcut {
+        objectName: "overlayHideFocusShortcut"
+        sequence: "Ctrl+Alt+J"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+        onActivated: {
+            navigation.currentIndex = 1
+            hideOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Hide overlay control focused.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayShowFocusShortcut"
+        sequence: "Ctrl+Alt+W"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            showOverlay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Show overlay control focused.")
+        }
+    }
+    Shortcut {
+        objectName: "overlaySizeFocusShortcut"
+        sequence: "Ctrl+Alt+Z"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            overlaySize.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + ".")
+        }
+    }
+    Shortcut {
+        objectName: "overlayClickThroughFocusShortcut"
+        sequence: "Ctrl+Alt+K"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            clickThroughToggle.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay click-through control focused; current mode is " + (window.overlayBridge.clickThrough ? "enabled" : "disabled") + ".")
+        }
+    }
+    Shortcut {
+        objectName: "overlayOpacityFocusShortcut"
+        sequence: "Ctrl+Alt+L"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            navigation.currentIndex = 1
+            overlayOpacityControl.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay opacity control focused; current value is " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayClickThroughShortcut"
+        sequence: "Ctrl+Alt+I"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            const requested = !window.overlayBridge.clickThrough
+            const applied = window.overlayBridge.setClickThrough(requested)
+            if (!applied) {
+                window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active.")
+                return
+            }
+            window.announceCaptureRecoveryState(requested
+                ? "DJ overlay click-through enabled; press Escape to unlock interaction."
+                : "DJ overlay interaction restored; keyboard and pointer input are available.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayRetryShortcut"
+        sequence: "Ctrl+Alt+Y"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && !window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until recovery succeeds.")
+            window.showOverlayAndHideControls()
+        }
+    }
+    Shortcut {
+        objectName: "overlayDisplayFocusShortcut"
+        sequence: "Ctrl+Alt+D"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0
+        onActivated: {
+            navigation.currentIndex = 1
+            overlayDisplay.forceActiveFocus()
+            window.announceCaptureRecoveryState(window.overlayDisplaySelectionRequired
+                ? "Overlay display selection required; choose an available display."
+                : "Overlay display selector focused.")
+        }
+    }
+    Shortcut {
+        objectName: "overlayReapplyShortcut"
+        sequence: "Ctrl+Alt+Shift+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity.")
+            window.reapplyOverlaySettingsAndRestore()
+        }
+    }
+    Shortcut {
+        objectName: "overlayHideShortcut"
+        sequence: "Ctrl+Alt+H"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            if (window.overlayHiddenByUser)
+                window.showOverlayAndHideControls()
+            else
+                window.hideOverlayAndRestoreControls()
+        }
+    }
+    Shortcut {
+        objectName: "overlayOpacityResetShortcut"
+        sequence: "Ctrl+Alt+Shift+O"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            const resetOpacity = 0.9
+            const applied = window.overlayBridge.setOpacity(resetOpacity)
+            if (applied) {
+                window.overlayOpacityEditInFlight = true
+                window.overlayPendingOpacity = resetOpacity
+                window.overlaySettingsRevision += 1
+                window.announceCaptureRecoveryState("DJ overlay opacity reset to 90 percent.")
+            } else {
+                window.syncOverlaySettingsStateFromBridge()
+                window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active.")
+            }
+        }
+    }
+    Shortcut {
+        objectName: "overlaySizeShortcut"
+        sequence: "Ctrl+Alt+O"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge && window.overlayBridge.available
+            && window.overlayBridge.screenNames.length > 0
+            && !window.overlayDisplaySelectionRequired
+        onActivated: {
+            const sizes = [[250, 110], [310, 130], [430, 180]]
+            const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
+            const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
+            if (resized) {
+                window.overlayPreferredSizeIndex = nextIndex
+                window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
+            } else {
+                window.syncOverlaySettingsStateFromBridge()
+                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
+            }
+        }
+    }
+    Shortcut {
         objectName: "playbackPauseShortcut"
         sequence: "Ctrl+Alt+Space"
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null
             && (window.playbackBridge.state === "Playing" || window.playbackBridge.state === "Paused")
-        onActivated: window.playbackBridge.state === "Paused"
-            ? window.playbackBridge.resume()
-            : window.playbackBridge.pause()
+        onActivated: window.togglePlaybackPause()
     }
     Shortcut {
         objectName: "visualizationResumeShortcut"
         sequence: "Ctrl+Alt+R"
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null && window.playbackBridge.state === "Paused"
-        onActivated: { window.playbackBridge.resume(); window.announceVisualizationRecovery("Playback resumed from keyboard shortcut; accepted snapshot retained.") }
+        onActivated: {
+            const resumed = window.playbackBridge.resume()
+            window.announceVisualizationRecovery(resumed
+                ? "Playback resumed from keyboard shortcut; accepted snapshot retained."
+                : "Playback resume from keyboard shortcut failed; accepted snapshot retained.")
+        }
+    }
+    Shortcut {
+        objectName: "analysisCancelShortcut"
+        sequence: "Ctrl+Alt+C"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canCancel
+        onActivated: {
+            window.analysisJobBridge.cancel()
+            window.announceVisualizationRecovery("Analysis cancelled from the keyboard; waiting for a replacement accepted snapshot.")
+        }
+    }
+    Shortcut {
+        objectName: "analysisRetryShortcut"
+        sequence: "Ctrl+Alt+Y"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canRetry
+        onActivated: window.retryVisualizationAnalysis()
+    }
+    Shortcut {
+        objectName: "analysisDiscardShortcut"
+        sequence: "Ctrl+Alt+D"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canRetry
+        onActivated: {
+            window.analysisJobBridge.discard()
+            window.announceVisualizationRecovery("Analysis recovery discarded from the keyboard; focus remains on recovery controls.")
+        }
+    }
+    Shortcut {
+        objectName: "analysisBatchRetryShortcut"
+        sequence: "Ctrl+Alt+B"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null
+            && window.analysisJobBridge.retryBatch !== undefined
+            && window.analysisJobBridge.batchAcceptedCount > 0
+            && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
+        onActivated: {
+            const retried = window.analysisJobBridge.retryBatch()
+            window.announceVisualizationRecovery(retried
+                ? "Analysis batch retry queued from the keyboard."
+                : "Analysis batch retry was rejected; no replacement work was queued.")
+        }
+    }
+    Shortcut {
+        objectName: "analysisBatchCancelShortcut"
+        sequence: "Ctrl+Alt+K"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null
+            && window.analysisJobBridge.cancelBatch !== undefined
+            && window.analysisJobBridge.batchAcceptedCount > 0
+            && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running")
+        onActivated: {
+            window.analysisJobBridge.cancelBatch()
+            window.announceVisualizationRecovery("Analysis batch cancelled from the keyboard; waiting for a replacement accepted snapshot.")
+        }
+    }
+    Shortcut {
+        objectName: "analysisBatchDiscardShortcut"
+        sequence: "Ctrl+Alt+Shift+D"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null
+            && window.analysisJobBridge.discardBatch !== undefined
+            && window.analysisJobBridge.batchAcceptedCount > 0
+            && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
+        onActivated: {
+            window.analysisJobBridge.discardBatch()
+            window.announceVisualizationRecovery("Analysis batch recovery discarded from the keyboard; focus remains on recovery controls.")
+        }
+    }
+    Shortcut {
+        objectName: "storageReopenShortcut"
+        sequence: "Ctrl+Alt+O"
+        context: Qt.ApplicationShortcut
+        enabled: typeof storageRecovery !== "undefined" && storageRecovery.open !== undefined
+            && (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
+        onActivated: {
+            storageRecovery.open()
+            window.announceVisualizationRecovery("Storage reopen requested from the keyboard; persisted recovery will refresh when available.")
+        }
     }
     Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped"
-        onActivated: { window.playbackBridge.stop(); window.announceVisualizationRecovery("Playback stopped from keyboard shortcut; accepted snapshot cleared.") }
+        onActivated: window.stopPlaybackWithRecovery("Playback stopped from keyboard shortcut; accepted snapshot cleared.")
     }
-    Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus() } }
+    Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused; type to filter the current folder.") } }
+    Shortcut { objectName: "libraryClearFilterShortcut"; sequence: "Ctrl+Alt+Shift+Backspace"; context: Qt.ApplicationShortcut; enabled: search.text !== ""; onActivated: { search.text = ""; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.") } }
+    Shortcut { objectName: "libraryFolderPathFocusShortcut"; sequence: "Ctrl+Alt+Shift+I"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; folderPath.forceActiveFocus(); window.announceVisualizationRecovery("Current Library folder path focused.") } }
+    Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; parentFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library parent-folder action focused.") } }
+    Shortcut { objectName: "libraryRecursiveFocusShortcut"; sequence: "Ctrl+Alt+Shift+Z"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; addFolderRecursively.forceActiveFocus(); window.announceVisualizationRecovery("Library recursive catalog action focused.") } }
+    Shortcut { objectName: "libraryRecursiveReturnFocusShortcut"; sequence: "Ctrl+Alt+Shift+J"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; returnToFolderBrowser.forceActiveFocus(); window.announceVisualizationRecovery("Library return-to-folder action focused.") } }
+    Shortcut { objectName: "libraryRecursiveAnalyzeFocusShortcut"; sequence: "Ctrl+Alt+Shift+K"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; analyzeRecursiveResults.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library analysis action focused.") } }
+    Shortcut { objectName: "libraryBatchStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+U"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch status focused.") } }
+    Shortcut { objectName: "libraryRecoveryStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+V"; context: Qt.ApplicationShortcut; enabled: typeof storageRecovery !== "undefined"; onActivated: { navigation.currentIndex = 0; analysisRecoveryStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis recovery status focused.") } }
+    Shortcut { objectName: "libraryAdmissionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+X"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisAdmissionStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis admission status focused.") } }
+    Shortcut { objectName: "libraryAnalysisProgressFocusShortcut"; sequence: "Ctrl+Alt+Shift+G"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisProgress.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis progress focused.") } }
+    Shortcut { objectName: "libraryClearShortcut"; sequence: "Ctrl+Alt+Backspace"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Library selection cleared; choose another source for fresh analysis."); browser.forceActiveFocus() } }
+    Shortcut { objectName: "libraryReopenShortcut"; sequence: "Ctrl+Alt+Shift+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null && !window.playbackMatchesSelection; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Selected Library source reopened for playback." : "Selected Library source could not be reopened for playback."); reopenSelectedPlayback.forceActiveFocus() } }
+    Shortcut { objectName: "libraryPlayShortcut"; sequence: "Ctrl+Alt+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Playing selected Library source " + window.selectedName + "." : "Selected Library source could not be opened for playback."); playSelectedTrack.forceActiveFocus() } }
+    Shortcut { objectName: "libraryPlaybackFocusShortcut"; sequence: "Ctrl+Alt+Shift+Y"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { navigation.currentIndex = 0; playSelectedTrack.forceActiveFocus(); window.announceVisualizationRecovery("Selected Library playback action focused.") } }
+    Shortcut { objectName: "libraryRefreshFocusShortcut"; sequence: "Ctrl+Alt+Shift+Q"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; refreshFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library refresh action focused.") } }
+    Shortcut { objectName: "libraryChooseFolderFocusShortcut"; sequence: "Ctrl+Alt+Shift+D"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; chooseFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library folder chooser focused.") } }
+    Shortcut { objectName: "libraryCatalogStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+C"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; catalogResultCount.forceActiveFocus(); window.announceVisualizationRecovery("Library catalog result count focused.") } }
+    Shortcut { objectName: "librarySelectionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+E"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; librarySelectionStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library selection status focused.") } }
+    Shortcut { objectName: "libraryShortcutHelpFocusShortcut"; sequence: "Ctrl+Alt+Shift+H"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryShortcutHelp.forceActiveFocus(); window.announceVisualizationRecovery("Library keyboard shortcut help focused.") } }
+    Shortcut { objectName: "libraryAnalyzeShortcut"; sequence: "Ctrl+Alt+A"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"; onActivated: { const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile()); window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry."); analyzeSelectedAudio.forceActiveFocus() } }
+    Shortcut { objectName: "libraryAnalysisFocusShortcut"; sequence: "Ctrl+Alt+Shift+N"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { navigation.currentIndex = 0; analyzeSelectedAudio.forceActiveFocus(); window.announceVisualizationRecovery("Selected Library analysis action focused.") } }
+    Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library folder browser focused.") } }
+    Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; if (window.recursiveCatalogActive) recursiveResultsView.forceActiveFocus(); else browser.forceActiveFocus(); window.announceVisualizationRecovery(window.recursiveCatalogActive ? "Recursive Library results focused." : "Library folder results focused.") } }
+    Shortcut { objectName: "libraryRecursiveResultsFocusShortcut"; sequence: "Ctrl+Alt+Shift+R"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; recursiveResultsView.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library results focused.") } }
+    Shortcut { objectName: "libraryRecursiveReturnShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; navigation.currentIndex = 0; window.announceVisualizationRecovery("Returned to the current folder browser."); browser.forceActiveFocus() } }
+    Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus(); window.announceVisualizationRecovery("Library tab focused.") } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
+    Shortcut {
+        objectName: "bulkRecoveryDiscardShortcut"
+        sequence: "Ctrl+Alt+Shift+A"
+        context: Qt.ApplicationShortcut
+        enabled: typeof storageRecovery !== "undefined" && storageRecovery.discardRuns !== undefined
+            && storageRecovery.retryableRunIds.length > 0
+            && !window.storageReopenPending
+        onActivated: {
+            storageRecovery.discardRuns(storageRecovery.retryableRunIds)
+            window.announceVisualizationRecovery("All saved recovery runs discarded from the keyboard.")
+        }
+    }
     Shortcut {
         objectName: "persistedRecoveryShortcut"
         sequence: "Ctrl+Shift+R"
@@ -383,6 +848,9 @@ ApplicationWindow {
         return window.restoreOverlayVisualStateFromBridge()
     }
     function refreshCatalog() {
+        window.recursiveCatalogActive = false
+        window.recursiveCatalogRows = []
+        if (typeof recursiveResultsView !== "undefined") recursiveResultsView.currentIndex = -1
         window.catalogRows = window.libraryCatalogBridge && window.browseFolder.toString() !== ""
             ? window.libraryCatalogBridge.browse(window.browseFolder, search.text) : []
         window.catalogDiagnostic = window.libraryCatalogBridge && window.libraryCatalogBridge.lastDiagnostic !== undefined
@@ -408,13 +876,13 @@ ApplicationWindow {
     function showOverlayAndHideControls() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayDisplayRecoveryPending = true
-            window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
+            window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             overlayDisplay.forceActiveFocus()
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
-            window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback.")
+            window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             overlayDisplay.forceActiveFocus()
             return false
         }
@@ -422,7 +890,7 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = false
         if (!window.overlayBridge.showOverlay()) {
             window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
+            window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             window.restoreOverlayFallbackControls("")
             overlayDisplay.forceActiveFocus()
             return false
@@ -492,12 +960,14 @@ ApplicationWindow {
         if (savedIndex < 0 || savedIndex >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
             overlayDisplay.forceActiveFocus()
             return false
         }
         if (!window.overlayBridge.moveToScreen(savedIndex)
                 || !window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied.")
             overlayDisplay.forceActiveFocus()
             return false
@@ -507,7 +977,16 @@ ApplicationWindow {
         window.overlayDisplaySelectionRequired = false
         if (window.overlayDisplayRecoveryPending) {
             window.overlayDisplayRecoveryPending = false
-            window.overlayBridge.showOverlay()
+            if (window.overlayHiddenByUser) {
+                window.announceCaptureRecoveryState("DJ overlay display recovered; it remains hidden by user request. Use Restore overlay when ready.")
+                return true
+            }
+            if (!window.overlayBridge.showOverlay()) {
+                window.overlayDisplayRecoveryPending = true
+                window.overlayDisplaySelectionRequired = true
+                window.restoreOverlayFallbackControls("DJ overlay could not be restored after display recovery; choose another display or retry.")
+                return false
+            }
             window.announceCaptureRecoveryState("DJ overlay recovered on the saved display with persisted visual settings.")
         }
         return true
@@ -522,10 +1001,16 @@ ApplicationWindow {
     function persistOverlayDisplaySelection(index, name) {
         if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
+            window.overlayPreferredScreenIndex = -1
+            window.overlayPreferredDisplayName = ""
+            overlayDisplay.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
             return false
         }
         if (!window.overlayBridge.moveToScreen(index)) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             window.announceCaptureRecoveryState("Overlay display selection could not be applied; control-window fallback remains active.")
             window.show()
             window.raise()
@@ -535,6 +1020,7 @@ ApplicationWindow {
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             window.announceCaptureRecoveryState("Overlay display selected, but persisted visual state could not be reapplied.")
             window.show()
             window.raise()
@@ -542,6 +1028,7 @@ ApplicationWindow {
             overlayDisplay.forceActiveFocus()
             return false
         }
+        window.syncOverlaySettingsStateFromBridge()
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
         window.overlayDisplaySelectionRequired = false
@@ -661,14 +1148,14 @@ ApplicationWindow {
                     text: "Press Escape to unlock overlay controls"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     Accessible.name: "Overlay recovery hint"
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayBridge !== null ? "; retained-settings and summary review available" : "; retained-settings and summary review unavailable")
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
                 }
-                Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current live tempo estimate" }
-                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current live key and chord estimate" }
-                Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output capture status" }
+                Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current live tempo estimate" }
+                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current live key and chord estimate" }
+                Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current output capture status" }
                 Button {
                     objectName: "overlayRetryCapture"
                     visible: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" && window.captureMonitorBridge.start
@@ -683,21 +1170,61 @@ ApplicationWindow {
         }
     }
 
+    function playSelectedLibraryTrack() {
+        if (!window.playbackBridge || window.selectedAudioUrl.toString() === "") {
+            window.announceCaptureRecoveryState("Select an audio source before starting playback.")
+            return false
+        }
+        const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1)
+        window.announceCaptureRecoveryState(accepted
+            ? "Playing selected Library source " + window.selectedName + "."
+            : "Selected Library source could not be opened for playback.")
+        return accepted
+    }
+
+    function reopenSelectedLibraryTrack() {
+        if (!window.playbackBridge || window.selectedAudioUrl.toString() === "") {
+            window.announceCaptureRecoveryState("Select an audio source before reopening playback.")
+            return false
+        }
+        if (window.playbackMatchesSelection) {
+            window.announceCaptureRecoveryState("Reopen selected playback is no longer needed; the playback source already matches the selection.")
+            return false
+        }
+        const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1)
+        window.announceCaptureRecoveryState(accepted
+            ? "Selected Library source reopened for playback."
+            : "Selected Library source could not be reopened for playback.")
+        return accepted
+    }
+
     function activateEntry(index) {
         if (index < 0 || index >= files.count) return
         const url = files.get(index, "fileUrl")
         if (files.isFolder(index)) {
+            window.clearSelectedAudio()
+            window.recursiveCatalogActive = false
+            window.recursiveCatalogRows = []
             browseFolder = url
+            browser.currentIndex = -1
+            search.text = ""
+            window.announceVisualizationRecovery("Opened Library folder " + files.get(index, "fileName") + ".")
         } else {
+            window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
             selectedName = files.get(index, "fileName")
             selectedAudioUrl = url
             metadataBridge.inspect(url)
+            window.announceVisualizationRecovery("Selected source changed; prior analysis presentation is stale until this source is analyzed.")
+            analyzeSelectedAudio.forceActiveFocus()
         }
     }
     function clearSelectedAudio() {
         window.selectedName = ""
         window.selectedAudioUrl = ""
         window.metadataStatus = "Choose an audio file to inspect its metadata."
+        window.clearVisualizationForCaptureState("Library selection cleared; choose another source for fresh analysis.")
+        window.announceVisualizationRecovery("Library selection cleared; choose another source for fresh analysis.")
+        browser.forceActiveFocus()
     }
     function clearVisualizationForCaptureState(reason) {
         window.visualizationSelectionResetReason = reason !== undefined ? reason : (window.liveBridge.status === "Error"
@@ -710,6 +1237,7 @@ ApplicationWindow {
         window.visualizationRecoveryAnnouncement = window.visualizationSelectionResetReason
         if (typeof visualizationCanvas !== "undefined") {
             visualizationCanvas.selectedPosition = -1
+            visualizationCanvas.selectedSpectrumBin = -1
             visualizationCanvas.renderedRevision = -1
         visualizationCanvas.acceptedPlaybackEpoch = -1
         visualizationCanvas.acceptedPlaybackSource = ""
@@ -773,6 +1301,7 @@ ApplicationWindow {
     }
     function clearVisualizationPositionAndFocus() {
         visualizationCanvas.selectedPosition = -1
+        visualizationCanvas.selectedSpectrumBin = -1
         visualizationCanvas.requestPaint()
         visualizationCanvas.forceActiveFocus()
     }
@@ -790,6 +1319,78 @@ ApplicationWindow {
             return false
         return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
     }
+
+    function stopPlaybackWithRecovery(message) {
+        if (!window.playbackBridge || window.playbackBridge.state === "Stopped")
+            return false
+        window.playbackBridge.stop()
+        window.announceVisualizationRecovery(message)
+        return true
+    }
+
+    function togglePlaybackPause() {
+        if (!window.playbackBridge)
+            return false
+        const paused = window.playbackBridge.state === "Paused"
+        const changed = paused ? window.playbackBridge.resume() : window.playbackBridge.pause()
+        window.announceCaptureRecoveryState(changed
+            ? (paused ? "Playback resumed." : "Playback paused.")
+            : "Playback pause or resume failed; state was unchanged.")
+        return changed
+    }
+
+    function refreshPlaybackOutputs() {
+        if (!window.playbackBridge)
+            return false
+        window.playbackBridge.refreshDevices()
+        window.announceCaptureRecoveryState("Playback outputs refreshed; choose an available device before starting native playback.")
+        return true
+    }
+
+    function playbackDeviceIdAt(index, label) {
+        if (index < 0 || !label)
+            return -1
+        const separator = label.indexOf(":")
+        const parsed = separator > 0 ? Number(label.slice(0, separator)) : Number.NaN
+        return isFinite(parsed) ? parsed : index
+    }
+
+    function startNativePlaybackOutput() {
+        if (!window.playbackBridge)
+            return false
+        const started = window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096)
+        window.announceCaptureRecoveryState(started
+            ? "Native playback started on the selected output device."
+            : "Native playback could not start; check the selected output device and format.")
+        return started
+    }
+
+    function reopenSelectedPlayback() {
+        if (!window.playbackBridge || !window.selectedAudioUrl || window.selectedAudioUrl.toString() === "") {
+            window.announceVisualizationRecovery("Select a Library track before reopening playback.")
+            return false
+        }
+        const nextEpoch = window.playbackBridge.epoch + 1
+        const reopened = window.playbackBridge.state === "Stopped"
+            ? window.playbackBridge.openSource(window.selectedAudioUrl, nextEpoch)
+            : window.playbackBridge.replaceSource(window.selectedAudioUrl, nextEpoch)
+        window.announceVisualizationRecovery(reopened
+            ? "Selected Library track reopened; visualization selection was reset."
+            : "Selected Library track could not be reopened; playback state was unchanged.")
+        return reopened
+    }
+
+    function retryNativePlaybackOutput() {
+        if (!window.playbackBridge) {
+            window.announceCaptureRecoveryState("Native playback is unavailable in this build.")
+            return false
+        }
+        const retried = window.playbackBridge.retryNative()
+        window.announceCaptureRecoveryState(retried
+            ? "Native playback output recovered on the selected device."
+            : "Native playback output retry failed; check the selected device and format.")
+        return retried
+    }
     function syncVisualizationSelectionFromPlayback(frame, durationFrames) {
         if (!isFinite(frame) || !isFinite(durationFrames) || durationFrames <= 0
                 || visualizationCanvas.acceptedResultIdentity === ""
@@ -806,6 +1407,14 @@ ApplicationWindow {
                     || window.liveBridge.status === "Starting"
                     || window.liveBridge.status === "Reacquiring")
                 window.clearVisualizationForCaptureState()
+            if (window.liveBridge.status === "Starting")
+                window.announceVisualizationRecovery("Output monitoring is starting; waiting for the first accepted visualization snapshot.")
+            else if (window.liveBridge.status === "Reacquiring")
+                window.announceVisualizationRecovery("Output monitoring is reacquiring; previous visualization selection was cleared.")
+            else if (window.liveBridge.status === "Error")
+                window.announceVisualizationRecovery("Output monitoring reported an error; retry monitoring after checking the selected output and permission state.")
+            else if (window.liveBridge.status === "Tracking")
+                window.announceVisualizationRecovery("Output monitoring is tracking; visualization updates will appear as accepted data arrives.")
         }
     }
     Connections {
@@ -996,7 +1605,7 @@ ApplicationWindow {
                 objectName: "reduceMotion"
                 text: "Reduce motion"
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
-                Accessible.value: checked ? "enabled" : "disabled"
+                        Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                 activeFocusOnTab: true
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
@@ -1172,38 +1781,100 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                     Accessible.name: "Library catalog status: " + text
                     ToolTip.text: "Library catalog status"
-                    Accessible.value: text
+                    Accessible.value: text + "; summary review available"
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Current catalog result count"
                     Accessible.description: text
                 }
+                Label {
+                    id: librarySelectionStatus
+                    objectName: "librarySelectionStatus"
+                    activeFocusOnTab: true
+                    text: window.selectedAudioUrl.toString() === "" ? "No Library source selected." : "Selected source: " + window.selectedName
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    Accessible.name: "Library selection status: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: window.selectedAudioUrl.toString() === "" ? "No audio source is selected. Choose an audio file from the browser." : text + ". Playback and analysis actions apply to this source."
+                    ToolTip.text: Accessible.description
+                }
+                Label {
+                    id: libraryShortcutHelp
+                    objectName: "libraryShortcutHelp"
+                    activeFocusOnTab: true
+                    text: "Shortcuts: Ctrl+Alt+Shift+H help · Ctrl+F filter · Ctrl+Alt+Shift+Backspace clear filter · Ctrl+Alt+Shift+I folder path · Ctrl+Alt+Shift+W parent action · Ctrl+Alt+Shift+Z recursive action · Ctrl+Alt+Shift+J return action · Ctrl+Alt+Shift+K recursive analysis · Ctrl+Alt+Shift+U batch status · Ctrl+Alt+Shift+V recovery status · Ctrl+Alt+Shift+X admission status · Ctrl+Alt+Shift+G analysis progress · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+Shift+M metadata status · Ctrl+Alt+Shift+N analysis action · Ctrl+Alt+Shift+Y playback action · Ctrl+Alt+Shift+Q refresh action · Ctrl+Alt+Shift+D folder chooser · Ctrl+Alt+Shift+C catalog status · Ctrl+Alt+Shift+E selection status · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    Accessible.name: "Library keyboard shortcut help"
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "Keyboard shortcuts for filtering, focusing results, reversing sort order, and clearing the current selection."
+                    ToolTip.text: Accessible.description
+                }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: folderPicker.open() }
+                    Button { id: chooseFolder; text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: folderPicker.open() }
                     Button {
-                        text: "Up"; objectName: "parentFolder"
+                        id: addFolderRecursively
+                        text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
+                        enabled: window.libraryCatalogBridge !== null && window.browseFolder.toString() !== ""
+                        Accessible.name: "Add folder recursively"; Accessible.role: Accessible.Button
+                        Accessible.description: "Enumerate supported audio files in this folder and all descendant folders without following links."
+                        ToolTip.text: "Enumerate supported audio files in this folder and all descendant folders"
+                        onClicked: {
+                            window.clearSelectedAudio()
+                            browser.currentIndex = -1
+                            window.recursiveCatalogRows = window.libraryCatalogBridge.browseRecursive(window.browseFolder, search.text)
+                            window.recursiveCatalogActive = true
+                            window.catalogDiagnostic = window.libraryCatalogBridge.lastDiagnostic
+                            window.announceVisualizationRecovery(window.recursiveCatalogRows.length + " recursive catalog entries found; use the folder browser to inspect or select a source.")
+                            recursiveResultsView.forceActiveFocus()
+                        }
+                    }
+                    Button {
+                        id: parentFolder; text: "Up"; objectName: "parentFolder"
                         activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
-                        onClicked: window.browseFolder = files.parentFolder
+                        onClicked: {
+                            window.clearSelectedAudio()
+                            window.browseFolder = files.parentFolder
+                            browser.currentIndex = -1
+                            search.text = ""
+                            window.recursiveCatalogActive = false
+                            window.recursiveCatalogRows = []
+                            window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
+                            browser.forceActiveFocus()
+                        }
                         Accessible.name: "Go to parent folder"
                         Accessible.role: Accessible.Button
                         Accessible.description: "Go to the parent folder"
                         ToolTip.text: "Go to the parent folder"
                     }
+                    Button {
+                        id: refreshFolder; text: "Refresh"; objectName: "refreshFolder"; activeFocusOnTab: true
+                        enabled: window.browseFolder.toString() !== ""
+                        Accessible.name: "Refresh folder contents"; Accessible.role: Accessible.Button
+                        Accessible.description: "Re-read the current folder so newly added, removed, or changed audio files are reflected."
+                        ToolTip.text: "Refresh the current folder contents"
+                        onClicked: { files.refresh(); window.refreshCatalog(); window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed; entry selection cleared."); browser.forceActiveFocus() }
+                    }
                     Label {
+                        id: folderPath
                         objectName: "folderPath"
+                        activeFocusOnTab: true
                         text: window.browseFolder.toString() || "No folder selected"
                         elide: Text.ElideMiddle; Layout.fillWidth: true
                         Accessible.name: "Current folder: " + text
-                        Accessible.value: text
+                        Accessible.value: text + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.StaticText
                         ToolTip.text: "Current folder path"
                     }
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; ToolTip.text: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog() }
-                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.role: Accessible.Button; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; ToolTip.text: "Reverse file-name sort order"; onClicked: window.sortDescending = !window.sortDescending }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; ToolTip.text: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog(); onAccepted: { window.announceVisualizationRecovery(files.count + " Library entries match the filter."); browser.forceActiveFocus() }; Keys.onEscapePressed: { text = ""; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.") } }
+                    Button { objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.role: Accessible.Button; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; ToolTip.text: "Reverse file-name sort order"; onClicked: { window.sortDescending = !window.sortDescending; window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.") } }
                 }
                 RowLayout {
                     Layout.fillWidth: true
@@ -1211,17 +1882,64 @@ ApplicationWindow {
                     Label { text: "Type"; font.bold: true; Layout.preferredWidth: 100; Accessible.name: "File type column"; Accessible.role: Accessible.ColumnHeader; ToolTip.text: "Audio format or folder type" }
                 }
                 Label {
+                    id: catalogResultCount
                     objectName: "catalogResultCount"
-                    text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : "Catalog: " + window.catalogRows.length + " matching entries"
+                    activeFocusOnTab: true
+                        text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : window.recursiveCatalogActive ? "Recursive catalog: " + window.recursiveCatalogRows.length + " entries" : "Catalog: " + window.catalogRows.length + " matching entries"
                     Accessible.name: "Catalog results: " + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current filtered catalog result count"
                 }
+                Label {
+                    objectName: "libraryBatchRecoveryBanner"
+                    visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                    text: visible ? ("Analysis batch: " + window.analysisJobBridge.status
+                          + " · accepted " + window.analysisJobBridge.batchAcceptedCount
+                          + " · complete " + window.analysisJobBridge.batchCompletedCount
+                          + " · failed " + window.analysisJobBridge.batchFailedCount
+                          + " · cancelled " + window.analysisJobBridge.batchCancelledCount
+                          + ((window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? " · recovery actions available below" : "")) : ""
+                    Accessible.name: "Library analysis batch recovery: " + text
+                    Accessible.value: visible ? text : ""
+                    Accessible.role: Accessible.Status
+                    Accessible.description: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? text + ". Retry or discard the retained batch in the selected source panel; the prior result is cleared before retry." : visible ? text + ". Progress updates as worker outcomes are published." : "No analysis batch is active."
+                    ToolTip.text: visible ? Accessible.description : "Library analysis batch status"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
+                Label {
+                    objectName: "libraryStorageRecoveryHealth"
+                    visible: typeof storageRecovery !== "undefined"
+                    text: visible ? ("Library storage: " + storageRecovery.status
+                          + (storageRecovery.retryableRunIds.length > 0 ? " · " + storageRecovery.retryableRunIds.length + " saved run(s)" : " · no saved runs")) : ""
+                    Accessible.name: "Library storage recovery health"
+                    Accessible.value: visible ? text : ""
+                    Accessible.role: Accessible.Status
+                    Accessible.description: visible && (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
+                        ? text + ". Reopen storage before retrying or discarding saved analysis runs."
+                        : visible ? text + ". Saved recovery state is synchronized with the Library controls." : "Storage recovery health is unavailable."
+                    ToolTip.text: visible ? Accessible.description : "Library storage recovery health"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
+                Label {
+                    objectName: "libraryPlaybackRecoveryStatus"
+                    visible: window.playbackBridge !== null && window.selectedAudioUrl.toString() !== ""
+                    text: visible ? ("Library playback: " + window.playbackBridge.state + (window.playbackMatchesSelection ? " · selected source" : " · another source is open")) : ""
+                    Accessible.name: "Library playback recovery status"
+                    Accessible.value: visible ? text : ""
+                    Accessible.role: Accessible.Status
+                    Accessible.description: visible && !window.playbackMatchesSelection ? text + ". Reopen selected playback to align the source before seeking." : visible ? text + ". Playback controls operate on the selected source." : "Playback status is unavailable."
+                    ToolTip.text: visible ? Accessible.description : "Library playback recovery status"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
                 Frame {
                     objectName: "browserFrame"
                     Layout.fillWidth: true; Layout.fillHeight: true
+                    visible: !window.recursiveCatalogActive
                     Accessible.name: "Library folder browser"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Browse folders and audio files in the current location."
@@ -1243,6 +1961,15 @@ ApplicationWindow {
                         Keys.onReturnPressed: window.activateEntry(currentIndex)
                         Keys.onEnterPressed: window.activateEntry(currentIndex)
                         Keys.onSpacePressed: window.activateEntry(currentIndex)
+                        Keys.onBackspacePressed: {
+                            if (files.parentFolder.toString() !== "") {
+                                window.browseFolder = files.parentFolder
+                                window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
+                                browser.currentIndex = -1
+                                event.accepted = true
+                            }
+                        }
+                        Keys.onEscapePressed: { window.clearSelectedAudio(); browser.currentIndex = -1; search.forceActiveFocus() }
                         ScrollBar.vertical: ScrollBar {}
                         delegate: ItemDelegate {
                             required property int index
@@ -1250,12 +1977,14 @@ ApplicationWindow {
                             required property bool fileIsDir
                             width: ListView.view.width
                             highlighted: ListView.isCurrentItem
+                            activeFocusOnTab: true
                             Accessible.name: fileName + (fileIsDir ? ", folder" : ", audio file")
                             Accessible.value: fileIsDir ? "folder" : "audio file"
                             Accessible.role: Accessible.ListItem
                             Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             ToolTip.text: fileIsDir ? "Open folder " + fileName : "Select audio file " + fileName
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
+                            onDoubleClicked: { browser.currentIndex = index; window.activateEntry(index); if (!fileIsDir) playSelectedTrack.click() }
                             contentItem: RowLayout {
                                 Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.ignored: true }
                                 Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100; Accessible.ignored: true }
@@ -1297,27 +2026,54 @@ ApplicationWindow {
                             Accessible.role: Accessible.Grouping
                             Accessible.description: "Open, configure, and control playback for the selected audio source."
                             ToolTip.text: window.playbackBridge ? "Playback controls; current state: " + window.playbackBridge.state : "Playback controls are unavailable"
-                            Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; ToolTip.text: "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, 1) }
-                            SpinBox { objectName: "playbackSampleRate"; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
-                            SpinBox { objectName: "playbackChannels"; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
-                            Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096) }
-                            Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current native output running state" }
-                            Label { text: window.playbackBridge ? window.playbackBridge.nativeError : ""; objectName: "nativePlaybackError"; Accessible.name: "Native playback error: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native playback error details"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                            Button { text: "Retry native"; objectName: "retryNativePlayback"; enabled: window.playbackBridge && window.playbackBridge.nativeError !== ""; Accessible.name: "Retry native playback"; Accessible.role: Accessible.Button; Accessible.description: "Retry starting native playback after an output error"; ToolTip.text: "Retry native playback after the output error"; onClicked: window.playbackBridge.retryNative() }
-                            Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.name: "Reopen selected playback source"; Accessible.role: Accessible.Button; Accessible.description: "Replace the current playback source with the selected audio source: " + window.selectedName; ToolTip.text: "Replace playback with the selected audio source"; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1) }
-                            Button { text: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume" : "Pause"; objectName: "pausePlayback"; Accessible.name: text + " playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume the selected audio source." : "Pause the selected audio source."; ToolTip.text: "Pause or resume playback"; enabled: window.playbackBridge && (window.playbackBridge.state === "Playing" || window.playbackBridge.state === "Paused"); onClicked: window.playbackBridge.state === "Paused" ? window.playbackBridge.resume() : window.playbackBridge.pause() }
-                            Button { text: "Stop"; objectName: "stopPlayback"; Accessible.name: "Stop playback"; Accessible.role: Accessible.Button; Accessible.description: "Stop playback and clear the current source."; ToolTip.text: "Stop playback and clear the current source"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.stop() }
-                            Button { text: "−5 s"; objectName: "seekBackPlayback"; Accessible.name: "Seek backward five seconds"; Accessible.role: Accessible.Button; Accessible.description: "Move playback five seconds earlier"; ToolTip.text: "Seek backward 5 seconds"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - 5 * 44100), window.playbackBridge.epoch + 1) }
-                            Button { text: "+5 s"; objectName: "seekForwardPlayback"; Accessible.name: "Seek forward five seconds"; Accessible.role: Accessible.Button; Accessible.description: "Move playback five seconds later"; ToolTip.text: "Seek forward 5 seconds"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * 44100, window.playbackBridge.epoch + 1) }
+                            Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; ToolTip.text: "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1) }
+                            Button { text: "Play selected"; objectName: "playSelectedTrack"; activeFocusOnTab: true; Accessible.name: "Play selected Library track"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before starting playback" : "Open and play the selected Library source"; ToolTip.text: "Play the selected Library track"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: { window.playSelectedLibraryTrack(); playSelectedTrack.forceActiveFocus() } }
+                            SpinBox { objectName: "playbackSampleRate"; activeFocusOnTab: true; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
+                            SpinBox { objectName: "playbackChannels"; activeFocusOnTab: true; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
+                            Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge && playbackDevice.currentIndex >= 0; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.startNativePlaybackOutput() }
+                            Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current native output running state" }
+                            Label { text: window.playbackBridge ? window.playbackBridge.nativeError : ""; objectName: "nativePlaybackError"; Accessible.name: "Native playback error: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Native playback error details"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Button { text: "Retry native"; objectName: "retryNativePlayback"; enabled: window.playbackBridge && window.playbackBridge.nativeError !== ""; Accessible.name: "Retry native playback"; Accessible.role: Accessible.Button; Accessible.description: "Retry starting native playback after an output error"; ToolTip.text: "Retry native playback after the output error"; onClicked: window.retryNativePlaybackOutput() }
+                            Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.name: "Reopen selected playback source"; Accessible.role: Accessible.Button; Accessible.description: "Replace the current playback source with the selected audio source: " + window.selectedName; ToolTip.text: "Replace playback with the selected audio source"; onClicked: { window.reopenSelectedLibraryTrack(); reopenSelectedPlayback.forceActiveFocus() } }
+                            Button { text: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume" : "Pause"; objectName: "pausePlayback"; Accessible.name: text + " playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume the selected audio source." : "Pause the selected audio source."; ToolTip.text: "Pause or resume playback"; enabled: window.playbackBridge && (window.playbackBridge.state === "Playing" || window.playbackBridge.state === "Paused"); onClicked: window.togglePlaybackPause() }
+                            Button { text: "Stop"; objectName: "stopPlayback"; Accessible.name: "Stop playback"; Accessible.role: Accessible.Button; Accessible.description: "Stop playback and clear the current source."; ToolTip.text: "Stop playback and clear the current source"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.stopPlaybackWithRecovery("Playback stopped; the source is ready to reopen or select another file.") }
+                            SpinBox { id: seekSeconds; objectName: "seekSeconds"; from: 1; to: 60; value: 5; editable: true; activeFocusOnTab: true; Accessible.name: "Seek step seconds"; Accessible.value: value + " seconds"; Accessible.role: Accessible.SpinBox; Accessible.description: "Choose the number of seconds moved by the backward and forward seek buttons"; ToolTip.text: "Choose the playback seek step in seconds" }
+                            Button { text: "−" + seekSeconds.value + " s"; objectName: "seekBackPlayback"; Accessible.name: seekSeconds.value === 5 ? "Seek backward five seconds" : "Seek backward " + seekSeconds.value + " seconds"; Accessible.role: Accessible.Button; Accessible.description: "Move playback backward by the selected number of seconds at the selected sample rate"; ToolTip.text: "Seek backward " + seekSeconds.value + " seconds"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: { if (window.playbackBridge && window.playbackBridge.state !== "Stopped") window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - seekSeconds.value * playbackSampleRate.value), window.playbackBridge.epoch + 1); else window.announceCaptureRecoveryState("Seek backward is no longer available because playback stopped.") } }
+                            Button { text: "+" + seekSeconds.value + " s"; objectName: "seekForwardPlayback"; Accessible.name: seekSeconds.value === 5 ? "Seek forward five seconds" : "Seek forward " + seekSeconds.value + " seconds"; Accessible.role: Accessible.Button; Accessible.description: "Move playback forward by the selected number of seconds at the selected sample rate"; ToolTip.text: "Seek forward " + seekSeconds.value + " seconds"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: { if (window.playbackBridge && window.playbackBridge.state !== "Stopped") window.playbackBridge.seek(window.playbackBridge.currentFrame + seekSeconds.value * playbackSampleRate.value, window.playbackBridge.epoch + 1); else window.announceCaptureRecoveryState("Seek forward is no longer available because playback stopped.") } }
                             SpinBox { id: seekFrame; objectName: "seekFrame"; from: 0; to: 2147483647; value: window.playbackBridge ? Math.min(seekFrame.to, window.playbackBridge.currentFrame) : 0; editable: true; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; Accessible.name: "Seek target frame"; Accessible.value: value; Accessible.role: Accessible.SpinBox; Accessible.description: "Enter an audio frame and apply it as the playback position"; ToolTip.text: "Enter a source frame, then choose Seek" }
-                            Button { text: "Seek"; objectName: "seekToFrame"; enabled: seekFrame.enabled; Accessible.name: "Seek to entered frame"; Accessible.role: Accessible.Button; Accessible.description: "Seek playback to the entered audio frame"; ToolTip.text: "Seek playback to the entered source frame"; onClicked: window.playbackBridge.seek(seekFrame.value, window.playbackBridge.epoch + 1) }
-                            ComboBox { objectName: "playbackDevice"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Playback output device"; Accessible.role: Accessible.ComboBox; Accessible.value: currentText; Accessible.description: currentText !== "" ? "Current output device: " + currentText + ". Choose the native playback output device." : "No output device selected. Choose the native playback output device."; ToolTip.text: "Choose the output device used for native playback"; onActivated: if (window.playbackBridge) window.playbackBridge.deviceId = currentIndex >= 0 ? currentIndex : -1 }
-                            Button { text: "Refresh outputs"; objectName: "refreshPlaybackDevices"; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Refresh playback outputs"; Accessible.role: Accessible.Button; Accessible.description: "Refresh native playback output devices"; ToolTip.text: "Refresh the available playback output devices"; onClicked: window.playbackBridge.refreshDevices() }
-                            Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState"; Accessible.name: "Playback state: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.state : "unavailable"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current native playback state" }
-                            Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current playback source"; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                            Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.currentFrame : 0; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
-                            Label { text: window.playbackBridge && window.playbackBridge.state !== "Stopped" ? "Seek uses audio frames; track duration is not available yet." : ""; objectName: "playbackSeekLimitation"; Accessible.name: "Playback seek limitation: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Playback seek currently uses source audio frames"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                            Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
+                            Button { text: "Seek"; objectName: "seekToFrame"; enabled: seekFrame.enabled; Accessible.name: "Seek to entered frame"; Accessible.role: Accessible.Button; Accessible.description: "Seek playback to the entered audio frame"; ToolTip.text: "Seek playback to the entered source frame"; onClicked: { if (window.playbackBridge && window.playbackBridge.state !== "Stopped") { window.playbackBridge.seek(seekFrame.value, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState("Playback seek requested to frame " + seekFrame.value + ".") } else window.announceCaptureRecoveryState("Seek is no longer available because playback stopped.") } }
+                            ComboBox { objectName: "playbackDevice"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Playback output device"; Accessible.role: Accessible.ComboBox; Accessible.value: currentText; Accessible.description: currentText !== "" ? "Current output device: " + currentText + ". Choose the native playback output device." : "No output device selected. Choose the native playback output device."; ToolTip.text: "Choose the output device used for native playback"; onActivated: if (window.playbackBridge) window.playbackBridge.deviceId = window.playbackDeviceIdAt(currentIndex, currentText) }
+                            Button { text: "Refresh outputs"; objectName: "refreshPlaybackDevices"; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Refresh playback outputs"; Accessible.role: Accessible.Button; Accessible.description: "Refresh native playback output devices"; ToolTip.text: "Refresh the available playback output devices"; onClicked: { window.refreshPlaybackOutputs(); playbackDevice.forceActiveFocus() } }
+                            Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState"; Accessible.name: "Playback state: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.state : "unavailable"; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current native playback state" }
+                            Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current playback source"; elide: Text.ElideMiddle; Layout.fillWidth: true }
+                            Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.currentFrame : 0; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
+                            Label { text: window.playbackBridge && window.playbackBridge.state !== "Stopped" ? "Seek uses audio frames; track duration is not available yet." : ""; objectName: "playbackSeekLimitation"; Accessible.name: "Playback seek limitation: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Playback seek currently uses source audio frames"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Label { text: window.playbackBridge === null ? "Seek unavailable until playback is connected" : (window.playbackBridge.state === "Stopped" ? "Seek unavailable while playback is stopped" : (!window.playbackMatchesSelection ? "Seek unavailable until the selected source is reopened" : "Seek ready for the selected source")); objectName: "playbackSeekActionStatus"; Accessible.name: "Playback seek action status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text + ". Seek operates on source audio frames and does not modify the source file."; ToolTip.text: "Current playback seek availability"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                            Label { text: window.playbackMatchesSelection ? "Playing selected source" : (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Playback is on another source" : ""); objectName: "playbackSelectionStatus"; Accessible.name: "Playback selection status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Whether playback matches the selected library source"; visible: text !== "" }
+                            Label {
+                                objectName: "playbackSourceIdentityStatus"
+                                visible: window.playbackBridge !== null && window.playbackBridge.source.toString() !== ""
+                                text: visible ? (window.playbackMatchesSelection ? "Playback source identity: selected Library source" : "Playback source identity: differs from selected Library source") : ""
+                                Accessible.name: "Playback source identity: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". Reopen selected playback when the identities differ; source audio remains unchanged." : "No playback source identity is available."
+                                ToolTip.text: "Playback source identity compared with Library selection"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
+                            }
+                            Label {
+                                objectName: "playbackRecoveryStatus"
+                                visible: window.playbackBridge !== null && (window.playbackBridge.nativeError !== "" || !window.playbackMatchesSelection)
+                                text: visible && window.playbackBridge.nativeError !== "" ? "Playback recovery: " + window.playbackBridge.nativeError : visible ? "Playback recovery: reopen the selected source to align playback with the Library selection" : ""
+                                Accessible.name: "Playback recovery status: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". The selected audio source remains unchanged." : "Playback recovery is not required."
+                                ToolTip.text: "Playback recovery and source alignment status"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
+                            }
                         }
                         Label {
                             objectName: "playbackUnavailable"
@@ -1325,10 +2081,88 @@ ApplicationWindow {
                             visible: !window.playbackBridge
                             Accessible.name: "Playback availability: " + text
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             ToolTip.text: "Playback controls unavailable; metadata remains read-only"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                    }
+                    Button {
+                        id: analyzeRecursiveResults
+                        objectName: "analyzeRecursiveResults"
+                        anchors.left: parent.left; anchors.bottom: parent.bottom
+                        text: "Analyze first files"
+                        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFiles !== undefined && window.recursiveCatalogRows.length > 0 && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
+                        Accessible.name: "Analyze recursive audio results"
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled ? "Fingerprint and queue the first available recursive audio results; the bounded queue reports accepted and rejected items." : "An analysis batch is already active; wait for completion or cancel before submitting another batch."
+                        ToolTip.text: "Queue the first recursive audio results for offline analysis"
+                        onClicked: {
+                            const paths = []
+                            for (let i = 0; i < window.recursiveCatalogRows.length && paths.length < 2; ++i) {
+                                const row = window.recursiveCatalogRows[i]
+                                if (row.audio) paths.push(row.path)
+                            }
+                            const accepted = window.analysisJobBridge.submitSelectedFiles(paths)
+                            window.announceVisualizationRecovery(accepted + " recursive audio files accepted for analysis.")
+                            recursiveResultsView.forceActiveFocus()
+                        }
+                    }
+                }
+                Button {
+                    id: returnToFolderBrowser
+                    objectName: "returnToFolderBrowser"
+                    visible: window.recursiveCatalogActive
+                    text: "Return to folder browser"
+                    activeFocusOnTab: true
+                    Accessible.name: "Return to folder browser"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: "Close recursive results and return to the current folder browser."
+                    ToolTip.text: "Return to the current folder browser"
+                    onClicked: {
+                        window.recursiveCatalogActive = false
+                        recursiveResultsView.currentIndex = -1
+                        window.announceVisualizationRecovery("Returned to the current folder browser.")
+                        browser.forceActiveFocus()
+                    }
+                }
+                Frame {
+                    objectName: "recursiveResultsFrame"
+                    visible: window.recursiveCatalogActive
+                    Layout.fillWidth: true; Layout.preferredHeight: 220
+                    Accessible.name: "Recursive library results"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Supported audio files found below the selected folder. Select an audio file to inspect its metadata and queue analysis."
+                    ListView {
+                        id: recursiveResultsView
+                        anchors.fill: parent; clip: true; model: window.recursiveCatalogRows
+                        activeFocusOnTab: true; keyNavigationEnabled: true
+                        Keys.onEscapePressed: { window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; window.announceVisualizationRecovery("Returned to the current folder browser."); browser.forceActiveFocus() }
+                        Keys.onReturnPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
+                        Keys.onEnterPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
+                        Keys.onSpacePressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
+                        Accessible.name: "Recursive audio results"
+                        Accessible.role: Accessible.List
+                        delegate: ItemDelegate {
+                            required property string name
+                            required property string path
+                            required property bool folder
+                            width: ListView.view.width
+                            enabled: !folder
+                            activeFocusOnTab: true
+                            Accessible.name: name + (folder ? ", folder" : ", audio file")
+                            Accessible.role: Accessible.ListItem
+                            Accessible.description: folder ? "Folder discovered recursively" : "Select this audio file for metadata and analysis"
+                            text: name + (folder ? "  (folder)" : "")
+                            onClicked: {
+                                window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
+                                window.selectedName = name
+                                window.selectedAudioUrl = Qt.resolvedUrl(path)
+                                if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
+                                window.announceVisualizationRecovery("Selected recursive audio source " + name + "; prior analysis presentation is stale until this source is analyzed.")
+                                analyzeSelectedAudio.forceActiveFocus()
+                            }
+                            onDoubleClicked: if (!folder) { onClicked(); playSelectedTrack.click() }
                         }
                     }
                 }
@@ -1369,7 +2203,7 @@ ApplicationWindow {
                         }
                         Label {
                             objectName: "selectedAudioDuration"
-                            text: window.selectedAudioUrl.toString() !== "" ? "Duration: unknown until decoded metadata is available" : "Duration unavailable"
+                            text: window.selectedAudioUrl.toString() === "" ? "Duration unavailable" : (window.metadataStatus.indexOf(" | ") >= 0 ? "Metadata: " + window.metadataStatus : "Duration: unknown until decoded metadata is available")
                             Accessible.name: "Selected audio duration: " + text
                             ToolTip.text: "Selected source duration"
                             Accessible.value: text
@@ -1390,13 +2224,30 @@ ApplicationWindow {
                             ToolTip.text: window.selectedName !== "" ? "Clear " + window.selectedName : "No audio source selected"
                             onClicked: window.clearSelectedAudio()
                         }
+                        Button {
+                            objectName: "analyzeSelectedAudio"
+                            text: "Analyze selected file"
+                            activeFocusOnTab: true
+                            enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
+                            Accessible.name: "Analyze selected audio file"
+                            Accessible.role: Accessible.Button
+                            Accessible.description: enabled ? "Fingerprint the selected local file and queue real offline analysis." : (window.analysisJobBridge && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "Analysis is already active for the selected source; wait for completion or cancel before submitting again." : "Select a local audio file before queueing analysis.")
+                            ToolTip.text: "Fingerprint and queue analysis for the selected audio file"
+                            onClicked: {
+                                const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile())
+                                window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry.")
+                                analyzeSelectedAudio.forceActiveFocus()
+                            }
+                        }
                         Label {
+                            id: metadataStatusLabel
                             objectName: "metadataStatus"; text: window.metadataStatus
+                            activeFocusOnTab: true
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio metadata status: " + text
                             ToolTip.text: "Current metadata status"
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                         }
                         Button {
@@ -1418,7 +2269,7 @@ ApplicationWindow {
                             visible: window.metadataStatus.indexOf("Error:") === 0
                             Accessible.name: "Metadata error recovery guidance: " + text
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             ToolTip.text: "Metadata error recovery guidance"
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -1451,29 +2302,43 @@ ApplicationWindow {
                             text: window.selectedName && window.analysisJobBridge && window.analysisJobBridge.status === "Complete" ? "Analysis freshness: source-linked analysis complete." : "Analysis freshness: waiting for source-linked analysis evidence."
                             Accessible.name: "Analysis freshness: " + text
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
+                        }
+                        Label {
+                            objectName: "analysisProvenance"
+                            visible: window.analysisJobBridge !== null && window.analysisJobBridge.engineVersion !== ""
+                            text: visible ? ("Analysis provenance: " + window.analysisJobBridge.engineVersion + " · " + window.analysisJobBridge.configurationId + " · " + window.analysisJobBridge.analysisMode) : ""
+                            Accessible.name: "Analysis provenance: " + text
+                            Accessible.value: visible ? text : ""
+                            Accessible.role: Accessible.Status
+                            Accessible.description: visible ? "Engine, configuration, and mode used for the selected analysis." : "Analysis provenance is unavailable until analysis is queued."
+                            ToolTip.text: "Engine, configuration, and mode for the selected analysis"
+                            Layout.fillWidth: true; wrapMode: Text.WordWrap
                         }
                         Label {
                             objectName: "sourceWorkflowStatus"
                             ToolTip.text: "Selected source playback and metadata workflow status"
                             text: window.selectedAudioUrl.toString() === ""
                                   ? "Select an audio source to inspect and play it."
-                                  : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · " + window.metadataStatus
+                                  : "Source workflow · playback: " + (window.playbackBridge ? window.playbackBridge.state : "unavailable") + " · analysis: " + (window.analysisJobBridge === null ? "unavailable" : ((window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "in progress" : (window.analysisJobBridge.status === "Complete" ? "ready" : "retry available"))) + " · " + window.metadataStatus
                             Accessible.name: "Selected source workflow status"
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         RowLayout { Layout.fillWidth: true
                             Label {
                                 text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (window.analysisJobBridge ? (window.analysisJobBridge.status + " · observed " + window.analysisJobBridge.frames + " frames.") : "Analysis progress unavailable")
+                                id: analysisProgress
                                 objectName: "analysisProgress"
+                                activeFocusOnTab: true
                                 Accessible.name: "Analysis progress: " + text
                                 ToolTip.text: "Current analysis progress and observed frame count"
-                                Accessible.role: Accessible.StaticText
+                                Accessible.value: text
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
@@ -1496,7 +2361,9 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
-                                objectName: "analysisRecoveryStatus"
+                            id: analysisRecoveryStatus
+                            objectName: "analysisRecoveryStatus"
+                            activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.recoveryStatus !== ""
                                 text: visible ? ("Recovery status: " + window.analysisJobBridge.recoveryStatus) : ""
                                 Accessible.name: "Analysis recovery status"
@@ -1525,7 +2392,9 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
-                                objectName: "analysisBatchStatus"
+                            id: analysisBatchStatus
+                            objectName: "analysisBatchStatus"
+                            activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount !== undefined
                                 text: visible ? ("Batch queue · accepted " + window.analysisJobBridge.batchAcceptedCount
                                       + " · rejected " + window.analysisJobBridge.batchRejectedCount
@@ -1555,6 +2424,22 @@ ApplicationWindow {
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            ProgressBar {
+                                id: analysisBatchProgressBar
+                                objectName: "analysisBatchProgressBar"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                                Layout.fillWidth: true
+                                from: 0; to: 1
+                                value: visible && window.analysisJobBridge.batchAcceptedCount > 0
+                                       ? Math.min(1, (window.analysisJobBridge.batchCompletedCount + window.analysisJobBridge.batchFailedCount + window.analysisJobBridge.batchCancelledCount) / window.analysisJobBridge.batchAcceptedCount)
+                                       : 0
+                                indeterminate: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") && value === 0
+                                Accessible.name: "Analysis batch completion"
+                                Accessible.value: visible ? Math.round(value * 100) + "% complete" : "unavailable"
+                                Accessible.role: Accessible.ProgressBar
+                                Accessible.description: visible ? "Completed, failed, or cancelled items out of the accepted analysis batch." : "Batch progress is unavailable."
+                                ToolTip.text: visible ? "Batch completion: " + Math.round(value * 100) + "%" : "Batch progress unavailable"
+                            }
                             Label {
                                 objectName: "analysisBatchLastResult"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastResult !== ""
@@ -1564,6 +2449,44 @@ ApplicationWindow {
                                 Accessible.description: visible ? text : "No batch analysis result is available."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
+                            }
+                            Label {
+                                objectName: "analysisBatchPublicationSummary"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                                text: visible ? ("Verified batch publication: " + window.analysisJobBridge.batchResultsPublished + " result(s) published · " + window.analysisJobBridge.batchQueuedCount + " queued · " + window.analysisJobBridge.batchFailedCount + " failed · " + window.analysisJobBridge.batchCancelledCount + " cancelled") : ""
+                                Accessible.name: "Analysis batch publication summary: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? "Counts distinguish results published after verification from work still queued or terminal without publication." : "No analysis batch is active."
+                                ToolTip.text: "Verified publication and terminal batch counts"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
+                                objectName: "analysisBatchLastSource"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastSource !== ""
+                                text: visible ? "Latest published source: " + window.analysisJobBridge.batchLastSource : ""
+                                Accessible.name: "Latest published analysis source: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? "Source path associated with the most recently verified published batch result." : "No verified batch source has been published."
+                                ToolTip.text: "Source path for the latest verified batch result"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideMiddle
+                            }
+                            Button {
+                                objectName: "selectLatestPublishedSource"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastSource !== ""
+                                text: "Select latest published source"
+                                enabled: visible
+                                Accessible.name: "Select latest published analysis source"
+                                Accessible.role: Accessible.Button
+                                Accessible.description: "Select the source associated with the latest verified batch result and refresh its metadata details."
+                                ToolTip.text: "Select the source associated with the latest verified batch result"
+                                onClicked: {
+                                    window.selectedAudioUrl = Qt.resolvedUrl(window.analysisJobBridge.batchLastSource)
+                                    window.selectedName = window.selectedAudioUrl.fileName
+                                    if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
+                                    window.announceVisualizationRecovery("Latest published analysis source selected.")
+                                }
                             }
                             Label {
                                 objectName: "persistedRecoveryStatus"
@@ -1579,6 +2502,17 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
+                                objectName: "analysisRecoveryNextAction"
+                                visible: window.analysisJobBridge !== null && (window.analysisJobBridge.status === "Cancelled" || window.analysisJobBridge.status === "Failed")
+                                text: visible ? (window.analysisJobBridge.status + " analysis retained for recovery. Use Retry batch to resume accepted work or Discard batch to clear the terminal state.") : ""
+                                Accessible.name: "Analysis recovery next action: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? "The terminal analysis state remains actionable; retry preserves accepted work and discard clears recovery metadata without changing source audio." : "No terminal analysis recovery action is pending."
+                                ToolTip.text: "Retry or discard the retained analysis recovery state"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "persistedRecoveryRejectionReason"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.status.indexOf("Retry rejected:") >= 0
                                 text: visible ? ("Persisted retry decision: " + storageRecovery.status) : ""
@@ -1590,7 +2524,9 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
-                                objectName: "analysisAdmissionStatus"
+                            id: analysisAdmissionStatus
+                            objectName: "analysisAdmissionStatus"
+                            activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 text: visible ? ("Analysis admission: " + storageRecovery.analysisStatus) : ""
                                 Accessible.name: "Analysis admission status"
@@ -1640,7 +2576,7 @@ ApplicationWindow {
                             }
                             Label {
                                 objectName: "analysisWorkerResult"
-                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.result !== ""
+                                visible: window.analysisResultMatchesSelection && window.analysisJobBridge.result !== ""
                                 text: visible ? ("Worker result: " + window.analysisJobBridge.result) : ""
                                 Accessible.name: "Worker analysis result"
                                 Accessible.value: visible ? text : ""
@@ -1691,8 +2627,8 @@ ApplicationWindow {
                             }
                             Label {
                                 objectName: "analysisStaleState"
-                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
-                                text: visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? "Prior analysis result cleared; retry requires fresh source evidence." : ""
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined && (!window.analysisResultMatchesSelection || storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed")
+                                text: visible && !window.analysisResultMatchesSelection ? "Prior analysis result hidden because the selected source changed; analyze this source to publish fresh evidence." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? "Prior analysis result cleared; retry requires fresh source evidence." : ""
                                 Accessible.name: "Analysis stale-result status"
                                 Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No stale analysis result is present."
@@ -1709,7 +2645,7 @@ ApplicationWindow {
                             }
                             Label {
                                 objectName: "analysisCompletionResult"
-                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
+                                visible: window.analysisResultMatchesSelection && typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
                                 text: visible ? ("Completed analysis result: " + storageRecovery.analysisResult) : ""
                                 Accessible.name: "Completed analysis result"
                                 Accessible.description: visible ? text : "No completed analysis result is available."
@@ -1742,10 +2678,10 @@ ApplicationWindow {
                                 Button {
                                     objectName: "invalidateAnalysisCache"
                                     text: "Forget cached result"
-                                    enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== ""
+                                    enabled: cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && typeof storageRecovery !== "undefined" && storageRecovery.cacheHit === true
                                     Accessible.name: "Forget cached analysis"
-                                    Accessible.description: "Remove this completed cache identity so the next analysis runs again. Source files are not changed."
-                                    onClicked: storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
+                                    Accessible.description: enabled ? "Remove this completed cache identity so the next analysis runs again. Source files are not changed." : "Run Check cache and confirm a completed cache hit before forgetting an identity."
+                                    onClicked: invalidateCacheDialog.open()
                                 }
                                 Button {
                                     objectName: "reanalyzeInvalidatedCache"
@@ -1754,8 +2690,32 @@ ApplicationWindow {
                                     enabled: visible && cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && window.selectedAudioUrl.toLocalFile() !== ""
                                     Accessible.name: "Run fresh analysis"
                                     Accessible.description: "Invalidate this identity and admit fresh analysis work to the queue."
-                                    onClicked: storageRecovery.reanalyze("reanalyze-" + cacheContent.text, window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text)
+                                    onClicked: reanalyzeCacheDialog.open()
                                 }
+                            }
+                            Dialog {
+                                id: reanalyzeCacheDialog
+                                objectName: "reanalyzeCacheDialog"
+                                title: "Run fresh analysis?"
+                                modal: true
+                                standardButtons: Dialog.Cancel | Dialog.Ok
+                                Accessible.name: "Run fresh analysis confirmation"
+                                Accessible.description: "Confirm invalidating this cache identity and queueing fresh analysis. Source audio is not changed."
+                                contentItem: Label { text: "This invalidates the selected cached identity and queues fresh analysis. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.role: Accessible.StaticText }
+                                onOpened: { window.announceVisualizationRecovery("Confirm fresh analysis; source audio remains unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
+                                onAccepted: { storageRecovery.reanalyze("reanalyze-" + cacheContent.text, window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Fresh analysis queued; source audio was not changed."); reanalyzeCacheDialog.close() }
+                            }
+                            Dialog {
+                                id: invalidateCacheDialog
+                                objectName: "invalidateCacheDialog"
+                                title: "Forget cached analysis?"
+                                modal: true
+                                standardButtons: Dialog.Cancel | Dialog.Ok
+                                Accessible.name: "Forget cached analysis confirmation"
+                                Accessible.description: "Confirm removal of the selected completed cache identity. Source audio is not modified."
+                                contentItem: Label { text: "This removes only the completed cached result for the entered identity. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.role: Accessible.StaticText }
+                                onOpened: { window.announceVisualizationRecovery("Confirm forgetting the cached result; source audio remains unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
+                                onAccepted: { storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Cached analysis identity forgotten; source audio was not changed."); invalidateCacheDialog.close() }
                             }
                             ComboBox {
                                 objectName: "persistedRecoveryRuns"
@@ -1771,9 +2731,20 @@ ApplicationWindow {
                                     ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable. Press Tab to reach them."
                                     : (count > 0 ? "Choose one of " + count + " saved analysis runs to recover. Press Tab to reach retry and discard actions after selection." : "No saved analysis runs available.")
                                 ToolTip.text: count > 0
-                                    ? "Choose one of " + count + " saved analysis runs" + (typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== "" ? ". Selected: " + storageRecovery.selectedRunId : "")
+                                    ? "Choose a saved analysis run to recover" + (typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== "" ? ". Selected: " + storageRecovery.selectedRunId : "")
                                     : "No saved analysis runs available"
                                 onActivated: { storageRecovery.selectRun(currentText); window.persistedRecoverySelectionActivated = true; window.announceVisualizationRecovery("Selected persisted recovery run " + currentText + ". Press Tab to reach retry and discard controls when the run is retryable."); persistedRecoveryRuns.forceActiveFocus() }
+                            }
+                            Label {
+                                objectName: "persistedRecoverySelectionStatus"
+                                visible: typeof storageRecovery !== "undefined"
+                                text: visible && storageRecovery.selectedRunId !== "" ? ("Recovery selection: " + storageRecovery.selectedRunId + (storageRecovery.analysisRetryable ? " · retry available" : " · waiting for terminal recovery state")) : "No persisted recovery run selected"
+                                Accessible.name: "Persisted recovery selection status"
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible && storageRecovery.selectedRunId !== "" ? text + ". Retry and discard actions follow this status; source audio is never modified." : "Select a saved run to expose its recovery actions."
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
                             }
                             Label {
                                 objectName: "persistedRecoveryRunDetails"
@@ -1785,6 +2756,22 @@ ApplicationWindow {
                                     ? "Diagnostic details for selected persisted recovery run " + storageRecovery.selectedRunId + ". Includes content identity, source path, and decoder snapshot."
                                     : "Run ID, content identity, source path, and decoder snapshot for each saved retryable analysis."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
+                            }
+                            Label {
+                                objectName: "persistedRecoveryActionStatus"
+                                visible: typeof storageRecovery !== "undefined"
+                                text: visible && storageRecovery.selectedRunId !== ""
+                                    ? ("Recovery actions: " + (storageRecovery.analysisRetryable ? "retry available" : "retry unavailable")
+                                       + (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0 ? " · reopen storage" : "")
+                                       + (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running" ? " · active work" : ""))
+                                    : "Select a saved run to expose recovery actions"
+                                Accessible.name: "Persisted recovery action status"
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". Retry and discard never modify source audio." : "No persisted recovery action is selected."
+                                ToolTip.text: "Current persisted recovery action availability"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
                             }
                             Button {
                                 objectName: "discardPersistedRecovery"
@@ -1866,9 +2853,32 @@ ApplicationWindow {
                                     Accessible.description: "The selected retry record will be removed; source audio remains unchanged."
                                     Accessible.role: Accessible.StaticText
                                 }
+                    Label {
+                        objectName: "visualizationLayoutState"
+                        text: window.compactHeader ? "Compact visualization layout" : "Expanded visualization layout"
+                        Accessible.name: "Visualization layout: " + text
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: "Responsive visualization layout selected from the current control-window width."
+                        ToolTip.text: text
+                    }
                                 onOpened: { window.announceVisualizationRecovery("Confirm discard for persisted recovery run " + storageRecovery.selectedRunId + ". Source audio will remain unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
                                 onAccepted: { const runId = storageRecovery.selectedRunId; if (window.storageReopenPending || storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0) { window.announceVisualizationRecovery("Storage became unavailable; discard of " + runId + " was canceled. Reopen storage to refresh recovery runs."); reopenStorage.forceActiveFocus() } else { window.overlayPersistedDiagnosticDismissed = true; storageRecovery.discardSelectedRun(); window.announceVisualizationRecovery("Persisted recovery discard requested for " + runId + "; the status will report if active work prevents removal."); discardPersistedRecoveryButton.forceActiveFocus() } }
                                 onRejected: { const runId = storageRecovery.selectedRunId; window.announceVisualizationRecovery("Persisted recovery discard canceled for " + runId + "; selected run was kept."); discardPersistedRecoveryButton.forceActiveFocus() }
+                            }
+                            Label {
+                                objectName: "analysisBatchActionStatus"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                                text: visible ? ("Batch actions: "
+                                      + ((window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "cancel available" : "cancel unavailable")
+                                      + ((window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? " · retry or discard available" : "")) : ""
+                                Accessible.name: "Analysis batch action status: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". Actions retain source audio and return focus after completion." : "No analysis batch actions are available."
+                                ToolTip.text: "Current analysis batch action availability"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
                             }
                             Button {
                                 objectName: "retryAnalysisBatch"
@@ -1881,7 +2891,7 @@ ApplicationWindow {
                                 Accessible.value: visible ? (window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount) : ""
                                 Accessible.description: visible ? "Retry cancelled or failed analysis items retained in the current batch. Current state: " + window.analysisJobBridge.status + "; accepted items: " + window.analysisJobBridge.batchAcceptedCount + "." : "Retry batch is unavailable."
                                 ToolTip.text: Accessible.description
-                                onClicked: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Failed" && window.analysisJobBridge.status !== "Cancelled")) { window.announceVisualizationRecovery("Analysis batch is no longer retryable; no batch retry was dispatched."); retryAnalysisBatchButton.forceActiveFocus() } else { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result."); retryAnalysisBatchButton.forceActiveFocus() } }
+                                onClicked: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Failed" && window.analysisJobBridge.status !== "Cancelled")) { window.announceVisualizationRecovery("Analysis batch is no longer retryable; no batch retry was dispatched."); retryAnalysisBatchButton.forceActiveFocus() } else { const accepted = window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery(accepted ? "Analysis batch retry queued; focus will return after a fresh accepted result." : "Analysis batch retry was rejected; the retained operations are no longer retryable."); retryAnalysisBatchButton.forceActiveFocus() } }
                             }
                             Button {
                                 objectName: "discardAnalysisBatch"
@@ -1989,7 +2999,7 @@ ApplicationWindow {
                     Accessible.description: "Start, stop, or retry live output monitoring."
                     ToolTip.text: "Live monitoring controls; current state is announced when available"
                     Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: window.captureMonitorBridge !== null && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; ToolTip.text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring" : window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry live output monitoring" : "Start live output monitoring"; onClicked: window.captureMonitorBridge.status === "Monitoring" ? window.captureMonitorBridge.stop() : window.captureMonitorBridge.start() }
-                    Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current capture monitor status and recovery state" }
+                    Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture: " + window.captureMonitorBridge.status) : "Capture unavailable"; objectName: "captureStatus"; Accessible.name: "Capture monitor status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current capture monitor status and recovery state" }
                 ColumnLayout {
                     objectName: "monitoringStatusGroup"
                     Layout.fillWidth: true
@@ -2003,17 +3013,17 @@ ApplicationWindow {
                 }
                 RowLayout {
                     objectName: "visualizationModeControls"
-                    Accessible.name: "Visualization mode controls"
+                    Accessible.name: "Visualization mode controls, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: visualizationCanvas.viewMode
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Choose waveform or frequency-domain FFT visualization."
-                    ToolTip.text: "Visualization mode controls; current mode is announced when available"
+                    Accessible.description: "Choose waveform or frequency-domain FFT visualization; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
+                    ToolTip.text: "Visualization mode controls; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending" : "overlay is ready") + "; current mode is announced when available"
                     Button {
                         id: waveformView
                         activeFocusOnTab: true
                         text: "Waveform"; objectName: "waveformView"; checkable: true; checked: visualizationCanvas.viewMode === "waveform"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
-                        Accessible.name: "Waveform view"; Accessible.description: checked ? "Waveform view is selected; show the selectable time-domain waveform." : "Show the selectable time-domain waveform."
-                        ToolTip.text: "Show the time-domain waveform (Ctrl+1)"
+                        Accessible.name: "Waveform view, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.description: (checked ? "Waveform view is selected; show the selectable time-domain waveform." : "Show the selectable time-domain waveform.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
+                        ToolTip.text: "Show the time-domain waveform (Ctrl+1); " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                         onClicked: visualizationCanvas.viewMode = "waveform"
                         Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; spectrumView.forceActiveFocus(); event.accepted = true }
                         Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; event.accepted = true }
@@ -2029,8 +3039,8 @@ ApplicationWindow {
                         id: spectrumView
                         activeFocusOnTab: true
                         text: "FFT"; objectName: "spectrumView"; checkable: true; checked: visualizationCanvas.viewMode === "spectrum"; Accessible.value: checked ? "selected" : "not selected"; Accessible.role: Accessible.RadioButton
-                        Accessible.name: "FFT view"; Accessible.description: checked ? "FFT view is selected; show the selectable frequency-domain FFT." : "Show the selectable frequency-domain FFT."
-                        ToolTip.text: "Show the frequency-domain FFT (Ctrl+2)"
+                        Accessible.name: "FFT view, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.description: (checked ? "FFT view is selected; show the selectable frequency-domain FFT." : "Show the selectable frequency-domain FFT.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
+                        ToolTip.text: "Show the frequency-domain FFT (Ctrl+2); " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                         onClicked: visualizationCanvas.viewMode = "spectrum"
                         Keys.onLeftPressed: { visualizationCanvas.viewMode = "waveform"; waveformView.forceActiveFocus(); event.accepted = true }
                         Keys.onRightPressed: { visualizationCanvas.viewMode = "spectrum"; event.accepted = true }
@@ -2047,7 +3057,7 @@ ApplicationWindow {
                         objectName: "visualizationModeStatus"
                         color: window.themeForegrounds[window.selectedThemeIndex]
                         font.pixelSize: window.compactHeader ? 12 : 14
-                    Accessible.name: "Visualization mode: " + text
+                    Accessible.name: "Visualization mode, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: visualizationCanvas.viewMode
                         Accessible.role: Accessible.StaticText
                         Accessible.description: text + ". Use Left and Right arrows to switch views, or Ctrl+1 and Ctrl+2."
@@ -2057,11 +3067,21 @@ ApplicationWindow {
                     id: visualizationCanvas; objectName: "visualizationCanvas"
                     property string viewMode: "waveform"
                     property real selectedPosition: -1
+                    property int selectedSpectrumBin: -1
                     property int renderedRevision: -1
                     property int acceptedPlaybackEpoch: -1
                     property string acceptedPlaybackSource: ""
                     property var renderedWaveform: []
                     property var renderedSpectrum: []
+                    readonly property int spectrumPeakIndex: {
+                        let peak = -1, value = 0
+                        for (let index = 0; index < renderedSpectrum.length; ++index) {
+                            const magnitude = Number(renderedSpectrum[index])
+                            if (isFinite(magnitude) && magnitude > value) { value = magnitude; peak = index }
+                        }
+                        return peak
+                    }
+                    readonly property real spectrumPeakMagnitude: spectrumPeakIndex >= 0 ? Math.max(0, Number(renderedSpectrum[spectrumPeakIndex])) : 0
                     readonly property string acceptedResultIdentity: window.acceptedAnalysisIdentity
                     readonly property bool reducedMotion: window.themePreferencesBridge !== null && window.themePreferencesBridge.reduceMotion
                     readonly property bool playbackSnapshotAligned: presentationReady
@@ -2071,12 +3091,20 @@ ApplicationWindow {
                         && window.playbackMatchesSelection
                     activeFocusOnTab: true
                     Keys.onLeftPressed: {
+                        if (viewMode === "spectrum") {
+                            selectedSpectrumBin = Math.max(0, (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) - 1)
+                            requestPaint(); event.accepted = true; return
+                        }
                         const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
                         selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - step)
                         requestPaint()
                         event.accepted = true
                     }
                     Keys.onRightPressed: {
+                        if (viewMode === "spectrum") {
+                            selectedSpectrumBin = Math.min(Math.max(0, renderedSpectrum.length - 1), (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) + 1)
+                            requestPaint(); event.accepted = true; return
+                        }
                         const step = (event.modifiers & Qt.ShiftModifier) ? 0.05 : 0.01
                         selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + step)
                         requestPaint()
@@ -2119,7 +3147,7 @@ ApplicationWindow {
                             : renderedSpectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120; Layout.minimumHeight: window.compactHeader ? 72 : 96
                     Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
-                    Accessible.value: visualizationCanvas.viewMode + ", revision " + visualizationCanvas.renderedRevision + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%")
+                    Accessible.value: visualizationCanvas.viewMode + ", revision " + visualizationCanvas.renderedRevision + ", " + (visualizationCanvas.selectedPosition < 0 ? "no position selected" : "position " + Math.round(visualizationCanvas.selectedPosition * 100) + "%") + (visualizationCanvas.viewMode === "spectrum" && visualizationCanvas.selectedSpectrumBin >= 0 ? ", selected bin " + visualizationCanvas.selectedSpectrumBin : "") + (visualizationCanvas.viewMode === "spectrum" && visualizationCanvas.spectrumPeakIndex >= 0 ? ", peak bin " + visualizationCanvas.spectrumPeakIndex : "")
                     Accessible.role: Accessible.Graphic
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
@@ -2148,7 +3176,8 @@ ApplicationWindow {
                                 if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))
                                     continue
                                 var x = i * width / Math.max(1, wave.length - 1)
-                                var lo = wave[i][0], hi = wave[i][1]
+                                var lo = Math.max(-1, Math.min(1, Number(wave[i][0])))
+                                var hi = Math.max(-1, Math.min(1, Number(wave[i][1])))
                                 ctx.moveTo(x, height * (0.5 - hi * 0.4)); ctx.lineTo(x, height * (0.5 - lo * 0.4))
                             }
                             ctx.stroke()
@@ -2157,7 +3186,13 @@ ApplicationWindow {
                             for (var k = 0; k < spec.length; ++k) {
                                 if (!isFinite(spec[k]))
                                     continue
-                                ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, spec[k] * height * 2))
+                                const magnitude = Math.max(0, spec[k])
+                                ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, magnitude * height * 2))
+                            }
+                            if (selectedSpectrumBin >= 0 && selectedSpectrumBin < spec.length) {
+                                ctx.strokeStyle = window.themeForegrounds[window.selectedThemeIndex]; ctx.lineWidth = 2; ctx.beginPath()
+                                ctx.moveTo((selectedSpectrumBin + 0.5) * width / spec.length, 0)
+                                ctx.lineTo((selectedSpectrumBin + 0.5) * width / spec.length, height); ctx.stroke()
                             }
                         }
                         if (selectedPosition >= 0) {
@@ -2176,6 +3211,10 @@ ApplicationWindow {
                         onClicked: {
                             if (!visualizationCanvas.presentationReady)
                                 return
+                            if (visualizationCanvas.viewMode === "spectrum") {
+                                visualizationCanvas.selectedSpectrumBin = Math.max(0, Math.min(visualizationCanvas.renderedSpectrum.length - 1, Math.floor(mouse.x * visualizationCanvas.renderedSpectrum.length / visualizationCanvas.width)))
+                                visualizationCanvas.forceActiveFocus(); visualizationCanvas.requestPaint(); return
+                            }
                             visualizationCanvas.selectedPosition = Math.max(0, Math.min(1, mouse.x / visualizationCanvas.width))
                             visualizationCanvas.forceActiveFocus()
                             visualizationCanvas.requestPaint()
@@ -2188,6 +3227,11 @@ ApplicationWindow {
                             if (!visualizationCanvas.presentationReady) {
                                 wheel.accepted = true
                                 return
+                            }
+                            if (visualizationCanvas.viewMode === "spectrum") {
+                                const binStep = (wheel.modifiers & Qt.ControlModifier) ? 10 : ((wheel.modifiers & Qt.ShiftModifier) ? 5 : 1)
+                                visualizationCanvas.selectedSpectrumBin = Math.max(0, Math.min(visualizationCanvas.renderedSpectrum.length - 1, (visualizationCanvas.selectedSpectrumBin < 0 ? 0 : visualizationCanvas.selectedSpectrumBin) + Math.sign(wheel.angleDelta.y) * binStep))
+                                visualizationCanvas.forceActiveFocus(); visualizationCanvas.requestPaint(); wheel.accepted = true; return
                             }
                             const stepDivisor = (wheel.modifiers & Qt.ControlModifier) ? 120 : ((wheel.modifiers & Qt.ShiftModifier) ? 240 : 1200)
                             const delta = wheel.angleDelta.y / stepDivisor
@@ -2206,7 +3250,7 @@ ApplicationWindow {
                         visible: visualizationCanvas.activeFocus
                         z: 2
                     }
-                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { if (visualizationPresentation.revision >= 0) { window.visualizationSelectionResetReason = ""; visualizationCanvas.renderedWaveform = visualizationPresentation.waveform.slice(); visualizationCanvas.renderedSpectrum = visualizationPresentation.spectrum.slice(); visualizationCanvas.acceptedPlaybackEpoch = window.playbackBridge ? window.playbackBridge.epoch : -1; visualizationCanvas.acceptedPlaybackSource = window.playbackBridge ? window.playbackBridge.source.toString() : "" } else { visualizationCanvas.renderedWaveform = []; visualizationCanvas.renderedSpectrum = []; visualizationCanvas.acceptedPlaybackEpoch = -1; visualizationCanvas.acceptedPlaybackSource = "" } visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1; visualizationCanvas.requestPaint() } }
+                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.selectedSpectrumBin = -1; if (visualizationPresentation.revision >= 0) { window.visualizationSelectionResetReason = ""; visualizationCanvas.renderedWaveform = visualizationPresentation.waveform.slice(); visualizationCanvas.renderedSpectrum = visualizationPresentation.spectrum.slice(); visualizationCanvas.acceptedPlaybackEpoch = window.playbackBridge ? window.playbackBridge.epoch : -1; visualizationCanvas.acceptedPlaybackSource = window.playbackBridge ? window.playbackBridge.source.toString() : "" } else { visualizationCanvas.renderedWaveform = []; visualizationCanvas.renderedSpectrum = []; visualizationCanvas.acceptedPlaybackEpoch = -1; visualizationCanvas.acceptedPlaybackSource = "" } visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1; visualizationCanvas.requestPaint() } }
                 }
                 Label {
                     objectName: "visualizationInteractionHint"
@@ -2218,11 +3262,11 @@ ApplicationWindow {
                             return "Select a " + modeLabel + " position with the pointer or keyboard."
                         return modeLabel.charAt(0).toUpperCase() + modeLabel.slice(1) + " position " + Math.round(visualizationCanvas.selectedPosition * 100) + "% selected; Enter, Space, right-click, or double-click can clear it."
                     }
-                    Accessible.name: "Visualization interaction hint"
+                    Accessible.name: "Visualization interaction hint, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
-                    ToolTip.text: "Current visualization selection and recovery hint"
+                    ToolTip.text: "Current visualization selection and recovery hint; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -2254,13 +3298,13 @@ ApplicationWindow {
                     objectName: "visualizationClearSelection"
                     enabled: visualizationCanvas.selectedPosition >= 0
                     text: enabled ? "Clear selection" : "No selection"
-                    Accessible.name: "Clear visualization selection"
+                    Accessible.name: "Clear visualization selection, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: enabled ? "available" : "unavailable"
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled
-                        ? "Clear the selected waveform or FFT position."
-                        : "There is no selected waveform or FFT position to clear."
-                    ToolTip.text: enabled ? "Clear the selected visualization position" : "No visualization position is selected"
+                        ? "Clear the selected waveform or FFT position; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
+                        : "There is no selected waveform or FFT position to clear; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
+                    ToolTip.text: (enabled ? "Clear the selected visualization position" : "No visualization position is selected") + "; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     contentItem: Text { text: parent.text; color: window.themeBackgrounds[window.selectedThemeIndex]; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; opacity: parent.enabled ? 1 : 0.65 }
                     background: Rectangle { color: window.themeForegrounds[window.selectedThemeIndex]; radius: 5; opacity: parent.enabled ? 1 : 0.35 }
                     onClicked: window.clearVisualizationPositionAndFocus()
@@ -2269,9 +3313,9 @@ ApplicationWindow {
                     objectName: "visualizationSelectionResetFeedback"
                     visible: window.visualizationSelectionResetReason !== ""
                     text: window.visualizationSelectionResetReason
-                    Accessible.name: "Visualization selection reset status"
+                    Accessible.name: "Visualization selection reset status, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Why the visualization selection was cleared"
                     color: window.themeAccentColors[window.selectedThemeIndex]
@@ -2284,7 +3328,7 @@ ApplicationWindow {
                     objectName: "visualizationRetryFeedback"
                     visible: window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring"
                     text: window.liveBridge.status === "Reacquiring" ? "Reacquiring capture; visualization will resume when output is available." : "Starting capture; visualization will populate when output is available."
-                    Accessible.name: "Visualization capture recovery status"
+                    Accessible.name: "Visualization capture recovery status, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
@@ -2301,11 +3345,11 @@ ApplicationWindow {
                     Layout.minimumWidth: 0
                     Layout.alignment: Qt.AlignTop
                     spacing: window.compactHeader ? 4 : 8
-                    Accessible.name: "Visualization data and capture status"
-                    Accessible.value: window.liveBridge.status === "Error" ? "capture error" : (window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring" ? window.liveBridge.status.toLowerCase() : (visualizationCanvas.modeHasData ? "ready" : "waiting"))
+                    Accessible.name: "Visualization data and capture status, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
+                    Accessible.value: (window.liveBridge.status === "Error" ? "capture error" : (window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring" ? window.liveBridge.status.toLowerCase() : (visualizationCanvas.modeHasData ? "ready" : "waiting"))) + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Current waveform or FFT availability, generation, and capture state."
-                    ToolTip.text: "Visualization data, generation, and capture status: " + (window.liveBridge.status === "Error" ? "capture error" : (visualizationCanvas.modeHasData ? "ready" : "waiting"))
+                    Accessible.description: "Current waveform or FFT availability, generation, and capture state; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
+                    ToolTip.text: "Visualization data, generation, and capture status: " + (window.liveBridge.status === "Error" ? "capture error" : (visualizationCanvas.modeHasData ? "ready" : "waiting")) + "; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                 Label {
                     objectName: "visualizationEmptyState"
                     visible: !visualizationCanvas.modeHasData
@@ -2319,22 +3363,22 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
-                    Accessible.name: "Visualization empty state"
-                    Accessible.value: text
+                    Accessible.name: "Visualization empty state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.StaticText
-                    Accessible.description: text
-                    ToolTip.text: "Visualization data availability and next action"
+                    Accessible.description: text + " " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.")
+                    ToolTip.text: "Visualization data availability and next action; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                 }
                 Label {
                     objectName: "visualizationLoadState"
                     text: typeof visualizationPresentation === "undefined"
                         ? "Unavailable"
                         : (visualizationCanvas.modeHasData ? (visualizationCanvas.reducedMotion ? "Ready · static snapshot" : "Ready") : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
-                    Accessible.name: "Visualization load state: " + text
-                    Accessible.value: text
+                    Accessible.name: "Visualization load state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "; recovery ready")
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
-                    ToolTip.text: "Current waveform/FFT presentation load state"
+                    ToolTip.text: "Current waveform/FFT presentation load state; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -2346,11 +3390,11 @@ ApplicationWindow {
                     text: typeof visualizationPresentation === "undefined" || !visualizationCanvas.presentationReady
                         ? (window.visualizationSelectionResetReason !== "" ? "Waiting for replacement analysis result; " + window.visualizationSelectionResetReason : "Waiting for an accepted analysis result")
                         : "Accepted analysis generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
-                    Accessible.name: "Visualization analysis handoff: " + text
+                    Accessible.name: "Visualization analysis handoff, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: "Status of the generation-gated analysis result consumed by waveform and FFT rendering."
-                    ToolTip.text: "Accepted analysis generation and revision consumed by the visualization"
+                    ToolTip.text: "Accepted analysis generation and revision consumed by the visualization; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -2376,6 +3420,24 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
                 Label {
+                    objectName: "selectedAnalysisActionStatus"
+                    visible: window.selectedName !== ""
+                    text: window.analysisJobBridge === null
+                        ? "Selected track · analysis unavailable"
+                        : (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running"
+                           ? "Selected track · analysis in progress"
+                           : (window.libraryAnalysisResultReady ? "Selected track · analysis ready" : "Selected track · analysis needs retry"))
+                    Accessible.name: "Selected track analysis action status: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Action-oriented status for the selected Library track analysis."
+                    ToolTip.text: "Selected Library track analysis action status"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "visualizationMotionState"
                     text: visualizationCanvas.reducedMotion
                         ? "Reduced motion · static accepted snapshot"
@@ -2391,6 +3453,18 @@ ApplicationWindow {
                     Layout.minimumWidth: 0
                     wrapMode: Text.WordWrap
                 }
+                Button {
+                    objectName: "selectedAnalysisRetry"
+                    visible: window.selectedName !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.canRetry
+                    enabled: visible
+                    text: "Retry selected analysis"
+                    Accessible.name: "Retry selected track analysis"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: "Retry analysis for the selected Library track and replace stale visualization data when accepted."
+                    ToolTip.text: "Retry analysis for the selected Library track"
+                    onClicked: window.retryVisualizationAnalysis()
+                }
                 Label {
                     objectName: "visualizationPlaybackFeedback"
                     text: visualizationCanvas.selectedPosition < 0
@@ -2398,11 +3472,28 @@ ApplicationWindow {
                         : (window.playbackBridge && window.playbackBridge.state !== "Stopped"
                            ? "Selected " + Math.round(visualizationCanvas.selectedPosition * 100) + "% · seek uses accepted snapshot"
                            : "Selected " + Math.round(visualizationCanvas.selectedPosition * 100) + "% · start playback to seek")
-                    Accessible.name: "Visualization playback feedback: " + text
+                    Accessible.name: "Visualization playback feedback, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
-                    Accessible.description: "Playback and seek readiness for the accepted waveform or FFT snapshot."
-                    ToolTip.text: "Playback seek feedback for the accepted visualization snapshot"
+                    Accessible.description: "Playback and seek readiness for the accepted waveform or FFT snapshot; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
+                    ToolTip.text: "Playback seek feedback for the accepted visualization snapshot; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
+                    objectName: "visualizationSpectrumReadout"
+                    visible: visualizationCanvas.viewMode === "spectrum"
+                    text: visualizationCanvas.selectedSpectrumBin < 0
+                        ? "FFT bin: none selected"
+                        : "FFT bin " + visualizationCanvas.selectedSpectrumBin + " · magnitude " + Number(visualizationCanvas.renderedSpectrum[visualizationCanvas.selectedSpectrumBin]).toFixed(3)
+                    Accessible.name: "FFT selection readout, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Selected FFT bin and its accepted spectrum magnitude; wheel and keyboard selection update this readout."
+                    ToolTip.text: "Selected FFT bin and accepted magnitude"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -2413,10 +3504,10 @@ ApplicationWindow {
                     objectName: "visualizationRecoveryAnnouncement"
                     text: window.visualizationRecoveryAnnouncement
                     visible: text !== ""
-                    Accessible.name: "Visualization recovery announcement: " + text
-                    Accessible.value: text
+                    Accessible.name: "Visualization recovery announcement, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Live announcement for keyboard or pointer playback recovery actions."
+                    Accessible.description: "Live announcement for keyboard or pointer playback recovery actions; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                     ToolTip.text: "Latest visualization playback recovery action"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
@@ -2433,11 +3524,11 @@ ApplicationWindow {
                            : (window.captureMonitorBridge.status === "Error"
                               ? "Capture retry failed · check permission and selected device"
                               : (window.captureMonitorBridge.status === "Reacquiring" ? "Capture reacquiring after a device transition" : "Capture device ready")))
-                    Accessible.name: "Visualization device recovery state: " + text
+                    Accessible.name: "Visualization device recovery state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Visible no-device, permission, retry-failure, and reacquisition guidance for visualization capture."
-                    ToolTip.text: "Capture device and permission recovery state"
+                    ToolTip.text: "Capture device and permission recovery state; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -2451,11 +3542,11 @@ ApplicationWindow {
                         : (window.visualizationSelectionResetReason !== ""
                            ? "Playback snapshot cleared · " + window.visualizationSelectionResetReason
                            : "Playback source/epoch is not aligned with the accepted snapshot")
-                    Accessible.name: "Visualization playback epoch feedback: " + text
+                    Accessible.name: "Visualization playback epoch feedback, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: "Live playback source and epoch alignment for the accepted visualization snapshot."
-                    ToolTip.text: "Playback source and epoch alignment for visualization seek"
+                    ToolTip.text: "Playback source and epoch alignment for visualization seek; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -2487,7 +3578,7 @@ ApplicationWindow {
                              : "Waveform samples: " + visualizationCanvas.renderedWaveform.length + " · Spectrum bins: " + visualizationCanvas.renderedSpectrum.length)
                     Accessible.name: "Visualization data status"
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
@@ -2544,6 +3635,21 @@ ApplicationWindow {
                     Layout.minimumWidth: 0
                     wrapMode: Text.WordWrap
                 }
+                Slider {
+                    id: visualizationPositionSlider
+                    objectName: "visualizationPositionSlider"
+                    from: 0; to: 1
+                    value: visualizationCanvas.selectedPosition < 0 ? 0 : visualizationCanvas.selectedPosition
+                    enabled: visualizationCanvas.presentationReady && visualizationCanvas.viewMode === "waveform"
+                    activeFocusOnTab: true
+                    Accessible.name: "Visualization playhead position"
+                    Accessible.value: enabled ? Math.round(value * 100) + "%" : "unavailable"
+                    Accessible.role: Accessible.Slider
+                    Accessible.description: "Choose a time-aligned waveform position before seeking playback."
+                    ToolTip.text: "Choose the waveform playhead position"
+                    onMoved: { visualizationCanvas.selectedPosition = value; visualizationCanvas.requestPaint() }
+                    Layout.fillWidth: true
+                }
                 Button {
                     objectName: "clearVisualizationSelection"
                     activeFocusOnTab: true
@@ -2580,6 +3686,20 @@ ApplicationWindow {
                     onClicked: window.seekPlaybackToVisualizationPosition(visualizationCanvas.selectedPosition, visualizationCanvas.renderedWaveform.length)
                 }
                 Button {
+                    objectName: "reopenSelectedPlayback"
+                    activeFocusOnTab: true
+                    text: "Reopen selected"
+                    enabled: window.playbackBridge !== null && window.selectedAudioUrl.toString() !== ""
+                    Accessible.name: "Reopen selected Library track"
+                    Accessible.value: enabled ? "available" : "select a Library track"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: enabled
+                        ? "Start or replace playback with the currently selected Library track at frame zero."
+                        : "Select a Library track before reopening playback."
+                    ToolTip.text: enabled ? "Reopen the selected Library track from the beginning" : "Select a Library track first"
+                    onClicked: { window.reopenSelectedPlayback(); reopenSelectedPlayback.forceActiveFocus() }
+                }
+                Button {
                     objectName: "resumeVisualizationPlayback"
                     activeFocusOnTab: true
                     text: "Resume playback"
@@ -2589,7 +3709,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled ? "Resume playback while retaining the accepted visualization snapshot." : "Playback must be paused to resume it."
                     ToolTip.text: enabled ? "Resume playback without clearing the accepted snapshot" : "Resume is available when playback is paused"
-                    onClicked: { window.playbackBridge.resume(); window.announceVisualizationRecovery("Playback resumed; accepted snapshot retained.") }
+                    onClicked: window.togglePlaybackPause()
                 }
                 Button {
                     objectName: "stopVisualizationPlayback"
@@ -2601,7 +3721,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled ? "Stop playback and clear the accepted visualization snapshot." : "Playback is already stopped."
                     ToolTip.text: enabled ? "Stop playback and clear the accepted visualization snapshot" : "Playback is already stopped"
-                    onClicked: { window.playbackBridge.stop(); window.announceVisualizationRecovery("Playback stopped; accepted snapshot cleared.") }
+                    onClicked: window.stopPlaybackWithRecovery("Playback stopped; accepted snapshot cleared.")
                 }
                 }
                 Label {
@@ -2625,7 +3745,7 @@ ApplicationWindow {
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
                     Accessible.name: "Visualization capture status: " + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
                     color: window.liveBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]
@@ -2644,12 +3764,12 @@ ApplicationWindow {
                     ToolTip.text: "DJ monitoring state, estimates, and evidence quality"
                     Label {
                         objectName: "djStatus"; text: "Status: " + window.liveBridge.status
-                        Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current DJ monitoring status"
+                        Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current DJ monitoring status"
                     }
                     Label {
                         objectName: "djEstimates"
                         text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
-                        Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current BPM, key, and chord estimates"
+                        Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current BPM, key, and chord estimates"
                     }
                     Label {
                      objectName: "djEvidenceStatus"
@@ -2674,23 +3794,34 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     Accessible.name: "Overlay actions"
                     Accessible.value: window.overlayBridge && window.overlayBridge.available
-                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings revision " + window.overlaySettingsRevision
-                        : "unavailable; control-window fallback active"
+                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings retained; revision " + window.overlaySettingsRevision
+                        : "unavailable; control-window fallback active; settings retained"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: window.overlayLaunchFallbackActive
-                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active and the control window remains available."
+                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained."
                         : window.overlayDisplayRecoveryPending
-                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending and the control-window fallback remains available."
+                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending, the control-window fallback remains available, and persisted settings are retained."
                         : "Show, unlock, or hide the DJ overlay window."
                     ToolTip.text: window.overlayBridge && window.overlayBridge.available
                         ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available"))
-                        : "Overlay window actions are unavailable; control-window fallback is active"
-                    Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Show the DJ overlay window" : (window.overlayDisplaySelectionRequired ? "Choose an available display before showing the overlay" : "Native overlay unavailable; keep using the control-window fallback"); ToolTip.text: enabled ? "Show the DJ overlay and hide the control window" : (window.overlayDisplaySelectionRequired ? "Choose a display before showing the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: window.showOverlayAndHideControls() }
-                    Button { text: window.overlayHiddenByUser ? "Restore hidden overlay" : "Restore overlay"; objectName: "restoreOverlay"; Accessible.name: "Restore DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "hidden by user" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user using its persisted display, position, size, and opacity." : "Restore the DJ overlay using its persisted display, position, size, and opacity") : (window.overlayDisplaySelectionRequired ? "Choose an available display before restoring the overlay" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user with persisted settings" : "Restore the overlay with persisted settings") : (window.overlayDisplaySelectionRequired ? "Choose a display before restoring the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: window.showOverlayAndHideControls() }
-                    Button { text: "Reapply saved settings"; objectName: "reapplyOverlaySettings"; Accessible.name: "Reapply saved overlay settings"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Reapply the saved display, position, size, and opacity before restoring the DJ overlay" : (window.overlayDisplaySelectionRequired ? "Choose an available display before reapplying saved settings" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? "Reapply saved overlay display, geometry, and opacity" : (window.overlayDisplaySelectionRequired ? "Choose a display before reapplying settings" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: window.reapplyOverlaySettingsAndRestore() }
-                    Button { id: unlockOverlay; text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : "unavailable"; Accessible.description: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode or is unavailable"; ToolTip.text: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode"; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough; onClicked: window.unlockOverlayAndRestoreFocus() }
-                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay window"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
-                    Button { text: "Quit Beatglass"; objectName: "quitBeatglass"; Accessible.name: "Quit Beatglass"; Accessible.role: Accessible.Button; Accessible.description: "Hide the DJ overlay and quit Beatglass while retaining persisted settings"; ToolTip.text: "Quit Beatglass and retain overlay settings"; onClicked: window.quitApplication() }
+                        : "Overlay window actions are unavailable; control-window fallback is active; overlay settings are retained"
+                    Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Show the DJ overlay window" : (window.overlayDisplaySelectionRequired ? "Choose an available display before showing the overlay" : "Native overlay unavailable; keep using the control-window fallback"); ToolTip.text: enabled ? "Show the DJ overlay and hide the control window" : (window.overlayDisplaySelectionRequired ? "Choose a display before showing the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.announceCaptureRecoveryState("DJ overlay launch requested on the selected display; restoring persisted settings."); window.showOverlayAndHideControls() } }
+                    Button { text: window.overlayHiddenByUser ? "Restore hidden overlay" : "Restore overlay"; objectName: "restoreOverlay"; Accessible.name: "Restore DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "hidden by user" : (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available")) : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user using its persisted display, position, size, and opacity." : "Restore the DJ overlay using its persisted display, position, size, and opacity") : (window.overlayDisplaySelectionRequired ? "Choose an available display before restoring the overlay" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user with persisted settings" : "Restore the overlay with persisted settings") : (window.overlayDisplaySelectionRequired ? "Choose a display before restoring the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.announceCaptureRecoveryState("DJ overlay restore requested; reapplying persisted display, geometry, and opacity."); window.showOverlayAndHideControls() } }
+                    Button { text: "Reapply saved settings"; objectName: "reapplyOverlaySettings"; Accessible.name: "Reapply saved overlay settings"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Reapply the saved display, position, size, and opacity before restoring the DJ overlay" : (window.overlayDisplaySelectionRequired ? "Choose an available display before reapplying saved settings" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? "Reapply saved overlay display, geometry, and opacity" : (window.overlayDisplaySelectionRequired ? "Choose a display before reapplying settings" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.reapplyOverlaySettingsAndRestore(); overlayDisplayStatus.forceActiveFocus() } }
+                    Button { id: unlockOverlay; text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : "unavailable"; Accessible.description: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode or is unavailable"; ToolTip.text: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode"; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough; onClicked: { window.unlockOverlayAndRestoreFocus(); overlayInteractionMode.forceActiveFocus() } }
+                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "already hidden" : "available") : "unavailable"; Accessible.description: enabled ? "Hide the DJ overlay window and restore the control window" : "Native overlay unavailable; control-window fallback is active"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: { window.announceCaptureRecoveryState("DJ overlay hidden; control-window fallback restored and overlay settings retained."); window.hideOverlayAndRestoreControls(); restoreOverlay.forceActiveFocus() } }
+                    Button { text: "Quit Beatglass"; objectName: "quitBeatglass"; Accessible.name: "Quit Beatglass"; Accessible.role: Accessible.Button; Accessible.value: "available; overlay settings retained"; Accessible.description: "Hide the DJ overlay and quit Beatglass while retaining persisted settings"; ToolTip.text: "Quit Beatglass and retain overlay settings"; onClicked: { window.announceCaptureRecoveryState("Beatglass quitting; overlay display, geometry, size, opacity, and interaction settings are retained."); window.quitApplication() } }
+                }
+                Label {
+                    objectName: "overlayShortcutHelp"
+                    text: "Keyboard: Esc unlocks · Ctrl+Alt+U focuses unlock · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+J focuses hide · Ctrl+Alt+W focuses show · Ctrl+Alt+Shift+W focuses restore · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+Shift+Y focuses retry · Ctrl+Alt+O cycles size · Ctrl+Alt+Z focuses size · Ctrl+Alt+Shift+O resets opacity · Ctrl+Alt+L focuses opacity · Ctrl+Alt+Shift+R reapplies saved settings · Ctrl+Alt+Shift+P focuses reapply · Ctrl+Alt+Shift+S reviews retained settings · Ctrl+Alt+Shift+M reviews overlay summary"
+                    Accessible.name: "Overlay keyboard shortcuts"
+                    Accessible.value: text + (window.overlayBridge !== null ? "; retained-settings review shortcut available" : "; retained-settings review unavailable")
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Keyboard shortcuts for unlocking, hiding, restoring, reapplying retained settings, and reviewing the overlay summary."
+                    ToolTip.text: text
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
@@ -2700,14 +3831,14 @@ ApplicationWindow {
                         ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity, settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending" : "")
                         : "unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Configure pointer click-through and overlay opacity."
+                    Accessible.description: "Configure pointer click-through and overlay opacity." + (window.overlayDisplayRecoveryPending ? " Recovery is pending." : "")
                     ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
                         activeFocusOnTab: true
                         Accessible.name: checked ? "Disable click-through" : "Enable click-through"
-                        Accessible.value: checked ? "enabled" : "disabled"
+                        Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                         Accessible.role: Accessible.CheckBox
                         Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled")
                         ToolTip.text: "Toggle pointer click-through for the overlay"
@@ -2718,15 +3849,194 @@ ApplicationWindow {
                             checked = window.overlayBridge.clickThrough
                             if (checked !== requestedClickThrough)
                                 window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again.")
+                            overlayInteractionMode.forceActiveFocus()
                         }
                         Connections {
                             target: window.overlayBridge
                             function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
                         }
                     }
-                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay pointer interaction mode" }
+                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text + (window.overlayDisplayRecoveryPending ? ", recovery pending" : ", ready"); Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; settings retained" : ""); Accessible.role: Accessible.StaticText; Accessible.description: text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending; overlay settings are retained." : ""); ToolTip.text: "Current overlay pointer interaction mode" }
+                    Label {
+                        objectName: "overlayKeyboardRecoveryStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (window.overlayBridge.clickThrough ? "Keyboard recovery: press Escape to unlock overlay" : "Keyboard recovery: overlay controls are interactive")
+                            : "Keyboard recovery unavailable"
+                        Accessible.name: "Overlay keyboard recovery status"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.overlayBridge.clickThrough
+                            ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window."
+                            : visible ? text + ". Click-through can be enabled or disabled from the overlay controls." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay keyboard recovery"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        objectName: "overlayEndpointStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
+                            ? "Overlay endpoint: " + window.endpointSelectionBridge.selectedEndpoint
+                            : "Overlay endpoint: none selected"
+                        Accessible.name: "Overlay capture endpoint status, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
+                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
+                            : text + ". Choose an output endpoint before starting monitoring." + (window.overlayDisplayRecoveryPending ? " The last endpoint selection remains retained while recovery is pending." : "")
+                        ToolTip.text: visible ? Accessible.description : "Overlay capture endpoint"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Button {
+                        objectName: "overlayEndpointRefreshAction"
+                        visible: window.overlayBridge !== null
+                        text: "Refresh overlay endpoint"
+                        enabled: visible && window.endpointSelectionBridge !== null
+                        Accessible.name: text
+                        Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "refresh available; recovery pending" : "refresh available; ready") : "refresh unavailable"
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring." : "Output endpoint refresh is unavailable."
+                        ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
+                        onClicked: {
+                            window.endpointSelectionBridge.refresh()
+                            window.announceCaptureRecoveryState("Overlay endpoint refresh requested; choose an output endpoint before retrying monitoring.")
+                            endpointSelector.forceActiveFocus()
+                        }
+                    }
+                    Label {
+                        objectName: "overlayLiveMonitoringState"
+                        activeFocusOnTab: true
+                        visible: window.overlayBridge !== null
+                        text: visible ? ("Overlay monitoring: " + window.liveBridge.status
+                            + (window.liveBridge.status === "Tracking" ? " · live estimates updating" : " · waiting for accepted output")) : "Overlay monitoring unavailable"
+                        Accessible.name: "Overlay live monitoring state, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.value: visible ? text : ""
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.liveBridge.status === "Tracking"
+                            ? text + ". Estimates are attributed to the monitored combined output." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
+                            : visible ? text + ". The overlay remains available while capture recovers; the selected endpoint remains retained." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay monitoring state"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Button {
+                        objectName: "overlayMonitoringAction"
+                        visible: window.overlayBridge !== null
+                        text: visible && window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop overlay monitoring" : "Start overlay monitoring"
+                        enabled: visible && window.captureMonitorBridge !== null
+                            && window.captureMonitorBridge.status !== "Starting"
+                            && window.captureMonitorBridge.status !== "Reacquiring"
+                        Accessible.name: text
+                        Accessible.value: (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable")
+                            + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "; ready")
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled
+                            ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.")
+                            : "Monitoring is transitioning; wait for the current capture state."
+                        ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
+                        onClicked: {
+                            if (!window.captureMonitorBridge) return
+                            if (window.captureMonitorBridge.status === "Monitoring") {
+                                window.captureMonitorBridge.stop()
+                                window.announceCaptureRecoveryState("Overlay monitoring stopped; overlay settings remain available.")
+                            } else {
+                                window.captureMonitorBridge.start()
+                                window.announceCaptureRecoveryState("Overlay monitoring requested; waiting for accepted output data.")
+                            }
+                            overlayLiveMonitoringState.forceActiveFocus()
+                        }
+                    }
+                    Button {
+                        objectName: "overlayCaptureRecoveryAction"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && window.captureMonitorBridge.status === "Error"
+                        text: "Retry overlay capture"
+                        enabled: visible && window.captureMonitorBridge.start !== undefined
+                        Accessible.name: text
+                        Accessible.value: enabled ? "retry available; capture status error" : "retry unavailable"
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled
+                            ? "Retry the selected output capture for the overlay and wait for a fresh accepted snapshot; settings revision " + window.overlaySettingsRevision + "."
+                            : "Overlay capture retry is unavailable; settings revision " + window.overlaySettingsRevision + "."
+                        ToolTip.text: Accessible.description
+                        onClicked: {
+                            window.captureMonitorBridge.start()
+                            window.announceCaptureRecoveryState("Overlay capture retry requested; waiting for a fresh accepted snapshot.")
+                            overlayLiveMonitoringState.forceActiveFocus()
+                        }
+                    }
+                    Label {
+                        objectName: "overlayEstimateAttribution"
+                        visible: window.overlayBridge !== null
+                        text: visible ? "Estimate source: selected system output · combined mix" : "Estimate source unavailable"
+                        Accessible.name: "Overlay estimate attribution, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; source retained" : "; source ready")
+                        Accessible.role: Accessible.StaticText
+                        Accessible.description: visible
+                            ? text + ". Track and deck metadata are unavailable unless a separately supported source provides them." + (window.overlayDisplayRecoveryPending ? " The selected combined-output source is retained while recovery is pending." : "")
+                            : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay estimate source"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        objectName: "overlaySettingsRetentionStatus"
+                        activeFocusOnTab: true
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (window.overlayDisplayRecoveryPending
+                                ? "Overlay settings retained while recovery is pending"
+                                : "Overlay settings retained: display, geometry, opacity, and interaction mode")
+                            : "Overlay settings retention unavailable"
+                        Accessible.name: "Overlay settings retention, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready") + ", revision " + window.overlaySettingsRevision
+                        Accessible.value: text + "; settings revision " + window.overlaySettingsRevision
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible
+                            ? text + ". Persisted settings remain available to restore the native overlay or use the control-window fallback."
+                            : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay settings retention"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Button {
+                        objectName: "overlaySettingsRetentionReviewAction"
+                        visible: window.overlayBridge !== null
+                        text: window.overlayDisplayRecoveryPending ? "Review recovery settings" : "Review retained settings"
+                        activeFocusOnTab: true
+                        enabled: visible
+                        Accessible.name: text
+                        Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "settings retained") + "; settings revision " + window.overlaySettingsRevision
+                        Accessible.role: Accessible.Button
+                        Accessible.description: window.overlayDisplayRecoveryPending
+                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending; current settings revision " + window.overlaySettingsRevision + "."
+                            : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings; current settings revision " + window.overlaySettingsRevision + "."
+                        ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
+                        onClicked: {
+                            overlaySettingsRetentionStatus.forceActiveFocus()
+                            window.announceCaptureRecoveryState(window.overlayDisplayRecoveryPending
+                                ? "Reviewing retained overlay settings while recovery is pending; settings revision " + window.overlaySettingsRevision + "."
+                                : "Reviewing retained overlay settings; native overlay recovery is available at settings revision " + window.overlaySettingsRevision + ".")
+                        }
+                    }
+                    Label {
+                        objectName: "overlayDataReadiness"
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (visualizationCanvas.modeHasData ? "Overlay estimates: accepted snapshot ready" : "Overlay estimates: waiting for accepted snapshot")
+                            : "Overlay estimates unavailable"
+                        Accessible.name: "Overlay estimate readiness, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; snapshot retained" : "; recovery ready")
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && visualizationCanvas.modeHasData
+                            ? text + ". The overlay is showing data from the current accepted visualization snapshot." + (window.overlayDisplayRecoveryPending ? " The accepted snapshot remains retained while recovery is pending." : "")
+                            : visible ? text + ". The overlay will update after monitoring accepts a replacement snapshot." + (window.overlayDisplayRecoveryPending ? " The last accepted snapshot remains retained while recovery is pending." : "") : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay estimate readiness"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
                     Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
-                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%"; Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%"; ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlayBridge.setOpacity(value); window.overlaySettingsRevision += 1 } } }
+                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlayBridge.setOpacity(value); window.overlaySettingsRevision += 1 } }; onPressedChanged: if (!pressed) overlayInteractionMode.forceActiveFocus() }
                     Connections {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge && (!window.overlayOpacityEditInFlight || Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) ) overlayOpacityControl.value = window.overlayBridge.opacity }
@@ -2737,20 +4047,21 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     objectName: "overlayDisplayControls"
                     Accessible.name: "Overlay display and size controls"
-                    Accessible.value: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "unavailable"
+                    Accessible.value: (window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "unavailable") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Choose the overlay destination display and window size."
+                    Accessible.description: "Choose the overlay destination display and window size." + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : "") + (window.overlayDisplayRecoveryPending ? " Recovery is pending." : "")
                     ToolTip.text: "Overlay destination display and window size; current display is announced when available"
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"
+                        activeFocusOnTab: true
                     Accessible.name: "Overlay display"; Accessible.value: (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Choose the display where the overlay is shown"
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
                         onActivated: {
                             if (window.persistOverlayDisplaySelection(currentIndex, currentText))
-                                retryOverlay.forceActiveFocus()
+                                overlayDisplayStatus.forceActiveFocus()
                             else
                                 forceActiveFocus()
                         }
@@ -2760,20 +4071,55 @@ ApplicationWindow {
                         objectName: "forgetUnavailableOverlayDisplay"
                         visible: window.overlayDisplaySelectionRequired && window.overlayPreferredDisplayName !== ""
                         text: "Forget saved display"
+                        activeFocusOnTab: true
                         Accessible.name: "Forget saved overlay display"
                         Accessible.role: Accessible.Button
                         Accessible.description: "Clear the unavailable saved display so another display can be selected"
                         ToolTip.text: "Clear the unavailable saved display and choose a replacement"
-                        onClicked: window.forgetUnavailableOverlayDisplay()
+                        onClicked: {
+                            window.forgetUnavailableOverlayDisplay()
+                            window.announceCaptureRecoveryState("Saved overlay display cleared; choose a replacement display.")
+                            overlayDisplay.forceActiveFocus()
+                        }
                     }
-                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.StaticText; Accessible.description: window.overlayDisplayRecoveryPending ? text + ". The saved display is being recovered; the overlay will return when it is available." : text + ". The overlay destination is ready."; ToolTip.text: "Current overlay display status" }
+                    Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : ""); Accessible.role: Accessible.StaticText; Accessible.description: window.overlayDisplayRecoveryPending ? text + ". The saved display is being recovered; the overlay will return when it is available." : (window.overlayHiddenByUser ? text + ". The overlay is hidden by user request; use Restore overlay when ready." : text + ". The overlay destination is ready."); ToolTip.text: "Current overlay display status" }
+                    Label {
+                        objectName: "overlayVisibilityStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible ? (window.overlayHiddenByUser ? "Overlay visibility: hidden by user" : "Overlay visibility: available") : "Overlay visibility unavailable"
+                        Accessible.name: "Overlay visibility status"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.overlayHiddenByUser
+                            ? text + ". Use Restore overlay to return the persisted overlay without losing monitoring."
+                            : visible ? text + ". Hide overlay preserves monitoring and restores the control window." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay visibility status"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        objectName: "overlayRecoveryActionStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (window.overlayDisplayRecoveryPending ? "Overlay recovery: waiting for a compatible display" : (window.overlayHiddenByUser ? "Overlay recovery: restore is available" : "Overlay recovery: ready"))
+                            : "Overlay recovery unavailable"
+                        Accessible.name: "Overlay recovery action status"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.overlayDisplayRecoveryPending
+                            ? text + ". Keep the control window available, then choose or reconnect a display before restoring."
+                            : visible && window.overlayHiddenByUser ? text + ". Restore overlay uses the persisted display, size, and opacity." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay recovery status"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
                     Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
                         text: "No displays are available for the overlay."
                         Accessible.name: "Overlay display empty state"
                         Accessible.value: text
-                        Accessible.role: Accessible.StaticText
+                        Accessible.role: Accessible.Status
                         Accessible.description: text + " Connect a display before choosing an overlay destination."
                         ToolTip.text: "Connect a display before choosing an overlay destination"
                     }
@@ -2797,17 +4143,26 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onActivated: if (window.overlayBridge) {
                             const sizes = [[250, 110], [310, 130], [430, 180]]
-                            window.overlayPreferredSizeIndex = currentIndex
-                            window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])
-                            window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
+                            const requestedIndex = currentIndex
+                            const resized = window.overlayBridge.resizeOverlay(
+                                sizes[requestedIndex][0], sizes[requestedIndex][1])
+                            if (resized) {
+                                window.overlayPreferredSizeIndex = requestedIndex
+                                window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
+                                overlayGeometryStatus.forceActiveFocus()
+                            } else {
+                                window.syncOverlaySettingsStateFromBridge()
+                                currentIndex = window.overlayPreferredSizeIndex
+                                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
+                            }
                         }
                     }
                 }
-                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
+                Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
                 Label {
                     objectName: "overlayFallbackState"
                     visible: window.overlayBridge !== null && !window.overlayBridge.available
-                    text: "Control window remains available as the tray/taskbar fallback until the overlay display recovers."
+                    text: "Control window remains available as the tray/taskbar fallback until the overlay display recovers. Use Retry overlay after reconnecting a display."
                     Accessible.name: "Overlay fallback state"
                     Accessible.value: text
                     Accessible.role: Accessible.Status
@@ -2822,11 +4177,11 @@ ApplicationWindow {
                         ? "Overlay position/size: " + window.overlayBridge.geometry.x + "," + window.overlayBridge.geometry.y + " · " + window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height
                         : "Overlay geometry unavailable; control-window fallback remains active."
                     Accessible.name: "Overlay geometry status: " + text + (window.overlayDisplayRecoveryPending ? " (recovery pending)" : "")
-                    Accessible.value: text + "; geometry revision " + window.overlayGeometryRevision + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
+                    Accessible.value: text + "; geometry revision " + window.overlayGeometryRevision + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
-                        ? "Persisted overlay position and size: " + text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ".")
-                        : "Persisted overlay position and size unavailable; control-window fallback remains active."
+                        ? "Persisted overlay position and size: " + text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending; settings are retained." : "") + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : ".")
+                        : "Persisted overlay position and size unavailable; control-window fallback remains active and settings are retained."
                     ToolTip.text: window.overlayDisplayRecoveryPending
                         ? "Current persisted overlay position and size; recovery is pending"
                         : "Current persisted overlay position and size"
@@ -2848,6 +4203,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "overlaySettingsSummary"
+                        activeFocusOnTab: true
                     text: "Overlay settings: "
                         + (window.overlayBridge && window.overlayBridge.displayName !== "" ? window.overlayBridge.displayName : "display unavailable")
                         + " · " + ["Compact", "Medium", "Large"][window.overlayPreferredSizeIndex]
@@ -2855,15 +4211,41 @@ ApplicationWindow {
                         + (window.overlayHiddenByUser ? " · hidden by user" : "")
                         + (window.overlayLaunchFallbackActive ? " · launch fallback active" : "")
                         + " · settings revision " + window.overlaySettingsRevision
-                        + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
-                    Accessible.name: "Overlay settings summary"
+                        + (window.overlayDisplayRecoveryPending ? " · recovery pending · settings retained" : (window.overlayLaunchFallbackActive ? " · settings retained" : ""))
+                    Accessible.name: "Overlay settings summary, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                     Accessible.value: text
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Current overlay display, size, opacity, and recovery state."
-                    ToolTip.text: "Current overlay display, size, opacity, and recovery state"
+                    Accessible.description: "Current overlay display, size, opacity, and settings revision. "
+                        + (window.overlayDisplayRecoveryPending
+                            ? "Recovery is pending; persisted settings are retained while the display is restored."
+                            : (window.overlayLaunchFallbackActive
+                                ? "The overlay is using its launch fallback while persisted settings remain available."
+                                : "The overlay is ready with persisted settings applied."))
+                    ToolTip.text: window.overlayDisplayRecoveryPending
+                        ? "Overlay recovery pending; persisted display settings are retained"
+                        : (window.overlayLaunchFallbackActive
+                            ? "Overlay launch fallback active; persisted display settings are available"
+                            : "Current overlay display, size, opacity, and recovery state")
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
+                    Button {
+                        objectName: "overlaySettingsSummaryReviewAction"
+                        visible: window.overlayBridge !== null
+                        text: "Review overlay summary"
+                        activeFocusOnTab: true
+                        Accessible.name: text + ", " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "available") + "; settings revision " + window.overlaySettingsRevision
+                        Accessible.role: Accessible.Button
+                        Accessible.description: "Focus the consolidated overlay settings summary for display, size, opacity, and recovery state; "
+                            + (window.overlayDisplayRecoveryPending ? "recovery is pending; " : "recovery is ready; ")
+                            + "current settings revision " + window.overlaySettingsRevision + "."
+                        ToolTip.text: Accessible.description
+                        onClicked: {
+                            overlaySettingsSummary.forceActiveFocus()
+                            window.announceCaptureRecoveryState("Overlay summary reviewed; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+                        }
+                    }
                 Label {
                     objectName: "overlayPersistedRecoveryDiagnostic"
                     visible: window.overlayBridge !== null && !window.overlayBridge.available
@@ -2881,7 +4263,7 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
-                Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display"); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay"); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay"); onClicked: { window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until the overlay is restored."); window.showOverlayAndHideControls() } }
+                Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display"); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay"); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay"); onClicked: { window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until the overlay is restored."); window.showOverlayAndHideControls(); overlayDisplayStatus.forceActiveFocus() } }
                 Item { Layout.fillHeight: true }
             }
         }
@@ -2923,7 +4305,7 @@ ApplicationWindow {
                                 text: "No output endpoints detected. Refresh after connecting an output device."
                                 Accessible.name: "Output endpoint empty state"
                                 Accessible.value: text
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 ToolTip.text: "No output endpoint is available; refresh after connecting a device"
                                 wrapMode: Text.WordWrap
@@ -2972,6 +4354,7 @@ ApplicationWindow {
                         ComboBox {
                             id: outputDevice
                             objectName: "outputDevice"
+                            activeFocusOnTab: true
                             model: ["Default system output"]
                             currentIndex: 0
                             enabled: true
@@ -3006,13 +4389,13 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
-                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Appearance guidance"; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Theme and reduced-motion guidance" }
+                        Label { text: "Choose a color theme or enable reduced motion from the toolbar."; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Appearance guidance"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Theme and reduced-motion guidance" }
                         Label {
                             objectName: "appearanceState"
                             text: "Theme: " + window.selectedTheme + " · Motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Accessible.name: "Current appearance settings: " + text
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             ToolTip.text: "Current theme: " + window.selectedTheme + "; motion: " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full")
                             Layout.fillWidth: true
@@ -3024,7 +4407,7 @@ ApplicationWindow {
                     text: "Settings are saved for this desktop profile. User audio files are never modified."
                     Accessible.name: "Settings status: " + text
                     Accessible.value: text
-                    Accessible.role: Accessible.StaticText
+                    Accessible.role: Accessible.Status
                     Accessible.description: "Settings persistence status and user-audio safety guarantee."
                     ToolTip.text: "Settings persistence and source-file safety"
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
@@ -3040,6 +4423,15 @@ ApplicationWindow {
     FolderDialog {
         id: folderPicker
         title: "Choose a folder to browse"
-        onAccepted: window.browseFolder = selectedFolder
+        onAccepted: {
+            window.clearSelectedAudio()
+            window.browseFolder = selectedFolder
+            search.text = ""
+            browser.currentIndex = -1
+            window.recursiveCatalogActive = false
+            window.recursiveCatalogRows = []
+            window.announceVisualizationRecovery("Library folder selected; choose an audio file to inspect or analyze.")
+            browser.forceActiveFocus()
+        }
     }
 }

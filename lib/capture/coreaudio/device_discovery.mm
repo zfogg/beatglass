@@ -6,6 +6,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 namespace beatglass::coreaudio {
 namespace {
@@ -65,11 +67,36 @@ std::vector<SourceInfo> enumerate_outputs(std::string& error) {
   for (const auto device : devices) {
     AudioObjectPropertyAddress streams{kAudioDevicePropertyStreams, kAudioDevicePropertyScopeOutput, kAudioObjectPropertyElementMain};
     UInt32 stream_bytes = 0;
+    UInt32 alive = 0;
+    AudioObjectPropertyAddress alive_address{kAudioDevicePropertyDeviceIsAlive,
+                                             kAudioObjectPropertyScopeGlobal,
+                                             kAudioObjectPropertyElementMain};
+    UInt32 alive_size = sizeof(alive);
+    if (AudioObjectGetPropertyData(device, &alive_address, 0, nullptr, &alive_size, &alive) != noErr || !alive) continue;
     // A disappearing or unreadable device cannot safely be offered as a source.
     if (AudioObjectGetPropertyDataSize(device, &streams, 0, nullptr, &stream_bytes) != noErr || stream_bytes == 0) continue;
     std::string uid, name;
     if (!property_string(device, kAudioDevicePropertyDeviceUID, uid) || !property_string(device, kAudioObjectPropertyName, name)) continue;
     result.push_back({std::move(uid), std::move(name), true, false});
+  }
+  // Put macOS's selected output first.  SourceInfo intentionally stays
+  // platform-neutral, so ordering is the portable way for a control surface
+  // to offer a useful initial choice without overwriting an explicit choice.
+  AudioDeviceID default_device = kAudioObjectUnknown;
+  AudioObjectPropertyAddress default_address{kAudioHardwarePropertyDefaultOutputDevice,
+                                               kAudioObjectPropertyScopeGlobal,
+                                               kAudioObjectPropertyElementMain};
+  UInt32 default_size = sizeof(default_device);
+  if (AudioObjectGetPropertyData(kAudioObjectSystemObject, &default_address, 0, nullptr,
+                                 &default_size, &default_device) == noErr &&
+      default_device != kAudioObjectUnknown) {
+    std::string default_uid;
+    if (property_string(default_device, kAudioDevicePropertyDeviceUID, default_uid)) {
+      const auto it = std::find_if(result.begin(), result.end(), [&](const SourceInfo& source) {
+        return source.id == default_uid;
+      });
+      if (it != result.end()) std::rotate(result.begin(), it, std::next(it));
+    }
   }
   return result;
 }

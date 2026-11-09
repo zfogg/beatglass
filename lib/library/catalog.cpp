@@ -72,4 +72,48 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
   });
   return result;
 }
+
+CatalogResult browse_recursive(const std::filesystem::path& folder, std::string search) {
+  CatalogResult result;
+  std::error_code error;
+  if (!std::filesystem::is_directory(folder, error)) {
+    result.diagnostic = error ? error.message() : "not a directory";
+    return result;
+  }
+  const auto query = folded(std::move(search));
+  std::filesystem::recursive_directory_iterator it(
+      folder, std::filesystem::directory_options::skip_permission_denied, error);
+  const std::filesystem::recursive_directory_iterator end;
+  for (; it != end && !error; it.increment(error)) {
+    const auto& entry = *it;
+    if (entry.is_symlink(error)) { if (error) break; it.disable_recursion_pending(); continue; }
+    const bool directory = entry.is_directory(error);
+    if (error) break;
+    if (!directory && (!entry.is_regular_file(error) || !supported_audio(entry.path()))) {
+      if (error) break;
+      continue;
+    }
+    const auto name = entry.path().filename().string();
+    if (!query.empty() && folded(name).find(query) == std::string::npos) continue;
+    std::uintmax_t bytes = 0;
+    if (!directory) { std::error_code size_error; bytes = entry.file_size(size_error); if (size_error) bytes = 0; }
+    std::string format;
+    if (!directory) {
+      auto extension = folded(entry.path().extension().string());
+      if (extension == ".wav") format = "WAV";
+      else if (extension == ".flac") format = "FLAC";
+      else if (extension == ".mp3") format = "MP3";
+      else if (extension == ".aiff" || extension == ".aif") format = "AIFF";
+    }
+    result.entries.push_back({entry.path(), name, entry.path().stem().string(), {}, directory,
+                              bytes, std::move(format), -1.0});
+  }
+  if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
+  std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
+    const auto af = folded(a.path.string()), bf = folded(b.path.string());
+    if (af != bf) return af < bf;
+    return a.path.string() < b.path.string();
+  });
+  return result;
+}
 } // namespace beatglass::library

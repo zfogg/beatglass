@@ -105,8 +105,11 @@ public:
   }
   bool fail(const char* operation, OSStatus code) {
     const bool cleaned = cleanup();
-    current = {TapState::error, std::string(operation) + " (OSStatus " + std::to_string(code) + ")" + (cleaned ? "" : "; cleanup failed"),
-               cleaned ? classify_osstatus(code) : TapFailure::backend_error}; return false;
+    const auto failure = cleaned ? classify_osstatus(code) : TapFailure::backend_error;
+    std::string message = std::string(operation) + " (OSStatus " + std::to_string(code) + ")";
+    if (failure == TapFailure::permission_denied) message += "; grant macOS audio recording permission and retry";
+    if (!cleaned) message += "; cleanup failed";
+    current = {TapState::error, std::move(message), failure}; return false;
   }
   bool fail_message(const char* message, TapFailure failure) {
     const bool cleaned = cleanup();
@@ -125,7 +128,12 @@ OutputTap::~OutputTap() {
 
 bool OutputTap::start(const std::string& uid, std::uint64_t epoch) {
   if (!stop()) return false;
-  if (uid.empty() || epoch == 0) { impl_->current = {TapState::error, "Output UID and nonzero epoch required", TapFailure::invalid_argument}; return false; }
+  if (uid.empty() || uid.find('\0') != std::string::npos || uid.find_first_not_of(" \t\r\n") == std::string::npos) {
+    impl_->current = {TapState::error, "Output UID required", TapFailure::invalid_argument}; return false;
+  }
+  if (epoch == 0) {
+    impl_->current = {TapState::error, "Nonzero capture epoch required", TapFailure::invalid_argument}; return false;
+  }
   if (@available(macOS 14.2, *)) {
     @autoreleasepool {
       NSString* output = [[NSString alloc] initWithBytes:uid.data() length:uid.size() encoding:NSUTF8StringEncoding];
@@ -186,13 +194,22 @@ TapStatus OutputTap::status() {
   UInt32 alive = 0;
   AudioStreamID stream = kAudioObjectUnknown;
   AudioStreamBasicDescription format{};
-  if (impl_->callback_fault.load(std::memory_order_acquire) || get(impl_->device, kAudioDevicePropertyDeviceIsAlive, alive) != noErr || !alive ||
-      !first_output_stream(impl_->device, stream) || stream != impl_->stream ||
+  const auto alive_status = get(impl_->device, kAudioDevicePropertyDeviceIsAlive, alive);
+  const bool device_lost = alive_status != noErr || !alive;
+  const bool stream_lost = !first_output_stream(impl_->device, stream) || stream != impl_->stream;
+  if (impl_->callback_fault.load(std::memory_order_acquire) || device_lost ||
+      stream_lost ||
       get(impl_->tap, kAudioTapPropertyFormat, format) != noErr ||
       format.mSampleRate != impl_->format.mSampleRate || format.mChannelsPerFrame != impl_->format.mChannelsPerFrame ||
       format.mFormatID != impl_->format.mFormatID || format.mFormatFlags != impl_->format.mFormatFlags ||
-      format.mBytesPerFrame != impl_->format.mBytesPerFrame || format.mBitsPerChannel != impl_->format.mBitsPerChannel) {
-    impl_->current = {TapState::interrupted, "Output disappeared, format changed, or tap callback failed; restart with a fresh epoch", TapFailure::backend_error};
+      format.mBytesPerFrame != impl_->format.mBytesPerFrame || format.mBitsPerChannel != impl_->format.mBitsPerChannel ||
+      format.mFramesPerPacket != impl_->format.mFramesPerPacket ||
+      format.mBytesPerPacket != impl_->format.mBytesPerPacket) {
+    const char* message = (device_lost || stream_lost)
+        ? "Output device or stream disappeared; select it again and restart with a fresh epoch"
+        : "Output format changed or tap callback failed; restart with a fresh epoch";
+    impl_->current = {TapState::interrupted, message,
+                      (device_lost || stream_lost) ? TapFailure::device_lost : TapFailure::backend_error};
   }
   return impl_->current;
 }
@@ -208,7 +225,10 @@ bool OutputTap::pop(CaptureBlock& block) {
 }
 bool OutputTap::stop() noexcept {
   if (impl_->cleanup()) { impl_->current.state = TapState::stopped; impl_->current.message.clear(); impl_->current.failure.reset(); return true; }
-  impl_->current.state = TapState::error; impl_->current.failure = TapFailure::backend_error; return false;
+  impl_->current.state = TapState::error;
+  impl_->current.message = "Core Audio cleanup failed; retry stop before restart";
+  impl_->current.failure = TapFailure::backend_error;
+  return false;
 }
 std::uint64_t OutputTap::dropped_frames() const noexcept { return impl_->fifo ? impl_->fifo->dropped_frames() : 0; }
 }

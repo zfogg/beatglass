@@ -10,6 +10,7 @@ class StorageRecoveryBridge::Worker final : public QObject {
 public slots:
   void open(QString path) {
     // Clear the previous database's selection before asynchronous transition work begins.
+    handle_.reset();
     emit runsChanged({}, {});
     emit analysis(QStringLiteral("Analysis idle"));
     beatglass::library::StorageConfig config{path.toStdString()};
@@ -23,6 +24,7 @@ public slots:
     else { emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); }
   }
   void close() {
+    handle_.reset();
     try { coordinator_.close_storage(); emit result(true, QStringLiteral("Storage closed")); }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Storage close failed: ") + QString::fromUtf8(error.what())); }
     catch (...) { emit result(false, QStringLiteral("Storage close failed: unknown storage error")); }
@@ -39,7 +41,7 @@ public slots:
     emit analysis(runs.empty() ? QStringLiteral("Analysis idle") : QStringLiteral("Analysis recovery available"));
     emit runsChanged(ids, details);
   }
-  void discard(QString id) { if (handle_ && (handle_->state() == beatglass::library_detail::TrackedState::queued || handle_->state() == beatglass::library_detail::TrackedState::running)) { emit result(false, QStringLiteral("Retryable run is active")); return; } try { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) { handle_.reset(); emit analysis(QStringLiteral("Analysis idle")); refresh(); } } catch (const std::exception& error) { emit result(false, QStringLiteral("Recovery discard rejected: ") + QString::fromUtf8(error.what())); refresh(); } catch (...) { emit result(false, QStringLiteral("Recovery discard rejected: unknown storage error")); refresh(); } }
+  void discard(QString id) { if (handle_ && (handle_->state() == beatglass::library_detail::TrackedState::queued || handle_->state() == beatglass::library_detail::TrackedState::running)) { emit result(false, QStringLiteral("Retryable run is active")); return; } try { const bool ok = coordinator_.storage().discard_retryable(id.toStdString()); emit result(ok, ok ? QStringLiteral("Retryable run discarded") : QStringLiteral("Retryable run not found")); if (ok) { handle_.reset(); emit analysis(QStringLiteral("Analysis idle")); } refresh(); } catch (const std::exception& error) { emit result(false, QStringLiteral("Recovery discard rejected: ") + QString::fromUtf8(error.what())); refresh(); } catch (...) { emit result(false, QStringLiteral("Recovery discard rejected: unknown storage error")); refresh(); } }
   void discardBatch(QStringList ids) {
     if (ids.isEmpty()) { emit result(false, QStringLiteral("No retryable recovery runs selected")); refresh(); return; }
     if (handle_ && (handle_->state() == beatglass::library_detail::TrackedState::queued || handle_->state() == beatglass::library_detail::TrackedState::running)) { emit result(false, QStringLiteral("Retryable run is active")); return; }
@@ -54,11 +56,11 @@ public slots:
   }
   void retry(QString runId) {
     runId = runId.trimmed();
-    if (runId.isEmpty()) { emit result(false, QStringLiteral("Retry rejected: no persisted run selected")); return; }
+    if (runId.isEmpty()) { emit result(false, QStringLiteral("Retry rejected: no persisted run selected")); refresh(); return; }
     std::optional<beatglass::library_detail::RetryableRun> found;
     try { found = coordinator_.storage().retryable_run(runId.toStdString()); }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
-    catch (...) { emit result(false, QStringLiteral("Retry rejected: unknown storage error")); return; }
+    catch (...) { emit result(false, QStringLiteral("Retry rejected: unknown storage error")); refresh(); return; }
     if (!found || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::missing_source_snapshot))); refresh(); return; }
     try { if (!beatglass::library::file_decoder_snapshot_compatible(found->decoder_snapshot)) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::incompatible_decoder_snapshot))); refresh(); return; } }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
@@ -68,12 +70,13 @@ public slots:
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
     beatglass::library::RetryRejectionReason rejection;
     try { rejection = coordinator_.retry_rejection_reason(runId.toStdString(), operation); }
-    catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); return; }
+    catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
     // Includes RetryRejectionReason::stale_source_identity for an epoch mismatch.
     if (rejection != beatglass::library::RetryRejectionReason::none) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(rejection))); refresh(); return; }
     try { handle_ = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation)); }
     catch (const std::exception& error) { handle_.reset(); emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
     emit result(static_cast<bool>(handle_), handle_ ? QStringLiteral("Retry queued") : QStringLiteral("Retry rejected: source identity or metadata unavailable"));
+    if (!handle_) refresh();
     if (handle_) { refresh(); emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); }
   }
   void findCached(QString content, QString engine, QString configuration, QString mode) {
@@ -193,6 +196,7 @@ void StorageRecoveryBridge::open() {
   if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); }
   if (!analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
   analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
+  if (!worker_) { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); return; }
   QMetaObject::invokeMethod(worker_, "open", Qt::QueuedConnection, Q_ARG(QString, databasePath_));
   status_ = QStringLiteral("Opening storage"); emit statusChanged();
 }
@@ -210,28 +214,28 @@ void StorageRecoveryBridge::close() {
   if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); }
   if (!analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
   analysisStatus_ = QStringLiteral("Analysis idle"); emit analysisStatusChanged();
-  status_ = QStringLiteral("Storage closed"); emit statusChanged();
+  status_ = worker_ ? QStringLiteral("Storage closed") : QStringLiteral("Storage error: worker unavailable"); emit statusChanged();
 }
-void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); }
-void StorageRecoveryBridge::selectRun(const QString& id) { if (selectedRunId_ == id) return; selectedRunId_ = id; emit selectedRunChanged(); }
-void StorageRecoveryBridge::discardRuns(const QStringList& ids) { if (!ids.isEmpty()) QMetaObject::invokeMethod(worker_, "discardBatch", Qt::QueuedConnection, Q_ARG(QStringList, ids)); }
-void StorageRecoveryBridge::discardSelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
-void StorageRecoveryBridge::retrySelectedRun() { if (!selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
+void StorageRecoveryBridge::refreshRetryableRuns() { if (worker_) QMetaObject::invokeMethod(worker_, "refresh", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
+void StorageRecoveryBridge::selectRun(const QString& id) { const auto normalized = id.trimmed(); if (selectedRunId_ == normalized) return; selectedRunId_ = normalized; emit selectedRunChanged(); }
+void StorageRecoveryBridge::discardRuns(const QStringList& ids) { if (worker_) QMetaObject::invokeMethod(worker_, "discardBatch", Qt::QueuedConnection, Q_ARG(QStringList, ids)); }
+void StorageRecoveryBridge::discardSelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (worker_ && !selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "discard", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
+void StorageRecoveryBridge::retrySelectedRun() { selectedRunId_ = selectedRunId_.trimmed(); if (worker_ && !selectedRunId_.isEmpty()) QMetaObject::invokeMethod(worker_, "retry", Qt::QueuedConnection, Q_ARG(QString, selectedRunId_)); }
 void StorageRecoveryBridge::findCached(QString content, QString engine, QString configuration, QString mode) {
-  if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+  if (worker_) QMetaObject::invokeMethod(worker_, "findCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
 }
 void StorageRecoveryBridge::invalidateCached(QString content, QString engine, QString configuration, QString mode) {
-  if (worker_) QMetaObject::invokeMethod(worker_, "invalidateCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+  if (worker_) QMetaObject::invokeMethod(worker_, "invalidateCached", Qt::QueuedConnection, Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
 }
 void StorageRecoveryBridge::submitAnalysis(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
-  if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+  if (worker_) QMetaObject::invokeMethod(worker_, "submitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, path), Q_ARG(QString, contentHash), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
 }
 void StorageRecoveryBridge::reanalyze(QString runId, QString path, QString contentHash, QString engine, QString configuration, QString mode) {
   invalidateCached(contentHash, engine, configuration, mode);
   submitAnalysis(std::move(runId), std::move(path), std::move(contentHash), std::move(engine), std::move(configuration), std::move(mode));
 }
-void StorageRecoveryBridge::cancelAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); }
-void StorageRecoveryBridge::retryAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); }
+void StorageRecoveryBridge::cancelAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "cancelAnalysis", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
+void StorageRecoveryBridge::retryAnalysis() { if (worker_) QMetaObject::invokeMethod(worker_, "retryAnalysis", Qt::QueuedConnection); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); } }
 void StorageRecoveryBridge::admitAnalysis(QString runId, QString content, QString engine, QString configuration, QString mode) {
-  if (worker_) QMetaObject::invokeMethod(worker_, "admitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode));
+  if (worker_) QMetaObject::invokeMethod(worker_, "admitAnalysis", Qt::QueuedConnection, Q_ARG(QString, runId), Q_ARG(QString, content), Q_ARG(QString, engine), Q_ARG(QString, configuration), Q_ARG(QString, mode)); else { status_ = QStringLiteral("Storage error: worker unavailable"); emit statusChanged(); }
 }

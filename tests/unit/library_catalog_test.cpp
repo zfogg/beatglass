@@ -172,6 +172,18 @@ TEST_CASE("catalog preserves empty directories as navigable entries") {
  CHECK(result.entries[0].format.empty());
 }
 
+TEST_CASE("recursive catalog discovers supported descendants without following links") {
+    const auto root = make_root("recursive");
+    std::filesystem::create_directories(root / "nested");
+    std::ofstream(root / "nested" / "deep.WAV") << "x";
+    std::ofstream(root / "nested" / "ignore.txt") << "x";
+    const auto result = beatglass::library::browse_recursive(root);
+    REQUIRE(result.diagnostic.empty());
+    REQUIRE(result.entries.size() == 2);
+    CHECK(result.entries[0].directory);
+    CHECK(result.entries[1].format == "WAV");
+}
+
 TEST_CASE("catalog reports a file path as an invalid browse root") {
  TempDir dir; dir.file("track.wav");
  const auto result = beatglass::library::browse(dir.path / "track.wav");

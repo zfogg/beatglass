@@ -187,7 +187,6 @@ public:
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
                   std::stop_token stop, const std::function<bool()>& revalidate) {
     try {
-      if (result.size() > kMaxCachedResultBytes || !sqlite_length_representable(result.size())) return Publish::error;
       exec("BEGIN IMMEDIATE");
       // A cancelled or stale run remains retryable.  Do this inside the same
       // transaction so a caller can immediately begin a replacement run while
@@ -197,6 +196,10 @@ public:
         bind(update.p, 1, id); bind_key(update.p, 2, key); done(update.p);
         return sqlite3_changes(db_) == 1;
       };
+      if (result.empty() || result.size() > kMaxCachedResultBytes || !sqlite_length_representable(result.size())) {
+        if (!retryable()) { rollback(); return Publish::error; }
+        exec("COMMIT"); return Publish::error;
+      }
       if (stop.stop_requested()) {
         // Cancellation is idempotent for a run already made retryable by a
         // prior stale/cancelled publication; do not turn that terminal state

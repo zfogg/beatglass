@@ -19,6 +19,18 @@ void EndpointBridge::refresh() {
     }
     selection_lost_ = !previous.isEmpty() && !contains_render_endpoint(snapshot_, previous.toStdString());
     if (selection_lost_) selected_.clear();
+    // Establish a usable initial capture source without overriding an
+    // explicit user selection.  The native endpoint inventory marks the
+    // system render default; retaining it here keeps the GUI selection and
+    // the control-thread capture request in sync after the first refresh.
+    if (previous.isEmpty() && selected_.isEmpty()) {
+      for (const auto& endpoint : snapshot_.endpoints) {
+        if (endpoint.is_default && select_render_endpoint(snapshot_, endpoint.id) == SelectionResult::accepted) {
+          selected_ = QString::fromStdString(endpoint.id);
+          break;
+        }
+      }
+    }
   } else {
     selected_.clear();
     selection_lost_ = !previous.isEmpty();

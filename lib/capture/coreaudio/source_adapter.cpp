@@ -6,6 +6,7 @@ namespace {
 SourceError source_error(const TapStatus& status) {
   if (!status.failure) return SourceError::backend_error;
   switch (*status.failure) {
+    case TapFailure::invalid_argument: return SourceError::not_found;
     case TapFailure::not_found: return SourceError::not_found;
     case TapFailure::permission_denied: return SourceError::permission_denied;
     case TapFailure::unsupported: return SourceError::unsupported;
@@ -23,11 +24,36 @@ SourceAdapter::SourceAdapter(SourceEpochAllocator& epochs, std::unique_ptr<Sourc
 SourceAdapter::~SourceAdapter() { (void)stop(); }
 EnumerationResult SourceAdapter::enumerate() {
   if (!backend_) return {EnumerationOutcome::error, {}, SourceError::backend_error, "Core Audio backend unavailable"};
-  try { return backend_->enumerate(); }
+  try {
+    auto result = backend_->enumerate();
+    if (result.outcome == EnumerationOutcome::error) {
+      result.sources.clear();
+      if (!result.error) result.error = SourceError::backend_error;
+      if (result.diagnostic.empty()) result.diagnostic = "Core Audio output enumeration failed";
+    } else if (result.outcome == EnumerationOutcome::ok && result.sources.empty() && result.diagnostic.empty()) {
+      result.error.reset();
+      result.diagnostic = "No Core Audio output devices available";
+    } else if (result.outcome == EnumerationOutcome::ok && !result.sources.empty()) {
+      result.error.reset();
+      result.diagnostic.clear();
+    } else if (result.outcome == EnumerationOutcome::cancelled && result.diagnostic.empty()) {
+      result.sources.clear();
+      result.error = SourceError::cancelled;
+      result.diagnostic = "Core Audio output enumeration cancelled";
+    } else if (result.outcome == EnumerationOutcome::cancelled) {
+      result.sources.clear();
+      result.error = SourceError::cancelled;
+      result.diagnostic = "Core Audio output enumeration cancelled";
+    }
+    return result;
+  }
   catch (...) { return {EnumerationOutcome::error, {}, SourceError::backend_error, "Core Audio enumeration failed"}; }
 }
 SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consumer consumer) {
-  if (!backend_ || !consumer || id.empty()) return {{}, SourceError::backend_error, "Invalid source request"};
+  if (!backend_) return {{}, SourceError::backend_error, "Core Audio backend unavailable"};
+  if (!consumer) return {{}, SourceError::backend_error, "Audio consumer required"};
+  if (id.empty() || id.find('\0') != std::string::npos || id.find_first_not_of(" \t\r\n") == std::string::npos)
+    return {{}, SourceError::not_found, "Output source id required"};
   if (quiescence_failed_) return {{}, SourceError::backend_error, "Previous capture has not quiesced"};
   if (lifecycle_.state() != SourceState::stopped) return {{}, SourceError::busy, "Source already active"};
   auto epoch = epochs_.next();
@@ -45,16 +71,21 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
   if (!native_started) {
     const bool stopped = backend_->stop(); quiescence_failed_ = !stopped;
     lifecycle_.stop();
-    const auto error = stopped ? source_error(failure) : SourceError::backend_error;
-    status_ = {SourceState::error, error, stopped ? failure.message : "Failed start and backend stop"};
+    const auto error = source_error(failure);
+    std::string diagnostic = failure.message.empty() ? "Core Audio capture start failed" : failure.message;
+    if (!stopped) diagnostic += "; backend stop also failed";
+    status_ = {SourceState::error, error, std::move(diagnostic)};
     return {{}, error, status_.message};
   }
   std::optional<AudioFormat> format;
+  bool format_query_failed = false;
   try { format = backend_->format(); }
-  catch (...) { format.reset(); }
+  catch (...) { format.reset(); format_query_failed = true; }
   if (!format || !format->sample_rate || !format->channels) {
     const bool stopped = backend_->stop(); quiescence_failed_ = !stopped; lifecycle_.stop();
-    status_ = {SourceState::error, SourceError::backend_error, stopped ? "Invalid capture format" : "Invalid format; backend stop failed"};
+    std::string diagnostic = format_query_failed ? "Core Audio format query failed" : "Invalid capture format";
+    if (!stopped) diagnostic += "; backend stop also failed";
+    status_ = {SourceState::error, SourceError::backend_error, std::move(diagnostic)};
     return {{}, SourceError::backend_error, status_.message};
   }
   attempt_ = attempt; format_ = format; consumer_ = std::move(consumer); sequence_ = 1;
@@ -67,14 +98,17 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
   return {attempt, {}, {}};
 }
 bool SourceAdapter::stop() noexcept {
-  if (delivering_) return false;
+  if (delivering_) {
+    status_ = {SourceState::error, SourceError::busy, "Cannot stop Core Audio capture during PCM delivery"};
+    return false;
+  }
   lifecycle_.stop(); pending_.reset(); attempt_.reset(); format_.reset(); anchor_.reset();
   running_taken_ = running_acknowledged_ = false; consumer_ = {};
   const bool stopped = !backend_ || backend_->stop();
   quiescence_failed_ = !stopped;
   status_.state = stopped ? SourceState::stopped : SourceState::error;
   status_.error = stopped ? std::optional<SourceError>{} : SourceError::backend_error;
-  status_.message.clear();
+  status_.message = stopped ? std::string{} : "Core Audio backend failed to quiesce";
   return stopped;
 }
 SourceStatus SourceAdapter::status() const { return status_; }
