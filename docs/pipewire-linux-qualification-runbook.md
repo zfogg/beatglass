@@ -103,3 +103,4 @@ Skipped JUnit testcases or non-zero skipped counts are rejected, so pending nati
 JUnit archives must include at least one named testcase; unnamed or testcase-free result documents are rejected.
 Duplicate JUnit testcase names are rejected so each native result remains uniquely attributable.
 CTest discovery entries must also have unique names, preserving an unambiguous native registration inventory.
+The discovery and JUnit testcase-name sets must match exactly, tying registered native tests to executed results.
