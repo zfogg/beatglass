@@ -391,3 +391,5 @@ It also rejects control characters in source filenames before creating the
 archive, keeping packager and verifier policies identical.
 
 Archive verification also binds the manifest timestamp to the declared SOURCE_DATE_EPOCH (with the packager's ZIP-compatible 1980 floor), so reproducibility metadata cannot drift during transfer.
+
+If an imported manifest contains an epoch outside the host datetime range, independent verification rejects it with an explicit unrepresentable-epoch error rather than producing platform-dependent results.
