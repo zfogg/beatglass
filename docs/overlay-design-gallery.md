@@ -124,6 +124,8 @@ screenshots.
 | [Fallback accepted](overlay-display-fallback-applied-card.svg) | saved fallback display confirmation |
 | [Interaction locked](overlay-interaction-locked-card.svg) | click-through lock with unlock shortcut |
 | [Interaction unlocked](overlay-interaction-unlocked-card.svg) | temporary control access with relock path |
+| [Unexpected close](overlay-unexpected-close-card.svg) | native window recovery with preserved state |
+| [Overlay reopened](overlay-reopened-card.svg) | restored native window without session interruption |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
