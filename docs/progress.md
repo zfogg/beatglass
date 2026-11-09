@@ -1,5 +1,9 @@
 # Progress and handoff
 
+`Ctrl+Alt+I` toggles native overlay click-through from the keyboard. Successful
+changes announce whether interaction is disabled or restored; rejected changes
+retain the current mode and report recovery guidance.
+
 When the native overlay is unavailable but displays are enumerated, `Ctrl+Alt+Y`
 retries recovery while keeping the control window visible until the show call
 succeeds, matching the button-based fallback path.
