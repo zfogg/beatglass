@@ -55,6 +55,8 @@ with zipfile.ZipFile(archive_path) as archive:
     summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
     if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):
         raise SystemExit("manifest commit does not match qualification summary")
+    if manifest.get("platform") and manifest.get("platform") != summary_data.get("platform"):
+        raise SystemExit("manifest platform does not match qualification summary")
     if summary_data.get("qualified") is not True:
         raise SystemExit("qualification summary is not qualified")
     if summary_data.get("native_test_name_match") is not True:

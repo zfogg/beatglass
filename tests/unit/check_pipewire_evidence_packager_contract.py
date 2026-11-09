@@ -24,6 +24,7 @@ markers = (
     "validate_pipewire_transition_evidence.py",
     "transition evidence validation failed",
     "transition_event_count",
+    "platform",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:
