@@ -105,13 +105,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+Up"
         context: Qt.ApplicationShortcut
         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
-        onActivated: {
-            window.browseFolder = files.parentFolder
-            search.text = ""
-            window.recursiveCatalogActive = false
-            window.recursiveCatalogRows = []
-            window.resetLibraryBrowserSelection("Moved to the parent Library folder; choose an audio source to inspect.")
-        }
+        onActivated: window.navigateLibraryParentFolder()
     }
     Shortcut {
         objectName: "librarySortShortcut"
@@ -957,6 +951,13 @@ ApplicationWindow {
     function returnLibraryFromRecursiveShortcut() {
         navigation.currentIndex = 0
         window.returnFromRecursiveResults()
+    }
+    function navigateLibraryParentFolder() {
+        window.browseFolder = files.parentFolder
+        search.text = ""
+        window.recursiveCatalogActive = false
+        window.recursiveCatalogRows = []
+        window.resetLibraryBrowserSelection("Moved to the parent Library folder; choose an audio source to inspect.")
     }
     function toggleLibrarySort(target) {
         window.sortDescending = !window.sortDescending
@@ -2162,13 +2163,7 @@ ApplicationWindow {
                         id: parentFolder; text: "Up"; objectName: "parentFolder"
                         activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
-                        onClicked: {
-                            window.browseFolder = files.parentFolder
-                            search.text = ""
-                            window.recursiveCatalogActive = false
-                            window.recursiveCatalogRows = []
-                            window.resetLibraryBrowserSelection("Moved to the parent Library folder; choose an audio source to inspect.")
-                        }
+                        onClicked: window.navigateLibraryParentFolder()
                         Accessible.name: "Go to parent folder"
                         Accessible.role: Accessible.Button
                         Accessible.description: "Go to the parent folder"
