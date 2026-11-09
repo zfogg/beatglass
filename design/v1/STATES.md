@@ -10,6 +10,7 @@
 | DJ permission recovery | OS capture permission unavailable | Explain why estimates are blank, link to system settings, and preserve Library evidence. |
 | Track metadata loading | Selected source is being decoded | Show a non-fabricated loading state, keep prior evidence hidden, and provide cancellation. |
 | Track metadata error | Decoder cannot read selected source | Explain cleared evidence, offer retry/another track, and state that files are unchanged. |
+| Track analysis queued | Verified source admitted to analysis queue | Hide prior evidence, show worker status and cancellation, and link to queue. |
 | DJ paused | User paused capture intentionally | Show no new estimates, preserve existing Library evidence, and offer resume/reacquire. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
