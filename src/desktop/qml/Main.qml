@@ -3748,6 +3748,7 @@ ApplicationWindow {
                     }
                     Label {
                         objectName: "overlaySettingsRetentionStatus"
+                        activeFocusOnTab: true
                         visible: window.overlayBridge !== null
                         text: visible
                             ? (window.overlayDisplayRecoveryPending
