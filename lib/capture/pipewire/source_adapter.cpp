@@ -6,8 +6,8 @@ MonitorStream::MonitorStream(std::uint64_t epoch, std::uint32_t sample_rate, std
 bool MonitorStream::push(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
                          bool discontinuity, double source_sample_time, bool sample_time_valid) noexcept {
   const bool accepted = !stopped_ && fifo_->push(samples, host_time, host_time_valid,
-      discontinuity || discontinuity_pending_, source_sample_time, sample_time_valid);
-  discontinuity_pending_ = false;
+      discontinuity || discontinuity_pending_.exchange(false, std::memory_order_acq_rel),
+      source_sample_time, sample_time_valid);
   return accepted;
 }
 bool MonitorStream::on_process(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
@@ -16,7 +16,7 @@ bool MonitorStream::on_process(std::span<const float> samples, std::uint64_t hos
 }
 void MonitorStream::on_error(int error_code) noexcept {
   error_code_.store(error_code, std::memory_order_release);
-  discontinuity_pending_ = true;
+  discontinuity_pending_.store(true, std::memory_order_release);
   stopped_ = true;
 }
 int MonitorStream::error_code() const noexcept { return error_code_.load(std::memory_order_acquire); }
@@ -29,7 +29,7 @@ bool MonitorStream::restart(std::uint64_t epoch, std::uint32_t sample_rate, std:
   auto next = std::make_unique<coreaudio::CaptureFifo>(epoch, sample_rate, channels);
   fifo_ = std::move(next);
   error_code_.store(0, std::memory_order_release);
-  discontinuity_pending_ = true;
+  discontinuity_pending_.store(true, std::memory_order_release);
   stopped_.store(false, std::memory_order_release);
   return true;
 }
