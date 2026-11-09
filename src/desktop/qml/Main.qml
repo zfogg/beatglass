@@ -1574,7 +1574,7 @@ ApplicationWindow {
                                 Accessible.value: visible ? text : ""
                                 Accessible.description: visible && storageRecovery.analysisStatus === "Analysis complete" ? "Analysis completed successfully; persisted retry selection is no longer active." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? storageRecovery.analysisStatus + "; persisted recovery remains retryable and the selected run stays actionable." : visible && storageRecovery.status === "Retryable run is active" && storageRecovery.selectedRunId !== "" ? "Selected run " + storageRecovery.selectedRunId + " is active; discard remains unavailable until it reaches a terminal state." : "Recovery status and persisted retryable runs."
                                 ToolTip.text: "Saved analysis recovery status and retryable runs"
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
