@@ -24,6 +24,7 @@ if summary.get("failed_command") is not None:
     raise SystemExit("native qualification has a failed command")
 
 artifacts = [summary_path]
+transition_schema = None
 for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
                         ("native_junit", "native_junit_sha256"),
                         ("native_transition_json", "native_transition_sha256")):
@@ -39,6 +40,7 @@ for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
         if not isinstance(transition_count, int) or isinstance(transition_count, bool) or transition_count <= 0:
             raise SystemExit("native summary has no positive transition event count")
         transition_payload = json.loads(path.read_text(encoding="utf-8"))
+        transition_schema = transition_payload.get("schema")
         transition_events = transition_payload.get("events", transition_payload)
         if not isinstance(transition_events, list) or len(transition_events) != transition_count:
             raise SystemExit("transition event count does not match native summary")
@@ -85,7 +87,7 @@ try:
             "source_date_epoch": epoch,
             "archive_timestamp_utc": archive_time.isoformat() + "Z",
             "transition_event_count": summary.get("native_transition_event_count"),
-            "transition_schema": "beatglass-pipewire-transitions-v1" if summary.get("native_transition_json") else None,
+            "transition_schema": transition_schema,
             "artifacts": [
                 {"name": path.name, "size": path.stat().st_size, "sha256": digest(path)}
                 for path in artifacts
