@@ -1532,9 +1532,10 @@ ApplicationWindow {
                                       + (window.analysisJobBridge.batchCapacity !== undefined ? (" · capacity " + window.analysisJobBridge.batchCapacity) : "")
                                       + (typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== "" ? (" · recovery: " + storageRecovery.analysisError) : "")) : ""
                                 Accessible.name: "Batch analysis queue status: " + text
+                                Accessible.value: visible ? text : ""
                                 ToolTip.text: "Accepted, rejected, and capacity limits for the analysis queue"
                                 Accessible.role: Accessible.StaticText
-                                Accessible.description: visible ? text : "Batch queue status is unavailable until the analysis bridge reports it."
+                                Accessible.description: visible ? "Live batch lifecycle and result counts: " + text : "Batch queue status is unavailable until the analysis bridge reports it."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
