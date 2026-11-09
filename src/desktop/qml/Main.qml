@@ -4298,6 +4298,8 @@ ApplicationWindow {
         title: "Choose a folder to browse"
         onAccepted: {
             window.browseFolder = selectedFolder
+            search.text = ""
+            browser.currentIndex = -1
             window.announceVisualizationRecovery("Library folder selected; choose an audio file to inspect or analyze.")
             browser.forceActiveFocus()
         }
