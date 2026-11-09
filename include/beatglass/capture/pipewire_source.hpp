@@ -50,6 +50,8 @@ struct MonitorStatus {
   bool format_matches(std::uint32_t sample_rate, std::uint32_t channels) const noexcept {
     return format && format->sample_rate == sample_rate && format->channels == channels;
   }
+  /** True when the selected sink identity equals the expected serial. */
+  bool serial_matches(const std::string& expected) const noexcept { return !expected.empty() && serial == expected; }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
