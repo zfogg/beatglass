@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / HELP</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Need a hand?</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Find the answer without leaving your live workflow.</text>
+  <rect x="112" y="258" width="466" height="144" rx="18" fill="#202938"/><text x="144" y="304" fill="#f2f6fb" font-family="Inter,Arial" font-size="21" font-weight="700">Keyboard shortcuts</text><text x="144" y="339" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Show, hide, unlock, or pause quickly.</text><text x="144" y="375" fill="#56d38b" font-family="Inter,Arial" font-size="16" font-weight="700">View shortcut reference →</text>
+  <rect x="622" y="258" width="466" height="144" rx="18" fill="#202938"/><text x="654" y="304" fill="#f2f6fb" font-family="Inter,Arial" font-size="21" font-weight="700">Troubleshooting</text><text x="654" y="339" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Check output, permissions, and capture.</text><text x="654" y="375" fill="#56d38b" font-family="Inter,Arial" font-size="16" font-weight="700">Open diagnostics →</text>
+  <rect x="112" y="432" width="976" height="132" rx="18" fill="#202938"/><text x="144" y="478" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">ABOUT BEATGLASS</text><text x="144" y="521" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">Built for a calm, glanceable desktop</text><text x="144" y="551" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Version 0.1 · Local processing · Your audio files stay yours</text>
+  <rect x="112" y="614" width="196" height="54" rx="14" fill="#56d38b"/><text x="210" y="648" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Close help</text><text x="1088" y="648" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Esc to close</text>
+</svg>
