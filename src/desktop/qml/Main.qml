@@ -1127,6 +1127,7 @@ ApplicationWindow {
         if (files.isFolder(index)) {
             browseFolder = url
             browser.currentIndex = -1
+            search.text = ""
             window.announceVisualizationRecovery("Opened Library folder " + files.get(index, "fileName") + ".")
         } else {
             window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
@@ -1730,6 +1731,7 @@ ApplicationWindow {
                         onClicked: {
                             window.browseFolder = files.parentFolder
                             browser.currentIndex = -1
+                            search.text = ""
                             window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
                             browser.forceActiveFocus()
                         }
