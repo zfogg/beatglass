@@ -132,8 +132,13 @@ summary = {"platform": platform.platform(), "commit": commit,
 if args.transitions:
     if not args.transitions.is_file():
         raise SystemExit(f"missing transition evidence: {args.transitions}")
+    transition_payload = json.loads(args.transitions.read_text(encoding="utf-8"))
+    transition_events = transition_payload.get("events", transition_payload) if isinstance(transition_payload, (dict, list)) else []
+    if not isinstance(transition_events, list) or not transition_events:
+        raise SystemExit("transition evidence has no events")
     summary["native_transition_json"] = str(args.transitions)
     summary["native_transition_sha256"] = hashlib.sha256(args.transitions.read_bytes()).hexdigest()
+    summary["native_transition_event_count"] = len(transition_events)
 summary["qualification_target"] = "Linux/PipeWire"
 summary["handoff_status"] = "complete" if summary["qualified"] else "failed"
 if args.summary:
