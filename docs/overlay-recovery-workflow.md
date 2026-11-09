@@ -76,6 +76,8 @@ The fallback also shows an explicit unlock-failure status while click-through
 remains active, making the next retry state visible to assistive technology.
 After a successful unlock, the fallback and recovery-pending markers are cleared
 so the interaction status returns to the ready state.
+Changing click-through successfully from the control window applies the same
+transition and clears stale recovery markers.
 The click-through status also prints `Ctrl+Alt+U` next to the Escape guidance,
 making the keyboard path to the Unlock action visible without opening help.
 The reconnect announcement also states that recovery remains paused, so a
