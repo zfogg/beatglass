@@ -18,6 +18,8 @@ if f"Host: `{matrix['host_os']}`" not in report:
     raise SystemExit("qualification report host identity does not match matrix")
 if "commit" in matrix and (not isinstance(matrix["commit"], str) or not matrix["commit"].strip()):
     raise SystemExit("qualification bundle has invalid commit identity")
+if matrix.get("commit") and f"Commit: `{matrix['commit']}`" not in report:
+    raise SystemExit("qualification report commit identity does not match matrix")
 for name, entry in matrix.get("platforms", {}).items():
     if f"| {name} | **{entry.get('status')}** |" not in report:
         raise SystemExit(f"qualification report is missing platform: {name}")
