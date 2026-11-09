@@ -123,3 +123,13 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertIn("report:platform identity mismatch", result["blockers"])
             self.assertIn("report:ready status contradicts exit gate", result["blockers"])
+
+    def test_platform_support_statuses_must_be_unique_and_known(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"platforms": [{"platform": "linux", "scenarios": []}],
+                "platform_support_status": [{"platform": "linux", "status": "mystery"},
+                                             {"platform": "linux", "status": "experimental"}]}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:duplicate platform support status", result["blockers"])
+            self.assertIn("report:invalid platform support status", result["blockers"])

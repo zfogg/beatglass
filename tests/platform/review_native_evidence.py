@@ -22,6 +22,11 @@ def assess(report_path: Path, reviewer: str) -> dict:
         support_names = {item.get("platform") for item in support if isinstance(item, dict)}
         if report_names != support_names:
             blockers.append("report:platform identity mismatch")
+        if len(support_names) != len(support):
+            blockers.append("report:duplicate platform support status")
+        for item in support:
+            if item.get("status") not in {"experimental", "qualified", "unsupported", "pending"}:
+                blockers.append("report:invalid platform support status")
     if report.get("exit_gate_status") not in {None, "PENDING", "ACCEPTED"}:
         blockers.append("report:invalid exit gate status")
     if report.get("ready") is True and report.get("exit_gate_status") != "ACCEPTED":
