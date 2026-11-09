@@ -13,3 +13,8 @@ controls. It reports whether a source is selected and names the source when
 one is active, so playback and analysis actions have an explicit target.
 `Ctrl+Alt+Backspace` clears that selection, announces the reset, and returns
 focus to the browser.
+
+The Library focus shortcuts also announce their destination: `Ctrl+F` focuses
+the filter, `Ctrl+Alt+L` focuses the current folder browser, and
+`Ctrl+Alt+Shift+L` focuses the active folder or recursive results view. This
+keeps keyboard navigation state visible to assistive technology.
