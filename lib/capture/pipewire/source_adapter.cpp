@@ -5,8 +5,16 @@ MonitorStream::MonitorStream(std::uint64_t epoch, std::uint32_t sample_rate, std
     : fifo_(std::make_unique<coreaudio::CaptureFifo>(epoch, sample_rate, channels)) {}
 bool MonitorStream::push(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
                          bool discontinuity, double source_sample_time, bool sample_time_valid) noexcept {
-  return !stopped_ && fifo_->push(samples, host_time, host_time_valid, discontinuity, source_sample_time, sample_time_valid);
+  const bool accepted = !stopped_ && fifo_->push(samples, host_time, host_time_valid,
+      discontinuity || discontinuity_pending_, source_sample_time, sample_time_valid);
+  discontinuity_pending_ = false;
+  return accepted;
 }
+bool MonitorStream::on_process(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
+                               double source_sample_time, bool sample_time_valid) noexcept {
+  return push(samples, host_time, host_time_valid, false, source_sample_time, sample_time_valid);
+}
+void MonitorStream::on_error() noexcept { discontinuity_pending_ = true; stopped_ = true; }
 bool MonitorStream::pop(coreaudio::CaptureBlock& block) noexcept { return fifo_ && fifo_->pop(block); }
 void MonitorStream::stop() noexcept { stopped_ = true; }
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }
