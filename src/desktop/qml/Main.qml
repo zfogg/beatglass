@@ -542,7 +542,7 @@ ApplicationWindow {
     Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; window.focusLibraryFilter("Library filter focused; type to filter the current folder.") } }
     Shortcut { objectName: "libraryClearFilterShortcut"; sequence: "Ctrl+Alt+Shift+Backspace"; context: Qt.ApplicationShortcut; enabled: search.text !== ""; onActivated: window.clearLibraryFilter(browser) }
     Shortcut { objectName: "libraryFolderPathFocusShortcut"; sequence: "Ctrl+Alt+Shift+I"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryFolderPath() }
-    Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; parentFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library parent-folder action focused.") } }
+    Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: window.focusLibraryParentAction() }
     Shortcut { objectName: "libraryRecursiveFocusShortcut"; sequence: "Ctrl+Alt+Shift+Z"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive; onActivated: window.focusLibraryRecursiveAction() }
     Shortcut { objectName: "libraryRecursiveReturnFocusShortcut"; sequence: "Ctrl+Alt+Shift+J"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; returnToFolderBrowser.forceActiveFocus(); window.announceVisualizationRecovery("Library return-to-folder action focused.") } }
     Shortcut { objectName: "libraryRecursiveAnalyzeFocusShortcut"; sequence: "Ctrl+Alt+Shift+K"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; analyzeRecursiveResults.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library analysis action focused.") } }
@@ -1014,6 +1014,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         folderPath.forceActiveFocus()
         window.announceVisualizationRecovery("Current Library folder path focused.")
+    }
+    function focusLibraryParentAction() {
+        navigation.currentIndex = 0
+        parentFolder.forceActiveFocus()
+        window.announceVisualizationRecovery("Library parent-folder action focused.")
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
