@@ -3011,7 +3011,7 @@ ApplicationWindow {
                                 Accessible.name: "Analysis batch action status: " + text
                                 Accessible.value: visible ? text : ""
                                 Accessible.role: Accessible.Status
-                                Accessible.description: visible ? text + ". Actions retain source audio and return focus after completion." : "No analysis batch actions are available."
+                                Accessible.description: visible ? text + ". " + window.analysisJobBridge.batchAcceptedCount + " accepted item(s) are represented; actions retain source audio and return focus after completion." : "No analysis batch actions are available."
                                 ToolTip.text: "Current analysis batch action availability"
                                 Layout.fillWidth: true
                                 wrapMode: Text.WordWrap
