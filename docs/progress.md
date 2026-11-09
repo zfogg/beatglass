@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Overlay settings now provide a focused endpoint refresh action that keeps
+selection and retry recovery in one workflow. Portable coverage is in
+`python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
+
 Overlay settings now expose a focused retry action when output capture errors,
 with explicit guidance that recovery waits for a fresh accepted snapshot.
 Portable coverage is in

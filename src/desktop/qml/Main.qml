@@ -3420,6 +3420,21 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
+                    Button {
+                        objectName: "overlayEndpointRefreshAction"
+                        visible: window.overlayBridge !== null
+                        text: "Refresh overlay endpoint"
+                        enabled: visible && window.endpointSelectionBridge !== null
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring." : "Output endpoint refresh is unavailable."
+                        ToolTip.text: Accessible.description
+                        onClicked: {
+                            window.endpointSelectionBridge.refresh()
+                            window.announceCaptureRecoveryState("Overlay endpoint refresh requested; choose an output endpoint before retrying monitoring.")
+                            endpointSelector.forceActiveFocus()
+                        }
+                    }
                     Label {
                         objectName: "overlayLiveMonitoringState"
                         visible: window.overlayBridge !== null
