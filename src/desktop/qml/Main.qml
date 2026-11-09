@@ -2591,7 +2591,7 @@ ApplicationWindow {
                                 Accessible.name: "Latest published analysis source: " + text
                                 Accessible.value: visible ? text : ""
                                 Accessible.role: Accessible.Status
-                                Accessible.description: visible ? "Source path associated with the most recently verified published batch result. The source remains read-only." : "No verified batch source has been published."
+                                Accessible.description: visible ? "Source path associated with the most recently verified published batch result. The source remains read-only and tags are never written." : "No verified batch source has been published."
                                 ToolTip.text: "Source path for the latest verified batch result"
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideMiddle
                             }
