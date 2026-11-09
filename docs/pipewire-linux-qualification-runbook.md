@@ -231,6 +231,8 @@ The archive manifest must carry the literal boolean `qualified: true`, not a
 truthy substitute, so qualification status cannot be ambiguous on transfer.
 Manifest artifact names are also unique case-insensitively, matching ZIP
 transport behavior and preventing ambiguous duplicate declarations.
+Dot and dot-dot artifact names are rejected as well, keeping the manifest
+table limited to concrete flat archive members.
 The verifier also cross-checks summary `native_junit_test_count` against parsed JUnit testcases.
 ative_junit_test_count against parsed JUnit testcases.
 Summary JUnit status fields for failures, errors, and skips must all be zero and are cross-checked against parsed results.
