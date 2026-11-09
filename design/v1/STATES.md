@@ -93,3 +93,5 @@ Additional implementation states to exercise: empty search; no selected track; u
 3. If the platform cannot expose the icon, retain a visible window or taskbar recovery route and explain why. Test icon disappearance, process relaunch, permission loss, display changes, shutdown and compositor refusal on actual platforms.
 
 The overlay's default track-metadata state is unavailable: combined system output alone cannot identify a DJ app's tracks or decks. The underlying DJ application in the scene owns its own illustrative data. Any future DJ-app integration is optional and software-specific, must show provenance and freshness and clear on disconnect or deck change, and must not attribute combined-mix analysis to a deck without evidence. Generic MIDI is not a guaranteed live title/artist feed.
+
+| Library batch cache reused | Admission reuses one unchanged completed identity and queues three changed/new sources | Make the cache decision visible, key reuse to identity/configuration, and force fresh work for changed content. |
