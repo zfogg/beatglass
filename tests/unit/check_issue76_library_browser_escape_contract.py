@@ -11,6 +11,7 @@ def main() -> None:
     marker = 'Keys.onEscapePressed: { window.clearSelectedAudio(); search.text = ""; browser.currentIndex = -1; search.forceActiveFocus();'
     assert marker in SOURCE
     assert "Library selection and filter cleared; all folder entries are visible." in SOURCE
+    assert "event.accepted = true" in SOURCE[SOURCE.index(marker) : SOURCE.index(marker) + 300]
 
 
 if __name__ == "__main__":
