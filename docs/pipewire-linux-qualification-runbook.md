@@ -78,6 +78,8 @@ The transition envelope commit must match the archive manifest commit; mixing
 events from another checkout is rejected.
 The summary’s transition SHA-256 is independently checked against the archived
 payload, in addition to the manifest artifact digest.
+The runner records the transition event count in the summary, and archive
+verification cross-checks it against the packaged envelope.
 The captured host platform must also match the qualification summary platform,
 preventing cross-host evidence mixing.
 Transition-bearing qualified archives must identify a Linux host; Windows and
