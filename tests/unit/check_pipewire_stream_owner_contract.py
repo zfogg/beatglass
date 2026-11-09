@@ -13,4 +13,5 @@ assert "handoff.on_error(-ENOSYS);" in source
 linux = (root / "lib/capture/pipewire/stream_owner_linux.cpp").read_text()
 for marker in ("pw_thread_loop_start(loop_)", "loop_started_", "pw_thread_loop_stop(loop_)", "pw_stream_connect"):
     assert marker in linux
+assert linux.index("pw_thread_loop_stop(loop_)") < linux.index("pw_context_destroy(context_)")
 print("PipeWire native stream owner seam verified (7 checks)")
