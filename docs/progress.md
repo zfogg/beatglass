@@ -848,3 +848,5 @@ Shortcut-help accessibility now reports whether retained-settings review is avai
 
 Retained-settings review accessibility value now includes the current settings revision. Portable coverage is in `python tests/unit/check_overlay_review_value_revision_contract.py`.
 
+Retained-settings review descriptions now include the current settings revision for screen-reader diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_description_contract.py`.
+
