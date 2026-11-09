@@ -170,7 +170,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     if ((opened && !storageOpen_) || (closed && storageOpen_)) { storageOpen_ = opened; emit storageStateChanged(); }
     status_ = ok ? text : QStringLiteral("Storage error: ") + text;
     if (!ok) {
-      if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
+      if (!retryableRunIds_.isEmpty() || !retryableRunDetails_.isEmpty()) { retryableRunIds_.clear(); retryableRunDetails_.clear(); emit retryableRunsChanged(); }
       if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
       if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
       if (!resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
@@ -237,7 +237,7 @@ void StorageRecoveryBridge::open() {
   if (databasePath_.isEmpty()) { status_ = QStringLiteral("Storage error: database path is required"); emit statusChanged(); return; }
   if (storageTransitionPending_) { status_ = QStringLiteral("Storage transition already in progress"); emit statusChanged(); return; }
   if (storageOpen_) { status_ = QStringLiteral("Storage already open"); emit statusChanged(); return; }
-  if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
+  if (!retryableRunIds_.isEmpty() || !retryableRunDetails_.isEmpty()) { retryableRunIds_.clear(); retryableRunDetails_.clear(); emit retryableRunsChanged(); }
   if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
   if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
   if (!resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
@@ -259,7 +259,7 @@ void StorageRecoveryBridge::close() {
   if (!storageOpen_ && !storageTransitionPending_) { status_ = QStringLiteral("Storage already closed"); emit statusChanged(); return; }
   storageTransitionPending_ = true; emit storageStateChanged();
   if (worker_) QMetaObject::invokeMethod(worker_, "close", Qt::QueuedConnection);
-  if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
+  if (!retryableRunIds_.isEmpty() || !retryableRunDetails_.isEmpty()) { retryableRunIds_.clear(); retryableRunDetails_.clear(); emit retryableRunsChanged(); }
   if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
   if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
   if (!resetStatus_.isEmpty()) { resetStatus_.clear(); emit resetStatusChanged(); }
