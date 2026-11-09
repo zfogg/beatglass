@@ -48,6 +48,8 @@ public:
   virtual std::string selected_serial() const = 0;
   /** Return the negotiated format for the selected stream, if active. */
   virtual std::optional<MonitorFormat> selected_format() const noexcept = 0;
+  /** Return the epoch owning the selected stream, or zero when stopped. */
+  virtual std::uint64_t selected_epoch() const noexcept = 0;
   /** Pop one bounded block on the control thread after start_stream succeeds. */
   virtual bool pop(coreaudio::CaptureBlock& block) noexcept = 0;
   virtual MonitorStatus poll_status() noexcept = 0;
