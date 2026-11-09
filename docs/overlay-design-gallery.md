@@ -67,6 +67,7 @@ screenshots.
 | [Rename](overlay-rename-card.svg) | favorite view naming and scope |
 | [Remove pin](overlay-delete-card.svg) | reversible favorite shortcut removal |
 | [Permission](overlay-permission-card.svg) | transparent system audio access request |
+| [Permission denied](overlay-permission-denied-card.svg) | actionable access recovery state |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
