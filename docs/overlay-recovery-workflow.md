@@ -202,3 +202,6 @@ If disabling click-through is rejected, the interaction toggle stays focused and
 
 The Ctrl+Alt+K click-through focus shortcut remains available while the overlay is blocked, returning focus to the interaction control without discarding persisted display or geometry settings.
 
+
+The Ctrl+Alt+L opacity focus shortcut remains usable while click-through is active, restoring the control window and focusing opacity without changing persisted display, geometry, or interaction settings.
+
