@@ -96,6 +96,8 @@ Theme changes announce the selected palette together with full/reduced motion mo
 
 The six native QML theme palettes now match the design/v1 tokens for surfaces, foregrounds, and accents (Light, Dark, High contrast, Purple, Blue, Yellow); reduced-motion remains an explicit accessible preference and suppresses pulse/transition animation without changing focus or status semantics.
 
+The native close callback delegates through a directly testable QML handler, preserving the same accepted=false, fallback activation, persistence, and focus contract in headless regression tests.
+
 Closing the native overlay window uses the same Hide/Restore fallback workflow: the control window is reactivated, persisted state remains available, and focus returns to Restore overlay.
 
 Display loss reactivates the control-window fallback before focusing display selection, keeping recovery visible and keyboard reachable even when the native overlay was hidden.

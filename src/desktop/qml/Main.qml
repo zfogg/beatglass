@@ -1524,14 +1524,16 @@ ApplicationWindow {
     property var libraryCatalogBridge: typeof libraryCatalog !== "undefined" ? libraryCatalog : null
     onBrowseFolderChanged: refreshCatalog()
 
+    function handleOverlayWindowClosing(closeRequest) {
+        closeRequest.accepted = false
+        window.hideOverlayAndRestoreControls()
+    }
+
     Window {
         id: djOverlay
         objectName: "djOverlay"
         title: "Beatglass overlay"
-        onClosing: function(close) {
-            close.accepted = false
-            window.hideOverlayAndRestoreControls()
-        }
+        onClosing: function(close) { window.handleOverlayWindowClosing(close) }
         visible: false
         width: 310; height: 130
         minimumWidth: 230; minimumHeight: 100
