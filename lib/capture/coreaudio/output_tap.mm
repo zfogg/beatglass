@@ -105,8 +105,11 @@ public:
   }
   bool fail(const char* operation, OSStatus code) {
     const bool cleaned = cleanup();
-    current = {TapState::error, std::string(operation) + " (OSStatus " + std::to_string(code) + ")" + (cleaned ? "" : "; cleanup failed"),
-               cleaned ? classify_osstatus(code) : TapFailure::backend_error}; return false;
+    const auto failure = cleaned ? classify_osstatus(code) : TapFailure::backend_error;
+    std::string message = std::string(operation) + " (OSStatus " + std::to_string(code) + ")";
+    if (failure == TapFailure::permission_denied) message += "; grant macOS audio recording permission and retry";
+    if (!cleaned) message += "; cleanup failed";
+    current = {TapState::error, std::move(message), failure}; return false;
   }
   bool fail_message(const char* message, TapFailure failure) {
     const bool cleaned = cleanup();
