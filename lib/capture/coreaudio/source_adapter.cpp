@@ -27,6 +27,7 @@ EnumerationResult SourceAdapter::enumerate() {
     auto result = backend_->enumerate();
     if (result.outcome == EnumerationOutcome::error) {
       result.sources.clear();
+      if (!result.error) result.error = SourceError::backend_error;
       if (result.diagnostic.empty()) result.diagnostic = "Core Audio output enumeration failed";
     }
     return result;
