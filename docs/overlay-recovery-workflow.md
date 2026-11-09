@@ -56,7 +56,7 @@ Pressing `Escape` while paused returns focus to `Resume recovery`, providing a
 predictable keyboard path back to the lifecycle action after reviewing status.
 It also announces that the paused recovery action is focused for assistive
 technology users.
-`Ctrl+Alt+Shift+P` opens the paused recovery page from anywhere in the
+`Ctrl+Alt+Shift+O` opens the paused recovery page from anywhere in the
 control window, restores the control window if it was hidden, and focuses
 `Resume recovery` for a complete keyboard workflow.
 The shortcut is safe to repeat: it reopens the same recovery page and restores
