@@ -1067,6 +1067,16 @@ ApplicationWindow {
         return isFinite(parsed) ? parsed : index
     }
 
+    function startNativePlaybackOutput() {
+        if (!window.playbackBridge)
+            return false
+        const started = window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096)
+        window.announceCaptureRecoveryState(started
+            ? "Native playback started on the selected output device."
+            : "Native playback could not start; check the selected output device and format.")
+        return started
+    }
+
     function reopenSelectedPlayback() {
         if (!window.playbackBridge || !window.selectedAudioUrl || window.selectedAudioUrl.toString() === "") {
             window.announceVisualizationRecovery("Select a Library track before reopening playback.")
@@ -1678,7 +1688,7 @@ ApplicationWindow {
                             Button { text: "Play selected"; objectName: "playSelectedTrack"; activeFocusOnTab: true; Accessible.name: "Play selected Library track"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before starting playback" : "Open and play the selected Library source"; ToolTip.text: "Play the selected Library track"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Playing selected Library source " + window.selectedName + "." : "Selected Library source could not be opened for playback."); if (accepted) playSelectedTrack.forceActiveFocus() } }
                             SpinBox { objectName: "playbackSampleRate"; activeFocusOnTab: true; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
                             SpinBox { objectName: "playbackChannels"; activeFocusOnTab: true; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
-                            Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge && playbackDevice.currentIndex >= 0; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: { window.playbackBridge.startNative(window.playbackBridge.epoch + 1, playbackSampleRate.value, playbackChannels.value, 4096); window.announceCaptureRecoveryState("Native playback start requested on the selected output device.") } }
+                            Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge && playbackDevice.currentIndex >= 0; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.startNativePlaybackOutput() }
                             Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current native output running state" }
                             Label { text: window.playbackBridge ? window.playbackBridge.nativeError : ""; objectName: "nativePlaybackError"; Accessible.name: "Native playback error: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Native playback error details"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                             Button { text: "Retry native"; objectName: "retryNativePlayback"; enabled: window.playbackBridge && window.playbackBridge.nativeError !== ""; Accessible.name: "Retry native playback"; Accessible.role: Accessible.Button; Accessible.description: "Retry starting native playback after an output error"; ToolTip.text: "Retry native playback after the output error"; onClicked: window.retryNativePlaybackOutput() }
