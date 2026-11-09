@@ -32,3 +32,6 @@ real capture/recovery evidence.
 The preflight requires an addressable output sink with a numeric object id,
 stable serial, and node name; record the selected serial and id in the native
 qualification manifest before capture.
+
+`pipewire_tests` also exercises the portable source-adapter failure boundary;
+native daemon-backed lifecycle cases remain skipped/pending until Linux.
