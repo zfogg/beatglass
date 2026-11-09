@@ -63,8 +63,11 @@ public:
   int submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority = 0);
   /** Cancel active batch jobs, publish Cancelled immediately, and clear stale result/batch presentation. */
   Q_INVOKABLE void cancelBatch();
-  /** Retry terminal batch jobs and immediately publish the refreshed aggregate state. */
-  Q_INVOKABLE void retryBatch();
+  /** Retry terminal batch jobs and immediately publish the refreshed aggregate state.
+   *
+   * Returns true only when at least one retained operation accepted the retry.
+   */
+  Q_INVOKABLE bool retryBatch();
   /** Discard terminal batch recovery state without touching source files. */
   Q_INVOKABLE void discardBatch();
   int batchAcceptedCount() const noexcept { return batchAccepted_; }

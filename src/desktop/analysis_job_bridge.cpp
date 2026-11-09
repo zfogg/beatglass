@@ -211,7 +211,7 @@ void AnalysisJobBridge::cancelBatch() {
   poll();
 }
 
-void AnalysisJobBridge::retryBatch() {
+bool AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
   if (accepted) {
@@ -222,6 +222,7 @@ void AnalysisJobBridge::retryBatch() {
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged(); poll();
   }
+  return accepted;
 }
 
 void AnalysisJobBridge::discardBatch() {
