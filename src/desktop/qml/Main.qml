@@ -1782,6 +1782,22 @@ ApplicationWindow {
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
+                            ProgressBar {
+                                id: analysisBatchProgressBar
+                                objectName: "analysisBatchProgressBar"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                                Layout.fillWidth: true
+                                from: 0; to: 1
+                                value: visible && window.analysisJobBridge.batchAcceptedCount > 0
+                                       ? Math.min(1, (window.analysisJobBridge.batchCompletedCount + window.analysisJobBridge.batchFailedCount + window.analysisJobBridge.batchCancelledCount) / window.analysisJobBridge.batchAcceptedCount)
+                                       : 0
+                                indeterminate: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") && value === 0
+                                Accessible.name: "Analysis batch completion"
+                                Accessible.value: visible ? Math.round(value * 100) + "% complete" : "unavailable"
+                                Accessible.role: Accessible.ProgressBar
+                                Accessible.description: visible ? "Completed, failed, or cancelled items out of the accepted analysis batch." : "Batch progress is unavailable."
+                                ToolTip.text: visible ? "Batch completion: " + Math.round(value * 100) + "%" : "Batch progress unavailable"
+                            }
                             Label {
                                 objectName: "analysisBatchLastResult"
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastResult !== ""
