@@ -79,7 +79,7 @@ with tempfile.TemporaryDirectory() as directory:
     if result.returncode == 0 or "suite test counts do not match testcases" not in result.stderr + result.stdout: raise SystemExit("aggregate JUnit count mismatch was accepted")
 
     nested_failure = root / "nested-failure.zip"
-    nested_failure_junit = b"<testsuites tests='1'><testsuite tests='1' failures='1'><testcase name='capture'/></testsuite></testsuites>\n"
+    nested_failure_junit = b"<testsuites tests='1' failures='1'><testsuite tests='1' failures='1'><testcase name='capture'/></testsuite></testsuites>\n"
     nested_failure_summary = dict(aggregate_summary, native_junit_sha256=hashlib.sha256(nested_failure_junit).hexdigest())
     nested_failure_artifacts = dict(artifacts, **{"native-summary.json": (json.dumps(nested_failure_summary) + "\n").encode(), "pipewire-tests.xml": nested_failure_junit})
     nested_failure_entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in nested_failure_artifacts.items()]
