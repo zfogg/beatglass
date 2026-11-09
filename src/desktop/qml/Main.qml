@@ -3456,7 +3456,7 @@ ApplicationWindow {
                     Accessible.name: "Overlay actions"
                     Accessible.value: window.overlayBridge && window.overlayBridge.available
                         ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings revision " + window.overlaySettingsRevision
-                        : "unavailable; control-window fallback active"
+                        : "unavailable; control-window fallback active; settings retained"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: window.overlayLaunchFallbackActive
                         ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained."
