@@ -76,6 +76,8 @@ Pending summaries preserve the same `--capture-plan` argument in their rerun
 command, so the native host receives the exact validated handoff request.
 They also record the capture-plan SHA-256 when the file is available, allowing
 the native host to prove it used the intended preparation instructions.
+The evidence manifest preserves that plan path, digest, and validation flag so
+the transferred archive remains tied to its capture instructions.
 Summaries explicitly record whether that plan passed validation before the
 runner proceeded.
 The pending-runner behavior fixture executes this Windows-safe path and asserts
