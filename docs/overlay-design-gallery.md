@@ -172,6 +172,7 @@ screenshots.
 | [Native resumed](overlay-native-resumed-card.svg) | restored live monitoring with prior overlay presentation |
 | [Native telemetry](overlay-native-telemetry-card.svg) | local health, latency, sample-rate, and drop diagnostics |
 | [Native output switch](overlay-native-output-switch-card.svg) | explicit display change with retained overlay appearance |
+| [Native output switched](overlay-native-output-switched-card.svg) | confirmed display change with resumed capture and preserved presentation |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
