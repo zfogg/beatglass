@@ -362,7 +362,7 @@ ApplicationWindow {
         objectName: "overlayPausedRecoveryFocusShortcut"
         sequence: "Escape"
         context: Qt.ApplicationShortcut
-        enabled: window.overlayRecoveryPausedByUser
+        enabled: window.overlayRecoveryPausedByUser && (!window.overlayBridge || !window.overlayBridge.clickThrough)
         onActivated: {
             window.announceCaptureRecoveryState("Paused overlay recovery; Resume recovery focused.")
             resumeOverlayRecovery.forceActiveFocus()

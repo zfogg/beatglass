@@ -66,6 +66,8 @@ with its hint as soon as recovery is resumed.
 If a display is disconnected and later restored while recovery is paused, focus
 returns to `Resume recovery` rather than the ordinary retry control, preserving
 the intentional pause across the display lifecycle.
+If click-through is enabled at the same time, Escape remains reserved for the
+native unlock workflow; the paused-recovery focus shortcut yields to it.
 The reconnect announcement also states that recovery remains paused, so a
 display reconnect cannot silently restart native retries.
 While the display is still unavailable, the paused card separately reports that
