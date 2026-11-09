@@ -1111,4 +1111,19 @@ TestCase {
         verify(fakeMetadata.lastFile.toString().endsWith("/tone.flac"))
         app.destroy()
     }
+    function test_overlayRecoveryPausedStatusAfterStop() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        retry.clicked()
+        let stop = findChild(app, "stopOverlayRecovery")
+        stop.clicked()
+        let paused = findChild(app, "overlayRecoveryPausedStatus")
+        verify(paused !== null)
+        verify(paused.visible)
+        compare(paused.text, "Recovery paused · monitoring continues")
+        compare(paused.Accessible.description, "Native overlay recovery is paused by user choice; start another retry when ready.")
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
