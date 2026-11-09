@@ -1,5 +1,11 @@
 # Beatglass
 
+Decoder snapshot validation is fail-closed: a retry is eligible only when the persisted `decoder_snapshot` is non-empty and matches the active decoder identity. Empty legacy snapshots and mismatched snapshots are rejected; they must be re-analyzed to establish fresh provenance.
+
+`decoder_snapshot` is a compatibility anchor for retryable analysis. A persisted run may be resubmitted only when its snapshot matches the active decoder/configuration contract; legacy rows with an empty snapshot are rejected conservatively until re-analysis establishes fresh metadata.
+
+Retryable analysis storage schema v2 persists `source_path` and `decoder_snapshot` beside content/engine/configuration/mode identity. The recovery bridge uses these fields for metadata-gated coordinator resubmission; missing or mismatched metadata remains a rejection.
+
 Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, and platform recovery contracts. End-to-end persistence, playback, native capture, and full native qualification remain in progress.
 
 The intended stack is C++20, CMake, Qt 6 Quick, SQLite, aubio and Essentia, with PipeWire, Core Audio taps and WASAPI loopback for Linux, macOS and Windows respectively. Dependency availability, versions and licenses must be verified before selection. No account or network service should be required at runtime.
@@ -70,6 +76,21 @@ The [Phase 0 gate audit](docs/phase0-gate.md) records the coordinator's acceptan
 See the [platform qualification status](docs/platform-qualification-status.md) for executable preparation checks and the native gates that remain open on Windows, macOS, and Linux. Its versioned readiness report (`readiness_report_schema: 1`) is fail-closed: incomplete or unrun scenarios produce `PENDING`/a nonzero checker result, and the report cannot promote the repository's explicitly experimental support language without actual native desktop, audio, and overlay evidence.
 
 The executable handoff path is: ingest native script output with `tests/platform/ingest_qualification_artifacts.py`, run `tests/platform/run_readiness_handoff.py` to generate and validate the report, then consume it with `tests/platform/consume_readiness_handoff.py`. These tools preserve `PENDING` until native evidence is reviewed; portable tests and dry runs do not qualify hardware.
+
+For an acceptance review, add `--review-output review.md --require-ready` to the handoff command. It exports the human checklist and fails closed while any native gate remains pending.
+
+For automated review, pair `--review-json review.json --consume-review --decision-output decision.json` with the same handoff command; the versioned packet consumer validates the exported review artifact and writes a conservative `ACCEPTED`/`PENDING` decision before release automation can proceed. Native evidence remains required for acceptance.
+
+The standalone decision consumer is `tests/platform/review_release_decision.py <bundle-root> <decision.json>` for already-retained canonical bundles.
+
+Release automation may promote only an accepted bundle with `tests/platform/promote_review_bundle.py <bundle-root> <release-root>`. The command refuses `PENDING` decisions, leaves the release destination untouched, writes `release-manifest.json` with the promoted report and packet SHA-256 values, and verifies that manifest before reporting success.
+Downstream release jobs should verify that artifact with `tests/platform/verify_release_manifest.py <release-root> --signoff signoff.json` before publishing; any changed, missing, or unsigned file fails closed.
+The final release-directory check is `tests/platform/verify_release_bundle.py <release-root>`; it requires the retained signoff and verifies the complete report/packet/manifest/signoff set together.
+Native review owners can record the remaining qualification assessment with `tests/platform/review_native_evidence.py <report.json> <reviewer> <native-review.json>`; incomplete scenarios remain `PENDING` and are listed as blockers.
+The handoff command can emit the same assessment with `--native-review-output native-review.json --native-reviewer <reviewer>`, keeping the report and qualification review artifacts from one run.
+The one-command workflow `tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root> --signoff signoff.json` runs retention, decision, promotion, and dual-hash signed manifest verification in order, then retains `signoff.json` beside the release artifacts; pending native evidence or mismatched human approval stops before release output.
+After an accepted decision, record manual release ownership with `tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`; the signoff binds both report and review-packet hashes, and pending decisions cannot receive a signoff.
+The signed release checklist is therefore: retain the pair, emit the decision, record signoff, run the signed `prepare_release_bundle.py` workflow, and verify the dual-hash manifest before publication.
 
 ## Qt 6.8.3 prebuilt desktop preset
 

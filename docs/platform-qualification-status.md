@@ -1,5 +1,29 @@
 # Platform qualification status
 
+Readiness evidence for shortcut recovery must show that stop/resume shortcuts update an accessible announcement (`queued`, `running`, `cancelled`, `retry`, or `complete`), preserve focus, and do not leave stale results presented. Run the portable contract with `python tests/unit/check_desktop_analysis_transition.py`; native screen-reader and assistive-technology timing still require platform runs.
+
+Native readiness evidence must verify keyboard parity for playback recovery: focus reaches pause/resume, retry, endpoint refresh, and reacquisition controls; accessible names expose current state; and stale-result clearing is announced without pointer input. Reproduce the portable audit with `python tests/unit/check_desktop_analysis_transition.py`; this does not replace native UI/accessibility qualification.
+
+Native readiness handoff must include bridge transition evidence for playback recovery controls: queued, running, cancellation, retry, completion, endpoint loss, reacquisition, and stale-result clearing. Reproduce portable checks with `python tests/unit/check_desktop_analysis_transition.py` and `python tests/unit/check_playback_epoch_docs_contract.py`; these do not replace native desktop/audio/overlay observations.
+
+The local retry decision contract is reproducible with `python tests/unit/check_bridge_resubmit_contract.py`, `python tests/unit/check_retry_evidence_docs.py`, and `git diff --check`. It verifies compatible retry admission and fail-closed rejection, but native decoder/runtime, playback, endpoint-loss, and overlay evidence remain required.
+
+## Decoder retry evidence handoff
+
+Native handoff bundles must demonstrate both a compatible retry (same decoder snapshot, source fixture hash, and identity) and an incompatible retry that is rejected fail-closed. Retain the original and retry commands, diagnostics, build/runtime identity, and resulting readiness status. The negative case is required evidence that stale decoder output cannot be promoted.
+
+## Native codec/runtime evidence expectations
+
+Each platform qualification run must record the decoder/runtime build identity, codec feature configuration, exact source fixture hash, decoder snapshot, selected backend/device, and the full command transcript. Evidence must include a successful decode plus a controlled failure or missing-codec case, with retained logs and the resulting readiness artifact. A portable decoder test or headless build is preparation evidence only and cannot advance the native matrix.
+
+Decoder snapshot mismatch/legacy rejection is covered as a portable fail-closed rule. Native codec and runtime compatibility still require retained Windows, macOS, and Linux evidence; a passing mismatch contract is not native qualification.
+
+Retry recovery requires a compatible non-empty `decoder_snapshot`; migrated legacy rows are intentionally rejected until fresh metadata is captured. This fail-closed policy prevents decoder drift from being presented as a valid result, but does not qualify codec/runtime behavior on Windows, macOS, or Linux.
+
+Retryable storage schema v2 retains source-path and decoder-snapshot metadata for bridge resubmission. Portable migration and rejection checks do not establish that a native decoder, playback device, or audio endpoint can be reopened successfully; those observations remain required on each platform.
+
+Playback epoch/recovery status: portable tests cover stale-state clearing and reacquisition after an epoch or endpoint transition. Native qualification must still capture real playback/output loss, recovery, and post-reacquisition evidence on each supported platform; headless epoch tests do not substitute for those observations.
+
 This matrix records development evidence and the remaining gates. A build or headless test does not establish native desktop, audio, or overlay support.
 
 | Platform | Current integrated/preparation evidence | Native gates still required |
@@ -9,6 +33,20 @@ This matrix records development evidence and the remaining gates. A build or hea
 | Linux | Configure with `-DBEATGLASS_BUILD_PIPEWIRE=ON`; build serially when memory is constrained; run CTest, including optional virtual-graph tests; run strict documentation checks. | Real PipeWire device routing and permissions, device loss/replacement, X11 window-manager behavior, GNOME and KDE Wayland probing, layer-shell refusal/fallback, monitor/DPI changes, and recovery from an unavailable overlay capability. |
 
 For every native run, record the OS version, kernel or build number, compiler, Qt version, audio backend/session version, display server or compositor, output device, build identity, exact commands, and observed limitations. Until those records exist for the relevant platform scenarios, support language must remain experimental.
+
+## Recovery/resubmission validation
+
+The portable recovery path now retains and displays retry identity fields and rejects resubmission without an explicit source path plus matching content, engine, configuration, and mode metadata. Local contract checks cover the bridge/UI handoff; they do not prove decoder correctness, native audio routing, or desktop recovery on supported hardware.
+
+Local checks used for this slice:
+
+```text
+python tests/unit/check_recovery_details_ui_contract.py
+python tests/unit/check_bridge_resubmit_contract.py
+git diff --check
+```
+
+Native Windows WASAPI, macOS Core Audio, Linux PipeWire, desktop UI, overlay, device-loss, and packaged-runtime qualification remain open.
 
 The platform status row and retained manifest must agree on source commit, capture time, and environment/toolchain; otherwise the run is not attributable to the documented build. Readiness reports also verify that aggregate failure-category counts, retained-artifact counts, and retained-artifact bytes equal the sum of their per-platform counts, expose retained artifact counts/bytes by platform, and require each retained count/byte total to match its artifact inventory.
 
@@ -191,7 +229,7 @@ Artifact diagnostic inventories sort paths by their string representation, so mi
 
 The lightweight readiness check also normalizes null or non-list artifact/scenario containers before iteration, matching report generation and preserving verifier contract errors rather than raising.
 
-The end-to-end local handoff command is `python tests/platform/run_readiness_handoff.py <retained-bundle-root> <report.json> --status docs/platform-qualification-status.md`. It generates the conservative report, validates the same JSON contract consumed by readiness tooling, checks retained bundles against the documented platform matrix, and records any `handoff_check_errors` in the report artifact itself. A structurally valid result remains `PENDING` until native desktop/audio/overlay evidence is reviewed; incomplete scenarios intentionally produce a nonzero result.
+The end-to-end local handoff command is `python tests/platform/run_readiness_handoff.py <retained-bundle-root> <report.json> --status docs/platform-qualification-status.md`. It generates the conservative report, validates the same JSON contract consumed by readiness tooling, checks retained bundles against the documented platform matrix, and records any `handoff_check_errors` in the report artifact itself. When `--review-json` is combined with `--consume-review` or `--require-ready`, the handoff consumes the retained report and packet as one bundle and verifies their binding. A structurally valid result remains `PENDING` until native desktop/audio/overlay evidence is reviewed; incomplete scenarios intentionally produce a nonzero result.
 
 `handoff_check_errors` is a required report field: it is always a list of nonempty strings (possibly empty when no status matrix was supplied), so consumers can distinguish a validated handoff artifact from one whose readiness checks were never recorded. With `--check-docs`, the command also runs `check_qualification_handoff.py` and records `documentation_check_errors`, proving the executable qualification procedures and status contract are present before a handoff is reviewed.
 
@@ -213,11 +251,85 @@ Ingestion also requires a 40-hex source commit and nonempty capture time in the 
 
 Capture times are parsed as ISO-8601 during ingestion; a malformed timestamp is rejected before the artifact can participate in a readiness handoff.
 
+Ingestion also imports the native script’s referenced playback, overlay, display-topology, and audio-inventory files into the artifact inventory, so those handoff inputs cannot be silently omitted from provenance review.
+
+The readiness report preserves each artifact’s role through generation, allowing downstream review to distinguish topology/audio/playback/overlay evidence from generic qualification outputs.
+
+The final consumer rejects a `READY` report with missing or empty artifact roles, making provenance loss between ingestion and acceptance fail closed.
+
+The portable regression suite exercises the complete review path—generation, optional native ingestion, documentation/readiness checks, report persistence, and downstream consumption—and expects a nonzero `PENDING` result for incomplete native evidence. This verifies orchestration without treating fixtures as hardware proof.
+
 `ingestion_errors` is a required list-of-strings report field. The downstream consumer rejects malformed or omitted ingestion audit data, preventing native artifact provenance failures from being hidden by an otherwise valid report shape.
 
 The consumer also rejects any report containing nonempty generation, handoff, documentation, or ingestion error lists—even if its gate status is manually changed to `READY`. Audit failures are therefore fail-closed at the final acceptance boundary.
 
 The consumer additionally rejects `READY` while `native_qualification_required` remains true. A downstream acceptance decision therefore requires both an error-free report and an explicit native-qualification state change; portable preparation evidence cannot be promoted by editing the gate flag alone.
+
+`READY` is also rejected while any platform support row remains `experimental`; native acceptance must update the support matrix consistently with the reviewed evidence.
+
+`READY` additionally requires every platform scenario inventory row to be `PASS`; any `UNRUN`, `PENDING`, or `FAIL` scenario keeps the consumer non-accepting.
+
+For human review, render `python tests/platform/review_readiness_handoff.py <report.json> <review.md>`. The checklist exposes each platform’s scenario statuses and artifact roles, but remains explicitly informational and preserves `PENDING` until native gates are reviewed.
+
+The same checklist can be exported during handoff with `--review-output <review.md>`, keeping the report and human-review artifact generated from one identical input.
+
+The exported checklist includes all four audit-error channels (`generation_errors`, `handoff_check_errors`, `documentation_check_errors`, and `ingestion_errors`) before the platform scenario/artifact sections, giving reviewers an actionable reason for every pending handoff.
+
+It also displays the native-required flag and each platform’s support status, making an inconsistent transition visible before strict consumer acceptance.
+
+Each platform section includes manifest hash, source commit, capture time, and environment anchors so reviewers can correlate checklist observations with retained provenance.
+
+It also includes the qualification command and output linkage recorded for that platform, making the review artifact traceable to the native run that produced the evidence.
+
+The checklist’s acceptance diagnostics are generated by the same consumer used by strict review, so the exported artifact shows the exact downstream rejection reasons rather than only raw status fields.
+
+Use `--require-ready` when the checklist is an acceptance gate; it exits nonzero for `PENDING`. Without that flag, checklist export remains informational and never changes the report state.
+
+Strict review also invokes the downstream consumer, so malformed audit trails, unpassed scenarios, missing roles, experimental support, or native-required state cannot pass merely by changing the top-level gate.
+
+Use `--json-output <review.json>` alongside the Markdown export for machine-readable review tooling; the packet carries gate state, acceptance diagnostics, platform support, provenance anchors, scenario status, and artifact summaries without changing acceptance semantics.
+
+Machine review packets use `review_packet_schema: 1`; consumers should reject unsupported versions rather than infer fields from an unversioned export.
+
+Each packet also carries a SHA-256 hash of its source report; packet consumers reject missing or malformed hash anchors so review artifacts remain traceable to the exact report under review.
+
+For retention verification, pass `--report <report.json>` to the packet consumer; it recomputes the source hash and rejects packets detached from the retained report.
+
+For release/review handoff, retain both files in one bundle and consume them together with `python tests/platform/consume_review_bundle.py <bundle-root>`. The bundle consumer validates the report contract, requires the packet, and verifies the packet's source hash against that exact retained report. Missing or replaced files remain pending; this portable workflow does not claim native desktop/audio/overlay qualification.
+
+To create that retained handoff bundle from generated artifacts, run `python tests/platform/retain_review_bundle.py <report.json> <review.json> <bundle-root>`. Export is verified immediately; pending native evidence or any detached/invalid input returns a nonzero result and remains diagnostic rather than release-ready.
+
+To feed a canonical bundle into release/review automation, run `python tests/platform/review_release_decision.py <bundle-root> <decision.json>`. The decision artifact records `ACCEPTED` or conservative `PENDING`, the exact report SHA-256, and machine-readable reasons. Missing, detached, or native-pending evidence can never be promoted by this consumer. The end-to-end handoff can emit the same artifact with `--review-json <review.json> --decision-output <decision.json>`; a pending decision is returned as a nonzero handoff result for release automation.
+
+The release boundary is executable: `python tests/platform/promote_review_bundle.py <bundle-root> <release-root>` copies the canonical report and packet only after the decision consumer returns `ACCEPTED`; it also writes and verifies `release-manifest.json` with both promoted artifact hashes. A `PENDING` bundle leaves the release destination untouched.
+
+Downstream release jobs must verify the promoted artifact with `python tests/platform/verify_release_manifest.py <release-root> --signoff <signoff.json>`. The verifier recomputes both hashes, requires manifest schema 1 and `ACCEPTED`, binds the signoff to the manifest report hash, and rejects missing, modified, or unsigned files before publication.
+
+The final release-directory check is `python tests/platform/verify_release_bundle.py <release-root>`. It requires the retained signoff in the release directory and verifies the complete report/packet/manifest/signoff set together before publication.
+
+Native review owners can create an explicit assessment with `python tests/platform/review_native_evidence.py <report.json> <reviewer> <native-review.json>`. The assessment lists every platform/scenario blocker and remains `PENDING` until required scenarios have retained `PASS` evidence; it records review metadata but does not replace actual desktop/audio/overlay qualification.
+
+The end-to-end handoff emits this assessment with `--native-review-output <native-review.json> --native-reviewer <reviewer>`, alongside the report and packet. A pending assessment returns nonzero and remains an explicit qualification blocker.
+
+The complete signed release workflow is `python tests/platform/prepare_release_bundle.py <report.json> <review.json> <retained-root> <release-root> --signoff <signoff.json>`: it retains and verifies the pair, evaluates the conservative decision, checks both signoff hashes, promotes only `ACCEPTED`, and verifies the resulting manifest against the human signoff. Native-pending evidence or a mismatched signoff stops before release output is created.
+
+After automation accepts a bundle, a release owner records manual acceptance with `python tests/platform/record_release_signoff.py <decision.json> <reviewer> <signoff.json>`. The signoff is bound to the decision's report and review-packet hashes and refuses `PENDING`; it is an audit record, not a substitute for native desktop/audio/overlay qualification.
+
+The final review checklist is intentionally ordered: retain the pair, emit the decision, record manual signoff, run the signed preparation workflow (which retains `signoff.json` beside the release artifacts), then verify the dual-hash release manifest before publication. Each step remains fail-closed and native qualification remains a separate required gate.
+
+The machine consumer is `python tests/platform/consume_review_packet.py <review.json>`. It rejects unsupported packet versions, recorded acceptance errors, and non-`READY` gate state; native qualification remains pending until the packet is backed by reviewed hardware evidence.
+
+The packet consumer independently rechecks native-required state, experimental support rows, and scenario statuses, so clearing `acceptance_errors` in a tampered packet cannot bypass release acceptance.
+
+The handoff command can emit the same packet directly with `--review-json <review.json>`, ensuring Markdown and machine-readable review outputs are derived from the identical generated report.
+
+Add `--consume-review` to validate that emitted packet immediately; pending native evidence intentionally makes this integrated command nonzero.
+
+When `--require-ready` is supplied with `--review-json`, packet consumption is automatic; strict release review cannot accidentally omit the versioned consumer step.
+
+The release/review workflow should use both `--review-json` and `--consume-review`; this keeps the machine packet versioned and ensures its consumer—not only the producer—approves the handoff.
+
+The equivalent end-to-end invocation is `run_readiness_handoff.py ... --review-output review.md --require-ready`; it writes the checklist and fails the same handoff run when native acceptance has not been reached.
 
 The portable consumer tests cover the eventual transition explicitly: clearing `native_qualification_required` removes only that native-state rejection; all remaining report-contract, provenance, and readiness checks still apply. This is a transition contract, not native evidence.
 

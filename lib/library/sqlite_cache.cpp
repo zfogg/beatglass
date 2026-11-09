@@ -7,6 +7,7 @@
 #include <stop_token>
 #include <string>
 #include <utility>
+#include <unordered_set>
 
 namespace beatglass::library_detail {
 bool sqlite_length_representable(std::size_t size) noexcept { return size <= static_cast<std::size_t>(std::numeric_limits<int>::max()); }
@@ -29,6 +30,11 @@ void validate_key(const CacheKey& key) {
       key.config.find('\0') != std::string::npos || key.mode.find('\0') != std::string::npos)
     throw std::invalid_argument("invalid cache identity");
 }
+void validate_snapshot_text(const std::string& value, const char* field, std::size_t maximum) {
+  if (value.size() > maximum || value.find('\0') != std::string::npos ||
+      !sqlite_length_representable(value.size()))
+    throw std::invalid_argument(std::string("invalid retry snapshot ") + field);
+}
 }
 struct SqliteCache::Impl {
 public:
@@ -44,15 +50,20 @@ public:
       int rc = sqlite3_step(version);
       int v = rc == SQLITE_ROW ? sqlite3_column_int(version, 0) : -1;
       sqlite3_finalize(version);
-      if (v != 0 && v != kCacheSchemaVersion) throw std::runtime_error("unsupported database schema");
+      if (v != 0 && v != 1 && v != kCacheSchemaVersion) throw std::runtime_error("unsupported database schema");
       if (v == 0) {
         exec("BEGIN IMMEDIATE");
         try {
-          exec("CREATE TABLE runs(id TEXT PRIMARY KEY, content TEXT NOT NULL, engine TEXT NOT NULL, config TEXT NOT NULL, mode TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('running','complete','retryable')), result BLOB, CHECK((status='complete' AND result IS NOT NULL) OR (status!='complete' AND result IS NULL)), UNIQUE(id,content,engine,config,mode,status))");
+          exec("CREATE TABLE runs(id TEXT PRIMARY KEY, content TEXT NOT NULL, engine TEXT NOT NULL, config TEXT NOT NULL, mode TEXT NOT NULL, source_path TEXT NOT NULL DEFAULT '', decoder_snapshot TEXT NOT NULL DEFAULT '', status TEXT NOT NULL CHECK(status IN ('running','complete','retryable')), result BLOB, CHECK((status='complete' AND result IS NOT NULL) OR (status!='complete' AND result IS NULL)), UNIQUE(id,content,engine,config,mode,status))");
           exec("CREATE TABLE active(content TEXT NOT NULL, engine TEXT NOT NULL, config TEXT NOT NULL, mode TEXT NOT NULL, run_id TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'complete' CHECK(status='complete'), PRIMARY KEY(content,engine,config,mode), FOREIGN KEY(run_id,content,engine,config,mode,status) REFERENCES runs(id,content,engine,config,mode,status))");
           exec("CREATE TABLE collection_entries(path TEXT PRIMARY KEY, name TEXT NOT NULL, kind TEXT NOT NULL, fingerprint TEXT NOT NULL, size_bytes INTEGER NOT NULL, modified_ns INTEGER NOT NULL)");
-          exec("PRAGMA user_version=1"); exec("COMMIT");
+          exec("PRAGMA user_version=2"); exec("COMMIT");
         } catch (...) { rollback(); throw; }
+      }
+      if (v == 1) {
+        exec("ALTER TABLE runs ADD COLUMN source_path TEXT NOT NULL DEFAULT ''");
+        exec("ALTER TABLE runs ADD COLUMN decoder_snapshot TEXT NOT NULL DEFAULT ''");
+        exec("PRAGMA user_version=2");
       }
       // Runs left running by a previous process are never cache hits.
       exec("UPDATE runs SET status='retryable' WHERE status='running'");
@@ -60,11 +71,13 @@ public:
   }
   ~Impl() { sqlite3_close(db_); }
   // All calls, including destruction, belong to one database worker.
-  void begin(const std::string& id, const CacheKey& key) {
+  void begin(const std::string& id, const CacheKey& key, const std::string& source_path, const std::string& decoder_snapshot) {
     validate_key(key);
+    validate_snapshot_text(source_path, "source path", kMaxCollectionPathBytes);
+    validate_snapshot_text(decoder_snapshot, "decoder snapshot", kMaxCacheConfigurationBytes);
     if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos) throw std::invalid_argument("invalid run ID");
-    Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status) VALUES(?,?,?,?,?,'running') ON CONFLICT(id) DO UPDATE SET status='running' WHERE runs.status='retryable' AND runs.content=excluded.content AND runs.engine=excluded.engine AND runs.config=excluded.config AND runs.mode=excluded.mode");
-    bind(s.p, 1, id); bind_key(s.p, 2, key); done(s.p);
+    Statement s(db_, "INSERT INTO runs(id,content,engine,config,mode,status,source_path,decoder_snapshot) VALUES(?,?,?,?,?,'running',?,?) ON CONFLICT(id) DO UPDATE SET status='running',source_path=excluded.source_path,decoder_snapshot=excluded.decoder_snapshot WHERE runs.status='retryable' AND runs.content=excluded.content AND runs.engine=excluded.engine AND runs.config=excluded.config AND runs.mode=excluded.mode");
+    bind(s.p, 1, id); bind_key(s.p, 2, key); bind(s.p, 6, source_path); bind(s.p, 7, decoder_snapshot); done(s.p);
   }
   bool find(const CacheKey& key, std::string& result) {
     validate_key(key);
@@ -77,7 +90,7 @@ public:
   }
   std::vector<RetryableRun> retryable_runs(std::size_t limit) {
     if (limit == 0 || limit > kMaxRetryableRuns) throw std::invalid_argument("invalid retryable run limit");
-    Statement s(db_, "SELECT id,content,engine,config,mode FROM runs WHERE status='retryable' ORDER BY id LIMIT ?");
+    Statement s(db_, "SELECT id,content,engine,config,mode,source_path,decoder_snapshot FROM runs WHERE status='retryable' ORDER BY id LIMIT ?");
     check(sqlite3_bind_int64(s.p, 1, static_cast<sqlite3_int64>(limit)));
     std::vector<RetryableRun> out; int rc = SQLITE_ROW;
     while ((rc = sqlite3_step(s.p)) == SQLITE_ROW) {
@@ -85,10 +98,26 @@ public:
                      {reinterpret_cast<const char*>(sqlite3_column_text(s.p, 1)),
                       reinterpret_cast<const char*>(sqlite3_column_text(s.p, 2)),
                       reinterpret_cast<const char*>(sqlite3_column_text(s.p, 3)),
-                      reinterpret_cast<const char*>(sqlite3_column_text(s.p, 4))}});
+                     reinterpret_cast<const char*>(sqlite3_column_text(s.p, 4))}, reinterpret_cast<const char*>(sqlite3_column_text(s.p, 5)), reinterpret_cast<const char*>(sqlite3_column_text(s.p, 6))});
     }
     if (rc != SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_));
     return out;
+  }
+  std::optional<RetryableRun> retryable_run(const std::string& id) {
+    if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
+      throw std::invalid_argument("invalid run ID");
+    Statement s(db_, "SELECT id,content,engine,config,mode,source_path,decoder_snapshot FROM runs WHERE id=? AND status='retryable'");
+    bind(s.p, 1, id);
+    const int rc = sqlite3_step(s.p);
+    if (rc == SQLITE_DONE) return std::nullopt;
+    if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_));
+    return RetryableRun{reinterpret_cast<const char*>(sqlite3_column_text(s.p, 0)),
+                        {reinterpret_cast<const char*>(sqlite3_column_text(s.p, 1)),
+                         reinterpret_cast<const char*>(sqlite3_column_text(s.p, 2)),
+                         reinterpret_cast<const char*>(sqlite3_column_text(s.p, 3)),
+                         reinterpret_cast<const char*>(sqlite3_column_text(s.p, 4))},
+                        reinterpret_cast<const char*>(sqlite3_column_text(s.p, 5)),
+                        reinterpret_cast<const char*>(sqlite3_column_text(s.p, 6))};
   }
   bool discard_retryable(const std::string& id) {
     if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
@@ -97,6 +126,24 @@ public:
     bind(s.p, 1, id);
     done(s.p);
     return sqlite3_changes(db_) != 0;
+  }
+  std::size_t discard_retryable(const std::vector<std::string>& ids) {
+    if (ids.empty() || ids.size() > kMaxRetryableRuns) throw std::invalid_argument("invalid retryable run batch");
+    std::unordered_set<std::string> unique;
+    for (const auto& id : ids) {
+      if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
+        throw std::invalid_argument("invalid run ID");
+      if (!unique.insert(id).second) throw std::invalid_argument("duplicate retryable run ID");
+    }
+    exec("BEGIN IMMEDIATE");
+    std::size_t removed = 0;
+    try {
+      for (const auto& id : ids) {
+        Statement s(db_, "DELETE FROM runs WHERE id=? AND status='retryable'");
+        bind(s.p, 1, id); done(s.p); removed += static_cast<std::size_t>(sqlite3_changes(db_));
+      }
+      exec("COMMIT"); return removed;
+    } catch (...) { rollback(); throw; }
   }
   bool mark_retryable(const std::string& id, const CacheKey& key) {
     validate_key(key);
@@ -201,10 +248,12 @@ private:
 };
 SqliteCache::SqliteCache(const std::string& path) : impl_(std::make_unique<Impl>(path)) {}
 SqliteCache::~SqliteCache() = default;
-void SqliteCache::begin(const std::string& id, const CacheKey& key) { impl_->begin(id, key); }
+void SqliteCache::begin(const std::string& id, const CacheKey& key, const std::string& source_path, const std::string& decoder_snapshot) { impl_->begin(id, key, source_path, decoder_snapshot); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
 std::vector<RetryableRun> SqliteCache::retryable_runs(std::size_t limit) { return impl_->retryable_runs(limit); }
+std::optional<RetryableRun> SqliteCache::retryable_run(const std::string& id) { return impl_->retryable_run(id); }
 bool SqliteCache::discard_retryable(const std::string& id) { return impl_->discard_retryable(id); }
+std::size_t SqliteCache::discard_retryable(const std::vector<std::string>& ids) { return impl_->discard_retryable(ids); }
 bool SqliteCache::mark_retryable(const std::string& id, const CacheKey& key) { return impl_->mark_retryable(id, key); }
 bool SqliteCache::invalidate(const CacheKey& key) { return impl_->invalidate(key); }
 void SqliteCache::put_entry(const CollectionEntry& e) { impl_->put_entry(e); }

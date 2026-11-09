@@ -1,0 +1,42 @@
+import importlib.util
+from pathlib import Path
+import shutil
+import tempfile
+import unittest
+
+spec = importlib.util.spec_from_file_location("promoter", Path(__file__).with_name("promote_review_bundle.py"))
+promoter = importlib.util.module_from_spec(spec); assert spec.loader
+spec.loader.exec_module(promoter)
+
+
+class ReviewBundlePromotionTest(unittest.TestCase):
+    def test_pending_bundle_cannot_be_promoted(self):
+        fixture = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source"; destination = Path(tmp) / "release"
+            source.mkdir()
+            shutil.copyfile(fixture / "readiness-report.json", source / "readiness-report.json")
+            review_spec = importlib.util.spec_from_file_location("review", Path(__file__).with_name("review_readiness_handoff.py"))
+            review = importlib.util.module_from_spec(review_spec); assert review_spec.loader
+            review_spec.loader.exec_module(review)
+            (source / "review.json").write_text(__import__("json").dumps(review.review_packet(source / "readiness-report.json")), encoding="utf-8")
+            accepted, errors = promoter.promote(source, destination)
+            self.assertFalse(accepted)
+            self.assertTrue(errors)
+            self.assertFalse(destination.exists())
+
+    def test_pending_bundle_does_not_write_release_manifest(self):
+        fixture = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source"; destination = Path(tmp) / "release"
+            source.mkdir()
+            shutil.copyfile(fixture / "readiness-report.json", source / "readiness-report.json")
+            accepted, _ = promoter.promote(source, destination)
+            self.assertFalse(accepted)
+            self.assertFalse((destination / "release-manifest.json").exists())
+
+    def test_missing_bundle_cannot_be_promoted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            accepted, errors = promoter.promote(Path(tmp) / "missing", Path(tmp) / "release")
+            self.assertFalse(accepted)
+            self.assertTrue(errors)

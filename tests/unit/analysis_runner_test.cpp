@@ -3,13 +3,34 @@
 #include <chrono>
 #include <atomic>
 #include <thread>
+#include <vector>
 using namespace beatglass::library;
 using namespace beatglass::library_detail;
 namespace { AnalysisOperation op(bool valid) { AnalysisOperation o; o.source.path="track.wav"; o.source.content_hash="sha256:test"; o.identity.content_hash="sha256:test"; o.identity.engine_version="engine"; o.identity.configuration_id="config"; o.identity.mode="offline"; o.source.size_bytes=12; o.serialize=[] { return std::string("result"); }; o.verify=[valid](std::stop_token){ return beatglass::FileVerificationResult{valid ? beatglass::FileVerificationOutcome::match : beatglass::FileVerificationOutcome::changed}; }; return o; } }
-namespace { void wait_for_terminal(const std::shared_ptr<JobHandle>& handle) { for(int i=0;i<1000; ++i) { const auto state=handle->state(); if(state != TrackedState::queued && state != TrackedState::running) return; std::this_thread::yield(); } } }
+namespace { void wait_for_terminal(const std::shared_ptr<JobHandle>& handle) { for(int i=0;i<10000; ++i) { const auto state=handle->state(); if(state != TrackedState::queued && state != TrackedState::running) return; std::this_thread::sleep_for(std::chrono::microseconds(100)); } } }
 TEST_CASE("analysis runner cancellation never publishes a result") { JobExecutor executor(1); AnalysisRunner runner(executor); auto operation=op(true); operation.serialize=[] { return std::string("should not publish"); }; operation.verify=[](std::stop_token stop) { while(!stop.stop_requested()) std::this_thread::yield(); return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::cancelled}; }; auto h=runner.submit(std::move(operation)); REQUIRE(h); h->cancel(); wait_for_terminal(h); CHECK(h->state()==TrackedState::cancelled); CHECK(h->frames()==0); executor.shutdown(); }
 TEST_CASE("analysis runner converts verifier exceptions into a failed job") { JobExecutor executor(1); AnalysisRunner runner(executor); auto operation=op(true); operation.verify=[](std::stop_token) -> beatglass::FileVerificationResult { throw std::runtime_error("source disappeared"); }; auto h=runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); CHECK(h->frames()==0); executor.shutdown(); }
 TEST_CASE("analysis runner completes verified work and reports progress") { JobExecutor executor(1); AnalysisRunner runner(executor); auto h=runner.submit(op(true)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::completed); CHECK(h->frames()==12); executor.shutdown(); }
+TEST_CASE("analysis runner publishes serialized result before completion") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); std::string published;
+  auto operation = op(true); operation.publish = [&](const std::string& result) { published = result; };
+  auto h = runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h);
+  CHECK(h->state() == TrackedState::completed); CHECK(published == "result"); executor.shutdown();
+}
+TEST_CASE("analysis runner forwards decoder progress into the tracked handle") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); std::vector<std::uint64_t> reported;
+  auto operation = op(true); operation.progress = [&](std::uint64_t done, std::uint64_t) { reported.push_back(done); };
+  auto h = runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h);
+  REQUIRE(reported.size() == 2); CHECK(reported.front() == 0); CHECK(reported.back() == 12); CHECK(h->frames() == 12);
+  executor.shutdown();
+}
+TEST_CASE("analysis runner hands decoded result and incremental progress to publication") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); std::string published; std::vector<std::uint64_t> observed;
+  auto operation = op(true); operation.serialize = {}; operation.decode = [&](std::stop_token, const auto& progress) { progress(4); progress(9); return std::string("decoded"); };
+  operation.publish = [&](const std::string& result) { published = result; };
+  auto h = runner.submit(std::move(operation)); REQUIRE(h); wait_for_terminal(h);
+  CHECK(h->state() == TrackedState::completed); CHECK(h->frames() == 12); CHECK(published == "decoded"); executor.shutdown();
+}
 TEST_CASE("analysis runner fails closed when verification rejects input") { JobExecutor executor(1); AnalysisRunner runner(executor); auto h=runner.submit(op(false)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
 TEST_CASE("analysis runner rejects operations without source attribution") { JobExecutor executor(1); AnalysisRunner runner(executor); auto missing=op(true); missing.source.path.clear(); auto h=runner.submit(std::move(missing)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
 TEST_CASE("analysis runner fails closed on empty serialization") { JobExecutor executor(1); AnalysisRunner runner(executor); auto empty=op(true); empty.serialize=[] { return std::string{}; }; auto h=runner.submit(std::move(empty)); REQUIRE(h); wait_for_terminal(h); CHECK(h->state()==TrackedState::failed); executor.shutdown(); }
@@ -53,5 +74,17 @@ TEST_CASE("retryable analysis reuses source identity after a failed attempt") {
   REQUIRE(retryable->retry(1));
   for (int i = 0; i < 1000 && (retryable->state() == TrackedState::queued || retryable->state() == TrackedState::running); ++i) std::this_thread::yield();
   CHECK(retryable->state() == TrackedState::completed); CHECK(attempts == 2); CHECK(retryable->frames() == 12);
+  executor.shutdown();
+}
+TEST_CASE("decoder-only analysis publishes its decoded result") {
+  JobExecutor executor(1); AnalysisRunner runner(executor); std::string published;
+  AnalysisOperation operation; operation.source.path = "track.wav"; operation.source.content_hash = "sha256:test";
+  operation.identity.content_hash = "sha256:test"; operation.identity.engine_version = "engine";
+  operation.identity.configuration_id = "config"; operation.identity.mode = "offline"; operation.source.size_bytes = 12;
+  operation.decode = [](std::stop_token stop, const auto& progress) { if (stop.stop_requested()) return std::string{}; progress(12); return std::string("decoded_frames=12"); };
+  operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
+  operation.publish = [&](const std::string& result) { published = result; };
+  auto handle = runner.submit(std::move(operation)); REQUIRE(handle); wait_for_terminal(handle);
+  CHECK(handle->state() == TrackedState::completed); CHECK(published == "decoded_frames=12"); CHECK(handle->frames() == 12);
   executor.shutdown();
 }

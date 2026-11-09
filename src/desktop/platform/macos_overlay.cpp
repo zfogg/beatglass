@@ -16,7 +16,10 @@ OverlayController::OverlayController(std::unique_ptr<OverlayNative> native, QObj
   connect(&save_timer_, &QTimer::timeout, this, [this] { saveSettings(); });
   screen_timer_.setSingleShot(true);
   connect(&screen_timer_, &QTimer::timeout, this, [this] {
-    updating_screens_ = true; keepOnScreen(); updating_screens_ = false; emit screensChanged();
+    updating_screens_ = true; keepOnScreen(); updating_screens_ = false;
+    scheduleSave();
+    emit geometryChanged();
+    emit screensChanged();
   });
   for (auto* screen : QGuiApplication::screens()) observeScreen(screen);
   connect(qGuiApp, &QGuiApplication::screenRemoved, this, [this](QScreen* screen) {
@@ -169,11 +172,11 @@ bool OverlayController::moveToScreen(int index) {
   const QPoint topLeft(bounds.center().x() - size.width() / 2, bounds.center().y() - size.height() / 2);
   overlay_->setScreen(screen);
   overlay_->setGeometry(QRect(topLeft, size));
-  keepOnScreen(); return true;
+  keepOnScreen(); scheduleSave(); return true;
 }
 bool OverlayController::resizeOverlay(int width, int height) {
   if (!overlay_ || width <= 0 || height <= 0) return false;
-  overlay_->resize(width, height); keepOnScreen(); return true;
+  overlay_->resize(width, height); keepOnScreen(); scheduleSave(); return true;
 }
 bool OverlayController::eventFilter(QObject* watched, QEvent* event) {
   if (watched == control_ && (event->type() == QEvent::Hide || event->type() == QEvent::Close ||

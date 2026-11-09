@@ -1,5 +1,25 @@
 # Progress and handoff
 
+Shortcut-triggered stop/resume must announce the resulting lifecycle state through the same accessible status surface as pointer actions. Portable contracts cover focus, shortcut dispatch, and state text; native screen-reader timing, focus restoration, and assistive-technology behavior remain unqualified.
+
+Keyboard playback recovery parity is part of the readiness handoff: transport, retry, endpoint refresh, and clear/reacquire actions must be reachable through the same focus order and accessible names as pointer controls. Portable UI contracts document this parity; native assistive-technology and hardware recovery remain unqualified.
+
+Playback recovery controls and the storage bridge transition surface are now documented as one handoff: queued/running/completed/cancelled/failed states remain distinct, stale results clear across epoch or endpoint transitions, and retry controls require preserved identity. Local transition contracts are preparation evidence; native playback, endpoint-loss, and overlay behavior remain open.
+
+Retry decisions are now explicit: a persisted run is resubmitted only when source path, content identity, engine, configuration, mode, and decoder snapshot are present and compatible; cache hits complete without decoder work; missing or mismatched metadata rejects fail-closed. Local checks are `python tests/unit/check_bridge_resubmit_contract.py`, `python tests/unit/check_retry_evidence_docs.py`, and `git diff --check`. These portable checks do not qualify native codecs, devices, or desktop recovery.
+
+Decoder retry evidence now has a paired handoff expectation: compatible snapshot/identity retries may proceed, while changed or legacy decoder snapshots must reject. Both outcomes need retained commands and diagnostics before native qualification can advance.
+
+Native codec/runtime preparation is now explicit: qualification artifacts must bind decoder snapshot, codec feature configuration, fixture hash, backend/device, build identity, and exact commands. Both successful decode and controlled failure evidence are required; portable tests remain preparation evidence and native gates stay open.
+
+Decoder snapshot mismatch handling is explicit: retry provenance requires exact compatibility with the active decoder identity. Empty legacy snapshots and mismatches reject recovery rather than silently decoding with a different runtime; the portable contract does not qualify native codec behavior.
+
+Decoder compatibility is explicit in retry recovery: `decoder_snapshot` travels with the persisted run, and legacy retry rows with an empty snapshot remain rejected rather than silently reusing a changed decoder. Local checks cover this policy; native codec/runtime compatibility is still unqualified.
+
+Retryable storage schema v2 persists `source_path` and `decoder_snapshot` with each run and migrates existing databases by adding empty defaults. Recovery UI and coordinator resubmission consume these fields conservatively; empty legacy metadata remains non-retryable until a source operation is reconstructed. This migration is covered by portable storage contracts, not native qualification.
+
+Playback/recovery behavior now treats an epoch change or endpoint interruption as a lifecycle boundary: stale queued evidence is cleared, reacquisition starts fresh, and prior results are not presented as current. Portable lifecycle contracts cover this behavior; native device-loss and real playback observations remain unqualified.
+
 ## Qualification handoff pipeline
 
 The merged portable handoff pipeline is now explicit: native platform scripts produce retained artifacts; `tests/platform/ingest_qualification_artifacts.py` verifies their hashes and identity into conservative manifests; `tests/platform/run_readiness_handoff.py` generates and validates the readiness report; and `tests/platform/consume_readiness_handoff.py` is the downstream acceptance boundary. Ingestion, documentation, and readiness failures remain auditable and nonzero, and generated scenarios remain `PENDING` until real native desktop/audio/overlay observations are reviewed. This pipeline is preparation evidence, not native qualification.
@@ -276,7 +296,75 @@ The remaining Issue #1 exit gate is explicit: perform supported Windows WASAPI, 
 
 The readiness report contract is versioned as `readiness_report_schema: 1`; `exit_gate_status` and `exit_gate_reason_codes` are the stable handoff fields. Product support language remains experimental while native qualification is open.
 
+The dependency-light `desktop_cache_bridge_contract` test now checks the complete cache handoff surface—Qt properties, queued worker dispatch, result signal, and visible QML hit state—without claiming a Qt build or native UI qualification.
+
+The dependency-light desktop transition contract now verifies that Library queue progress, retry/cancel controls, asynchronous cache lookup and cache-hit presentation coexist in one UI surface. It does not claim that a Qt build, decoder run or native qualification has occurred.
+
 The desktop storage bridge now exposes an asynchronous cache lookup (`findCached`) and publishes hit/result state only after the worker responds. This keeps SQLite off the GUI thread and gives the future decoder queue a real UI-owned handoff; no decoder or analysis is started by the lookup, and native UI qualification remains pending.
+
+The Library UI now provides a read-only cache lookup action for content, engine, configuration and mode identities. It enables the worker-backed call only when all fields are present; decoder admission and source revalidation remain queue-owned.
+
+Cache hits now render the serialized cached result in the Library surface, making the lookup outcome inspectable instead of status-only. This is intentionally a result handoff, not a claim that the UI has decoded or recomputed the source.
+
+The Library surface now also renders queue outcome and retry availability beside cached results. This keeps a cache hit distinct from queued/running/failed/cancelled analysis state; the existing worker queue remains the owner of decoder execution and retry semantics.
+
+The queue row now includes observed frame progress alongside state and retry availability, giving the UI a source-attributed progress signal without moving decoder or analysis work onto the GUI thread.
+
+Worker progress callbacks are lifetime-safe: queued GUI updates retain only a `QPointer` and are discarded after the bridge is destroyed, so decoder/worker completion cannot publish into a dead UI object.
+
+The worker analysis contract now also hands the verified serialized result to an optional worker-owned publication callback before reporting completion. This is the handoff point for cache/UI consumers; the callback remains off the GUI and audio threads.
+
+`AnalysisJobBridge` now consumes that handoff as a queued `result` property, retaining the worker-thread boundary while making completed analysis inspectable by the desktop surface.
+
+The Library surface renders that worker result separately from cached-result status, preserving the distinction between a newly completed worker result and a cache lookup.
+
+Retrying an analysis attempt clears the prior worker result before the new attempt is queued, preventing stale output from being presented as current work.
+
+Batch analysis now reports how many accepted operations have published verified results through the worker handoff, keeping queue admission counts distinct from completed-result counts.
+
+The published-result count is scoped to the current batch attempt and resets when that batch is retried.
+
+The bridge also exposes the latest verified batch payload for inspection; it is cleared when a new batch or retry begins and remains separate from the single-operation result.
+
+Displayed worker and batch result text is capped at 4096 bytes with an explicit truncation marker; the full serialized value remains owned by the worker publication callback.
+
+Starting a fresh batch also clears any prior single-operation result before queue admission, so the Library surface cannot attribute old output to the new batch.
+
+Fresh batch admission also resets the displayed aggregate frame count, preventing progress from the previous single operation from appearing on the new batch.
+
+Single and batch retries now reset/republish frame progress immediately, rather than waiting for the periodic bridge poll to correct stale values.
+
+Invalid single-operation submissions also clear prior result and frame state before entering `Failed`, so rejected work cannot display stale output.
+
+The desktop bridge now carries the submitted operation source path alongside status, progress, and results, making worker output source-attributed in the Library surface.
+
+Starting a batch clears the prior single-operation source attribution; batch admission remains a multi-source operation and is represented by its batch counters rather than a misleading single path.
+
+The desktop bridge now reports a bounded, source-attributed failure reason for invalid requests and worker failures, and clears it when a new attempt is accepted.
+
+`StorageRecoveryBridge::submitAnalysis` now queues a path-backed decoder through the coordinator-owned worker and reports accepted/rejected submission status to Qt; completion/retry polling remains worker-owned and native qualification is pending.
+
+The same failure explanation is surfaced when any accepted batch operation fails, while successful batch publications continue to report independently.
+
+Batch status now also reports the count of accepted operations that failed, alongside published results and admission counts.
+
+It reports cancelled accepted operations separately from failures, preserving the distinction needed for retry and cancellation feedback.
+
+Batch status also reports accepted operations that reached completion, completing the queued batch outcome breakdown.
+
+The derived queued count identifies accepted operations that have not yet completed, failed, or cancelled; publication is intentionally not subtracted separately because successful publication and completion describe the same terminal operation.
+
+A provisional `make_file_decode_operation` now supplies the worker-side decoder seam: it opens a path with `FileReader`, drains normalized PCM off the GUI/audio threads, checks cancellation and emits a deterministic decoded-frame serialization. Decoder-only operations now pass runner admission and publish through the observable analysis result path; this is still not musical analysis, cache publication, or native codec qualification.
+
+`AnalysisJobBridge::submitFile` now connects that provisional operation to the desktop worker queue with explicit content hash, engine, configuration, and mode identity. Decoder I/O remains off the GUI thread; source hashing, cache admission, musical analysis, and native codec qualification remain open.
+
+Decode progress now flows through the operation’s wrapped progress callback, so the worker handle and desktop bridge observe the same incremental frame counts rather than only the terminal result.
+
+Analysis operations now support an optional stop-aware transactional publisher carrying the run identity and cache revalidation boundary. The runner treats a rejected or cancelled commit as non-complete; legacy non-persistent publication remains supported.
+
+`AnalysisCoordinator` now owns the worker executor and `StorageOwner` together, attaching run-identity publication before queue submission. This is the safe library boundary for a future Qt bridge; native UI wiring and platform qualification remain pending.
+
+`StorageRecoveryBridge::Worker` now owns that coordinator rather than a standalone storage object. Existing cache/retry recovery calls remain queued on the worker thread while sharing the coordinator’s storage lifetime with future analysis submissions.
 
 The desktop recovery panel now presents the asynchronous cache lookup state as an explicit, accessible UI status (`Cached analysis ready` versus an identity miss). This is presentation only: the queue still owns source fingerprinting, admission and decoder execution, and native Qt/audio qualification remains pending.
 
@@ -290,3 +378,23 @@ A cache acceptance regression demonstrates that a committed unchanged identity i
 The library now exposes `reuse_cached_operation`, a worker-owned identity lookup that returns a completed cached result before analysis serialization/DSP begins. Configuration/content identity changes miss independently. The caller still owns fingerprinting, source revalidation and scheduling; decoder/UI wiring and native qualification remain open.
 
 StorageOwner now exposes the same completed-result lookup at the storage lifetime boundary, with a regression covering open/lookup/close behavior. This is an integration handoff for the future desktop analysis queue; the GUI still does not schedule real file analysis.
+Coordinator admission now returns cache hits without queueing decoder work and reserves a run before submitting misses. The explicit `Submission` result distinguishes cached, reserved, and rejected paths for the desktop lifecycle; retryable persistence remains worker-owned.
+Submission now uses coordinator admission: cache hits publish directly to the recovery result without creating a decoder handle, while misses reserve a run and enter the queued lifecycle.
+The Library UI now consumes the coordinator admission status and admitted result properties from the recovery bridge, keeping cache-hit and queued-miss identity visible separately.
+
+Library controls now expose coordinator completion status with explicit cancel and retry actions, distinct from cache lookup controls.
+
+The completion surface now renders the coordinator’s decoded result payload separately from cached-result lookup, preserving result identity across retry and cancellation diagnostics.
+
+The Library also surfaces persisted retryable-run count alongside active analysis status, making failed publication/recovery outcomes visible without conflating them with cache hits.
+
+The recovery bridge now displays each persisted retryable run's run ID, content identity, engine, configuration, and mode. Retry resubmission is metadata-gated: the bridge reconstructs a file decoder operation and calls the coordinator resubmission boundary only when an explicit source path and matching identity are supplied; missing metadata is rejected. This is a portable handoff contract, not native qualification.
+
+Recovery guidance now distinguishes unavailable storage from waiting retryable work and a clear recovery state; completed result identity remains a separate field.
+A cancellation retry regression now verifies that a cancelled publication leaves no active cache result, preserves the persisted source/decoder snapshot, and can be admitted and committed again with retryable state cleared. This remains provisional until native desktop qualification.
+A worker-owned analysis exposes live frame progress through `StorageRecoveryBridge`; cancellation is cooperative and never publishes a stale result. On restart, SQLite restores retryable source/decoder identity and the bridge reports recovery availability, while frame counters correctly restart at zero because they are process-local execution state. A successful retry or explicit discard clears the persisted recovery record and the UI selection.
+Persisted recovery selection is reconciled from each worker refresh: retry/discard completion removes resolved IDs, clears the selected run, and updates the retryable lifecycle status. This prevents a completed or discarded run from remaining actionable in the Library UI.
+Persisted retry now retains its worker handle after admission, so the same progress, cancellation, terminal status, and refresh path is used for selected-run recovery as for a new submission. A failed or cancelled retry remains visible as recovery work; successful completion refreshes and clears the persisted record.
+Analysis failure diagnostics are transient lifecycle state: queued, running, cancelled, completed, and restart-recovery transitions clear the previous error, while a failed attempt keeps its retryable explanation visible until the next transition.
+Successful selected-run retry, explicit discard, and cache invalidation clear the shared queue-error diagnostic before refresh. This keeps single-run and adjacent batch/recovery controls from showing an error after the underlying persisted state has been resolved.
+Batch status now includes persisted recovery errors when present, while successful retry/discard transitions clear that suffix through the shared bridge error lifecycle. This keeps batch operators aware of recovery work without leaving resolved diagnostics visible.

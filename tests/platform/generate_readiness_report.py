@@ -54,6 +54,7 @@ def build_report(root: Path) -> dict:
             if not exists:
                 errors.append(f"missing artifact: {item.get('path')}")
             inventory.append({"path": item.get("path"), "sha256": digest,
+                             "role": item.get("role"),
                              "bytes": path.stat().st_size if exists else -1,
                              "hash_valid": exists and digest == item.get("sha256")})
         scenarios = {str(item.get("id")): item for item in scenarios_data if isinstance(item, dict)}

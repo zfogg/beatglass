@@ -78,6 +78,14 @@ TEST_CASE("SQLite cache rejects incomplete identities before creating runs") {
   REQUIRE_THROWS_AS(cache.begin("run", {"hash", "", "config", "offline"}), std::invalid_argument);
   REQUIRE_THROWS_AS(cache.begin("", {"hash", "engine", "config", "offline"}), std::invalid_argument);
 }
+TEST_CASE("SQLite cache bounds persisted retry snapshots") {
+  SqliteCache cache(":memory:");
+  const CacheKey key{"hash", "engine", "config", "offline"};
+  REQUIRE_THROWS_AS(cache.begin("run", key, std::string(kMaxCollectionPathBytes + 1, 'x')), std::invalid_argument);
+  REQUIRE_THROWS_AS(cache.begin("run", key, "/music/a.flac", std::string(kMaxCacheConfigurationBytes + 1, 'x')), std::invalid_argument);
+  REQUIRE_THROWS_AS(cache.begin("run", key, std::string("/music/\0x", 9)), std::invalid_argument);
+  REQUIRE_THROWS_AS(cache.begin("run", key, "/music/a.flac", std::string("decoder\0v3", 10)), std::invalid_argument);
+}
 TEST_CASE("SQLite cache lookup rejects malformed identities") {
   SqliteCache cache(":memory:");
   std::string result;
@@ -152,10 +160,61 @@ TEST_CASE("SQLite cache discards only retryable runs") {
   REQUIRE_FALSE(cache.discard_retryable("retry"));
   REQUIRE_THROWS_AS(cache.discard_retryable(""), std::invalid_argument);
 }
+TEST_CASE("SQLite cache preserves retryable rows when batch validation fails") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("keep", key);
+  REQUIRE(cache.publish("keep", key, "partial", {}, [] { return false; }) == Publish::stale_input);
+  REQUIRE_THROWS_AS(cache.discard_retryable(std::vector<std::string>{"keep", std::string("bad\0id", 6)}), std::invalid_argument);
+  REQUIRE(cache.retryable_runs().size() == 1);
+  CHECK(cache.retryable_runs().front().id == "keep");
+}
+TEST_CASE("SQLite cache rolls back a batch discard when a later ID is malformed") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("keep", key);
+  REQUIRE(cache.publish("keep", key, "partial", {}, [] { return false; }) == Publish::stale_input);
+  REQUIRE_THROWS_AS(cache.discard_retryable(std::vector<std::string>{"keep", std::string("bad\0id", 6)}), std::invalid_argument);
+  REQUIRE(cache.retryable_runs().size() == 1);
+  CHECK(cache.retryable_runs().front().id == "keep");
+}
+TEST_CASE("SQLite cache rejects duplicate batch discard IDs before deleting") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("keep", key);
+  REQUIRE(cache.publish("keep", key, "partial", {}, [] { return false; }) == Publish::stale_input);
+  REQUIRE_THROWS_AS(cache.discard_retryable(std::vector<std::string>{"keep", "keep"}), std::invalid_argument);
+  CHECK(cache.retryable_runs().size() == 1);
+}
+TEST_CASE("SQLite cache discards retryable runs atomically as a batch") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("one", key); REQUIRE(cache.publish("one", key, "x", {}, [] { return false; }) == Publish::stale_input);
+  cache.begin("two", key); REQUIRE(cache.publish("two", key, "x", {}, [] { return false; }) == Publish::stale_input);
+  CHECK(cache.discard_retryable(std::vector<std::string>{"one", "two", "missing"}) == 2);
+  CHECK(cache.retryable_runs().empty());
+  REQUIRE_THROWS_AS(cache.discard_retryable(std::vector<std::string>{"ok", std::string("bad\0id", 6)}), std::invalid_argument);
+}
 TEST_CASE("SQLite retryable run query exposes its bound") {
   SqliteCache cache(":memory:");
   CHECK(kMaxRetryableRuns == 10000);
   CHECK_THROWS_AS(cache.retryable_runs(kMaxRetryableRuns + 1), std::invalid_argument);
+}
+TEST_CASE("SQLite retryable runs preserve source and decoder snapshots") {
+  SqliteCache cache(":memory:");
+  CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("snapshot", key, "/music/example.flac", "decoder-v3;pcm-f32;44100");
+  REQUIRE(cache.publish("snapshot", key, "discard", {}, [] { return false; }) == Publish::stale_input);
+  const auto runs = cache.retryable_runs();
+  REQUIRE(runs.size() == 1);
+  CHECK(runs.front().source_path == "/music/example.flac");
+  CHECK(runs.front().decoder_snapshot == "decoder-v3;pcm-f32;44100");
+}
+TEST_CASE("SQLite legacy retryable runs preserve an empty decoder snapshot") {
+  SqliteCache cache(":memory:");
+  CacheKey key{"legacy-hash", "engine", "config", "offline"};
+  cache.begin("legacy-snapshot", key, "/music/legacy.flac");
+  REQUIRE(cache.publish("legacy-snapshot", key, "discard", {}, [] { return false; }) == Publish::stale_input);
+  const auto runs = cache.retryable_runs();
+  REQUIRE(runs.size() == 1);
+  CHECK(runs.front().source_path == "/music/legacy.flac");
+  CHECK(runs.front().decoder_snapshot.empty());
 }
 TEST_CASE("SQLite cache run IDs expose their API bound") {
   SqliteCache cache(":memory:");
@@ -193,7 +252,7 @@ TEST_CASE("SQLite binding lengths are checked before narrowing") {
   REQUIRE_FALSE(sqlite_length_representable(maximum + 1));
 }
 TEST_CASE("SQLite cache exposes its on-disk schema version") {
-  REQUIRE(kCacheSchemaVersion == 1);
+  REQUIRE(kCacheSchemaVersion == 2);
 }
 TEST_CASE("SQLite cache holds exclusive ownership during recovery and use") {
   auto path = std::filesystem::temp_directory_path() /

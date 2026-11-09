@@ -53,3 +53,14 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
             (root / "qualification-manifest.txt").write_text("platform=windows\ncommit=" + "0" * 40 + "\ncaptured_at=not-a-time\n", encoding="utf-8")
             self.assertIn("invalid capture timestamp", ingest.ingest(root, root / "manifest.json"))
+
+    def test_ingests_referenced_native_evidence_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "native-playback.json").write_text("{}", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text(
+                "platform=windows\ncommit=" + "0" * 40 + "\ncaptured_at=2026-11-08T00:00:00Z\n"
+                "playback_evidence=native-playback.json\n", encoding="utf-8")
+            self.assertEqual(ingest.ingest(root, root / "manifest.json"), [])
+            data = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(data["artifacts"][0]["role"], "playback_evidence")

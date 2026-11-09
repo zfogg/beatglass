@@ -1,6 +1,14 @@
 #include "analysis_job_bridge.hpp"
+#include "beatglass/library/file_analysis_operation.hpp"
 
 namespace {
+constexpr std::size_t kMaxDisplayedResultBytes = 4096;
+std::string displayedResult(std::string value) {
+  if (value.size() <= kMaxDisplayedResultBytes) return value;
+  value.resize(kMaxDisplayedResultBytes);
+  value += "…[truncated]";
+  return value;
+}
 QString stateText(beatglass::library_detail::TrackedState state) {
   using beatglass::library_detail::TrackedState;
   switch (state) {
@@ -21,20 +29,54 @@ AnalysisJobBridge::AnalysisJobBridge(beatglass::library_detail::JobExecutor& exe
   connect(&poll_timer_, &QTimer::timeout, this, &AnalysisJobBridge::poll);
 }
 
+bool AnalysisJobBridge::submitFile(const QString& path, const QString& contentHash,
+                                   const QString& engineVersion, const QString& configurationId,
+                                   const QString& mode) {
+  beatglass::library::AnalysisIdentity identity;
+  identity.content_hash = contentHash.toStdString(); identity.engine_version = engineVersion.toStdString();
+  identity.configuration_id = configurationId.toStdString(); identity.mode = mode.toStdString();
+  return static_cast<bool>(submit(beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity))));
+}
+
 std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit(beatglass::library::AnalysisOperation op) {
+  if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
+  const auto sourcePath = QString::fromStdString(op.source.path.string());
+  if (sourcePath_ != sourcePath) { sourcePath_ = sourcePath; emit sourceChanged(); }
   if (!op.valid()) {
+    failureReason_ = QStringLiteral("Analysis request is missing valid source identity or worker callbacks.");
+    emit failureChanged();
+    if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+    if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     status_ = QStringLiteral("Failed");
     emit statusChanged();
     retryable_.reset(); return {};
   }
   frames_ = 0;
-  batch_.clear(); batchAccepted_ = batchRejected_ = 0; emit batchChanged();
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  result_.clear();
+  emit resultChanged();
+  for (const auto& operation : batch_) if (operation) operation->cancel();
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); emit batchChanged();
   auto progress = op.progress;
-  op.progress = [this, progress](auto done, auto total) {
+  auto publish = op.publish;
+  op.publish = [weak_self = weak_self_, publish](const std::string& value) {
+    if (publish) publish(value);
+    if (!weak_self) return;
+    const auto displayed = displayedResult(value);
+    const auto result = QString::fromUtf8(displayed.data(), static_cast<int>(displayed.size()));
+    QMetaObject::invokeMethod(weak_self, [weak_self, result] {
+      if (!weak_self) return;
+      weak_self->result_ = result;
+      emit weak_self->resultChanged();
+    }, Qt::QueuedConnection);
+  };
+  op.progress = [weak_self = weak_self_, progress](auto done, auto total) {
     if (progress) progress(done, total);
-    QMetaObject::invokeMethod(this, [this, done] {
-      frames_ = done;
-      emit progressChanged();
+    if (!weak_self) return;
+    QMetaObject::invokeMethod(weak_self, [weak_self, done] {
+      if (!weak_self) return;
+      weak_self->frames_ = done;
+      emit weak_self->progressChanged();
     }, Qt::QueuedConnection);
   };
   retryable_ = runner_.submit_retryable(std::move(op));
@@ -59,59 +101,147 @@ bool AnalysisJobBridge::canRetry() const noexcept {
 void AnalysisJobBridge::cancel() {
   if (!canCancel()) return;
   retryable_->cancel();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  if (failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Analysis cancelled before publication; retry is available."); emit failureChanged(); }
+  if (status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
   poll();
 }
 
 void AnalysisJobBridge::retry() {
   if (!canRetry()) return;
-  if (retryable_->retry()) { frames_ = retryable_->frames(); status_ = QStringLiteral("Queued"); poll_timer_.start(); emit statusChanged(); }
+  if (retryable_->retry()) {
+    if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
+    if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+    frames_ = retryable_->frames();
+    emit progressChanged();
+    if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+    status_ = QStringLiteral("Queued"); poll_timer_.start(); emit statusChanged(); poll();
+  }
+}
+
+void AnalysisJobBridge::discard() {
+  if (!retryable_ || canCancel()) return;
+  retryable_.reset();
+  poll_timer_.stop();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
+  recoveryStatus_ = QStringLiteral("Single analysis recovery discarded"); emit statusChanged();
 }
 
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
-  batch_.clear(); batchAccepted_ = batchRejected_ = 0;
+  if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
+  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  if (retryable_ && canCancel()) retryable_->cancel();
+  retryable_.reset();
+  if (!sourcePath_.isEmpty()) { sourcePath_.clear(); emit sourceChanged(); }
+  batch_.clear(); batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   for (auto& operation : operations) {
     if (static_cast<int>(batch_.size()) >= batchCapacity_) { ++batchRejected_; continue; }
+    auto publish = operation.publish;
+    operation.publish = [weak_self = weak_self_, publish](const std::string& value) {
+      if (publish) publish(value);
+      if (!weak_self) return;
+      const auto displayed = displayedResult(value);
+      const auto result = QString::fromUtf8(displayed.data(), static_cast<int>(displayed.size()));
+      QMetaObject::invokeMethod(weak_self, [weak_self, result] {
+        if (!weak_self) return;
+        ++weak_self->batchResultsPublished_;
+        weak_self->batchLastResult_ = result;
+        emit weak_self->batchChanged();
+      }, Qt::QueuedConnection);
+    };
     auto retained = runner_.submit_retryable(std::move(operation), priority);
     if (!retained) { ++batchRejected_; continue; }
     batch_.push_back(std::move(retained)); ++batchAccepted_;
   }
   emit batchChanged();
-  if (!batch_.empty()) poll_timer_.start();
+  if (!batch_.empty()) {
+    if (status_ != QStringLiteral("Queued")) { status_ = QStringLiteral("Queued"); emit statusChanged(); }
+    poll_timer_.start();
+  } else if (batchRejected_ != 0 && status_ != QStringLiteral("Failed")) {
+    status_ = QStringLiteral("Failed"); emit statusChanged();
+  }
   return batchAccepted_;
 }
 
 void AnalysisJobBridge::cancelBatch() {
   for (const auto& operation : batch_) if (operation) operation->cancel();
+  batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  emit batchChanged();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!batch_.empty() && status_ != QStringLiteral("Cancelled")) { status_ = QStringLiteral("Cancelled"); emit statusChanged(); }
   poll();
 }
 
 void AnalysisJobBridge::retryBatch() {
   bool accepted = false;
   for (const auto& operation : batch_) if (operation && operation->retry()) accepted = true;
-  if (accepted) { poll_timer_.start(); emit statusChanged(); }
+  if (accepted) {
+    if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
+    if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+    if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+    batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear();
+    if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+    poll_timer_.start(); emit statusChanged(); poll();
+  }
+}
+
+void AnalysisJobBridge::discardBatch() {
+  bool terminal = !batch_.empty();
+  for (const auto& operation : batch_) terminal = terminal && operation && !(
+      operation->state() == beatglass::library_detail::TrackedState::queued ||
+      operation->state() == beatglass::library_detail::TrackedState::running);
+  if (!terminal) return;
+  batch_.clear();
+  batchAccepted_ = batchRejected_ = batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0;
+  batchLastResult_.clear();
+  poll_timer_.stop();
+  if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
+  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
+  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
+  recoveryStatus_ = QStringLiteral("Batch analysis recovery discarded"); emit statusChanged();
+  emit batchChanged();
 }
 
 void AnalysisJobBridge::poll() {
   if (!retryable_ && batch_.empty()) return;
   if (!retryable_ && !batch_.empty()) {
     bool active = false, failed = false, cancelled = false;
+    int failed_count = 0, cancelled_count = 0, completed_count = 0;
     qulonglong total = 0;
     for (const auto& operation : batch_) {
       if (!operation) continue;
       const auto state = operation->state(); total += operation->frames();
       active = active || state == beatglass::library_detail::TrackedState::queued || state == beatglass::library_detail::TrackedState::running;
       failed = failed || state == beatglass::library_detail::TrackedState::failed;
+      if (state == beatglass::library_detail::TrackedState::failed) ++failed_count;
+      if (state == beatglass::library_detail::TrackedState::cancelled) ++cancelled_count;
+      if (state == beatglass::library_detail::TrackedState::completed) ++completed_count;
       cancelled = cancelled || state == beatglass::library_detail::TrackedState::cancelled;
     }
     if (frames_ != total) { frames_ = total; emit progressChanged(); }
+    if (batchFailedCount_ != failed_count) { batchFailedCount_ = failed_count; emit batchChanged(); }
+    if (batchCancelledCount_ != cancelled_count) { batchCancelledCount_ = cancelled_count; emit batchChanged(); }
+    if (batchCompletedCount_ != completed_count) { batchCompletedCount_ = completed_count; emit batchChanged(); }
     const auto next = active ? QStringLiteral("Running") : failed ? QStringLiteral("Failed") : cancelled ? QStringLiteral("Cancelled") : QStringLiteral("Complete");
     if (status_ != next) { status_ = next; emit statusChanged(); }
+    if (next == QStringLiteral("Cancelled") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Analysis batch cancelled before publication; retry is available."); emit failureChanged(); }
+    if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("One or more batch operations failed before publishing a verified result."); failureReason_ += QStringLiteral(" Retry is available."); emit failureChanged(); }
     if (!active) poll_timer_.stop();
     return;
   }
   const auto next = stateText(retryable_->state());
   if (frames_ != retryable_->frames()) { frames_ = retryable_->frames(); emit progressChanged(); }
   if (status_ != next) { status_ = next; emit statusChanged(); }
+  if (next == QStringLiteral("Cancelled") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Analysis cancelled before publication; retry is available."); emit failureChanged(); }
+  if (next == QStringLiteral("Failed") && failureReason_.isEmpty()) { failureReason_ = QStringLiteral("Worker analysis failed before publishing a verified result; retry is available."); emit failureChanged(); }
   if (!canCancel()) poll_timer_.stop();
 }
 

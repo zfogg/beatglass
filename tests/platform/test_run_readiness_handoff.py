@@ -76,3 +76,80 @@ class ReadinessHandoffTest(unittest.TestCase):
             errors = handoff.run(bundles, root / "readiness.json", native_output=native, native_platform="windows")
             self.assertTrue(any("platform mismatch" in error for error in errors))
 
+    def test_full_handoff_pipeline_review_is_nonzero_and_auditable(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; status = root / "status.md"
+            status.write_text("| Windows | prep | gates |\n| macOS | prep | gates |\n| Linux | prep | gates |\n", encoding="utf-8")
+            errors = handoff.run(bundles, output, status, 100000, check_docs=True, consume_report=True)
+            report = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(errors)
+            self.assertEqual(report["exit_gate_status"], "PENDING")
+            self.assertIn("handoff_check_errors", report)
+            self.assertIn("documentation_check_errors", report)
+            self.assertIn("ingestion_errors", report)
+
+    def test_handoff_exports_human_review_checklist(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; review = root / "review.md"
+            handoff.run(bundles, output, review_output=review)
+            self.assertIn("Gate status: **PENDING**", review.read_text(encoding="utf-8"))
+
+    def test_handoff_strict_review_gate_rejects_pending(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; review = root / "review.md"
+            errors = handoff.run(bundles, output, review_output=review, require_ready=True)
+            self.assertTrue(any("review gate is not ready" in error for error in errors))
+
+    def test_handoff_exports_machine_review_packet(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            handoff.run(bundles, output, review_json=packet)
+            data = json.loads(packet.read_text(encoding="utf-8"))
+            self.assertEqual(data["gate_status"], "PENDING")
+            self.assertEqual(len(data["platforms"]), 3)
+
+    def test_handoff_consumes_emitted_review_packet(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            errors = handoff.run(bundles, output, review_json=packet, consume_review=True)
+            self.assertTrue(any("review packet" in error for error in errors))
+
+    def test_strict_gate_automatically_consumes_review_packet(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            errors = handoff.run(bundles, output, review_json=packet, require_ready=True)
+            self.assertTrue(any("review packet" in error for error in errors))
+
+    def test_strict_gate_consumes_report_and_packet_as_retained_bundle(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"
+            handoff.run(bundles, output, review_json=packet)
+            output.write_text("{}", encoding="utf-8")
+            errors = handoff.bundle_consumer.consume(root, output.name, packet.name)
+            self.assertTrue(any("source report hash mismatch" in error for error in errors))
+
+    def test_handoff_writes_conservative_release_decision(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; packet = root / "review.json"; decision = root / "decision.json"
+            errors = handoff.run(bundles, output, review_json=packet, decision_output=decision)
+            data = json.loads(decision.read_text(encoding="utf-8"))
+            self.assertEqual(data["decision"], "PENDING")
+            self.assertTrue(any("release decision is PENDING" in error for error in errors))
+
+    def test_handoff_writes_native_review_assessment(self):
+        bundles = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "readiness.json"; review = root / "native-review.json"
+            errors = handoff.run(bundles, output, native_review_output=review, native_reviewer_name="release-owner")
+            data = json.loads(review.read_text(encoding="utf-8"))
+            self.assertEqual(data["decision"], "PENDING")
+            self.assertTrue(any("native evidence review is PENDING" in error for error in errors))
+

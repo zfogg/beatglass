@@ -50,12 +50,18 @@ FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
 Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
                             const CacheKey& key, const std::filesystem::path& path,
                             const std::string& result, std::stop_token stop) {
+  if (result.empty()) return Publish::error;
   const auto initial = revalidate_file_identity(path, key.content, stop);
   if (initial == FingerprintStatus::cancelled) return Publish::cancelled;
+  if (initial == FingerprintStatus::changed) { cache.invalidate(key); return Publish::stale_input; }
   if (initial != FingerprintStatus::ok) return Publish::stale_input;
+  if (stop.stop_requested()) return Publish::cancelled;
   cache.begin(run_id, key);
   return cache.publish(run_id, key, result, stop, [&] {
-    return revalidate_file_identity(path, key.content, stop) == FingerprintStatus::ok;
+    if (stop.stop_requested()) { cache.invalidate(key); return false; }
+    const auto status = revalidate_file_identity(path, key.content, stop);
+    if (status == FingerprintStatus::changed) cache.invalidate(key);
+    return status == FingerprintStatus::ok;
   });
 }
 
@@ -63,7 +69,13 @@ FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::
                                                  const std::string& expected_content,
                                                  std::stop_token stop, std::string* diagnostic) {
   const auto status = revalidate_file_identity(path, expected_content, stop, diagnostic);
-  if (status == FingerprintStatus::changed || status == FingerprintStatus::error) cache.remove_entry(path);
+  // An unreadable path is not proof that the catalog entry is stale. Keep it
+  // available with its diagnostic so a transient permission/device failure can
+  // be retried without losing the user's catalog row.
+  if (status == FingerprintStatus::changed) {
+    cache.remove_entry(path);
+    if (diagnostic) *diagnostic = "content identity changed; catalog entry removed";
+  }
   return status;
 }
 
@@ -73,6 +85,8 @@ bool prune_missing_collection_entry(SqliteCache& cache, const std::filesystem::p
   const bool exists = std::filesystem::exists(path, ec);
   if (ec) { if (diagnostic) *diagnostic = ec.message(); return false; }
   if (exists) return false;
-  return cache.remove_entry(path.string());
+  const bool removed = cache.remove_entry(path.string());
+  if (removed && diagnostic) *diagnostic = "source path missing; catalog entry removed";
+  return removed;
 }
 }

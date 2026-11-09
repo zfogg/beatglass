@@ -61,8 +61,33 @@ git diff --check origin/main...HEAD
 rg "mark_retryable|retryable|publish_operation" include lib tests docs
 ```
 
+## Bridge-visible recovery
+
+The desktop analysis bridge keeps terminal failure and cancellation actionable:
+the status remains `Failed` or `Cancelled`, stale result text is cleared, and
+`canRetry` stays true while the retained operation is available. The failure
+diagnostic explicitly says that retry is available, so a UI consumer does not
+need to infer recovery from a generic terminal label. Batch failures and
+cancellations expose the same guidance. Native screen-reader timing remains a
+qualification responsibility; the portable bridge contract is checked with
+`python tests/unit/check_bridge_recovery_action_contract.py`.
+
+Terminal recovery can also be discarded explicitly. Single-job `discard()`
+and batch `discardBatch()` clear the retained handles, displayed result,
+diagnostic, progress, counters and terminal status, returning the bridge to
+`Idle`. They never remove source audio or mutate persisted library records;
+discarding a persisted retry remains a storage-owner operation.
+The bridge exposes a status announcement (`Single analysis recovery discarded`
+or `Batch analysis recovery discarded`) after reset so single and batch UI
+surfaces remain synchronized and assistive technology can distinguish a clean
+reset from an unreported failure.
+
 The focused CTest remains the authoritative executable regression. On the
 current Windows development host it is not claimed here because rebuilding
 the modified SQLite test binary has exhausted available memory and has also
 encountered executable permission locks. That limitation is tracked with the
 held cancellation PR rather than hidden by a source-only pass.
+
+The persisted storage bridge exposes the same reset state through
+`resetStatus`; discarding a selected retryable run announces
+`Persisted recovery discarded`, and a newly admitted retry clears that status.
