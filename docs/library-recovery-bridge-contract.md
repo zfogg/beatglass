@@ -89,6 +89,8 @@ only be invalidated or reanalyzed while the exact identity last checked remains
 unchanged; editing any field requires another lookup first.
 The cache form also provides a clear-identity action that removes all fields and
 returns focus to the control, ensuring stale hits cannot remain actionable.
+The clear action announces that a fresh cache check is required before any
+cache mutation, keeping the keyboard workflow's next step explicit.
 The desktop cache controls mirror this contract: lookup, invalidation, and
 reanalysis actions stay disabled until content, engine, configuration, and a
 valid `offline`/`live` mode are present.

@@ -110,6 +110,8 @@ if 'property bool analysisCacheIdentityDirty: true' not in qml or '&& !window.an
     raise SystemExit("Cache invalidation must be disabled after identity edits until lookup refreshes the hit")
 if 'objectName: "clearAnalysisCacheIdentity"' not in qml or 'cacheContent.clear(); cacheEngine.clear(); cacheConfig.clear(); cacheMode.clear()' not in qml:
     raise SystemExit("Cache identity controls must provide a safe clear action")
+if 'Analysis cache identity cleared; run Check cache' not in qml:
+    raise SystemExit("Cache identity clearing must announce the next required action")
 if 'Analysis cancellation rejected: storage is not open' not in source or 'Analysis retry rejected: storage is not open' not in source:
     raise SystemExit("Analysis lifecycle actions must reject closed storage before queueing worker work")
 if 'Analysis rejected: content identity is required' not in source or 'Analysis admission rejected: content identity is required' not in source:
