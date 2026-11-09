@@ -3747,7 +3747,7 @@ ApplicationWindow {
                         text: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
                             ? "Overlay endpoint: " + window.endpointSelectionBridge.selectedEndpoint
                             : "Overlay endpoint: none selected"
-                        Accessible.name: "Overlay capture endpoint status"
+                        Accessible.name: "Overlay capture endpoint status, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: text
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
