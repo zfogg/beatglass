@@ -47,6 +47,7 @@ public slots:
       emit result(complete, QStringLiteral("%1 of %2 retryable recovery runs discarded").arg(static_cast<qulonglong>(removed)).arg(static_cast<qulonglong>(values.size())));
       if (removed) { handle_.reset(); emit analysis(QStringLiteral("Analysis idle")); } refresh();
     } catch (const std::exception& error) { emit result(false, QStringLiteral("Recovery discard rejected: ") + QString::fromUtf8(error.what())); refresh(); }
+    catch (...) { emit result(false, QStringLiteral("Recovery discard rejected: unknown storage error")); refresh(); }
   }
   void retry(QString runId) {
     runId = runId.trimmed();
