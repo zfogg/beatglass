@@ -116,6 +116,8 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit("transition evidence is empty")
         if summary_data.get("native_transition_event_count") != len(transitions):
             raise SystemExit("transition event count does not match summary")
+        if manifest.get("transition_event_count") != len(transitions):
+            raise SystemExit("transition event count does not match manifest")
         names = [event.get("event") for event in transitions if isinstance(event, dict)]
         if any(required not in names for required in ("start", "process", "error", "restart")):
             raise SystemExit("transition evidence is missing lifecycle events")

@@ -72,6 +72,7 @@ try:
             "qualified": True,
             "source_date_epoch": epoch,
             "archive_timestamp_utc": archive_time.isoformat() + "Z",
+            "transition_event_count": summary.get("native_transition_event_count"),
             "artifacts": [
                 {"name": path.name, "size": path.stat().st_size, "sha256": digest(path)}
                 for path in artifacts
