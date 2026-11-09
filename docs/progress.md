@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire registry discovery now rejects whitespace-only node serials before
+adding sinks, preventing malformed identities from entering source selection.
+Portable coverage is in
+`python tests/unit/check_pipewire_serial_validation_contract.py`.
+
 PipeWire sink ordering now uses the display name as a deterministic tie-breaker
 when server serials collide, keeping refresh order stable even for duplicate
 serial metadata. Portable coverage is in
