@@ -4,6 +4,7 @@
 #include <limits>
 #include <stdexcept>
 #include "beatglass/library/detail/sqlite_cache.hpp"
+#include "beatglass/library/file_analysis_operation.hpp"
 using namespace beatglass::library_detail;
 TEST_CASE("SQLite cache replaces only completed revalidated runs") {
   SqliteCache cache(":memory:"); CacheKey key{"sha256:a", "engine1", "config1", "offline"};
@@ -130,6 +131,35 @@ TEST_CASE("SQLite cache persists completed work and recovers interrupted runs") 
   }
   REQUIRE(std::filesystem::remove(path));
 }
+
+TEST_CASE("SQLite cache reuses durable identity and reruns changed content or configuration") {
+  const auto path = std::filesystem::temp_directory_path() /
+    ("beatglass-cache-acceptance-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()) + ".sqlite");
+  const CacheKey unchanged{"sha256:file-v1", "engine-v1", "config-a", "offline"};
+  {
+    SqliteCache cache(path.string());
+    cache.begin("initial", unchanged, "/music/acceptance.wav", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("initial", unchanged, "analysis-v1", {}, [] { return true; }) == Publish::committed);
+  }
+  {
+    SqliteCache cache(path.string());
+    std::string result;
+    CHECK(cache.find(unchanged, result));
+    CHECK(result == "analysis-v1");
+
+    const CacheKey changed_content{"sha256:file-v2", "engine-v1", "config-a", "offline"};
+    CHECK_FALSE(cache.find(changed_content, result));
+    cache.begin("content-change", changed_content, "/music/acceptance.wav", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("content-change", changed_content, "analysis-v2", {}, [] { return true; }) == Publish::committed);
+
+    const CacheKey changed_configuration{"sha256:file-v1", "engine-v1", "config-b", "offline"};
+    CHECK_FALSE(cache.find(changed_configuration, result));
+    cache.begin("config-change", changed_configuration, "/music/acceptance.wav", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("config-change", changed_configuration, "analysis-config-b", {}, [] { return true; }) == Publish::committed);
+  }
+  REQUIRE(std::filesystem::remove(path));
+}
+
 TEST_CASE("SQLite cache observes cancellation immediately before commit") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("one", key); std::stop_source stop;
