@@ -1896,7 +1896,7 @@ ApplicationWindow {
                                 title: "Discard analysis recovery?"
                                 standardButtons: Dialog.Ok | Dialog.Cancel
                                 contentItem: Label { text: "This clears the retained analysis recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis recovery confirmation"; Accessible.role: Accessible.StaticText }
-                                onAccepted: { window.analysisJobBridge.discard(); window.announceVisualizationRecovery("Analysis recovery discarded; focus remains on the recovery controls.") }
+                                onAccepted: { if (!window.analysisJobBridge || !window.analysisJobBridge.canRetry) { window.announceVisualizationRecovery("Analysis recovery changed before discard; no recovery was discarded. Retry remains available when the worker reaches a terminal state."); retryAnalysis.forceActiveFocus() } else { window.analysisJobBridge.discard(); window.announceVisualizationRecovery("Analysis recovery discarded; focus remains on the recovery controls."); retryAnalysis.forceActiveFocus() } }
                             }
                             Button {
                                 objectName: "cancelAnalysis"
