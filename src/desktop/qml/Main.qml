@@ -2165,9 +2165,9 @@ ApplicationWindow {
                         anchors.fill: parent; clip: true; model: window.recursiveCatalogRows
                         activeFocusOnTab: true; keyNavigationEnabled: true
                         Keys.onEscapePressed: { window.clearSelectedAudio(); window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; search.text = ""; browser.currentIndex = -1; window.announceVisualizationRecovery("Returned to the current folder browser; the filter, entry selection, and selected source were cleared."); browser.forceActiveFocus(); event.accepted = true }
-                        Keys.onReturnPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
-                        Keys.onEnterPressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
-                        Keys.onSpacePressed: { if (currentIndex >= 0) currentItem.click(); event.accepted = true }
+                        Keys.onReturnPressed: { if (currentIndex >= 0) currentItem.click(); else window.announceVisualizationRecovery("Choose a recursive Library result before activating."); event.accepted = true }
+                        Keys.onEnterPressed: { if (currentIndex >= 0) currentItem.click(); else window.announceVisualizationRecovery("Choose a recursive Library result before activating."); event.accepted = true }
+                        Keys.onSpacePressed: { if (currentIndex >= 0) currentItem.click(); else window.announceVisualizationRecovery("Choose a recursive Library result before activating."); event.accepted = true }
                         Accessible.name: "Recursive audio results"
                         Accessible.role: Accessible.List
                         delegate: ItemDelegate {
