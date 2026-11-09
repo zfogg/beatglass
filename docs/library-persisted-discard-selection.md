@@ -7,3 +7,5 @@ actions therefore remain scoped to explicit selections.
 When a batch is accepted, the bridge publishes `Discarding persisted recovery`
 until the worker reports the terminal result.
 Single selected discard publishes the same transition status as batch discard.
+It clears stale displayed result and progress before requesting the destructive
+recovery operation.
