@@ -45,6 +45,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
     handoff_errors = report.get("handoff_check_errors")
     if report.get("ready") is True and isinstance(handoff_errors, list) and handoff_errors:
         blockers.append("report:ready report has handoff errors")
+    documentation_errors = report.get("documentation_check_errors")
+    if report.get("ready") is True and isinstance(documentation_errors, list) and documentation_errors:
+        blockers.append("report:ready report has documentation errors")
     seen_platforms = set()
     report_commit = report.get("commit")
     for platform in report.get("platforms", []):

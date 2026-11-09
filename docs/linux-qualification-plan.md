@@ -53,6 +53,7 @@ while disabling the native qualification requirement.
 Ready reports must have no exit-gate reason codes; pending reports must retain
 at least one reason code explaining the unresolved gate. Ready reports must
 also have no handoff-check errors.
+They must also have no documentation-check errors.
 Support summaries must use one known status per platform: `experimental`,
 `qualified`, `unsupported`, or `pending`.
 If both `scenarios` and `scenario_inventory` are present, they must be identical;

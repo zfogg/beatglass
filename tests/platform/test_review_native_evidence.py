@@ -292,3 +292,12 @@ class NativeEvidenceReviewTest(unittest.TestCase):
                 "platforms": []}))
             result = review.assess(report, "release-owner")
             self.assertIn("report:ready report has handoff errors", result["blockers"])
+
+    def test_ready_report_cannot_contain_documentation_errors(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"ready": True,
+                "exit_gate_status": "ACCEPTED", "documentation_check_errors": ["stale docs"],
+                "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:ready report has documentation errors", result["blockers"])
