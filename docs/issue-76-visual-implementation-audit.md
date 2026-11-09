@@ -845,6 +845,8 @@ For a missing saved display, Forget saved display is keyboard reachable, announc
 
 Retry overlay is now explicitly included in the keyboard tab order while display recovery is pending, so users can reach the actionable retry control without pointer input.
 
+The overlay display selector is now explicitly keyboard reachable as well, ensuring recovery can proceed from destination selection through retry without pointer input.
+
 The overlay display empty state now uses live status semantics alongside saved-display recovery, making missing-output remediation discoverable before destination selection.
 
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.

@@ -2753,6 +2753,7 @@ ApplicationWindow {
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"
+                        activeFocusOnTab: true
                     Accessible.name: "Overlay display"; Accessible.value: (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Choose the display where the overlay is shown"
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
