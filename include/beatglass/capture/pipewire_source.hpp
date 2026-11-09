@@ -38,6 +38,10 @@ struct MonitorStatus {
   bool has_boundary() const noexcept { return discontinuity || overflowed || needs_restart; }
   /** True when this snapshot is safe for downstream audio publication. */
   bool usable() const noexcept { return active && !requires_reacquisition() && !has_error(); }
+  /** True when a negotiated nonzero capture format is present. */
+  bool has_format() const noexcept {
+    return format && format->sample_rate != 0 && format->channels != 0;
+  }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
