@@ -1,5 +1,8 @@
 # Progress and handoff
 
+`Ctrl+Alt+Shift+W` focuses Restore overlay, preserving a direct keyboard path
+to bring back a user-hidden overlay with its persisted settings.
+
 When the native overlay is unavailable, `Ctrl+Alt+Shift+Y` focuses the Retry
 overlay action so recovery remains keyboard reachable.
 
