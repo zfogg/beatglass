@@ -10,6 +10,7 @@ public:
   explicit LibraryPreferences(QObject* parent = nullptr);
   QString folder() const { return folder_; }
 public slots: void setFolder(const QString& folder);
+  void clearFolder();
 signals: void folderChanged();
 private: QSettings settings_; QString folder_;
 };

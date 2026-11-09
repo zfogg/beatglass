@@ -102,6 +102,8 @@ The cache controls are also disabled while the bridge reports closed storage,
 so users cannot invoke actions that will be rejected by the worker boundary.
 The selected Library folder is persisted by a GUI-thread `LibraryPreferences`
 QSettings bridge and restored on startup; source files are never modified.
+The Library also exposes a “Forget folder” action that clears the preference and
+current selection without touching audio files.
 The reusable jobs contract exposes explicit terminal-state and known-total
 predicates so UI and persistence code do not duplicate cancellation/failure or
 indeterminate-progress semantics.
