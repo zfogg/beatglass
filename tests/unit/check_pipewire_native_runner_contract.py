@@ -7,4 +7,6 @@ for marker in ("--archive", "package_native_evidence.py", "archive packaging fai
     assert marker in source
 for marker in ("verify_native_evidence_archive.py", "archive verification failed"):
     assert marker in source
+for marker in ("requested_summary", "requested_archive", "native_artifacts", "pending_reason"):
+    assert marker in source
 print("PipeWire native runner contract verified (5 checks)")

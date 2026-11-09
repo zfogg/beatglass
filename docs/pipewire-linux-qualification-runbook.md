@@ -27,6 +27,8 @@ On non-Linux hosts the runner writes a structured pending summary when
 Windows/macOS handoffs auditable without claiming Linux qualification.
 The pending summary still records the source checkout commit, allowing a
 later Linux handoff to prove which code was actually qualified.
+It also records requested summary/archive paths and an empty native artifact
+list, making the host limitation explicit without claiming qualification.
 It labels the target as `Linux/PipeWire` and the handoff as `pending`, so
 downstream evidence tooling can distinguish an unrun gate from a failed one.
 Linux runs use the same schema with `handoff_status: complete` only when the
