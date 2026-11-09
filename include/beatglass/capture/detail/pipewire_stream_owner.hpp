@@ -26,4 +26,5 @@ public:
   virtual void stop() noexcept = 0;
 };
 std::unique_ptr<StreamOwner> make_stream_owner();
+std::unique_ptr<StreamOwner> make_linux_stream_owner();
 }
