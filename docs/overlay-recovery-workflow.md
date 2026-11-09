@@ -70,6 +70,8 @@ If click-through is enabled at the same time, Escape remains reserved for the
 native unlock workflow; the paused-recovery focus shortcut yields to it.
 If unlocking fails, focus remains on the visible Unlock overlay action so the
 failure can be retried without losing the interaction workflow.
+The control window is also restored and activated before that focus is applied,
+so a failed unlock from the hidden overlay still leaves an actionable fallback.
 The click-through status also prints `Ctrl+Alt+U` next to the Escape guidance,
 making the keyboard path to the Unlock action visible without opening help.
 The reconnect announcement also states that recovery remains paused, so a
