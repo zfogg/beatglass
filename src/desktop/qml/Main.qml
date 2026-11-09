@@ -1059,6 +1059,14 @@ ApplicationWindow {
         return window.playbackBridge.seek(frame, window.playbackBridge.epoch + 1)
     }
 
+    function refreshPlaybackOutputs() {
+        if (!window.playbackBridge)
+            return false
+        window.playbackBridge.refreshDevices()
+        window.announceCaptureRecoveryState("Playback outputs refreshed; choose an available device before starting native playback.")
+        return true
+    }
+
     function playbackDeviceIdAt(index, label) {
         if (index < 0 || !label)
             return -1
@@ -1701,7 +1709,7 @@ ApplicationWindow {
                             SpinBox { id: seekFrame; objectName: "seekFrame"; from: 0; to: 2147483647; value: window.playbackBridge ? Math.min(seekFrame.to, window.playbackBridge.currentFrame) : 0; editable: true; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; Accessible.name: "Seek target frame"; Accessible.value: value; Accessible.role: Accessible.SpinBox; Accessible.description: "Enter an audio frame and apply it as the playback position"; ToolTip.text: "Enter a source frame, then choose Seek" }
                             Button { text: "Seek"; objectName: "seekToFrame"; enabled: seekFrame.enabled; Accessible.name: "Seek to entered frame"; Accessible.role: Accessible.Button; Accessible.description: "Seek playback to the entered audio frame"; ToolTip.text: "Seek playback to the entered source frame"; onClicked: { if (window.playbackBridge && window.playbackBridge.state !== "Stopped") { window.playbackBridge.seek(seekFrame.value, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState("Playback seek requested to frame " + seekFrame.value + ".") } else window.announceCaptureRecoveryState("Seek is no longer available because playback stopped.") } }
                             ComboBox { objectName: "playbackDevice"; model: window.playbackBridge ? window.playbackBridge.devices : []; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Playback output device"; Accessible.role: Accessible.ComboBox; Accessible.value: currentText; Accessible.description: currentText !== "" ? "Current output device: " + currentText + ". Choose the native playback output device." : "No output device selected. Choose the native playback output device."; ToolTip.text: "Choose the output device used for native playback"; onActivated: if (window.playbackBridge) window.playbackBridge.deviceId = window.playbackDeviceIdAt(currentIndex, currentText) }
-                            Button { text: "Refresh outputs"; objectName: "refreshPlaybackDevices"; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Refresh playback outputs"; Accessible.role: Accessible.Button; Accessible.description: "Refresh native playback output devices"; ToolTip.text: "Refresh the available playback output devices"; onClicked: { window.playbackBridge.refreshDevices(); playbackDevice.forceActiveFocus() } }
+                            Button { text: "Refresh outputs"; objectName: "refreshPlaybackDevices"; activeFocusOnTab: true; enabled: window.playbackBridge; Accessible.name: "Refresh playback outputs"; Accessible.role: Accessible.Button; Accessible.description: "Refresh native playback output devices"; ToolTip.text: "Refresh the available playback output devices"; onClicked: { window.refreshPlaybackOutputs(); playbackDevice.forceActiveFocus() } }
                             Label { text: window.playbackBridge ? "Playback: " + window.playbackBridge.state : "Playback unavailable"; objectName: "playbackState"; Accessible.name: "Playback state: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.state : "unavailable"; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current native playback state" }
                             Label { text: window.playbackBridge && window.playbackBridge.source.toString() !== "" ? "Source: " + window.playbackBridge.source.fileName : "No source opened"; objectName: "playbackSource"; Accessible.name: "Playback source: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current playback source"; elide: Text.ElideMiddle; Layout.fillWidth: true }
                             Label { text: window.playbackBridge ? "Frame " + window.playbackBridge.currentFrame + " · Epoch " + window.playbackBridge.epoch : ""; objectName: "playbackPosition"; Accessible.name: "Playback position: " + text; Accessible.value: window.playbackBridge ? window.playbackBridge.currentFrame : 0; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current source frame and playback epoch" }
