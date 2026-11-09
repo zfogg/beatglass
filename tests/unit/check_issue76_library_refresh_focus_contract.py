@@ -1,23 +1,13 @@
-#!/usr/bin/env python3
-"""Portable contract for focusing the Library refresh action."""
-
+"""Contract checks for Library refresh action focus."""
 from pathlib import Path
-
-
-SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").read_text(encoding="utf-8")
-
-
+ROOT = Path(__file__).resolve().parents[2]
+QML = (ROOT / "src/desktop/qml/Main.qml").read_text(encoding="utf-8")
 def main() -> None:
-    start = SOURCE.index('objectName: "libraryRefreshFocusShortcut"')
-    block = SOURCE[start : SOURCE.index("    Shortcut {", start)]
-    assert 'sequence: "Ctrl+Alt+Shift+Q"' in block
-    assert 'window.browseFolder.toString() !== ""' in block
+    start = QML.index("function focusLibraryRefreshAction")
+    block = QML[start:QML.index("function browserEmptyMessage", start)]
+    assert "navigation.currentIndex = 0" in block
     assert "refreshFolder.forceActiveFocus()" in block
-    assert "announceVisualizationRecovery" in block
-    refresh = SOURCE[SOURCE.index('objectName: "refreshFolder"') - 80 :]
-    assert "id: refreshFolder" in refresh
-    assert "Ctrl+Alt+Shift+Q refresh action" in SOURCE
-
-
+    assert "Library refresh action focused" in block
+    assert "window.focusLibraryRefreshAction()" in QML
 if __name__ == "__main__":
     main()
