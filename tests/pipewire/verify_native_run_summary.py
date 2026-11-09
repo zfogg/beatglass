@@ -2,6 +2,7 @@
 import hashlib
 import json
 import sys
+import subprocess
 from pathlib import Path
 
 if len(sys.argv) != 2:
@@ -24,4 +25,14 @@ if summary.get("native_junit_sha256") != hashlib.sha256(Path(summary["native_jun
     raise SystemExit("native JUnit digest mismatch")
 if summary.get("native_discovery_sha256") != hashlib.sha256(Path(summary["native_discovery_json"]).read_bytes()).hexdigest():
     raise SystemExit("native discovery digest mismatch")
+if summary.get("native_transition_json"):
+    transition = Path(summary["native_transition_json"])
+    if not transition.is_file():
+        raise SystemExit(f"missing transition evidence artifact: {transition}")
+    if summary.get("native_transition_sha256") != hashlib.sha256(transition.read_bytes()).hexdigest():
+        raise SystemExit("native transition digest mismatch")
+    validator = Path(__file__).with_name("validate_pipewire_transition_evidence.py")
+    result = subprocess.run([sys.executable, str(validator), str(transition)], capture_output=True, text=True, check=False)
+    if result.returncode:
+        raise SystemExit(result.stderr or result.stdout or "native transition evidence failed validation")
 print("Native PipeWire qualification summary verified")
