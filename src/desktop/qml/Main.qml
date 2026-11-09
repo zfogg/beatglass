@@ -4092,7 +4092,9 @@ ApplicationWindow {
                         Accessible.name: text
                         Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "available") + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Button
-                        Accessible.description: "Focus the consolidated overlay settings summary for display, size, opacity, and recovery state; current settings revision " + window.overlaySettingsRevision + "."
+                        Accessible.description: "Focus the consolidated overlay settings summary for display, size, opacity, and recovery state; "
+                            + (window.overlayDisplayRecoveryPending ? "recovery is pending; " : "recovery is ready; ")
+                            + "current settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description
                         onClicked: {
                             overlaySettingsSummary.forceActiveFocus()
