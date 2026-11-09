@@ -55,3 +55,8 @@ The tray/taskbar fallback keeps monitoring available while native overlay action
 are unavailable:
 
 ![Overlay tray fallback rendering](overlay-tray-fallback.svg)
+
+Announcements mirror the visible state and next action so visual and assistive
+feedback stay aligned:
+
+![Overlay announcement rendering](overlay-announcement-card.svg)
