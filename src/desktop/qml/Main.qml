@@ -656,13 +656,13 @@ ApplicationWindow {
     function showOverlayAndHideControls() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayDisplayRecoveryPending = true
-            window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
+            window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             overlayDisplay.forceActiveFocus()
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayDisplayRecoveryPending = true
-            window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback.")
+            window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             overlayDisplay.forceActiveFocus()
             return false
         }
@@ -670,7 +670,7 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = false
         if (!window.overlayBridge.showOverlay()) {
             window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
+            window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             window.restoreOverlayFallbackControls("")
             overlayDisplay.forceActiveFocus()
             return false

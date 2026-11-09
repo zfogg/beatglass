@@ -796,3 +796,5 @@ Hiding the native overlay now announces the control-window fallback transition w
 
 Quitting Beatglass now announces that overlay display, geometry, size, opacity, and interaction settings are retained before shutdown. Portable coverage is in `python tests/unit/check_overlay_quit_announce_contract.py`.
 
+Failed native overlay launch paths now explicitly state that the control-window fallback preserves overlay settings while recovery remains pending. Portable coverage is in `python tests/unit/check_overlay_fallback_detail_contract.py`.
+
