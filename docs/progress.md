@@ -786,3 +786,5 @@ Releasing the overlay opacity slider now returns focus to the interaction-mode s
 
 Selecting an overlay size now returns keyboard focus to geometry status after a successful resize, keeping the resulting dimensions immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_size_focus_contract.py`.
 
+Selecting an overlay destination display now returns keyboard focus to current-display status after persistence, while failed selection keeps focus on the selector. Portable coverage is in `python tests/unit/check_overlay_display_focus_contract.py`.
+
