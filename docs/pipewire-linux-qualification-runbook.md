@@ -41,3 +41,4 @@ The runner also records the parsed `native_test_count` from CTest's JSON
 Qualification additionally requires `native_test_count` to be positive.
 The summary exposes the prerequisite/daemon result separately as
 `daemon_preflight`.
+When a stage fails, `failed_command` identifies the first failing command.
