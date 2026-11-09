@@ -84,7 +84,7 @@ ApplicationWindow {
         objectName: "libraryFilterFocusShortcut"
         sequence: "Ctrl+L"
         context: Qt.ApplicationShortcut
-        onActivated: { search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused.") }
+        onActivated: window.focusLibraryFilter()
     }
     Shortcut {
         objectName: "libraryRecursiveCatalogShortcut"
@@ -977,6 +977,11 @@ ApplicationWindow {
         search.text = ""
         target.forceActiveFocus()
         window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.")
+    }
+    function focusLibraryFilter() {
+        search.forceActiveFocus()
+        search.selectAll()
+        window.announceVisualizationRecovery("Library filter focused.")
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
