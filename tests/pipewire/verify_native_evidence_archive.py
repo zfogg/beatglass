@@ -73,4 +73,7 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("JUnit evidence reports failures or errors")
     if int(junit_root.attrib.get("skipped", "0")) or any(node.tag == "skipped" for node in junit_root.iter()):
         raise SystemExit("JUnit evidence reports skipped tests")
+    testcases = [node for node in junit_root.iter() if node.tag == "testcase"]
+    if not testcases or any(not node.attrib.get("name", "").strip() for node in testcases):
+        raise SystemExit("JUnit evidence has unnamed testcases")
 print("Native PipeWire evidence archive verified")

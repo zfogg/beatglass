@@ -100,3 +100,4 @@ Each discovered CTest entry must also have a non-empty name; unnamed registratio
 JUnit evidence must report at least one executed testcase; zero-test result documents are rejected.
 JUnit evidence with non-zero failures/errors or failure/error testcase elements is rejected, keeping qualified archives failure-free.
 Skipped JUnit testcases or non-zero skipped counts are rejected, so pending native scenarios cannot pass the qualification gate.
+JUnit archives must include at least one named testcase; unnamed or testcase-free result documents are rejected.

@@ -11,7 +11,7 @@ verifier = Path(__file__).parents[1] / "pipewire" / "verify_native_evidence_arch
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     summary = b'{"commit":"fixture-commit","qualified":true}\n'
-    junit = b"<testsuite tests='1'/>\n"
+    junit = b"<testsuite tests='1'><testcase name='capture'/></testsuite>\n"
     discovery = b'{"tests": [{"name": "capture"}]}\n'
     artifacts = {"native-summary.json": summary, "pipewire-tests-discovery.json": discovery, "pipewire-tests.xml": junit}
     entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in artifacts.items()]
