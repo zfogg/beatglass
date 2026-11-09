@@ -74,6 +74,7 @@ public slots:
     try { handle_ = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation)); }
     catch (const std::exception& error) { handle_.reset(); emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
     emit result(static_cast<bool>(handle_), handle_ ? QStringLiteral("Retry queued") : QStringLiteral("Retry rejected: source identity or metadata unavailable"));
+    if (!handle_) refresh();
     if (handle_) { refresh(); emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); }
   }
   void findCached(QString content, QString engine, QString configuration, QString mode) {
