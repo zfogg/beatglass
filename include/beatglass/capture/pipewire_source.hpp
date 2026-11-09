@@ -82,6 +82,8 @@ public:
   bool on_process(std::span<const float> samples, std::uint64_t host_time,
                   bool host_time_valid, double source_sample_time,
                   bool sample_time_valid) noexcept;
+  /** Pop one bounded PCM block on the control thread; callback memory never escapes. */
+  bool pop(coreaudio::CaptureBlock& block) noexcept;
   /** Consume callback error/discontinuity markers for one control-thread poll. */
   Status poll_status() noexcept;
   const std::string& serial() const noexcept { return serial_; }
