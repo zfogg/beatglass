@@ -170,4 +170,10 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, source_date_epoch=-1)))
     result = subprocess.run([sys.executable, str(verifier), str(negative_epoch)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid reproducibility metadata" not in result.stderr + result.stdout: raise SystemExit("negative source epoch was accepted")
-print("PipeWire evidence archive verifier behavior passed (16 scenarios)")
+    invalid_platform = root / "invalid-platform.zip"
+    with zipfile.ZipFile(invalid_platform, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, platform=42)))
+    result = subprocess.run([sys.executable, str(verifier), str(invalid_platform)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid platform identity" not in result.stderr + result.stdout: raise SystemExit("invalid manifest platform was accepted")
+print("PipeWire evidence archive verifier behavior passed (17 scenarios)")
