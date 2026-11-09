@@ -84,6 +84,8 @@ The summary’s transition SHA-256 is independently checked against the archived
 payload, in addition to the manifest artifact digest.
 The runner records the transition event count in the summary, and archive
 verification cross-checks it against the packaged envelope.
+The runner validates the supplied transition artifact before writing a
+qualified summary, so invalid lifecycle evidence cannot pass the capture gate.
 The packager also writes that count into the manifest; archive verification
 cross-checks all three representations.
 The manifest carries the host platform too, and verification binds it to the
