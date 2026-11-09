@@ -14,7 +14,9 @@ bool valid_serial(const std::string& serial) noexcept {
 }
 }
 MonitorStream::MonitorStream(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) noexcept
-    : fifo_(std::make_unique<coreaudio::CaptureFifo>(epoch, sample_rate, channels)) {}
+    : fifo_(std::make_unique<coreaudio::CaptureFifo>(epoch, sample_rate, channels)) {
+  discontinuity_pending_.store(true, std::memory_order_release);
+}
 bool MonitorStream::push(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
                          bool discontinuity, double source_sample_time, bool sample_time_valid) noexcept {
   const bool accepted = !stopped_ && fifo_->push(samples, host_time, host_time_valid,
