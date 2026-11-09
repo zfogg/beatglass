@@ -18,6 +18,10 @@ struct MonitorStatus {
   bool overflowed{};
   int error_code{};
 };
+struct MonitorFormat {
+  std::uint32_t sample_rate{};
+  std::uint32_t channels{};
+};
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
  * capture callbacks copy bounded PCM into caller-owned storage. A source
@@ -39,6 +43,8 @@ public:
                               std::uint32_t channels) = 0;
   /** Return the currently selected sink serial, or an empty value when stopped. */
   virtual std::string selected_serial() const = 0;
+  /** Return the negotiated format for the selected stream, if active. */
+  virtual std::optional<MonitorFormat> selected_format() const noexcept = 0;
   /** Pop one bounded block on the control thread after start_stream succeeds. */
   virtual bool pop(coreaudio::CaptureBlock& block) noexcept = 0;
   virtual MonitorStatus poll_status() noexcept = 0;
@@ -83,10 +89,7 @@ private:
 /** Control-thread owner for one selected output monitor epoch. */
 class MonitorSession {
 public:
-  struct Format {
-    std::uint32_t sample_rate{};
-    std::uint32_t channels{};
-  };
+  using Format = MonitorFormat;
   using Status = MonitorStatus;
   /** Select a validated sink and allocate its bounded stream on the control thread. */
   bool start(std::string serial, std::uint64_t epoch, std::uint32_t sample_rate,
