@@ -106,3 +106,5 @@ CTest discovery entries must also have unique names, preserving an unambiguous n
 The discovery and JUnit testcase-name sets must match exactly, tying registered native tests to executed results.
 The verifier cross-checks summary `native_test_count` against the discovery inventory count.
 ative_test_count against the discovery inventory count.
+Qualified handoffs must explicitly record `native_test_name_match: true` in the summary after discovery/execution reconciliation.
+ative_test_name_match: true in the summary after discovery/execution reconciliation.

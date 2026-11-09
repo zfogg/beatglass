@@ -43,6 +43,8 @@ with zipfile.ZipFile(archive_path) as archive:
     summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
     if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):
         raise SystemExit("manifest commit does not match qualification summary")
+    if summary_data.get("native_test_name_match") is not True:
+        raise SystemExit("summary does not confirm native test-name match")
     if not any((name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml") for name in declared):
         raise SystemExit("evidence archive has no JUnit results")
     if not any(name.endswith(".json") and "discovery" in name for name in declared):
