@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Native overlay telemetry</title>
+  <desc id="desc">A compact telemetry panel reports capture health, latency, sample rate, and dropped frames with a diagnostics action.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <text x="96" y="112" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Overlay diagnostics</text>
+  <text x="96" y="144" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Live telemetry helps explain what the overlay is showing.</text>
+  <rect x="96" y="182" width="220" height="110" rx="16" fill="#17243c"/>
+  <text x="120" y="218" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="14">OUTPUT</text>
+  <text x="120" y="256" fill="#39d98a" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700">Healthy</text>
+  <text x="120" y="280" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="14">Display 2 · active</text>
+  <rect x="332" y="182" width="220" height="110" rx="16" fill="#17243c"/>
+  <text x="356" y="218" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="14">LATENCY</text>
+  <text x="356" y="256" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700">3 ms</text>
+  <text x="356" y="280" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="14">capture to overlay</text>
+  <rect x="568" y="182" width="256" height="110" rx="16" fill="#17243c"/>
+  <text x="592" y="218" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="14">CAPTURE</text>
+  <text x="592" y="256" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="26" font-weight="700">48 kHz</text>
+  <text x="592" y="280" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="14">0 dropped frames</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">Telemetry stays local to this session.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">No audio files or tags are written by diagnostics.</text>
+  <rect x="96" y="438" width="194" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="193" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Open diagnostics</text>
+  <rect x="308" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="385" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Close</text>
+</svg>
