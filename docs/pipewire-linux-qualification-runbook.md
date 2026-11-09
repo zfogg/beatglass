@@ -54,6 +54,9 @@ not parse human-readable text.
 The shared discovery contract marks permission, daemon-connection, timeout,
 and broken-pipe errors retryable while treating invalid requests as terminal;
 qualification should verify both branches.
+The monitor backend consumes that classification by retrying one discovery
+attempt within the caller’s original timeout budget, allowing a PipeWire user
+daemon or permission session to recover without unbounded blocking.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used

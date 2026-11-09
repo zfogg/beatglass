@@ -7,4 +7,6 @@ assert "session_.reset();" in c
 assert "if (!valid_serial(serial) || !epoch || !sample_rate || !channels) return false;" in c
 assert "if (epoch == session_.epoch()) return false;" in c
 assert "session_.start(serial, epoch, sample_rate, channels)" in c
-print("PipeWire reacquire contract verified (3 checks)")
+assert "if (!result.retryable()) return result;" in c
+assert "const auto remaining" in c
+print("PipeWire reacquire contract verified (5 checks)")
