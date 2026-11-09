@@ -837,6 +837,9 @@ ApplicationWindow {
                     window.overlayDisplayRecoveryPending = true
                     window.overlayDisplaySelectionRequired = true
                 }
+                // Keep keyboard recovery actionable after native bridge/display loss.
+                if (typeof retryOverlay !== "undefined")
+                    retryOverlay.forceActiveFocus()
             } else {
                 const synced = window.syncOverlaySettingsFromBridge()
                 window.overlayOpacityEditInFlight = false
