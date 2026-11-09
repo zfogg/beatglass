@@ -47,6 +47,14 @@ if restart.get("epoch") <= start.get("epoch"):
     raise SystemExit("restart does not advance the capture epoch")
 if not isinstance(restart.get("serial"), str) or not restart["serial"].strip():
     raise SystemExit("restart event has no sink serial")
+reacquisition = restart.get("reacquisition")
+if reacquisition is not None:
+    if not isinstance(reacquisition, dict) or reacquisition.get("epoch") != restart.get("epoch"):
+        raise SystemExit("reacquisition evidence has the wrong epoch")
+    if not isinstance(reacquisition.get("sample_count"), int) or isinstance(reacquisition.get("sample_count"), bool) or reacquisition["sample_count"] <= 0:
+        raise SystemExit("reacquisition evidence has no captured samples")
+    if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
+        raise SystemExit("reacquisition evidence has no sink serial")
 fmt = restart.get("format")
 if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("channels", 0) <= 0:
     raise SystemExit("restart event has no negotiated format")
