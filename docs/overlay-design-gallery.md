@@ -108,6 +108,8 @@ screenshots.
 | [Layout applied](overlay-layout-applied-card.svg) | saved geometry confirmation and change path |
 | [Display picker](overlay-display-picker-card.svg) | monitor selection with preview verification |
 | [Display applied](overlay-display-applied-card.svg) | saved display confirmation with recovery path |
+| [Click-through control](overlay-click-through-control-card.svg) | interaction mode with unlock guidance |
+| [Click-through applied](overlay-click-through-applied-card.svg) | saved pass-through state and shortcut recovery |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
