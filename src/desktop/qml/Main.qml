@@ -2412,7 +2412,7 @@ ApplicationWindow {
                             Accessible.name: "Analysis provenance: " + text
                             Accessible.value: visible ? text : ""
                             Accessible.role: Accessible.Status
-                            Accessible.description: visible ? "Engine, configuration, and mode used for the selected analysis." : "Analysis provenance is unavailable until analysis is queued."
+                            Accessible.description: visible ? "Engine, configuration, and mode used for the selected analysis; this identifies the evidence provenance." : "Analysis provenance is unavailable until analysis is queued."
                             ToolTip.text: "Engine, configuration, and mode for the selected analysis"
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                         }
