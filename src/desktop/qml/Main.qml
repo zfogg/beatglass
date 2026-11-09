@@ -558,7 +558,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryAnalysisQueueFocusShortcut"; sequence: "Ctrl+Alt+Shift+6"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryAnalysisQueue() }
     Shortcut { objectName: "libraryBatchProgressFocusShortcut"; sequence: "Ctrl+Alt+Shift+5"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchProgress() }
     Shortcut { objectName: "libraryBatchResultFocusShortcut"; sequence: "Ctrl+Alt+Shift+4"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchResult() }
-    Shortcut { objectName: "libraryBatchPublicationFocusShortcut"; sequence: "Ctrl+Alt+Shift+3"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchPublicationSummary.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch publication summary focused.") } }
+    Shortcut { objectName: "libraryBatchPublicationFocusShortcut"; sequence: "Ctrl+Alt+Shift+3"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchPublication() }
     Shortcut { objectName: "libraryBatchSourceFocusShortcut"; sequence: "Ctrl+Alt+Shift+2"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchLastSource.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch source focused.") } }
     Shortcut { objectName: "libraryRecoveryNextActionFocusShortcut"; sequence: "Ctrl+Alt+Shift+1"; context: Qt.ApplicationShortcut; enabled: typeof storageRecovery !== "undefined"; onActivated: window.focusLibraryRecoveryNextAction() }
     Shortcut { objectName: "libraryMetadataErrorFocusShortcut"; sequence: "Ctrl+Alt+Shift+F"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0; onActivated: window.focusLibraryMetadataErrorGuidance() }
@@ -1074,6 +1074,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         analysisBatchLastResult.forceActiveFocus()
         window.announceVisualizationRecovery("Library analysis batch result focused.")
+    }
+    function focusLibraryBatchPublication() {
+        navigation.currentIndex = 0
+        analysisBatchPublicationSummary.forceActiveFocus()
+        window.announceVisualizationRecovery("Library analysis batch publication summary focused.")
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
