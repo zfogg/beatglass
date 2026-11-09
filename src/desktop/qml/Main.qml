@@ -71,6 +71,20 @@ ApplicationWindow {
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     Shortcut {
+        objectName: "playbackSeekBackShortcut"
+        sequence: "Alt+Left"
+        context: Qt.ApplicationShortcut
+        enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection
+        onActivated: { window.playbackBridge.seek(Math.max(0, window.playbackBridge.currentFrame - 5 * playbackSampleRate.value), window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState("Playback sought backward five seconds from the keyboard.") }
+    }
+    Shortcut {
+        objectName: "playbackSeekForwardShortcut"
+        sequence: "Alt+Right"
+        context: Qt.ApplicationShortcut
+        enabled: window.playbackBridge !== null && window.playbackBridge.state !== "Stopped" && window.playbackMatchesSelection
+        onActivated: { window.playbackBridge.seek(window.playbackBridge.currentFrame + 5 * playbackSampleRate.value, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState("Playback sought forward five seconds from the keyboard.") }
+    }
+    Shortcut {
         objectName: "overlayEscapeShortcut"
         sequence: "Escape"
         context: Qt.ApplicationShortcut
