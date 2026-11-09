@@ -808,3 +808,5 @@ The available overlay actions accessibility value now states that persisted sett
 
 Pending overlay recovery descriptions now state that persisted settings remain retained while the control-window fallback is available. Portable coverage is in `python tests/unit/check_overlay_recovery_description_contract.py`.
 
+Persisted overlay geometry status now states settings retention during pending recovery and fallback. Portable coverage is in `python tests/unit/check_overlay_geometry_retention_contract.py`.
+

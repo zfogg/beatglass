@@ -3841,8 +3841,8 @@ ApplicationWindow {
                     Accessible.value: text + "; geometry revision " + window.overlayGeometryRevision + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
-                        ? "Persisted overlay position and size: " + text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : "") + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : ".")
-                        : "Persisted overlay position and size unavailable; control-window fallback remains active."
+                        ? "Persisted overlay position and size: " + text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending; settings are retained." : "") + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : ".")
+                        : "Persisted overlay position and size unavailable; control-window fallback remains active and settings are retained."
                     ToolTip.text: window.overlayDisplayRecoveryPending
                         ? "Current persisted overlay position and size; recovery is pending"
                         : "Current persisted overlay position and size"
