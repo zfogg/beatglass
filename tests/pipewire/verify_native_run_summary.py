@@ -10,6 +10,10 @@ summary_path = Path(sys.argv[1])
 summary = json.loads(summary_path.read_text(encoding="utf-8"))
 if not summary.get("qualified"):
     raise SystemExit("native qualification summary is not qualified")
+if summary.get("qualification_target") != "Linux/PipeWire" or summary.get("handoff_status") != "complete":
+    raise SystemExit("native qualification summary has incomplete handoff status")
+if not isinstance(summary.get("commit"), str) or not summary["commit"].strip():
+    raise SystemExit("native qualification summary has no commit identity")
 if summary.get("failed_command") is not None:
     raise SystemExit("native qualification has a failed command")
 for key in ("native_discovery_json", "native_junit"):
