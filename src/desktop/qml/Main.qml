@@ -3414,6 +3414,20 @@ ApplicationWindow {
                     }
                     Label { objectName: "overlayDisplayStatus"; text: window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? "Current display: " + window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "Current display unavailable"; Accessible.name: "Current overlay display: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : ""); Accessible.role: Accessible.StaticText; Accessible.description: window.overlayDisplayRecoveryPending ? text + ". The saved display is being recovered; the overlay will return when it is available." : (window.overlayHiddenByUser ? text + ". The overlay is hidden by user request; use Restore overlay when ready." : text + ". The overlay destination is ready."); ToolTip.text: "Current overlay display status" }
                     Label {
+                        objectName: "overlayVisibilityStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible ? (window.overlayHiddenByUser ? "Overlay visibility: hidden by user" : "Overlay visibility: available") : "Overlay visibility unavailable"
+                        Accessible.name: "Overlay visibility status"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.overlayHiddenByUser
+                            ? text + ". Use Restore overlay to return the persisted overlay without losing monitoring."
+                            : visible ? text + ". Hide overlay preserves monitoring and restores the control window." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay visibility status"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
                         text: "No displays are available for the overlay."
