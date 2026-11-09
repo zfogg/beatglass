@@ -21,6 +21,8 @@ public:
                        bool host_time_valid, double source_sample_time,
                        bool sample_time_valid, bool discontinuity,
                        MonitorStream& handoff) noexcept = 0;
+  /** Native state/error callback boundary; closes callback admission. */
+  virtual void report_error(int error_code, MonitorStream& handoff) noexcept = 0;
   virtual void stop() noexcept = 0;
 };
 std::unique_ptr<StreamOwner> make_stream_owner();

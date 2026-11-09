@@ -18,6 +18,9 @@ public:
     return active && handoff.push(samples, host_time, host_time_valid, discontinuity,
                                   source_sample_time, sample_time_valid);
   }
+  void report_error(int error_code, beatglass::pipewire::MonitorStream& handoff) noexcept override {
+    handoff.on_error(error_code);
+  }
   void stop() noexcept override { active = false; }
   Config last;
   bool active = false;
@@ -35,6 +38,8 @@ TEST_CASE("stream owner contract preserves target and negotiated format lifecycl
   CHECK(owner.last.channels == 2);
   owner.stop();
   CHECK_FALSE(owner.connected());
+  owner.report_error(-32, handoff);
+  CHECK(handoff.needs_restart());
   REQUIRE(owner.connect({"sink-8", 44100, 2}, handoff));
   CHECK(owner.connected());
 }
