@@ -57,7 +57,8 @@ predictable keyboard path back to the lifecycle action after reviewing status.
 It also announces that the paused recovery action is focused for assistive
 technology users.
 `Ctrl+Alt+Shift+P` opens the paused recovery page from anywhere in the
-control window and focuses `Resume recovery` for a complete keyboard workflow.
+control window, restores the control window if it was hidden, and focuses
+`Resume recovery` for a complete keyboard workflow.
 The page shortcut is only active while the pause state is live and disappears
 with its hint as soon as recovery is resumed.
 If a display is disconnected and later restored while recovery is paused, focus

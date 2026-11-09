@@ -375,6 +375,9 @@ ApplicationWindow {
         enabled: window.overlayRecoveryPausedByUser
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             window.announceCaptureRecoveryState("Paused overlay recovery page opened; Resume recovery is ready.")
             resumeOverlayRecovery.forceActiveFocus()
         }
