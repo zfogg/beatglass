@@ -452,3 +452,5 @@ The runner's `native_execution_attempted` field distinguishes a real host attemp
 
 A matrix may mark a platform qualified only after its summary records `native_execution_attempted: true`; pending entries retain blockers for scheduling.
 
+
+Keep the matrix report's native-attempt column visible during review; a qualified status without an attempted run is invalid.
