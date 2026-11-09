@@ -34,7 +34,10 @@ bool MonitorStream::restart(std::uint64_t epoch, std::uint32_t sample_rate, std:
   return true;
 }
 bool MonitorStream::pop(coreaudio::CaptureBlock& block) noexcept { return fifo_ && fifo_->pop(block); }
-void MonitorStream::stop() noexcept { stopped_.store(true, std::memory_order_release); }
+void MonitorStream::stop() noexcept {
+  discontinuity_pending_ = true;
+  stopped_.store(true, std::memory_order_release);
+}
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }
 namespace {
 class DiscoveryBoundary final : public MonitorBackend {
