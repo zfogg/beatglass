@@ -413,3 +413,5 @@ Use the archive verifier after copying evidence between hosts, then run the nati
 Record both verifier output and native-runner output in the handoff so reviewers can distinguish archive integrity from host qualification status.
 
 For auditability, preserve the exact archive verifier command, native-runner command, and resulting artifact paths in the handoff record.
+
+Handoff records should retain verifier warnings (including fixture duplicate-entry warnings) alongside pass/fail status rather than discarding diagnostic output.
