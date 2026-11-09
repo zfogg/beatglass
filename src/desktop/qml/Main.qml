@@ -550,6 +550,7 @@ ApplicationWindow {
             overlayDisplay.forceActiveFocus()
             return false
         }
+        window.syncOverlaySettingsStateFromBridge()
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
         window.overlayDisplaySelectionRequired = false
