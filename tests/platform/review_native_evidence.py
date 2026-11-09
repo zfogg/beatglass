@@ -161,6 +161,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
                 if (row is None or row.get("status") != "PASS" or not isinstance(digest, str) or len(digest) != 64
                         or matching is None):
                     blockers.append(f"{name}:{scenario_id}:invalid scenario evidence hash")
+            for scenario_id, row in scenarios.items():
+                if row.get("status") == "PASS" and scenario_id not in evidence_hashes:
+                    blockers.append(f"{name}:{scenario_id}:missing scenario evidence hash")
         for scenario in sorted(REQUIRED):
             row = scenarios.get(scenario)
             evidence = row.get("evidence") if isinstance(row, dict) else None
