@@ -1,5 +1,9 @@
 # Progress and handoff
 
+The overlay now reports the selected output endpoint and explicitly states that
+combined-output monitoring does not identify individual decks. Portable coverage
+is in `python tests/unit/check_overlay_endpoint_status_contract.py`.
+
 The overlay now exposes dynamic keyboard recovery guidance for click-through
 mode, including Escape and the control-window unlock shortcut, while keeping
 interactive-mode guidance explicit. Portable coverage is in
