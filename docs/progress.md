@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio format-query exceptions now retain a distinct diagnostic from an
+invalid format value, while both paths still quiesce the backend before
+returning. Portable coverage is in
+`python tests/unit/check_macos_format_query_failure_contract.py`.
+
 Invalid Core Audio capture formats now preserve their root diagnostic when
 cleanup also fails, appending the quiescence failure instead of replacing it.
 Portable coverage is in
