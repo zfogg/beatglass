@@ -50,3 +50,6 @@ class NativeQualificationDryRunTest(unittest.TestCase):
         macos = (ROOT / "tests/macos/run_qualification.sh").read_text(encoding="utf-8")
         self.assertIn("UNRUN", windows)
         self.assertIn("UNRUN", macos)
+        self.assertIn("qualification-manifest.txt", windows)
+        self.assertIn("qualification-manifest.txt", macos)
+        self.assertIn("qualification-cases.tsv", macos)

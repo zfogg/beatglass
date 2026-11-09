@@ -19,6 +19,9 @@ The pending handoff also enumerates the host, daemon, development-package, and
 audio-sink blockers needed before a native run can start.
 Cross-platform qualification scripts similarly record unrun native steps
 explicitly rather than presenting an incomplete artifact set as success.
+The Windows and macOS dry-run contract checks also require their retained
+qualification manifest and scenario-case outputs to remain present in the
+handoff scripts.
 
 ## Runnable preparation checks
 
