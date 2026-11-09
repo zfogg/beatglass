@@ -1,6 +1,7 @@
 #pragma once
 #include "beatglass/capture/pipewire_source.hpp"
 #include <memory>
+#include <span>
 namespace beatglass::pipewire::detail {
 /** Linux-only control-thread seam for native pw_stream ownership. */
 class StreamOwner {
@@ -15,6 +16,8 @@ public:
   virtual bool connect(const Config& config, MonitorStream& handoff) = 0;
   /** True while the native stream is connected and callback admission is valid. */
   virtual bool connected() const noexcept = 0;
+  /** Native callback boundary; implementations copy bounded PCM into handoff. */
+  virtual bool process(std::span<const float> samples, MonitorStream& handoff) noexcept = 0;
   virtual void stop() noexcept = 0;
 };
 std::unique_ptr<StreamOwner> make_stream_owner();
