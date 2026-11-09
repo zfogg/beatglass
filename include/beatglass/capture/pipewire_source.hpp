@@ -27,6 +27,8 @@ public:
   /** Start a stream after the negotiated native format is known. */
   virtual bool start_stream(const std::string& serial, std::uint64_t epoch,
                             std::uint32_t sample_rate, std::uint32_t channels) = 0;
+  /** Pop one bounded block on the control thread after start_stream succeeds. */
+  virtual bool pop(coreaudio::CaptureBlock& block) noexcept = 0;
   /** Stop and quiesce the stream; safe to call repeatedly. */
   virtual bool stop() noexcept = 0;
 };
