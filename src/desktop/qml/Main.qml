@@ -1997,6 +1997,7 @@ ApplicationWindow {
                     ToolTip.text: "Return to the current folder browser"
                     onClicked: {
                         window.recursiveCatalogActive = false
+                        recursiveResultsView.currentIndex = -1
                         window.announceVisualizationRecovery("Returned to the current folder browser.")
                         browser.forceActiveFocus()
                     }
