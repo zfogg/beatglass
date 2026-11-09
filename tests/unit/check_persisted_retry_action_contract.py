@@ -106,3 +106,5 @@ if 'Analysis rejected: content identity is required' not in source or 'Analysis 
     raise SystemExit("Analysis submission and admission must reject empty content identities")
 if 'Analysis rejected: source path is required' not in source:
     raise SystemExit("Analysis submission must reject an empty source path")
+if 'Reanalysis rejected: storage is not open' not in source:
+    raise SystemExit("Reanalysis must reject closed storage before invalidating cache")
