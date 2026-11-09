@@ -4018,11 +4018,11 @@ ApplicationWindow {
                         + (window.overlayHiddenByUser ? " · hidden by user" : "")
                         + (window.overlayLaunchFallbackActive ? " · launch fallback active" : "")
                         + " · settings revision " + window.overlaySettingsRevision
-                        + (window.overlayDisplayRecoveryPending ? " · recovery pending" : "")
+                        + (window.overlayDisplayRecoveryPending ? " · recovery pending · settings retained" : (window.overlayLaunchFallbackActive ? " · settings retained" : ""))
                     Accessible.name: "Overlay settings summary"
                     Accessible.value: text
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Current overlay display, size, opacity, and recovery state."
+                    Accessible.description: "Current overlay display, size, opacity, recovery state, and whether persisted settings are retained."
                     ToolTip.text: "Current overlay display, size, opacity, and recovery state"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true

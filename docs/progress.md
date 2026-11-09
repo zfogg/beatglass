@@ -852,3 +852,5 @@ Retained-settings review descriptions now include the current settings revision 
 
 Overlay settings-retention status accessible name now includes the current settings revision. Portable coverage is in `python tests/unit/check_overlay_retention_name_contract.py`.
 
+Overlay settings summary now surfaces retained-settings state during pending recovery and launch fallback. Portable coverage is in `python tests/unit/check_overlay_summary_retention_contract.py`.
+
