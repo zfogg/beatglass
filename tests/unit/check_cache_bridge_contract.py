@@ -31,4 +31,12 @@ haystack = header + source + qml
 missing = [name for name, marker in required.items() if marker not in haystack]
 if missing:
     raise SystemExit("Missing cache bridge contract markers: " + ", ".join(missing))
+lookup = source[source.index("void findCached("):source.index("void invalidateCached(")]
+invalidate = source[source.index("void invalidateCached("):source.index("void submitAnalysis(")]
+for marker in ("Cache lookup rejected:", "catch (const std::exception& error)"):
+    if marker not in lookup:
+        raise SystemExit(f"Missing cache lookup recovery marker: {marker}")
+for marker in ("Cache invalidation rejected:", "catch (const std::exception& error)"):
+    if marker not in invalidate:
+        raise SystemExit(f"Missing cache invalidation recovery marker: {marker}")
 print(f"Desktop cache bridge contract verified ({len(required)} checks)")
