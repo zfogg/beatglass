@@ -3687,7 +3687,7 @@ ApplicationWindow {
                         Accessible.value: text
                         Accessible.role: Accessible.StaticText
                         Accessible.description: visible
-                            ? text + ". Track and deck metadata are unavailable unless a separately supported source provides them."
+                            ? text + ". Track and deck metadata are unavailable unless a separately supported source provides them." + (window.overlayDisplayRecoveryPending ? " The selected combined-output source is retained while recovery is pending." : "")
                             : text
                         ToolTip.text: visible ? Accessible.description : "Overlay estimate source"
                         Layout.fillWidth: true

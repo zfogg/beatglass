@@ -812,3 +812,5 @@ Persisted overlay geometry status now states settings retention during pending r
 
 Overlay interaction-mode status now states settings retention while recovery is pending. Portable coverage is in `python tests/unit/check_overlay_interaction_retention_contract.py`.
 
+Overlay estimate attribution now states that the selected combined-output source remains retained during pending recovery. Portable coverage is in `python tests/unit/check_overlay_attribution_retention_contract.py`.
+
