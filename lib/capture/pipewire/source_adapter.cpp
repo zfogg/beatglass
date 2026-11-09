@@ -1,6 +1,18 @@
 #include "beatglass/capture/pipewire_source.hpp"
+#include <cctype>
 
 namespace beatglass::pipewire {
+namespace {
+bool valid_serial(const std::string& serial) noexcept {
+  if (serial.empty()) return false;
+  bool non_space = false;
+  for (const unsigned char byte : serial) {
+    if (byte == 0) return false;
+    if (!std::isspace(byte)) non_space = true;
+  }
+  return non_space;
+}
+}
 MonitorStream::MonitorStream(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) noexcept
     : fifo_(std::make_unique<coreaudio::CaptureFifo>(epoch, sample_rate, channels)) {}
 bool MonitorStream::push(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
@@ -44,7 +56,7 @@ void MonitorStream::stop() noexcept {
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }
 bool MonitorSession::start(std::string serial, std::uint64_t epoch, std::uint32_t sample_rate,
                            std::uint32_t channels) {
-  if (serial.empty() || !epoch || !sample_rate || !channels) return false;
+  if (!valid_serial(serial) || !epoch || !sample_rate || !channels) return false;
   auto next = std::make_unique<MonitorStream>(epoch, sample_rate, channels);
   serial_ = std::move(serial);
   stream_ = std::move(next);
