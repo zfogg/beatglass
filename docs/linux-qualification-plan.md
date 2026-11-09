@@ -11,6 +11,8 @@ Attempted summaries also record the host operating-system label alongside the
 platform identity.
 Pending and attempted summaries use the explicit
 `beatglass-native-runner-summary-v1` schema identifier for downstream validators.
+The completed-summary verifier requires that schema, a timezone-aware capture
+timestamp, Python environment identity, and host OS before accepting evidence.
 
 ## Runnable preparation checks
 

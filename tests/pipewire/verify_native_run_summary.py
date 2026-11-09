@@ -3,12 +3,25 @@ import hashlib
 import json
 import sys
 import subprocess
+from datetime import datetime
 from pathlib import Path
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: verify_native_run_summary.py SUMMARY.json")
 summary_path = Path(sys.argv[1])
 summary = json.loads(summary_path.read_text(encoding="utf-8"))
+if summary.get("runner_summary_schema") != "beatglass-native-runner-summary-v1":
+    raise SystemExit("native qualification summary has unsupported runner schema")
+try:
+    captured_at = datetime.fromisoformat(str(summary.get("captured_at", "")).replace("Z", "+00:00"))
+    if captured_at.tzinfo is None:
+        raise ValueError
+except ValueError:
+    raise SystemExit("native qualification summary has invalid capture timestamp")
+if not isinstance(summary.get("environment"), dict) or not summary["environment"].get("python"):
+    raise SystemExit("native qualification summary has incomplete environment identity")
+if not summary.get("host_os"):
+    raise SystemExit("native qualification summary has no host OS identity")
 if not summary.get("qualified"):
     raise SystemExit("native qualification summary is not qualified")
 if summary.get("qualification_target") != "Linux/PipeWire" or summary.get("handoff_status") != "complete":
