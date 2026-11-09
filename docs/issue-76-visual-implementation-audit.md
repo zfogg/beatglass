@@ -851,6 +851,8 @@ The overlay display selector is now explicitly keyboard reachable as well, ensur
 
 The output endpoint empty state now uses live status semantics alongside endpoint discovery and recovery guidance, so missing-device remediation is announced consistently.
 
+The output-device selector is explicitly keyboard reachable, keeping monitoring setup usable from the same keyboard recovery path as endpoint refresh and status guidance.
+
 The overlay display empty state now uses live status semantics alongside saved-display recovery, making missing-output remediation discoverable before destination selection.
 
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.

@@ -2987,6 +2987,7 @@ ApplicationWindow {
                         ComboBox {
                             id: outputDevice
                             objectName: "outputDevice"
+                            activeFocusOnTab: true
                             model: ["Default system output"]
                             currentIndex: 0
                             enabled: true
