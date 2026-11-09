@@ -2163,4 +2163,25 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
+    function test_selectReplacementDisplayReappliesRetainedVisualState() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Projector", "Laptop"]
+        fakeOverlay.displayName = "Projector"
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Missing display"
+        app.overlayPreferredScreenIndex = -1
+        app.overlayDisplayRecoveryPending = true
+        app.overlayDisplaySelectionRequired = true
+        verify(app.persistOverlayDisplaySelection(0, "Projector"))
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 0)
+        compare(fakeOverlay.requestedWidth, 620)
+        verify(!app.overlayDisplaySelectionRequired)
+        verify(!app.overlayDisplayRecoveryPending)
+        verify(!app.overlayLaunchFallbackActive)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
