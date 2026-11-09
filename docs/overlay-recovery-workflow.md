@@ -66,6 +66,8 @@ with its hint as soon as recovery is resumed.
 If a display is disconnected and later restored while recovery is paused, focus
 returns to `Resume recovery` rather than the ordinary retry control, preserving
 the intentional pause across the display lifecycle.
+The reconnect announcement also states that recovery remains paused, so a
+display reconnect cannot silently restart native retries.
 
 ## Screenshot qualification
 
