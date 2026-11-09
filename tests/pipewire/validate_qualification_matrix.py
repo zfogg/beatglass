@@ -32,6 +32,8 @@ for name, entry in platforms.items():
         raise SystemExit(f"pending qualification lacks reason: {name}")
     if "native_execution_attempted" in entry and not isinstance(entry["native_execution_attempted"], bool):
         raise SystemExit(f"invalid native execution attempt flag: {name}")
+    if entry["status"] == "qualified" and entry.get("native_execution_attempted") is not True:
+        raise SystemExit(f"qualified platform lacks native execution attempt: {name}")
     if "execution_blockers" in entry and (not isinstance(entry["execution_blockers"], list) or
             any(not isinstance(blocker, str) or not blocker.strip() for blocker in entry["execution_blockers"])):
         raise SystemExit(f"invalid native execution blockers: {name}")
