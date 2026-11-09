@@ -26,6 +26,8 @@ if not isinstance(inventory, list):
 version = subprocess.run(["pw-cli", "--version"], check=False,
                          capture_output=True, text=True).stdout.strip()
 manifest = {"captured_at_utc": datetime.now(timezone.utc).isoformat(),
+            "host_platform": platform.platform(),
+            "python_version": platform.python_version(),
             "pipewire_cli_version": version, "inventory": inventory}
 output.parent.mkdir(parents=True, exist_ok=True)
 output.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
