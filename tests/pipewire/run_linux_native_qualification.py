@@ -82,7 +82,8 @@ summary = {"platform": platform.platform(), "commit": commit,
            "daemon_preflight": preflight_result,
            "native_pipewire_tests": native_result,
            "native_junit": str(evidence / "pipewire-tests.xml"),
-           "qualified": discovery_count is not None and discovery_count > 0 and all(item["returncode"] == 0 for item in results)}
+           "native_junit_exists": (evidence / "pipewire-tests.xml").is_file(),
+           "qualified": discovery_count is not None and discovery_count > 0 and (evidence / "pipewire-tests.xml").is_file() and all(item["returncode"] == 0 for item in results)}
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
