@@ -3187,7 +3187,7 @@ ApplicationWindow {
                     objectName: "visualizationSelectionResetFeedback"
                     visible: window.visualizationSelectionResetReason !== ""
                     text: window.visualizationSelectionResetReason
-                    Accessible.name: "Visualization selection reset status"
+                    Accessible.name: "Visualization selection reset status, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: text
