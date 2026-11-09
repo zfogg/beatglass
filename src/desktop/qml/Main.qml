@@ -91,6 +91,16 @@ ApplicationWindow {
         onActivated: { files.refresh(); window.refreshCatalog(); window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed from the keyboard; entry selection cleared."); browser.forceActiveFocus() }
     }
     Shortcut {
+        objectName: "librarySortShortcut"
+        sequence: "Ctrl+Alt+S"
+        context: Qt.ApplicationShortcut
+        onActivated: {
+            window.sortDescending = !window.sortDescending
+            window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
+            sortOrder.forceActiveFocus()
+        }
+    }
+    Shortcut {
         objectName: "playbackSeekBackShortcut"
         sequence: "Alt+Left"
         context: Qt.ApplicationShortcut
