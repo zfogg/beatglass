@@ -16,7 +16,7 @@ def main() -> None:
         'enabled: visible && !window.storageReopenPending && storageRecovery.retryableRunIds.length > 0',
         'storageRecovery.discardRuns !== undefined',
         'storageRecovery.retryableRunIds.length > 0',
-        'id: discardAllPersistedRecovery',
+        'objectName: "discardAllPersistedRecovery"',
         'onAccepted: { storageRecovery.discardRuns(storageRecovery.retryableRunIds)',
         'window.storageReopenPending = true',
     ]
