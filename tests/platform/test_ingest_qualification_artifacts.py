@@ -88,3 +88,13 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertEqual(ingest.ingest(root, output), [])
             data = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual([item["path"] for item in data["artifacts"]], ["a-first.log", "z-last.log"])
+
+    def test_rejects_empty_qualification_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            empty = root / "empty.log"; empty.write_bytes(b"")
+            digest = hashlib.sha256(empty.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  empty.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("empty qualification artifact" in error for error in errors))
