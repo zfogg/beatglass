@@ -1,10 +1,14 @@
 #include "beatglass/capture/detail/pipewire_stream_owner.hpp"
+#include <cerrno>
 namespace beatglass::pipewire::detail {
 namespace {
 class UnavailableStreamOwner final : public StreamOwner {
 public:
   bool connect(const std::string&, std::uint32_t, std::uint32_t,
-               MonitorStream&) override { return false; }
+               MonitorStream& handoff) override {
+    handoff.on_error(-ENOSYS);
+    return false;
+  }
   void stop() noexcept override {}
 };
 }
