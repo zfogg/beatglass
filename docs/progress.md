@@ -878,5 +878,7 @@ The consolidated overlay settings summary tooltip now distinguishes recovery-pen
 
 The overlay summary review action now describes whether recovery is pending or ready alongside its settings revision. Portable coverage is in `python tests/unit/check_overlay_summary_review_description_state_contract.py`.
 
+The overlay monitoring action now exposes the capture-monitor status and recovery-pending state as an accessible value. Portable coverage is in `python tests/unit/check_overlay_monitoring_action_state_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
