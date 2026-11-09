@@ -30,6 +30,7 @@ public slots:
     std::vector<beatglass::library_detail::RetryableRun> runs;
     try { runs = coordinator_.storage().retryable_runs(); }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Recovery refresh failed: ") + QString::fromUtf8(error.what())); emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); return; }
+    catch (...) { emit result(false, QStringLiteral("Recovery refresh failed: unknown storage error")); emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); return; }
     QStringList ids;
     QStringList details;
     for (const auto& run : runs) { ids.push_back(QString::fromStdString(run.id)); details.push_back(QString::fromStdString(run.id + " | " + run.key.content + " | " + run.key.engine + " | " + run.key.config + " | " + run.key.mode + " | source=" + run.source_path + " | decoder=" + run.decoder_snapshot)); }
