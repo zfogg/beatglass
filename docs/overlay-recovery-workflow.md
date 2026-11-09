@@ -214,3 +214,6 @@ The display focus shortcut remains usable during click-through, returning focus 
 
 The Restore overlay focus shortcut remains usable during click-through, returning focus to the explicit restore action while preserving the saved display, geometry, and opacity settings.
 
+
+The Show overlay focus shortcut remains usable during click-through, returning focus to the explicit show action while preserving saved display, geometry, and opacity settings.
+
