@@ -36,3 +36,4 @@ The summary exposes that listing as `native_test_discovery`, separately from
 the `native_pipewire_tests` execution result.
 The runner also records the parsed `native_test_count` from CTest's JSON
 `tests` array.
+Qualification additionally requires `native_test_count` to be positive.
