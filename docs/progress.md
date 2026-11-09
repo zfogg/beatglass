@@ -840,3 +840,5 @@ Overlay settings-retention status now exposes the settings revision in its acces
 
 Retained-settings review announcements now include the current settings revision for recovery diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_revision_contract.py`.
 
+Retained-settings review tooltip now includes the current settings revision for at-a-glance diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_tooltip_contract.py`.
+

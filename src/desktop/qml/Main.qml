@@ -3688,7 +3688,7 @@ ApplicationWindow {
                         Accessible.name: text
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring." : "Output endpoint refresh is unavailable."
-                        ToolTip.text: Accessible.description
+                        ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             window.endpointSelectionBridge.refresh()
                             window.announceCaptureRecoveryState("Overlay endpoint refresh requested; choose an output endpoint before retrying monitoring.")
@@ -3723,7 +3723,7 @@ ApplicationWindow {
                         Accessible.description: enabled
                             ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.")
                             : "Monitoring is transitioning; wait for the current capture state."
-                        ToolTip.text: Accessible.description
+                        ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             if (!window.captureMonitorBridge) return
                             if (window.captureMonitorBridge.status === "Monitoring") {
@@ -3796,7 +3796,7 @@ ApplicationWindow {
                         Accessible.description: window.overlayDisplayRecoveryPending
                             ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending."
                             : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings."
-                        ToolTip.text: Accessible.description
+                        ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             overlaySettingsRetentionStatus.forceActiveFocus()
                             window.announceCaptureRecoveryState(window.overlayDisplayRecoveryPending
