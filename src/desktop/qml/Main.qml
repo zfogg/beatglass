@@ -91,10 +91,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+R"
         context: Qt.ApplicationShortcut
         enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive
-        onActivated: {
-            addFolderRecursively.click()
-            window.announceVisualizationRecovery("Recursive Library catalog requested; results will receive focus when ready.")
-        }
+        onActivated: window.requestLibraryRecursiveCatalog()
     }
     Shortcut {
         objectName: "libraryRefreshShortcut"
@@ -1100,6 +1097,10 @@ ApplicationWindow {
         window.activateEntry(browser.currentIndex)
         window.announceVisualizationRecovery("Activated the focused Library entry.")
         browser.forceActiveFocus()
+    }
+    function requestLibraryRecursiveCatalog() {
+        addFolderRecursively.click()
+        window.announceVisualizationRecovery("Recursive Library catalog requested; results will receive focus when ready.")
     }
     function focusLibraryBatchProgress() {
         navigation.currentIndex = 0
