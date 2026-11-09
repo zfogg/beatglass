@@ -123,7 +123,8 @@ with zipfile.ZipFile(archive_path) as archive:
                 summary_data["native_transition_event_count"] <= 0 or
                 summary_data["native_transition_event_count"] != len(transitions)):
             raise SystemExit("transition event count does not match summary")
-        if manifest.get("transition_event_count") != len(transitions):
+        manifest_count = manifest.get("transition_event_count")
+        if not isinstance(manifest_count, int) or isinstance(manifest_count, bool) or manifest_count <= 0 or manifest_count != len(transitions):
             raise SystemExit("transition event count does not match manifest")
         names = [event.get("event") for event in transitions if isinstance(event, dict)]
         if any(required not in names for required in ("start", "process", "error", "restart")):
