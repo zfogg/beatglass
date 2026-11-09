@@ -130,6 +130,17 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "overlayRetentionFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+S"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge !== null
+        onActivated: {
+            navigation.currentIndex = 1
+            overlaySettingsRetentionReviewAction.forceActiveFocus()
+            window.announceCaptureRecoveryState("Retained overlay settings review control focused.")
+        }
+    }
+    Shortcut {
         objectName: "overlayUnlockFocusShortcut"
         sequence: "Ctrl+Alt+U"
         context: Qt.ApplicationShortcut

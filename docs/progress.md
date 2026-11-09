@@ -826,3 +826,5 @@ Overlay settings-retention status is now keyboard-focusable, allowing non-pointe
 
 Overlay controls now include a “Review retained settings” action that moves focus to the settings-retention status for keyboard recovery review. Portable coverage is in `python tests/unit/check_overlay_settings_retention_review_contract.py`.
 
+The retained-settings review action now has a global `Ctrl+Alt+Shift+S` shortcut that returns focus to overlay recovery context. Portable coverage is in `python tests/unit/check_overlay_retention_shortcut_contract.py`.
+
