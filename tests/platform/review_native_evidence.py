@@ -13,8 +13,12 @@ def assess(report_path: Path, reviewer: str) -> dict:
     except (OSError, json.JSONDecodeError) as error:
         return {"native_review_schema": 1, "decision": "PENDING", "reviewer": reviewer.strip(), "blockers": [str(error)]}
     blockers = []
+    seen_platforms = set()
     for platform in report.get("platforms", []):
         name = platform.get("platform", "unknown")
+        if name in seen_platforms:
+            blockers.append(f"{name}:duplicate platform entry")
+        seen_platforms.add(name)
         if platform.get("manifest_platform") != name:
             blockers.append(f"{name}:manifest platform mismatch")
         commit = platform.get("commit")
@@ -45,7 +49,11 @@ def assess(report_path: Path, reviewer: str) -> dict:
             matching = next((item for item in inventory if isinstance(item, dict) and item.get("path") == output), None)
             if not matching or matching.get("sha256") != output_sha:
                 blockers.append(f"{name}:qualification output linkage mismatch")
-        scenarios = {row.get("id"): row for row in platform.get("scenarios", []) if isinstance(row, dict)}
+        rows = [row for row in platform.get("scenarios", []) if isinstance(row, dict)]
+        ids = [row.get("id") for row in rows]
+        if len(ids) != len(set(ids)):
+            blockers.append(f"{name}:duplicate scenario id")
+        scenarios = {row.get("id"): row for row in rows}
         if set(scenarios) != REQUIRED:
             blockers.append(f"{name}:scenario inventory incomplete")
         for scenario in sorted(REQUIRED):
