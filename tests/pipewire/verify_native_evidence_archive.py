@@ -117,6 +117,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("summary native JUnit digest does not match archive")
     transition_path = summary_data.get("native_transition_json")
     if transition_path:
+        if not isinstance(transition_path, str) or not transition_path.strip():
+            raise SystemExit("summary transition path is invalid")
         transition_name = transition_path.replace("\\", "/").rsplit("/", 1)[-1]
         if transition_name not in declared:
             raise SystemExit("summary transition path does not match archive")

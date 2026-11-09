@@ -203,6 +203,8 @@ The manifest itself must also decode to a JSON object before archive fields are
 trusted.
 Malformed transition evidence JSON is likewise rejected explicitly before
 lifecycle validation.
+The summary transition path must be a non-empty string before it is mapped to
+an archived member.
 The decoded summary must also be a JSON object, preventing arrays or scalar
 values from bypassing field-level qualification checks.
 The portable behavior fixture can be run with
