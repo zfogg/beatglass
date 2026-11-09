@@ -7,3 +7,6 @@ the control-thread lifecycle boundary.
 
 The stream-level restart seam applies the same guard, so callers cannot bypass
 the session lifecycle invariant.
+
+Restart also requires a nonzero epoch different from the current one, making
+each reacquisition boundary explicit and preventing same-epoch reuse.
