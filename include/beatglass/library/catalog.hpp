@@ -47,4 +47,11 @@ struct CatalogResult {
 CatalogResult browse(const std::filesystem::path& folder,
                      std::string search = {});
 
+/** Enumerate a local folder and all descendant folders without following links.
+ * The result uses the same supported-format and deterministic ordering rules
+ * as browse(); filesystem errors return an empty result with a diagnostic.
+ */
+CatalogResult browse_recursive(const std::filesystem::path& folder,
+                               std::string search = {});
+
 } // namespace beatglass::library
