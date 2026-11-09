@@ -76,6 +76,8 @@ platform, preventing raw or detached event lists from being accepted as native
 qualification evidence.
 The transition envelope commit must match the archive manifest commit; mixing
 events from another checkout is rejected.
+The summary’s transition SHA-256 is independently checked against the archived
+payload, in addition to the manifest artifact digest.
 Capture provenance before validation and packaging:
 
 ```sh

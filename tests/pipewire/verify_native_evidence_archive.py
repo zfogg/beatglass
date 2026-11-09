@@ -95,7 +95,10 @@ with zipfile.ZipFile(archive_path) as archive:
         transition_name = transition_path.replace("\\", "/").rsplit("/", 1)[-1]
         if transition_name not in declared:
             raise SystemExit("summary transition path does not match archive")
-        transitions = json.loads(archive.read(transition_name))
+        transition_payload = archive.read(transition_name)
+        if summary_data.get("native_transition_sha256") != hashlib.sha256(transition_payload).hexdigest():
+            raise SystemExit("summary transition digest does not match archive")
+        transitions = json.loads(transition_payload)
         if not isinstance(transitions, dict) or transitions.get("schema") != "beatglass-pipewire-transitions-v1":
             raise SystemExit("transition evidence has invalid provenance schema")
         if not isinstance(transitions.get("commit"), str) or not transitions["commit"].strip():
