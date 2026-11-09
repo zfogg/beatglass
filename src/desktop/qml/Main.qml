@@ -1394,7 +1394,9 @@ ApplicationWindow {
                 window.restoreOverlayFallbackControls("DJ overlay could not be restored after display recovery; choose another display or retry.")
                 return false
             }
-            window.announceCaptureRecoveryState("DJ overlay recovered on the saved display with persisted visual settings, including " + Math.round(window.overlayBridge.opacity * 100) + " percent opacity.")
+            const recoveredDisplay = window.overlayPreferredDisplayName !== ""
+                ? window.overlayPreferredDisplayName : "the saved display"
+            window.announceCaptureRecoveryState("DJ overlay recovered on " + recoveredDisplay + " with persisted visual settings, including " + Math.round(window.overlayBridge.opacity * 100) + " percent opacity.")
         }
         return true
     }
