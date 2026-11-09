@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Overlay size changes now treat native resize failure as a rejected edit: the
+persisted geometry remains authoritative, the size selector is synchronized
+back to that geometry, and the control window announces the recovery instead
+of reporting a size that was not applied.
+
 macOS Core Audio discovery now places the system-selected output first after a
 successful enumeration, without changing the neutral `SourceInfo` contract or
 overriding a later explicit user selection. The portable source contract is
