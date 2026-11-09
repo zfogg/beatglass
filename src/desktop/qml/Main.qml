@@ -2267,7 +2267,7 @@ ApplicationWindow {
                             Accessible.name: "Selected audio file: " + text
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
-                            Accessible.description: text
+                            Accessible.description: window.metadataStatus.indexOf("Error:") === 0 ? text + ". Retry metadata to attempt decoding again." : text
                             ToolTip.text: "Currently selected audio file"
                         }
                         Label {
@@ -2287,7 +2287,7 @@ ApplicationWindow {
                             ToolTip.text: "Selected source duration"
                             Accessible.value: text
                             Accessible.role: Accessible.StaticText
-                            Accessible.description: text
+                            Accessible.description: window.metadataStatus.indexOf("Error:") === 0 ? text + ". Retry metadata to attempt decoding again." : text
                             wrapMode: Text.WordWrap
                             Layout.fillWidth: true
                         }
