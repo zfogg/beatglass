@@ -101,7 +101,7 @@ ApplicationWindow {
         sequence: "Ctrl+R"
         context: Qt.ApplicationShortcut
         enabled: window.browseFolder.toString() !== ""
-        onActivated: { files.refresh(); window.refreshCatalog(); window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed from the keyboard; entry selection cleared."); browser.forceActiveFocus() }
+        onActivated: { files.refresh(); window.refreshCatalog(); window.resetLibraryBrowserSelection("Folder contents refreshed from the keyboard; entry selection cleared.") }
     }
     Shortcut {
         objectName: "libraryParentFolderShortcut"
