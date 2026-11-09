@@ -84,6 +84,8 @@ The packager also writes that count into the manifest; archive verification
 cross-checks all three representations.
 The manifest carries the host platform too, and verification binds it to the
 qualification summary before accepting the archive.
+Transition-bearing manifests also declare the transition schema version, which
+the verifier matches against the captured envelope.
 The captured host platform must also match the qualification summary platform,
 preventing cross-host evidence mixing.
 Transition-bearing qualified archives must identify a Linux host; Windows and
