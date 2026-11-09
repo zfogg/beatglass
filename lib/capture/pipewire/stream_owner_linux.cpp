@@ -72,6 +72,14 @@ public:
     handoff_ = nullptr;
   }
 private:
+  static void state_changed(void* data, enum pw_stream_state, enum pw_stream_state state,
+                            const char* error) {
+    auto& owner = *static_cast<LinuxStreamOwner*>(data);
+    if (state == PW_STREAM_STATE_ERROR) {
+      owner.active_ = false;
+      if (owner.handoff_) owner.handoff_->on_error(error ? -EIO : -EPIPE);
+    }
+  }
   static void process(void* data) {
     auto& owner = *static_cast<LinuxStreamOwner*>(data);
     if (!owner.active_ || !owner.stream_ || !owner.handoff_) return;
@@ -108,7 +116,8 @@ private:
     }
     pw_stream_queue_buffer(owner.stream_, buffer);
   }
-  static constexpr pw_stream_events events_ = {PW_VERSION_STREAM_EVENTS, nullptr, nullptr, process};
+  static constexpr pw_stream_events events_ = {
+      .version = PW_VERSION_STREAM_EVENTS, .state_changed = state_changed, .process = process};
   static const pw_stream_events events;
   pw_thread_loop* loop_{};
   pw_context* context_{};
