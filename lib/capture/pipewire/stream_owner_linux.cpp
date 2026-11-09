@@ -23,6 +23,8 @@ public:
   bool connect(const Config& config, MonitorStream& handoff) override {
     if (active_ || config.serial.empty() || !config.sample_rate || !config.channels) return false;
     handoff_ = &handoff;
+    sample_rate_ = config.sample_rate;
+    channels_ = config.channels;
     loop_ = pw_thread_loop_new("beatglass-pipewire", nullptr);
     if (!loop_) return false;
     context_ = pw_context_new(pw_thread_loop_get_loop(loop_), nullptr, 0);
@@ -79,9 +81,14 @@ private:
   }
   static void param_changed(void* data, uint32_t id, const spa_pod* param) {
     auto& owner = *static_cast<LinuxStreamOwner*>(data);
-    if (id == SPA_PARAM_Format && !param) {
+    if (id == SPA_PARAM_Format) {
+      spa_audio_info_raw negotiated{};
+      const bool valid = param && spa_format_audio_raw_parse(param, &negotiated) == 0 &&
+                         negotiated.format == SPA_AUDIO_FORMAT_F32 &&
+                         negotiated.rate == owner.sample_rate_ && negotiated.channels == owner.channels_;
+      if (valid) return;
       owner.active_ = false;
-      if (owner.handoff_) owner.handoff_->on_error(-EINVAL);
+      if (owner.handoff_) owner.handoff_->on_error(-EPROTO);
     }
   }
   static void state_changed(void* data, enum pw_stream_state, enum pw_stream_state state,
@@ -140,6 +147,8 @@ private:
   pw_properties* props_{};
   MonitorStream* handoff_{};
   bool active_ = false;
+  std::uint32_t sample_rate_{};
+  std::uint32_t channels_{};
 };
 
 const pw_stream_events LinuxStreamOwner::events = LinuxStreamOwner::events_;
