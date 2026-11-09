@@ -1277,4 +1277,13 @@ TestCase {
         verify(findChild(app, "showOverlay").activeFocus)
         app.destroy()
     }
+    function test_restoreFocusShortcutRestoresControlWindow() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        let shortcut = findChild(app, "overlayRestoreFocusShortcut")
+        shortcut.activated()
+        verify(app.visible)
+        verify(findChild(app, "restoreOverlay").activeFocus)
+        app.destroy()
+    }
 }

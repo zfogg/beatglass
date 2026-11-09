@@ -91,6 +91,8 @@ The `Ctrl+Alt+Z` size focus shortcut also restores and activates the control
 window before focusing the overlay size control.
 The Show and Hide overlay focus shortcuts restore and activate the control
 window before focusing their respective lifecycle actions as well.
+Restore, Retry, Reapply settings, and retained-settings review focus shortcuts
+follow the same control-window restoration rule.
 The reconnect announcement also states that recovery remains paused, so a
 display reconnect cannot silently restart native retries.
 While the display is still unavailable, the paused card separately reports that

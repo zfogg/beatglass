@@ -173,6 +173,9 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             restoreOverlay.forceActiveFocus()
             window.announceCaptureRecoveryState("Restore overlay control focused.")
         }
@@ -185,6 +188,9 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             retryOverlay.forceActiveFocus()
             window.announceCaptureRecoveryState("Retry overlay control focused.")
         }
@@ -198,6 +204,9 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             reapplyOverlaySettings.forceActiveFocus()
             window.announceCaptureRecoveryState("Reapply saved settings control focused.")
         }
@@ -209,6 +218,9 @@ ApplicationWindow {
         enabled: window.overlayBridge !== null
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             overlaySettingsRetentionReviewAction.forceActiveFocus()
             window.announceCaptureRecoveryState("Retained overlay settings review control focused.")
         }
