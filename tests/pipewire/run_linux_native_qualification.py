@@ -52,8 +52,10 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
                     "duration_seconds": round(time.monotonic() - capture_started, 3),
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
 native_result = next((item for item in results if "--timeout" in item["command"] and "^pipewire_tests$" in item["command"]), None)
+discovery_result = next((item for item in results if "--show-only=json-v1" in item["command"]), None)
 summary = {"platform": platform.platform(), "commit": commit,
            "pipewire_version": pipewire_version, "commands": results,
+           "native_test_discovery": discovery_result,
            "native_pipewire_tests": native_result,
            "qualified": len(results) == len(commands) and all(item["returncode"] == 0 for item in results)}
 if args.summary:
