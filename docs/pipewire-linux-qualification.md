@@ -54,6 +54,8 @@ The capture timestamp must be timezone-qualified ISO-8601 so evidence from
 different hosts can be ordered reliably.
 The validator requires the offset to be UTC (`+00:00`), matching the capture
 command and avoiding local-time ambiguity.
+Manifests also record `audio_sink_count`; validation compares it with the raw
+inventory to detect truncated or mutated evidence.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a

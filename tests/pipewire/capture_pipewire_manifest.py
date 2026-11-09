@@ -31,7 +31,9 @@ manifest = {"schema_version": 1,
             "captured_at_utc": datetime.now(timezone.utc).isoformat(),
             "host_platform": platform.platform(),
             "python_version": platform.python_version(),
-            "pipewire_cli_version": version, "inventory": inventory}
+            "pipewire_cli_version": version,
+            "audio_sink_count": sum(1 for item in inventory if isinstance(item, dict) and item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink"),
+            "inventory": inventory}
 output.parent.mkdir(parents=True, exist_ok=True)
 with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent,
                                  prefix=f".{output.name}.", suffix=".tmp", delete=False) as temporary:

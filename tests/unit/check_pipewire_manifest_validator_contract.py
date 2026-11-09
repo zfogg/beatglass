@@ -13,7 +13,7 @@ print("PipeWire manifest validator contract verified (6 checks)")
 validator = Path(__file__).parents[2] / "tests/pipewire/validate_pipewire_manifest.py"
 valid = {"schema_version": 1, "captured_at_utc": "2026-01-01T00:00:00+00:00",
          "host_platform": "Linux", "python_version": "3.12",
-         "pipewire_cli_version": "1.0", "inventory": [{"id": 1, "info": {"props": {"media.class": "Audio/Sink", "object.serial": "1", "node.name": "test"}}}]}
+         "pipewire_cli_version": "1.0", "audio_sink_count": 1, "inventory": [{"id": 1, "info": {"props": {"media.class": "Audio/Sink", "object.serial": "1", "node.name": "test"}}}]}
 with tempfile.TemporaryDirectory() as directory:
     path = Path(directory) / "manifest.json"
     path.write_text(json.dumps(valid), encoding="utf-8")
