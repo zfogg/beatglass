@@ -61,6 +61,8 @@ the worker for a new persisted-recovery snapshot.
 Cache lookup and invalidation follow the same boundary and reject synchronously
 while storage is closed, preserving cache state until a configured database is
 open.
+Both operations also reject an empty content identity before touching storage,
+preventing an accidental unscoped cache query or invalidation.
 Analysis admission uses the same guard and reports `Analysis admission rejected:
 storage is not open` until storage is available.
 New analysis submissions are rejected with `Analysis rejected: storage is not
