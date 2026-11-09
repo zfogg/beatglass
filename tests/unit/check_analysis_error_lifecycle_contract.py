@@ -3,6 +3,9 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
 source = (root / "src/desktop/storage_recovery_bridge.cpp").read_text(encoding="utf-8")
+submit = source[source.index("void submitAnalysis("):source.index("void cancelAnalysis(")]
+assert "Analysis submission rejected:" in submit
+assert "handle_.reset(); emit result(false" in submit
 docs = (root / "docs/progress.md").read_text(encoding="utf-8")
 required = [
     'text != QStringLiteral("Analysis failed")',

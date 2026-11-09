@@ -101,13 +101,16 @@ public slots:
       emit analysis(QStringLiteral("Analysis rejected"));
       return;
     }
-    beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
-    auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
-    operation.publish = [this](const std::string& value) { emit analysisResult(QString::fromStdString(value)); };
-    auto submission = coordinator_.submit_admitted(runId.toStdString(), std::move(operation));
-    if (submission.cached) { emit analysisResult(QString::fromStdString(*submission.cached)); emit analysis(QStringLiteral("Cached analysis ready")); handle_.reset(); return; }
-    handle_ = std::move(submission.handle); emit analysis(handle_ ? (submission.analysis_reserved ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected")) : QStringLiteral("Analysis rejected"));
-    if (handle_) QTimer::singleShot(50, this, &Worker::pollAnalysis);
+    try {
+      beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+      auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
+      operation.publish = [this](const std::string& value) { emit analysisResult(QString::fromStdString(value)); };
+      auto submission = coordinator_.submit_admitted(runId.toStdString(), std::move(operation));
+      if (submission.cached) { emit analysisResult(QString::fromStdString(*submission.cached)); emit analysis(QStringLiteral("Cached analysis ready")); handle_.reset(); return; }
+      handle_ = std::move(submission.handle); emit analysis(handle_ ? (submission.analysis_reserved ? QStringLiteral("Analysis queued") : QStringLiteral("Analysis rejected")) : QStringLiteral("Analysis rejected"));
+      if (handle_) QTimer::singleShot(50, this, &Worker::pollAnalysis);
+    } catch (const std::exception& error) { handle_.reset(); emit result(false, QStringLiteral("Analysis submission rejected: ") + QString::fromUtf8(error.what())); emit analysis(QStringLiteral("Analysis rejected")); }
+    catch (...) { handle_.reset(); emit result(false, QStringLiteral("Analysis submission rejected: unknown error")); emit analysis(QStringLiteral("Analysis rejected")); }
   }
   void cancelAnalysis() { if (handle_) { handle_->cancel(); pollAnalysis(); } }
   void retryAnalysis() { if (handle_ && handle_->retry()) { emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); } }
