@@ -17,6 +17,7 @@ for name, entry in matrix["platforms"].items():
     reason = entry.get("pending_reason", "—")
     attempted = "yes" if entry.get("native_execution_attempted") else "no"
     blockers = ", ".join(entry.get("execution_blockers", [])) or "—"
+    blockers = blockers.replace("|", "\\|")
     lines.append(f"| {name} | **{entry['status']}** | {attempted} | {evidence} | {reason} | {blockers} |")
 Path(sys.argv[2]).write_text("\n".join(lines) + "\n", encoding="utf-8")
 print(f"Rendered qualification matrix report to {sys.argv[2]}")
