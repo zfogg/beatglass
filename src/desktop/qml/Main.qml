@@ -4141,6 +4141,10 @@ ApplicationWindow {
     FolderDialog {
         id: folderPicker
         title: "Choose a folder to browse"
-        onAccepted: window.browseFolder = selectedFolder
+        onAccepted: {
+            window.browseFolder = selectedFolder
+            window.announceVisualizationRecovery("Library folder selected; choose an audio file to inspect or analyze.")
+            browser.forceActiveFocus()
+        }
     }
 }
