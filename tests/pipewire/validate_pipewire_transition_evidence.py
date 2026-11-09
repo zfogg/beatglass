@@ -5,7 +5,11 @@ from pathlib import Path
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: validate_pipewire_transition_evidence.py EVENTS.json")
-events = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+events = payload.get("events") if isinstance(payload, dict) else payload
+if isinstance(payload, dict):
+    if payload.get("schema") != "beatglass-pipewire-transitions-v1" or not str(payload.get("commit", "")).strip():
+        raise SystemExit("transition evidence has incomplete provenance")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
 names = [event.get("event") for event in events if isinstance(event, dict)]
