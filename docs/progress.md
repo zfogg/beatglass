@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Invalid Core Audio tap arguments now map to the public `not_found` source
+category instead of an opaque backend error, matching malformed source-ID
+handling. Portable coverage is in
+`python tests/unit/check_macos_invalid_argument_mapping_contract.py`.
+
 Core Audio start requests now reject source IDs containing NUL bytes before
 native NSString conversion, avoiding malformed identity lookups. Portable
 coverage is in `python tests/unit/check_macos_source_id_nul_contract.py`.
