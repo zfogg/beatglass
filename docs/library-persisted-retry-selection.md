@@ -6,3 +6,4 @@ ignoring the action. When accepted, it publishes `Retrying persisted recovery`
 until the worker returns the terminal retry result.
 Before requeueing, the bridge clears stale displayed results and progress from
 the previous attempt.
+It also clears stale retry/error state before the persisted worker request.
