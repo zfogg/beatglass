@@ -42,6 +42,8 @@ if platform.system() != "Linux":
         pending["pending_command"] += ["--summary", str(args.summary)]
     if args.archive:
         pending["pending_command"] += ["--archive", str(args.archive)]
+    if args.capture_plan:
+        pending["pending_command"] += ["--capture-plan", str(args.capture_plan)]
     if args.summary:
         args.summary.parent.mkdir(parents=True, exist_ok=True)
         args.summary.write_text(json.dumps(pending, indent=2) + "\n", encoding="utf-8")
