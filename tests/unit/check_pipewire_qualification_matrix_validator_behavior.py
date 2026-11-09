@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 
 validator = Path(__file__).parents[1] / "pipewire" / "validate_qualification_matrix.py"
-valid = {"schema":"beatglass-native-qualification-matrix-v1", "platforms": {
+valid = {"schema":"beatglass-native-qualification-matrix-v1", "host_os":"Windows", "platforms": {
     "Linux":{"status":"pending","evidence":[],"pending_reason":"host unavailable"},
     "Windows":{"status":"qualified","evidence":["windows.zip"]},
     "Darwin":{"status":"pending","evidence":[],"pending_reason":"host unavailable"}}}
@@ -42,4 +42,10 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     if result.returncode == 0 or "duplicate evidence path" not in result.stderr + result.stdout:
         raise SystemExit("duplicate evidence path was accepted")
-print("PipeWire qualification matrix validator behavior passed (6 scenarios)")
+    invalid["platforms"]["Windows"]["evidence"] = ["evidence.zip"]
+    invalid["host_os"] = 42
+    path.write_text(json.dumps(invalid), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid qualification matrix host" not in result.stderr + result.stdout:
+        raise SystemExit("invalid matrix host was accepted")
+print("PipeWire qualification matrix validator behavior passed (7 scenarios)")

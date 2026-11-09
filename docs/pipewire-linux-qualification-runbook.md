@@ -58,6 +58,8 @@ Duplicate evidence paths are rejected so each listed artifact contributes a
 distinct handoff record.
 When a runner summary supplies a commit, the matrix preserves and validates
 that non-empty provenance identity for later cross-host reconciliation.
+The matrix host identity is likewise required to be a non-empty string before
+the report is accepted.
 Runner summaries carry the same matrix schema and a per-host matrix status,
 so archived Linux results can be merged into the cross-platform report without
 guessing whether a host was pending or qualified.
