@@ -106,6 +106,11 @@ def assess(report_path: Path, reviewer: str) -> dict:
             if len(artifact_paths) != len(set(artifact_paths)):
                 blockers.append(f"{name}:duplicate artifact path")
             for artifact in inventory:
+                artifact_path = artifact.get("path") if isinstance(artifact, dict) else None
+                if (not isinstance(artifact_path, str) or artifact_path.startswith(("/", "\\")) or
+                        ":" in artifact_path or ".." in artifact_path.replace("\\", "/").split("/")):
+                    blockers.append(f"{name}:invalid artifact path")
+                    break
                 if (not isinstance(artifact, dict) or not artifact.get("path") or
                         not isinstance(artifact.get("role"), str) or not artifact["role"].strip() or
                         not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64 or
