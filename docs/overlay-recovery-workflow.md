@@ -253,3 +253,6 @@ When the operating system reorders displays, recovery matches the saved display 
 
 If displays reorder while recovery is paused, the saved display identity and geometry remain retained, Resume recovery stays focused, and no native retry starts until the user explicitly resumes.
 
+
+If displays reorder while click-through is active, recovery matches the saved display by identity and returns focus to Unlock overlay, preserving the saved geometry until interaction is restored.
+

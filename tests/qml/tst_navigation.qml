@@ -1976,4 +1976,21 @@ TestCase {
         fakeOverlay.displayName = "Display"
         fakeOverlay.available = true
     }
+    function test_clickThroughDisplayReorderRetainsIdentityAndUnlockFocus() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        fakeOverlay.screenNames = ["Projector", "Laptop"]
+        fakeOverlay.displayName = "Projector"
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 0
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 1)
+        verify(findChild(app, "unlockOverlay").activeFocus)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+        fakeOverlay.clickThrough = false
+    }
 }
