@@ -43,6 +43,9 @@ Portable lifecycle coverage now exercises callback failure, discontinuity
 publication, rejection of same-epoch restart, and stale-epoch suppression;
 native Linux qualification must additionally reproduce these transitions with
 the real PipeWire daemon.
+Registry enumeration de-duplicates repeated globals by object serial before a
+device switch is offered to the coordinator; native qualification should
+exercise duplicate-global and remove/re-add scenarios.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
