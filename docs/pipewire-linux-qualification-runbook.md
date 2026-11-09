@@ -441,3 +441,5 @@ Attach local contract/behavior test output to regenerated handoffs so metadata e
 Use a stable handoff filename for verifier output and preserve prior outputs when regenerating, allowing reviewers to compare evidence revisions.
 
 When comparing evidence revisions, retain the prior archive and verifier output rather than overwriting them; provenance review depends on the revision history.
+
+Pending native runner summaries include explicit blockers (host OS, daemon, PipeWire library, and audio sink) so a handoff can be actioned without implying execution.
