@@ -4383,8 +4383,10 @@ ApplicationWindow {
                 Label { visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Overlay unavailable on this display."; objectName: "overlayUnavailable"; Accessible.name: "Overlay availability: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Native overlay is unavailable on the selected display"; wrapMode: Text.WordWrap }
                 Label {
                     objectName: "overlayFallbackState"
-                    visible: window.overlayBridge !== null && !window.overlayBridge.available
-                    text: "Control window remains available as the tray/taskbar fallback until the overlay display recovers. Use Retry overlay after reconnecting a display."
+                    visible: window.overlayBridge !== null && (window.overlayLaunchFallbackActive || !window.overlayBridge.available)
+                    text: window.overlayBridge.available
+                        ? "Control window remains available as the fallback while the overlay restores. Review persisted settings, then use Restore overlay."
+                        : "Control window remains available as the tray/taskbar fallback until the overlay display recovers. Use Retry overlay after reconnecting a display."
                     Accessible.name: "Overlay fallback state"
                     Accessible.value: text
                     Accessible.role: Accessible.Status
