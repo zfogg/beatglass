@@ -3104,6 +3104,18 @@ ApplicationWindow {
                     Layout.minimumWidth: 0
                     wrapMode: Text.WordWrap
                 }
+                Button {
+                    objectName: "selectedAnalysisRetry"
+                    visible: window.selectedName !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.canRetry
+                    enabled: visible
+                    text: "Retry selected analysis"
+                    Accessible.name: "Retry selected track analysis"
+                    Accessible.value: enabled ? "available" : "unavailable"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: "Retry analysis for the selected Library track and replace stale visualization data when accepted."
+                    ToolTip.text: "Retry analysis for the selected Library track"
+                    onClicked: window.retryVisualizationAnalysis()
+                }
                 Label {
                     objectName: "visualizationPlaybackFeedback"
                     text: visualizationCanvas.selectedPosition < 0
