@@ -734,6 +734,21 @@ TestCase {
         app.destroy()
     }
 
+    function test_overlayAvailabilityLossRestoresKeyboardFocusToRetry() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Display"]
+        let app = shellWithOverlayPreferences.createObject(null)
+        findChild(app, "navigation").currentIndex = 1
+        fakeOverlay.available = false
+        let retry = findChild(app, "retryOverlay")
+        tryVerify(() => retry.visible)
+        tryVerify(() => retry.activeFocus)
+        compare(retry.Accessible.name, "Retry DJ overlay")
+        compare(retry.ToolTip.text, retry.Accessible.description)
+        fakeOverlay.available = true
+        app.destroy()
+    }
+
     function test_reducedMotionStopsAndClearsOverlayPulse() {
         fakeThemePreferences.reduceMotion = false
         fakeLive.status = "Tracking"

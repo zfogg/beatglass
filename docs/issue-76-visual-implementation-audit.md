@@ -82,6 +82,7 @@ Display-loss evidence must show the overlay disappearing, the control window rem
 
 Overlay design states are covered by explicit Show, Unlock, Hide, display-change, unavailable-display, empty-display, and Retry controls. Each state keeps recovery guidance accessible and routes display changes through the native overlay bridge; native multi-monitor, click-through, and display-loss evidence remains required.
 
+Native overlay availability loss returns keyboard focus to the visible Retry overlay action after restoring the control window. This makes bridge/display recovery actionable without requiring pointer input; successful retry continues to the persisted-state restore path.
 Overlay hide, unlock, display replacement, and retry preserve the reduced-motion contract: announcements and accessible state text remain, while motion is suppressed. Focus returns to a recoverable control after overlay/display changes; native multi-monitor and assistive-technology timing remain qualification gaps.
 
 Endpoint replacement and reacquisition preserve focus on the endpoint selector and route announcements through the shared recovery helper. Reduced-motion mode changes animation presentation only; stale clearing, status text, and keyboard focus remain identical across Settings, DJ, and overlay surfaces.
