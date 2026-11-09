@@ -89,6 +89,8 @@ with zipfile.ZipFile(archive_path) as archive:
     testcase_names = [node.attrib["name"] for node in testcases]
     if len(testcase_names) != len(set(testcase_names)):
         raise SystemExit("JUnit evidence has duplicate testcase names")
+    if int(summary_data.get("native_junit_test_count", 0)) != len(testcases):
+        raise SystemExit("summary native_junit_test_count does not match JUnit")
     if set(discovery_names) != set(testcase_names):
         raise SystemExit("discovery and JUnit test names do not match")
 print("Native PipeWire evidence archive verified")
