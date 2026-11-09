@@ -189,4 +189,11 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=duplicate_entries)))
     result = subprocess.run([sys.executable, str(verifier), str(casefold_manifest)], capture_output=True, text=True)
     if result.returncode == 0 or "case-insensitive duplicate manifest artifact" not in result.stderr + result.stdout: raise SystemExit("case-insensitive manifest duplicate was accepted")
-print("PipeWire evidence archive verifier behavior passed (19 scenarios)")
+    boolean_size = root / "boolean-size.zip"
+    boolean_entries = [dict(entry, size=True) if entry["name"] == "native-summary.json" else entry for entry in manifest["artifacts"]]
+    with zipfile.ZipFile(boolean_size, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=boolean_entries)))
+    result = subprocess.run([sys.executable, str(verifier), str(boolean_size)], capture_output=True, text=True)
+    if result.returncode == 0 or "malformed artifact metadata" not in result.stderr + result.stdout: raise SystemExit("boolean artifact size was accepted")
+print("PipeWire evidence archive verifier behavior passed (20 scenarios)")
