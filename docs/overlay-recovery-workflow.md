@@ -262,3 +262,6 @@ After a click-through display reorder, successful Unlock clears stale recovery m
 
 If Unlock fails after a display reorder, click-through remains active, Unlock keeps focus, and the stale recovery markers remain visible until a later successful unlock clears them; saved identity is not replaced by the reordered index.
 
+
+After a failed Unlock following display reorder, a later successful Unlock clears only the stale failure markers; it preserves the resolved display identity and retained geometry for the next restore.
+
