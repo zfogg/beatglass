@@ -26,3 +26,14 @@ TEST_CASE("stream owner contract preserves target and negotiated format lifecycl
   owner.stop();
   CHECK_FALSE(owner.connected());
 }
+
+TEST_CASE("stream owner rejects incomplete native stream configuration") {
+  FakeOwner owner;
+  beatglass::pipewire::MonitorStream handoff(8, 48000, 2);
+  CHECK_FALSE(owner.connect({"", 48000, 2}, handoff));
+  CHECK_FALSE(owner.connected());
+  CHECK_FALSE(owner.connect({"sink-8", 0, 2}, handoff));
+  CHECK_FALSE(owner.connected());
+  owner.stop();
+  CHECK_FALSE(owner.connected());
+}
