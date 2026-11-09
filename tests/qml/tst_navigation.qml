@@ -1324,4 +1324,15 @@ TestCase {
         verify(findChild(app, "restoreOverlay").enabled)
         app.destroy()
     }
+    function test_persistedOpacitySurvivesVisualRecovery() {
+        fakeOverlay.available = true
+        fakeOverlay.opacity = 0.42
+        let app = shellWithOverlay.createObject(null)
+        app.overlayDisplayRecoveryPending = true
+        verify(app.recoverOverlayAfterDisplayChange())
+        compare(fakeOverlay.opacity, 0.42)
+        verify(app.overlaySettingsRevision > 0)
+        app.destroy()
+        fakeOverlay.opacity = 0.9
+    }
 }
