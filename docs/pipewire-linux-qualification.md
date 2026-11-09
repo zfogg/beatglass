@@ -35,3 +35,5 @@ qualification manifest before capture.
 
 `pipewire_tests` also exercises the portable source-adapter failure boundary;
 native daemon-backed lifecycle cases remain skipped/pending until Linux.
+Run `ctest --test-dir build -R pipewire_tests --output-on-failure` during the
+Linux qualification pass and retain the test output with the manifest.
