@@ -26,6 +26,8 @@ except json.JSONDecodeError as exc:
     raise SystemExit(f"pw-dump returned invalid JSON: {exc}")
 if not isinstance(inventory, list):
     raise SystemExit("pw-dump returned a non-list inventory")
+if not any(isinstance(item, dict) and item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink" for item in inventory):
+    raise SystemExit("pw-dump returned no Audio/Sink")
 version = subprocess.run(["pw-cli", "--version"], check=False,
                          capture_output=True, text=True).stdout.strip()
 manifest = {"schema_version": 1,

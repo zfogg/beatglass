@@ -56,6 +56,8 @@ The validator requires the offset to be UTC (`+00:00`), matching the capture
 command and avoiding local-time ambiguity.
 Manifests also record `audio_sink_count`; validation compares it with the raw
 inventory to detect truncated or mutated evidence.
+Capture itself refuses to publish when no Audio/Sink is present, avoiding a
+misleading empty qualification artifact.
 They include an `inventory_sha256` digest over canonical JSON; validation
 recomputes it to detect post-capture edits and requires the standard 64-digit
 lowercase SHA-256 representation.
