@@ -20,10 +20,9 @@ public slots:
     else { emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); }
   }
   void close() {
-    coordinator_.close_storage();
-    emit runsChanged({}, {});
-    emit analysis(QStringLiteral("Analysis idle"));
-    emit result(true, QStringLiteral("Storage closed"));
+    try { coordinator_.close_storage(); emit result(true, QStringLiteral("Storage closed")); }
+    catch (const std::exception& error) { emit result(false, QStringLiteral("Storage close failed: ") + QString::fromUtf8(error.what())); }
+    emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle"));
   }
   void refresh() {
     std::vector<beatglass::library_detail::RetryableRun> runs;
