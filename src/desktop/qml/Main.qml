@@ -433,6 +433,7 @@ ApplicationWindow {
     }
     Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; search.forceActiveFocus(); search.selectAll() } }
     Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; browser.forceActiveFocus() } }
+    Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; if (window.recursiveCatalogActive) recursiveResultsView.forceActiveFocus(); else browser.forceActiveFocus() } }
     Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus() } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
