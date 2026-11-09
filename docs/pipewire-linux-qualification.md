@@ -57,7 +57,8 @@ command and avoiding local-time ambiguity.
 Manifests also record `audio_sink_count`; validation compares it with the raw
 inventory to detect truncated or mutated evidence.
 They include an `inventory_sha256` digest over canonical JSON; validation
-recomputes it to detect post-capture edits.
+recomputes it to detect post-capture edits and requires the standard 64-digit
+lowercase SHA-256 representation.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a
