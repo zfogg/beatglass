@@ -2,6 +2,7 @@
 import argparse
 import json
 import platform
+import sys
 import subprocess
 import time
 from pathlib import Path
@@ -17,7 +18,7 @@ if platform.system() != "Linux":
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 pipewire_version = subprocess.run(["pkg-config", "--modversion", "libpipewire-0.3"], check=False, capture_output=True, text=True).stdout.strip()
 commands = [
-    ["python", str(args.source / "tests/pipewire/check_linux_native_prerequisites.py")],
+    [sys.executable, str(args.source / "tests/pipewire/check_linux_native_prerequisites.py")],
     ["cmake", "-S", str(args.source), "-B", str(args.build), "-DBEATGLASS_BUILD_PIPEWIRE=ON", "-DBUILD_TESTING=ON"],
     ["cmake", "--build", str(args.build)],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "pipewire"],
@@ -40,7 +41,7 @@ for index, command in enumerate(commands):
     if result.returncode:
         break
 if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
-    capture = ["python", str(args.source / "tests/pipewire/capture_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
+    capture = [sys.executable, str(args.source / "tests/pipewire/capture_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
     capture_started = time.monotonic()
     result = subprocess.run(capture, check=False, text=True, capture_output=True)
     capture_index = len(results)
@@ -52,7 +53,7 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
                     "duration_seconds": round(time.monotonic() - capture_started, 3),
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
     if result.returncode == 0:
-        validate = ["python", str(args.source / "tests/pipewire/validate_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
+        validate = [sys.executable, str(args.source / "tests/pipewire/validate_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
         validate_started = time.monotonic()
         result = subprocess.run(validate, check=False, text=True, capture_output=True)
         validate_index = len(results)
