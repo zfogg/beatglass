@@ -109,6 +109,8 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit("transition evidence has no provenance platform")
         if summary_data.get("platform") and transitions["platform"] != summary_data["platform"]:
             raise SystemExit("transition evidence platform does not match summary")
+        if not transitions["platform"].lower().startswith("linux"):
+            raise SystemExit("transition evidence is not from a Linux host")
         transitions = transitions.get("events")
         if not isinstance(transitions, list) or not transitions:
             raise SystemExit("transition evidence is empty")

@@ -80,6 +80,8 @@ The summary’s transition SHA-256 is independently checked against the archived
 payload, in addition to the manifest artifact digest.
 The captured host platform must also match the qualification summary platform,
 preventing cross-host evidence mixing.
+Transition-bearing qualified archives must identify a Linux host; Windows and
+macOS runs remain pending handoff evidence rather than Linux qualification.
 Capture provenance before validation and packaging:
 
 ```sh
