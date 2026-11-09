@@ -169,6 +169,7 @@ screenshots.
 | [Native status popover](overlay-native-status-popover-card.svg) | compact health, overlay, and pause controls |
 | [Native pause confirmation](overlay-native-pause-confirm-card.svg) | explicit capture pause with retained overlay settings |
 | [Native paused](overlay-native-paused-card.svg) | paused native overlay with retained settings and resume action |
+| [Native resumed](overlay-native-resumed-card.svg) | restored live monitoring with prior overlay presentation |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
