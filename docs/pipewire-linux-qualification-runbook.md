@@ -447,3 +447,5 @@ Pending native runner summaries include explicit blockers (host OS, daemon, Pipe
 Review each blocker before scheduling a native rerun; once satisfied, preserve the same pending summary until the host runner records real command results.
 
 After blockers are resolved, rerun the native runner from the recorded pending command and replace pending status only with captured host evidence.
+
+The runner's `native_execution_attempted` field distinguishes a real host attempt from a preflight-only pending record; keep it when merging summaries.
