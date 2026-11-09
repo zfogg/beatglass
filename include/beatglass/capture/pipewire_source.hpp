@@ -32,6 +32,8 @@ struct MonitorStatus {
   bool requires_reacquisition() const noexcept {
     return !active || needs_restart || discontinuity || overflowed;
   }
+  /** True when the native stream reported an error for this snapshot. */
+  bool has_error() const noexcept { return error_code != 0; }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
