@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Confirm native overlay activation</title>
+  <desc id="desc">A confirmation card that explains the native overlay will appear above other windows and offers an explicit activation action.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <circle cx="116" cy="116" r="28" fill="#39d98a"/>
+  <path d="M104 116l8 8 16-18" fill="none" stroke="#08141a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="168" y="111" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Overlay is ready</text>
+  <text x="168" y="142" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Bring the native window forward when you are ready.</text>
+  <rect x="96" y="190" width="728" height="104" rx="16" fill="#17243c"/>
+  <text x="124" y="226" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Native overlay</text>
+  <text x="124" y="258" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Display 2 · Bottom-right · 82% opacity</text>
+  <text x="124" y="282" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="16">Click-through is on; use Ctrl+Shift+O to unlock.</text>
+  <rect x="96" y="326" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="370" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">Activation changes only the overlay window.</text>
+  <text x="96" y="398" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">Your audio session and saved appearance stay untouched.</text>
+  <rect x="96" y="438" width="220" height="46" rx="12" fill="#39d98a"/>
+  <text x="206" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Activate overlay</text>
+  <rect x="334" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="411" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Not now</text>
+</svg>
