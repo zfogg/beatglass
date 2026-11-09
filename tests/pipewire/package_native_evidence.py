@@ -35,6 +35,11 @@ for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
     if summary.get(digest_key) != digest(path):
         raise SystemExit(f"{key} digest mismatch")
     if key == "native_transition_json":
+        transition_payload = json.loads(path.read_text(encoding="utf-8"))
+        if not str(transition_payload.get("platform", "")).lower().startswith("linux"):
+            raise SystemExit("transition evidence is not from a Linux host")
+        if transition_payload.get("commit") != summary.get("commit"):
+            raise SystemExit("transition evidence commit does not match summary")
         validator = Path(__file__).with_name("validate_pipewire_transition_evidence.py")
         check = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True, check=False)
         if check.returncode:

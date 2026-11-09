@@ -26,6 +26,8 @@ markers = (
     "transition_event_count",
     "platform",
     "transition_schema",
+    "not from a Linux host",
+    "transition evidence commit does not match summary",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:
