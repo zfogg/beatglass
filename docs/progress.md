@@ -1,8 +1,9 @@
 # Progress and handoff
 
-Waveform rendering now clamps accepted min/max PCM extrema to the normalized
-[-1, 1] display range before mapping them into the canvas, preventing malformed
-or transient out-of-range source values from escaping the visual bounds.
+Invalid Core Audio capture formats now preserve their root diagnostic when
+cleanup also fails, appending the quiescence failure instead of replacing it.
+Portable coverage is in
+`python tests/unit/check_macos_invalid_format_diagnostic_contract.py`.
 
 The FFT view now derives a bounded peak-bin summary from the accepted spectrum
 snapshot and exposes it through the canvas accessibility value, making the

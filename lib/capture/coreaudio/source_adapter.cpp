@@ -56,7 +56,9 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
   catch (...) { format.reset(); }
   if (!format || !format->sample_rate || !format->channels) {
     const bool stopped = backend_->stop(); quiescence_failed_ = !stopped; lifecycle_.stop();
-    status_ = {SourceState::error, SourceError::backend_error, stopped ? "Invalid capture format" : "Invalid format; backend stop failed"};
+    std::string diagnostic = "Invalid capture format";
+    if (!stopped) diagnostic += "; backend stop also failed";
+    status_ = {SourceState::error, SourceError::backend_error, std::move(diagnostic)};
     return {{}, SourceError::backend_error, status_.message};
   }
   attempt_ = attempt; format_ = format; consumer_ = std::move(consumer); sequence_ = 1;
