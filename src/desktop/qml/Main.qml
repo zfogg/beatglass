@@ -1606,10 +1606,10 @@ ApplicationWindow {
                         objectName: "analyzeRecursiveResults"
                         anchors.left: parent.left; anchors.bottom: parent.bottom
                         text: "Analyze first files"
-                        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFiles !== undefined && window.recursiveCatalogRows.length > 0
+                        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFiles !== undefined && window.recursiveCatalogRows.length > 0 && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
                         Accessible.name: "Analyze recursive audio results"
                         Accessible.role: Accessible.Button
-                        Accessible.description: "Fingerprint and queue the first available recursive audio results; the bounded queue reports accepted and rejected items."
+                        Accessible.description: enabled ? "Fingerprint and queue the first available recursive audio results; the bounded queue reports accepted and rejected items." : "An analysis batch is already active; wait for completion or cancel before submitting another batch."
                         ToolTip.text: "Queue the first recursive audio results for offline analysis"
                         onClicked: {
                             const paths = []
