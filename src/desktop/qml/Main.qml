@@ -1171,6 +1171,7 @@ ApplicationWindow {
                     text: "Retry capture"
                     ToolTip.text: "Retry monitoring the selected output source"
                     Accessible.name: "Retry overlay capture"
+                    Accessible.value: window.overlayDisplayRecoveryPending ? "available; overlay recovery pending" : "available; overlay ready"
                     Accessible.role: Accessible.Button
                     Accessible.description: "Retry monitoring the selected output source"
                     onClicked: window.captureMonitorBridge.start()
