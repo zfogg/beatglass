@@ -11,6 +11,7 @@
 | Library storage recovery | Saved folder exists but local storage is unavailable | Explain retained source files, offer reopen/choose/forget actions, and keep analysis disabled. |
 | Jobs empty | No queued, running, or recoverable analysis | Explain that results remain available and offer a route back to Library. |
 | DJ permission recovery | OS capture permission unavailable | Explain why estimates are blank, link to system settings, and preserve Library evidence. |
+| DJ monitoring starting | Output capture is opening and reacquiring timing | Gate estimates until stable frames arrive, show bounded startup progress, and preserve Library evidence on cancel. |
 | Track metadata loading | Selected source is being decoded | Show a non-fabricated loading state, keep prior evidence hidden, and provide cancellation. |
 | Track metadata error | Decoder cannot read selected source | Explain cleared evidence, offer retry/another track, and state that files are unchanged. |
 | Track analysis queued | Verified source admitted to analysis queue | Hide prior evidence, show worker status and cancellation, and link to queue. |
