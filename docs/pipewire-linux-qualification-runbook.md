@@ -437,3 +437,5 @@ If a handoff is regenerated, update its verifier revision and command together w
 Do not merge regenerated handoff metadata from a different verifier revision without rerunning the local contract and behavior checks.
 
 Attach local contract/behavior test output to regenerated handoffs so metadata edits remain independently reviewable.
+
+Use a stable handoff filename for verifier output and preserve prior outputs when regenerating, allowing reviewers to compare evidence revisions.
