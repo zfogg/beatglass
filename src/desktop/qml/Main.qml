@@ -1935,6 +1935,21 @@ ApplicationWindow {
                         }
                     }
                 }
+                Button {
+                    objectName: "returnToFolderBrowser"
+                    visible: window.recursiveCatalogActive
+                    text: "Return to folder browser"
+                    activeFocusOnTab: true
+                    Accessible.name: "Return to folder browser"
+                    Accessible.role: Accessible.Button
+                    Accessible.description: "Close recursive results and return to the current folder browser."
+                    ToolTip.text: "Return to the current folder browser"
+                    onClicked: {
+                        window.recursiveCatalogActive = false
+                        window.announceVisualizationRecovery("Returned to the current folder browser.")
+                        browser.forceActiveFocus()
+                    }
+                }
                 Frame {
                     objectName: "recursiveResultsFrame"
                     visible: window.recursiveCatalogActive
