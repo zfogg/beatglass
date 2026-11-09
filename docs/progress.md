@@ -1,5 +1,9 @@
 # Progress and handoff
 
+When the native overlay is unavailable but displays are enumerated, `Ctrl+Alt+Y`
+retries recovery while keeping the control window visible until the show call
+succeeds, matching the button-based fallback path.
+
 `Ctrl+Alt+D` focuses the overlay display selector and announces whether a
 replacement display is required, providing a direct keyboard recovery path
 when a monitor disappears or a saved destination becomes stale.
