@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio stop requests made during PCM delivery now return typed `busy`
+status with an actionable diagnostic instead of a silent false result.
+Portable coverage is in
+`python tests/unit/check_macos_stop_delivery_contract.py`.
+
 Core Audio stop failures now expose an explicit retry-before-restart diagnostic
 instead of retaining stale startup text. Portable coverage is in
 `python tests/unit/check_macos_stop_failure_message_contract.py`.

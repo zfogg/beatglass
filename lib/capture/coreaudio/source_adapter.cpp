@@ -98,7 +98,10 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
   return {attempt, {}, {}};
 }
 bool SourceAdapter::stop() noexcept {
-  if (delivering_) return false;
+  if (delivering_) {
+    status_ = {SourceState::error, SourceError::busy, "Cannot stop Core Audio capture during PCM delivery"};
+    return false;
+  }
   lifecycle_.stop(); pending_.reset(); attempt_.reset(); format_.reset(); anchor_.reset();
   running_taken_ = running_acknowledged_ = false; consumer_ = {};
   const bool stopped = !backend_ || backend_->stop();
