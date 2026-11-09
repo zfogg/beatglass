@@ -50,6 +50,8 @@ public:
   virtual std::optional<MonitorFormat> selected_format() const noexcept = 0;
   /** Return the epoch currently owned by the selected session, or zero when stopped. */
   virtual std::uint64_t selected_epoch() const noexcept = 0;
+  /** Return whether the selected stream is currently accepting callback data. */
+  virtual bool selected_active() const noexcept = 0;
   /** Return whether a block tagged with epoch belongs to the selected stream. */
   virtual bool accepts_epoch(std::uint64_t epoch) const noexcept = 0;
   /** Pop one bounded block on the control thread after start_stream succeeds. */
@@ -124,6 +126,7 @@ public:
   bool accepts_epoch(std::uint64_t epoch) const noexcept {
     return epoch != 0 && epoch == epoch_ && stream_ && !stream_->needs_restart();
   }
+  bool active() const noexcept { return stream_ && !stream_->needs_restart(); }
 private:
   std::string serial_;
   std::unique_ptr<MonitorStream> stream_;

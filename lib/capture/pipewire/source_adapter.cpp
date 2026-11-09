@@ -117,6 +117,7 @@ public:
   std::string selected_serial() const override { return session_.serial(); }
   std::optional<MonitorFormat> selected_format() const noexcept override { return session_.format(); }
   std::uint64_t selected_epoch() const noexcept override { return session_.epoch(); }
+  bool selected_active() const noexcept override { return session_.active(); }
   bool accepts_epoch(std::uint64_t epoch) const noexcept override { return session_.accepts_epoch(epoch); }
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
   MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
