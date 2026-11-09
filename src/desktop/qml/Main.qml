@@ -1940,6 +1940,22 @@ ApplicationWindow {
                                 ToolTip.text: "Source path for the latest verified batch result"
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideMiddle
                             }
+                            Button {
+                                objectName: "selectLatestPublishedSource"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastSource !== ""
+                                text: "Select latest published source"
+                                enabled: visible
+                                Accessible.name: "Select latest published analysis source"
+                                Accessible.role: Accessible.Button
+                                Accessible.description: "Select the source associated with the latest verified batch result and refresh its metadata details."
+                                ToolTip.text: "Select the source associated with the latest verified batch result"
+                                onClicked: {
+                                    window.selectedAudioUrl = Qt.resolvedUrl(window.analysisJobBridge.batchLastSource)
+                                    window.selectedName = window.selectedAudioUrl.fileName
+                                    if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
+                                    window.announceVisualizationRecovery("Latest published analysis source selected.")
+                                }
+                            }
                             Label {
                                 objectName: "persistedRecoveryStatus"
                                 visible: typeof storageRecovery !== "undefined"
