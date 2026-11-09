@@ -1861,4 +1861,18 @@ TestCase {
         compare(app.overlayPreferredSizeIndex, 2)
         app.destroy()
     }
+    function test_restoreAfterRetainedReviewUsesSavedSettings() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        app.hideOverlayAndRestoreControls()
+        findChild(app, "overlaySettingsRetentionReviewAction").clicked()
+        findChild(app, "restoreOverlay").clicked()
+        verify(!app.overlayHiddenByUser)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(fakeOverlay.shows > 0)
+        app.destroy()
+    }
 }

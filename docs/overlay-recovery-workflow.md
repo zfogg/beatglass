@@ -232,3 +232,6 @@ The retained-settings summary action remains directly activatable during click-t
 
 Retained-settings review remains available after the user hides the overlay: reviewing the status does not unhide or rewrite the saved display and geometry state, so Restore remains an explicit choice.
 
+
+After reviewing retained settings following Hide, Restore overlay remains an explicit action: it relaunches using the same saved display and geometry and clears only the user-hidden marker.
+
