@@ -7,6 +7,7 @@
 #include <stop_token>
 #include <string>
 #include <utility>
+#include <unordered_set>
 
 namespace beatglass::library_detail {
 bool sqlite_length_representable(std::size_t size) noexcept { return size <= static_cast<std::size_t>(std::numeric_limits<int>::max()); }
@@ -128,12 +129,16 @@ public:
   }
   std::size_t discard_retryable(const std::vector<std::string>& ids) {
     if (ids.empty() || ids.size() > kMaxRetryableRuns) throw std::invalid_argument("invalid retryable run batch");
+    std::unordered_set<std::string> unique;
+    for (const auto& id : ids) {
+      if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
+        throw std::invalid_argument("invalid run ID");
+      if (!unique.insert(id).second) throw std::invalid_argument("duplicate retryable run ID");
+    }
     exec("BEGIN IMMEDIATE");
     std::size_t removed = 0;
     try {
       for (const auto& id : ids) {
-        if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
-          throw std::invalid_argument("invalid run ID");
         Statement s(db_, "DELETE FROM runs WHERE id=? AND status='retryable'");
         bind(s.p, 1, id); done(s.p); removed += static_cast<std::size_t>(sqlite3_changes(db_));
       }

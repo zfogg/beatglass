@@ -176,6 +176,13 @@ TEST_CASE("SQLite cache rolls back a batch discard when a later ID is malformed"
   REQUIRE(cache.retryable_runs().size() == 1);
   CHECK(cache.retryable_runs().front().id == "keep");
 }
+TEST_CASE("SQLite cache rejects duplicate batch discard IDs before deleting") {
+  SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
+  cache.begin("keep", key);
+  REQUIRE(cache.publish("keep", key, "partial", {}, [] { return false; }) == Publish::stale_input);
+  REQUIRE_THROWS_AS(cache.discard_retryable(std::vector<std::string>{"keep", "keep"}), std::invalid_argument);
+  CHECK(cache.retryable_runs().size() == 1);
+}
 TEST_CASE("SQLite cache discards retryable runs atomically as a batch") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};
   cache.begin("one", key); REQUIRE(cache.publish("one", key, "x", {}, [] { return false; }) == Publish::stale_input);
