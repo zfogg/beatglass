@@ -4329,8 +4329,8 @@ ApplicationWindow {
                     title: "Audio capture"
                     Accessible.name: "Audio capture settings"
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Choose the output endpoint and device used for live monitoring."
-                    ToolTip.text: "Configure live audio capture sources"
+                    Accessible.description: "Choose the output endpoint and device used for live monitoring. " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.")
+                    ToolTip.text: "Configure live audio capture sources; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
