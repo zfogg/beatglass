@@ -40,6 +40,8 @@ for command in summary.get("commands", []):
                 artifacts.append(path)
 if len({path.name for path in artifacts}) != len(artifacts):
     raise SystemExit("evidence artifacts have colliding archive names")
+if len({path.name.casefold() for path in artifacts}) != len(artifacts):
+    raise SystemExit("evidence artifacts have case-insensitive archive name collisions")
 
 if output_path.exists() or output_path.is_symlink():
     raise SystemExit(f"refusing to overwrite existing output: {output_path}")

@@ -145,3 +145,5 @@ Both POSIX and Windows path separators are rejected in entry names; archives
 must remain a flat basename-only handoff.
 Control characters are rejected from entry names as well, avoiding ambiguous
 or truncated extraction paths.
+The packager applies the same case-folded collision check before writing the
+archive, so invalid evidence is rejected at its source.
