@@ -17,6 +17,7 @@ def main() -> None:
     assert "window.recursiveCatalogRows = []" in block
     assert "browser.currentIndex = -1" in block
     assert "event.accepted = true" in block
+    assert "Already at the top Library folder" in block
 
 
 if __name__ == "__main__":
