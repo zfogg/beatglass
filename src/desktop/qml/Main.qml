@@ -1959,7 +1959,10 @@ ApplicationWindow {
             if (window.overlayDisplayRecoveryPending && window.overlayBridge
                     && window.overlayBridge.screenNames.length > 0
                     && !window.overlayDisplaySelectionRequired) {
-                window.recoverOverlayAfterDisplayChange()
+                if (!window.overlayRecoveryPausedByUser)
+                    window.recoverOverlayAfterDisplayChange()
+                else
+                    window.announceCaptureRecoveryState("DJ overlay geometry restored; recovery remains paused until Resume recovery is chosen.")
                 if (window.overlayRecoveryPausedByUser)
                     resumeOverlayRecovery.forceActiveFocus()
                 else
