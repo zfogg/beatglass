@@ -788,12 +788,21 @@ ApplicationWindow {
             window.announceCaptureRecoveryState("Persisted overlay geometry unavailable; control-window fallback remains active.")
             return false
         }
-        window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)
+        if (!window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)) {
+            window.announceCaptureRecoveryState("Persisted overlay geometry could not be restored; control-window fallback remains active.")
+            return false
+        }
         const savedOpacity = Number(window.overlayBridge.opacity)
-        if (isFinite(savedOpacity) && savedOpacity >= 0.2 && savedOpacity <= 1.0)
-            window.overlayBridge.setOpacity(savedOpacity)
-        else {
-            window.overlayBridge.setOpacity(0.9)
+        if (isFinite(savedOpacity) && savedOpacity >= 0.2 && savedOpacity <= 1.0) {
+            if (!window.overlayBridge.setOpacity(savedOpacity)) {
+                window.announceCaptureRecoveryState("Persisted overlay opacity could not be restored; control-window fallback remains active.")
+                return false
+            }
+        } else {
+            if (!window.overlayBridge.setOpacity(0.9)) {
+                window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe opacity could not be applied.")
+                return false
+            }
             window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe 90 percent opacity applied.")
         }
         window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
