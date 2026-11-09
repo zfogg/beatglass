@@ -764,3 +764,5 @@ If the native platform rejects a requested click-through transition, the toggle 
 Unlock follows the same failure contract: the control window only announces restored interaction after the native bridge accepts the transition; a rejected unlock keeps fallback controls available and reports the failure.
 
 Hide also restores the control window when the native bridge has already disappeared, preserving the user-hidden intent while making the fallback actionable.
+
+Persisted display restore failures now announce that the saved display is unavailable and direct keyboard users to choose another display while retaining the control-window fallback.
