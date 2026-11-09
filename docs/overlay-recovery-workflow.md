@@ -205,3 +205,6 @@ The Ctrl+Alt+K click-through focus shortcut remains available while the overlay 
 
 The Ctrl+Alt+L opacity focus shortcut remains usable while click-through is active, restoring the control window and focusing opacity without changing persisted display, geometry, or interaction settings.
 
+
+The Ctrl+Alt+Z size focus shortcut remains usable while click-through is active, restoring the control window and focusing the saved size control without changing persisted display or geometry state.
+
