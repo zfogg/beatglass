@@ -460,3 +460,5 @@ Merged matrices retain platform blocker lists and attempt flags verbatim; confli
 Matrix reports now expose attempt status and blockers directly; review those fields before scheduling or accepting a host qualification.
 
 Qualification report renderers escape evidence paths, reasons, and blockers for safe Markdown review; raw JSON remains the authoritative handoff.
+
+Markdown reports escape all identity and evidence cells; consume the raw matrix JSON when exact values are required.
