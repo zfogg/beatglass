@@ -1695,6 +1695,17 @@ ApplicationWindow {
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                         }
                         Label {
+                            objectName: "analysisProvenance"
+                            visible: window.analysisJobBridge !== null && window.analysisJobBridge.engineVersion !== ""
+                            text: visible ? ("Analysis provenance: " + window.analysisJobBridge.engineVersion + " · " + window.analysisJobBridge.configurationId + " · " + window.analysisJobBridge.analysisMode) : ""
+                            Accessible.name: "Analysis provenance: " + text
+                            Accessible.value: visible ? text : ""
+                            Accessible.role: Accessible.Status
+                            Accessible.description: visible ? "Engine, configuration, and mode used for the selected analysis." : "Analysis provenance is unavailable until analysis is queued."
+                            ToolTip.text: "Engine, configuration, and mode for the selected analysis"
+                            Layout.fillWidth: true; wrapMode: Text.WordWrap
+                        }
+                        Label {
                             objectName: "sourceWorkflowStatus"
                             ToolTip.text: "Selected source playback and metadata workflow status"
                             text: window.selectedAudioUrl.toString() === ""
