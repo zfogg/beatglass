@@ -54,6 +54,7 @@ Ready reports must have no exit-gate reason codes; pending reports must retain
 at least one reason code explaining the unresolved gate. Ready reports must
 also have no handoff-check errors.
 Reason codes must be non-empty strings so pending gates remain machine-readable.
+Reason codes must also be unique to avoid obscuring the actual blocker set.
 They must also have no documentation-check errors.
 The report handoff status must be `complete` (or omitted for legacy reports)
 when `ready: true`; pending or failed handoffs cannot be promoted.
