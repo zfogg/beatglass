@@ -403,3 +403,5 @@ Malformed optional summary timestamp provenance is rejected before artifact acce
 Summary archive timestamps, when supplied, must be canonical UTC strings and equal the manifest timestamp; malformed values are rejected before evidence acceptance.
 
 UTC provenance checks are case-sensitive: only the canonical uppercase Z suffix is accepted for summary timestamps.
+
+Archive review should report timestamp-schema failures separately from native execution failures so pending host qualification is never confused with transfer-integrity rejection.
