@@ -53,7 +53,7 @@ public:
 private:
   std::unique_ptr<coreaudio::CaptureFifo> fifo_;
   std::atomic<bool> stopped_{false};
-  bool discontinuity_pending_{};
+  std::atomic<bool> discontinuity_pending_{false};
   std::atomic<int> error_code_{0};
 };
 /** Create the provisional PipeWire monitor boundary; ownership stays with the caller. */
