@@ -390,6 +390,19 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "analysisBatchDiscardShortcut"
+        sequence: "Ctrl+Alt+Shift+D"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null
+            && window.analysisJobBridge.discardBatch !== undefined
+            && window.analysisJobBridge.batchAcceptedCount > 0
+            && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
+        onActivated: {
+            window.analysisJobBridge.discardBatch()
+            window.announceVisualizationRecovery("Analysis batch recovery discarded from the keyboard; focus remains on recovery controls.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
