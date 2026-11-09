@@ -101,7 +101,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "native_junit_failures": junit_failures,
            "native_junit_errors": junit_errors,
            "native_junit_skipped": junit_skipped,
-           "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and all(item["returncode"] == 0 for item in results)}
+           "qualified": discovery_count is not None and discovery_count > 0 and junit_count is not None and junit_count > 0 and junit_failures == 0 and junit_errors == 0 and junit_skipped == 0 and all(item["returncode"] == 0 for item in results)}
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
