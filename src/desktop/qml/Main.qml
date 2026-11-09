@@ -920,6 +920,7 @@ ApplicationWindow {
             window.announceCaptureRecoveryState(reason)
     }
     function showOverlayAndHideControls() {
+        window.overlayHiddenByUser = false
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayDisplayRecoveryPending = true
             window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
