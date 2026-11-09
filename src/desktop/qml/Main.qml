@@ -3452,6 +3452,22 @@ ApplicationWindow {
                         wrapMode: Text.WordWrap
                     }
                     Label {
+                        objectName: "overlayRecoveryActionStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (window.overlayDisplayRecoveryPending ? "Overlay recovery: waiting for a compatible display" : (window.overlayHiddenByUser ? "Overlay recovery: restore is available" : "Overlay recovery: ready"))
+                            : "Overlay recovery unavailable"
+                        Accessible.name: "Overlay recovery action status"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && window.overlayDisplayRecoveryPending
+                            ? text + ". Keep the control window available, then choose or reconnect a display before restoring."
+                            : visible && window.overlayHiddenByUser ? text + ". Restore overlay uses the persisted display, size, and opacity." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay recovery status"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
                         text: "No displays are available for the overlay."
