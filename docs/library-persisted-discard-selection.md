@@ -9,3 +9,4 @@ until the worker reports the terminal result.
 Single selected discard publishes the same transition status as batch discard.
 It clears stale displayed result and progress before requesting the destructive
 recovery operation.
+Batch discard applies the same stale-result and progress reset before queueing.

@@ -35,6 +35,9 @@ if source.count("Discarding persisted recovery") < 2:
 discard_source = source[source.index("void StorageRecoveryBridge::discardSelectedRun"):]
 if "analysisResult_.clear()" not in discard_source:
     raise SystemExit("Persisted discard must clear stale result")
+batch_discard = source[source.index("void StorageRecoveryBridge::discardRuns"):source.index("void StorageRecoveryBridge::discardSelectedRun")]
+if "analysisResult_.clear()" not in batch_discard:
+    raise SystemExit("Batch persisted discard must clear stale result")
 if "Refreshing persisted recovery" not in source:
     raise SystemExit("Recovery refresh must publish a transition status")
 if "Persisted recovery refreshed" not in source:
