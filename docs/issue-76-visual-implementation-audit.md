@@ -784,3 +784,5 @@ The unavailable-bridge restore path now follows the same focus rule, so every pe
 Invalid persisted visual state now announces the exact recovery action before returning focus to display selection.
 
 Native show failures now restore focus to display recovery as well, keeping the fallback actionable when the platform refuses to present the overlay window.
+
+Unavailable-bridge and invalid-visual-state show fallbacks now restore the same display-selector focus, so every show failure path is keyboard actionable.
