@@ -58,6 +58,7 @@ TestCase {
         property int shows: 0
         property int hides: 0
         property var screenNames: ["Display"]
+        property string displayName: "Display"
         property int screenIndex: -1
         property int selectedScreen: -1
         property int requestedWidth: 0
@@ -68,7 +69,7 @@ TestCase {
         function hideOverlay() { hides++; clickThrough = false }
         function setClickThrough(value) { if ((value && refuseClickThrough) || (!value && refuseUnlock)) return false; clickThrough = value; return true }
         function setOpacity(value) { opacity = value }
-        function moveToScreen(index) { selectedScreen = index; screenIndex = index; return true }
+        function moveToScreen(index) { selectedScreen = index; screenIndex = index; displayName = screenNames[index]; return true }
         function resizeOverlay(width, height) { requestedWidth = width; return true }
     }
     Component { id: shell; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive } }
@@ -1334,5 +1335,21 @@ TestCase {
         verify(app.overlaySettingsRevision > 0)
         app.destroy()
         fakeOverlay.opacity = 0.9
+    }
+    function test_persistedDisplayIdentitySurvivesVisualRecovery() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        fakeOverlay.displayName = "Projector"
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 1
+        app.overlayDisplayRecoveryPending = true
+        verify(app.recoverOverlayAfterDisplayChange())
+        compare(fakeOverlay.selectedScreen, 1)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        verify(app.overlayRecoveryAnnouncement.indexOf("Projector") >= 0)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
     }
 }

@@ -130,3 +130,6 @@ viewport and attach the images to the UI qualification issue:
 
 The contract test checks the stable object names and copy used by these states;
 native desktop screenshots remain required evidence for platform qualification.
+
+The saved display identity is restored by name rather than only by its old index, and a successful recovery announcement names the display that was reconnected. This keeps display continuity understandable when the operating system reorders screens after reconnecting them.
+
