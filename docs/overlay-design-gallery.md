@@ -118,6 +118,8 @@ screenshots.
 | [Shortcut saved](overlay-activation-shortcut-applied-card.svg) | persisted activation confirmation |
 | [Tray disconnected](overlay-tray-disconnected-card.svg) | recoverable tray loss with preserved overlay state |
 | [Tray reconnected](overlay-tray-reconnected-card.svg) | restored tray actions without playback interruption |
+| [Activation pending](overlay-activation-pending-card.svg) | native window activation progress state |
+| [Activation failed](overlay-activation-failed-card.svg) | recoverable activation failure with retry |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
