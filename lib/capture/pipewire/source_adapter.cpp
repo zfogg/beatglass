@@ -77,6 +77,7 @@ void MonitorSession::reset() noexcept {
 bool MonitorSession::needs_restart() const noexcept { return !stream_ || stream_->needs_restart(); }
 bool MonitorSession::restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) {
   if (!stream_ || !stream_->needs_restart()) return false;
+  if (!epoch || epoch == epoch_) return false;
   const bool restarted = stream_ && stream_->restart(epoch, sample_rate, channels);
   if (restarted) format_ = Format{sample_rate, channels};
   if (restarted) epoch_ = epoch;
