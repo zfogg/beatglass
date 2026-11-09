@@ -191,6 +191,8 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
     cacheHit_ = hit; cachedResult_ = result; emit cachedResultChanged();
+    if (analysisAdmission_) { analysisAdmission_ = false; emit analysisAdmissionChanged(); }
+    if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; const bool retryable = text == QStringLiteral("Analysis cancelled") || text == QStringLiteral("Analysis failed") || text == QStringLiteral("Analysis recovery available"); if (analysisRetryable_ != retryable) { analysisRetryable_ = retryable; emit analysisRetryableChanged(); } if (text != QStringLiteral("Analysis failed") && !analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); } if ((text == QStringLiteral("Analysis cancelled") || text == QStringLiteral("Analysis failed")) && !analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); } emit analysisStatusChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisError, this, [this](const QString& text) { analysisError_ = text; emit analysisErrorChanged(); }, Qt::QueuedConnection);

@@ -7,7 +7,8 @@ presentation, and emits actionable `Cache lookup rejected:` or `Cache
 invalidation rejected:` status text. A storage exception therefore cannot
 escape a queued UI invocation or leave an earlier cache hit displayed as
 current; failed invalidation also clears the stale presentation
-conservatively.
+conservatively. A new cache lookup likewise clears any prior admission
+readout, so results from separate identity probes cannot be combined.
 
 Successful invalidation continues to clear the cached result only after the
 storage owner confirms removal. It also clears the displayed analysis and
