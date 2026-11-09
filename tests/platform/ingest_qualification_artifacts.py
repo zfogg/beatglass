@@ -49,6 +49,8 @@ def ingest(root: Path, output: Path) -> list[str]:
             if normalized in seen_paths:
                 errors.append(f"duplicate artifact path: {normalized}"); continue
             seen_paths.add(normalized)
+            if path.stat().st_size == 0:
+                errors.append(f"empty qualification artifact: {normalized}"); continue
             actual = hashlib.sha256(path.read_bytes()).hexdigest()
             if actual != digest.lower():
                 errors.append(f"artifact hash mismatch: {relative}")
