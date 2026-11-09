@@ -5,7 +5,7 @@ import sys
 import tempfile
 
 source = (Path(__file__).parents[2] / "tests/pipewire/validate_pipewire_manifest.py").read_text(encoding="utf-8")
-for marker in ("schema_version", "captured_at_utc", "host_platform", "python_version", "pipewire_cli_version", "inventory", "is_symlink", "refusing symlinked manifest", "must identify Linux", "non-negative numeric ids", "unsupported PipeWire qualification manifest schema", "must be a list"):
+for marker in ("schema_version", "captured_at_utc", "host_platform", "python_version", "pipewire_cli_version", "inventory", "is_symlink", "refusing symlinked manifest", "must identify Linux", "non-negative numeric ids", "object ids must be unique", "unsupported PipeWire qualification manifest schema", "must be a list"):
     assert marker in source
 print("PipeWire manifest validator contract verified (6 checks)")
 
@@ -27,6 +27,9 @@ with tempfile.TemporaryDirectory() as directory:
     path.write_text(json.dumps({**valid, "inventory": [{}]}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
+    path.write_text(json.dumps({**valid, "inventory": [{"id": 1}, {"id": 1}]}), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    assert result.returncode != 0
     path.write_text(json.dumps({**valid, "captured_at_utc": "not-a-timestamp"}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
@@ -36,4 +39,4 @@ with tempfile.TemporaryDirectory() as directory:
     path.write_text(json.dumps({**valid, "host_platform": "Windows"}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
-print("PipeWire manifest validator fixture behavior verified (7 scenarios)")
+print("PipeWire manifest validator fixture behavior verified (8 scenarios)")

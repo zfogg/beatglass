@@ -34,4 +34,7 @@ if any(not isinstance(item, dict) for item in manifest["inventory"]):
     raise SystemExit("manifest inventory entries must be objects")
 if any(not isinstance(item.get("id"), int) or item["id"] < 0 for item in manifest["inventory"]):
     raise SystemExit("manifest inventory entries must have non-negative numeric ids")
+ids = [item["id"] for item in manifest["inventory"]]
+if len(ids) != len(set(ids)):
+    raise SystemExit("manifest inventory object ids must be unique")
 print("PipeWire qualification manifest is valid")
