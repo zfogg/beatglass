@@ -46,7 +46,7 @@ with zipfile.ZipFile(archive_path) as archive:
     artifacts = manifest.get("artifacts", [])
     if not isinstance(artifacts, list) or not artifacts:
         raise SystemExit("evidence manifest contains no artifacts")
-    if any(not isinstance(artifact, dict) or not isinstance(artifact.get("name"), str) or not artifact["name"].strip() or artifact["name"] == "evidence-manifest.json" or "/" in artifact["name"] or "\\" in artifact["name"] for artifact in artifacts):
+    if any(not isinstance(artifact, dict) or not isinstance(artifact.get("name"), str) or not artifact["name"].strip() or artifact["name"] in (".", "..", "evidence-manifest.json") or "/" in artifact["name"] or "\\" in artifact["name"] for artifact in artifacts):
         raise SystemExit("malformed manifest artifact name")
     if len({artifact["name"] for artifact in artifacts}) != len(artifacts):
         raise SystemExit("duplicate manifest artifact")
