@@ -17,6 +17,9 @@ class AnalysisJobBridge final : public QObject {
   Q_PROPERTY(QString sourcePath READ sourcePath NOTIFY sourceChanged)
   Q_PROPERTY(QString failureReason READ failureReason NOTIFY failureChanged)
   Q_PROPERTY(QString recoveryStatus READ recoveryStatus NOTIFY statusChanged)
+  Q_PROPERTY(QString engineVersion READ engineVersion NOTIFY provenanceChanged)
+  Q_PROPERTY(QString configurationId READ configurationId NOTIFY provenanceChanged)
+  Q_PROPERTY(QString analysisMode READ analysisMode NOTIFY provenanceChanged)
   Q_PROPERTY(bool canCancel READ canCancel NOTIFY statusChanged)
   Q_PROPERTY(bool canRetry READ canRetry NOTIFY statusChanged)
   Q_PROPERTY(int batchAcceptedCount READ batchAcceptedCount NOTIFY batchChanged)
@@ -37,6 +40,9 @@ public:
   QString sourcePath() const { return sourcePath_; }
   QString failureReason() const { return failureReason_; }
   QString recoveryStatus() const { return recoveryStatus_; }
+  QString engineVersion() const { return engineVersion_; }
+  QString configurationId() const { return configurationId_; }
+  QString analysisMode() const { return analysisMode_; }
   bool canCancel() const noexcept;
   bool canRetry() const noexcept;
   /** Cancel the active job, publish Cancelled immediately, and clear stale result presentation. */
@@ -75,6 +81,7 @@ signals:
   void resultChanged();
   void sourceChanged();
   void failureChanged();
+  void provenanceChanged();
   void batchChanged();
 private slots:
   void poll();
@@ -99,4 +106,7 @@ private:
   QString sourcePath_;
   QString failureReason_;
   QString recoveryStatus_;
+  QString engineVersion_;
+  QString configurationId_;
+  QString analysisMode_;
 };

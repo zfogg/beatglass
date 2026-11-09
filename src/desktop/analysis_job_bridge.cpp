@@ -33,6 +33,9 @@ AnalysisJobBridge::AnalysisJobBridge(beatglass::library_detail::JobExecutor& exe
 bool AnalysisJobBridge::submitFile(const QString& path, const QString& contentHash,
                                    const QString& engineVersion, const QString& configurationId,
                                    const QString& mode) {
+  if (engineVersion_ != engineVersion || configurationId_ != configurationId || analysisMode_ != mode) {
+    engineVersion_ = engineVersion; configurationId_ = configurationId; analysisMode_ = mode; emit provenanceChanged();
+  }
   beatglass::library::AnalysisIdentity identity;
   identity.content_hash = contentHash.toStdString(); identity.engine_version = engineVersion.toStdString();
   identity.configuration_id = configurationId.toStdString(); identity.mode = mode.toStdString();
