@@ -3506,7 +3506,7 @@ ApplicationWindow {
                     Accessible.description: window.overlayLaunchFallbackActive
                         ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained."
                         : window.overlayDisplayRecoveryPending
-                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending and the control-window fallback remains available."
+                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending, the control-window fallback remains available, and persisted settings are retained."
                         : "Show, unlock, or hide the DJ overlay window."
                     ToolTip.text: window.overlayBridge && window.overlayBridge.available
                         ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available"))

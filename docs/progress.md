@@ -806,3 +806,5 @@ The overlay actions accessible value now reports that settings are retained duri
 
 The available overlay actions accessibility value now states that persisted settings are retained, alongside the settings revision. Portable coverage is in `python tests/unit/check_overlay_available_value_contract.py`.
 
+Pending overlay recovery descriptions now state that persisted settings remain retained while the control-window fallback is available. Portable coverage is in `python tests/unit/check_overlay_recovery_description_contract.py`.
+
