@@ -1,5 +1,13 @@
 # Issue #76 visual implementation audit
 
+## Overlay design evidence
+
+The committed overlay state/component renderings are indexed in the [design
+evidence gallery](overlay-design-gallery.md). The gallery includes the ready,
+recovery, disconnected, interaction, visualization, and native qualification
+matrix renderings; these are review evidence and do not replace native desktop
+screenshots on Linux, macOS, or Windows.
+
 ## Persisted recovery outcome announcements
 
 The desktop recovery bridge emits terminal `Analysis failed` and `Analysis cancelled` states through the real `analysisStatus` signal. The QML recovery surface announces each selected-run/status pair once, restores focus to Retry, and clears the de-duplication key when the run is cleared or transitions back to a non-terminal state. This prevents repeated worker notifications from producing stale or duplicate spoken feedback while keeping retry available for a genuine new failure or cancellation.
