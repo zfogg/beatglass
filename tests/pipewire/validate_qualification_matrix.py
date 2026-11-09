@@ -30,4 +30,9 @@ for name, entry in platforms.items():
         raise SystemExit(f"duplicate evidence path: {name}")
     if entry["status"] == "pending" and not isinstance(entry.get("pending_reason"), str):
         raise SystemExit(f"pending qualification lacks reason: {name}")
+    if "native_execution_attempted" in entry and not isinstance(entry["native_execution_attempted"], bool):
+        raise SystemExit(f"invalid native execution attempt flag: {name}")
+    if "execution_blockers" in entry and (not isinstance(entry["execution_blockers"], list) or
+            any(not isinstance(blocker, str) or not blocker.strip() for blocker in entry["execution_blockers"])):
+        raise SystemExit(f"invalid native execution blockers: {name}")
 print(f"Qualification matrix verified ({len(platforms)} platforms)")
