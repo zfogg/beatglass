@@ -418,6 +418,21 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlaySafeModeCanBeClearedForAnotherRecoveryAttempt() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        let clear = findChild(app, "clearOverlaySafeMode")
+        retry.clicked(); retry.clicked(); retry.clicked()
+        verify(clear.visible)
+        compare(clear.Accessible.description, "Clear the native overlay retry limit and make Retry overlay available again")
+        clear.clicked()
+        compare(app.overlayRecoveryAttemptCount, 0)
+        verify(retry.enabled)
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)
