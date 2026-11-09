@@ -11,6 +11,9 @@ markers = (
     "native_discovery_sha256",
     "native_junit_sha256",
     "refusing to overwrite",
+    "evidence-manifest.json",
+    "sha256",
+    "beatglass-native-pipewire-evidence-v1",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:

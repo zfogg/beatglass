@@ -63,3 +63,6 @@ The archive contains the summary, discovery JSON, JUnit results, and any
 captured command stdout/stderr files that exist. Review the ZIP contents before
 attaching it to the qualification record; it is the auditable handoff artifact,
 not a replacement for native desktop/audio evidence.
+It also contains `evidence-manifest.json`, which records the qualified commit,
+each archived file's byte size, and its SHA-256 digest for independent transfer
+verification.
