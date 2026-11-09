@@ -41,7 +41,7 @@ public slots:
     if (ids.isEmpty()) { emit result(false, QStringLiteral("No retryable recovery runs selected")); refresh(); return; }
     if (handle_ && (handle_->state() == beatglass::library_detail::TrackedState::queued || handle_->state() == beatglass::library_detail::TrackedState::running)) { emit result(false, QStringLiteral("Retryable run is active")); return; }
     try {
-      std::vector<std::string> values; for (const auto& id : ids) values.push_back(id.toStdString());
+      std::vector<std::string> values; for (const auto& id : ids) { const auto normalized = id.trimmed(); if (!normalized.isEmpty()) values.push_back(normalized.toStdString()); }
       const auto removed = coordinator_.storage().discard_retryable(values); const bool complete = removed == values.size();
       emit result(complete, QStringLiteral("%1 of %2 retryable recovery runs discarded").arg(static_cast<qulonglong>(removed)).arg(static_cast<qulonglong>(values.size())));
       if (removed) { handle_.reset(); emit analysis(QStringLiteral("Analysis idle")); } refresh();
