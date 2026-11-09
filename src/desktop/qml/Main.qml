@@ -561,7 +561,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryBatchPublicationFocusShortcut"; sequence: "Ctrl+Alt+Shift+3"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchPublicationSummary.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch publication summary focused.") } }
     Shortcut { objectName: "libraryBatchSourceFocusShortcut"; sequence: "Ctrl+Alt+Shift+2"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: { navigation.currentIndex = 0; analysisBatchLastSource.forceActiveFocus(); window.announceVisualizationRecovery("Library analysis batch source focused.") } }
     Shortcut { objectName: "libraryRecoveryNextActionFocusShortcut"; sequence: "Ctrl+Alt+Shift+1"; context: Qt.ApplicationShortcut; enabled: typeof storageRecovery !== "undefined"; onActivated: { navigation.currentIndex = 0; analysisRecoveryNextAction.forceActiveFocus(); window.announceVisualizationRecovery("Library recovery next action focused.") } }
-    Shortcut { objectName: "libraryMetadataErrorFocusShortcut"; sequence: "Ctrl+Alt+Shift+F"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0; onActivated: { navigation.currentIndex = 0; metadataErrorGuidance.forceActiveFocus(); window.announceVisualizationRecovery("Library metadata error guidance focused.") } }
+    Shortcut { objectName: "libraryMetadataErrorFocusShortcut"; sequence: "Ctrl+Alt+Shift+F"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0; onActivated: window.focusLibraryMetadataErrorGuidance() }
     Shortcut { objectName: "libraryClearShortcut"; sequence: "Ctrl+Alt+Backspace"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: window.resetLibraryBrowserSelection("Library selection cleared; choose another source for fresh analysis.") }
     Shortcut { objectName: "libraryReopenShortcut"; sequence: "Ctrl+Alt+Shift+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null && !window.playbackMatchesSelection; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Selected Library source reopened for playback." : "Selected Library source could not be reopened for playback."); reopenSelectedPlayback.forceActiveFocus() } }
     Shortcut { objectName: "libraryPlayShortcut"; sequence: "Ctrl+Alt+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Playing selected Library source " + window.selectedName + "." : "Selected Library source could not be opened for playback."); playSelectedTrack.forceActiveFocus() } }
@@ -1049,6 +1049,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         analyzeSelectedAudio.forceActiveFocus()
         window.announceVisualizationRecovery("Selected Library analysis action focused.")
+    }
+    function focusLibraryMetadataErrorGuidance() {
+        navigation.currentIndex = 0
+        metadataErrorGuidance.forceActiveFocus()
+        window.announceVisualizationRecovery("Library metadata error guidance focused.")
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
