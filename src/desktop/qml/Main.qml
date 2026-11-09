@@ -81,7 +81,10 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+R"
         context: Qt.ApplicationShortcut
         enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive
-        onActivated: addFolderRecursively.click()
+        onActivated: {
+            addFolderRecursively.click()
+            window.announceVisualizationRecovery("Recursive Library catalog requested; results will receive focus when ready.")
+        }
     }
     Shortcut {
         objectName: "libraryRefreshShortcut"
@@ -98,6 +101,16 @@ ApplicationWindow {
             window.sortDescending = !window.sortDescending
             window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
             sortOrder.forceActiveFocus()
+        }
+    }
+    Shortcut {
+        objectName: "libraryActivateEntryShortcut"
+        sequence: "Ctrl+Alt+Enter"
+        context: Qt.ApplicationShortcut
+        enabled: !window.recursiveCatalogActive && browser.currentIndex >= 0
+        onActivated: {
+            window.activateEntry(browser.currentIndex)
+            window.announceVisualizationRecovery("Activated the focused Library entry.")
         }
     }
     Shortcut {
