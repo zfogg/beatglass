@@ -130,6 +130,17 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "libraryMetadataFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+M"
+        context: Qt.ApplicationShortcut
+        enabled: window.selectedAudioUrl.toString() !== ""
+        onActivated: {
+            navigation.currentIndex = 0
+            metadataStatusLabel.forceActiveFocus()
+            window.announceVisualizationRecovery("Selected Library metadata status focused.")
+        }
+    }
+    Shortcut {
         objectName: "libraryActivateEntryShortcut"
         sequence: "Ctrl+Alt+Enter"
         context: Qt.ApplicationShortcut
@@ -1771,7 +1782,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "libraryShortcutHelp"
-                    text: "Shortcuts: Ctrl+F filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
+                    text: "Shortcuts: Ctrl+F filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+Shift+M metadata status · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     Accessible.name: "Library keyboard shortcut help"
@@ -2202,7 +2213,9 @@ ApplicationWindow {
                             }
                         }
                         Label {
+                            id: metadataStatusLabel
                             objectName: "metadataStatus"; text: window.metadataStatus
+                            activeFocusOnTab: true
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio metadata status: " + text
                             ToolTip.text: "Current metadata status"
