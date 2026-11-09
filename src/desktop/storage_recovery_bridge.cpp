@@ -52,7 +52,8 @@ public slots:
     const auto rejection = coordinator_.retry_rejection_reason(runId.toStdString(), operation);
     // Includes RetryRejectionReason::stale_source_identity for an epoch mismatch.
     if (rejection != beatglass::library::RetryRejectionReason::none) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(rejection))); return; }
-    handle_ = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation));
+    try { handle_ = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation)); }
+    catch (const std::exception& error) { handle_.reset(); emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); return; }
     emit result(static_cast<bool>(handle_), handle_ ? QStringLiteral("Retry queued") : QStringLiteral("Retry rejected: source identity or metadata unavailable"));
     if (handle_) { refresh(); emit analysis(QStringLiteral("Analysis queued")); QTimer::singleShot(50, this, &Worker::pollAnalysis); }
   }
