@@ -70,7 +70,8 @@ private:
     if (!buffer || !buffer->buffer || !buffer->buffer->datas[0].data) return;
     const auto& data_block = buffer->buffer->datas[0];
     const auto sample_bytes = data_block.chunk.size;
-    if (sample_bytes == 0 || data_block.chunk.stride != static_cast<int32_t>(sizeof(float))) {
+    if (sample_bytes == 0 || sample_bytes % sizeof(float) != 0 ||
+        data_block.chunk.stride != static_cast<int32_t>(sizeof(float))) {
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
     }
