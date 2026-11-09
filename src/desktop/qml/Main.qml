@@ -1706,7 +1706,7 @@ ApplicationWindow {
                                 activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
                                 model: visible ? storageRecovery.retryableRunIds : []
-                                enabled: visible && count > 0
+                                enabled: visible && count > 0 && !window.storageReopenPending
                                 Accessible.name: "Persisted retryable analysis runs (" + count + ")"
                                 Accessible.role: Accessible.ComboBox
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
@@ -1734,7 +1734,7 @@ ApplicationWindow {
                                 id: discardPersistedRecoveryButton
                                 activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
-                                enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.status !== "Storage closed" && storageRecovery.status.indexOf("Storage error:") !== 0 && storageRecovery.analysisStatus !== "Analysis complete" && storageRecovery.analysisStatus !== "Analysis queued" && storageRecovery.analysisStatus !== "Analysis running"
+                                enabled: visible && !window.storageReopenPending && storageRecovery.selectedRunId !== "" && storageRecovery.status !== "Storage closed" && storageRecovery.status.indexOf("Storage error:") !== 0 && storageRecovery.analysisStatus !== "Analysis complete" && storageRecovery.analysisStatus !== "Analysis queued" && storageRecovery.analysisStatus !== "Analysis running"
                                 text: "Discard saved run"
                                 Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Discard saved retryable analysis run " + storageRecovery.selectedRunId
@@ -1750,7 +1750,7 @@ ApplicationWindow {
                                 objectName: "retryPersistedRecovery"
                                 activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined"
-                                enabled: visible && storageRecovery.selectedRunId !== "" && storageRecovery.status !== "Storage closed" && storageRecovery.status.indexOf("Storage error:") !== 0 && storageRecovery.analysisRetryable && storageRecovery.analysisStatus !== "Analysis queued" && storageRecovery.analysisStatus !== "Analysis running"
+                                enabled: visible && !window.storageReopenPending && storageRecovery.selectedRunId !== "" && storageRecovery.status !== "Storage closed" && storageRecovery.status.indexOf("Storage error:") !== 0 && storageRecovery.analysisRetryable && storageRecovery.analysisStatus !== "Analysis queued" && storageRecovery.analysisStatus !== "Analysis running"
                                 text: "Retry selected run"
                                 onClicked: { const runId = storageRecovery.selectedRunId; window.overlayPersistedDiagnosticDismissed = true; storageRecovery.retrySelectedRun(); window.announceVisualizationRecovery("Persisted recovery retry admitted for " + runId + "; reset status cleared."); forceActiveFocus() }
                                 Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
