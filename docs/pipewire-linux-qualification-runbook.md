@@ -28,3 +28,5 @@ The summary records the repository commit and `libpipewire-0.3` version used
 for the run.
 The explicit native CTest invocation uses `--no-tests=error`, so a build that
 omits `pipewire_tests` cannot report a false green qualification.
+It also applies a 30-second per-test timeout to bound stalled stream startup
+or callback delivery while preserving captured failure logs.
