@@ -874,3 +874,5 @@ Summary review action descriptions now include the current settings revision. Po
 
 Consolidated overlay settings summary accessible name now includes ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_summary_name_contract.py`.
 
+Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
+
