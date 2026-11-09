@@ -1919,6 +1919,17 @@ ApplicationWindow {
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
                             Label {
+                                objectName: "analysisBatchPublicationSummary"
+                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                                text: visible ? ("Verified batch publication: " + window.analysisJobBridge.batchResultsPublished + " result(s) published · " + window.analysisJobBridge.batchQueuedCount + " queued · " + window.analysisJobBridge.batchFailedCount + " failed · " + window.analysisJobBridge.batchCancelledCount + " cancelled") : ""
+                                Accessible.name: "Analysis batch publication summary: " + text
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? "Counts distinguish results published after verification from work still queued or terminal without publication." : "No analysis batch is active."
+                                ToolTip.text: "Verified publication and terminal batch counts"
+                                Layout.fillWidth: true; wrapMode: Text.WordWrap
+                            }
+                            Label {
                                 objectName: "persistedRecoveryStatus"
                                 visible: typeof storageRecovery !== "undefined"
                                 text: visible ? (storageRecovery.status + (storageRecovery.retryableRunIds.length > 0 ? (" · retryable runs " + storageRecovery.retryableRunIds.length) : "")) : ""
