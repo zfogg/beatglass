@@ -2350,7 +2350,7 @@ ApplicationWindow {
                             ToolTip.text: "Current metadata status"
                             Accessible.value: text
                             Accessible.role: Accessible.Status
-                            Accessible.description: text
+                            Accessible.description: window.metadataStatus.indexOf("Error:") === 0 ? text + ". Retry metadata is available for this selected source." : text
                         }
                         Button {
                             id: retryMetadata
