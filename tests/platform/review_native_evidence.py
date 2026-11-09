@@ -42,6 +42,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
         blockers.append("report:ready report has exit gate blockers")
     if report.get("ready") is False and reasons is not None and (not isinstance(reasons, list) or not reasons):
         blockers.append("report:pending report lacks exit gate reason codes")
+    handoff_errors = report.get("handoff_check_errors")
+    if report.get("ready") is True and isinstance(handoff_errors, list) and handoff_errors:
+        blockers.append("report:ready report has handoff errors")
     seen_platforms = set()
     report_commit = report.get("commit")
     for platform in report.get("platforms", []):
