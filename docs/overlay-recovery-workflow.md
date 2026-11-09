@@ -265,3 +265,6 @@ If Unlock fails after a display reorder, click-through remains active, Unlock ke
 
 After a failed Unlock following display reorder, a later successful Unlock clears only the stale failure markers; it preserves the resolved display identity and retained geometry for the next restore.
 
+
+After successful Unlock resolves a reordered display, click-through can be re-enabled without replacing the saved display identity or geometry; the interaction transition remains a separate explicit choice.
+
