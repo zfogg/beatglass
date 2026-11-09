@@ -55,4 +55,11 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(manifest))
     result = subprocess.run([sys.executable, str(verifier), str(traversal)], capture_output=True, text=True)
     if result.returncode == 0 or "unsafe archive entry" not in result.stderr + result.stdout: raise SystemExit("unsafe archive entry was accepted")
-print("PipeWire evidence archive verifier behavior passed (5 scenarios)")
+
+    empty = root / "empty.zip"
+    empty_manifest = dict(manifest, artifacts=[])
+    with zipfile.ZipFile(empty, "w") as archive:
+        archive.writestr("evidence-manifest.json", json.dumps(empty_manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(empty)], capture_output=True, text=True)
+    if result.returncode == 0 or "contains no artifacts" not in result.stderr + result.stdout: raise SystemExit("empty manifest was accepted")
+print("PipeWire evidence archive verifier behavior passed (6 scenarios)")
