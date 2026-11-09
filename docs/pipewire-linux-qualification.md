@@ -68,6 +68,7 @@ Manifest validation runs that same gate before checking metadata, keeping
 capture-time and review-time structural acceptance identical.
 The shared gate requires every raw object to retain `info.props` before either
 path proceeds to target metadata checks.
+It also rejects duplicate object IDs before publication or review.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
 The manifest host identity must begin with `Linux`; Windows capture remains a

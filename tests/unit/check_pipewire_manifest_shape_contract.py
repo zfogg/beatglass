@@ -5,6 +5,7 @@ from manifest_contract import validate_inventory_shape
 
 assert validate_inventory_shape([])
 assert validate_inventory_shape([{"id": 1}])
+assert validate_inventory_shape([{"id": 1, "info": {"props": {"media.class": "Audio/Sink"}}}, {"id": 1, "info": {"props": {}}}])
 assert validate_inventory_shape(["bad"])
 assert validate_inventory_shape([{"id": 1}])
 assert validate_inventory_shape([{ "id": 1, "info": {"props": {"media.class": "Audio/Sink"}}}]) is None
