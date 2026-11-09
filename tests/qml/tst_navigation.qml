@@ -1950,7 +1950,21 @@ TestCase {
         compare(fakeOverlay.requestedWidth, 620)
         app.destroy()
     }
-    function test_displayReconnectReusesRetainedGeometrySettings() {
+'    function test_pausedDisplayRecoveryRestoresControlWindowActivation() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = []
+        let app = shellWithOverlay.createObject(null)
+        app.overlayRecoveryPausedByUser = true
+        app.overlayPreferredScreenIndex = 0
+        app.overlayDisplayRecoveryPending = true
+        fakeOverlay.screenNames = ["Display"]
+        tryVerify(() => findChild(app, "resumeOverlayRecovery").activeFocus)
+        verify(app.visible)
+        verify(app.overlayRecoveryPausedByUser)
+        app.destroy()
+    }
+
+'    function test_displayReconnectReusesRetainedGeometrySettings() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
         app.overlayPreferredDisplayName = "Projector"
