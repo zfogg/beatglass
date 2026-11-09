@@ -41,5 +41,7 @@ also resolve to the same retained artifact entry.
 
 Reports must contain one entry per platform and one entry per scenario; duplicate
 platform or scenario identifiers are rejected rather than silently overwritten.
+Scenario statuses are limited to `PASS`, `UNRUN`, `FAIL`, and `BLOCKED`; only
+`PASS` may carry evidence, preventing contradictory pending reports.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
