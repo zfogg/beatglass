@@ -2934,7 +2934,7 @@ ApplicationWindow {
                         objectName: "visualizationModeStatus"
                         color: window.themeForegrounds[window.selectedThemeIndex]
                         font.pixelSize: window.compactHeader ? 12 : 14
-                    Accessible.name: "Visualization mode: " + text
+                    Accessible.name: "Visualization mode, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: visualizationCanvas.viewMode
                         Accessible.role: Accessible.StaticText
                         Accessible.description: text + ". Use Left and Right arrows to switch views, or Ctrl+1 and Ctrl+2."

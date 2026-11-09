@@ -918,5 +918,7 @@ Visualization capture retry status now names overlay recovery context. Portable 
 
 Visualization data and capture status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_status_name_contract.py`.
 
+Visualization mode status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_mode_name_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
