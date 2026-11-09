@@ -45,3 +45,5 @@ When a stage fails, `failed_command` identifies the first failing command.
 The native test run also writes `pipewire-tests.xml` via CTest's JUnit output
 for machine-readable ingestion of individual stream cases.
 The runner records `native_junit_exists` and requires it for qualification.
+Qualification also requires zero skipped testcases; skipped native stream cases
+remain explicitly pending rather than being treated as success.
