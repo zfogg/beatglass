@@ -42,6 +42,8 @@ struct MonitorStatus {
   bool has_format() const noexcept {
     return format && format->sample_rate != 0 && format->channels != 0;
   }
+  /** True when the selected sink identity is present in this snapshot. */
+  bool has_serial() const noexcept { return !serial.empty(); }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
