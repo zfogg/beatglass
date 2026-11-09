@@ -74,6 +74,8 @@ When the display returns, no native recovery attempt is started automatically
 while paused; the user must choose `Resume recovery`.
 Geometry updates received during that paused interval follow the same rule and
 only refresh persisted state; they do not trigger a hidden retry.
+The same manual boundary applies when the native bridge itself returns after an
+availability loss: a previously visible overlay is not silently relaunched.
 
 ## Screenshot qualification
 

@@ -817,7 +817,10 @@ ApplicationWindow {
                 }
                 if (synced && window.overlayWasVisibleBeforeAvailabilityLoss) {
                     window.overlayWasVisibleBeforeAvailabilityLoss = false
-                    window.recoverOverlayAfterDisplayChange()
+                    if (!window.overlayRecoveryPausedByUser)
+                        window.recoverOverlayAfterDisplayChange()
+                    else
+                        window.announceCaptureRecoveryState("DJ overlay bridge recovered; recovery remains paused until Resume recovery is chosen.")
                 }
             }
         }
