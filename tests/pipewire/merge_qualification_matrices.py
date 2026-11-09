@@ -14,6 +14,11 @@ for path in inputs:
         raise SystemExit(f"malformed qualification matrix: {path}")
     if matrix.get("schema") != "beatglass-native-qualification-matrix-v1":
         raise SystemExit(f"invalid qualification matrix schema: {path}")
+    for platform_name, entry in matrix.get("platforms", {}).items():
+        for evidence_path in entry.get("evidence", []):
+            if (not isinstance(evidence_path, str) or evidence_path.startswith(("/", "\\")) or
+                    ".." in Path(evidence_path).parts):
+                raise SystemExit(f"unsafe evidence path for {platform_name}: {evidence_path}")
     if merged is None:
         merged = dict(matrix)
         merged["platforms"] = {}

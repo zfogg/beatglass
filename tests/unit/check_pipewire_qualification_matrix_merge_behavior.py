@@ -19,4 +19,9 @@ with tempfile.TemporaryDirectory() as directory:
     if result.returncode != 0: raise SystemExit(result.stderr or result.stdout)
     if set(json.loads(output.read_text(encoding="utf-8"))["platforms"]) != {"Linux", "Windows", "Darwin"}:
         raise SystemExit("merged matrix omitted a platform")
-print("PipeWire qualification matrix merge behavior passed (1 scenario)")
+    base["platforms"]["Linux"]["evidence"] = ["../outside.zip"]
+    left.write_text(json.dumps(base), encoding="utf-8")
+    rejected = subprocess.run([sys.executable, str(script), str(output), str(left), str(right)], capture_output=True, text=True)
+    if rejected.returncode == 0 or "unsafe evidence path" not in rejected.stderr + rejected.stdout:
+        raise SystemExit("unsafe evidence path was accepted during merge")
+print("PipeWire qualification matrix merge behavior passed (2 scenarios)")
