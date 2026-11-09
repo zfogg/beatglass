@@ -24,6 +24,7 @@
 | Track playback move checking | Recovered source is being verified after a playback mismatch | Hold queue/playback, hide evidence, and keep cancellation/removal explicit until identity verification completes. |
 | Track playback move confirmed | Recovered source passes identity verification after mismatch | Restore queue/playback and evidence eligibility only for the confirmed path, with future mismatch returning to recovery. |
 | Track playback move canceled | Recovery is canceled before a recovered source is confirmed | Keep playback/evidence locked, clear active queue work, and preserve explicit retry/removal without touching files. |
+| Track playback move removed | Unconfirmed recovered source is removed from the playback queue | Clear playback state while retaining source attribution and fail-closed evidence for later Browse recovery. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
