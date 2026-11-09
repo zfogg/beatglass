@@ -28,6 +28,8 @@ def ingest(root: Path, output: Path) -> list[str]:
         errors.append("missing qualification-manifest.txt")
     if not re.fullmatch(r"[0-9a-fA-F]{40}", identity.get("commit", "")):
         errors.append("invalid source commit identity")
+    if "platform" in identity and not identity["platform"].strip():
+        errors.append("empty platform identity")
     if not identity.get("captured_at", "").strip():
         errors.append("missing capture time")
     else:
