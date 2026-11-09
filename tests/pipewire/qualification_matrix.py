@@ -10,9 +10,9 @@ output = Path(sys.argv[1])
 summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8")) if len(sys.argv) == 4 else None
 host = platform.system()
 platforms = {
-    "Linux": {"target": "Linux/PipeWire", "status": "qualified" if host == "Linux" else "pending", "evidence": []},
-    "Windows": {"target": "Windows/native audio/overlay", "status": "qualified" if host == "Windows" else "pending", "evidence": []},
-    "Darwin": {"target": "macOS/native audio/overlay", "status": "qualified" if host == "Darwin" else "pending", "evidence": []},
+    "Linux": {"target": "Linux/PipeWire", "status": "pending", "evidence": []},
+    "Windows": {"target": "Windows/native audio/overlay", "status": "pending", "evidence": []},
+    "Darwin": {"target": "macOS/native audio/overlay", "status": "pending", "evidence": []},
 }
 for item in platforms.values():
     if item["status"] == "pending":
