@@ -798,3 +798,5 @@ Quitting Beatglass now announces that overlay display, geometry, size, opacity, 
 
 Failed native overlay launch paths now explicitly state that the control-window fallback preserves overlay settings while recovery remains pending. Portable coverage is in `python tests/unit/check_overlay_fallback_detail_contract.py`.
 
+The overlay actions accessibility description now states that native-launch fallback retains overlay settings, making persistence explicit while recovery is pending. Portable coverage is in `python tests/unit/check_overlay_fallback_status_contract.py`.
+
