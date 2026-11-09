@@ -84,6 +84,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("discovery JSON has duplicate test names")
     if int(summary_data.get("native_test_count", 0)) != len(discovery_tests):
         raise SystemExit("summary native_test_count does not match discovery")
+    if int(summary_data["native_test_discovery"].get("count", len(discovery_tests))) != len(discovery_tests):
+        raise SystemExit("summary native discovery count does not match discovery")
     junit_root = ET.fromstring(archive.read(junit_name))
     if junit_root.tag not in ("testsuite", "testsuites"):
         raise SystemExit("JUnit evidence has invalid root")
