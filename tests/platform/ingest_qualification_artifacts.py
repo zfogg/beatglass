@@ -64,7 +64,10 @@ def ingest(root: Path, output: Path) -> list[str]:
     }
     known_paths = {item["path"] for item in artifacts}
     for key, relative in referenced.items():
-        path = (root / relative).resolve()
+        candidate = root / relative
+        if candidate.is_symlink():
+            errors.append(f"symlinked referenced evidence: {relative}"); continue
+        path = candidate.resolve()
         normalized = Path(relative).as_posix()
         if root.resolve() not in path.parents or not path.is_file():
             errors.append(f"missing or escaping referenced evidence: {relative}"); continue

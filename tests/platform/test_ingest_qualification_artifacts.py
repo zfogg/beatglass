@@ -89,6 +89,23 @@ class QualificationIngestTest(unittest.TestCase):
             data = json.loads(output.read_text(encoding="utf-8"))
             self.assertEqual([item["path"] for item in data["artifacts"]], ["a-first.log", "z-last.log"])
 
+    def test_rejects_symlinked_referenced_evidence(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "outside.json"
+            target.write_text("{}", encoding="utf-8")
+            link = root / "playback.json"
+            try:
+                link.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text(
+                "commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n"
+                "playback_evidence=playback.json\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("symlinked referenced evidence" in error for error in errors))
+
     def test_rejects_empty_qualification_artifact(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
