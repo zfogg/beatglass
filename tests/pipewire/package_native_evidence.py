@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 import sys
+import subprocess
 from datetime import datetime, timezone
 import zipfile
 from pathlib import Path
@@ -33,6 +34,11 @@ for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
         raise SystemExit(f"missing evidence artifact: {path}")
     if summary.get(digest_key) != digest(path):
         raise SystemExit(f"{key} digest mismatch")
+    if key == "native_transition_json":
+        validator = Path(__file__).with_name("validate_pipewire_transition_evidence.py")
+        check = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True, check=False)
+        if check.returncode:
+            raise SystemExit(check.stderr or check.stdout or "transition evidence validation failed")
     artifacts.append(path)
 for command in summary.get("commands", []):
     for key in ("stdout", "stderr"):
