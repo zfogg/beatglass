@@ -90,3 +90,4 @@ so recipients can audit the reproducibility policy without the original host.
 Run `python tests/unit/check_pipewire_evidence_packager_behavior.py` to verify
 that fixed `SOURCE_DATE_EPOCH` inputs produce byte-for-byte identical archives.
 The verifier parses that timestamp as ISO-8601 and rejects malformed metadata.
+Qualified archives must include the summary JSON and machine-readable JUnit results; the verifier rejects evidence packages missing those native gate artifacts.
