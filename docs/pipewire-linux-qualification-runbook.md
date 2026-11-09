@@ -129,3 +129,7 @@ documents. For aggregate output it sums every nested `testsuite` `tests`
 attribute and requires that total to equal the serialized `<testcase>` count.
 This prevents a qualified archive from masking an incomplete or internally
 inconsistent native test report.
+
+Failure, error, and skipped counts are likewise summed across nested suites;
+any non-zero aggregate is rejected even when individual `<failure>`, `<error>`,
+or `<skipped>` elements are absent.

@@ -98,9 +98,9 @@ with zipfile.ZipFile(archive_path) as archive:
     suites = [junit_root] if junit_root.tag == "testsuite" else [node for node in junit_root.iter("testsuite")]
     if not suites or sum(int(node.attrib.get("tests", "0")) for node in suites) < 1:
         raise SystemExit("JUnit evidence has no executed tests")
-    if int(junit_root.attrib.get("failures", "0")) or int(junit_root.attrib.get("errors", "0")) or any(node.tag in ("failure", "error") for node in junit_root.iter()):
+    if sum(int(node.attrib.get("failures", "0")) for node in suites) or sum(int(node.attrib.get("errors", "0")) for node in suites) or any(node.tag in ("failure", "error") for node in junit_root.iter()):
         raise SystemExit("JUnit evidence reports failures or errors")
-    if int(junit_root.attrib.get("skipped", "0")) or any(node.tag == "skipped" for node in junit_root.iter()):
+    if sum(int(node.attrib.get("skipped", "0")) for node in suites) or any(node.tag == "skipped" for node in junit_root.iter()):
         raise SystemExit("JUnit evidence reports skipped tests")
     testcases = [node for node in junit_root.iter() if node.tag == "testcase"]
     if not testcases or any(not node.attrib.get("name", "").strip() for node in testcases):
