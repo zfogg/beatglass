@@ -4493,5 +4493,9 @@ ApplicationWindow {
             window.announceVisualizationRecovery("Library folder selected; choose an audio file to inspect or analyze.")
             browser.forceActiveFocus()
         }
+        onRejected: {
+            window.announceVisualizationRecovery("Library folder selection canceled; the current folder remains open.")
+            chooseFolder.forceActiveFocus()
+        }
     }
 }
