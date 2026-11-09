@@ -191,6 +191,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(worker_, &Worker::runsChanged, this, [this](const QStringList& ids, const QStringList& details) {
     retryableRunIds_ = ids; retryableRunDetails_ = details;
     if (!selectedRunId_.isEmpty() && !retryableRunIds_.contains(selectedRunId_)) { selectedRunId_.clear(); emit selectedRunChanged(); }
+    if (status_ == QStringLiteral("Refreshing persisted recovery")) { status_ = QStringLiteral("Persisted recovery refreshed"); emit statusChanged(); }
     emit retryableRunsChanged();
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::cached, this, [this](bool hit, const QString& result) {
