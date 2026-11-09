@@ -886,5 +886,7 @@ Overlay estimate attribution now exposes whether the selected combined-output so
 
 Overlay estimate readiness now exposes accepted-snapshot readiness alongside recovery-pending retention. Portable coverage is in `python tests/unit/check_overlay_readiness_state_contract.py`.
 
+Overlay settings retention status now names its ready versus recovery-pending state alongside the settings revision. Portable coverage is in `python tests/unit/check_overlay_retention_state_name_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
