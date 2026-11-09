@@ -2226,6 +2226,7 @@ ApplicationWindow {
                             Layout.fillWidth: true
                         }
                         Button {
+                            id: clearSelectedAudio
                             objectName: "clearSelectedAudio"
                             text: "Clear selection"
                             activeFocusOnTab: true
@@ -2235,7 +2236,7 @@ ApplicationWindow {
                             Accessible.role: Accessible.Button
                             Accessible.description: window.selectedName !== "" ? "Clear the selected audio source and return analysis details to the empty state: " + window.selectedName : "No audio source is selected."
                             ToolTip.text: window.selectedName !== "" ? "Clear " + window.selectedName : "No audio source selected"
-                            onClicked: window.clearSelectedAudio()
+                            onClicked: { window.clearSelectedAudio(); window.announceVisualizationRecovery("Library selection cleared; choose another source for fresh analysis."); clearSelectedAudio.forceActiveFocus() }
                         }
                         Button {
                             objectName: "analyzeSelectedAudio"
