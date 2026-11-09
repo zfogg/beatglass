@@ -168,6 +168,14 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, output)
             self.assertIn("evidence manifest output is not a file", errors)
 
+    def test_rejects_missing_manifest_output_parent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            errors = ingest.ingest(root, root / "missing" / "manifest.json")
+            self.assertIn("evidence manifest output parent is missing", errors)
+
     def test_sorts_artifacts_for_reproducible_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
