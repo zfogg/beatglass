@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio tap startup now reports distinct diagnostics for malformed output
+UIDs versus a zero capture epoch, making invalid lifecycle requests actionable.
+Portable coverage is in
+`python tests/unit/check_macos_epoch_diagnostic_contract.py`.
+
 The Core Audio tap now independently rejects empty, whitespace-only, and
 NUL-containing UIDs before native setup, protecting direct backend callers as
 well as the source adapter. Portable coverage is in
