@@ -1832,7 +1832,7 @@ ApplicationWindow {
                             Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             ToolTip.text: fileIsDir ? "Open folder " + fileName : "Select audio file " + fileName
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
-                            onDoubleClicked: if (!fileIsDir) { browser.currentIndex = index; window.activateEntry(index); playSelectedTrack.click() }
+                            onDoubleClicked: { browser.currentIndex = index; window.activateEntry(index); if (!fileIsDir) playSelectedTrack.click() }
                             contentItem: RowLayout {
                                 Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.ignored: true }
                                 Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100; Accessible.ignored: true }
