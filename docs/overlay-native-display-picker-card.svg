@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="560" viewBox="0 0 920 560" role="img" aria-labelledby="title desc">
+  <title id="title">Choose native overlay display</title>
+  <desc id="desc">A display picker lists available outputs and makes the selected native overlay destination clear before applying a change.</desc>
+  <rect width="920" height="560" rx="28" fill="#0b1220"/>
+  <rect x="56" y="52" width="808" height="456" rx="22" fill="#111c31" stroke="#30415f" stroke-width="2"/>
+  <text x="96" y="112" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700">Choose display</text>
+  <text x="96" y="144" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="17">Select where the native overlay should appear.</text>
+  <rect x="96" y="182" width="728" height="62" rx="14" fill="#1b3550" stroke="#6ca8ff" stroke-width="2"/>
+  <circle cx="124" cy="213" r="9" fill="#6ca8ff"/>
+  <text x="150" y="219" fill="#f4f7fb" font-family="Inter,Arial,sans-serif" font-size="18" font-weight="600">Display 2 · Built-in panel</text>
+  <text x="620" y="219" fill="#9eacc4" font-family="Inter,Arial,sans-serif" font-size="15">Current</text>
+  <rect x="96" y="260" width="728" height="62" rx="14" fill="#17243c"/>
+  <circle cx="124" cy="291" r="9" fill="#506487"/>
+  <text x="150" y="297" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="18">Display 1 · External monitor</text>
+  <text x="620" y="297" fill="#39d98a" font-family="Inter,Arial,sans-serif" font-size="15">Available</text>
+  <rect x="96" y="338" width="728" height="1" fill="#30415f"/>
+  <text x="96" y="378" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="17">Appearance stays the same after switching.</text>
+  <text x="96" y="406" fill="#8f9db5" font-family="Inter,Arial,sans-serif" font-size="16">Bottom-right · Midnight · 82% opacity · click-through on</text>
+  <rect x="96" y="438" width="182" height="46" rx="12" fill="#6ca8ff"/>
+  <text x="187" y="468" text-anchor="middle" fill="#08141a" font-family="Inter,Arial,sans-serif" font-size="16" font-weight="700">Apply display</text>
+  <rect x="296" y="438" width="154" height="46" rx="12" fill="#22324d" stroke="#506487"/>
+  <text x="373" y="468" text-anchor="middle" fill="#dbe7f6" font-family="Inter,Arial,sans-serif" font-size="16">Cancel</text>
+</svg>
