@@ -14,6 +14,9 @@ markers = (
     "evidence-manifest.json",
     "sha256",
     "beatglass-native-pipewire-evidence-v1",
+    "SOURCE_DATE_EPOCH",
+    "sorted(artifacts",
+    "ZipInfo",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:
