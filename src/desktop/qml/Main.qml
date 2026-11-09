@@ -1836,7 +1836,8 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.retryBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
                                 Accessible.name: "Retry analysis batch"
-                                Accessible.description: "Retry cancelled or failed analysis items retained in the current batch."
+                                Accessible.value: visible ? (window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount) : ""
+                                Accessible.description: visible ? "Retry cancelled or failed analysis items retained in the current batch. Current state: " + window.analysisJobBridge.status + "; accepted items: " + window.analysisJobBridge.batchAcceptedCount + "." : "Retry batch is unavailable."
                                 ToolTip.text: Accessible.description
                                 onClicked: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Failed" && window.analysisJobBridge.status !== "Cancelled")) { window.announceVisualizationRecovery("Analysis batch is no longer retryable; no batch retry was dispatched."); retryAnalysisBatchButton.forceActiveFocus() } else { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result."); retryAnalysisBatchButton.forceActiveFocus() } }
                             }
@@ -1848,7 +1849,8 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.discardBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
                                 Accessible.name: "Discard analysis batch"
-                                Accessible.description: "Clear the terminal batch recovery state without changing source audio. Confirmation is required; focus returns here after the dialog."
+                                Accessible.value: visible ? (window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount) : ""
+                                Accessible.description: visible ? "Clear the terminal batch recovery state without changing source audio. Current state: " + window.analysisJobBridge.status + "; accepted items: " + window.analysisJobBridge.batchAcceptedCount + ". Confirmation is required; focus returns here after the dialog." : "Discard batch is unavailable."
                                 ToolTip.text: Accessible.description
                                 onClicked: discardAnalysisBatchDialog.open()
                             }
