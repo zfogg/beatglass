@@ -12,7 +12,8 @@ with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     summary = b'{"commit":"fixture-commit","qualified":true}\n'
     junit = b"<testsuite tests='1'/>\n"
-    artifacts = {"native-summary.json": summary, "pipewire-tests.xml": junit}
+    discovery = b'{"tests": [{"name": "capture"}]}\n'
+    artifacts = {"native-summary.json": summary, "pipewire-tests-discovery.json": discovery, "pipewire-tests.xml": junit}
     entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in artifacts.items()]
     manifest = {"format": "beatglass-native-pipewire-evidence-v1", "commit": "fixture-commit", "qualified": True, "source_date_epoch": 0, "archive_timestamp_utc": "1980-01-01T00:00:00Z", "artifacts": entries}
 

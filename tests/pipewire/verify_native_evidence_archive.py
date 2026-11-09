@@ -43,6 +43,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("manifest commit does not match qualification summary")
     if not any((name.endswith(".xml") and "junit" in name) or name.endswith("tests.xml") for name in declared):
         raise SystemExit("evidence archive has no JUnit results")
+    if not any(name.endswith(".json") and "discovery" in name for name in declared):
+        raise SystemExit("evidence archive has no CTest discovery JSON")
     for artifact in artifacts:
         name = artifact["name"]
         if name not in names:
