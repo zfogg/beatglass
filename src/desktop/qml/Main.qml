@@ -1835,7 +1835,7 @@ ApplicationWindow {
                                 Accessible.name: "Retry analysis batch"
                                 Accessible.description: "Retry cancelled or failed analysis items retained in the current batch."
                                 ToolTip.text: Accessible.description
-                                onClicked: { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result."); retryAnalysisBatchButton.forceActiveFocus() }
+                                onClicked: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Failed" && window.analysisJobBridge.status !== "Cancelled")) { window.announceVisualizationRecovery("Analysis batch is no longer retryable; no batch retry was dispatched."); retryAnalysisBatchButton.forceActiveFocus() } else { window.analysisJobBridge.retryBatch(); window.announceVisualizationRecovery("Analysis batch retry queued; focus will return after a fresh accepted result."); retryAnalysisBatchButton.forceActiveFocus() } }
                             }
                             Button {
                                 objectName: "discardAnalysisBatch"
@@ -1867,7 +1867,7 @@ ApplicationWindow {
                                 Accessible.name: "Cancel analysis batch"
                                 Accessible.description: "Cancel all queued or running analysis items retained in the current batch."
                                 ToolTip.text: Accessible.description
-                                onClicked: { window.analysisJobBridge.cancelBatch(); window.announceVisualizationRecovery("Analysis batch cancelled; waiting for a replacement accepted snapshot.") }
+                                onClicked: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running")) { window.announceVisualizationRecovery("Analysis batch is no longer active; no batch cancel was dispatched."); retryAnalysisBatchButton.forceActiveFocus() } else { window.analysisJobBridge.cancelBatch(); window.announceVisualizationRecovery("Analysis batch cancelled; waiting for a replacement accepted snapshot."); cancelAnalysisBatch.forceActiveFocus() } }
                             }
                             Button {
                                 text: "Retry analysis"
