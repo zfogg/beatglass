@@ -2861,7 +2861,7 @@ ApplicationWindow {
                                 + (visible && storageRecovery.status.indexOf("retryable recovery runs discarded") >= 0 ? " · " + storageRecovery.status : "")
                                 Accessible.name: "Persisted analysis recovery status: " + text
                                 Accessible.value: visible ? text : ""
-                                Accessible.description: (visible && storageRecovery.analysisStatus === "Analysis complete" ? "Analysis completed successfully; persisted retry selection is no longer active." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? storageRecovery.analysisStatus + "; persisted recovery remains retryable and the selected run stays actionable." : visible && storageRecovery.status === "Retryable run is active" && storageRecovery.selectedRunId !== "" ? "Selected run " + storageRecovery.selectedRunId + " is active; discard remains unavailable until it reaches a terminal state." : visible && storageRecovery.retryableRunIds.length > 0 ? "Recovery status and " + storageRecovery.retryableRunIds.length + " persisted retryable run(s); select one to retry or discard." : "Recovery status and persisted retryable runs.") + " Source audio remains unchanged by persisted recovery actions."
+                                Accessible.description: (visible && storageRecovery.analysisStatus === "Analysis complete" ? "Analysis completed successfully; persisted retry selection is no longer active." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? storageRecovery.analysisStatus + "; persisted recovery remains retryable and the selected run stays actionable." : visible && storageRecovery.status === "Retryable run is active" && storageRecovery.selectedRunId !== "" ? "Selected run " + storageRecovery.selectedRunId + " is active; discard remains unavailable until it reaches a terminal state." : visible && storageRecovery.recoveryAvailable ? "Recovery status and " + storageRecovery.retryableRunIds.length + " persisted retryable run(s); select one to retry or discard." : "Recovery status and persisted retryable runs.") + " Source audio remains unchanged by persisted recovery actions."
                                 ToolTip.text: "Saved analysis recovery status and retryable runs"
                                 Accessible.role: Accessible.Status
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
@@ -3183,7 +3183,7 @@ ApplicationWindow {
                                 objectName: "discardAllPersistedRecovery"
                                 activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.discardRuns !== undefined
-                                enabled: visible && !window.storageReopenPending && storageRecovery.retryableRunIds.length > 0
+                                enabled: visible && !window.storageReopenPending && storageRecovery.recoveryAvailable
                                 text: "Discard all saved runs"
                                 Accessible.name: "Discard all saved retryable analysis runs"
                                 Accessible.value: enabled ? "available; " + storageRecovery.retryableRunIds.length + " runs" : "unavailable; no retryable runs"

@@ -70,6 +70,10 @@ if 'storageRecovery.recoveryAvailable ? "Analysis recovery available' not in qml
     raise SystemExit("Recovery guidance must consume the availability property")
 if 'visible: typeof storageRecovery !== "undefined" && storageRecovery.recoveryAvailable' not in qml:
     raise SystemExit("Recovery outcome status must consume the availability property")
+if 'visible && storageRecovery.recoveryAvailable ? "Recovery status and "' not in qml:
+    raise SystemExit("Recovery details must consume the availability property")
+if 'enabled: visible && !window.storageReopenPending && storageRecovery.recoveryAvailable' not in qml:
+    raise SystemExit("Retry control must consume the availability property")
 if "storageTransitionPending_" not in bridge or "storageTransitionPending_ = true" not in source:
     raise SystemExit("Open-state API must distinguish transition failures")
 if "const auto normalized = path.trimmed()" not in source:

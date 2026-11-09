@@ -45,5 +45,8 @@ duplicating list-length logic.
 Recovery guidance and persisted retry outcome status use the same property, so
 stale availability text and controls disappear together after refresh, retry,
 or discard clears the saved-run snapshot.
+The detailed status description and retry control use this property as well,
+so a stale run-list representation cannot keep recovery actionable after the
+bridge has cleared its snapshot.
 Changing the database path is subject to the same transition guard; path
 ownership cannot change underneath an in-flight close or open.
