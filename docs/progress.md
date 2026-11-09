@@ -792,3 +792,5 @@ Showing the native overlay now announces the selected-display launch and persist
 
 Restoring the overlay now announces persisted display, geometry, and opacity reapplication before the control window transitions away. Portable coverage is in `python tests/unit/check_overlay_restore_announce_contract.py`.
 
+Hiding the native overlay now announces the control-window fallback transition while retaining overlay settings. Portable coverage is in `python tests/unit/check_overlay_hide_announce_contract.py`.
+
