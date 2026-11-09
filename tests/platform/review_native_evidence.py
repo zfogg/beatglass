@@ -86,7 +86,7 @@ def assess(report_path: Path, reviewer: str) -> dict:
         captured_at = platform.get("captured_at")
         try:
             parsed_capture = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
-            valid_capture_time = parsed_capture.tzinfo is not None
+            valid_capture_time = parsed_capture.tzinfo is not None and parsed_capture <= datetime.now(parsed_capture.tzinfo)
         except (AttributeError, TypeError, ValueError):
             valid_capture_time = False
         if not valid_capture_time:
