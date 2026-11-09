@@ -1716,10 +1716,10 @@ ApplicationWindow {
                             objectName: "analyzeSelectedAudio"
                             text: "Analyze selected file"
                             activeFocusOnTab: true
-                            enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined
+                            enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
                             Accessible.name: "Analyze selected audio file"
                             Accessible.role: Accessible.Button
-                            Accessible.description: enabled ? "Fingerprint the selected local file and queue real offline analysis." : "Select a local audio file before queueing analysis."
+                            Accessible.description: enabled ? "Fingerprint the selected local file and queue real offline analysis." : (window.analysisJobBridge && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "Analysis is already active for the selected source; wait for completion or cancel before submitting again." : "Select a local audio file before queueing analysis.")
                             ToolTip.text: "Fingerprint and queue analysis for the selected audio file"
                             onClicked: {
                                 const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile())
