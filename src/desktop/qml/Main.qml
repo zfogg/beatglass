@@ -403,6 +403,17 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "storageReopenShortcut"
+        sequence: "Ctrl+Alt+O"
+        context: Qt.ApplicationShortcut
+        enabled: typeof storageRecovery !== "undefined" && storageRecovery.open !== undefined
+            && (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
+        onActivated: {
+            storageRecovery.open()
+            window.announceVisualizationRecovery("Storage reopen requested from the keyboard; persisted recovery will refresh when available.")
+        }
+    }
+    Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
