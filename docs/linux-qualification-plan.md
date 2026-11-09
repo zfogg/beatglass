@@ -47,5 +47,7 @@ The report-level platform inventory must match its platform-support summary, and
 `ready: true` is only valid with an `ACCEPTED` exit-gate status.
 Support summaries must use one known status per platform: `experimental`,
 `qualified`, `unsupported`, or `pending`.
+`qualified` requires every scenario in that platform's inventory to be `PASS`;
+an all-`PASS` inventory cannot remain marked non-qualified.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
