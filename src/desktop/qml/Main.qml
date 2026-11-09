@@ -327,7 +327,12 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+R"
         context: Qt.ApplicationShortcut
         enabled: window.playbackBridge !== null && window.playbackBridge.state === "Paused"
-        onActivated: { window.playbackBridge.resume(); window.announceVisualizationRecovery("Playback resumed from keyboard shortcut; accepted snapshot retained.") }
+        onActivated: {
+            const resumed = window.playbackBridge.resume()
+            window.announceVisualizationRecovery(resumed
+                ? "Playback resumed from keyboard shortcut; accepted snapshot retained."
+                : "Playback resume from keyboard shortcut failed; accepted snapshot retained.")
+        }
     }
     Shortcut {
         objectName: "visualizationStopShortcut"
