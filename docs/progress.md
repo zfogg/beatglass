@@ -1,21 +1,11 @@
 # Progress and handoff
 
-## Current recovery/cache qualification snapshot
-
-The current storage recovery path persists retryable state for cancellation,
-stale verification, empty publication, oversized publication, and transactional
-publish failures. Portable evidence for this slice is:
-
-```text
-python tests/unit/check_publish_cancellation_recovery_contract.py
-python tests/unit/check_publish_oversize_recovery_contract.py
-python tests/unit/check_publish_empty_recovery_contract.py
-python tests/unit/check_sqlite_publish_contract.py
-```
-
-These checks verify source contracts only; they do not replace Catch2 execution
-or native Windows, macOS, and Linux qualification. Native evidence remains
-required for the issue #1 exit gate.
+Windows output endpoint discovery now adopts the native render default on the
+first successful refresh when the user has not selected an endpoint. A later
+refresh never overrides an explicit selection; if that endpoint disappears,
+the bridge clears it and reports selection loss so capture must be reacquired.
+The portable source contract is checked by
+`python tests/unit/check_windows_endpoint_default_selection_contract.py`.
 
 Shortcut-triggered stop/resume must announce the resulting lifecycle state through the same accessible status surface as pointer actions. Portable contracts cover focus, shortcut dispatch, and state text; native screen-reader timing, focus restoration, and assistive-technology behavior remain unqualified.
 
