@@ -16,4 +16,7 @@ assert 'test_validVisualRestoreIsDirectlyTestable' in qml_tests
 assert '42 percent opacity' in qml_tests
 docs = Path('docs/issue-76-visual-implementation-audit.md').read_text(encoding='utf-8')
 assert 'valid persisted visual-state restore path' in docs
-print('Overlay native retry focus contract verified (10 checks)')
+assert 'function handleOverlayWindowClosing' in qml
+assert 'window.handleOverlayWindowClosing(close)' in qml
+assert 'test_overlayCloseHandlerIsDirectlyContractTestable' in qml_tests
+print('Overlay native retry focus contract verified (13 checks)')
