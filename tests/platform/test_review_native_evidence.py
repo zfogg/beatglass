@@ -252,3 +252,10 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps(payload))
             result = review.assess(report, "release-owner")
             self.assertIn("linux:scenario inventory mismatch", result["blockers"])
+
+    def test_unknown_platform_identity_is_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"platforms": [{"platform": "haiku", "scenarios": []}]}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("haiku:unknown platform identity", result["blockers"])

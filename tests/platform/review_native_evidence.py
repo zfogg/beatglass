@@ -35,6 +35,8 @@ def assess(report_path: Path, reviewer: str) -> dict:
     report_commit = report.get("commit")
     for platform in report.get("platforms", []):
         name = platform.get("platform", "unknown")
+        if name not in {"linux", "windows", "macos"}:
+            blockers.append(f"{name}:unknown platform identity")
         if name in seen_platforms:
             blockers.append(f"{name}:duplicate platform entry")
         seen_platforms.add(name)
