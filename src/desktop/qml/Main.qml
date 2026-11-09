@@ -531,6 +531,8 @@ ApplicationWindow {
     function persistOverlayDisplaySelection(index, name) {
         if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
+            overlayDisplay.forceActiveFocus()
             return false
         }
         if (!window.overlayBridge.moveToScreen(index)) {
