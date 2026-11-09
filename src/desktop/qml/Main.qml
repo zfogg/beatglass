@@ -1705,7 +1705,7 @@ ApplicationWindow {
                         text: window.browseFolder.toString() || "No folder selected"
                         elide: Text.ElideMiddle; Layout.fillWidth: true
                         Accessible.name: "Current folder: " + text
-                        Accessible.value: text
+                        Accessible.value: text + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.StaticText
                         ToolTip.text: "Current folder path"
                     }
@@ -3775,7 +3775,7 @@ ApplicationWindow {
                                 : "Overlay settings retained: display, geometry, opacity, and interaction mode")
                             : "Overlay settings retention unavailable"
                         Accessible.name: "Overlay settings retention"
-                        Accessible.value: text
+                        Accessible.value: text + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Status
                         Accessible.description: visible
                             ? text + ". Persisted settings remain available to restore the native overlay or use the control-window fallback."
