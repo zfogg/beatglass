@@ -885,6 +885,7 @@ ApplicationWindow {
             }
         }
         function onClickThroughChanged() {
+            window.overlaySettingsRevision += 1
             if (window.overlayBridge && window.overlayBridge.clickThrough)
                 window.announceCaptureRecoveryState("DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.")
             else
