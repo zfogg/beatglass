@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Cancelled Core Audio enumeration now normalizes any stale backend error code to
+the typed `cancelled` category, keeping outcome and error semantics aligned.
+Portable coverage is in
+`python tests/unit/check_macos_cancel_error_normalization_contract.py`.
+
 Successful Core Audio enumeration now clears stale error categories for both
 empty and non-empty success, keeping the result contract self-consistent.
 Portable coverage is in
