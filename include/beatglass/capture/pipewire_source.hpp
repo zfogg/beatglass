@@ -58,6 +58,8 @@ struct MonitorStatus {
   bool has_epoch() const noexcept { return epoch != 0; }
   /** True when identity, format, and epoch form a usable status snapshot. */
   bool is_consistent() const noexcept { return has_context() && has_epoch() && !requires_reacquisition(); }
+  /** True when this snapshot can authorize downstream publication. */
+  bool can_publish() const noexcept { return is_consistent() && !has_error(); }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
