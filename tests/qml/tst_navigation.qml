@@ -1108,7 +1108,7 @@ TestCase {
         tryCompare(app, "selectedTheme", "Yellow")
         compare(findChild(app, "themePreferenceAnnouncement").text, "Theme preference restored: Yellow (reduced motion).")
         fakeThemePreferences.reduceMotion = false
-        compare(findChild(app, "themePreferenceAnnouncement").text, "Reduced motion disabled; standard presentation transitions restored.")
+        compare(findChild(app, "themePreferenceAnnouncement").text, "Reduced motion disabled for Yellow; standard presentation transitions restored.")
         app.destroy()
         fakeThemePreferences.themeIndex = 0
     }
