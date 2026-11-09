@@ -3416,7 +3416,7 @@ ApplicationWindow {
                         : (window.visualizationSelectionResetReason !== ""
                            ? "Playback snapshot cleared · " + window.visualizationSelectionResetReason
                            : "Playback source/epoch is not aligned with the accepted snapshot")
-                    Accessible.name: "Visualization playback epoch feedback: " + text
+                    Accessible.name: "Visualization playback epoch feedback, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Live playback source and epoch alignment for the accepted visualization snapshot."
