@@ -9,10 +9,20 @@ TEST_CASE("registry discovery selects only addressable output sinks") {
   nodes.add(2, node, "Audio/Source", "124", "microphone", "Mic");
   nodes.add(3, node, "Audio/Sink", "", "bad", nullptr);
   nodes.add(4, "PipeWire:Interface:Device", "Audio/Sink", "125", "device", nullptr);
+  nodes.add(6, node, "Audio/Sink", "123", "output-duplicate", "Duplicate");
   auto sinks = nodes.sinks();
   REQUIRE(sinks.size() == 1);
   CHECK(sinks[0].serial == "123");
   CHECK(sinks[0].description == "Speakers");
+}
+
+TEST_CASE("registry discovery de-duplicates a sink serial across registry globals") {
+  beatglass::pipewire::RegistrySnapshot nodes;
+  nodes.add(1, "PipeWire:Interface:Node", "Audio/Sink", "same", "first", "First");
+  nodes.add(2, "PipeWire:Interface:Node", "Audio/Sink", "same", "second", "Second");
+  const auto sinks = nodes.sinks();
+  REQUIRE(sinks.size() == 1);
+  CHECK(sinks.front().serial == "same");
 }
 TEST_CASE("registry snapshot handles fallback names and removal") {
   beatglass::pipewire::RegistrySnapshot nodes;

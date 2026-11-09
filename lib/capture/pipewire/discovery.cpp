@@ -12,6 +12,7 @@
 #include <limits>
 #include <vector>
 #include <algorithm>
+#include <set>
 
 namespace beatglass::pipewire {
 void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, const char* serial,
@@ -32,7 +33,10 @@ void RegistrySnapshot::add(std::uint32_t id, const char* type, const char* cls, 
 void RegistrySnapshot::remove(std::uint32_t id) { nodes_.erase(id); }
 std::vector<Sink> RegistrySnapshot::sinks() const {
   std::vector<Sink> result;
-  for (const auto& [id, sink] : nodes_) result.push_back(sink);
+  std::set<std::string> serials;
+  for (const auto& [id, sink] : nodes_) {
+    if (serials.insert(sink.serial).second) result.push_back(sink);
+  }
   std::sort(result.begin(), result.end(), [](const Sink& a, const Sink& b) {
     return a.serial == b.serial ? a.name < b.name : a.serial < b.serial;
   });
