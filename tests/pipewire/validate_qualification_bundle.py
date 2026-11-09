@@ -27,4 +27,8 @@ for name, entry in matrix.get("platforms", {}).items():
         raise SystemExit(f"qualification report is missing pending reason: {name}")
     if entry.get("status") == "qualified" and any(f"`{path}`" not in report for path in entry.get("evidence", [])):
         raise SystemExit(f"qualification report is missing evidence: {name}")
+    if entry.get("status") == "qualified" and entry.get("native_execution_attempted") is not True:
+        raise SystemExit(f"qualification bundle has unattempted platform: {name}")
+    if entry.get("status") == "qualified" and entry.get("execution_blockers"):
+        raise SystemExit(f"qualification bundle has unresolved blockers: {name}")
 print("Qualification bundle verified")
