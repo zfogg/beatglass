@@ -18,6 +18,8 @@ if not isinstance(manifest, dict) or any(key not in manifest or manifest[key] is
     raise SystemExit("manifest missing required qualification identity or inventory")
 if manifest["schema_version"] != 1:
     raise SystemExit("unsupported PipeWire qualification manifest schema")
+if not str(manifest["host_platform"]).startswith("Linux"):
+    raise SystemExit("manifest host_platform must identify Linux")
 try:
     captured_at = datetime.fromisoformat(manifest["captured_at_utc"])
 except ValueError:

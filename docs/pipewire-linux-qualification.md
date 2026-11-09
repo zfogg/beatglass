@@ -56,6 +56,8 @@ The validator requires the offset to be UTC (`+00:00`), matching the capture
 command and avoiding local-time ambiguity.
 Validation refuses symlinked manifest paths so evidence review cannot silently
 follow an unrelated file.
+The manifest host identity must begin with `Linux`; Windows capture remains a
+safe pending path and cannot be mistaken for native qualification evidence.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
 interrupted or racing capture cannot leave a partial artifact at the requested
 path.
