@@ -37,3 +37,8 @@ Interaction mode uses the same status-card hierarchy so click-through state is
 visible without competing with recovery actions:
 
 ![Overlay interaction mode rendering](overlay-interaction-card.svg)
+
+Opacity uses an explicit value and a bounded slider so the visual effect is
+understandable without relying on color alone:
+
+![Overlay opacity control rendering](overlay-opacity-card.svg)

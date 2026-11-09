@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300" role="img" aria-labelledby="title desc">
+  <title id="title">Overlay opacity control card</title>
+  <desc id="desc">A settings card showing an opacity slider from 20 to 100 percent and a current value of 90 percent.</desc>
+  <rect width="760" height="300" rx="22" fill="#0f172a"/>
+  <rect x="32" y="28" width="696" height="244" rx="18" fill="#1e293b" stroke="#475569"/>
+  <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="25" font-weight="700">Overlay opacity</text>
+  <text x="60" y="118" fill="#cbd5e1" font-family="sans-serif" font-size="15">Current value</text><text x="620" y="118" fill="#f8fafc" font-family="sans-serif" font-size="20" font-weight="700">90%</text>
+  <rect x="60" y="150" width="620" height="10" rx="5" fill="#334155"/><rect x="60" y="150" width="543" height="10" rx="5" fill="#60a5fa"/><circle cx="603" cy="155" r="13" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
+  <text x="60" y="194" fill="#94a3b8" font-family="sans-serif" font-size="13">20% minimum</text><text x="612" y="194" fill="#94a3b8" font-family="sans-serif" font-size="13">100% maximum</text>
+  <text x="60" y="238" fill="#cbd5e1" font-family="sans-serif" font-size="14">Keyboard and screen-reader value: 90 percent opacity.</text>
+</svg>
