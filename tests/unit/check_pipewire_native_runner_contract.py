@@ -11,4 +11,5 @@ for marker in ("requested_summary", "requested_archive", "native_artifacts", "pe
     assert marker in source
 for marker in ("host_os", "pending_command"):
     assert marker in source
+assert '"environment"' in source
 print("PipeWire native runner contract verified (5 checks)")
