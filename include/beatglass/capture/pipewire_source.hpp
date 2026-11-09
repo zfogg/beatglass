@@ -23,6 +23,7 @@ struct MonitorStatus {
   int error_code{};
   std::string serial;
   std::optional<MonitorFormat> format;
+  std::uint64_t epoch{};
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
@@ -115,10 +116,12 @@ public:
   /** Consume callback error/discontinuity markers for one control-thread poll. */
   Status poll_status() noexcept;
   const std::string& serial() const noexcept { return serial_; }
+  std::uint64_t epoch() const noexcept { return epoch_; }
 private:
   std::string serial_;
   std::unique_ptr<MonitorStream> stream_;
   std::optional<Format> format_;
+  std::uint64_t epoch_{};
 };
 /** Create the provisional PipeWire monitor boundary; ownership stays with the caller. */
 std::unique_ptr<MonitorBackend> make_monitor_backend();
