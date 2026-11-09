@@ -15,7 +15,7 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(runner), "--source", str(root.parent), "--summary", str(summary), "--capture-plan", str(plan)], capture_output=True, text=True)
     if result.returncode == 0: raise SystemExit("non-Linux native runner claimed qualification")
     payload = json.loads(summary.read_text(encoding="utf-8"))
-    if payload.get("handoff_status") != "pending" or payload.get("qualified") is not False or payload.get("capture_plan_validated") is not True:
+    if payload.get("handoff_status") != "pending" or payload.get("qualified") is not False or payload.get("capture_plan_validated") is not True or payload.get("native_execution_attempted") is not False:
         raise SystemExit("pending native handoff fields were not recorded honestly")
     invalid_plan = output / "invalid-plan.json"
     invalid_plan.write_text("{}", encoding="utf-8")
