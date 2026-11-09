@@ -3356,7 +3356,7 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
-                    ToolTip.text: "Current waveform/FFT presentation load state"
+                    ToolTip.text: "Current waveform/FFT presentation load state; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
