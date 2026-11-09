@@ -49,6 +49,7 @@ screenshots.
 | [Reconnecting](overlay-reconnecting-card.svg) | retrying a lost selected output |
 | [Listening](overlay-listening-card.svg) | healthy live output analysis |
 | [Pause confirmation](overlay-pause-confirmation-card.svg) | explicit capture pause decision |
+| [Resume](overlay-resume-card.svg) | ready-to-continue monitoring workflow |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
