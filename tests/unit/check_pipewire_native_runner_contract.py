@@ -23,4 +23,5 @@ probe = (Path(__file__).parents[2] / "tests/pipewire/check_linux_native_prerequi
 for marker in ("--report", "native_execution_attempted", '"status"', '"pending"'):
     assert marker in probe
 assert "linker" in probe and "pkg-config" in probe
+assert "next_commands" in probe and "run_linux_native_qualification.py" in probe
 print("PipeWire native runner contract verified (5 checks)")

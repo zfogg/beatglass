@@ -17,7 +17,12 @@ def finish(status, missing, versions=None):
     report = {"platform": platform.platform(), "host_os": platform.system(),
               "target": "Linux/PipeWire", "status": status,
               "native_execution_attempted": False, "missing": missing,
-              "versions": versions or {}}
+              "versions": versions or {},
+              "next_commands": [
+                  "python tests/pipewire/check_linux_native_prerequisites.py --report evidence/linux-pipewire-preflight.json",
+                  "cmake -S . -B build-pipewire -DBEATGLASS_BUILD_PIPEWIRE=ON -DBUILD_TESTING=ON",
+                  "python tests/pipewire/run_linux_native_qualification.py --source . --summary evidence/linux-summary.json",
+              ]}
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
