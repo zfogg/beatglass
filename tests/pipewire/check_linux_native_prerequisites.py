@@ -1,5 +1,6 @@
 """Check the Linux PipeWire development prerequisites without requiring Linux on CI."""
 import platform
+import json
 import shutil
 import subprocess
 import sys
@@ -17,6 +18,13 @@ for tool in ("pw-cli", "pw-dump"):
 if not missing and subprocess.run(["pw-cli", "info", "0"], check=False,
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
     missing.append("running PipeWire daemon")
+if not missing:
+    dump = subprocess.run(["pw-dump"], check=False, stdout=subprocess.PIPE, text=True)
+    try:
+        if not isinstance(json.loads(dump.stdout), list):
+            missing.append("valid pw-dump JSON")
+    except json.JSONDecodeError:
+        missing.append("valid pw-dump JSON")
 else:
     result = subprocess.run(["pkg-config", "--exists", "libpipewire-0.3"], check=False)
     if result.returncode:
