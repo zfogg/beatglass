@@ -2898,6 +2898,23 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                 }
                 Label {
+                    objectName: "visualizationSpectrumReadout"
+                    visible: visualizationCanvas.viewMode === "spectrum"
+                    text: visualizationCanvas.selectedSpectrumBin < 0
+                        ? "FFT bin: none selected"
+                        : "FFT bin " + visualizationCanvas.selectedSpectrumBin + " · magnitude " + Number(visualizationCanvas.renderedSpectrum[visualizationCanvas.selectedSpectrumBin]).toFixed(3)
+                    Accessible.name: "FFT selection readout: " + text
+                    Accessible.value: text
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Selected FFT bin and its accepted spectrum magnitude; wheel and keyboard selection update this readout."
+                    ToolTip.text: "Selected FFT bin and accepted magnitude"
+                    color: window.themeForegrounds[window.selectedThemeIndex]
+                    font.pixelSize: window.compactHeader ? 12 : 14
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    wrapMode: Text.WordWrap
+                }
+                Label {
                     objectName: "visualizationRecoveryAnnouncement"
                     text: window.visualizationRecoveryAnnouncement
                     visible: text !== ""

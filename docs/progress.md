@@ -1,5 +1,9 @@
 # Progress and handoff
 
+The selected FFT bin now has a visible and screen-reader readout showing its
+accepted magnitude. Wheel, keyboard, source-change, and result-reset paths all
+update or clear the same readout state.
+
 The PipeWire callback seam now records native error codes in an atomic status
 slot, allowing control-thread lifecycle code to distinguish callback failure
 from ordinary stop and restart. No allocation occurs on the callback path.
