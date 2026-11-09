@@ -758,3 +758,5 @@ Click-through transitions participate in the settings revision as well. The nati
 If the native platform rejects a requested click-through transition, the toggle is restored to the actual native state and an actionable recovery announcement keeps the control window discoverable instead of claiming that input mode changed.
 
 Unlock follows the same failure contract: the control window only announces restored interaction after the native bridge accepts the transition; a rejected unlock keeps fallback controls available and reports the failure.
+
+Hide also restores the control window when the native bridge has already disappeared, preserving the user-hidden intent while making the fallback actionable.
