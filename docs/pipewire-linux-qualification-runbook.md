@@ -39,3 +39,5 @@ the `native_pipewire_tests` execution result.
 The runner also records the parsed `native_test_count` from CTest's JSON
 `tests` array.
 Qualification additionally requires `native_test_count` to be positive.
+The summary exposes the prerequisite/daemon result separately as
+`daemon_preflight`.
