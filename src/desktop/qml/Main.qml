@@ -1053,6 +1053,22 @@ ApplicationWindow {
         return accepted
     }
 
+    function reopenSelectedLibraryTrack() {
+        if (!window.playbackBridge || window.selectedAudioUrl.toString() === "") {
+            window.announceCaptureRecoveryState("Select an audio source before reopening playback.")
+            return false
+        }
+        if (window.playbackMatchesSelection) {
+            window.announceCaptureRecoveryState("Reopen selected playback is no longer needed; the playback source already matches the selection.")
+            return false
+        }
+        const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1)
+        window.announceCaptureRecoveryState(accepted
+            ? "Selected Library source reopened for playback."
+            : "Selected Library source could not be reopened for playback.")
+        return accepted
+    }
+
     function activateEntry(index) {
         if (index < 0 || index >= files.count) return
         const url = files.get(index, "fileUrl")
@@ -1825,7 +1841,7 @@ ApplicationWindow {
                             Label { text: window.playbackBridge && window.playbackBridge.nativeRunning ? "Native output active" : "Native output stopped"; objectName: "nativePlaybackState"; Accessible.name: "Native playback state: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current native output running state" }
                             Label { text: window.playbackBridge ? window.playbackBridge.nativeError : ""; objectName: "nativePlaybackError"; Accessible.name: "Native playback error: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Native playback error details"; visible: text !== ""; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                             Button { text: "Retry native"; objectName: "retryNativePlayback"; enabled: window.playbackBridge && window.playbackBridge.nativeError !== ""; Accessible.name: "Retry native playback"; Accessible.role: Accessible.Button; Accessible.description: "Retry starting native playback after an output error"; ToolTip.text: "Retry native playback after the output error"; onClicked: window.retryNativePlaybackOutput() }
-                            Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.name: "Reopen selected playback source"; Accessible.role: Accessible.Button; Accessible.description: "Replace the current playback source with the selected audio source: " + window.selectedName; ToolTip.text: "Replace playback with the selected audio source"; onClicked: { if (window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection) window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); else window.announceCaptureRecoveryState("Reopen selected playback is no longer needed; the playback source already matches the selection.") } }
+                            Button { text: "Reopen selected"; objectName: "reopenSelectedPlayback"; visible: window.selectedAudioUrl.toString() !== "" && window.playbackBridge && !window.playbackMatchesSelection; enabled: visible; Accessible.name: "Reopen selected playback source"; Accessible.role: Accessible.Button; Accessible.description: "Replace the current playback source with the selected audio source: " + window.selectedName; ToolTip.text: "Replace playback with the selected audio source"; onClicked: window.reopenSelectedLibraryTrack() }
                             Button { text: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume" : "Pause"; objectName: "pausePlayback"; Accessible.name: text + " playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge && window.playbackBridge.state === "Paused" ? "Resume the selected audio source." : "Pause the selected audio source."; ToolTip.text: "Pause or resume playback"; enabled: window.playbackBridge && (window.playbackBridge.state === "Playing" || window.playbackBridge.state === "Paused"); onClicked: window.togglePlaybackPause() }
                             Button { text: "Stop"; objectName: "stopPlayback"; Accessible.name: "Stop playback"; Accessible.role: Accessible.Button; Accessible.description: "Stop playback and clear the current source."; ToolTip.text: "Stop playback and clear the current source"; enabled: window.playbackBridge && window.playbackBridge.state !== "Stopped"; onClicked: window.stopPlaybackWithRecovery("Playback stopped; the source is ready to reopen or select another file.") }
                             SpinBox { id: seekSeconds; objectName: "seekSeconds"; from: 1; to: 60; value: 5; editable: true; activeFocusOnTab: true; Accessible.name: "Seek step seconds"; Accessible.value: value + " seconds"; Accessible.role: Accessible.SpinBox; Accessible.description: "Choose the number of seconds moved by the backward and forward seek buttons"; ToolTip.text: "Choose the playback seek step in seconds" }
