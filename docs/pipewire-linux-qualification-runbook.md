@@ -26,3 +26,5 @@ It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
 for the run.
+The explicit native CTest invocation uses `--no-tests=error`, so a build that
+omits `pipewire_tests` cannot report a false green qualification.
