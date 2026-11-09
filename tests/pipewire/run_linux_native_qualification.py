@@ -31,6 +31,7 @@ if platform.system() != "Linux":
                "native_execution_attempted": False,
                "commands": [], "failed_command": None, "pending_command": [sys.executable, str(Path(__file__)), "--source", str(args.source)], "qualified": False,
                "pending_reason": "Linux native qualification pending: run on Linux",
+               "native_execution_blockers": ["Linux host", "PipeWire daemon", "libpipewire-0.3", "audio sink"],
                "environment": {"python": sys.version.split()[0], "cwd": str(Path.cwd())},
                "qualification_matrix_schema": "beatglass-native-qualification-matrix-v1",
                "qualification_matrix_status": "pending",

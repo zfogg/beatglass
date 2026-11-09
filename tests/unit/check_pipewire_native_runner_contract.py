@@ -9,7 +9,7 @@ for marker in ("verify_native_evidence_archive.py", "archive verification failed
     assert marker in source
 for marker in ("requested_summary", "requested_archive", "native_artifacts", "pending_reason"):
     assert marker in source
-for marker in ("host_os", "pending_command", "native_execution_attempted"):
+for marker in ("host_os", "pending_command", "native_execution_attempted", "native_execution_blockers"):
     assert marker in source
 assert '"environment"' in source
 for marker in ("qualification_matrix_schema", "qualification_matrix_status", "beatglass-native-qualification-matrix-v1"):
