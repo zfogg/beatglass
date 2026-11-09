@@ -72,6 +72,11 @@ public:
     handoff_ = nullptr;
   }
 private:
+  static void destroy(void* data) {
+    auto& owner = *static_cast<LinuxStreamOwner*>(data);
+    owner.active_ = false;
+    if (owner.handoff_) owner.handoff_->on_error(-EPIPE);
+  }
   static void param_changed(void* data, uint32_t id, const spa_pod* param) {
     auto& owner = *static_cast<LinuxStreamOwner*>(data);
     if (id == SPA_PARAM_Format && !param) {
@@ -124,7 +129,7 @@ private:
     pw_stream_queue_buffer(owner.stream_, buffer);
   }
   static constexpr pw_stream_events events_ = {
-      .version = PW_VERSION_STREAM_EVENTS, .state_changed = state_changed,
+      .version = PW_VERSION_STREAM_EVENTS, .destroy = destroy, .state_changed = state_changed,
       .param_changed = param_changed, .process = process};
   static const pw_stream_events events;
   pw_thread_loop* loop_{};
