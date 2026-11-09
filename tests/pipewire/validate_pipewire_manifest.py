@@ -6,8 +6,11 @@ from pathlib import Path
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: validate_pipewire_manifest.py MANIFEST")
+manifest_path = Path(sys.argv[1])
+if manifest_path.is_symlink():
+    raise SystemExit("refusing symlinked manifest")
 try:
-    manifest = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 except (OSError, json.JSONDecodeError) as exc:
     raise SystemExit(f"invalid manifest: {exc}")
 required = ("schema_version", "captured_at_utc", "host_platform", "python_version", "pipewire_cli_version", "inventory")
