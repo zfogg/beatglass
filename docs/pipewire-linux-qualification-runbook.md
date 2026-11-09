@@ -27,6 +27,8 @@ On non-Linux hosts the runner writes a structured pending summary when
 Windows/macOS handoffs auditable without claiming Linux qualification.
 The pending summary still records the source checkout commit, allowing a
 later Linux handoff to prove which code was actually qualified.
+It labels the target as `Linux/PipeWire` and the handoff as `pending`, so
+downstream evidence tooling can distinguish an unrun gate from a failed one.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
