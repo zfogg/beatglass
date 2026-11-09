@@ -152,6 +152,17 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "overlaySummaryReviewShortcut"
+        sequence: "Ctrl+Alt+Shift+M"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge !== null
+        onActivated: {
+            navigation.currentIndex = 1
+            overlaySettingsSummaryReviewAction.forceActiveFocus()
+            window.announceCaptureRecoveryState("Overlay summary review control focused.")
+        }
+    }
+    Shortcut {
         objectName: "overlayHideFocusShortcut"
         sequence: "Ctrl+Alt+J"
         context: Qt.ApplicationShortcut
