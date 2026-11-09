@@ -28,6 +28,9 @@ if(BUILD_TESTING)
   add_test(NAME pipewire_native_evidence_archive_verifier_behavior
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_evidence_archive_verifier_behavior.py)
   set_tests_properties(pipewire_native_evidence_archive_verifier_behavior PROPERTIES LABELS qualification TIMEOUT 10)
+  add_test(NAME pipewire_native_evidence_packager_behavior
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_evidence_packager_behavior.py)
+  set_tests_properties(pipewire_native_evidence_packager_behavior PROPERTIES LABELS qualification TIMEOUT 10)
   add_test(NAME pipewire_native_build_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_native_build_contract.py)
   set_tests_properties(pipewire_native_build_contract PROPERTIES LABELS unit TIMEOUT 10)

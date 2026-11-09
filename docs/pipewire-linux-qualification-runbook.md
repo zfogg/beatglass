@@ -85,3 +85,5 @@ checks a valid archive plus rejection of unlisted, tampered, duplicate-entry,
 and traversal-style artifacts. Empty evidence manifests are rejected as well,
 so a qualified handoff always contains at least one archived artifact.
 The manifest must also carry a non-empty repository commit identity.
+Run `python tests/unit/check_pipewire_evidence_packager_behavior.py` to verify
+that fixed `SOURCE_DATE_EPOCH` inputs produce byte-for-byte identical archives.
