@@ -844,3 +844,5 @@ Retained-settings review tooltip now includes the current settings revision for 
 
 Overlay shortcut help now exposes retained-settings review as an explicit accessible capability. Portable coverage is in `python tests/unit/check_overlay_shortcut_capability_contract.py`.
 
+Shortcut-help accessibility now reports whether retained-settings review is available with the native overlay bridge. Portable coverage is in `python tests/unit/check_overlay_shortcut_state_contract.py`.
+
