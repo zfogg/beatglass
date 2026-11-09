@@ -21,6 +21,8 @@ with zipfile.ZipFile(archive_path) as archive:
     if manifest.get("format") != "beatglass-native-pipewire-evidence-v1" or not manifest.get("qualified"):
         raise SystemExit("invalid or unqualified evidence manifest")
     artifacts = manifest.get("artifacts", [])
+    if not artifacts:
+        raise SystemExit("evidence manifest contains no artifacts")
     if len({artifact.get("name") for artifact in artifacts}) != len(artifacts):
         raise SystemExit("duplicate manifest artifact")
     declared = {artifact["name"] for artifact in artifacts}

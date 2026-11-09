@@ -79,4 +79,5 @@ commit, preventing evidence from being relabeled under a different build.
 The portable behavior fixture can be run with
 `python tests/unit/check_pipewire_evidence_archive_verifier_behavior.py`; it
 checks a valid archive plus rejection of unlisted, tampered, duplicate-entry,
-and traversal-style artifacts.
+and traversal-style artifacts. Empty evidence manifests are rejected as well,
+so a qualified handoff always contains at least one archived artifact.
