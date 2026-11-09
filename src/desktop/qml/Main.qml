@@ -1490,7 +1490,9 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.failureReason !== ""
                                 text: visible ? ("Analysis issue: " + window.analysisJobBridge.failureReason) : ""
                                 Accessible.name: "Analysis failure reason"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No analysis failure has been reported."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
@@ -1498,6 +1500,7 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.recoveryStatus !== ""
                                 text: visible ? ("Recovery status: " + window.analysisJobBridge.recoveryStatus) : ""
                                 Accessible.name: "Analysis recovery status"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No recovery reset has been performed."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -1594,7 +1597,9 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== ""
                                 text: visible ? storageRecovery.analysisError : ""
                                 Accessible.name: "Analysis queue error"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No analysis queue error is present."
+                                Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
                             Label {
