@@ -122,6 +122,9 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("summary native_junit_test_count does not match JUnit")
     if sum(count(node, "tests") for node in suites) != len(testcases):
         raise SystemExit("JUnit suite test counts do not match testcases")
+    for suite in suites:
+        if count(suite, "tests") != sum(1 for node in suite.iter("testcase")):
+            raise SystemExit("JUnit suite test count does not match its testcases")
     if set(discovery_names) != set(testcase_names):
         raise SystemExit("discovery and JUnit test names do not match")
 print("Native PipeWire evidence archive verified")
