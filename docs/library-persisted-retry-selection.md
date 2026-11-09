@@ -1,6 +1,6 @@
 # Persisted retry selection
 
-The persisted retry action now reports an explicit rejection when invoked
-without a selected retryable run. It also reports worker unavailability instead
-of silently ignoring the action. This keeps the recovery workflow truthful and
-leaves selection unchanged until a real retry request is queued.
+The persisted retry action reports explicit rejection when invoked without a
+selected retryable run and reports worker unavailability instead of silently
+ignoring the action. When accepted, it publishes `Retrying persisted recovery`
+until the worker returns the terminal retry result.
