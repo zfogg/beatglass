@@ -3352,7 +3352,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
                     Accessible.name: "Visualization empty state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text + " " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.")
                     ToolTip.text: "Visualization data availability and next action; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
