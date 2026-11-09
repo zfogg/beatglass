@@ -20,4 +20,6 @@ end = qml.index("function hideOverlayAndRestoreControls()")
 segment = qml[start:end]
 if not all(marker in segment for marker in ("window.show()", "window.raise()", "window.requestActivate()")):
     raise SystemExit("display selection failure must restore control-window focus")
+if segment.count("window.overlayLaunchFallbackActive = true") != 4:
+    raise SystemExit("display selection failures must activate control-window fallback")
 print(f"Overlay display selection fallback contract verified ({len(required)} checks)")
