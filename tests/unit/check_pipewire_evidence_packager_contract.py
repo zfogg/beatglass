@@ -23,6 +23,7 @@ markers = (
     "native_transition_json",
     "validate_pipewire_transition_evidence.py",
     "transition evidence validation failed",
+    "transition_event_count",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:
