@@ -3362,7 +3362,7 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Status of the generation-gated analysis result consumed by waveform and FFT rendering."
-                    ToolTip.text: "Accepted analysis generation and revision consumed by the visualization"
+                    ToolTip.text: "Accepted analysis generation and revision consumed by the visualization; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
