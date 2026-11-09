@@ -31,6 +31,11 @@ public:
   /** Copy one callback block into preallocated storage; false records overflow/discontinuity. */
   bool push(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
             bool discontinuity, double source_sample_time, bool sample_time_valid) noexcept;
+  /** Native pw_stream process callback seam; marks a discontinuity before the next block when requested. */
+  bool on_process(std::span<const float> samples, std::uint64_t host_time, bool host_time_valid,
+                  double source_sample_time, bool sample_time_valid) noexcept;
+  /** Native state/error callback seam; closes callback admission until control-thread restart. */
+  void on_error() noexcept;
   /** Pop the next bounded block on the control thread. */
   bool pop(coreaudio::CaptureBlock& block) noexcept;
   /** Stop accepting callback data and expose overflow state. */
@@ -39,6 +44,7 @@ public:
 private:
   std::unique_ptr<coreaudio::CaptureFifo> fifo_;
   bool stopped_{};
+  bool discontinuity_pending_{};
 };
 /** Create the provisional PipeWire monitor boundary; ownership stays with the caller. */
 std::unique_ptr<MonitorBackend> make_monitor_backend();
