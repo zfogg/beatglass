@@ -28,3 +28,7 @@ This verifies that the Linux-gated PipeWire/SPA translation unit, callback
 ownership boundary, and provisional format/target-node contract are present.
 It does not replace a Linux build with `libpipewire-0.3`, a running daemon, or
 real capture/recovery evidence.
+
+The preflight requires an addressable output sink with a numeric object id,
+stable serial, and node name; record the selected serial and id in the native
+qualification manifest before capture.
