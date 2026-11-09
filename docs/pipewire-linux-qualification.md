@@ -54,6 +54,8 @@ The capture timestamp must be timezone-qualified ISO-8601 so evidence from
 different hosts can be ordered reliably.
 The validator requires the offset to be UTC (`+00:00`), matching the capture
 command and avoiding local-time ambiguity.
+Validation refuses symlinked manifest paths so evidence review cannot silently
+follow an unrelated file.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
 interrupted or racing capture cannot leave a partial artifact at the requested
 path.

@@ -5,7 +5,7 @@ import sys
 import tempfile
 
 source = (Path(__file__).parents[2] / "tests/pipewire/validate_pipewire_manifest.py").read_text(encoding="utf-8")
-for marker in ("schema_version", "captured_at_utc", "host_platform", "python_version", "pipewire_cli_version", "inventory", "unsupported PipeWire qualification manifest schema", "must be a list"):
+for marker in ("schema_version", "captured_at_utc", "host_platform", "python_version", "pipewire_cli_version", "inventory", "is_symlink", "refusing symlinked manifest", "unsupported PipeWire qualification manifest schema", "must be a list"):
     assert marker in source
 print("PipeWire manifest validator contract verified (6 checks)")
 
