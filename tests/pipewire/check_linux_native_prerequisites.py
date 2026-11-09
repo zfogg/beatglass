@@ -21,8 +21,12 @@ if not missing and subprocess.run(["pw-cli", "info", "0"], check=False,
 if not missing:
     dump = subprocess.run(["pw-dump"], check=False, stdout=subprocess.PIPE, text=True)
     try:
-        if not isinstance(json.loads(dump.stdout), list):
+        inventory = json.loads(dump.stdout)
+        if not isinstance(inventory, list):
             missing.append("valid pw-dump JSON")
+        elif not any(item.get("info", {}).get("props", {}).get("media.class") == "Audio/Sink"
+                     for item in inventory if isinstance(item, dict)):
+            missing.append("PipeWire Audio/Sink node")
     except json.JSONDecodeError:
         missing.append("valid pw-dump JSON")
 else:
