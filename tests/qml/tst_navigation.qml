@@ -1182,4 +1182,16 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_explicitShowClearsPausedRecoveryMarker() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        verify(app.overlayRecoveryPausedByUser)
+        fakeOverlay.available = true
+        app.showOverlayAndHideControls()
+        verify(!app.overlayRecoveryPausedByUser)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
