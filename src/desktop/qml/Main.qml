@@ -788,6 +788,7 @@ ApplicationWindow {
     function restoreOverlayDisplaySelectionFromBridge() {
         if (!window.overlayBridge) {
             window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
             return false
         }
         if (window.overlayBridge.displayName !== "")
