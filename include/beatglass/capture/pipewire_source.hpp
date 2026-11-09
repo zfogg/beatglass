@@ -119,7 +119,9 @@ public:
   Status poll_status() noexcept;
   const std::string& serial() const noexcept { return serial_; }
   std::uint64_t epoch() const noexcept { return epoch_; }
-  bool accepts_epoch(std::uint64_t epoch) const noexcept { return epoch != 0 && epoch == epoch_; }
+  bool accepts_epoch(std::uint64_t epoch) const noexcept {
+    return epoch != 0 && epoch == epoch_ && stream_ && !stream_->needs_restart();
+  }
 private:
   std::string serial_;
   std::unique_ptr<MonitorStream> stream_;
