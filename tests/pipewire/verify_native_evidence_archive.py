@@ -7,6 +7,16 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 from pathlib import PurePosixPath
 
+def count(node, key):
+    """Read a non-negative JUnit count without accepting malformed metadata."""
+    try:
+        value = int(node.attrib.get(key, "0"))
+    except (TypeError, ValueError):
+        raise SystemExit(f"JUnit evidence has malformed {key} count")
+    if value < 0:
+        raise SystemExit(f"JUnit evidence has negative {key} count")
+    return value
+
 if len(sys.argv) != 2:
     raise SystemExit("usage: verify_native_evidence_archive.py EVIDENCE.zip")
 archive_path = sys.argv[1]
@@ -96,11 +106,11 @@ with zipfile.ZipFile(archive_path) as archive:
     if junit_root.tag not in ("testsuite", "testsuites"):
         raise SystemExit("JUnit evidence has invalid root")
     suites = [junit_root] if junit_root.tag == "testsuite" else [node for node in junit_root.iter("testsuite")]
-    if not suites or sum(int(node.attrib.get("tests", "0")) for node in suites) < 1:
+    if not suites or sum(count(node, "tests") for node in suites) < 1:
         raise SystemExit("JUnit evidence has no executed tests")
-    if sum(int(node.attrib.get("failures", "0")) for node in suites) or sum(int(node.attrib.get("errors", "0")) for node in suites) or any(node.tag in ("failure", "error") for node in junit_root.iter()):
+    if sum(count(node, "failures") for node in suites) or sum(count(node, "errors") for node in suites) or any(node.tag in ("failure", "error") for node in junit_root.iter()):
         raise SystemExit("JUnit evidence reports failures or errors")
-    if sum(int(node.attrib.get("skipped", "0")) for node in suites) or any(node.tag == "skipped" for node in junit_root.iter()):
+    if sum(count(node, "skipped") for node in suites) or any(node.tag == "skipped" for node in junit_root.iter()):
         raise SystemExit("JUnit evidence reports skipped tests")
     testcases = [node for node in junit_root.iter() if node.tag == "testcase"]
     if not testcases or any(not node.attrib.get("name", "").strip() for node in testcases):
@@ -110,7 +120,7 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("JUnit evidence has duplicate testcase names")
     if int(summary_data.get("native_junit_test_count", 0)) != len(testcases):
         raise SystemExit("summary native_junit_test_count does not match JUnit")
-    if sum(int(node.attrib.get("tests", "0")) for node in suites) != len(testcases):
+    if sum(count(node, "tests") for node in suites) != len(testcases):
         raise SystemExit("JUnit suite test counts do not match testcases")
     if set(discovery_names) != set(testcase_names):
         raise SystemExit("discovery and JUnit test names do not match")
