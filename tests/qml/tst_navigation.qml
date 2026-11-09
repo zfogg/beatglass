@@ -1543,4 +1543,21 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_pausedEscapeFocusRetainsPersistedSettings() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        let shortcut = findChild(app, "overlayPausedRecoveryFocusShortcut")
+        verify(shortcut.enabled)
+        shortcut.activated()
+        verify(findChild(app, "resumeOverlayRecovery").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(app.overlayRecoveryAnnouncement.indexOf("paused recovery action") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
