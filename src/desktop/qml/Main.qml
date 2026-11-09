@@ -2645,12 +2645,12 @@ ApplicationWindow {
                     ToolTip.text: "DJ monitoring state, estimates, and evidence quality"
                     Label {
                         objectName: "djStatus"; text: "Status: " + window.liveBridge.status
-                        Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current DJ monitoring status"
+                        Accessible.name: "DJ monitoring status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current DJ monitoring status"
                     }
                     Label {
                         objectName: "djEstimates"
                         text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
-                        Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current BPM, key, and chord estimates"
+                        Accessible.name: "DJ estimates"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current BPM, key, and chord estimates"
                     }
                     Label {
                      objectName: "djEvidenceStatus"
