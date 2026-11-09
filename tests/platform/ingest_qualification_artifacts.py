@@ -42,7 +42,10 @@ def ingest(root: Path, output: Path) -> list[str]:
             if len(parts) != 2:
                 errors.append(f"malformed artifact hash line: {line}"); continue
             digest, relative = parts
-            path = (root / relative).resolve()
+            candidate = root / relative
+            if candidate.is_symlink():
+                errors.append(f"symlinked qualification artifact: {relative}"); continue
+            path = candidate.resolve()
             if root.resolve() not in path.parents or not path.is_file():
                 errors.append(f"missing or escaping artifact: {relative}"); continue
             normalized = Path(relative).as_posix()

@@ -98,3 +98,21 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-artifacts.sha256").write_text(f"{digest}  empty.log\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertTrue(any("empty qualification artifact" in error for error in errors))
+
+    def test_rejects_symlinked_qualification_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text(
+                "commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            target = root / "outside.log"
+            target.write_bytes(b"native evidence")
+            link = root / "linked.log"
+            try:
+                link.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            digest = hashlib.sha256(target.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(
+                f"{digest}  linked.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("symlinked qualification artifact" in error for error in errors))
