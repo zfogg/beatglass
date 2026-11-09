@@ -41,4 +41,11 @@ with tempfile.TemporaryDirectory() as directory:
     verified = subprocess.run([sys.executable, str(verifier), str(archive)], capture_output=True, text=True)
     if verified.returncode != 0:
         raise SystemExit(verified.stderr or verified.stdout)
-print("PipeWire evidence end-to-end handoff passed (1 scenario)")
+    reproducible = root / "evidence-repeat.zip"
+    repeated = subprocess.run([sys.executable, str(packager), str(summary), str(reproducible)], env=env, capture_output=True, text=True)
+    if repeated.returncode != 0 or archive.read_bytes() != reproducible.read_bytes():
+        raise SystemExit("fixed SOURCE_DATE_EPOCH did not reproduce the end-to-end archive")
+    repeated_verified = subprocess.run([sys.executable, str(verifier), str(reproducible)], capture_output=True, text=True)
+    if repeated_verified.returncode != 0:
+        raise SystemExit(repeated_verified.stderr or repeated_verified.stdout)
+print("PipeWire evidence end-to-end handoff passed (2 scenarios)")
