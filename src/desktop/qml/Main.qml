@@ -1512,6 +1512,21 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                 }
+                Label {
+                    objectName: "libraryStorageRecoveryHealth"
+                    visible: typeof storageRecovery !== "undefined"
+                    text: visible ? ("Library storage: " + storageRecovery.status
+                          + (storageRecovery.retryableRunIds.length > 0 ? " · " + storageRecovery.retryableRunIds.length + " saved run(s)" : " · no saved runs")) : ""
+                    Accessible.name: "Library storage recovery health"
+                    Accessible.value: visible ? text : ""
+                    Accessible.role: Accessible.Status
+                    Accessible.description: visible && (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
+                        ? text + ". Reopen storage before retrying or discarding saved analysis runs."
+                        : visible ? text + ". Saved recovery state is synchronized with the Library controls." : "Storage recovery health is unavailable."
+                    ToolTip.text: visible ? Accessible.description : "Library storage recovery health"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
                 Frame {
                     objectName: "browserFrame"
                     Layout.fillWidth: true; Layout.fillHeight: true
