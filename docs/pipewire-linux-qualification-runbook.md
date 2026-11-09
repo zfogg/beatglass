@@ -133,3 +133,6 @@ inconsistent native test report.
 Failure, error, and skipped counts are likewise summed across nested suites;
 any non-zero aggregate is rejected even when individual `<failure>`, `<error>`,
 or `<skipped>` elements are absent.
+All aggregate count attributes must also be well-formed, non-negative
+integers; malformed or negative status metadata is rejected before the archive
+can be marked qualified.
