@@ -18,9 +18,9 @@ parser.add_argument("--archive", type=Path, help="package the qualified summary 
 args = parser.parse_args()
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
-    pending = {"platform": platform.platform(), "qualification_target": "Linux/PipeWire",
+    pending = {"platform": platform.platform(), "host_os": platform.system(), "qualification_target": "Linux/PipeWire",
                "handoff_status": "pending", "commit": commit or None, "pipewire_version": None,
-               "commands": [], "failed_command": None, "qualified": False,
+               "commands": [], "failed_command": None, "pending_command": [sys.executable, str(Path(__file__)), "--source", str(args.source)], "qualified": False,
                "pending_reason": "Linux native qualification pending: run on Linux",
                "requested_summary": str(args.summary) if args.summary else None,
                "requested_archive": str(args.archive) if args.archive else None,

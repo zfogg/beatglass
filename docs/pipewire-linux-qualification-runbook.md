@@ -29,6 +29,8 @@ The pending summary still records the source checkout commit, allowing a
 later Linux handoff to prove which code was actually qualified.
 It also records requested summary/archive paths and an empty native artifact
 list, making the host limitation explicit without claiming qualification.
+The pending record includes the host OS and the exact runner command that must
+be rerun on Linux, making the handoff actionable rather than merely advisory.
 It labels the target as `Linux/PipeWire` and the handoff as `pending`, so
 downstream evidence tooling can distinguish an unrun gate from a failed one.
 Linux runs use the same schema with `handoff_status: complete` only when the
