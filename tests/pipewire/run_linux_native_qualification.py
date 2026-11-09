@@ -27,7 +27,7 @@ if args.capture_plan:
     capture_plan_validated = True
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 if platform.system() != "Linux":
-    pending = {"platform": platform.platform(), "host_os": platform.system(), "qualification_target": "Linux/PipeWire",
+    pending = {"runner_summary_schema": "beatglass-native-runner-summary-v1", "platform": platform.platform(), "host_os": platform.system(), "qualification_target": "Linux/PipeWire",
                "captured_at": datetime.now(timezone.utc).isoformat(),
                "handoff_status": "pending", "commit": commit or None, "pipewire_version": None,
                "native_execution_attempted": False,
@@ -139,7 +139,7 @@ if junit_path.is_file():
         junit_skipped = sum(1 for case in cases if case.find("skipped") is not None)
     except ET.ParseError:
         junit_count = 0
-summary = {"platform": platform.platform(), "host_os": platform.system(), "commit": commit,
+summary = {"runner_summary_schema": "beatglass-native-runner-summary-v1", "platform": platform.platform(), "host_os": platform.system(), "commit": commit,
            "captured_at": datetime.now(timezone.utc).isoformat(),
            "environment": {"python": sys.version.split()[0], "cwd": str(Path.cwd()),
                            "platform": platform.platform()},
