@@ -1080,6 +1080,7 @@ ApplicationWindow {
             selectedAudioUrl = url
             metadataBridge.inspect(url)
             window.announceVisualizationRecovery("Selected source changed; prior analysis presentation is stale until this source is analyzed.")
+            analyzeSelectedAudio.forceActiveFocus()
         }
     }
     function clearSelectedAudio() {
