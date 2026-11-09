@@ -3342,7 +3342,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled ? "Stop playback and clear the accepted visualization snapshot." : "Playback is already stopped."
                     ToolTip.text: enabled ? "Stop playback and clear the accepted visualization snapshot" : "Playback is already stopped"
-                    onClicked: { window.playbackBridge.stop(); window.announceVisualizationRecovery("Playback stopped; accepted snapshot cleared.") }
+                    onClicked: window.stopPlaybackWithRecovery("Playback stopped; accepted snapshot cleared.")
                 }
                 }
                 Label {
