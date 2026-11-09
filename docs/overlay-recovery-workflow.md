@@ -271,3 +271,6 @@ After successful Unlock resolves a reordered display, click-through can be re-en
 
 After click-through is re-enabled on a reordered display, retained-settings summary review remains available and reports the updated settings revision without replacing the resolved display identity.
 
+
+The retained-settings status exposes its revision in the accessibility value after reordered-display recovery, giving assistive-technology users a stable confirmation of which persisted bundle they are reviewing.
+

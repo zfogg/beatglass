@@ -2107,4 +2107,22 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_reorderedReviewAnnouncesSettingsRevision() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        fakeOverlay.screenNames = ["Laptop", "Projector"]
+        fakeOverlay.displayName = "Projector"
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 1
+        app.overlaySettingsRevision = 4
+        let status = findChild(app, "overlaySettingsRetentionStatus")
+        verify(status.visible)
+        verify(status.Accessible.value.indexOf("revision 4") >= 0)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        app.destroy()
+        fakeOverlay.clickThrough = false
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
