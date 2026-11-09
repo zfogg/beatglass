@@ -3040,7 +3040,7 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.discardBatch !== undefined && window.analysisJobBridge.batchAcceptedCount > 0
                                 enabled: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled")
                                 Accessible.name: "Discard analysis batch"
-                                Accessible.value: visible ? (window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount) : ""
+                                Accessible.value: visible ? (enabled ? "available; " : "unavailable; ") + window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount : ""
                                 Accessible.description: visible ? "Clear the terminal batch recovery state without changing source audio. Current state: " + window.analysisJobBridge.status + "; accepted items: " + window.analysisJobBridge.batchAcceptedCount + ". Confirmation is required; focus returns here after the dialog." : "Discard batch is unavailable."
                                 ToolTip.text: Accessible.description
                                 onClicked: discardAnalysisBatchDialog.open()
