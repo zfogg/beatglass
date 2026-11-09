@@ -342,6 +342,13 @@ ApplicationWindow {
         onActivated: window.resetOverlayRecoveryAttempts()
     }
     Shortcut {
+        objectName: "overlayStopRecoveryShortcut"
+        sequence: "Ctrl+Alt+Shift+X"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayRecoveryAttemptCount > 0 && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit
+        onActivated: window.stopOverlayRecoveryAttempts()
+    }
+    Shortcut {
         objectName: "overlayDisplayFocusShortcut"
         sequence: "Ctrl+Alt+D"
         context: Qt.ApplicationShortcut

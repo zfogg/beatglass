@@ -39,6 +39,8 @@ During an active retry cycle, the card also shows bounded progress such as
 `Recovery attempts: 1/3` so the next action and remaining budget are clear.
 Users can choose `Stop recovery` before the limit to pause retries while
 leaving monitoring available; starting a new retry cycle remains explicit.
+The same action is available from the keyboard with `Ctrl+Alt+Shift+X` while
+an active retry cycle is in progress.
 
 ## Screenshot qualification
 
