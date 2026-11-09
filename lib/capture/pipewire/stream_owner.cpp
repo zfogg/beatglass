@@ -9,6 +9,10 @@ public:
     return false;
   }
   bool connected() const noexcept override { return false; }
+  bool process(std::span<const float>, MonitorStream& handoff) noexcept override {
+    handoff.on_error(-ENOSYS);
+    return false;
+  }
   void stop() noexcept override {}
 };
 }
