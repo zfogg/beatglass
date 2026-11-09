@@ -256,3 +256,6 @@ If displays reorder while recovery is paused, the saved display identity and geo
 
 If displays reorder while click-through is active, recovery matches the saved display by identity and returns focus to Unlock overlay, preserving the saved geometry until interaction is restored.
 
+
+After a click-through display reorder, successful Unlock clears stale recovery markers only after the saved display identity is resolved; the reordered display and retained geometry remain selected.
+
