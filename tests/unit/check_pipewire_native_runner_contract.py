@@ -12,4 +12,6 @@ for marker in ("requested_summary", "requested_archive", "native_artifacts", "pe
 for marker in ("host_os", "pending_command"):
     assert marker in source
 assert '"environment"' in source
+for marker in ("qualification_matrix_schema", "qualification_matrix_status", "beatglass-native-qualification-matrix-v1"):
+    assert marker in source
 print("PipeWire native runner contract verified (5 checks)")

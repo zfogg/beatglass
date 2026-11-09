@@ -23,6 +23,8 @@ if platform.system() != "Linux":
                "commands": [], "failed_command": None, "pending_command": [sys.executable, str(Path(__file__)), "--source", str(args.source)], "qualified": False,
                "pending_reason": "Linux native qualification pending: run on Linux",
                "environment": {"python": sys.version.split()[0], "cwd": str(Path.cwd())},
+               "qualification_matrix_schema": "beatglass-native-qualification-matrix-v1",
+               "qualification_matrix_status": "pending",
                "requested_summary": str(args.summary) if args.summary else None,
                "requested_archive": str(args.archive) if args.archive else None,
                "native_artifacts": [],
@@ -156,6 +158,8 @@ if args.transitions:
     summary["native_transition_event_count"] = len(transition_events)
 summary["qualification_target"] = "Linux/PipeWire"
 summary["handoff_status"] = "complete" if summary["qualified"] else "failed"
+summary["qualification_matrix_schema"] = "beatglass-native-qualification-matrix-v1"
+summary["qualification_matrix_status"] = "qualified" if summary["qualified"] else "pending"
 if args.summary:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
