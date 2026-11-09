@@ -1157,4 +1157,14 @@ TestCase {
         app.destroy()
         fakeOverlay.available = true
     }
+    function test_overlayPausedRecoveryKeepsResumeFocusPath() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        findChild(app, "retryOverlay").clicked()
+        findChild(app, "stopOverlayRecovery").clicked()
+        verify(app.overlayRecoveryPausedByUser)
+        verify(findChild(app, "resumeOverlayRecovery").activeFocus)
+        app.destroy()
+        fakeOverlay.available = true
+    }
 }
