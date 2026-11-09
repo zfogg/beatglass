@@ -65,6 +65,8 @@ with zipfile.ZipFile(archive_path) as archive:
         summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
     except (json.JSONDecodeError, UnicodeDecodeError):
         raise SystemExit("malformed qualification summary")
+    if not isinstance(summary_data, dict):
+        raise SystemExit("qualification summary is not an object")
     if "commit" in summary_data and (not isinstance(summary_data["commit"], str) or not summary_data["commit"].strip()):
         raise SystemExit("qualification summary has invalid commit identity")
     if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):

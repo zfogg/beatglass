@@ -199,6 +199,8 @@ The verifier also cross-checks the manifest commit against the archived summary
 commit, preventing evidence from being relabeled under a different build.
 Malformed summary JSON is rejected with an explicit qualification-summary
 error rather than being treated as an incomplete handoff.
+The decoded summary must also be a JSON object, preventing arrays or scalar
+values from bypassing field-level qualification checks.
 The portable behavior fixture can be run with
 `python tests/unit/check_pipewire_evidence_archive_verifier_behavior.py`; it
 checks a valid archive plus rejection of unlisted, tampered, duplicate-entry,
