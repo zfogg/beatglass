@@ -69,6 +69,8 @@ The Audio/Sink entry must retain non-empty `object.serial` and `node.name` for
 deterministic target selection.
 Serial and node-name values must remain strings; numeric values are not
 coerced into target identifiers.
+Audio/Sink `object.serial` values must additionally be decimal numeric strings,
+matching PipeWire's stable serial identity format.
 Serials and node names must be unique among Audio/Sink entries so selection is
 never ambiguous.
 The schema version is validated as an integer to prevent JSON booleans from
