@@ -443,3 +443,5 @@ Use a stable handoff filename for verifier output and preserve prior outputs whe
 When comparing evidence revisions, retain the prior archive and verifier output rather than overwriting them; provenance review depends on the revision history.
 
 Pending native runner summaries include explicit blockers (host OS, daemon, PipeWire library, and audio sink) so a handoff can be actioned without implying execution.
+
+Review each blocker before scheduling a native rerun; once satisfied, preserve the same pending summary until the host runner records real command results.
