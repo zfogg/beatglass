@@ -72,6 +72,8 @@ While the display is still unavailable, the paused card separately reports that
 display recovery is pending and that resuming remains a manual choice.
 When the display returns, no native recovery attempt is started automatically
 while paused; the user must choose `Resume recovery`.
+Geometry updates received during that paused interval follow the same rule and
+only refresh persisted state; they do not trigger a hidden retry.
 
 ## Screenshot qualification
 
