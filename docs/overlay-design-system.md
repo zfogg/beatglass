@@ -84,3 +84,8 @@ Capture status uses explicit lifecycle language so source loss and reacquisition
 are understandable at a glance:
 
 ![Overlay capture status rendering](overlay-capture-card.svg)
+
+The recovery timeline makes the transition from loss to restore legible in one
+compact scan:
+
+![Overlay recovery timeline rendering](overlay-recovery-timeline.svg)

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300" role="img" aria-labelledby="title desc">
+  <title id="title">Overlay recovery timeline</title>
+  <desc id="desc">A four-step timeline from display loss through review, retry, and restored overlay.</desc>
+  <rect width="760" height="300" rx="22" fill="#0f172a"/><rect x="32" y="28" width="696" height="244" rx="18" fill="#1e293b" stroke="#475569"/>
+  <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Recovery timeline</text>
+  <line x1="100" y1="158" x2="660" y2="158" stroke="#64748b" stroke-width="3"/>
+  <g font-family="sans-serif" text-anchor="middle"><circle cx="100" cy="158" r="22" fill="#fb7185"/><text x="100" y="164" fill="#fff" font-size="14" font-weight="700">1</text><text x="100" y="210" fill="#fecdd3" font-size="14">Display lost</text>
+  <circle cx="286" cy="158" r="22" fill="#fbbf24"/><text x="286" y="164" fill="#111827" font-size="14" font-weight="700">2</text><text x="286" y="210" fill="#fde68a" font-size="14">Review</text>
+  <circle cx="472" cy="158" r="22" fill="#60a5fa"/><text x="472" y="164" fill="#172554" font-size="14" font-weight="700">3</text><text x="472" y="210" fill="#bfdbfe" font-size="14">Retry / restore</text>
+  <circle cx="660" cy="158" r="22" fill="#4ade80"/><text x="660" y="164" fill="#163b2b" font-size="14" font-weight="700">4</text><text x="660" y="210" fill="#bbf7d0" font-size="14">Ready</text></g>
+</svg>
