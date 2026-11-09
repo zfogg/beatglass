@@ -34,3 +34,5 @@ Before execution, the runner captures CTest's JSON test listing to prove the
 native target registered concrete cases.
 The summary exposes that listing as `native_test_discovery`, separately from
 the `native_pipewire_tests` execution result.
+The runner also records the parsed `native_test_count` from CTest's JSON
+`tests` array.

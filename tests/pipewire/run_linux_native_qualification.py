@@ -53,9 +53,17 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
 native_result = next((item for item in results if "--timeout" in item["command"] and "^pipewire_tests$" in item["command"]), None)
 discovery_result = next((item for item in results if "--show-only=json-v1" in item["command"]), None)
+discovery_count = None
+if discovery_result:
+    try:
+        discovery_json = json.loads(Path(discovery_result["stdout"]).read_text(encoding="utf-8"))
+        discovery_count = len(discovery_json.get("tests", []))
+    except (OSError, json.JSONDecodeError, AttributeError):
+        discovery_count = 0
 summary = {"platform": platform.platform(), "commit": commit,
            "pipewire_version": pipewire_version, "commands": results,
            "native_test_discovery": discovery_result,
+           "native_test_count": discovery_count,
            "native_pipewire_tests": native_result,
            "qualified": len(results) == len(commands) and all(item["returncode"] == 0 for item in results)}
 if args.summary:
