@@ -409,3 +409,5 @@ Archive review should report timestamp-schema failures separately from native ex
 Archive verifier output is transfer evidence only; a passing archive does not claim that the underlying Linux/PipeWire native run occurred on the current host.
 
 Use the archive verifier after copying evidence between hosts, then run the native qualification gate separately; do not substitute one result for the other.
+
+Record both verifier output and native-runner output in the handoff so reviewers can distinguish archive integrity from host qualification status.
