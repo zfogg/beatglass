@@ -18,4 +18,5 @@ for marker in ("--capture-plan", "validate_native_host_capture_plan.py", "captur
     assert marker in source
 assert '"--capture-plan"' in source
 assert "capture_plan_sha256" in source
+assert "capture_plan_validated" in source
 print("PipeWire native runner contract verified (5 checks)")

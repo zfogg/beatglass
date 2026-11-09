@@ -76,6 +76,8 @@ Pending summaries preserve the same `--capture-plan` argument in their rerun
 command, so the native host receives the exact validated handoff request.
 They also record the capture-plan SHA-256 when the file is available, allowing
 the native host to prove it used the intended preparation instructions.
+Summaries explicitly record whether that plan passed validation before the
+runner proceeded.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
