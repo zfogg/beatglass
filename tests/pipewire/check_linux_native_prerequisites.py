@@ -14,6 +14,9 @@ if not shutil.which("pkg-config"):
 for tool in ("pw-cli", "pw-dump"):
     if not shutil.which(tool):
         missing.append(tool)
+if not missing and subprocess.run(["pw-cli", "info", "0"], check=False,
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
+    missing.append("running PipeWire daemon")
 else:
     result = subprocess.run(["pkg-config", "--exists", "libpipewire-0.3"], check=False)
     if result.returncode:
