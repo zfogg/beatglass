@@ -61,7 +61,10 @@ with zipfile.ZipFile(archive_path) as archive:
     if unexpected:
         raise SystemExit(f"unlisted archive artifact: {sorted(unexpected)[0]}")
     summary_names = [name for name in declared if name.endswith(".json") and "summary" in name]
-    summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
+    try:
+        summary_data = json.loads(archive.read(summary_names[0])) if len(summary_names) == 1 else {}
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        raise SystemExit("malformed qualification summary")
     if "commit" in summary_data and (not isinstance(summary_data["commit"], str) or not summary_data["commit"].strip()):
         raise SystemExit("qualification summary has invalid commit identity")
     if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):
