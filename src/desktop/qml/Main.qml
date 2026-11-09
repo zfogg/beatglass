@@ -870,8 +870,11 @@ ApplicationWindow {
                 || !isFinite(window.overlayBridge.geometry.width)
                 || !isFinite(window.overlayBridge.geometry.height)
                 || window.overlayBridge.geometry.width <= 0
-                || window.overlayBridge.geometry.height <= 0)
+                || window.overlayBridge.geometry.height <= 0) {
+            window.overlayLaunchFallbackActive = true
+            window.overlayDisplayRecoveryPending = true
             return false
+        }
         const geometry = window.overlayBridge.geometry
         if (window.overlayBridge.displayName !== "")
             window.overlayPreferredDisplayName = window.overlayBridge.displayName
