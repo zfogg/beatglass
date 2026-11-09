@@ -996,7 +996,7 @@ ApplicationWindow {
                 objectName: "reduceMotion"
                 text: "Reduce motion"
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
-                Accessible.value: checked ? "enabled" : "disabled"
+                        Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                 activeFocusOnTab: true
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
@@ -2708,7 +2708,7 @@ ApplicationWindow {
                         text: "Click through"; objectName: "clickThrough"
                         activeFocusOnTab: true
                         Accessible.name: checked ? "Disable click-through" : "Enable click-through"
-                        Accessible.value: checked ? "enabled" : "disabled"
+                        Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                         Accessible.role: Accessible.CheckBox
                         Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled")
                         ToolTip.text: "Toggle pointer click-through for the overlay"
