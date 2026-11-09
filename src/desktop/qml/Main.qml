@@ -3904,9 +3904,9 @@ ApplicationWindow {
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onClicked: if (window.overlayBridge) {
                             const requestedClickThrough = checked
-                            window.overlayBridge.setClickThrough(requestedClickThrough)
+                            const applied = window.overlayBridge.setClickThrough(requestedClickThrough)
                             checked = window.overlayBridge.clickThrough
-                            if (checked !== requestedClickThrough)
+                            if (!applied || checked !== requestedClickThrough)
                                 window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again.")
                             overlayInteractionMode.forceActiveFocus()
                         }
