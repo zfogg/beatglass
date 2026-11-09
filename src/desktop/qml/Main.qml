@@ -3032,7 +3032,7 @@ ApplicationWindow {
                 RowLayout {
                     objectName: "visualizationModeControls"
                     Accessible.name: "Visualization mode controls, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
-                    Accessible.value: visualizationCanvas.viewMode
+                    Accessible.value: visualizationCanvas.viewMode + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Choose waveform or frequency-domain FFT visualization; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                     ToolTip.text: "Visualization mode controls; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending" : "overlay is ready") + "; current mode is announced when available"
