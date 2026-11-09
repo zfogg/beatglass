@@ -19,6 +19,7 @@ Admission responses synchronize the cached-result presentation, keeping the
 bridge's cache-hit and admission properties consistent for one identity.
 Admission responses also publish the corresponding ready, queued, or rejected
 status so the UI cannot remain on a prior job state.
+Admission also clears stale retry/error state before the next analysis decision.
 Lookup completion also clears stale retry/error state from a previous job, so
 a fresh identity probe cannot inherit recovery controls from unrelated work.
 Cache hits also populate the analysis result display directly; misses clear it

@@ -54,6 +54,8 @@ if "cacheHit_ = !result.isEmpty()" not in admitted_connection:
     raise SystemExit("Admission results must synchronize cached-result state")
 if "Cached analysis ready" not in admitted_connection or "Analysis queued" not in admitted_connection:
     raise SystemExit("Admission results must expose an explicit lifecycle status")
+if "analysisRetryable_ = false" not in admitted_connection or "analysisError_.clear()" not in admitted_connection:
+    raise SystemExit("Admission must clear stale recovery state")
 if "analysisFrames_ = 0" not in cached_connection or "analysisFrames_ = 0" not in admitted_connection:
     raise SystemExit("Cache/admission transitions must clear stale progress")
 if 'Cached analysis ready' not in cached_connection or 'Cache lookup complete' not in cached_connection:
