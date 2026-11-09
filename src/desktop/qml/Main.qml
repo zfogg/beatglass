@@ -972,6 +972,7 @@ ApplicationWindow {
     }
     function restoreOverlayFallbackControls(reason) {
         window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
         window.overlayHiddenByUser = false
         window.show()
         window.raise()
