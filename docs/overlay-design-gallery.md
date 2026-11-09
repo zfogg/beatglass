@@ -51,6 +51,7 @@ screenshots.
 | [Pause confirmation](overlay-pause-confirmation-card.svg) | explicit capture pause decision |
 | [Resume](overlay-resume-card.svg) | ready-to-continue monitoring workflow |
 | [Status bar](overlay-status-bar-card.svg) | compact live monitoring indicators |
+| [Contrast](overlay-contrast-card.svg) | readable themes, labels, and state colors |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
