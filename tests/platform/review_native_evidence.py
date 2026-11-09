@@ -108,7 +108,9 @@ def assess(report_path: Path, reviewer: str) -> dict:
             for artifact in inventory:
                 artifact_path = artifact.get("path") if isinstance(artifact, dict) else None
                 if (not isinstance(artifact_path, str) or artifact_path.startswith(("/", "\\")) or
-                        ":" in artifact_path or ".." in artifact_path.replace("\\", "/").split("/")):
+                        ":" in artifact_path or "\\" in artifact_path or "//" in artifact_path or
+                        "." in artifact_path.replace("\\", "/").split("/") or
+                        ".." in artifact_path.replace("\\", "/").split("/")):
                     blockers.append(f"{name}:invalid artifact path")
                     break
                 if (not isinstance(artifact, dict) or not artifact.get("path") or
