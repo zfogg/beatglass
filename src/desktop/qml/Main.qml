@@ -2279,6 +2279,22 @@ ApplicationWindow {
                                     : "Run ID, content identity, source path, and decoder snapshot for each saved retryable analysis."
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
+                            Label {
+                                objectName: "persistedRecoveryActionStatus"
+                                visible: typeof storageRecovery !== "undefined"
+                                text: visible && storageRecovery.selectedRunId !== ""
+                                    ? ("Recovery actions: " + (storageRecovery.analysisRetryable ? "retry available" : "retry unavailable")
+                                       + (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0 ? " · reopen storage" : "")
+                                       + (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running" ? " · active work" : ""))
+                                    : "Select a saved run to expose recovery actions"
+                                Accessible.name: "Persisted recovery action status"
+                                Accessible.value: visible ? text : ""
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". Retry and discard never modify source audio." : "No persisted recovery action is selected."
+                                ToolTip.text: "Current persisted recovery action availability"
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
+                            }
                             Button {
                                 objectName: "discardPersistedRecovery"
                                 id: discardPersistedRecoveryButton
