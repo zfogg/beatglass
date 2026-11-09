@@ -1,0 +1,22 @@
+"""Check the Linux PipeWire development prerequisites without requiring Linux on CI."""
+import platform
+import shutil
+import subprocess
+import sys
+
+if platform.system() != "Linux":
+    print("PipeWire native preflight pending: run on Linux with libpipewire-0.3")
+    raise SystemExit(0)
+
+missing = []
+if not shutil.which("pkg-config"):
+    missing.append("pkg-config")
+else:
+    result = subprocess.run(["pkg-config", "--exists", "libpipewire-0.3"], check=False)
+    if result.returncode:
+        missing.append("libpipewire-0.3 development package")
+if missing:
+    print("Missing Linux PipeWire prerequisites: " + ", ".join(missing), file=sys.stderr)
+    print("Install PipeWire development headers and rerun CMake with BEATGLASS_BUILD_PIPEWIRE=ON", file=sys.stderr)
+    raise SystemExit(1)
+print("Linux PipeWire prerequisites available; configure and run pipewire_tests")
