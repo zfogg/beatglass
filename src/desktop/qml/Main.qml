@@ -524,6 +524,7 @@ ApplicationWindow {
     }
     Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused; type to filter the current folder.") } }
     Shortcut { objectName: "libraryClearFilterShortcut"; sequence: "Ctrl+Alt+Shift+Backspace"; context: Qt.ApplicationShortcut; enabled: search.text !== ""; onActivated: { search.text = ""; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.") } }
+    Shortcut { objectName: "libraryFolderPathFocusShortcut"; sequence: "Ctrl+Alt+Shift+I"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; folderPath.forceActiveFocus(); window.announceVisualizationRecovery("Current Library folder path focused.") } }
     Shortcut { objectName: "libraryClearShortcut"; sequence: "Ctrl+Alt+Backspace"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Library selection cleared; choose another source for fresh analysis."); browser.forceActiveFocus() } }
     Shortcut { objectName: "libraryReopenShortcut"; sequence: "Ctrl+Alt+Shift+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null && !window.playbackMatchesSelection; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Selected Library source reopened for playback." : "Selected Library source could not be reopened for playback."); reopenSelectedPlayback.forceActiveFocus() } }
     Shortcut { objectName: "libraryPlayShortcut"; sequence: "Ctrl+Alt+P"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge !== null; onActivated: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Playing selected Library source " + window.selectedName + "." : "Selected Library source could not be opened for playback."); playSelectedTrack.forceActiveFocus() } }
@@ -1794,7 +1795,7 @@ ApplicationWindow {
                     id: libraryShortcutHelp
                     objectName: "libraryShortcutHelp"
                     activeFocusOnTab: true
-                    text: "Shortcuts: Ctrl+Alt+Shift+H help · Ctrl+F filter · Ctrl+Alt+Shift+Backspace clear filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+Shift+M metadata status · Ctrl+Alt+Shift+N analysis action · Ctrl+Alt+Shift+Y playback action · Ctrl+Alt+Shift+Q refresh action · Ctrl+Alt+Shift+D folder chooser · Ctrl+Alt+Shift+C catalog status · Ctrl+Alt+Shift+E selection status · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
+                    text: "Shortcuts: Ctrl+Alt+Shift+H help · Ctrl+F filter · Ctrl+Alt+Shift+Backspace clear filter · Ctrl+Alt+Shift+I folder path · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+Shift+M metadata status · Ctrl+Alt+Shift+N analysis action · Ctrl+Alt+Shift+Y playback action · Ctrl+Alt+Shift+Q refresh action · Ctrl+Alt+Shift+D folder chooser · Ctrl+Alt+Shift+C catalog status · Ctrl+Alt+Shift+E selection status · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     Accessible.name: "Library keyboard shortcut help"
@@ -1851,7 +1852,9 @@ ApplicationWindow {
                         onClicked: { files.refresh(); window.refreshCatalog(); window.clearSelectedAudio(); browser.currentIndex = -1; window.announceVisualizationRecovery("Folder contents refreshed; entry selection cleared."); browser.forceActiveFocus() }
                     }
                     Label {
+                        id: folderPath
                         objectName: "folderPath"
+                        activeFocusOnTab: true
                         text: window.browseFolder.toString() || "No folder selected"
                         elide: Text.ElideMiddle; Layout.fillWidth: true
                         Accessible.name: "Current folder: " + text
