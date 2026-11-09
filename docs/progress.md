@@ -824,3 +824,5 @@ Overlay controls now expose a dedicated settings-retention status covering displ
 
 Overlay settings-retention status is now keyboard-focusable, allowing non-pointer users to inspect persisted recovery state directly. Portable coverage is in `python tests/unit/check_overlay_retention_focus_contract.py`.
 
+Overlay controls now include a “Review retained settings” action that moves focus to the settings-retention status for keyboard recovery review. Portable coverage is in `python tests/unit/check_overlay_settings_retention_review_contract.py`.
+
