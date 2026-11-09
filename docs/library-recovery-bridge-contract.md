@@ -24,3 +24,5 @@ after the worker reports `Storage open` and false after `Storage closed` or an
 open failure. Configuration and open state are intentionally separate.
 The bridge tracks an in-flight open/close transition so an open failure also
 drives `storageOpen` false without misclassifying unrelated worker errors.
+Injected database paths are trimmed before configuration; whitespace-only input
+therefore leaves storage unconfigured instead of queuing an invalid open.
