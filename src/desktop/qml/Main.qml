@@ -2339,6 +2339,8 @@ ApplicationWindow {
                             ToolTip.text: "Fingerprint and queue analysis for the selected audio file"
                             onClicked: {
                                 const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile())
+                                if (accepted)
+                                    window.clearVisualizationForCaptureState("Fresh Library analysis queued; previous visualization evidence is stale until completion.")
                                 window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry.")
                                 analyzeSelectedAudio.forceActiveFocus()
                             }
