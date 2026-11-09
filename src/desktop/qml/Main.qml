@@ -2576,7 +2576,7 @@ ApplicationWindow {
                                 Accessible.name: "Analysis batch publication summary: " + text
                                 Accessible.value: visible ? text : ""
                                 Accessible.role: Accessible.Status
-                                Accessible.description: visible ? "Counts distinguish results published after verification from work still queued or terminal without publication." : "No analysis batch is active."
+                                Accessible.description: visible ? "Counts distinguish results published after verification from work still queued or terminal without publication. Retry or discard recovery applies only to terminal failures." : "No analysis batch is active."
                                 ToolTip.text: "Verified publication and terminal batch counts"
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
