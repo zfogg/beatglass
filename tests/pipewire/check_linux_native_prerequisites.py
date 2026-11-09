@@ -72,4 +72,10 @@ if missing:
     raise SystemExit(1)
 version = subprocess.run(["pkg-config", "--modversion", "libpipewire-0.3"], check=False,
                          stdout=subprocess.PIPE, text=True).stdout.strip()
-print(f"Linux PipeWire prerequisites available; libpipewire-0.3={version}; configure and run pipewire_tests")
+tool_versions = []
+for tool in ("pw-cli", "pw-dump"):
+    output = subprocess.run([tool, "--version"], check=False, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT, text=True).stdout.strip().splitlines()
+    tool_versions.append(f"{tool}={output[0] if output else 'unknown'}")
+print(f"Linux PipeWire prerequisites available; libpipewire-0.3={version}; "
+      f"{', '.join(tool_versions)}; configure and run pipewire_tests")
