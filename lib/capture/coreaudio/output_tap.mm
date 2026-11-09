@@ -225,7 +225,10 @@ bool OutputTap::pop(CaptureBlock& block) {
 }
 bool OutputTap::stop() noexcept {
   if (impl_->cleanup()) { impl_->current.state = TapState::stopped; impl_->current.message.clear(); impl_->current.failure.reset(); return true; }
-  impl_->current.state = TapState::error; impl_->current.failure = TapFailure::backend_error; return false;
+  impl_->current.state = TapState::error;
+  impl_->current.message = "Core Audio cleanup failed; retry stop before restart";
+  impl_->current.failure = TapFailure::backend_error;
+  return false;
 }
 std::uint64_t OutputTap::dropped_frames() const noexcept { return impl_->fifo ? impl_->fifo->dropped_frames() : 0; }
 }

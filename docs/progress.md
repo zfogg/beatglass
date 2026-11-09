@@ -1,5 +1,9 @@
 # Progress and handoff
 
+Core Audio stop failures now expose an explicit retry-before-restart diagnostic
+instead of retaining stale startup text. Portable coverage is in
+`python tests/unit/check_macos_stop_failure_message_contract.py`.
+
 Core Audio tap startup now reports distinct diagnostics for malformed output
 UIDs versus a zero capture epoch, making invalid lifecycle requests actionable.
 Portable coverage is in
