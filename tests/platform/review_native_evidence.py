@@ -16,6 +16,8 @@ def assess(report_path: Path, reviewer: str) -> dict:
     report_platforms = report.get("platforms")
     if not isinstance(report_platforms, list) or not report_platforms:
         blockers.append("report:platform inventory missing")
+    elif {item.get("platform") for item in report_platforms if isinstance(item, dict)} != {"linux", "windows", "macos"}:
+        blockers.append("report:platform inventory incomplete")
     support = report.get("platform_support_status")
     if isinstance(report_platforms, list) and isinstance(support, list):
         report_names = {item.get("platform") for item in report_platforms if isinstance(item, dict)}
