@@ -259,3 +259,10 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps({"platforms": [{"platform": "haiku", "scenarios": []}]}))
             result = review.assess(report, "release-owner")
             self.assertIn("haiku:unknown platform identity", result["blockers"])
+
+    def test_all_three_platforms_are_required(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"platforms": [{"platform": "linux", "scenarios": []}]}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:platform inventory incomplete", result["blockers"])
