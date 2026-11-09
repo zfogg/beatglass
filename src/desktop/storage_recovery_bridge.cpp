@@ -234,6 +234,7 @@ void StorageRecoveryBridge::setDatabasePath(const QString& path) {
 }
 void StorageRecoveryBridge::open() {
   if (databasePath_.isEmpty()) { status_ = QStringLiteral("Storage error: database path is required"); emit statusChanged(); return; }
+  if (storageOpen_) { status_ = QStringLiteral("Storage already open"); emit statusChanged(); return; }
   if (!retryableRunIds_.isEmpty()) { retryableRunIds_.clear(); emit retryableRunsChanged(); }
   if (!selectedRunId_.isEmpty()) { selectedRunId_.clear(); emit selectedRunChanged(); }
   if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
