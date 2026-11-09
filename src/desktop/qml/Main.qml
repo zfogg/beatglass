@@ -481,7 +481,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; if (window.recursiveCatalogActive) recursiveResultsView.forceActiveFocus(); else browser.forceActiveFocus(); window.announceVisualizationRecovery(window.recursiveCatalogActive ? "Recursive Library results focused." : "Library folder results focused.") } }
     Shortcut { objectName: "libraryRecursiveResultsFocusShortcut"; sequence: "Ctrl+Alt+Shift+R"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; recursiveResultsView.forceActiveFocus(); window.announceVisualizationRecovery("Recursive Library results focused.") } }
     Shortcut { objectName: "libraryRecursiveReturnShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.recursiveCatalogActive; onActivated: { window.recursiveCatalogActive = false; recursiveResultsView.currentIndex = -1; navigation.currentIndex = 0; window.announceVisualizationRecovery("Returned to the current folder browser."); browser.forceActiveFocus() } }
-    Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus() } }
+    Shortcut { objectName: "libraryTabShortcut"; sequence: "Ctrl+Shift+1"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; libraryTab.forceActiveFocus(); window.announceVisualizationRecovery("Library tab focused.") } }
     Shortcut { objectName: "djTabShortcut"; sequence: "Ctrl+Shift+2"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 1; djTab.forceActiveFocus() } }
     Shortcut { objectName: "settingsTabShortcut"; sequence: "Ctrl+Shift+3"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 2; settingsTab.forceActiveFocus() } }
     Shortcut {
@@ -1728,6 +1728,17 @@ ApplicationWindow {
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: window.selectedAudioUrl.toString() === "" ? "No audio source is selected. Choose an audio file from the browser." : text + ". Playback and analysis actions apply to this source."
+                    ToolTip.text: Accessible.description
+                }
+                Label {
+                    objectName: "libraryShortcutHelp"
+                    text: "Shortcuts: Ctrl+F filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    Accessible.name: "Library keyboard shortcut help"
+                    Accessible.value: text
+                    Accessible.role: Accessible.StaticText
+                    Accessible.description: "Keyboard shortcuts for filtering, focusing results, reversing sort order, and clearing the current selection."
                     ToolTip.text: Accessible.description
                 }
                 RowLayout {
