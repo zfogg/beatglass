@@ -326,3 +326,10 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             result = review.assess(report, "release-owner")
             self.assertIn("report:ready must be boolean", result["blockers"])
             self.assertIn("report:native qualification requirement must be boolean", result["blockers"])
+
+    def test_exit_gate_reason_codes_are_nonempty_strings(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"exit_gate_reason_codes": ["", 7], "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:invalid exit gate reason codes", result["blockers"])
