@@ -20,6 +20,10 @@ ApplicationWindow {
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
     property var analysisJobBridge: typeof analysisJob !== "undefined" ? analysisJob : null
+    readonly property bool analysisResultMatchesSelection: analysisJobBridge !== null
+        && selectedAudioUrl.toString() !== ""
+        && analysisJobBridge.sourcePath !== ""
+        && analysisJobBridge.sourcePath === selectedAudioUrl.toLocalFile()
     property var captureMonitorBridge: typeof captureMonitor !== "undefined" ? captureMonitor : null
     property var endpointSelectionBridge: typeof endpointSelection !== "undefined" ? endpointSelection : null
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
@@ -938,6 +942,7 @@ ApplicationWindow {
             selectedName = files.get(index, "fileName")
             selectedAudioUrl = url
             metadataBridge.inspect(url)
+            window.announceVisualizationRecovery("Selected source changed; prior analysis presentation is stale until this source is analyzed.")
         }
     }
     function clearSelectedAudio() {
@@ -1666,7 +1671,7 @@ ApplicationWindow {
                                 window.selectedName = name
                                 window.selectedAudioUrl = Qt.resolvedUrl(path)
                                 if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
-                                window.announceVisualizationRecovery("Selected recursive audio source " + name + ".")
+                                window.announceVisualizationRecovery("Selected recursive audio source " + name + "; prior analysis presentation is stale until this source is analyzed.")
                             }
                         }
                     }
@@ -2070,7 +2075,7 @@ ApplicationWindow {
                             }
                             Label {
                                 objectName: "analysisWorkerResult"
-                                visible: window.analysisJobBridge !== null && window.analysisJobBridge.result !== ""
+                                visible: window.analysisResultMatchesSelection && window.analysisJobBridge.result !== ""
                                 text: visible ? ("Worker result: " + window.analysisJobBridge.result) : ""
                                 Accessible.name: "Worker analysis result"
                                 Accessible.value: visible ? text : ""
@@ -2121,8 +2126,8 @@ ApplicationWindow {
                             }
                             Label {
                                 objectName: "analysisStaleState"
-                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
-                                text: visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? "Prior analysis result cleared; retry requires fresh source evidence." : ""
+                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined && (!window.analysisResultMatchesSelection || storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed")
+                                text: visible && !window.analysisResultMatchesSelection ? "Prior analysis result hidden because the selected source changed; analyze this source to publish fresh evidence." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? "Prior analysis result cleared; retry requires fresh source evidence." : ""
                                 Accessible.name: "Analysis stale-result status"
                                 Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No stale analysis result is present."
@@ -2139,7 +2144,7 @@ ApplicationWindow {
                             }
                             Label {
                                 objectName: "analysisCompletionResult"
-                                visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
+                                visible: window.analysisResultMatchesSelection && typeof storageRecovery !== "undefined" && storageRecovery.analysisResult !== ""
                                 text: visible ? ("Completed analysis result: " + storageRecovery.analysisResult) : ""
                                 Accessible.name: "Completed analysis result"
                                 Accessible.description: visible ? text : "No completed analysis result is available."
