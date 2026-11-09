@@ -108,6 +108,7 @@ public:
                       std::uint32_t channels) override {
     return session_.restart(epoch, sample_rate, channels);
   }
+  std::string selected_serial() const override { return session_.serial(); }
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
   MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
   bool stop() noexcept override { session_.stop(); return true; }
