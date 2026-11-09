@@ -1,5 +1,6 @@
 """Validate the shape of a captured PipeWire qualification manifest."""
 import json
+import hashlib
 import re
 import sys
 from datetime import datetime
@@ -50,6 +51,9 @@ if not any(item["info"]["props"].get("media.class") == "Audio/Sink" for item in 
     raise SystemExit("manifest inventory must include an Audio/Sink")
 if manifest["audio_sink_count"] != sum(1 for item in manifest["inventory"] if item["info"]["props"].get("media.class") == "Audio/Sink"):
     raise SystemExit("manifest audio_sink_count does not match inventory")
+expected_digest = hashlib.sha256(json.dumps(manifest["inventory"], sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+if manifest.get("inventory_sha256") != expected_digest:
+    raise SystemExit("manifest inventory_sha256 does not match inventory")
 for item in manifest["inventory"]:
     props = item["info"]["props"]
     if "media.class" in props and not isinstance(props["media.class"], str):
