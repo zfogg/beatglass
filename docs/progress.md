@@ -1,5 +1,10 @@
 # Progress and handoff
 
+Core Audio start requests now reject whitespace-only source IDs as
+`not_found`, preventing malformed selections from reaching native tap setup.
+Portable coverage is in
+`python tests/unit/check_macos_source_id_whitespace_contract.py`.
+
 Core Audio start requests now distinguish missing source IDs (`not_found`) and
 missing consumers from an unavailable backend, giving callers actionable typed
 diagnostics. Portable coverage is in
