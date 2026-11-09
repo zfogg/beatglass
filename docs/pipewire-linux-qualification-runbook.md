@@ -92,3 +92,4 @@ that fixed `SOURCE_DATE_EPOCH` inputs produce byte-for-byte identical archives.
 The verifier parses that timestamp as ISO-8601 and rejects malformed metadata.
 Qualified archives must include the summary JSON and machine-readable JUnit results; the verifier rejects evidence packages missing those native gate artifacts.
 The producer also rejects evidence paths with colliding archive basenames before writing the ZIP.
+Qualified archives must include the preserved CTest discovery JSON in addition to summary and JUnit results, proving both registration and execution.
