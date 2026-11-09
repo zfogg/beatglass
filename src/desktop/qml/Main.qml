@@ -2037,6 +2037,7 @@ ApplicationWindow {
                             onClicked: {
                                 const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile())
                                 window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry.")
+                                analyzeSelectedAudio.forceActiveFocus()
                             }
                         }
                         Label {
