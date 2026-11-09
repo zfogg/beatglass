@@ -1488,6 +1488,23 @@ ApplicationWindow {
                     Accessible.description: text
                     ToolTip.text: "Current filtered catalog result count"
                 }
+                Label {
+                    objectName: "libraryBatchRecoveryBanner"
+                    visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
+                    text: visible ? ("Analysis batch: " + window.analysisJobBridge.status
+                          + " · accepted " + window.analysisJobBridge.batchAcceptedCount
+                          + " · complete " + window.analysisJobBridge.batchCompletedCount
+                          + " · failed " + window.analysisJobBridge.batchFailedCount
+                          + " · cancelled " + window.analysisJobBridge.batchCancelledCount
+                          + ((window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? " · recovery actions available below" : "")) : ""
+                    Accessible.name: "Library analysis batch recovery: " + text
+                    Accessible.value: visible ? text : ""
+                    Accessible.role: Accessible.Status
+                    Accessible.description: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? text + ". Retry or discard the retained batch in the selected source panel; the prior result is cleared before retry." : visible ? text + ". Progress updates as worker outcomes are published." : "No analysis batch is active."
+                    ToolTip.text: visible ? Accessible.description : "Library analysis batch status"
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                }
                 Frame {
                     objectName: "browserFrame"
                     Layout.fillWidth: true; Layout.fillHeight: true
