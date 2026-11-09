@@ -43,6 +43,9 @@ The same action is available from the keyboard with `Ctrl+Alt+Shift+X` while
 an active retry cycle is in progress.
 The active recovery card repeats this shortcut next to the Stop recovery action
 so pausing a retry remains discoverable.
+After `Stop recovery`, the card keeps a persistent `Recovery paused · monitoring
+continues` status so an intentional user pause is distinguishable from a native
+bridge failure; the next retry remains an explicit action.
 
 ## Screenshot qualification
 
