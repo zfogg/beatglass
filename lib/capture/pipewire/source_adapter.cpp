@@ -107,6 +107,7 @@ public:
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
   MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
   bool stop() noexcept override { session_.stop(); return true; }
+  void reset() noexcept override { session_.reset(); }
 private:
   MonitorSession session_;
 };
