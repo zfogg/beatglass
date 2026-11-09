@@ -110,6 +110,8 @@ screenshots.
 | [Display applied](overlay-display-applied-card.svg) | saved display confirmation with recovery path |
 | [Click-through control](overlay-click-through-control-card.svg) | interaction mode with unlock guidance |
 | [Click-through applied](overlay-click-through-applied-card.svg) | saved pass-through state and shortcut recovery |
+| [Tray activation](overlay-tray-activation-card.svg) | tray controls for visible overlay state |
+| [Tray hidden](overlay-tray-hidden-card.svg) | hidden overlay with preserved restore state |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
