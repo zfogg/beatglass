@@ -25,6 +25,7 @@ screenshots.
 | [Interaction](overlay-interaction-card.svg) | click-through/unlock |
 | [Shortcuts](overlay-shortcuts-card.svg) | keyboard parity |
 | [Announcements](overlay-announcement-card.svg) | accessible state copy |
+| [Reduced motion](overlay-reduced-motion-card.svg) | static visualization preference |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
