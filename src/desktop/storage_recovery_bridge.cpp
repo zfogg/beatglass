@@ -54,11 +54,11 @@ public slots:
   }
   void retry(QString runId) {
     runId = runId.trimmed();
-    if (runId.isEmpty()) { emit result(false, QStringLiteral("Retry rejected: no persisted run selected")); return; }
+    if (runId.isEmpty()) { emit result(false, QStringLiteral("Retry rejected: no persisted run selected")); refresh(); return; }
     std::optional<beatglass::library_detail::RetryableRun> found;
     try { found = coordinator_.storage().retryable_run(runId.toStdString()); }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
-    catch (...) { emit result(false, QStringLiteral("Retry rejected: unknown storage error")); return; }
+    catch (...) { emit result(false, QStringLiteral("Retry rejected: unknown storage error")); refresh(); return; }
     if (!found || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::missing_source_snapshot))); refresh(); return; }
     try { if (!beatglass::library::file_decoder_snapshot_compatible(found->decoder_snapshot)) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::incompatible_decoder_snapshot))); refresh(); return; } }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
@@ -68,7 +68,7 @@ public slots:
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
     beatglass::library::RetryRejectionReason rejection;
     try { rejection = coordinator_.retry_rejection_reason(runId.toStdString(), operation); }
-    catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); return; }
+    catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
     // Includes RetryRejectionReason::stale_source_identity for an epoch mismatch.
     if (rejection != beatglass::library::RetryRejectionReason::none) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(rejection))); refresh(); return; }
     try { handle_ = coordinator_.resubmit_retryable(runId.toStdString(), std::move(operation)); }
