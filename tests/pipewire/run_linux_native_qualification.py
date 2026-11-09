@@ -15,8 +15,16 @@ parser.add_argument("--build", type=Path, default=Path("build-pipewire"))
 parser.add_argument("--summary", type=Path)
 args = parser.parse_args()
 if platform.system() != "Linux":
-    print("Linux native qualification pending: run on Linux")
-    raise SystemExit(0)
+    pending = {"platform": platform.platform(), "commit": None, "pipewire_version": None,
+               "commands": [], "failed_command": None, "qualified": False,
+               "pending_reason": "Linux native qualification pending: run on Linux",
+               "native_test_discovery": None, "native_test_count": None,
+               "native_test_name_match": False, "native_junit_exists": False}
+    if args.summary:
+        args.summary.parent.mkdir(parents=True, exist_ok=True)
+        args.summary.write_text(json.dumps(pending, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(pending, indent=2))
+    raise SystemExit(1)
 commit = subprocess.run(["git", "-C", str(args.source), "rev-parse", "HEAD"], check=False, capture_output=True, text=True).stdout.strip()
 pipewire_version = subprocess.run(["pkg-config", "--modversion", "libpipewire-0.3"], check=False, capture_output=True, text=True).stdout.strip()
 commands = [

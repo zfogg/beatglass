@@ -22,6 +22,9 @@ reacquisition. Attach logs or recordings for each case; headless CI does not
 replace native desktop/audio qualification.
 
 The runner JSON records native_pipewire_tests separately; qualification requires that target to return zero.
+On non-Linux hosts the runner writes a structured pending summary when
+`--summary` is provided and exits non-zero with `qualified: false`; this keeps
+Windows/macOS handoffs auditable without claiming Linux qualification.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
