@@ -266,3 +266,12 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps({"platforms": [{"platform": "linux", "scenarios": []}]}))
             result = review.assess(report, "release-owner")
             self.assertIn("report:platform inventory incomplete", result["blockers"])
+
+    def test_report_schema_and_native_gate_are_consistent(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"readiness_report_schema": 99,
+                "native_qualification_required": False, "ready": True, "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:unsupported readiness schema", result["blockers"])
+            self.assertIn("report:ready without native qualification requirement", result["blockers"])
