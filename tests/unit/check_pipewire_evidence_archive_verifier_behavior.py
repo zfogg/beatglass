@@ -10,7 +10,7 @@ from pathlib import Path
 verifier = Path(__file__).parents[1] / "pipewire" / "verify_native_evidence_archive.py"
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
-    summary = b'{"commit":"fixture-commit","qualified":true,"native_test_count":1,"native_test_name_match":true,"native_junit_test_count":1,"native_junit_failures":0,"native_junit_errors":0,"native_junit_skipped":0}\n'
+    summary = b'{"commit":"fixture-commit","qualified":true,"native_test_count":1,"native_test_name_match":true,"native_junit_test_count":1,"native_junit_failures":0,"native_junit_errors":0,"native_junit_skipped":0,"native_junit_exists":true}\n'
     junit = b"<testsuite tests='1'><testcase name='capture'/></testsuite>\n"
     discovery = b'{"tests": [{"name": "capture"}]}\n'
     artifacts = {"native-summary.json": summary, "pipewire-tests-discovery.json": discovery, "pipewire-tests.xml": junit}
