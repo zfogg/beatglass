@@ -71,9 +71,12 @@ preflight_result = next((item for item in results if "check_linux_native_prerequ
 discovery_result = next((item for item in results if "--show-only=json-v1" in item["command"]), None)
 discovery_count = None
 discovery_tests = None
+discovery_artifact = evidence / "pipewire-tests-discovery.json"
 if discovery_result:
     try:
-        discovery_json = json.loads(Path(discovery_result["stdout"]).read_text(encoding="utf-8"))
+        discovery_text = Path(discovery_result["stdout"]).read_text(encoding="utf-8")
+        discovery_json = json.loads(discovery_text)
+        discovery_artifact.write_text(json.dumps(discovery_json, indent=2) + "\n", encoding="utf-8")
         discovery_tests = [item.get("name", "") for item in discovery_json.get("tests", [])]
         discovery_count = len(discovery_tests)
     except (OSError, json.JSONDecodeError, AttributeError):
@@ -99,6 +102,7 @@ summary = {"platform": platform.platform(), "commit": commit,
            "pipewire_version": pipewire_version, "commands": results,
            "failed_command": next((item["command"] for item in results if item["returncode"]), None),
            "native_test_discovery": discovery_result,
+           "native_discovery_json": str(discovery_artifact),
            "native_test_count": discovery_count,
            "native_test_name_match": discovery_tests is not None and junit_tests is not None and set(discovery_tests) == set(junit_tests),
            "daemon_preflight": preflight_result,

@@ -51,3 +51,5 @@ The summary includes `native_junit_sha256` so the archived JUnit evidence can
 be verified after transfer.
 It also records `native_junit_tests`, the concrete testcase names executed.
 Qualification requires the discovered and executed testcase-name sets to match.
+The raw discovery JSON is preserved as `pipewire-tests-discovery.json` for
+post-run evidence ingestion.
