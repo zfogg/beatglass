@@ -1,5 +1,10 @@
 # Progress and handoff
 
+The overlay now labels live estimates as coming from the selected system
+output's combined mix and explicitly avoids implying deck-level track metadata.
+Portable coverage is in
+`python tests/unit/check_overlay_estimate_attribution_contract.py`.
+
 The overlay settings surface now exposes truthful live-monitoring state,
 including whether combined-output estimates are updating or capture is waiting
 for accepted data. Portable coverage is in
