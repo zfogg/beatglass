@@ -13,3 +13,5 @@ running PipeWire session is available.
 
 Native `ERROR`, `UNCONNECTED`, `PAUSED`, destroy, malformed-buffer, and bounded
 handoff failures all quiesce callback admission and require a fresh epoch.
+Negotiated formats that are not F32 or do not match the requested rate/channel
+configuration report `-EPROTO` and follow the same reacquisition path.
