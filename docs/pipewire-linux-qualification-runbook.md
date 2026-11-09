@@ -136,3 +136,5 @@ or `<skipped>` elements are absent.
 All aggregate count attributes must also be well-formed, non-negative
 integers; malformed or negative status metadata is rejected before the archive
 can be marked qualified.
+For `testsuites` roots, the declared failure, error, and skipped totals must
+also equal the corresponding nested-suite totals.

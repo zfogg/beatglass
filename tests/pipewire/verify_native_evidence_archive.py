@@ -113,6 +113,10 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("JUnit evidence has no executed tests")
     if junit_root.tag == "testsuites" and count(junit_root, "tests") != sum(count(node, "tests") for node in suites):
         raise SystemExit("JUnit aggregate test count does not match suites")
+    if junit_root.tag == "testsuites":
+        for key, label in (("failures", "failure"), ("errors", "error"), ("skipped", "skipped")):
+            if count(junit_root, key) != sum(count(node, key) for node in suites):
+                raise SystemExit(f"JUnit aggregate {label} count does not match suites")
     if sum(count(node, "failures") for node in suites) or sum(count(node, "errors") for node in suites) or any(node.tag in ("failure", "error") for node in junit_root.iter()):
         raise SystemExit("JUnit evidence reports failures or errors")
     if sum(count(node, "skipped") for node in suites) or any(node.tag == "skipped" for node in junit_root.iter()):
