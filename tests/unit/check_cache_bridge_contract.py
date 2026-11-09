@@ -41,4 +41,6 @@ for marker in ("Cache invalidation rejected:", "catch (const std::exception& err
         raise SystemExit(f"Missing cache invalidation recovery marker: {marker}")
 if invalidate.count("emit cached(false, QString{})") < 2:
     raise SystemExit("Cache invalidation must clear stale presentation on failure and success")
+if "analysisResult_.clear()" not in source[source.index('if (ok && text == QStringLiteral("Cached analysis invalidated")'):source.index("emit statusChanged();")]:
+    raise SystemExit("Cache invalidation must clear the displayed analysis result")
 print(f"Desktop cache bridge contract verified ({len(required)} checks)")
