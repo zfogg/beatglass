@@ -842,3 +842,5 @@ Retained-settings review announcements now include the current settings revision
 
 Retained-settings review tooltip now includes the current settings revision for at-a-glance diagnostics. Portable coverage is in `python tests/unit/check_overlay_review_tooltip_contract.py`.
 
+Overlay shortcut help now exposes retained-settings review as an explicit accessible capability. Portable coverage is in `python tests/unit/check_overlay_shortcut_capability_contract.py`.
+
