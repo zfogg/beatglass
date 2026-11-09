@@ -73,7 +73,13 @@ private:
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
     }
-    const auto samples = std::span<const float>(static_cast<const float*>(data_block.data), sample_bytes / sizeof(float));
+    if (data_block.chunk.offset > data_block.maxsize ||
+        sample_bytes > data_block.maxsize - data_block.chunk.offset) {
+      pw_stream_queue_buffer(owner.stream_, buffer);
+      return;
+    }
+    const auto* sample_data = static_cast<const std::byte*>(data_block.data) + data_block.chunk.offset;
+    const auto samples = std::span<const float>(reinterpret_cast<const float*>(sample_data), sample_bytes / sizeof(float));
     owner.handoff_->push(samples, 0, false, false, 0.0, false);
     pw_stream_queue_buffer(owner.stream_, buffer);
   }
