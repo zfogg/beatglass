@@ -74,3 +74,8 @@ Visualization uses a quiet empty/ready treatment with the mode and capture state
 always visible:
 
 ![Overlay visualization rendering](overlay-visualization-card.svg)
+
+FFT mode uses the same empty/ready hierarchy while exposing frequency-domain
+context:
+
+![Overlay FFT rendering](overlay-fft-card.svg)
