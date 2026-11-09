@@ -786,3 +786,5 @@ Invalid persisted visual state now announces the exact recovery action before re
 Native show failures now restore focus to display recovery as well, keeping the fallback actionable when the platform refuses to present the overlay window.
 
 Unavailable-bridge and invalid-visual-state show fallbacks now restore the same display-selector focus, so every show failure path is keyboard actionable.
+
+Display replacement recovery and explicit display selection failures now return focus to the display selector too, covering missing saved displays, native move failures, and visual-state reapply failures.
