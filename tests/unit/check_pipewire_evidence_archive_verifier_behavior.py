@@ -63,4 +63,18 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(empty_manifest))
     result = subprocess.run([sys.executable, str(verifier), str(empty)], capture_output=True, text=True)
     if result.returncode == 0 or "contains no artifacts" not in result.stderr + result.stdout: raise SystemExit("empty manifest was accepted")
-print("PipeWire evidence archive verifier behavior passed (6 scenarios)")
+
+    aggregate = root / "aggregate-count-mismatch.zip"
+    aggregate_junit = b"<testsuites tests='2'><testsuite tests='2'><testcase name='capture'/></testsuite></testsuites>\n"
+    aggregate_summary = json.loads(summary)
+    aggregate_summary["native_junit_test_count"] = 1
+    aggregate_summary["native_junit_sha256"] = hashlib.sha256(aggregate_junit).hexdigest()
+    aggregate_artifacts = dict(artifacts, **{"native-summary.json": (json.dumps(aggregate_summary) + "\n").encode(), "pipewire-tests.xml": aggregate_junit})
+    aggregate_entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in aggregate_artifacts.items()]
+    aggregate_manifest = dict(manifest, artifacts=aggregate_entries)
+    with zipfile.ZipFile(aggregate, "w") as archive:
+        for name, data in aggregate_artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(aggregate_manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(aggregate)], capture_output=True, text=True)
+    if result.returncode == 0 or "suite test counts do not match testcases" not in result.stderr + result.stdout: raise SystemExit("aggregate JUnit count mismatch was accepted")
+print("PipeWire evidence archive verifier behavior passed (7 scenarios)")
