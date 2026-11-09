@@ -1846,7 +1846,7 @@ ApplicationWindow {
                                 event.accepted = true
                             }
                         }
-                        Keys.onEscapePressed: { window.clearSelectedAudio(); search.forceActiveFocus() }
+                        Keys.onEscapePressed: { window.clearSelectedAudio(); browser.currentIndex = -1; search.forceActiveFocus() }
                         ScrollBar.vertical: ScrollBar {}
                         delegate: ItemDelegate {
                             required property int index
