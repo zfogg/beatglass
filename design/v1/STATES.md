@@ -13,6 +13,7 @@
 | Track reanalysis failed | A verified Night Drive reanalysis fails before publishing a result | Keep stale evidence hidden, preserve source identity, and offer explicit retry/discard recovery without modifying the audio file. |
 | Track reanalysis discarded | Failed reanalysis is discarded without restoring an unaccepted result | Clear local run state, retain the verified source, and leave retry, queue, and browse actions explicit. |
 | Track reanalysis ready | Verified source has no active run and is ready for a deliberate track-only retry | Show exact run scope, keep evidence clear, and publish only if source identity still matches at completion. |
+| Track reanalysis running | Verified Night Drive track-only reanalysis is 68% complete | Keep stale evidence hidden, expose progress and cancel semantics, and hold playback/queue actions until identity-checked completion. |
 | Library folder navigation | User opens a nested catalog folder | Show breadcrumbs and folder-scoped actions while preserving source identity and the complete catalog. |
 | Library folder empty | Indexed folder has no supported audio sources | Explain the folder-scoped empty state, offer navigation/add-folder actions, and preserve other catalog entries. |
 | Library folder permission recovery | Indexed folder cannot be read by the operating system | Explain access denial, avoid starting jobs, and offer permissions/retry/alternate-folder recovery. |
