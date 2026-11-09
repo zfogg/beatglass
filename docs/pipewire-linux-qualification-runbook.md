@@ -476,3 +476,5 @@ Release promotion must preserve the explicit native qualification status from th
 Synthetic verifier fixtures may exercise qualified-path logic, but they must never be recorded as native host evidence or used to promote a real qualification claim.
 
 A release signoff for a synthetic qualified fixture is not native qualification evidence; promotion continues to emit pending status until a real host manifest is supplied.
+
+Do not copy synthetic native-qualification commit identifiers into release manifests; provenance commits must come from the actual host capture run.
