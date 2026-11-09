@@ -1765,7 +1765,7 @@ ApplicationWindow {
                                 objectName: "discardAllPersistedRecovery"
                                 activeFocusOnTab: true
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.discardRuns !== undefined
-                                enabled: visible && storageRecovery.retryableRunIds.length > 0
+                                enabled: visible && !window.storageReopenPending && storageRecovery.retryableRunIds.length > 0
                                 text: "Discard all saved runs"
                                 Accessible.name: "Discard all saved retryable analysis runs"
                                 Accessible.description: "Remove every persisted retry record currently shown. Source audio files are never changed."
