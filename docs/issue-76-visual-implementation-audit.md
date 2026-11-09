@@ -810,3 +810,5 @@ Cache availability, cached results, worker results, and queue outcomes now expos
 Output endpoint discovery, selected endpoint state, and capture-permission guidance now use live status semantics, so device recovery and permission instructions are announced consistently.
 
 The native overlay-unavailable fallback now uses the same live status semantics as geometry, persisted restore, settings, and historical recovery diagnostics, making display loss consistently discoverable.
+
+Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
