@@ -284,6 +284,9 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             clickThroughToggle.forceActiveFocus()
             window.announceCaptureRecoveryState("Overlay click-through control focused; current mode is " + (window.overlayBridge.clickThrough ? "enabled" : "disabled") + ".")
         }
