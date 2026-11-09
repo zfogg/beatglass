@@ -113,9 +113,11 @@ bool OverlayController::showOverlay() {
   }
   return true;
 }
-void OverlayController::hideOverlay() {
+bool OverlayController::hideOverlay() {
   setClickThrough(false);
-  if (overlay_) overlay_->hide();
+  if (!overlay_) return false;
+  overlay_->hide();
+  return true;
 }
 bool OverlayController::setOpacity(qreal value) {
   if (overlay_ && std::isfinite(value)) {

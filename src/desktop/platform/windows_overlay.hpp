@@ -46,8 +46,8 @@ public:
   Q_INVOKABLE bool moveToScreen(int index);
   /** Show the overlay after clamping it to a current display. */
   Q_INVOKABLE bool showOverlay();
-  /** Hide the overlay and clear click-through state. */
-  Q_INVOKABLE void hideOverlay();
+  /** Hide the overlay and clear click-through state. Return false when unattached. */
+  Q_INVOKABLE bool hideOverlay();
   /** Resize the overlay to positive logical dimensions, clamped on screen. */
   Q_INVOKABLE bool resizeOverlay(int width, int height);
   /** Enable click-through only while the distinct control window is visible and not minimized; return whether the requested state was applied. Hiding, minimizing, closing or destroying the control window unlocks the overlay. */

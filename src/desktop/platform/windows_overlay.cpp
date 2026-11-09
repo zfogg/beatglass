@@ -119,9 +119,11 @@ bool OverlayController::showOverlay() {
   overlay_->show();
   return true;
 }
-void OverlayController::hideOverlay() {
+bool OverlayController::hideOverlay() {
   setClickThrough(false);
-  if (overlay_) overlay_->hide();
+  if (!overlay_) return false;
+  overlay_->hide();
+  return true;
 }
 bool OverlayController::resizeOverlay(int width, int height) {
   if (!overlay_ || width <= 0 || height <= 0) return false;
