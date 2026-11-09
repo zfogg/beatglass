@@ -26,6 +26,7 @@ def promote(source: Path, destination: Path) -> tuple[bool, list[str]]:
         manifest = {
             "release_manifest_schema": 1,
             "decision": "ACCEPTED",
+            "native_qualification_status": "pending",
             "report_sha256": hashlib.sha256((destination / "readiness-report.json").read_bytes()).hexdigest(),
             "review_packet_sha256": hashlib.sha256((destination / "review.json").read_bytes()).hexdigest(),
         }
