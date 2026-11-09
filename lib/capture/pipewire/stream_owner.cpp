@@ -14,6 +14,9 @@ public:
     handoff.on_error(-ENOSYS);
     return false;
   }
+  void report_error(int error_code, MonitorStream& handoff) noexcept override {
+    handoff.on_error(error_code);
+  }
   void stop() noexcept override {}
 };
 }
