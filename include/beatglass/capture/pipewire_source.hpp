@@ -11,16 +11,18 @@
 #include <optional>
 
 namespace beatglass::pipewire {
+struct MonitorFormat {
+  std::uint32_t sample_rate{};
+  std::uint32_t channels{};
+};
 struct MonitorStatus {
   bool active{};
   bool needs_restart{};
   bool discontinuity{};
   bool overflowed{};
   int error_code{};
-};
-struct MonitorFormat {
-  std::uint32_t sample_rate{};
-  std::uint32_t channels{};
+  std::string serial;
+  std::optional<MonitorFormat> format;
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
