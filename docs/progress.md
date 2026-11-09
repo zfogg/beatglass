@@ -864,3 +864,5 @@ The consolidated overlay summary review action now has a global `Ctrl+Alt+Shift+
 
 In-app shortcut help now documents Ctrl+Alt+Shift+M for overlay summary review. Portable coverage is in `python tests/unit/check_overlay_summary_help_contract.py`.
 
+Shortcut help now exposes summary-review capability in its accessible value. Portable coverage is in `python tests/unit/check_overlay_summary_help_state_contract.py`.
+

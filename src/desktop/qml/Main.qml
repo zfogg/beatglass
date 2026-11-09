@@ -1048,7 +1048,7 @@ ApplicationWindow {
                     text: "Press Escape to unlock overlay controls"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     Accessible.name: "Overlay recovery hint"
-                    Accessible.value: text + (window.overlayBridge !== null ? "; retained-settings review shortcut available" : "; retained-settings review unavailable")
+                    Accessible.value: text + (window.overlayBridge !== null ? "; retained-settings and summary review available" : "; retained-settings and summary review unavailable")
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
@@ -1675,7 +1675,7 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                     Accessible.name: "Library catalog status: " + text
                     ToolTip.text: "Library catalog status"
-                    Accessible.value: text
+                    Accessible.value: text + "; summary review available"
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Current catalog result count"
                     Accessible.description: text
