@@ -128,6 +128,7 @@ screenshots.
 | [Overlay reopened](overlay-reopened-card.svg) | restored native window without session interruption |
 | [Startup recovery](overlay-startup-recovery-card.svg) | native state restoration progress |
 | [Startup retry](overlay-startup-retry-card.svg) | recoverable native activation failure |
+| [Window chrome](overlay-window-chrome-control-card.svg) | borderless native frame preference |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
