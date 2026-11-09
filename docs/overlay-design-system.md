@@ -64,3 +64,8 @@ feedback stay aligned:
 Keyboard shortcuts use the same action labels as the visible controls:
 
 ![Overlay keyboard shortcut rendering](overlay-shortcuts-card.svg)
+
+The compact overlay chrome keeps the live readout calm while exposing status and
+the current visualization mode:
+
+![Overlay window chrome rendering](overlay-window-chrome.svg)
