@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / NOW PLAYING</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Now playing</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Keep the current track and analysis context together.</text>
+  <rect x="112" y="258" width="976" height="172" rx="18" fill="#202938"/><rect x="144" y="290" width="108" height="108" rx="14" fill="#2a3444"/><circle cx="198" cy="344" r="31" fill="#56d38b"/><path d="M187 344h22M198 333v22" stroke="#10131a" stroke-width="5" stroke-linecap="round"/><text x="286" y="316" fill="#f2f6fb" font-family="Inter,Arial" font-size="26" font-weight="700">Midnight Drive</text><text x="286" y="352" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Neon Avenue · 04:12 remaining</text><text x="286" y="383" fill="#56d38b" font-family="Inter,Arial" font-size="16" font-weight="700">Listening and analyzing</text>
+  <text x="112" y="484" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">Analysis context</text><text x="112" y="520" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Waveform, FFT, and timing views follow the selected track.</text><text x="112" y="558" fill="#9ba9bb" font-family="Inter,Arial" font-size="16">Source</text><text x="194" y="558" fill="#f2f6fb" font-family="Inter,Arial" font-size="16">Selected system output · local metadata only</text>
+  <rect x="112" y="620" width="210" height="54" rx="14" fill="#2a3444"/><text x="217" y="654" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Open waveform</text><text x="1088" y="654" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Updates with playback</text>
+</svg>
