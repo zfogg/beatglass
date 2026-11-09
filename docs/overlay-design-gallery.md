@@ -98,6 +98,8 @@ screenshots.
 | [Scan schedule](overlay-library-scan-schedule-card.svg) | predictable incremental indexing settings |
 | [Scans disabled](overlay-library-scan-schedule-disabled-card.svg) | explicit manual-only indexing mode |
 | [Confirm scan](overlay-library-scan-confirm-card.svg) | scoped scan confirmation with safe cancellation |
+| [Remove folder](overlay-library-remove-folder-confirm-card.svg) | destructive-action guard with file-safety boundary |
+| [Folder removed](overlay-library-folder-removed-card.svg) | non-destructive removal confirmation and re-add path |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
