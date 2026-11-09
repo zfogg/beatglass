@@ -1610,4 +1610,20 @@ TestCase {
         fakeOverlay.clickThrough = false
         fakeOverlay.available = true
     }
+    function test_unlockFailureRetainsPersistedSettingsForRetry() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        fakeOverlay.refuseUnlock = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredSizeIndex = 2
+        verify(!app.unlockOverlayAndRestoreFocus())
+        verify(findChild(app, "unlockOverlay").activeFocus)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredSizeIndex, 2)
+        verify(app.overlayRecoveryAnnouncement.indexOf("unlock") >= 0)
+        app.destroy()
+        fakeOverlay.refuseUnlock = false
+        fakeOverlay.clickThrough = false
+    }
 }
