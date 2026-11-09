@@ -914,5 +914,7 @@ Playback epoch feedback now names overlay recovery context. Portable coverage is
 
 Visualization selection-reset feedback now names overlay recovery context. Portable coverage is in `python tests/unit/check_selection_reset_name_contract.py`.
 
+Visualization capture retry status now names overlay recovery context. Portable coverage is in `python tests/unit/check_visualization_retry_name_contract.py`.
+
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
