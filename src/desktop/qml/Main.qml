@@ -245,6 +245,9 @@ ApplicationWindow {
         enabled: window.overlayBridge && window.overlayBridge.available
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             hideOverlay.forceActiveFocus()
             window.announceCaptureRecoveryState("Hide overlay control focused.")
         }
@@ -258,6 +261,9 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             showOverlay.forceActiveFocus()
             window.announceCaptureRecoveryState("Show overlay control focused.")
         }
