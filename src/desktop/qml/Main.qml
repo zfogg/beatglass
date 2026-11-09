@@ -33,6 +33,8 @@ ApplicationWindow {
     property bool overlayWasVisibleBeforeAvailabilityLoss: false
     property bool overlayHiddenByUser: false
     property bool overlayLaunchFallbackActive: false
+    // UI-visible count of native overlay recovery requests; the bridge performs retry work.
+    property int overlayRecoveryAttemptCount: 0
     property int overlayGeometryRevision: 0
     property int overlaySettingsRevision: 0
     property bool overlayOpacityEditInFlight: false
@@ -1814,6 +1816,7 @@ ApplicationWindow {
                 clickThroughToggle.checked = false
                 window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
             } else if (window.overlayBridge) {
+                window.overlayRecoveryAttemptCount = 0
                 clickThroughToggle.checked = window.overlayBridge.clickThrough
                 window.syncOverlaySettingsStateFromBridge()
                 if (window.overlayBridge.screenNames.length === 0) {
@@ -1845,6 +1848,7 @@ ApplicationWindow {
                     ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName) : -1
                 const savedIndex = savedNameIndex >= 0 ? savedNameIndex : window.overlayPreferredScreenIndex
                 if (savedIndex >= 0 && savedIndex < window.overlayBridge.screenNames.length) {
+                    window.overlayRecoveryAttemptCount = 0
                     window.overlayPreferredScreenIndex = savedIndex
                     window.overlayDisplaySelectionRequired = false
                     window.recoverOverlayAfterDisplayChange()
@@ -4687,7 +4691,7 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
-                Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available" : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display"); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay"); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay"); onClicked: { window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until the overlay is restored."); window.showOverlayAndHideControls(); overlayDisplayStatus.forceActiveFocus() } }
+                Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available; attempt " + (window.overlayRecoveryAttemptCount + 1) : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display"); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display; attempt " + (window.overlayRecoveryAttemptCount + 1) : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay"); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay"); onClicked: { window.overlayRecoveryAttemptCount += 1; window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored."); window.showOverlayAndHideControls(); overlayDisplayStatus.forceActiveFocus() } }
                 Item { Layout.fillHeight: true }
             }
         }

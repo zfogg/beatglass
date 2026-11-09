@@ -392,6 +392,19 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlayRetryTracksRecoveryAttemptAndResetsWhenAvailable() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        compare(app.overlayRecoveryAttemptCount, 0)
+        retry.clicked()
+        compare(app.overlayRecoveryAttemptCount, 1)
+        fakeOverlay.available = true
+        tryCompare(app, "overlayRecoveryAttemptCount", 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)
