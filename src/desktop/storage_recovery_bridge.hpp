@@ -16,6 +16,7 @@ class StorageRecoveryBridge final : public QObject {
   Q_PROPERTY(bool storageTransitionPending READ storageTransitionPending NOTIFY storageStateChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
   Q_PROPERTY(QStringList retryableRunIds READ retryableRunIds NOTIFY retryableRunsChanged)
+  Q_PROPERTY(bool recoveryAvailable READ recoveryAvailable NOTIFY retryableRunsChanged)
   Q_PROPERTY(QStringList retryableRunDetails READ retryableRunDetails NOTIFY retryableRunsChanged)
   Q_PROPERTY(QString selectedRunId READ selectedRunId WRITE selectRun NOTIFY selectedRunChanged)
   Q_PROPERTY(bool cacheHit READ cacheHit NOTIFY cachedResultChanged)
@@ -37,6 +38,7 @@ public:
   bool storageTransitionPending() const { return storageTransitionPending_; }
   QString status() const { return status_; }
   QStringList retryableRunIds() const { return retryableRunIds_; }
+  bool recoveryAvailable() const { return !retryableRunIds_.isEmpty(); }
   QStringList retryableRunDetails() const { return retryableRunDetails_; }
   QString selectedRunId() const { return selectedRunId_; }
   /** Queue storage open on the dedicated worker; returns before SQLite work begins. */

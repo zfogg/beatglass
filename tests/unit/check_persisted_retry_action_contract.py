@@ -62,6 +62,8 @@ if "Q_PROPERTY(bool storageOpen READ storageOpen NOTIFY storageStateChanged)" no
     raise SystemExit("Recovery bridge must expose open-storage state")
 if "Q_PROPERTY(bool storageTransitionPending READ storageTransitionPending NOTIFY storageStateChanged)" not in bridge:
     raise SystemExit("Recovery bridge must expose storage transition state")
+if "Q_PROPERTY(bool recoveryAvailable READ recoveryAvailable NOTIFY retryableRunsChanged)" not in bridge or "bool recoveryAvailable() const" not in bridge:
+    raise SystemExit("Recovery bridge must expose persisted recovery availability")
 if "storageTransitionPending_" not in bridge or "storageTransitionPending_ = true" not in source:
     raise SystemExit("Open-state API must distinguish transition failures")
 if "const auto normalized = path.trimmed()" not in source:
