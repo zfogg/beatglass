@@ -46,6 +46,8 @@ so pausing a retry remains discoverable.
 After `Stop recovery`, the card keeps a persistent `Recovery paused · monitoring
 continues` status so an intentional user pause is distinguishable from a native
 bridge failure; the next retry remains an explicit action.
+The paused card also exposes `Resume recovery`, which starts a fresh bounded
+attempt without requiring the user to rediscover the retry control.
 
 ## Screenshot qualification
 
