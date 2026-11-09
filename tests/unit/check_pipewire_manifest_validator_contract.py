@@ -22,6 +22,9 @@ with tempfile.TemporaryDirectory() as directory:
     path.write_text(json.dumps({**valid, "schema_version": 99}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     assert result.returncode != 0
+    path.write_text(json.dumps({**valid, "schema_version": True}), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
+    assert result.returncode != 0
     duplicate = {"id": 2, "info": {"props": {"media.class": "Audio/Sink", "object.serial": "1", "node.name": "other"}}}
     path.write_text(json.dumps({**valid, "inventory": [valid["inventory"][0], duplicate]}), encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)

@@ -16,7 +16,7 @@ except (OSError, json.JSONDecodeError) as exc:
 required = ("schema_version", "captured_at_utc", "host_platform", "python_version", "pipewire_cli_version", "inventory")
 if not isinstance(manifest, dict) or any(key not in manifest or manifest[key] is None for key in required):
     raise SystemExit("manifest missing required qualification identity or inventory")
-if manifest["schema_version"] != 1:
+if type(manifest["schema_version"]) is not int or manifest["schema_version"] != 1:
     raise SystemExit("unsupported PipeWire qualification manifest schema")
 if not str(manifest["host_platform"]).startswith("Linux"):
     raise SystemExit("manifest host_platform must identify Linux")
