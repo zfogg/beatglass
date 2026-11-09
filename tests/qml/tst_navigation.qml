@@ -1164,7 +1164,7 @@ TestCase {
         verify(focusShortcut.enabled)
         compare(focusShortcut.context, Qt.ApplicationShortcut)
         let pageShortcut = findChild(app, "overlayPausedRecoveryPageShortcut")
-        compare(pageShortcut.sequence, "Ctrl+Alt+Shift+O")
+        compare(pageShortcut.sequence, "Ctrl+Alt+Shift+Pause")
         verify(pageShortcut.enabled)
         verify(findChild(app, "overlayPausedRecoveryPageShortcutHint").visible)
         compare(app.navigation.currentIndex, 1)
@@ -1300,6 +1300,17 @@ TestCase {
         let app = shellWithOverlay.createObject(null)
         compare(findChild(app, "overlayReapplyShortcut").sequence, "Ctrl+Alt+Shift+A")
         compare(findChild(app, "overlayResumeRecoveryShortcut").sequence, "Ctrl+Alt+Shift+R")
+        app.destroy()
+    }
+    function test_clickThroughToggleAnnouncesRestoredInteraction() {
+        fakeOverlay.available = true
+        fakeOverlay.clickThrough = true
+        let app = shellWithOverlay.createObject(null)
+        let toggle = findChild(app, "clickThrough")
+        toggle.checked = false
+        toggle.clicked()
+        verify(!fakeOverlay.clickThrough)
+        verify(!app.overlayDisplayRecoveryPending)
         app.destroy()
     }
 }

@@ -58,7 +58,7 @@ Pressing `Escape` while paused returns focus to `Resume recovery`, providing a
 predictable keyboard path back to the lifecycle action after reviewing status.
 It also announces that the paused recovery action is focused for assistive
 technology users.
-`Ctrl+Alt+Shift+O` opens the paused recovery page from anywhere in the
+`Ctrl+Alt+Shift+Pause` opens the paused recovery page from anywhere in the
 control window, restores the control window if it was hidden, and focuses
 `Resume recovery` for a complete keyboard workflow.
 The shortcut is safe to repeat: it reopens the same recovery page and restores
@@ -80,6 +80,8 @@ After a successful unlock, the fallback and recovery-pending markers are cleared
 so the interaction status returns to the ready state.
 Changing click-through successfully from the control window applies the same
 transition and clears stale recovery markers.
+Successful click-through changes also announce the resulting interaction mode,
+so keyboard and pointer availability is explicit to assistive technology.
 The click-through status also prints `Ctrl+Alt+U` next to the Escape guidance,
 making the keyboard path to the Unlock action visible without opening help.
 Using `Ctrl+Alt+U` also restores and activates the control window before focus
