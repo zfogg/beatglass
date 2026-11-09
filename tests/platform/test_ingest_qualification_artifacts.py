@@ -191,6 +191,21 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, parent / "manifest.json")
             self.assertIn("symlinked evidence manifest output parent", errors)
 
+    def test_rejects_symlinked_qualification_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            real_root = base / "real"
+            real_root.mkdir()
+            (real_root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (real_root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            root = base / "linked"
+            try:
+                root.symlink_to(real_root, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            errors = ingest.ingest(root, base / "manifest.json")
+            self.assertIn("symlinked qualification root", errors)
+
     def test_sorts_artifacts_for_reproducible_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
