@@ -2793,6 +2793,7 @@ ApplicationWindow {
                                     visible: storageRecovery.analysisStatus === "Analysis idle · reanalysis required"
                                     enabled: visible && cacheContent.text !== "" && cacheEngine.text !== "" && cacheConfig.text !== "" && cacheMode.text !== "" && window.selectedAudioUrl.toLocalFile() !== ""
                                     Accessible.name: "Run fresh analysis"
+                                    Accessible.value: enabled ? "available; reanalysis required" : "unavailable; select a source and complete cache identity"
                                     Accessible.description: "Invalidate this identity and admit fresh analysis work to the queue."
                                     onClicked: { reanalyzeCacheDialog.open(); window.announceVisualizationRecovery("Confirm fresh analysis for the selected cache identity; source audio remains unchanged.") }
                                 }
