@@ -10,3 +10,6 @@ The callback contract forbids allocation, blocking, logging, UI/database calls,
 or exposing PipeWire-owned memory. Linux native compilation and runtime
 qualification remain pending until a host with `libpipewire-0.3` headers and a
 running PipeWire session is available.
+
+Native `ERROR`, `UNCONNECTED`, `PAUSED`, destroy, malformed-buffer, and bounded
+handoff failures all quiesce callback admission and require a fresh epoch.
