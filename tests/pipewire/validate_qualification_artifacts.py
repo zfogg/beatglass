@@ -11,8 +11,12 @@ def main() -> int:
         return 2
     root = Path(sys.argv[1])
     missing = [name for name in REQUIRED if not (root / name).is_file()]
+    empty = [name for name in REQUIRED if (root / name).is_file() and (root / name).stat().st_size == 0]
     if missing:
         print("missing: " + ", ".join(missing), file=sys.stderr)
+        return 1
+    if empty:
+        print("empty: " + ", ".join(empty), file=sys.stderr)
         return 1
     print(f"PipeWire qualification artifacts verified ({len(REQUIRED)} files)")
     return 0
