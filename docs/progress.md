@@ -780,3 +780,5 @@ Reapplying saved overlay settings now returns keyboard focus to the current-disp
 
 Unlocking click-through overlay input now returns keyboard focus to the interaction-mode status, keeping the restored input state immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_unlock_focus_contract.py`.
 
+Changing overlay click-through mode now returns keyboard focus to the interaction-mode status, keeping the resulting input state immediately inspectable. Portable coverage is in `python tests/unit/check_overlay_click_focus_contract.py`.
+

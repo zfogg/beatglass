@@ -3467,6 +3467,7 @@ ApplicationWindow {
                             checked = window.overlayBridge.clickThrough
                             if (checked !== requestedClickThrough)
                                 window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again.")
+                            overlayInteractionMode.forceActiveFocus()
                         }
                         Connections {
                             target: window.overlayBridge
