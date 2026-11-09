@@ -459,6 +459,7 @@ ApplicationWindow {
                 window.show()
                 window.raise()
                 window.requestActivate()
+                overlayDisplay.forceActiveFocus()
                 return false
             }
         if (!window.restoreOverlayVisualStateFromBridge()) {
@@ -466,6 +467,7 @@ ApplicationWindow {
             window.show()
             window.raise()
             window.requestActivate()
+            overlayDisplay.forceActiveFocus()
             return false
         }
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")

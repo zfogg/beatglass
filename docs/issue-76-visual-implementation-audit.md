@@ -768,3 +768,5 @@ Unlock follows the same failure contract: the control window only announces rest
 Hide also restores the control window when the native bridge has already disappeared, preserving the user-hidden intent while making the fallback actionable.
 
 Persisted display restore failures now announce that the saved display is unavailable and direct keyboard users to choose another display while retaining the control-window fallback.
+
+Restore failures now also return keyboard focus to the display selector after reactivating the control window, covering both an unavailable persisted display and invalid persisted visual state.
