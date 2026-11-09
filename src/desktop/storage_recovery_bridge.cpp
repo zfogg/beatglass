@@ -17,6 +17,7 @@ public slots:
     bool ok = false;
     try { ok = coordinator_.open_storage(config, &diagnostic); }
     catch (const std::exception& error) { diagnostic = error.what(); }
+    catch (...) { diagnostic = "unknown storage error"; }
     emit result(ok, QString::fromStdString(ok ? "Storage open" : diagnostic));
     if (ok) refresh();
     else { emit runsChanged({}, {}); emit analysis(QStringLiteral("Analysis idle")); }
