@@ -271,6 +271,9 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
             overlaySize.forceActiveFocus()
             window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + ".")
         }
