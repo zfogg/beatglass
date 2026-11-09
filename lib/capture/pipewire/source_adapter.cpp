@@ -20,6 +20,15 @@ void MonitorStream::on_error(int error_code) noexcept {
   stopped_ = true;
 }
 int MonitorStream::error_code() const noexcept { return error_code_.load(std::memory_order_acquire); }
+bool MonitorStream::restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels) {
+  if (!epoch || !sample_rate || !channels) return false;
+  auto next = std::make_unique<coreaudio::CaptureFifo>(epoch, sample_rate, channels);
+  fifo_ = std::move(next);
+  error_code_.store(0, std::memory_order_release);
+  discontinuity_pending_ = true;
+  stopped_.store(false, std::memory_order_release);
+  return true;
+}
 bool MonitorStream::pop(coreaudio::CaptureBlock& block) noexcept { return fifo_ && fifo_->pop(block); }
 void MonitorStream::stop() noexcept { stopped_.store(true, std::memory_order_release); }
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }

@@ -1,8 +1,9 @@
 # Progress and handoff
 
-The selected FFT bin now has a visible and screen-reader readout showing its
-accepted magnitude. Wheel, keyboard, source-change, and result-reset paths all
-update or clear the same readout state.
+PipeWire monitor transport now has an explicit control-thread `restart` boundary
+that replaces the bounded FIFO with a fresh epoch/format, clears callback error
+status, and marks the first accepted block discontinuous. Portable coverage is
+in `python tests/unit/check_pipewire_restart_contract.py`.
 
 The PipeWire callback seam now records native error codes in an atomic status
 slot, allowing control-thread lifecycle code to distinguish callback failure
