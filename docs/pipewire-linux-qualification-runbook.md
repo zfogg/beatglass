@@ -80,6 +80,8 @@ Summaries explicitly record whether that plan passed validation before the
 runner proceeded.
 The pending-runner behavior fixture executes this Windows-safe path and asserts
 that it exits unqualified while preserving the validated-plan provenance.
+It also verifies invalid capture plans are rejected before any native command
+can run.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
