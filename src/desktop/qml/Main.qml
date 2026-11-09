@@ -3839,7 +3839,7 @@ ApplicationWindow {
                         objectName: "overlayEstimateAttribution"
                         visible: window.overlayBridge !== null
                         text: visible ? "Estimate source: selected system output · combined mix" : "Estimate source unavailable"
-                        Accessible.name: "Overlay estimate attribution"
+                        Accessible.name: "Overlay estimate attribution, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; source retained" : "; source ready")
                         Accessible.role: Accessible.StaticText
                         Accessible.description: visible
