@@ -872,3 +872,5 @@ Overlay summary review action now exposes recovery state and settings revision i
 
 Summary review action descriptions now include the current settings revision. Portable coverage is in `python tests/unit/check_overlay_summary_action_description_contract.py`.
 
+Consolidated overlay settings summary accessible name now includes ready versus recovery-pending state. Portable coverage is in `python tests/unit/check_overlay_summary_name_contract.py`.
+
