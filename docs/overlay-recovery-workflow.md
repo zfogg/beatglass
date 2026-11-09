@@ -181,3 +181,6 @@ The paused recovery page shortcut Ctrl+Alt+Shift+Pause reopens the same paused w
 
 When click-through remains active during paused recovery, Escape stays reserved for the native unlock workflow; the paused focus action yields without clearing persisted display or geometry settings.
 
+
+When paused recovery and click-through overlap, Ctrl+Alt+U restores the control window and focuses Unlock overlay while retaining the queued display and geometry settings for the later resume.
+
