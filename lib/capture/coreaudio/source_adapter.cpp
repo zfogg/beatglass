@@ -67,7 +67,7 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
   if (!native_started) {
     const bool stopped = backend_->stop(); quiescence_failed_ = !stopped;
     lifecycle_.stop();
-    const auto error = stopped ? source_error(failure) : SourceError::backend_error;
+    const auto error = source_error(failure);
     std::string diagnostic = failure.message.empty() ? "Core Audio capture start failed" : failure.message;
     if (!stopped) diagnostic += "; backend stop also failed";
     status_ = {SourceState::error, error, std::move(diagnostic)};
