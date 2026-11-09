@@ -13,6 +13,7 @@ with tempfile.TemporaryDirectory() as directory:
     for name in names:
         (artifact / name).write_text("evidence\n", encoding="utf-8")
     result = subprocess.run([sys.executable, str(validator), str(artifact), "--json"], capture_output=True, text=True, check=True)
+    assert result.stdout.startswith('{"artifact_dir":')
     report = json.loads(result.stdout)
     assert report["schema"] == "pipewire-qualification-v1"
     assert report["verified"] is True
