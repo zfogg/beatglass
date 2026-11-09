@@ -166,7 +166,7 @@ ApplicationWindow {
         onActivated: {
             navigation.currentIndex = 1
             overlaySettingsSummaryReviewAction.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay summary review control focused.")
+            window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
         }
     }
     Shortcut {
