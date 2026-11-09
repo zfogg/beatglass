@@ -2004,7 +2004,7 @@ ApplicationWindow {
                             Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             ToolTip.text: fileIsDir ? "Open folder " + fileName : "Select audio file " + fileName
                             onClicked: { browser.currentIndex = index; window.activateEntry(index) }
-                            onDoubleClicked: { browser.currentIndex = index; window.activateEntry(index); if (!fileIsDir) playSelectedTrack.click() }
+                            onDoubleClicked: { browser.currentIndex = index; window.activateEntry(index); if (!fileIsDir) playSelectedTrack.click(); event.accepted = true }
                             contentItem: RowLayout {
                                 Label { text: fileName; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.ignored: true }
                                 Label { text: fileIsDir ? "Folder" : "Audio file"; Layout.preferredWidth: 100; Accessible.ignored: true }
@@ -2185,7 +2185,7 @@ ApplicationWindow {
                                 window.announceVisualizationRecovery("Selected recursive audio source " + name + "; prior analysis presentation is stale until this source is analyzed.")
                                 analyzeSelectedAudio.forceActiveFocus()
                             }
-                            onDoubleClicked: if (!folder) { onClicked(); playSelectedTrack.click() }
+                            onDoubleClicked: { if (!folder) { onClicked(); playSelectedTrack.click() }; event.accepted = true }
                         }
                     }
                 }
