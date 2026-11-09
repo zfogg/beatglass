@@ -981,6 +981,7 @@ ApplicationWindow {
         if (!window.overlayBridge || !window.overlayBridge.clickThrough)
             return false
         if (!window.overlayBridge.setClickThrough(false)) {
+            window.overlayLaunchFallbackActive = true
             window.announceCaptureRecoveryState("DJ overlay could not be unlocked; control-window fallback remains available.")
             return false
         }
