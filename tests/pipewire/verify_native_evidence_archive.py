@@ -102,7 +102,10 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("summary native_test_count does not match discovery")
     if int(summary_data["native_test_discovery"].get("count", len(discovery_tests))) != len(discovery_tests):
         raise SystemExit("summary native discovery count does not match discovery")
-    junit_root = ET.fromstring(archive.read(junit_name))
+    try:
+        junit_root = ET.fromstring(archive.read(junit_name))
+    except ET.ParseError as error:
+        raise SystemExit(f"JUnit evidence is malformed XML: {error}")
     if junit_root.tag not in ("testsuite", "testsuites"):
         raise SystemExit("JUnit evidence has invalid root")
     suites = [junit_root] if junit_root.tag == "testsuite" else [node for node in junit_root.iter("testsuite")]
