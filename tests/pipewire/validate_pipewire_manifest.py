@@ -1,5 +1,6 @@
 """Validate the shape of a captured PipeWire qualification manifest."""
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -53,6 +54,8 @@ for item in manifest["inventory"]:
         raise SystemExit("Audio/Sink must retain serial and node name")
     if props.get("media.class") == "Audio/Sink" and (not isinstance(props.get("object.serial"), str) or not isinstance(props.get("node.name"), str)):
         raise SystemExit("Audio/Sink serial and node name must be strings")
+    if props.get("media.class") == "Audio/Sink" and not re.fullmatch(r"[0-9]+", props["object.serial"]):
+        raise SystemExit("Audio/Sink object.serial must be numeric")
 sinks = [item["info"]["props"] for item in manifest["inventory"] if item["info"]["props"].get("media.class") == "Audio/Sink"]
 if len({p["object.serial"] for p in sinks}) != len(sinks) or len({p["node.name"] for p in sinks}) != len(sinks):
     raise SystemExit("Audio/Sink serials and node names must be unique")
