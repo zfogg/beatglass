@@ -53,9 +53,16 @@ if results and results[-1]["returncode"] == 0 and len(results) == len(commands):
                     "stdout": str(stdout_path), "stderr": str(stderr_path)})
     if result.returncode == 0:
         validate = ["python", str(args.source / "tests/pipewire/validate_pipewire_manifest.py"), str(evidence / "pipewire-manifest.json")]
+        validate_started = time.monotonic()
         result = subprocess.run(validate, check=False, text=True, capture_output=True)
+        validate_index = len(results)
+        validate_stdout = evidence / f"native-{validate_index}-stdout.log"
+        validate_stderr = evidence / f"native-{validate_index}-stderr.log"
+        validate_stdout.write_text(result.stdout, encoding="utf-8")
+        validate_stderr.write_text(result.stderr, encoding="utf-8")
         results.append({"command": validate, "returncode": result.returncode,
-                        "duration_seconds": 0.0, "stdout": "", "stderr": ""})
+                        "duration_seconds": round(time.monotonic() - validate_started, 3),
+                        "stdout": str(validate_stdout), "stderr": str(validate_stderr)})
 native_result = next((item for item in results if "--timeout" in item["command"] and "^pipewire_tests$" in item["command"]), None)
 discovery_result = next((item for item in results if "--show-only=json-v1" in item["command"]), None)
 discovery_count = None
