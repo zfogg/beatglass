@@ -65,6 +65,8 @@ An accepted native manifest must contain at least one captured PipeWire object;
 an empty dump is treated as failed qualification evidence.
 At least one captured object must be an `Audio/Sink`; unrelated nodes alone do
 not provide native output evidence.
+The Audio/Sink entry must retain non-empty `object.serial` and `node.name` for
+deterministic target selection.
 Each object must retain its `info` object so native properties remain
 auditable after capture, including its `props` dictionary.
 Manifest publication uses a temporary file and atomic no-overwrite link, so an
