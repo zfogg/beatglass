@@ -235,9 +235,16 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(manifest))
     result = subprocess.run([sys.executable, str(verifier), str(summary_timestamp_drift)], capture_output=True, text=True)
     if result.returncode == 0 or "manifest archive timestamp does not match qualification summary" not in result.stderr + result.stdout: raise SystemExit("summary timestamp drift was accepted")
+    invalid_summary_timestamp = root / "invalid-summary-timestamp.zip"
+    invalid_timestamp_summary = json.dumps(dict(json.loads(summary), archive_timestamp_utc=123)).encode()
+    with zipfile.ZipFile(invalid_summary_timestamp, "w") as archive:
+        for name, data in artifacts.items(): archive.writestr(name, invalid_timestamp_summary if name == "native-summary.json" else data)
+        archive.writestr("evidence-manifest.json", json.dumps(manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(invalid_summary_timestamp)], capture_output=True, text=True)
+    if result.returncode == 0 or "manifest archive timestamp does not match qualification summary" not in result.stderr + result.stdout: raise SystemExit("invalid summary timestamp was accepted")
     malformed_json = root / "malformed-manifest-json.zip"
     with zipfile.ZipFile(malformed_json, "w") as archive:
         archive.writestr("evidence-manifest.json", b"{")
     result = subprocess.run([sys.executable, str(verifier), str(malformed_json)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed evidence manifest" not in result.stderr + result.stdout: raise SystemExit("malformed manifest JSON was accepted")
-print("PipeWire evidence archive verifier behavior passed (27 scenarios)")
+print("PipeWire evidence archive verifier behavior passed (28 scenarios)")
