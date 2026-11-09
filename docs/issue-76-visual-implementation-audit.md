@@ -805,3 +805,5 @@ Storage transition, persisted retry outcome, and stale-result diagnostics now ex
 Batch result, persisted recovery, retry rejection, admission, and frame-progress diagnostics now expose their live text as status values, completing the accessible readout for persisted analysis lifecycle states.
 
 Cache availability, cached results, worker results, and queue outcomes now expose live accessible status values, completing the result and admission readout across persisted and active analysis paths.
+
+Output endpoint discovery, selected endpoint state, and capture-permission guidance now use live status semantics, so device recovery and permission instructions are announced consistently.

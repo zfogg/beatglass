@@ -2929,14 +2929,14 @@ ApplicationWindow {
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
-                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current output endpoint discovery status" }
+                            Label { text: window.endpointSelectionBridge ? window.endpointSelectionBridge.status : "Output selection unavailable"; objectName: "endpointStatus"; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.name: "Output endpoint status: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current output endpoint discovery status" }
                             Label {
                                 objectName: "endpointUnavailableState"
                                 visible: window.endpointSelectionBridge === null
                                 text: "Output endpoint discovery is unavailable in this build."
                                 Accessible.name: "Output endpoint discovery availability"
                                 Accessible.value: text
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 ToolTip.text: "Output endpoint discovery is unavailable in this build"
                                 wrapMode: Text.WordWrap
@@ -2948,7 +2948,7 @@ ApplicationWindow {
                                 text: "Output endpoint recovery is available: connect an output device and refresh the endpoint list."
                                 Accessible.name: "Output endpoint recovery guidance"
                                 Accessible.value: text
-                                Accessible.role: Accessible.StaticText
+                                Accessible.role: Accessible.Status
                                 Accessible.description: text
                                 ToolTip.text: "Connect an output device and refresh endpoint discovery"
                                 wrapMode: Text.WordWrap
@@ -2968,7 +2968,7 @@ ApplicationWindow {
                                 wrapMode: Text.WordWrap
                                 Layout.fillWidth: true
                             }
-                            Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current selected output endpoint"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Label { text: window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== "" ? "Selected endpoint: " + window.endpointSelectionBridge.selectedEndpoint : "No output endpoint selected"; objectName: "selectedEndpointStatus"; Accessible.name: "Selected output endpoint: " + text; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text; ToolTip.text: "Current selected output endpoint"; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         ComboBox {
                             id: outputDevice
                             objectName: "outputDevice"
@@ -2990,7 +2990,7 @@ ApplicationWindow {
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio capture permission guidance"
                             Accessible.value: text
-                            Accessible.role: Accessible.StaticText
+                            Accessible.role: Accessible.Status
                             Accessible.description: text
                             ToolTip.text: "Audio capture permission and recovery guidance"
                         }
