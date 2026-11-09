@@ -817,8 +817,8 @@ ApplicationWindow {
         }
         function onReduceMotionChanged() {
             window.themePreferenceAnnouncement = window.themePreferencesBridge.reduceMotion
-                ? "Reduced motion enabled; static visualization snapshots remain available."
-                : "Reduced motion disabled; standard presentation transitions restored."
+                ? "Reduced motion enabled for " + window.selectedTheme + "; static visualization snapshots remain available."
+                : "Reduced motion disabled for " + window.selectedTheme + "; standard presentation transitions restored."
         }
     }
     Connections {
@@ -1556,10 +1556,10 @@ ApplicationWindow {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
-                        window.themePreferenceAnnouncement = "Reduced motion enabled; overlay beat pulse disabled."
+                        window.themePreferenceAnnouncement = "Reduced motion enabled for " + window.selectedTheme + "; overlay beat pulse disabled."
                     } else if (djOverlay.visible && window.liveBridge.status === "Tracking") {
                         beatPulse.restart()
-                        window.themePreferenceAnnouncement = "Reduced motion disabled; overlay beat pulse restored."
+                        window.themePreferenceAnnouncement = "Reduced motion disabled for " + window.selectedTheme + "; overlay beat pulse restored."
                     }
                 }
             }
