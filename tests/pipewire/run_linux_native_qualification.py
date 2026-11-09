@@ -22,6 +22,7 @@ if platform.system() != "Linux":
                "handoff_status": "pending", "commit": commit or None, "pipewire_version": None,
                "commands": [], "failed_command": None, "pending_command": [sys.executable, str(Path(__file__)), "--source", str(args.source)], "qualified": False,
                "pending_reason": "Linux native qualification pending: run on Linux",
+               "environment": {"python": sys.version.split()[0], "cwd": str(Path.cwd())},
                "requested_summary": str(args.summary) if args.summary else None,
                "requested_archive": str(args.archive) if args.archive else None,
                "native_artifacts": [],

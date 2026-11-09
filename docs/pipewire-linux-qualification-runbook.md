@@ -31,6 +31,8 @@ It also records requested summary/archive paths and an empty native artifact
 list, making the host limitation explicit without claiming qualification.
 The pending record includes the host OS and the exact runner command that must
 be rerun on Linux, making the handoff actionable rather than merely advisory.
+It also records the runner Python version and working directory for reproducible
+handoff diagnostics.
 It labels the target as `Linux/PipeWire` and the handoff as `pending`, so
 downstream evidence tooling can distinguish an unrun gate from a failed one.
 Linux runs use the same schema with `handoff_status: complete` only when the
