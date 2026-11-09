@@ -1970,6 +1970,7 @@ ApplicationWindow {
                             required property bool folder
                             width: ListView.view.width
                             enabled: !folder
+                            activeFocusOnTab: true
                             Accessible.name: name + (folder ? ", folder" : ", audio file")
                             Accessible.role: Accessible.ListItem
                             Accessible.description: folder ? "Folder discovered recursively" : "Select this audio file for metadata and analysis"
