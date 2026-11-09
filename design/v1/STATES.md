@@ -16,6 +16,7 @@
 | Library import review | Scan found unsupported, missing, or unreadable sources | Keep entries recoverable, provide locate/retry/remove actions, and never delete source files implicitly. |
 | Library empty | First run before folder selection | Offer folder picker and explain source preservation and supported formats accurately. |
 | Library filter empty | Search returns no matches | Explain the query, offer Clear search, and reassure that source files are unchanged. |
+| Library filtered results | Active status/folder filters match catalog entries | Show removable filter chips, filtered count, scoped actions, and preserve the complete catalog. |
 | Library storage recovery | Saved folder exists but local storage is unavailable | Explain retained source files, offer reopen/choose/forget actions, and keep analysis disabled. |
 | Jobs empty | No queued, running, or recoverable analysis | Explain that results remain available and offer a route back to Library. |
 | DJ permission recovery | OS capture permission unavailable | Explain why estimates are blank, link to system settings, and preserve Library evidence. |
