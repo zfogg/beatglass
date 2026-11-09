@@ -10,7 +10,7 @@ def main() -> None:
     for object_name in ("lookupAnalysisCache", "invalidateAnalysisCache", "reanalyzeInvalidatedCache"):
         start = QML.index(f'objectName: "{object_name}"')
         block = QML[start:QML.index("\n", start)]
-        assert "analysisCacheIdentityReady" in block, object_name
+        assert "window.analysisCacheIdentityReady" in block, object_name
 
 if __name__ == "__main__":
     main()
