@@ -39,4 +39,6 @@ for marker in ("Cache lookup rejected:", "catch (const std::exception& error)"):
 for marker in ("Cache invalidation rejected:", "catch (const std::exception& error)"):
     if marker not in invalidate:
         raise SystemExit(f"Missing cache invalidation recovery marker: {marker}")
+if invalidate.count("emit cached(false, QString{})") < 2:
+    raise SystemExit("Cache invalidation must clear stale presentation on failure and success")
 print(f"Desktop cache bridge contract verified ({len(required)} checks)")

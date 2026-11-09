@@ -6,7 +6,8 @@ bridge now catches those failures, clears a failed lookup's cached-result
 presentation, and emits actionable `Cache lookup rejected:` or `Cache
 invalidation rejected:` status text. A storage exception therefore cannot
 escape a queued UI invocation or leave an earlier cache hit displayed as
-current.
+current; failed invalidation also clears the stale presentation
+conservatively.
 
 Successful invalidation continues to clear the cached result only after the
 storage owner confirms removal. These paths do not mutate source audio or
