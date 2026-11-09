@@ -88,7 +88,7 @@ public:
   bool discard_retryable(const std::string& id);
   /** Atomically discard the supplied retryable run IDs; validates every ID before deleting any row and returns the number removed. */
   std::size_t discard_retryable(const std::vector<std::string>& ids);
-  /** Mark a matching running operation retryable after a pre-publication worker failure; returns false when ID/key do not match a running row and throws for invalid inputs. */
+  /** Mark a matching running operation retryable after a pre-publication worker failure; the transition clears any partial result and is idempotent for recovery callers; returns false when ID/key do not match a running row or it is already terminal, and throws for invalid inputs. */
   bool mark_retryable(const std::string& id, const CacheKey& key);
   /** Remove the active result for an exact identity; returns false when none exists, throws for an invalid key, and leaves source files and historical runs untouched. */
   bool invalidate(const CacheKey& key);
