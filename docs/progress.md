@@ -1,5 +1,10 @@
 # Progress and handoff
 
+The Core Audio tap now independently rejects empty, whitespace-only, and
+NUL-containing UIDs before native setup, protecting direct backend callers as
+well as the source adapter. Portable coverage is in
+`python tests/unit/check_macos_tap_id_validation_contract.py`.
+
 Invalid Core Audio tap arguments now map to the public `not_found` source
 category instead of an opaque backend error, matching malformed source-ID
 handling. Portable coverage is in
