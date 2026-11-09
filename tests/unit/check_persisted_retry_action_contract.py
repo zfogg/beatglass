@@ -42,6 +42,8 @@ if "analysisRetryable_ = false" not in batch_discard:
     raise SystemExit("Batch persisted discard must clear stale recovery state")
 if "Refreshing persisted recovery" not in source:
     raise SystemExit("Recovery refresh must publish a transition status")
+if "retryable recovery runs discarded" not in source or 'analysisStatus_ = QStringLiteral("Analysis idle")' not in source:
+    raise SystemExit("Batch discard completion must return analysis state to idle")
 if "Persisted recovery refreshed" not in source:
     raise SystemExit("Recovery refresh must publish completion status")
 if "Persisted recovery selected" not in source:
