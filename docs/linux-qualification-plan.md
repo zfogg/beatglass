@@ -45,6 +45,7 @@ Scenario statuses are limited to `PASS`, `UNRUN`, `FAIL`, and `BLOCKED`; only
 `PASS` may carry evidence, preventing contradictory pending reports.
 The report-level platform inventory must match its platform-support summary, and
 `ready: true` is only valid with an `ACCEPTED` exit-gate status.
+Platform identities are limited to `linux`, `windows`, and `macos`.
 Support summaries must use one known status per platform: `experimental`,
 `qualified`, `unsupported`, or `pending`.
 If both `scenarios` and `scenario_inventory` are present, they must be identical;
