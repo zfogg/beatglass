@@ -178,6 +178,7 @@ screenshots.
 | [Native display none](overlay-native-display-none-card.svg) | empty display selection with safe retained monitoring |
 | [Native display restored](overlay-native-display-restored-card.svg) | recovered display with preserved overlay settings |
 | [Native display restore applied](overlay-native-display-restore-applied-card.svg) | healthy live state after restoring the native overlay |
+| [Native display retry](overlay-native-display-retry-card.svg) | bounded display restore retry with safe-mode escape |
 | [Startup restored](overlay-startup-restored-card.svg) | ready state after native restoration |
 | [Startup fallback](overlay-startup-fallback-card.svg) | unavailable-display recovery with preserved appearance |
 
