@@ -858,3 +858,5 @@ Consolidated overlay settings summary is now keyboard-focusable for direct inspe
 
 Overlay recovery controls now include a Review overlay summary action for direct inspection of consolidated display, size, opacity, and recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_review_contract.py`.
 
+Reviewing the consolidated overlay summary now announces its settings revision and pending recovery state. Portable coverage is in `python tests/unit/check_overlay_summary_review_announce_contract.py`.
+
