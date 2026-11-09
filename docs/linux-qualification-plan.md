@@ -34,6 +34,8 @@ The reviewer additionally requires matching platform/manifest identity, a
 40-character build commit, complete provenance, exact artifact counts, and the
 full six-scenario inventory before a platform can be accepted. Every retained
 artifact must also carry a valid 64-character SHA-256, positive byte count, and
-an explicit successful hash check.
+an explicit successful hash check. Platform manifests must carry their own
+validated SHA-256 identity plus the exact qualification command and output
+artifact used to produce the handoff.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.

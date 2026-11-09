@@ -22,6 +22,13 @@ def assess(report_path: Path, reviewer: str) -> dict:
             blockers.append(f"{name}:invalid build commit identity")
         if platform.get("provenance_complete") is not True:
             blockers.append(f"{name}:incomplete provenance")
+        manifest_sha = platform.get("manifest_sha256")
+        if not isinstance(manifest_sha, str) or len(manifest_sha) != 64 or any(char not in "0123456789abcdefABCDEF" for char in manifest_sha):
+            blockers.append(f"{name}:invalid manifest identity")
+        if not isinstance(platform.get("qualification_command"), str) or not platform["qualification_command"].strip():
+            blockers.append(f"{name}:missing qualification command")
+        if not isinstance(platform.get("qualification_output"), str) or not platform["qualification_output"].strip():
+            blockers.append(f"{name}:missing qualification output")
         inventory = platform.get("artifact_inventory")
         if not isinstance(inventory, list) or platform.get("retained_artifacts") != len(inventory):
             blockers.append(f"{name}:artifact count mismatch")
