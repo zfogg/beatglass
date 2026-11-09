@@ -60,3 +60,7 @@ Announcements mirror the visible state and next action so visual and assistive
 feedback stay aligned:
 
 ![Overlay announcement rendering](overlay-announcement-card.svg)
+
+Keyboard shortcuts use the same action labels as the visible controls:
+
+![Overlay keyboard shortcut rendering](overlay-shortcuts-card.svg)
