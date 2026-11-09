@@ -345,6 +345,13 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "analysisRetryShortcut"
+        sequence: "Ctrl+Alt+Y"
+        context: Qt.ApplicationShortcut
+        enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canRetry
+        onActivated: window.retryVisualizationAnalysis()
+    }
+    Shortcut {
         objectName: "visualizationStopShortcut"
         sequence: "Ctrl+Alt+Shift+S"
         context: Qt.ApplicationShortcut
