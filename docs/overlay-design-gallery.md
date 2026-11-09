@@ -59,6 +59,7 @@ screenshots.
 | [History](overlay-history-card.svg) | local recent listening record |
 | [Pinned views](overlay-favorite-card.svg) | favorite layouts and outputs |
 | [Tips](overlay-tips-card.svg) | compact guidance for personal workflows |
+| [Command palette](overlay-command-palette-card.svg) | searchable keyboard-first actions |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
