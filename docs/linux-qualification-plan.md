@@ -51,5 +51,7 @@ Support summaries must use one known status per platform: `experimental`,
 an all-`PASS` inventory cannot remain marked non-qualified.
 Retained-byte totals must equal the sum of the recorded artifact sizes, so
 manifests cannot under-report or over-report the evidence they contain.
+Scenario evidence digest maps must reference only `PASS` scenarios and contain
+valid SHA-256 values.
 
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.
