@@ -3371,6 +3371,30 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
+                    Button {
+                        objectName: "overlayMonitoringAction"
+                        visible: window.overlayBridge !== null
+                        text: visible && window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop overlay monitoring" : "Start overlay monitoring"
+                        enabled: visible && window.captureMonitorBridge !== null
+                            && window.captureMonitorBridge.status !== "Starting"
+                            && window.captureMonitorBridge.status !== "Reacquiring"
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled
+                            ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.")
+                            : "Monitoring is transitioning; wait for the current capture state."
+                        ToolTip.text: Accessible.description
+                        onClicked: {
+                            if (!window.captureMonitorBridge) return
+                            if (window.captureMonitorBridge.status === "Monitoring") {
+                                window.captureMonitorBridge.stop()
+                                window.announceCaptureRecoveryState("Overlay monitoring stopped; overlay settings remain available.")
+                            } else {
+                                window.captureMonitorBridge.start()
+                                window.announceCaptureRecoveryState("Overlay monitoring requested; waiting for accepted output data.")
+                            }
+                        }
+                    }
                     Label {
                         objectName: "overlayEstimateAttribution"
                         visible: window.overlayBridge !== null
