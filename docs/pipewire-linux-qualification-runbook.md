@@ -31,6 +31,8 @@ It labels the target as `Linux/PipeWire` and the handoff as `pending`, so
 downstream evidence tooling can distinguish an unrun gate from a failed one.
 Linux runs use the same schema with `handoff_status: complete` only when the
 qualification predicate passes, and `failed` otherwise.
+The completed-summary verifier enforces that schema and requires a non-empty
+commit identity before accepting discovery/JUnit digests.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
