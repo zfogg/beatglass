@@ -1948,6 +1948,10 @@ ApplicationWindow {
                 } else {
                     window.overlayDisplayRecoveryPending = false
                     window.announceCaptureRecoveryState("DJ overlay recovered; Show, Restore, and Reapply actions are available.")
+                    window.show()
+                    window.raise()
+                    window.requestActivate()
+                    overlaySettingsRetentionReviewAction.forceActiveFocus()
                 }
             }
         }
