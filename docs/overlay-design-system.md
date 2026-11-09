@@ -79,3 +79,8 @@ FFT mode uses the same empty/ready hierarchy while exposing frequency-domain
 context:
 
 ![Overlay FFT rendering](overlay-fft-card.svg)
+
+Capture status uses explicit lifecycle language so source loss and reacquisition
+are understandable at a glance:
+
+![Overlay capture status rendering](overlay-capture-card.svg)
