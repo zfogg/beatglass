@@ -78,6 +78,8 @@ They also record the capture-plan SHA-256 when the file is available, allowing
 the native host to prove it used the intended preparation instructions.
 The evidence manifest preserves that plan path, digest, and validation flag so
 the transferred archive remains tied to its capture instructions.
+When a capture plan is supplied, the packager also archives the plan itself,
+with its digest checked alongside native summaries and transition evidence.
 Summaries explicitly record whether that plan passed validation before the
 runner proceeded.
 The pending-runner behavior fixture executes this Windows-safe path and asserts

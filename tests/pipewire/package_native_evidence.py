@@ -28,7 +28,8 @@ transition_schema = None
 transition_commit = None
 for key, digest_key in (("native_discovery_json", "native_discovery_sha256"),
                         ("native_junit", "native_junit_sha256"),
-                        ("native_transition_json", "native_transition_sha256")):
+                        ("native_transition_json", "native_transition_sha256"),
+                        ("capture_plan", "capture_plan_sha256")):
     if key not in summary:
         continue
     path = Path(summary[key]).resolve()
