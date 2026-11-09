@@ -39,6 +39,8 @@ public:
   virtual MonitorStatus poll_status() noexcept = 0;
   /** Stop and quiesce the stream; safe to call repeatedly. */
   virtual bool stop() noexcept = 0;
+  /** Release the selected session and negotiated format on the control thread. */
+  virtual void reset() noexcept = 0;
 };
 /** Bounded callback handoff used by a PipeWire stream adapter. The callback only calls push; control code calls pop/stop. */
 class MonitorStream {
