@@ -30,4 +30,13 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(manifest))
     result = subprocess.run([sys.executable, str(verifier), str(bad)], capture_output=True, text=True)
     if result.returncode == 0 or "unlisted archive artifact" not in result.stderr + result.stdout: raise SystemExit("unlisted artifact was accepted")
-print("PipeWire evidence archive verifier behavior passed (2 scenarios)")
+
+    tampered = root / "tampered.zip"
+    changed = dict(artifacts)
+    changed["pipewire-tests.xml"] = b"<testsuite tests='99'/>\n"
+    with zipfile.ZipFile(tampered, "w") as archive:
+        for name, data in changed.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(manifest))
+    result = subprocess.run([sys.executable, str(verifier), str(tampered)], capture_output=True, text=True)
+    if result.returncode == 0 or not any(message in result.stderr + result.stdout for message in ("size mismatch", "digest mismatch")): raise SystemExit("tampered artifact was accepted")
+print("PipeWire evidence archive verifier behavior passed (3 scenarios)")
