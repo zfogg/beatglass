@@ -41,6 +41,8 @@ public:
   int error_code() const noexcept;
   /** Consume and clear the last callback error on the control thread. */
   int take_error() noexcept;
+  /** Consume and clear the pending discontinuity marker on the control thread. */
+  bool take_discontinuity() noexcept;
   /** Control-thread predicate: a callback error or stop requires a fresh restart epoch. */
   bool needs_restart() const noexcept;
   /** Control-thread restart boundary: replace the FIFO with a fresh epoch and format. */
