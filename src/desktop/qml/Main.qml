@@ -2142,7 +2142,9 @@ ApplicationWindow {
                     onClicked: {
                         window.recursiveCatalogActive = false
                         recursiveResultsView.currentIndex = -1
-                        window.announceVisualizationRecovery("Returned to the current folder browser.")
+                        search.text = ""
+                        browser.currentIndex = -1
+                        window.announceVisualizationRecovery("Returned to the current folder browser; the filter and entry selection were cleared.")
                         browser.forceActiveFocus()
                     }
                 }
