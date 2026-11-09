@@ -5,6 +5,7 @@
 | Library | Browse indexed collection; completed, analyzing and source changed rows; track key unknown | Folder navigation, search, sort, select, individual/batch analysis; preserve files. |
 | Library import in progress | Folder scan is discovering and checking sources | Show bounded progress, preserve the last catalog snapshot, and make cancellation non-destructive. |
 | Library import complete | Folder scan finished with new, unchanged, and review-needed sources | Summarize identity reuse, offer analysis for new entries, and preserve source files. |
+| Library import review | Scan found unsupported, missing, or unreadable sources | Keep entries recoverable, provide locate/retry/remove actions, and never delete source files implicitly. |
 | Library empty | First run before folder selection | Offer folder picker and explain source preservation and supported formats accurately. |
 | Library filter empty | Search returns no matches | Explain the query, offer Clear search, and reassure that source files are unchanged. |
 | Library storage recovery | Saved folder exists but local storage is unavailable | Explain retained source files, offer reopen/choose/forget actions, and keep analysis disabled. |
