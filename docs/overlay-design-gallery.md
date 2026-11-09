@@ -26,6 +26,7 @@ screenshots.
 | [Shortcuts](overlay-shortcuts-card.svg) | keyboard parity |
 | [Announcements](overlay-announcement-card.svg) | accessible state copy |
 | [Layout](overlay-layout-card.svg) | spacing and hierarchy |
+| [Microcopy](overlay-microcopy-card.svg) | concise state guidance |
 | [Reduced motion](overlay-reduced-motion-card.svg) | static visualization preference |
 | [Theme](overlay-theme-card.svg) | contrast-safe visual preference |
 | [Focus](overlay-focus-card.svg) | keyboard focus visibility |
