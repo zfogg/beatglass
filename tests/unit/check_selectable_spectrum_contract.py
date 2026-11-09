@@ -6,7 +6,7 @@ QML = (Path(__file__).resolve().parents[2] / "src/desktop/qml/Main.qml").read_te
 def main() -> None:
     start = QML.index('property int selectedSpectrumBin')
     block = QML[start:start + 5000]
-    for marker in ("selectedSpectrumBin = Math.max", "selectedSpectrumBin = Math.min", "Math.floor(mouse.x * visualizationCanvas.renderedSpectrum.length", "selected bin"):
+    for marker in ("selectedSpectrumBin = Math.max", "selectedSpectrumBin = Math.min", "Math.floor(mouse.x * visualizationCanvas.renderedSpectrum.length /", "selected bin"):
         assert marker in block, marker
     print("Selectable spectrum contract verified (4 checks)")
 
