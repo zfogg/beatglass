@@ -434,7 +434,10 @@ ApplicationWindow {
     function unlockOverlayAndRestoreFocus() {
         if (!window.overlayBridge || !window.overlayBridge.clickThrough)
             return false
-        window.overlayBridge.setClickThrough(false)
+        if (!window.overlayBridge.setClickThrough(false)) {
+            window.announceCaptureRecoveryState("DJ overlay could not be unlocked; control-window fallback remains available.")
+            return false
+        }
         window.announceCaptureRecoveryState("DJ overlay unlocked; keyboard and pointer interaction restored.")
         if (typeof unlockOverlay !== "undefined")
             unlockOverlay.forceActiveFocus()
