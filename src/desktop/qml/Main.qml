@@ -530,6 +530,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryRefreshFocusShortcut"; sequence: "Ctrl+Alt+Shift+Q"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; refreshFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library refresh action focused.") } }
     Shortcut { objectName: "libraryChooseFolderFocusShortcut"; sequence: "Ctrl+Alt+Shift+D"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; chooseFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library folder chooser focused.") } }
     Shortcut { objectName: "libraryCatalogStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+C"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; catalogResultCount.forceActiveFocus(); window.announceVisualizationRecovery("Library catalog result count focused.") } }
+    Shortcut { objectName: "librarySelectionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+E"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; librarySelectionStatus.forceActiveFocus(); window.announceVisualizationRecovery("Library selection status focused.") } }
     Shortcut { objectName: "libraryAnalyzeShortcut"; sequence: "Ctrl+Alt+A"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"; onActivated: { const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile()); window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry."); analyzeSelectedAudio.forceActiveFocus() } }
     Shortcut { objectName: "libraryAnalysisFocusShortcut"; sequence: "Ctrl+Alt+Shift+N"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: { navigation.currentIndex = 0; analyzeSelectedAudio.forceActiveFocus(); window.announceVisualizationRecovery("Selected Library analysis action focused.") } }
     Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library folder browser focused.") } }
@@ -1775,7 +1776,9 @@ ApplicationWindow {
                     Accessible.description: text
                 }
                 Label {
+                    id: librarySelectionStatus
                     objectName: "librarySelectionStatus"
+                    activeFocusOnTab: true
                     text: window.selectedAudioUrl.toString() === "" ? "No Library source selected." : "Selected source: " + window.selectedName
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
@@ -1787,7 +1790,7 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "libraryShortcutHelp"
-                    text: "Shortcuts: Ctrl+F filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+Shift+M metadata status · Ctrl+Alt+Shift+N analysis action · Ctrl+Alt+Shift+Y playback action · Ctrl+Alt+Shift+Q refresh action · Ctrl+Alt+Shift+D folder chooser · Ctrl+Alt+Shift+C catalog status · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
+                    text: "Shortcuts: Ctrl+F filter · Ctrl+Alt+L browser · Ctrl+Alt+Shift+L results · Ctrl+Alt+Shift+O sort control · Ctrl+Alt+Shift+M metadata status · Ctrl+Alt+Shift+N analysis action · Ctrl+Alt+Shift+Y playback action · Ctrl+Alt+Shift+Q refresh action · Ctrl+Alt+Shift+D folder chooser · Ctrl+Alt+Shift+C catalog status · Ctrl+Alt+Shift+E selection status · Ctrl+Alt+R recursive catalog · Ctrl+Alt+Up parent folder · Ctrl+R refresh folder · Ctrl+Alt+S reverse name order · Ctrl+Alt+Backspace clear selection"
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     Accessible.name: "Library keyboard shortcut help"
