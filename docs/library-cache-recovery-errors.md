@@ -14,3 +14,6 @@ Successful invalidation continues to clear the cached result only after the
 storage owner confirms removal. It also clears the displayed analysis and
 admission state, making reanalysis an explicit next action. These paths do not
 mutate source audio or reserve analysis work.
+
+Admission responses synchronize the cached-result presentation, keeping the
+bridge's cache-hit and admission properties consistent for one identity.

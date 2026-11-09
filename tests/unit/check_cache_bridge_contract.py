@@ -46,4 +46,7 @@ if "analysisResult_.clear()" not in source[source.index('if (ok && text == QStri
 cached_connection = source[source.index("connect(worker_, &Worker::cached,"):source.index("connect(worker_, &Worker::analysis,")]
 if "analysisAdmissionResult_.clear()" not in cached_connection:
     raise SystemExit("Cache lookup must clear stale admission presentation")
+admitted_connection = source[source.index("connect(worker_, &Worker::admitted,"):source.index("workerThread_.start();")]
+if "cacheHit_ = !result.isEmpty()" not in admitted_connection:
+    raise SystemExit("Admission results must synchronize cached-result state")
 print(f"Desktop cache bridge contract verified ({len(required)} checks)")

@@ -198,7 +198,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
   connect(worker_, &Worker::analysisError, this, [this](const QString& text) { analysisError_ = text; emit analysisErrorChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisProgress, this, [this](qulonglong frames) { analysisFrames_ = frames; emit analysisProgressChanged(); }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysisResult, this, [this](const QString& text) { analysisResult_ = text; emit analysisResultChanged(); }, Qt::QueuedConnection);
-  connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; emit analysisAdmissionChanged(); }, Qt::QueuedConnection);
+  connect(worker_, &Worker::admitted, this, [this](bool reserved, const QString& result) { analysisReserved_ = reserved; analysisAdmissionResult_ = result; cacheHit_ = !result.isEmpty(); cachedResult_ = result; emit analysisAdmissionChanged(); emit cachedResultChanged(); }, Qt::QueuedConnection);
   workerThread_.start();
 }
 
