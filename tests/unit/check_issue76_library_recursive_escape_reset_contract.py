@@ -15,6 +15,7 @@ def main() -> None:
     assert "browser.currentIndex = -1" in block
     assert "filter and entry selection were cleared" in block
     assert "browser.forceActiveFocus()" in block
+    assert "event.accepted = true" in block
 
 
 if __name__ == "__main__":
