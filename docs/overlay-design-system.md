@@ -42,3 +42,7 @@ Opacity uses an explicit value and a bounded slider so the visual effect is
 understandable without relying on color alone:
 
 ![Overlay opacity control rendering](overlay-opacity-card.svg)
+
+Size uses named presets with dimensions so the choice remains legible at a glance:
+
+![Overlay size control rendering](overlay-size-card.svg)
