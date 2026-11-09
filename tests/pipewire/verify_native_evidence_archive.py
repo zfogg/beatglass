@@ -3,6 +3,7 @@ import hashlib
 import json
 import sys
 import zipfile
+from datetime import datetime
 from pathlib import PurePosixPath
 
 if len(sys.argv) != 2:
@@ -24,6 +25,10 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("evidence manifest has no commit identity")
     if not isinstance(manifest.get("source_date_epoch"), int) or not manifest.get("archive_timestamp_utc", "").endswith("Z"):
         raise SystemExit("evidence manifest has invalid reproducibility metadata")
+    try:
+        datetime.fromisoformat(manifest["archive_timestamp_utc"][:-1])
+    except ValueError:
+        raise SystemExit("evidence manifest has malformed archive timestamp")
     artifacts = manifest.get("artifacts", [])
     if not artifacts:
         raise SystemExit("evidence manifest contains no artifacts")
