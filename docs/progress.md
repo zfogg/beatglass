@@ -794,3 +794,5 @@ Restoring the overlay now announces persisted display, geometry, and opacity rea
 
 Hiding the native overlay now announces the control-window fallback transition while retaining overlay settings. Portable coverage is in `python tests/unit/check_overlay_hide_announce_contract.py`.
 
+Quitting Beatglass now announces that overlay display, geometry, size, opacity, and interaction settings are retained before shutdown. Portable coverage is in `python tests/unit/check_overlay_quit_announce_contract.py`.
+
