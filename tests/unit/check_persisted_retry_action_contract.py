@@ -90,3 +90,5 @@ if "if (storageTransitionPending_) { status_ = QStringLiteral(\"Storage transiti
     raise SystemExit("Path changes must reject overlapping transitions")
 if "if (!retryableRunIds_.isEmpty() || !retryableRunDetails_.isEmpty())" not in source:
     raise SystemExit("Storage lifecycle resets must clear persisted recovery details with run ids")
+if 'if (!storageOpen_) { status_ = QStringLiteral("Storage error: storage is not open")' not in source:
+    raise SystemExit("Recovery refresh must reject closed storage before queueing worker work")
