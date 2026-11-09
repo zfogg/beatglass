@@ -9,7 +9,7 @@ SOURCE = (Path(__file__).parents[2] / "src" / "desktop" / "qml" / "Main.qml").re
 
 def main() -> None:
     start = SOURCE.index('objectName: "retryAnalysis"')
-    line = SOURCE[start - 100 : SOURCE.index("\n", start)]
+    line = SOURCE[start - 180 : SOURCE.index("\n", start)]
     assert "id: retryAnalysis" in line
     assert "window.retryVisualizationAnalysis()" in line
     assert "retryAnalysis.forceActiveFocus()" in line
