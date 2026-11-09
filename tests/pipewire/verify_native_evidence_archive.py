@@ -59,6 +59,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("evidence archive has no CTest discovery JSON")
     for artifact in artifacts:
         name = artifact["name"]
+        if not isinstance(artifact.get("size"), int) or artifact["size"] < 0 or not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64 or any(char not in "0123456789abcdef" for char in artifact["sha256"]):
+            raise SystemExit(f"malformed artifact metadata: {name}")
         if name not in names:
             raise SystemExit(f"manifest artifact missing from archive: {name}")
         payload = archive.read(name)

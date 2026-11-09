@@ -119,3 +119,4 @@ ative_test_discovery record in addition to the archived discovery JSON.
 The summary discovery/JUnit digests are cross-checked against the transferred archive bytes.
 If present, summary `native_test_discovery.count` must match the archived discovery inventory count.
 ative_test_discovery.count must match the archived discovery inventory count.
+Manifest artifact entries must use non-negative sizes and canonical lowercase SHA-256 digests; malformed metadata is rejected explicitly.
