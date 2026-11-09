@@ -3800,8 +3800,8 @@ ApplicationWindow {
                         onClicked: {
                             overlaySettingsRetentionStatus.forceActiveFocus()
                             window.announceCaptureRecoveryState(window.overlayDisplayRecoveryPending
-                                ? "Reviewing retained overlay settings while recovery is pending."
-                                : "Reviewing retained overlay settings; native overlay recovery is available.")
+                                ? "Reviewing retained overlay settings while recovery is pending; settings revision " + window.overlaySettingsRevision + "."
+                                : "Reviewing retained overlay settings; native overlay recovery is available at settings revision " + window.overlaySettingsRevision + ".")
                         }
                     }
                     Label {
