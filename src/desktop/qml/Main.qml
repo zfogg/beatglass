@@ -540,7 +540,7 @@ ApplicationWindow {
         onActivated: window.stopPlaybackWithRecovery("Playback stopped from keyboard shortcut; accepted snapshot cleared.")
     }
     Shortcut { objectName: "librarySearchShortcut"; sequence: "Ctrl+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused; type to filter the current folder.") } }
-    Shortcut { objectName: "libraryClearFilterShortcut"; sequence: "Ctrl+Alt+Shift+Backspace"; context: Qt.ApplicationShortcut; enabled: search.text !== ""; onActivated: { search.text = ""; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.") } }
+    Shortcut { objectName: "libraryClearFilterShortcut"; sequence: "Ctrl+Alt+Shift+Backspace"; context: Qt.ApplicationShortcut; enabled: search.text !== ""; onActivated: window.clearLibraryFilter(browser) }
     Shortcut { objectName: "libraryFolderPathFocusShortcut"; sequence: "Ctrl+Alt+Shift+I"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; folderPath.forceActiveFocus(); window.announceVisualizationRecovery("Current Library folder path focused.") } }
     Shortcut { objectName: "libraryParentFocusShortcut"; sequence: "Ctrl+Alt+Shift+W"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""; onActivated: { navigation.currentIndex = 0; parentFolder.forceActiveFocus(); window.announceVisualizationRecovery("Library parent-folder action focused.") } }
     Shortcut { objectName: "libraryRecursiveFocusShortcut"; sequence: "Ctrl+Alt+Shift+Z"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive; onActivated: { navigation.currentIndex = 0; addFolderRecursively.forceActiveFocus(); window.announceVisualizationRecovery("Library recursive catalog action focused.") } }
@@ -972,6 +972,11 @@ ApplicationWindow {
         window.sortDescending = !window.sortDescending
         window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
         target.forceActiveFocus()
+    }
+    function clearLibraryFilter(target) {
+        search.text = ""
+        target.forceActiveFocus()
+        window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.")
     }
     function browserEmptyMessage() {
         if (!window.browseFolder.toString()) return "Choose a folder to browse."
@@ -2037,7 +2042,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; ToolTip.text: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog(); onAccepted: { window.announceVisualizationRecovery(files.count + " Library entries match the filter."); browser.forceActiveFocus(); event.accepted = true }; Keys.onEscapePressed: { text = ""; browser.forceActiveFocus(); window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible."); event.accepted = true } }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; ToolTip.text: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: window.refreshCatalog(); onAccepted: { window.announceVisualizationRecovery(files.count + " Library entries match the filter."); browser.forceActiveFocus(); event.accepted = true }; Keys.onEscapePressed: { window.clearLibraryFilter(browser); event.accepted = true } }
                     Button { id: sortOrder; objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.role: Accessible.Button; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; ToolTip.text: "Reverse file-name sort order"; onClicked: window.toggleLibrarySort(sortOrder) }
                 }
                 RowLayout {
