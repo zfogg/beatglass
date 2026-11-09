@@ -3795,7 +3795,7 @@ ApplicationWindow {
                                 ? "Overlay settings retained while recovery is pending"
                                 : "Overlay settings retained: display, geometry, opacity, and interaction mode")
                             : "Overlay settings retention unavailable"
-                        Accessible.name: "Overlay settings retention"
+                        Accessible.name: "Overlay settings retention, revision " + window.overlaySettingsRevision
                         Accessible.value: text + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Status
                         Accessible.description: visible
