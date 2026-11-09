@@ -42,3 +42,5 @@ class NativeQualificationDryRunTest(unittest.TestCase):
             self.assertFalse(payload["native_execution_attempted"])
             self.assertIn("captured_at", payload)
             self.assertIn("environment", payload)
+            self.assertTrue(payload["pending_reason"])
+            self.assertIn("Linux host", payload["native_execution_blockers"])
