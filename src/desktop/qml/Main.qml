@@ -956,6 +956,7 @@ ApplicationWindow {
         window.visualizationRecoveryAnnouncement = window.visualizationSelectionResetReason
         if (typeof visualizationCanvas !== "undefined") {
             visualizationCanvas.selectedPosition = -1
+            visualizationCanvas.selectedSpectrumBin = -1
             visualizationCanvas.renderedRevision = -1
         visualizationCanvas.acceptedPlaybackEpoch = -1
         visualizationCanvas.acceptedPlaybackSource = ""
@@ -1019,6 +1020,7 @@ ApplicationWindow {
     }
     function clearVisualizationPositionAndFocus() {
         visualizationCanvas.selectedPosition = -1
+        visualizationCanvas.selectedSpectrumBin = -1
         visualizationCanvas.requestPaint()
         visualizationCanvas.forceActiveFocus()
     }
@@ -2661,7 +2663,7 @@ ApplicationWindow {
                         visible: visualizationCanvas.activeFocus
                         z: 2
                     }
-                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { if (visualizationPresentation.revision >= 0) { window.visualizationSelectionResetReason = ""; visualizationCanvas.renderedWaveform = visualizationPresentation.waveform.slice(); visualizationCanvas.renderedSpectrum = visualizationPresentation.spectrum.slice(); visualizationCanvas.acceptedPlaybackEpoch = window.playbackBridge ? window.playbackBridge.epoch : -1; visualizationCanvas.acceptedPlaybackSource = window.playbackBridge ? window.playbackBridge.source.toString() : "" } else { visualizationCanvas.renderedWaveform = []; visualizationCanvas.renderedSpectrum = []; visualizationCanvas.acceptedPlaybackEpoch = -1; visualizationCanvas.acceptedPlaybackSource = "" } visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1; visualizationCanvas.requestPaint() } }
+                    Connections { target: typeof visualizationPresentation !== "undefined" ? visualizationPresentation : null; function onChanged() { visualizationCanvas.selectedSpectrumBin = -1; if (visualizationPresentation.revision >= 0) { window.visualizationSelectionResetReason = ""; visualizationCanvas.renderedWaveform = visualizationPresentation.waveform.slice(); visualizationCanvas.renderedSpectrum = visualizationPresentation.spectrum.slice(); visualizationCanvas.acceptedPlaybackEpoch = window.playbackBridge ? window.playbackBridge.epoch : -1; visualizationCanvas.acceptedPlaybackSource = window.playbackBridge ? window.playbackBridge.source.toString() : "" } else { visualizationCanvas.renderedWaveform = []; visualizationCanvas.renderedSpectrum = []; visualizationCanvas.acceptedPlaybackEpoch = -1; visualizationCanvas.acceptedPlaybackSource = "" } visualizationCanvas.renderedRevision = visualizationPresentation.revision >= 0 ? visualizationPresentation.revision : -1; visualizationCanvas.requestPaint() } }
                 }
                 Label {
                     objectName: "visualizationInteractionHint"

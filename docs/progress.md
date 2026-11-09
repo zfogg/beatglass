@@ -1,14 +1,8 @@
 # Progress and handoff
 
-Enumeration errors now clear any backend-provided source list before reaching
-the UI, preventing stale devices from being offered alongside an error.
-Portable coverage is in
-`python tests/unit/check_macos_enumeration_error_empty_contract.py`.
-
-Core Audio enumeration now guarantees a user-facing fallback diagnostic when a
-backend reports an error without text, avoiding a silent unavailable-device
-state. Portable coverage is in
-`python tests/unit/check_macos_enumeration_diagnostic_contract.py`.
+Selected FFT bins are now cleared whenever capture state or the accepted
+visualization result changes, preventing a stale frequency cursor from being
+carried into a new source, generation, or revision.
 
 The FFT view now supports direct bin selection: clicking a spectrum bar or
 using Left/Right while focused selects a bounded frequency bin, draws a cursor,
