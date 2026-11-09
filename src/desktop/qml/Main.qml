@@ -1030,7 +1030,7 @@ ApplicationWindow {
                     text: "Press Escape to unlock overlay controls"
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     Accessible.name: "Overlay recovery hint"
-                    Accessible.value: text + "; retained-settings review shortcut available"
+                    Accessible.value: text + (window.overlayBridge !== null ? "; retained-settings review shortcut available" : "; retained-settings review unavailable")
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
@@ -3624,7 +3624,7 @@ ApplicationWindow {
                     objectName: "overlayShortcutHelp"
                     text: "Keyboard: Esc unlocks · Ctrl+Alt+U focuses unlock · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+J focuses hide · Ctrl+Alt+W focuses show · Ctrl+Alt+Shift+W focuses restore · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+Shift+Y focuses retry · Ctrl+Alt+O cycles size · Ctrl+Alt+Z focuses size · Ctrl+Alt+Shift+O resets opacity · Ctrl+Alt+L focuses opacity · Ctrl+Alt+Shift+R reapplies saved settings · Ctrl+Alt+Shift+P focuses reapply · Ctrl+Alt+Shift+S reviews retained settings"
                     Accessible.name: "Overlay keyboard shortcuts"
-                    Accessible.value: text + "; retained-settings review shortcut available"
+                    Accessible.value: text + (window.overlayBridge !== null ? "; retained-settings review shortcut available" : "; retained-settings review unavailable")
                     Accessible.role: Accessible.Status
                     Accessible.description: "Keyboard shortcuts for unlocking, hiding, restoring, reapplying, and reviewing retained overlay settings."
                     ToolTip.text: text
