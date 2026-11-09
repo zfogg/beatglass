@@ -21,6 +21,9 @@ void MonitorStream::on_error(int error_code) noexcept {
 }
 int MonitorStream::error_code() const noexcept { return error_code_.load(std::memory_order_acquire); }
 int MonitorStream::take_error() noexcept { return error_code_.exchange(0, std::memory_order_acq_rel); }
+bool MonitorStream::take_discontinuity() noexcept {
+  return discontinuity_pending_.exchange(false, std::memory_order_acq_rel);
+}
 bool MonitorStream::needs_restart() const noexcept {
   return stopped_.load(std::memory_order_acquire) || error_code() != 0;
 }
@@ -35,7 +38,7 @@ bool MonitorStream::restart(std::uint64_t epoch, std::uint32_t sample_rate, std:
 }
 bool MonitorStream::pop(coreaudio::CaptureBlock& block) noexcept { return fifo_ && fifo_->pop(block); }
 void MonitorStream::stop() noexcept {
-  discontinuity_pending_ = true;
+  discontinuity_pending_.store(true, std::memory_order_release);
   stopped_.store(true, std::memory_order_release);
 }
 bool MonitorStream::overflowed() const noexcept { return fifo_ && fifo_->exhausted(); }
