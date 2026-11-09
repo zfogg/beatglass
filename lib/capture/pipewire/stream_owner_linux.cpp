@@ -35,7 +35,8 @@ public:
     if (!props_) { stop(); return false; }
     stream_ = pw_stream_new_simple(pw_thread_loop_get_loop(loop_), "beatglass-monitor", props_, &events, this);
     if (!stream_) { stop(); return false; }
-    pw_thread_loop_start(loop_);
+    if (pw_thread_loop_start(loop_) < 0) { stop(); return false; }
+    loop_started_ = true;
     std::uint8_t pod_buffer[1024];
     spa_pod_builder builder = SPA_POD_BUILDER_INIT(pod_buffer, sizeof(pod_buffer));
     spa_audio_info_raw audio{};
@@ -61,17 +62,20 @@ public:
   void stop() noexcept override {
     active_ = false;
     if (handoff_) handoff_->stop();
-    if (loop_) pw_thread_loop_lock(loop_);
+    if (loop_ && loop_started_) pw_thread_loop_lock(loop_);
     if (stream_) {
       pw_stream_disconnect(stream_);
       pw_stream_destroy(stream_);
       stream_ = nullptr;
     }
-    if (loop_) pw_thread_loop_unlock(loop_);
+    if (loop_ && loop_started_) pw_thread_loop_unlock(loop_);
     if (props_) { pw_properties_free(props_); props_ = nullptr; }
     if (core_) { pw_core_disconnect(core_); core_ = nullptr; }
     if (context_) { pw_context_destroy(context_); context_ = nullptr; }
-    if (loop_) { pw_thread_loop_stop(loop_); pw_thread_loop_destroy(loop_); loop_ = nullptr; }
+    if (loop_) {
+      if (loop_started_) pw_thread_loop_stop(loop_);
+      pw_thread_loop_destroy(loop_); loop_ = nullptr; loop_started_ = false;
+    }
     handoff_ = nullptr;
   }
 private:
@@ -148,6 +152,7 @@ private:
   pw_properties* props_{};
   MonitorStream* handoff_{};
   bool active_ = false;
+  bool loop_started_ = false;
   std::uint32_t sample_rate_{};
   std::uint32_t channels_{};
 };

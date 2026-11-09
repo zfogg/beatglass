@@ -33,6 +33,9 @@ Linux runs use the same schema with `handoff_status: complete` only when the
 qualification predicate passes, and `failed` otherwise.
 The completed-summary verifier enforces that schema and requires a non-empty
 commit identity before accepting discovery/JUnit digests.
+The native owner records whether its thread loop actually started, so early
+PipeWire construction failures can tear down safely without locking an
+unstarted loop; native Linux qualification must exercise these failure paths.
 It also records the manifest capture command's stdout/stderr alongside the
 native command logs.
 The summary records the repository commit and `libpipewire-0.3` version used
