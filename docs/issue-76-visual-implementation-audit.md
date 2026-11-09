@@ -823,6 +823,8 @@ Output endpoint discovery, selected endpoint state, and capture-permission guida
 
 The native overlay-unavailable fallback now uses the same live status semantics as geometry, persisted restore, settings, and historical recovery diagnostics, making display loss consistently discoverable.
 
+Visualization interaction, selection reset, analysis handoff, and playback-epoch feedback now expose live status semantics for capture recovery and generation alignment.
+
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
 
 Metadata status, metadata recovery guidance, visualization data, and visualization capture state now use live status semantics, aligning source, analysis, and rendering diagnostics for assistive technology.
