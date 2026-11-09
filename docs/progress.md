@@ -816,3 +816,5 @@ Overlay estimate attribution now states that the selected combined-output source
 
 Overlay estimate readiness now states that the accepted snapshot remains retained while display recovery is pending. Portable coverage is in `python tests/unit/check_overlay_readiness_retention_contract.py`.
 
+Overlay endpoint status now states that the selected endpoint remains retained during pending recovery. Portable coverage is in `python tests/unit/check_overlay_endpoint_retention_contract.py`.
+

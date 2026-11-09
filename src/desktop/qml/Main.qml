@@ -3625,8 +3625,8 @@ ApplicationWindow {
                         Accessible.value: text
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
-                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks."
-                            : text + ". Choose an output endpoint before starting monitoring."
+                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
+                            : text + ". Choose an output endpoint before starting monitoring." + (window.overlayDisplayRecoveryPending ? " The last endpoint selection remains retained while recovery is pending." : "")
                         ToolTip.text: visible ? Accessible.description : "Overlay capture endpoint"
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
