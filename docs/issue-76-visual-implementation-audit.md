@@ -790,3 +790,4 @@ Native show failures now restore focus to display recovery as well, keeping the 
 Unavailable-bridge and invalid-visual-state show fallbacks now restore the same display-selector focus, so every show failure path is keyboard actionable.
 
 Display replacement recovery and explicit display selection failures now return focus to the display selector too, covering missing saved displays, native move failures, and visual-state reapply failures.
+After hiding the overlay, focus returns to the Hide control in the restored control window so keyboard users can continue from a stable action surface.
