@@ -54,6 +54,8 @@ struct MonitorStatus {
   bool serial_matches(const std::string& expected) const noexcept { return !expected.empty() && serial == expected; }
   /** True when this snapshot carries the expected nonzero capture epoch. */
   bool epoch_matches(std::uint64_t expected) const noexcept { return expected != 0 && epoch == expected; }
+  /** True when this snapshot carries any valid nonzero capture epoch. */
+  bool has_epoch() const noexcept { return epoch != 0; }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
