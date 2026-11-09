@@ -433,6 +433,19 @@ TestCase {
         fakeOverlay.available = true
     }
 
+    function test_overlaySafeModeStatusExplainsMonitoringFallback() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        let retry = findChild(app, "retryOverlay")
+        retry.clicked(); retry.clicked(); retry.clicked()
+        let status = findChild(app, "overlaySafeModeStatus")
+        verify(status.visible)
+        compare(status.text, "Safe mode active · monitoring continues without the native overlay")
+        compare(status.Accessible.description, "Native overlay retries are paused after the limit; clear safe mode to try again.")
+        app.destroy()
+        fakeOverlay.available = true
+    }
+
     function test_overlayDisplayEmptyStateIsAccessible() {
         fakeOverlay.screenNames = []
         let app = shellWithOverlay.createObject(null)
