@@ -102,6 +102,9 @@ The summary’s transition SHA-256 is independently checked against the archived
 payload, in addition to the manifest artifact digest.
 The runner records the transition event count in the summary, and archive
 verification cross-checks it against the packaged envelope.
+Pass `--summary evidence/native-summary.json --archive
+evidence/native-qualification.zip` to package the qualified summary and
+captured artifacts immediately after native checks succeed.
 The runner validates the supplied transition artifact before writing a
 qualified summary, so invalid lifecycle evidence cannot pass the capture gate.
 The packager also writes that count into the manifest; archive verification
