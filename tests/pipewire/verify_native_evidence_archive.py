@@ -109,6 +109,8 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit("transition evidence has no provenance commit")
         if transitions["commit"] != manifest.get("commit"):
             raise SystemExit("transition evidence commit does not match archive manifest")
+        if manifest.get("transition_commit") != transitions["commit"]:
+            raise SystemExit("transition commit does not match manifest")
         if not isinstance(transitions.get("platform"), str) or not transitions["platform"].strip():
             raise SystemExit("transition evidence has no provenance platform")
         if summary_data.get("platform") and transitions["platform"] != summary_data["platform"]:
