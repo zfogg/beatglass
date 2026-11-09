@@ -2460,7 +2460,7 @@ ApplicationWindow {
                                 text: visible ? ("Analysis issue: " + window.analysisJobBridge.failureReason) : ""
                                 Accessible.name: "Analysis failure reason"
                                 Accessible.value: visible ? text : ""
-                                Accessible.description: visible ? text : "No analysis failure has been reported."
+                                Accessible.description: visible ? text + ". Use Retry analysis or discard recovery when the status permits." : "No analysis failure has been reported."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
                             }
