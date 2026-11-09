@@ -146,7 +146,11 @@ public:
     return session_.pop_current(block);
   }
   MonitorStatus poll_status() noexcept override { return session_.poll_status(); }
-  bool stop() noexcept override { session_.stop(); return true; }
+  bool stop() noexcept override {
+    if (owner_) owner_->stop();
+    session_.stop();
+    return true;
+  }
   void reset() noexcept override {
     if (owner_) owner_->stop();
     session_.reset();
