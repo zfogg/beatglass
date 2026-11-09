@@ -798,12 +798,4 @@ The shared fallback-control helper now restores display-selector focus after act
 Active analysis failure reasons, recovery status, and persisted queue errors now expose their live text as accessible status values, so assistive technology receives the same diagnostics visible in the recovery surface.
 The display selector now includes recovery-pending state in its accessible value and description, so assistive technology receives the same recovery context as the surrounding display status.
 
-The persisted recovery guidance itself is now exposed as a live status value, carrying unavailable, retryable, or clear state to assistive technology as storage transitions and retryable-run counts change.
-
-Storage transition, persisted retry outcome, and stale-result diagnostics now expose their current text as accessible status values, keeping database reopen and retry decisions synchronized for keyboard and screen-reader users.
-
-Batch result, persisted recovery, retry rejection, admission, and frame-progress diagnostics now expose their live text as status values, completing the accessible readout for persisted analysis lifecycle states.
-
-Cache availability, cached results, worker results, and queue outcomes now expose live accessible status values, completing the result and admission readout across persisted and active analysis paths.
-
-Output endpoint discovery, selected endpoint state, and capture-permission guidance now use live status semantics, so device recovery and permission instructions are announced consistently.
+The Hide action now reports whether it is available or already hidden, and explains the control-window fallback when native overlay availability is lost.
