@@ -10,6 +10,10 @@ spec.loader.exec_module(promoter)
 
 
 class ReviewBundlePromotionTest(unittest.TestCase):
+    def test_promotion_code_marks_native_status_pending(self):
+        source = (Path(__file__).with_name("promote_review_bundle.py")).read_text(encoding="utf-8")
+        self.assertIn('"native_qualification_status": "pending"', source)
+
     def test_pending_bundle_cannot_be_promoted(self):
         fixture = Path(__file__).parent / "fixtures/readiness-bundles"
         with tempfile.TemporaryDirectory() as tmp:
