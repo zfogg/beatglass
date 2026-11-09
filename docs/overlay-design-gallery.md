@@ -25,6 +25,7 @@ screenshots.
 | [Interaction](overlay-interaction-card.svg) | click-through/unlock |
 | [Shortcuts](overlay-shortcuts-card.svg) | keyboard parity |
 | [Announcements](overlay-announcement-card.svg) | accessible state copy |
+| [Layout](overlay-layout-card.svg) | spacing and hierarchy |
 | [Reduced motion](overlay-reduced-motion-card.svg) | static visualization preference |
 | [Theme](overlay-theme-card.svg) | contrast-safe visual preference |
 | [Focus](overlay-focus-card.svg) | keyboard focus visibility |
