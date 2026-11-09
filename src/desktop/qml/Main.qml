@@ -2559,7 +2559,7 @@ ApplicationWindow {
                                        : 0
                                 indeterminate: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") && value === 0
                                 Accessible.name: "Analysis batch completion"
-                                Accessible.value: visible ? (indeterminate ? "in progress; " : "") + Math.round(value * 100) + "% complete; " + window.analysisJobBridge.batchCompletedCount + " completed, " + window.analysisJobBridge.batchFailedCount + " failed, " + window.analysisJobBridge.batchCancelledCount + " cancelled" : "unavailable"
+                                Accessible.value: visible ? (indeterminate ? "in progress; " : "") + Math.round(value * 100) + "% complete; " + window.analysisJobBridge.batchCompletedCount + " completed, " + window.analysisJobBridge.batchFailedCount + " failed, " + window.analysisJobBridge.batchCancelledCount + " cancelled" : "unavailable; no accepted batch items"
                                 Accessible.role: Accessible.ProgressBar
                                 Accessible.description: visible ? "Completed, failed, or cancelled items out of the accepted analysis batch. Cancel is available while running; retry or discard recovery is available after terminal failure." : "Batch progress is unavailable."
                                 ToolTip.text: visible ? "Batch completion: " + Math.round(value * 100) + "%" : "Batch progress unavailable"
