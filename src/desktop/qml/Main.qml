@@ -537,12 +537,14 @@ ApplicationWindow {
         return true
     }
     function hideOverlayAndRestoreControls() {
-        if (!window.overlayBridge) return
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
         window.overlayHiddenByUser = true
-        window.overlayBridge.hideOverlay()
-        window.announceCaptureRecoveryState("DJ overlay hidden; output monitoring remains available in the control window.")
+        if (window.overlayBridge)
+            window.overlayBridge.hideOverlay()
+        window.announceCaptureRecoveryState(window.overlayBridge
+            ? "DJ overlay hidden; output monitoring remains available in the control window."
+            : "DJ overlay bridge unavailable; control window restored as the fallback.")
         window.show()
         window.raise()
         window.requestActivate()
