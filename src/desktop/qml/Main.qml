@@ -810,7 +810,7 @@ ApplicationWindow {
         return true
     }
     function syncOverlaySizePreferenceFromGeometry(geometry) {
-        if (!geometry || geometry.width <= 0 || geometry.height <= 0)
+        if (!geometry || !isFinite(geometry.x) || !isFinite(geometry.y) || geometry.width <= 0 || geometry.height <= 0)
             return false
         const sizes = [[250, 110], [310, 130], [430, 180]]
         let best = 0
@@ -828,6 +828,8 @@ ApplicationWindow {
     }
     function syncOverlayGeometryStateFromBridge() {
         if (!window.overlayBridge || !window.overlayBridge.geometry
+                || !isFinite(window.overlayBridge.geometry.x)
+                || !isFinite(window.overlayBridge.geometry.y)
                 || window.overlayBridge.geometry.width <= 0
                 || window.overlayBridge.geometry.height <= 0)
             return false
