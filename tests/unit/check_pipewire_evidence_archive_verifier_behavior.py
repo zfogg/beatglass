@@ -77,4 +77,15 @@ with tempfile.TemporaryDirectory() as directory:
         archive.writestr("evidence-manifest.json", json.dumps(aggregate_manifest))
     result = subprocess.run([sys.executable, str(verifier), str(aggregate)], capture_output=True, text=True)
     if result.returncode == 0 or "suite test counts do not match testcases" not in result.stderr + result.stdout: raise SystemExit("aggregate JUnit count mismatch was accepted")
-print("PipeWire evidence archive verifier behavior passed (7 scenarios)")
+
+    nested_failure = root / "nested-failure.zip"
+    nested_failure_junit = b"<testsuites tests='1'><testsuite tests='1' failures='1'><testcase name='capture'/></testsuite></testsuites>\n"
+    nested_failure_summary = dict(aggregate_summary, native_junit_sha256=hashlib.sha256(nested_failure_junit).hexdigest())
+    nested_failure_artifacts = dict(artifacts, **{"native-summary.json": (json.dumps(nested_failure_summary) + "\n").encode(), "pipewire-tests.xml": nested_failure_junit})
+    nested_failure_entries = [{"name": name, "size": len(data), "sha256": hashlib.sha256(data).hexdigest()} for name, data in nested_failure_artifacts.items()]
+    with zipfile.ZipFile(nested_failure, "w") as archive:
+        for name, data in nested_failure_artifacts.items(): archive.writestr(name, data)
+        archive.writestr("evidence-manifest.json", json.dumps(dict(manifest, artifacts=nested_failure_entries)))
+    result = subprocess.run([sys.executable, str(verifier), str(nested_failure)], capture_output=True, text=True)
+    if result.returncode == 0 or "reports failures or errors" not in result.stderr + result.stdout: raise SystemExit("nested JUnit failure count was accepted")
+print("PipeWire evidence archive verifier behavior passed (8 scenarios)")
