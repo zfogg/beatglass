@@ -1041,6 +1041,18 @@ ApplicationWindow {
         }
     }
 
+    function playSelectedLibraryTrack() {
+        if (!window.playbackBridge || window.selectedAudioUrl.toString() === "") {
+            window.announceCaptureRecoveryState("Select an audio source before starting playback.")
+            return false
+        }
+        const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1)
+        window.announceCaptureRecoveryState(accepted
+            ? "Playing selected Library source " + window.selectedName + "."
+            : "Selected Library source could not be opened for playback.")
+        return accepted
+    }
+
     function activateEntry(index) {
         if (index < 0 || index >= files.count) return
         const url = files.get(index, "fileUrl")
@@ -1806,7 +1818,7 @@ ApplicationWindow {
                             Accessible.description: "Open, configure, and control playback for the selected audio source."
                             ToolTip.text: window.playbackBridge ? "Playback controls; current state: " + window.playbackBridge.state : "Playback controls are unavailable"
                             Button { text: "Open"; objectName: "openPlayback"; activeFocusOnTab: true; Accessible.name: "Open selected playback source"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before opening playback" : "Open the selected audio source for playback"; ToolTip.text: "Open the selected audio source for playback"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1) }
-                            Button { text: "Play selected"; objectName: "playSelectedTrack"; activeFocusOnTab: true; Accessible.name: "Play selected Library track"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before starting playback" : "Open and play the selected Library source"; ToolTip.text: "Play the selected Library track"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: { const accepted = window.playbackBridge.openSource(window.selectedAudioUrl, window.playbackBridge.epoch + 1); window.announceCaptureRecoveryState(accepted ? "Playing selected Library source " + window.selectedName + "." : "Selected Library source could not be opened for playback."); if (accepted) playSelectedTrack.forceActiveFocus() } }
+                            Button { text: "Play selected"; objectName: "playSelectedTrack"; activeFocusOnTab: true; Accessible.name: "Play selected Library track"; Accessible.role: Accessible.Button; Accessible.description: window.selectedAudioUrl.toString() === "" ? "Select an audio source before starting playback" : "Open and play the selected Library source"; ToolTip.text: "Play the selected Library track"; enabled: window.selectedAudioUrl.toString() !== "" && window.playbackBridge; onClicked: { if (window.playSelectedLibraryTrack()) playSelectedTrack.forceActiveFocus() } }
                             SpinBox { objectName: "playbackSampleRate"; activeFocusOnTab: true; from: 8000; to: 192000; value: 44100; editable: true; Accessible.name: "Playback sample rate"; Accessible.value: value + " hertz"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback sample rate in hertz"; ToolTip.text: "Choose the native playback sample rate in hertz" }
                             SpinBox { objectName: "playbackChannels"; activeFocusOnTab: true; from: 1; to: 8; value: 2; editable: true; Accessible.name: "Playback channels"; Accessible.value: value + " channels"; Accessible.role: Accessible.SpinBox; Accessible.description: "Native playback channel count"; ToolTip.text: "Choose the native playback channel count" }
                             Button { text: "Start native"; objectName: "startNativePlayback"; enabled: window.playbackBridge && playbackDevice.currentIndex >= 0; Accessible.name: "Start native playback"; Accessible.role: Accessible.Button; Accessible.description: window.playbackBridge ? "Start native playback at " + playbackSampleRate.value + " hertz with " + playbackChannels.value + " channels on the selected output device" : "Native playback is unavailable in this build"; ToolTip.text: "Start native playback using the selected format"; onClicked: window.startNativePlaybackOutput() }
