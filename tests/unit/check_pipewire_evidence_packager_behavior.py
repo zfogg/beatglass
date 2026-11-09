@@ -21,8 +21,10 @@ with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run([sys.executable, str(packager), str(summary), str(root / name)], env=env, capture_output=True, text=True)
         if result.returncode != 0: raise SystemExit(result.stderr or result.stdout)
     if (root / "first.zip").read_bytes() != (root / "second.zip").read_bytes(): raise SystemExit("fixed SOURCE_DATE_EPOCH did not produce reproducible ZIP bytes")
+    before = hashlib.sha256((root / "first.zip").read_bytes()).digest()
     result = subprocess.run([sys.executable, str(packager), str(summary), str(root / "first.zip")], env=env, capture_output=True, text=True)
     if result.returncode == 0 or "refusing to overwrite" not in result.stderr + result.stdout: raise SystemExit("existing output was overwritten")
+    if hashlib.sha256((root / "first.zip").read_bytes()).digest() != before: raise SystemExit("existing output changed after refusal")
     left = root / "left"; right = root / "right"; left.mkdir(); right.mkdir()
     left_log = left / "command.log"; right_log = right / "command.log"
     left_log.write_text("left", encoding="utf-8"); right_log.write_text("right", encoding="utf-8")
