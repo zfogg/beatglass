@@ -126,6 +126,7 @@ public:
     if (!session_.start(serial, epoch, sample_rate, channels)) return false;
     if (!owner_ || !session_.native_handoff() ||
         !owner_->connect(serial, sample_rate, channels, *session_.native_handoff())) {
+      if (owner_) owner_->stop();
       session_.reset();
       return false;
     }
@@ -144,6 +145,7 @@ public:
     if (!owner_ || !session_.native_handoff() ||
         !owner_->connect(session_.serial(), sample_rate, channels,
                          *session_.native_handoff())) {
+      if (owner_) owner_->stop();
       session_.reset();
       return false;
     }
