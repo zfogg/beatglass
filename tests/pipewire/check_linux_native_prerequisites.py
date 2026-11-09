@@ -20,6 +20,10 @@ else:
                                  stdout=subprocess.PIPE, text=True).stdout.strip()
         if not version:
             missing.append("libpipewire-0.3 version metadata")
+        pcfiledir = subprocess.run(["pkg-config", "--variable=pcfiledir", "libpipewire-0.3"],
+                                   check=False, stdout=subprocess.PIPE, text=True).stdout.strip()
+        if not pcfiledir:
+            missing.append("libpipewire-0.3 pkg-config directory")
         for flag in ("--cflags", "--libs"):
             if subprocess.run(["pkg-config", flag, "libpipewire-0.3"], check=False,
                               stdout=subprocess.PIPE, text=True).returncode:
