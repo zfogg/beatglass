@@ -17,6 +17,8 @@ markers = (
     "SOURCE_DATE_EPOCH",
     "sorted(artifacts",
     "ZipInfo",
+    "source_date_epoch",
+    "archive_timestamp_utc",
 )
 missing = [marker for marker in markers if marker not in source]
 if missing:

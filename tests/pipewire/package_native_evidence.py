@@ -55,6 +55,8 @@ try:
             "format": "beatglass-native-pipewire-evidence-v1",
             "commit": summary.get("commit"),
             "qualified": True,
+            "source_date_epoch": epoch,
+            "archive_timestamp_utc": archive_time.isoformat() + "Z",
             "artifacts": [
                 {"name": path.name, "size": path.stat().st_size, "sha256": digest(path)}
                 for path in artifacts
