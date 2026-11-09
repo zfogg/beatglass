@@ -165,7 +165,9 @@ public:
   bool selected_active() const noexcept override {
     return session_.active() && owner_ && owner_->connected();
   }
-  bool accepts_epoch(std::uint64_t epoch) const noexcept override { return session_.accepts_epoch(epoch); }
+  bool accepts_epoch(std::uint64_t epoch) const noexcept override {
+    return session_.accepts_epoch(epoch) && owner_ && owner_->connected();
+  }
   bool pop(coreaudio::CaptureBlock& block) noexcept override { return session_.pop(block); }
   bool pop_current(coreaudio::CaptureBlock& block) noexcept override {
     return session_.pop_current(block);
