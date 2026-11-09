@@ -2818,7 +2818,7 @@ ApplicationWindow {
                                 enabled: visible && count > 0 && !window.storageReopenPending
                                 Accessible.name: "Persisted retryable analysis runs (" + count + ")"
                                 Accessible.role: Accessible.ComboBox
-                                Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
+                                Accessible.value: enabled ? "available; " + storageRecovery.selectedRunId : "unavailable; " + (storageRecovery && storageRecovery.selectedRunId !== "" ? storageRecovery.analysisStatus : "no persisted run selected")
                                 Accessible.description: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Selected persisted recovery run " + storageRecovery.selectedRunId + ". " + (storageRecovery.resetStatus !== undefined && storageRecovery.resetStatus !== "" ? "Recovery status: " + storageRecovery.resetStatus + ". " : "") + "Retry and discard controls are available when the run is retryable. Press Tab to reach them."
                                     : (count > 0 ? "Choose one of " + count + " saved analysis runs to recover. Press Tab to reach retry and discard actions after selection." : "No saved analysis runs available.")
@@ -2875,7 +2875,7 @@ ApplicationWindow {
                                 Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Discard saved retryable analysis run " + storageRecovery.selectedRunId
                                     : "Discard saved retryable analysis run"
-                                Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
+                                Accessible.value: enabled ? "available; " + storageRecovery.selectedRunId : "unavailable; " + (storageRecovery && storageRecovery.selectedRunId !== "" ? storageRecovery.analysisStatus : "no persisted run selected")
                                 ToolTip.text: "Discard the selected saved analysis run"
                                 Accessible.description: typeof storageRecovery !== "undefined" && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running") ? "The selected run is active; discard is unavailable until terminal resolution." : typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus === "Analysis complete" ? "The selected analysis is complete; no persisted retry record can be discarded." : typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Open confirmation to remove retry record " + storageRecovery.selectedRunId + ". The source audio file is never changed."
