@@ -26,4 +26,8 @@ For each session, record the exact distribution, kernel, compositor/session vers
 
 Until these observations are recorded on actual Linux desktops, the project should describe Linux capture and overlay as experimental and unsupported.
 
+Review acceptance also verifies that every `PASS` scenario points to a retained,
+non-empty evidence file beneath the submitted report directory; a status string
+alone cannot promote native evidence.
+
 Use the [native Linux evidence template](linux-native-evidence-template.md) for each session so environment identity, commands, observations, and limitations remain reviewable.

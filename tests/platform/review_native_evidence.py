@@ -18,7 +18,11 @@ def assess(report_path: Path, reviewer: str) -> dict:
         scenarios = {row.get("id"): row for row in platform.get("scenarios", []) if isinstance(row, dict)}
         for scenario in sorted(REQUIRED):
             row = scenarios.get(scenario)
-            if not row or row.get("status") != "PASS" or not isinstance(row.get("evidence"), str) or not row["evidence"].strip():
+            evidence = row.get("evidence") if isinstance(row, dict) else None
+            evidence_path = (report_path.parent / evidence).resolve() if isinstance(evidence, str) and evidence.strip() else None
+            evidence_valid = (evidence_path is not None and report_path.parent.resolve() in evidence_path.parents
+                              and evidence_path.is_file() and evidence_path.stat().st_size > 0)
+            if (not row or row.get("status") != "PASS" or not evidence_valid):
                 blockers.append(f"{name}:{scenario}")
     if not reviewer.strip():
         blockers.append("reviewer identity is required")
