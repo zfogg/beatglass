@@ -223,3 +223,6 @@ The Hide overlay focus shortcut remains usable during click-through, returning f
 
 The Reapply saved settings focus shortcut remains usable during click-through, returning focus to the explicit reapply action while preserving the saved display, geometry, opacity, and interaction state.
 
+
+The overlay summary review shortcut remains usable during click-through, returning focus to the persisted display/geometry/opacity summary without changing the saved state.
+
