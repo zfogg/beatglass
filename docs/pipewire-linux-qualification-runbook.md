@@ -205,6 +205,8 @@ Malformed transition evidence JSON is likewise rejected explicitly before
 lifecycle validation.
 The summary transition path must be a non-empty string before it is mapped to
 an archived member.
+Discovery and JUnit artifact paths follow the same string-only rule before
+their archive basenames are compared.
 The decoded summary must also be a JSON object, preventing arrays or scalar
 values from bypassing field-level qualification checks.
 The portable behavior fixture can be run with
