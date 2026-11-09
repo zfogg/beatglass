@@ -433,3 +433,5 @@ Record the repository revision used by the verifier alongside its command so arc
 Record the verifier revision and command in the same handoff entry as the archive path to keep evidence review reproducible.
 
 If a handoff is regenerated, update its verifier revision and command together with the archive path; stale command metadata invalidates reproducibility.
+
+Do not merge regenerated handoff metadata from a different verifier revision without rerunning the local contract and behavior checks.
