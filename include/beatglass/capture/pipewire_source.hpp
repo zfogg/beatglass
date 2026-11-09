@@ -46,6 +46,10 @@ struct MonitorStatus {
   bool has_serial() const noexcept { return !serial.empty(); }
   /** True when identity and negotiated format are both available. */
   bool has_context() const noexcept { return has_serial() && has_format(); }
+  /** True when the negotiated format equals the requested dimensions. */
+  bool format_matches(std::uint32_t sample_rate, std::uint32_t channels) const noexcept {
+    return format && format->sample_rate == sample_rate && format->channels == channels;
+  }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
