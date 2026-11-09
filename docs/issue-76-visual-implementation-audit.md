@@ -720,6 +720,8 @@ The macOS native screen-recovery timer now persists the clamped geometry and emi
 
 macOS direct display and size edits now explicitly schedule native persistence after clamping, matching the Windows bridge’s immediate persistence semantics and ensuring settings survive a subsequent reconnect even when no additional window signal arrives.
 
+The overlay action group now reports the same settings revision as the detailed settings summary, alongside hidden-user and pending-recovery state. Assistive technology can verify that action availability and persisted settings describe one bridge snapshot.
+
 Display recovery now prefers the persisted display name when the monitor list changes, falling back to the prior session index only when necessary. This keeps a reconnected display target stable across enumeration order changes and otherwise leaves the explicit display-selection fallback active.
 
 The QML surface now synchronizes the preferred display identity from the native bridge's persisted state and shows targeted missing-display guidance when that saved monitor is not enumerated. Users can reconnect it or select a replacement without losing the control-window recovery path.

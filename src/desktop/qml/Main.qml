@@ -2593,7 +2593,7 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     Accessible.name: "Overlay actions"
                     Accessible.value: window.overlayBridge && window.overlayBridge.available
-                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
+                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings revision " + window.overlaySettingsRevision
                         : "unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: window.overlayLaunchFallbackActive
