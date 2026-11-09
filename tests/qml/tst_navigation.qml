@@ -1921,4 +1921,23 @@ TestCase {
         compare(fakeOverlay.requestedWidth, 620)
         app.destroy()
     }
+    function test_displayReconnectReusesRetainedGeometrySettings() {
+        fakeOverlay.available = true
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Projector"
+        app.overlayPreferredScreenIndex = 0
+        app.overlayDisplayRecoveryPending = true
+        fakeOverlay.screenNames = []
+        verify(!app.recoverOverlayAfterDisplayChange())
+        compare(app.overlayPreferredDisplayName, "Projector")
+        fakeOverlay.screenNames = ["Projector"]
+        fakeOverlay.displayName = "Projector"
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        verify(app.recoverOverlayAfterDisplayChange())
+        compare(fakeOverlay.requestedWidth, 620)
+        compare(app.overlayPreferredDisplayName, "Projector")
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
