@@ -97,3 +97,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Library batch cache reused | Admission reuses one unchanged completed identity and queues three changed/new sources | Make the cache decision visible, key reuse to identity/configuration, and force fresh work for changed content. |
 
 | Library batch cache invalidated | Analysis configuration changes invalidate four previously completed identities | Preserve old results, admit fresh runs, and make configuration mismatch visible without mutating source files. |
+
+| Library batch cache complete | Configuration-refresh batch accepts three fresh results, reuses one, and withholds one mismatch | Reconcile fresh/reused/recovery outcomes without stale evidence or source mutation. |
