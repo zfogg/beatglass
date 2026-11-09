@@ -27,6 +27,11 @@ if platform.system() != "Linux":
                "native_artifacts": [],
                "native_test_discovery": None, "native_test_count": None,
                "native_test_name_match": False, "native_junit_exists": False}
+    pending["pending_command"] = [sys.executable, str(Path(__file__)), "--source", str(args.source)]
+    if args.summary:
+        pending["pending_command"] += ["--summary", str(args.summary)]
+    if args.archive:
+        pending["pending_command"] += ["--archive", str(args.archive)]
     if args.summary:
         args.summary.parent.mkdir(parents=True, exist_ok=True)
         args.summary.write_text(json.dumps(pending, indent=2) + "\n", encoding="utf-8")
