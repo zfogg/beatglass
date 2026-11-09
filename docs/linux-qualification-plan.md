@@ -58,6 +58,8 @@ The report handoff status must be `complete` (or omitted for legacy reports)
 when `ready: true`; pending or failed handoffs cannot be promoted.
 Conversely, `exit_gate_status: ACCEPTED` is invalid unless `ready: true` is
 also present.
+Gate booleans such as `ready` and `native_qualification_required` must be JSON
+booleans, not strings that merely resemble booleans.
 Support summaries must use one known status per platform: `experimental`,
 `qualified`, `unsupported`, or `pending`.
 If both `scenarios` and `scenario_inventory` are present, they must be identical;

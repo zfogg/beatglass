@@ -317,3 +317,12 @@ class NativeEvidenceReviewTest(unittest.TestCase):
                 "exit_gate_status": "ACCEPTED", "platforms": []}))
             result = review.assess(report, "release-owner")
             self.assertIn("report:accepted gate without ready status", result["blockers"])
+
+    def test_gate_boolean_fields_are_typed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"ready": "true",
+                "native_qualification_required": "yes", "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:ready must be boolean", result["blockers"])
+            self.assertIn("report:native qualification requirement must be boolean", result["blockers"])
