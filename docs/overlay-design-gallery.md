@@ -43,6 +43,7 @@ screenshots.
 | [Performance](overlay-latency-card.svg) | latency, sample rate, and dropped frames |
 | [Notifications](overlay-notifications-card.svg) | restore, output, and pause activity |
 | [Calibration](overlay-calibration-card.svg) | live preview for position, size, opacity |
+| [Privacy](overlay-privacy-card.svg) | local analysis and safe file behavior |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
