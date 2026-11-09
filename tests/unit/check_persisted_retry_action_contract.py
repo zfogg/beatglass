@@ -62,3 +62,5 @@ if "Q_PROPERTY(bool storageOpen READ storageOpen NOTIFY storageStateChanged)" no
     raise SystemExit("Recovery bridge must expose open-storage state")
 if "storageTransitionPending_" not in bridge or "storageTransitionPending_ = true" not in source:
     raise SystemExit("Open-state API must distinguish transition failures")
+if "const auto normalized = path.trimmed()" not in source:
+    raise SystemExit("Database paths must be normalized before configuration")
