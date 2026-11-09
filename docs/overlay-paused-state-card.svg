@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / MONITORING</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Monitoring paused</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Your settings are safe. Resume when you are ready.</text>
+  <rect x="112" y="258" width="976" height="164" rx="18" fill="#202938"/>
+  <circle cx="174" cy="340" r="38" fill="#e3b45b"/><rect x="162" y="318" width="10" height="44" rx="5" fill="#10131a"/><rect x="180" y="318" width="10" height="44" rx="5" fill="#10131a"/>
+  <text x="244" y="323" fill="#f2f6fb" font-family="Inter,Arial" font-size="24" font-weight="700">No audio is being captured</text>
+  <text x="244" y="361" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">The overlay remains visible with your last chosen layout.</text>
+  <text x="244" y="389" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Nothing will be written to your audio files.</text>
+  <rect x="112" y="466" width="976" height="104" rx="18" fill="#202938"/>
+  <text x="144" y="510" fill="#f2f6fb" font-family="Inter,Arial" font-size="19" font-weight="700">Resume behavior</text>
+  <text x="144" y="543" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Reconnect to the selected output and continue where you left off.</text>
+  <rect x="830" y="490" width="214" height="56" rx="14" fill="#56d38b"/><text x="937" y="525" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Resume monitoring</text>
+  <rect x="112" y="614" width="176" height="52" rx="14" fill="#2a3444"/><text x="200" y="647" fill="#f2f6fb" font-family="Inter,Arial" font-size="17" text-anchor="middle">Open controls</text>
+</svg>
