@@ -2943,7 +2943,7 @@ ApplicationWindow {
                     Accessible.value: visualizationCanvas.viewMode
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Choose waveform or frequency-domain FFT visualization; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
-                    ToolTip.text: "Visualization mode controls; current mode is announced when available"
+                    ToolTip.text: "Visualization mode controls; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending" : "overlay is ready") + "; current mode is announced when available"
                     Button {
                         id: waveformView
                         activeFocusOnTab: true
