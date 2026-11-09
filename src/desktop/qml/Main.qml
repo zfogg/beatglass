@@ -534,6 +534,8 @@ ApplicationWindow {
         if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
+            window.overlayPreferredScreenIndex = -1
+            window.overlayPreferredDisplayName = ""
             overlayDisplay.forceActiveFocus()
             window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
             return false
