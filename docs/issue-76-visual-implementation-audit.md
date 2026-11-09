@@ -830,3 +830,5 @@ Live tempo, harmony, overlay capture, and monitor capture states now use status 
 Analysis freshness, selected-source workflow, and frame progress now expose live status values, aligning source selection and active analysis lifecycle feedback.
 
 Native playback state, source, position, and output-running state now expose live status values, making playback and analysis source identity consistent for assistive technology.
+
+Native playback errors, seek limitations, source-selection mismatch, and unavailable-control guidance now use live status semantics, keeping playback recovery actionable.
