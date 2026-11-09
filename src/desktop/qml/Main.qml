@@ -3333,6 +3333,22 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
+                    Label {
+                        objectName: "overlayDataReadiness"
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (visualizationCanvas.modeHasData ? "Overlay estimates: accepted snapshot ready" : "Overlay estimates: waiting for accepted snapshot")
+                            : "Overlay estimates unavailable"
+                        Accessible.name: "Overlay estimate readiness"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible && visualizationCanvas.modeHasData
+                            ? text + ". The overlay is showing data from the current accepted visualization snapshot."
+                            : visible ? text + ". The overlay will update after monitoring accepts a replacement snapshot." : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay estimate readiness"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
                     Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
                     Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlayBridge.setOpacity(value); window.overlaySettingsRevision += 1 } } }
                     Connections {
