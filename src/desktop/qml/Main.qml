@@ -3271,7 +3271,7 @@ ApplicationWindow {
                     text: typeof visualizationPresentation === "undefined" || !visualizationCanvas.presentationReady
                         ? (window.visualizationSelectionResetReason !== "" ? "Waiting for replacement analysis result; " + window.visualizationSelectionResetReason : "Waiting for an accepted analysis result")
                         : "Accepted analysis generation " + visualizationPresentation.generation + " · revision " + visualizationPresentation.revision
-                    Accessible.name: "Visualization analysis handoff: " + text
+                    Accessible.name: "Visualization analysis handoff, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Status of the generation-gated analysis result consumed by waveform and FFT rendering."
