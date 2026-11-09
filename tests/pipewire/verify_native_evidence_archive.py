@@ -80,6 +80,8 @@ with zipfile.ZipFile(archive_path) as archive:
         raise SystemExit("qualification summary has invalid commit identity")
     if len(summary_names) != 1 or summary_data.get("commit") != manifest.get("commit"):
         raise SystemExit("manifest commit does not match qualification summary")
+    if "source_date_epoch" in summary_data and summary_data["source_date_epoch"] != manifest["source_date_epoch"]:
+        raise SystemExit("manifest source date epoch does not match qualification summary")
     if "platform" in summary_data and (not isinstance(summary_data["platform"], str) or not summary_data["platform"].strip()):
         raise SystemExit("qualification summary has invalid platform identity")
     if "platform" in manifest and (not isinstance(manifest["platform"], str) or not manifest["platform"].strip()):
