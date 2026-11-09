@@ -771,6 +771,8 @@ ApplicationWindow {
                 if (djOverlay.visible) {
                     window.hideOverlayAndRestoreControls()
                     window.overlayHiddenByUser = false
+                    window.overlayDisplayRecoveryPending = true
+                    window.overlayDisplaySelectionRequired = true
                 }
             } else {
                 const synced = window.syncOverlaySettingsFromBridge()
