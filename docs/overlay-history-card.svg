@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <rect width="1200" height="760" fill="#10131a"/>
+  <rect x="68" y="54" width="1064" height="652" rx="28" fill="#171c26" stroke="#394557" stroke-width="2"/>
+  <text x="112" y="114" fill="#9ba9bb" font-family="Inter,Arial" font-size="18" letter-spacing="3">BEATGLASS / HISTORY</text>
+  <text x="112" y="174" fill="#f2f6fb" font-family="Inter,Arial" font-size="42" font-weight="700">Listening history</text>
+  <text x="112" y="211" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">A private, local record of tracks you have analyzed.</text>
+  <rect x="112" y="258" width="976" height="88" rx="16" fill="#202938"/><text x="144" y="298" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">JUST NOW</text><text x="144" y="329" fill="#f2f6fb" font-family="Inter,Arial" font-size="19" font-weight="700">Midnight Drive</text><text x="1028" y="329" fill="#b8c4d2" font-family="Inter,Arial" font-size="16" text-anchor="end">42:18</text>
+  <rect x="112" y="364" width="976" height="88" rx="16" fill="#202938"/><text x="144" y="404" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">12 MIN AGO</text><text x="144" y="435" fill="#f2f6fb" font-family="Inter,Arial" font-size="19" font-weight="700">Afterglow</text><text x="1028" y="435" fill="#b8c4d2" font-family="Inter,Arial" font-size="16" text-anchor="end">03:58</text>
+  <rect x="112" y="470" width="976" height="88" rx="16" fill="#202938"/><text x="144" y="510" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">YESTERDAY</text><text x="144" y="541" fill="#f2f6fb" font-family="Inter,Arial" font-size="19" font-weight="700">Soft Focus</text><text x="1028" y="541" fill="#b8c4d2" font-family="Inter,Arial" font-size="16" text-anchor="end">05:12</text>
+  <rect x="112" y="614" width="196" height="54" rx="14" fill="#2a3444"/><text x="210" y="648" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Clear history</text><text x="1088" y="648" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Stored locally</text>
+</svg>
