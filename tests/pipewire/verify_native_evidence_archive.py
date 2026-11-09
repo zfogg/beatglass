@@ -107,6 +107,8 @@ with zipfile.ZipFile(archive_path) as archive:
             raise SystemExit("transition evidence commit does not match archive manifest")
         if not isinstance(transitions.get("platform"), str) or not transitions["platform"].strip():
             raise SystemExit("transition evidence has no provenance platform")
+        if summary_data.get("platform") and transitions["platform"] != summary_data["platform"]:
+            raise SystemExit("transition evidence platform does not match summary")
         transitions = transitions.get("events")
         if not isinstance(transitions, list) or not transitions:
             raise SystemExit("transition evidence is empty")
