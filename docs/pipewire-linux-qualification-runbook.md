@@ -89,6 +89,8 @@ The error event itself must carry the discontinuity marker and a nonzero native
 error code; unrelated event metadata cannot satisfy those requirements.
 At least one process event with captured samples must carry the initial start
 epoch, proving samples were delivered before the failure boundary.
+The restart event must carry the selected sink serial and negotiated format so
+device-switch evidence identifies the post-recovery target.
 When present in a packaged summary, the archive verifier rechecks the same
 required lifecycle events and epoch/discontinuity/error invariants.
 It also requires the transition envelope’s schema, source commit, and host

@@ -41,6 +41,8 @@ if not any(isinstance(event.get("sample_count"), int) and not isinstance(event.g
 restart = next(event for event in events if event.get("event") == "restart")
 if restart.get("epoch") <= start.get("epoch"):
     raise SystemExit("restart does not advance the capture epoch")
+if not isinstance(restart.get("serial"), str) or not restart["serial"].strip():
+    raise SystemExit("restart event has no sink serial")
 fmt = restart.get("format")
 if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("channels", 0) <= 0:
     raise SystemExit("restart event has no negotiated format")
