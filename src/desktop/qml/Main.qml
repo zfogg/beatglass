@@ -772,8 +772,13 @@ ApplicationWindow {
         }
     }
     Component.onCompleted: {
-        if (overlayBridge) overlayBridge.attach(djOverlay, window)
-        window.syncOverlaySettingsFromBridge()
+        if (overlayBridge && !overlayBridge.attach(djOverlay, window)) {
+            window.overlayLaunchFallbackActive = true
+            window.overlayDisplayRecoveryPending = true
+            window.announceCaptureRecoveryState("Native overlay attachment failed; control-window fallback remains active.")
+        } else {
+            window.syncOverlaySettingsFromBridge()
+        }
         refreshCatalog()
     }
     function restoreOverlayDisplaySelectionFromBridge() {
