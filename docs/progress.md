@@ -1,5 +1,10 @@
 # Progress and handoff
 
+PipeWire control-thread lifecycle code can now atomically consume and clear the
+latest native callback error, preventing repeated handling while preserving
+lock-free callback publication. Portable coverage is in
+`python tests/unit/check_pipewire_error_consume_contract.py`.
+
 The visualization now exposes its responsive compact/expanded layout state as
 an accessible status, so width-driven presentation changes are announced
 without implying a change to the underlying accepted analysis data.

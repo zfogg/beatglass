@@ -39,6 +39,8 @@ public:
   void on_error(int error_code) noexcept;
   /** Read the last native callback error code on the control thread; zero means none. */
   int error_code() const noexcept;
+  /** Consume and clear the last callback error on the control thread. */
+  int take_error() noexcept;
   /** Control-thread restart boundary: replace the FIFO with a fresh epoch and format. */
   bool restart(std::uint64_t epoch, std::uint32_t sample_rate, std::uint32_t channels);
   /** Pop the next bounded block on the control thread. */
