@@ -2563,7 +2563,7 @@ ApplicationWindow {
                                 text: visible ? ("Latest batch result: " + window.analysisJobBridge.batchLastResult) : ""
                                 Accessible.name: "Latest batch analysis result"
                                 Accessible.value: visible ? text : ""
-                                Accessible.description: visible ? text : "No batch analysis result is available."
+                                Accessible.description: visible ? text + ". Review batch status for retry or discard recovery." : "No batch analysis result is available."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap; elide: Text.ElideRight
                             }
