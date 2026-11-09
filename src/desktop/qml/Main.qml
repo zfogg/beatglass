@@ -1115,7 +1115,6 @@ ApplicationWindow {
     }
     function requestLibraryRecursiveCatalog() {
         addFolderRecursively.click()
-        window.announceVisualizationRecovery("Recursive Library catalog requested; results will receive focus when ready.")
     }
     function focusLibraryBatchProgress() {
         navigation.currentIndex = 0

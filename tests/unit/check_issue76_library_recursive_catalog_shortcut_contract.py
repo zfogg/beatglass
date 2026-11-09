@@ -6,7 +6,7 @@ def main() -> None:
     start = QML.index("function requestLibraryRecursiveCatalog")
     block = QML[start:QML.index("function browserEmptyMessage", start)]
     assert "addFolderRecursively.click()" in block
-    assert "Recursive Library catalog requested" in block
+    assert "announceVisualizationRecovery" not in block
     assert "window.requestLibraryRecursiveCatalog()" in QML
 if __name__ == "__main__":
     main()
