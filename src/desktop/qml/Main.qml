@@ -567,7 +567,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryCatalogStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+C"; context: Qt.ApplicationShortcut; enabled: window.browseFolder.toString() !== ""; onActivated: window.focusLibraryCatalogStatus() }
     Shortcut { objectName: "librarySelectionStatusFocusShortcut"; sequence: "Ctrl+Alt+Shift+E"; context: Qt.ApplicationShortcut; onActivated: window.focusLibrarySelectionStatus() }
     Shortcut { objectName: "libraryShortcutHelpFocusShortcut"; sequence: "Ctrl+Alt+Shift+H"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryShortcutHelp() }
-    Shortcut { objectName: "libraryAnalyzeShortcut"; sequence: "Ctrl+Alt+A"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"; onActivated: { const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile()); window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry."); analyzeSelectedAudio.forceActiveFocus() } }
+    Shortcut { objectName: "libraryAnalyzeShortcut"; sequence: "Ctrl+Alt+A"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"; onActivated: window.analyzeLibrarySelectionFromShortcut() }
     Shortcut { objectName: "libraryAnalysisFocusShortcut"; sequence: "Ctrl+Alt+Shift+N"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: window.focusLibraryAnalysisAction() }
     Shortcut { objectName: "libraryBrowserShortcut"; sequence: "Ctrl+Alt+L"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryResults() }
     Shortcut { objectName: "libraryResultsShortcut"; sequence: "Ctrl+Alt+Shift+L"; context: Qt.ApplicationShortcut; onActivated: window.focusLibraryResults() }
@@ -1089,6 +1089,14 @@ ApplicationWindow {
     function playLibrarySelectionFromShortcut() {
         const accepted = window.playSelectedLibraryTrack()
         playSelectedTrack.forceActiveFocus()
+        return accepted
+    }
+    function analyzeLibrarySelectionFromShortcut() {
+        const accepted = window.analysisJobBridge.submitSelectedFile(window.selectedAudioUrl.toLocalFile())
+        if (accepted)
+            window.clearVisualizationForCaptureState("Analysis queued; previous visualization evidence is stale until fresh accepted analysis.")
+        window.announceVisualizationRecovery(accepted ? "Selected audio analysis queued." : "Selected audio analysis could not be queued; check the source and retry.")
+        analyzeSelectedAudio.forceActiveFocus()
         return accepted
     }
     function focusLibraryBatchProgress() {
