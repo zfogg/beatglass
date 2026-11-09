@@ -18,6 +18,7 @@ commands = [
     ["cmake", "-S", str(args.source), "-B", str(args.build), "-DBEATGLASS_BUILD_PIPEWIRE=ON", "-DBUILD_TESTING=ON"],
     ["cmake", "--build", str(args.build)],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "pipewire"],
+    ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "^pipewire_tests$"],
 ]
 results = []
 for command in commands:
