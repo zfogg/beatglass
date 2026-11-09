@@ -26,7 +26,7 @@ for name, entry in platforms.items():
         raise SystemExit(f"qualified platform has no evidence: {name}")
     if entry["status"] == "qualified" and not isinstance(matrix.get("commit"), str):
         raise SystemExit(f"qualified platform lacks evidence provenance: {name}")
-    if any(not isinstance(path, str) or not path.strip() or any(ord(char) < 32 for char in path) for path in entry["evidence"]):
+    if any(not isinstance(path, str) or not path.strip() or path.startswith(("/", "\\")) or ".." in Path(path).parts or any(ord(char) < 32 for char in path) for path in entry["evidence"]):
         raise SystemExit(f"invalid evidence path: {name}")
     if len(set(entry["evidence"])) != len(entry["evidence"]):
         raise SystemExit(f"duplicate evidence path: {name}")
