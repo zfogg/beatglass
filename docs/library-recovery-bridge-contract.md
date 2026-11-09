@@ -96,6 +96,8 @@ so users cannot invoke actions that will be rejected by the worker boundary.
 The reusable jobs contract exposes explicit terminal-state and known-total
 predicates so UI and persistence code do not duplicate cancellation/failure or
 indeterminate-progress semantics.
+`JobLifecycle::retry` now uses the shared terminal predicate while explicitly
+excluding completed jobs, keeping retry admission consistent with queue state.
 The desktop cache controls mirror this contract: lookup, invalidation, and
 reanalysis actions stay disabled until content, engine, configuration, and a
 valid `offline`/`live` mode are present.

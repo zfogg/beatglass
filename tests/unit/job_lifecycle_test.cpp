@@ -33,6 +33,12 @@ TEST_CASE("cancelled and failed jobs can be retried from zero progress") {
   CHECK_FALSE(failed.snapshot().total_frames.has_value());
   CHECK_FALSE(failed.retry());
 }
+TEST_CASE("job lifecycle retry uses shared terminal predicate") {
+  CHECK(isTerminal(JobStatus::cancelled));
+  CHECK(isTerminal(JobStatus::failed));
+  CHECK(isTerminal(JobStatus::complete));
+  CHECK_FALSE(isTerminal(JobStatus::running));
+}
 
 TEST_CASE("commit decision serializes cancellation at the commit boundary") {
  CommitDecision early; CHECK_FALSE(early.begin_commit(true)); CHECK(early.cancelled());
