@@ -820,3 +820,5 @@ Overlay endpoint status now states that the selected endpoint remains retained d
 
 Overlay live-monitoring status now states that the selected endpoint remains retained while capture recovers. Portable coverage is in `python tests/unit/check_overlay_live_retention_contract.py`.
 
+Overlay controls now expose a dedicated settings-retention status covering display, geometry, opacity, and interaction mode during recovery and fallback. Portable coverage is in `python tests/unit/check_overlay_settings_retention_status_contract.py`.
+

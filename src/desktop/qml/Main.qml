@@ -3745,6 +3745,24 @@ ApplicationWindow {
                         wrapMode: Text.WordWrap
                     }
                     Label {
+                        objectName: "overlaySettingsRetentionStatus"
+                        visible: window.overlayBridge !== null
+                        text: visible
+                            ? (window.overlayDisplayRecoveryPending
+                                ? "Overlay settings retained while recovery is pending"
+                                : "Overlay settings retained: display, geometry, opacity, and interaction mode")
+                            : "Overlay settings retention unavailable"
+                        Accessible.name: "Overlay settings retention"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: visible
+                            ? text + ". Persisted settings remain available to restore the native overlay or use the control-window fallback."
+                            : text
+                        ToolTip.text: visible ? Accessible.description : "Overlay settings retention"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
                         objectName: "overlayDataReadiness"
                         visible: window.overlayBridge !== null
                         text: visible
