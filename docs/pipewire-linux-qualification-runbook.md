@@ -399,3 +399,5 @@ When summaries include source_date_epoch, archive verification validates its typ
 If a summary carries rchive_timestamp_utc, verification also cross-checks it against the manifest timestamp to detect provenance drift.
 
 Malformed optional summary timestamp provenance is rejected before artifact acceptance, keeping archive transfer failures explicit and auditable.
+
+Summary archive timestamps, when supplied, must be canonical UTC strings and equal the manifest timestamp; malformed values are rejected before evidence acceptance.
