@@ -83,6 +83,14 @@ def assess(report_path: Path, reviewer: str) -> dict:
             blockers.append(f"{name}:qualified status without all scenarios passing")
         if support_status != "qualified" and rows and all(row.get("status") == "PASS" for row in rows):
             blockers.append(f"{name}:all scenarios pass but platform is not qualified")
+        evidence_hashes = platform.get("scenario_evidence_sha256", {})
+        if not isinstance(evidence_hashes, dict):
+            blockers.append(f"{name}:invalid scenario evidence hashes")
+        else:
+            for scenario_id, digest in evidence_hashes.items():
+                row = scenarios.get(scenario_id)
+                if row is None or row.get("status") != "PASS" or not isinstance(digest, str) or len(digest) != 64:
+                    blockers.append(f"{name}:{scenario_id}:invalid scenario evidence hash")
         for scenario in sorted(REQUIRED):
             row = scenarios.get(scenario)
             evidence = row.get("evidence") if isinstance(row, dict) else None
