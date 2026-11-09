@@ -112,6 +112,8 @@ The manifest carries the host platform too, and verification binds it to the
 qualification summary before accepting the archive.
 Transition-bearing manifests also declare the transition schema version, which
 the verifier matches against the captured envelope.
+They also carry the transition source commit, independently bound to the
+captured envelope during verification.
 The packager derives that manifest field from the captured payload rather than
 duplicating a hard-coded schema value.
 The captured host platform must also match the qualification summary platform,

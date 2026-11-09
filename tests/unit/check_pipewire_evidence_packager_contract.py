@@ -26,6 +26,7 @@ markers = (
     "transition_event_count",
     "platform",
     "transition_schema",
+    "transition_commit",
     "not from a Linux host",
     "transition evidence commit does not match summary",
     "no positive transition event count",
