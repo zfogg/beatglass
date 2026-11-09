@@ -837,6 +837,8 @@ DJ monitoring status and BPM/key/chord estimates now use live status semantics, 
 
 The overlay fallback status now includes the concrete Retry overlay recovery action, so assistive technology receives both the fallback availability and the next step.
 
+For a missing saved display, Forget saved display is keyboard reachable, announces the replacement-display next step, and restores focus to the display selector after clearing stale destination state.
+
 The overlay display empty state now uses live status semantics alongside saved-display recovery, making missing-output remediation discoverable before destination selection.
 
 Appearance guidance, current theme/motion state, and settings persistence safety now expose live status semantics, keeping preference changes and the user-audio safety guarantee available to assistive technology.
