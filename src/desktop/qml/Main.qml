@@ -1125,6 +1125,7 @@ ApplicationWindow {
         if (index < 0 || index >= files.count) return
         const url = files.get(index, "fileUrl")
         if (files.isFolder(index)) {
+            window.clearSelectedAudio()
             browseFolder = url
             browser.currentIndex = -1
             search.text = ""
