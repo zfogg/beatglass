@@ -417,3 +417,5 @@ For auditability, preserve the exact archive verifier command, native-runner com
 Handoff records should retain verifier warnings (including fixture duplicate-entry warnings) alongside pass/fail status rather than discarding diagnostic output.
 
 Treat verifier warnings as review context: they do not turn a pending native qualification into a qualified host result.
+
+Archive-review warnings should be copied verbatim into the evidence handoff, preserving the diagnostic context needed for later native-host review.
