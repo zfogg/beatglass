@@ -122,6 +122,8 @@ screenshots.
 | [Activation failed](overlay-activation-failed-card.svg) | recoverable activation failure with retry |
 | [Display fallback](overlay-display-fallback-card.svg) | unavailable-monitor recovery with preserved settings |
 | [Fallback accepted](overlay-display-fallback-applied-card.svg) | saved fallback display confirmation |
+| [Interaction locked](overlay-interaction-locked-card.svg) | click-through lock with unlock shortcut |
+| [Interaction unlocked](overlay-interaction-unlocked-card.svg) | temporary control access with relock path |
 
 The gallery is intentionally state-first: every card pairs status, retained
 context, and a next action. See [overlay recovery workflow](overlay-recovery-workflow.md)
