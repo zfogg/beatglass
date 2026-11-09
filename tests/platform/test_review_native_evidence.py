@@ -333,3 +333,10 @@ class NativeEvidenceReviewTest(unittest.TestCase):
             report.write_text(__import__("json").dumps({"exit_gate_reason_codes": ["", 7], "platforms": []}))
             result = review.assess(report, "release-owner")
             self.assertIn("report:invalid exit gate reason codes", result["blockers"])
+
+    def test_exit_gate_reason_codes_are_unique(self):
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.json"
+            report.write_text(__import__("json").dumps({"exit_gate_reason_codes": ["native_pending", "native_pending"], "platforms": []}))
+            result = review.assess(report, "release-owner")
+            self.assertIn("report:duplicate exit gate reason codes", result["blockers"])

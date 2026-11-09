@@ -46,6 +46,8 @@ def assess(report_path: Path, reviewer: str) -> dict:
     reasons = report.get("exit_gate_reason_codes")
     if reasons is not None and (not isinstance(reasons, list) or any(not isinstance(reason, str) or not reason.strip() for reason in reasons)):
         blockers.append("report:invalid exit gate reason codes")
+    if isinstance(reasons, list) and len(reasons) != len(set(reasons)):
+        blockers.append("report:duplicate exit gate reason codes")
     if report.get("ready") is True and isinstance(reasons, list) and reasons:
         blockers.append("report:ready report has exit gate blockers")
     if report.get("ready") is False and reasons is not None and (not isinstance(reasons, list) or not reasons):
