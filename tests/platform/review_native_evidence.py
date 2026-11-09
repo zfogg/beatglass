@@ -25,6 +25,14 @@ def assess(report_path: Path, reviewer: str) -> dict:
         inventory = platform.get("artifact_inventory")
         if not isinstance(inventory, list) or platform.get("retained_artifacts") != len(inventory):
             blockers.append(f"{name}:artifact count mismatch")
+        else:
+            for artifact in inventory:
+                if (not isinstance(artifact, dict) or not artifact.get("path") or
+                        not isinstance(artifact.get("sha256"), str) or len(artifact["sha256"]) != 64 or
+                        artifact.get("hash_valid") is not True or not isinstance(artifact.get("bytes"), int) or
+                        artifact["bytes"] <= 0):
+                    blockers.append(f"{name}:invalid artifact provenance")
+                    break
         scenarios = {row.get("id"): row for row in platform.get("scenarios", []) if isinstance(row, dict)}
         if set(scenarios) != REQUIRED:
             blockers.append(f"{name}:scenario inventory incomplete")
