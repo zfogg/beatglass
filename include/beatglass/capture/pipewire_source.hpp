@@ -28,6 +28,10 @@ struct MonitorStatus {
   bool accepts_epoch(std::uint64_t candidate) const noexcept {
     return active && candidate != 0 && candidate == epoch;
   }
+  /** True when the consumer must reacquire before publishing more audio. */
+  bool requires_reacquisition() const noexcept {
+    return !active || needs_restart || discontinuity || overflowed;
+  }
 };
 /** Control-thread lifecycle for a future PipeWire output-monitor stream.
  * Implementations own the PipeWire stream and never expose callback memory;
