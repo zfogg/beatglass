@@ -69,6 +69,7 @@ private:
     auto* buffer = pw_stream_dequeue_buffer(owner.stream_);
     if (!buffer) return;
     if (!buffer->buffer || buffer->buffer->n_datas == 0 || !buffer->buffer->datas[0].data) {
+      owner.active_ = false;
       if (owner.handoff_) owner.handoff_->on_error(-EINVAL);
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
@@ -92,8 +93,10 @@ private:
       return;
     }
     const auto samples = std::span<const float>(reinterpret_cast<const float*>(sample_data), sample_bytes / sizeof(float));
-    if (!owner.handoff_->push(samples, 0, false, false, 0.0, false))
+    if (!owner.handoff_->push(samples, 0, false, false, 0.0, false)) {
+      owner.active_ = false;
       owner.handoff_->on_error(-ENOBUFS);
+    }
     pw_stream_queue_buffer(owner.stream_, buffer);
   }
   static constexpr pw_stream_events events_ = {PW_VERSION_STREAM_EVENTS, nullptr, nullptr, process};
