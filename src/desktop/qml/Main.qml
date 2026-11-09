@@ -3255,7 +3255,7 @@ ApplicationWindow {
                     text: typeof visualizationPresentation === "undefined"
                         ? "Unavailable"
                         : (visualizationCanvas.modeHasData ? (visualizationCanvas.reducedMotion ? "Ready · static snapshot" : "Ready") : (window.liveBridge.status === "Tracking" ? "Waiting for capture data" : "Idle"))
-                    Accessible.name: "Visualization load state: " + text
+                    Accessible.name: "Visualization load state, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending: " : "overlay ready: ") + text
                     Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
