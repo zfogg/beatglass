@@ -64,6 +64,9 @@ Pending platform reasons must also appear in the rendered report, so reviewers
 can act on the missing-host requirement without opening the raw JSON.
 Qualified platform evidence paths must be visible in the report as well, so a
 qualified status always points reviewers to concrete handoff artifacts.
+Prepare an explicit, non-fabricating host capture plan with
+`python tests/pipewire/prepare_native_host_capture.py evidence/native-host-capture-plan.json`;
+it lists the Linux, Windows, and macOS commands/permissions still required.
 The validator behavior fixture covers both an actionable mixed-status matrix
 and rejection of incomplete platform coverage.
 The report behavior fixture checks that qualified evidence and pending reasons
