@@ -94,5 +94,8 @@ non-empty string identifying the runtime/toolchain context.
 Reacquisition evidence may include `environment`; when supplied it must be a
 non-empty runtime environment description.
 
+Reacquisition evidence may include `host`; when supplied it must be a non-empty
+host identity for the machine producing recovery evidence.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
