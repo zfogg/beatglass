@@ -875,3 +875,12 @@ def test_summary_review_focus_shortcut_reports_success():
     assert "overlaySettingsSummaryReviewAction.forceActiveFocus()" in body
     assert "announceCaptureRecoveryState" in body
     assert "return true" in body
+
+
+def test_paused_recovery_shortcuts_propagate_focus_result():
+    page_start = QML.index("function handleOverlayPausedPageShortcut")
+    page = QML[page_start : QML.index("    function handleOverlayPausedFocusShortcut", page_start)]
+    focus_start = QML.index("function handleOverlayPausedFocusShortcut")
+    focus = QML[focus_start : QML.index("    function handleOverlayHideToggleShortcut", focus_start)]
+    assert "return window.focusOverlayRecoveryAction" in page
+    assert "return window.focusOverlayRecoveryAction" in focus
