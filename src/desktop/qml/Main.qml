@@ -2682,7 +2682,6 @@ ApplicationWindow {
                 text: window.themePreferenceAnnouncement
                 visible: text !== ""
                 Accessible.name: "Theme preference announcement: " + text
-                Accessible.value: text
                 Accessible.role: Accessible.Status
                 Accessible.description: "Live appearance and reduced-motion preference state."
                 Layout.fillWidth: true
