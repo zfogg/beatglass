@@ -584,3 +584,12 @@ def test_reapply_button_requires_available_display():
     assert "screenNames.length === 0" in body
     assert "focusOverlayDisplayRecoveryFailure" in body
     assert "return" in body
+
+
+def test_unlock_action_requires_available_click_through_overlay():
+    start = QML.index("function handleOverlayUnlockAction")
+    body = QML[start : QML.index("    function focusOverlaySummaryReviewShortcut", start)]
+    assert "overlayBridge.available" in body
+    assert "clickThrough" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return" in body
