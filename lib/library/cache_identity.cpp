@@ -9,7 +9,7 @@ CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
   CacheIdentityResult out;
   const auto fingerprint = fingerprint_file(path, stop);
   out.status = fingerprint.status;
-  out.diagnostic = fingerprint.diagnostic;
+  out.diagnostic = fingerprint_status_diagnostic(fingerprint.status, fingerprint.diagnostic);
   if (fingerprint.status != FingerprintStatus::ok) return out;
   out.key = CacheKey{fingerprint.digest, std::move(engine), std::move(config), std::move(mode)};
   return out;
@@ -18,7 +18,7 @@ CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
 FingerprintStatus refresh_collection_file(SqliteCache& cache, const std::filesystem::path& path,
                                           std::stop_token stop, std::string* diagnostic) {
   const auto fingerprint = fingerprint_file(path, stop);
-  if (diagnostic) *diagnostic = fingerprint.diagnostic;
+  if (diagnostic) *diagnostic = fingerprint_status_diagnostic(fingerprint.status, fingerprint.diagnostic);
   if (fingerprint.status != FingerprintStatus::ok) return fingerprint.status;
   const auto name = path.filename().string();
   cache.put_entry({path.string(), name, "audio", fingerprint.digest, fingerprint.size,
