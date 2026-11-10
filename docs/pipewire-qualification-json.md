@@ -244,3 +244,5 @@ If present, host `clock_source_count` must be a positive integer describing
 the number of available synchronization sources.
 If present, host `clock_source_primary` must be a boolean indicating whether
 the recorded source was the host's primary synchronization source.
+If present, host `clock_source_id` must be a non-empty string identifying the
+selected synchronization source.
