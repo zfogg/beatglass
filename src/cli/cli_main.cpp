@@ -95,6 +95,7 @@ void save_preferences(const CliPreferences& preferences) {
 }
 using namespace ftxui;
 
+
 struct Track { std::filesystem::path path; std::string title; std::optional<beatglass::FileMetadata> metadata; };
 std::string format_bpm(const std::optional<float>& bpm) {
   if (!bpm) return "—";
@@ -500,6 +501,7 @@ int main(int argc, char** argv) {
   std::uint32_t live_sample_rate = 0;
   std::uint64_t live_observed_frames = 0;
   std::uint64_t live_discontinuities = 0;
+  std::uint64_t live_beats = 0;
   float live_signal_confidence = 0.0f;
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
