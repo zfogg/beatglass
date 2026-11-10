@@ -248,6 +248,8 @@ def main() -> int:
                 category = "clock"
             elif error == "captured_at must be ISO-8601":
                 category = "timestamp_format"
+            elif error == "captured_at cannot be in the future":
+                category = "freshness"
             elif error.startswith("captured_at "):
                 category = "temporal"
             elif error.startswith(("scenarios must", "missing required scenarios")):

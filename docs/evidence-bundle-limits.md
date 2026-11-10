@@ -108,6 +108,8 @@ Missing timestamp timezone information is grouped under `clock` for direct
 capture-clock discipline triage.
 Malformed timestamp values are grouped under `timestamp_format` for direct
 capture-time serialization triage.
+Future capture timestamps are grouped under `freshness` for direct evidence
+age and clock-skew triage.
 Timestamp format, timezone, and future-capture failures are grouped under
 `temporal` in JSON output for clear freshness and clock-discipline reporting.
 Missing retained evidence for a required scenario is grouped under
