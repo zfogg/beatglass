@@ -1670,7 +1670,7 @@ int main(int argc, char** argv) {
   auto settings = Renderer(Container::Vertical(Components{reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button, beat_grid_mode_button, tonal_history_mode_button, playback_device_picker}), [&] {
     return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
       text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
-      text("Tonal engine: optional Essentia music-replay build (disabled in this standard CLI build).") | color(Color::GrayLight) | italic,
+      text("Tonal engine: provisional FFT fallback; optional Essentia music-replay build provides higher-fidelity causal labels.") | color(Color::GrayLight) | italic,
       text("Preferences persist in the platform Beatglass CLI config."), text("Config: " + preferences_path().string()) | color(Color::GrayLight) | italic, separator(),
       text("PRESENTATION") | bold | underlined, reduce_motion_checkbox->Render(),
       text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight) | italic,

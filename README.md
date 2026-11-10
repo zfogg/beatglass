@@ -102,10 +102,12 @@ Live also exposes explicit
 half/normal/double tempo interpretation and reset/reacquire controls. Settings
 controls reduced motion and the seek step. Mouse tab selection and `Tab`/`1`/`2`/`3` keyboard
 navigation are supported; terminals below 100 columns or 28 rows show a clear
-resize prompt. Standard builds show Key/Chord as unavailable; when
-`BEATGLASS_BUILD_MUSIC_REPLAY=ON` is enabled with Essentia, Library analysis uses
-the optional causal tonal replay path and displays its real key/chord estimates
-plus a bounded recent tonal history.
+resize prompt. Standard builds display explicitly provisional FFT-derived
+key/chord estimates with bounded recent tonal history; when
+`BEATGLASS_BUILD_MUSIC_REPLAY=ON` is enabled with Essentia, Library and Live
+analysis use the optional causal tonal replay path and display its higher-fidelity
+key/chord estimates. Neither path claims calibrated confidence or full-mix
+musical accuracy yet.
 
 Library keyboard shortcuts include `a` for Analyze all visible, `r` for refresh,
 `s` for sort, and `o` for the folder action; text inputs retain normal character
