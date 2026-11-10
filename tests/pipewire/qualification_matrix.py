@@ -82,10 +82,10 @@ if summary is not None:
 matrix = {"schema": "beatglass-native-qualification-matrix-v1", "host_os": host, "python": sys.version.split()[0], "platforms": platforms}
 if summary is not None and isinstance(summary.get("commit"), str) and summary["commit"].strip():
     matrix["commit"] = summary["commit"]
-output.parent.mkdir(parents=True, exist_ok=True)
 temporary = None
-existing_mode = stat.S_IMODE(output.stat().st_mode) if output.exists() else None
 try:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    existing_mode = stat.S_IMODE(output.stat().st_mode) if output.exists() else None
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent, delete=False) as handle:
         temporary = Path(handle.name)
         handle.write(json.dumps(matrix, indent=2) + "\n")

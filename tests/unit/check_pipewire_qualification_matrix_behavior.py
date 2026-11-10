@@ -1,5 +1,6 @@
 """Exercise matrix generation with runner summary evidence."""
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -22,7 +23,7 @@ with tempfile.TemporaryDirectory() as directory:
         raise SystemExit("pending platform lacks an actionable reason")
     if host_entry["status"] != "pending" or host_entry["evidence"] != ["evidence/native-summary.json"] or host_entry["pending_reason"] != "host unavailable" or host_entry["native_execution_attempted"] is not False or host_entry["execution_blockers"] != ["Linux host"]:
         raise SystemExit("runner summary was not merged into host matrix entry")
-    summary.write_text(json.dumps({"qualified": True, "native_artifacts": ["evidence/native-qualification.zip"]}), encoding="utf-8")
+    summary.write_text(json.dumps({"qualified": True, "commit": "native-commit", "native_execution_attempted": True, "native_artifacts": ["evidence/native-qualification.zip"]}), encoding="utf-8")
     qualified = root / "qualified-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(qualified), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode != 0:
@@ -33,7 +34,7 @@ with tempfile.TemporaryDirectory() as directory:
     absolute = root / "evidence" / "native-absolute.zip"
     absolute.parent.mkdir()
     absolute.write_bytes(b"evidence")
-    summary.write_text(json.dumps({"qualified": True, "native_artifacts": [str(absolute)]}), encoding="utf-8")
+    summary.write_text(json.dumps({"qualified": True, "commit": "native-commit", "native_execution_attempted": True, "native_artifacts": [str(absolute)]}), encoding="utf-8")
     absolute_matrix = root / "absolute-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(absolute_matrix), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode != 0:
@@ -41,7 +42,7 @@ with tempfile.TemporaryDirectory() as directory:
     absolute_entry = json.loads(absolute_matrix.read_text(encoding="utf-8"))["platforms"][matrix["host_os"]]
     if absolute_entry["evidence"] != ["evidence/native-absolute.zip"]:
         raise SystemExit("absolute evidence path was not made portable")
-    summary.write_text(json.dumps({"qualified": True, "native_artifacts": "evidence.zip"}), encoding="utf-8")
+    summary.write_text(json.dumps({"qualified": True, "commit": "native-commit", "native_execution_attempted": True, "native_artifacts": "evidence.zip"}), encoding="utf-8")
     malformed = root / "malformed-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(malformed), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid native_artifacts" not in result.stderr + result.stdout:
@@ -56,8 +57,8 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(duplicate_artifact), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "duplicate native_artifacts" not in result.stderr + result.stdout:
         raise SystemExit("duplicate native artifact entries were accepted")
-    first_external = root / "one" / "evidence.zip"
-    second_external = root / "two" / "evidence.zip"
+    first_external = root.parent / f"one-{os.getpid()}" / "evidence.zip"
+    second_external = root.parent / f"two-{os.getpid()}" / "evidence.zip"
     first_external.parent.mkdir()
     second_external.parent.mkdir()
     first_external.write_bytes(b"one")
@@ -165,4 +166,14 @@ with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run([sys.executable, str(script), str(linked_parent / "matrix.json")], capture_output=True, text=True)
         if result.returncode == 0 or "output directory is a symbolic link" not in result.stderr + result.stdout:
             raise SystemExit("symbolic-link matrix output directory was accepted")
-print("PipeWire qualification matrix behavior passed (2 scenarios)")
+    blocked_parent = root / "blocked-parent"
+    blocked_parent.write_text("not a directory", encoding="utf-8")
+    blocked_output = blocked_parent / "matrix.json"
+    result = subprocess.run(
+        [sys.executable, str(script), str(blocked_output)],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0 or "qualification matrix output is unwritable" not in result.stdout + result.stderr:
+        raise SystemExit("file parent output was not reported cleanly")
+    print("PipeWire qualification matrix behavior passed (3 scenarios)")

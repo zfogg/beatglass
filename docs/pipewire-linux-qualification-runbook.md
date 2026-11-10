@@ -54,6 +54,9 @@ making the rename durable before the handoff reports success.
 When replacing an existing matrix, its permission mode is copied to the
 temporary file before replacement so atomic updates do not broaden or remove
 the handoff file's access policy.
+If parent-directory creation or another output operation fails, the handoff
+reports a controlled `qualification matrix output is unwritable` error rather
+than exposing a raw filesystem traceback.
 Every artifact entry must be a non-empty string path; numeric or blank entries
 fail before matrix generation.
 Artifact paths must also be printable text without control characters so
