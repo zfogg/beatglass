@@ -1655,9 +1655,9 @@ ApplicationWindow {
     }
     function handleOverlayHideToggleShortcut() {
         if (window.overlayHiddenByUser) {
-            window.handleOverlayRestoreAction()
+            return window.handleOverlayRestoreAction()
         } else {
-            window.handleOverlayHideAction()
+            return window.handleOverlayHideAction()
         }
     }
     function handleOverlayRestoreAction() {
