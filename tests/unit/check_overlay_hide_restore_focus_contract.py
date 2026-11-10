@@ -774,6 +774,7 @@ def test_display_focus_shortcut_returns_bridge_availability():
     assert "return window.overlayBridge !== null" in body
 
 
+ 
 def test_retry_button_returns_native_result():
     start = QML.index("function handleOverlayRetryButtonAction")
     body = QML[start : QML.index("    function handleOverlayShowButtonAction", start)]
@@ -781,3 +782,13 @@ def test_retry_button_returns_native_result():
     assert "const retried" in body
     assert "overlayDisplayStatus.forceActiveFocus()" in body
     assert "return retried" in body
+def test_show_button_propagates_native_result():
+    start = QML.index("function handleOverlayShowButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowAction", start)]
+    assert "return false" in body
+    assert "return window.handleOverlayShowAction()" in body
+    action_start = QML.index("function handleOverlayShowAction")
+    action_body = QML[action_start : QML.index("    function focusOverlayDisplayShortcut", action_start)]
+    assert "const restored" in action_body
+    assert "retryOverlay.forceActiveFocus()" in action_body
+    assert "return restored" in action_body
