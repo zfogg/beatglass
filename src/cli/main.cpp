@@ -66,6 +66,6 @@ int main(int argc, char** argv) {
     if (json) { json_result("result", r); return 0; }
     std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nduration seconds: " << (r.metadata.sample_rate ? static_cast<double>(r.metadata.frames) / r.metadata.sample_rate : 0.0) << "\nbeats: " << r.beats << "\ntempo: ";
     if (r.bpm) std::cout << *r.bpm << " BPM\n"; else std::cout << "unknown\n";
-  } catch (const std::exception& e) { std::cerr << e.what() << "\n"; return 1; }
+  } catch (const std::exception& e) { std::cerr << "error: " << e.what() << "\n"; return 1; }
   return 0;
 }

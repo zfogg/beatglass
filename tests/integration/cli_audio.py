@@ -65,6 +65,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert "state: tracking" in resume_lines[-1], resume_lines[-1]
     missing = subprocess.run([exe, str(root / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0
+    assert missing.stderr.startswith("error: "), missing.stderr
     import json
     quiet_json = json.loads(subprocess.run([exe, "--json", str(silence)], capture_output=True, text=True, check=True).stdout)
     assert quiet_json["schema_version"] == 1 and quiet_json["type"] == "result"
