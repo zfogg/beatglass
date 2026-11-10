@@ -158,6 +158,8 @@ SHA-256 mismatches are grouped under `hash` for direct retained-file
 integrity triage.
 Malformed SHA-256 declarations are grouped under `hash_format` for direct
 manifest-integrity triage.
+Malformed artifact entry structures are grouped under `artifact_entry` for
+direct manifest-shape triage.
 Per-artifact byte-limit violations are grouped under `size` for direct
 retained-file capacity triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
