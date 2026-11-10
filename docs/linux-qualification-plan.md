@@ -57,6 +57,7 @@ For each session, record the exact distribution, kernel, compositor/session vers
 - The discontinuity `error` event must remain in the active pre-restart epoch; an error attributed to the post-restart epoch is rejected as contradictory evidence.
 - Process events may include `drop_count`; when present, every process event must report a non-negative count, preserving queue-overflow evidence without inferring drops from missing fields.
 - When an error event reports a sink serial, it must match the active start serial; a changed serial belongs on the subsequent restart event, preserving device-switch evidence ordering.
+- A process event carrying `sample_position` must also carry a positive `sample_count`, so sample timing claims always identify the captured range they describe.
 - Exercise an X11 session with a real window manager, including stacking, input-shape behavior, monitor/DPI changes, fullscreen applications, and recovery from an off-screen overlay.
 - Exercise GNOME and KDE Wayland sessions separately. Probe layer-shell availability and compositor refusal; fall back to an ordinary compact window when the required capability is absent.
 - Verify that no fallback silently captures a microphone or a different output sink, and that the user can always recover the main controls.
