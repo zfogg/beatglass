@@ -4710,7 +4710,7 @@ ApplicationWindow {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge && (!window.overlayOpacityEditInFlight || Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) ) overlayOpacityControl.value = window.overlayBridge.opacity }
                     }
-                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay opacity value" }
+                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : ""); Accessible.role: Accessible.StaticText; Accessible.description: text + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : ""); ToolTip.text: "Current overlay opacity value" }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null

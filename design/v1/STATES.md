@@ -113,6 +113,7 @@
 | Missing saved display stale naming | A preferred display is not currently enumerated | Identify the missing-display recovery state and stale evidence directly in the status name. |
 | Overlay size stale state | User adjusts overlay size while capture recovers | Preserve geometry controls while identifying that live evidence remains stale until fresh capture. |
 | Overlay opacity stale state | User adjusts opacity while capture recovers | Preserve presentation controls while identifying that live evidence remains stale until fresh capture. |
+| Opacity value stale state | User reviews the current opacity value during capture recovery | Keep the presentation value readable while marking the underlying live evidence stale. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
