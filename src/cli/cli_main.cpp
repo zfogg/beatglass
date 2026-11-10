@@ -532,6 +532,15 @@ int main(int argc, char** argv) {
   auto live_button = Button(&live_button_label, toggle_live);
   auto refresh_live_button = Button(" Refresh sinks ", [&] {
 #ifdef _WIN32
+    const auto stopped_for_refresh = live_session && live_session->state() != beatglass::SourceState::stopped;
+    if (stopped_for_refresh) {
+      live_session->stop();
+      live_tracking_state = beatglass::TrackingState::stopped;
+      live_bpm.reset();
+      live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+      live_button_label = " Start monitoring ";
+      live_status = "Capture stopped while render sinks were refreshed.";
+    }
     live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
     live_error = live_endpoint_snapshot.error;
     live_endpoints.clear(); live_endpoint_ids.clear(); live_selected = 0;
@@ -540,7 +549,7 @@ int main(int argc, char** argv) {
       live_endpoint_ids.push_back(endpoint.id);
       if (endpoint.is_default) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
     }
-    live_status = std::to_string(live_endpoints.size()) + " render sinks discovered.";
+    if (!stopped_for_refresh) live_status = std::to_string(live_endpoints.size()) + " render sinks discovered.";
 #else
     live_status = "Native sink discovery is unavailable in this build.";
 #endif
