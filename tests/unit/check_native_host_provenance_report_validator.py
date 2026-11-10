@@ -60,6 +60,13 @@ with tempfile.TemporaryDirectory() as directory:
     assert "omits required provenance fields" in result.stderr
 
 with tempfile.TemporaryDirectory() as directory:
+    report = Path(directory) / "case-mismatch-report.json"
+    report.write_text(json.dumps({"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": "linux", "name": "host", "checked_fields": ["Name", "Platform"]}), encoding="utf-8")
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "omits required provenance fields" in result.stderr
+
+with tempfile.TemporaryDirectory() as directory:
     for fields in (["platform"], ["name"], ["node_id"]):
         report = Path(directory) / "missing-required-report.json"
         report.write_text(json.dumps({"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": "linux", "name": "host", "checked_fields": fields}), encoding="utf-8")
