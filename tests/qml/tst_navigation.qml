@@ -2549,7 +2549,7 @@ TestCase {
         fakeOverlay.opacity = 0.9
     }
 
-'    function test_selectReplacementDisplayReappliesRetainedVisualState() {
+    function test_selectReplacementDisplayReappliesRetainedVisualState() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = ["Projector", "Laptop"]
         fakeOverlay.displayName = "Projector"
