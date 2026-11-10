@@ -1508,10 +1508,9 @@ ApplicationWindow {
             return false
         }
         if (!window.overlayBridge.moveToScreen(index)) {
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("Overlay display selection could not be applied; control-window fallback remains active.")
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selection could not be applied; control-window fallback remains active.")
             window.show()
             window.raise()
             window.requestActivate()
