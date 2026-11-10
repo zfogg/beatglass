@@ -146,3 +146,5 @@ When process events provide `timestamp_ns`, it must be a non-negative integer.
 Provided process timestamps must also be monotonic in event order.
 
 When process events provide `duration_ns`, it must be a non-negative integer.
+When both timestamps and durations are provided, adjacent process intervals
+must not overlap.
