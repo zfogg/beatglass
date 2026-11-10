@@ -26,6 +26,9 @@ def verify(root: Path, manifest: Path) -> list[str]:
     platform = data.get("platform")
     if isinstance(platform, str) and platform.strip() and platform.lower() not in SUPPORTED_PLATFORMS:
         errors.append(f"unsupported platform: {platform}")
+    environment = data.get("environment")
+    if isinstance(environment, str) and any(ord(char) < 32 and char not in "\t" for char in environment):
+        errors.append("environment must not contain control characters")
     commit = data.get("commit")
     if isinstance(commit, str) and commit.strip() and not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
         errors.append("commit must be a 40-character hexadecimal SHA-1")
