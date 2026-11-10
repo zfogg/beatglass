@@ -22,6 +22,9 @@ def verify(root: Path, manifest: Path) -> list[str]:
     for field in REQUIRED_PROVENANCE:
         if not isinstance(data.get(field), str) or not data[field].strip():
             errors.append(f"missing provenance field: {field}")
+    commit = data.get("commit")
+    if isinstance(commit, str) and commit.strip() and not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
+        errors.append("commit must be a 40-character hexadecimal SHA-1")
     captured_at = data.get("captured_at")
     if isinstance(captured_at, str) and captured_at.strip():
         try:
