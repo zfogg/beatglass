@@ -1,8 +1,11 @@
 #include "beatglass/core/file_analysis.hpp"
+#include "beatglass/core/causal_replay.hpp"
+#include "beatglass/core/audio.hpp"
 #include "beatglass/core/playback_session.hpp"
 #include "state_label.hpp"
 #ifdef _WIN32
 #include "../desktop/platform/windows_endpoints.hpp"
+#include "../desktop/platform/windows_loopback_session.hpp"
 #endif
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -73,11 +76,15 @@ int main(int argc, char** argv) {
   std::string filter;
   bool recursive = true;
   std::vector<std::string> live_endpoints;
+  std::vector<std::string> live_endpoint_ids;
   std::string live_error;
 #ifdef _WIN32
   const auto endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
   live_error = endpoint_snapshot.error;
-  for (const auto& endpoint : endpoint_snapshot.endpoints) live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
+  for (const auto& endpoint : endpoint_snapshot.endpoints) {
+    live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
+    live_endpoint_ids.push_back(endpoint.id);
+  }
 #else
   live_endpoints.push_back("PipeWire/Core Audio/WASAPI adapter");
   live_error = "Native sink enumeration is platform-specific and not enabled in this build.";
@@ -89,6 +96,23 @@ int main(int argc, char** argv) {
   std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
   std::future<beatglass::TempoResult> analysis_future;
+#ifdef _WIN32
+  beatglass::SourceEpochAllocator live_epochs;
+  std::unique_ptr<beatglass::windows::LoopbackSession> live_session;
+  std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
+  std::string live_status = "Capture stopped.";
+  std::optional<float> live_bpm;
+  beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
+  live_session = std::make_unique<beatglass::windows::LoopbackSession>(live_epochs, [&] {
+    live_replay = std::make_unique<beatglass::CausalTempoReplay>();
+    live_bpm.reset();
+    live_tracking_state = beatglass::TrackingState::reacquiring;
+  });
+#else
+  std::string live_status = "Native loopback capture is unavailable in this build.";
+  std::optional<float> live_bpm;
+  beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
+#endif
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze = [&] {
     if (selected < 0 || selected >= static_cast<int>(tracks.size()) || busy) return;
@@ -131,7 +155,32 @@ int main(int argc, char** argv) {
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result.has_value(), result ? result->metadata.frames : 0, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), separator(), status_view});
     return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
-  auto live = Renderer([&] { Elements endpoints; for (const auto& endpoint : live_endpoints) endpoints.push_back(text("●  " + endpoint) | color(Color::YellowLight)); if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight)); return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Enumerated by the native output adapter."), separator(), vbox(endpoints), live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: ") | color(Color::GrayLight), text("— BPM"), text("Key: —    Chord: —"), text("Capture state: stopped"), separator(), text("Start capture will be wired to the platform source lifecycle next."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
+  auto toggle_live = [&] {
+#ifdef _WIN32
+    if (live_session && live_session->state() != beatglass::SourceState::stopped) {
+      live_session->stop();
+      live_tracking_state = beatglass::TrackingState::stopped;
+      live_bpm.reset();
+      live_status = "Capture stopped.";
+      return;
+    }
+    if (live_endpoint_ids.empty()) { live_status = "No render endpoint is available."; return; }
+    const auto endpoint = std::find_if(endpoint_snapshot.endpoints.begin(), endpoint_snapshot.endpoints.end(), [](const auto& value) { return value.is_default; });
+    const auto index = endpoint == endpoint_snapshot.endpoints.end() ? 0u : static_cast<unsigned>(std::distance(endpoint_snapshot.endpoints.begin(), endpoint));
+    if (live_session->start(live_endpoint_ids[index])) live_status = "Starting capture…";
+    else live_status = "Capture could not start; inspect endpoint permissions or device state.";
+#else
+    live_status = "Native loopback capture is unavailable in this build.";
+#endif
+  };
+  auto live_button = Button(" Start monitoring ", toggle_live);
+  auto live = Renderer(live_button, [&] {
+    Elements endpoints;
+    for (const auto& endpoint : live_endpoints) endpoints.push_back(text("●  " + endpoint) | color(Color::YellowLight));
+    if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
+    const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
+    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Enumerated by the native output adapter."), separator(), vbox(endpoints), live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), live_button->Render(), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+  });
   auto settings = Renderer([&] { return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold, text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"), text("Terminal motion: enabled"), separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."), text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto tabs = Container::Tab({library, live, settings}, &tab);
   auto library_tab = Button("  Library  ", [&] { tab = 0; });
@@ -153,6 +202,26 @@ int main(int argc, char** argv) {
     if (event == Event::ArrowUp && tab == 0 && !tracks.empty()) { selected = std::max(selected - 1, 0); return true; }
     if (event == Event::Custom) {
       ++spinner_frame;
+#ifdef _WIN32
+      if (live_session && live_session->state() != beatglass::SourceState::stopped) {
+        live_session->poll();
+        beatglass::windows::LoopbackPacket packet;
+        while (live_session->pop(packet)) {
+          const auto layout = packet.channels == 1 ? beatglass::ChannelLayout::mono : packet.channels == 2 ? beatglass::ChannelLayout::stereo : beatglass::ChannelLayout::multichannel;
+          beatglass::AudioBlock block{{packet.sample_rate, static_cast<std::uint16_t>(packet.channels), layout}, packet.epoch, packet.first_frame, static_cast<std::int64_t>(packet.qpc_100ns) * 100, packet.discontinuity, std::span<const float>(packet.samples.data(), packet.sample_count)};
+          try {
+            const auto state = live_replay->process(block);
+            live_bpm = state.bpm;
+            live_tracking_state = state.state;
+            live_status = "Receiving OS sink audio; analysis is worker-owned and discontinuity-safe.";
+          } catch (const std::exception& error) {
+            live_tracking_state = beatglass::TrackingState::error;
+            live_status = std::string("Live analysis failed: ") + error.what();
+            live_session->stop();
+          }
+        }
+      }
+#endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
         try { result = analysis_future.get(); status = "Analysis complete — estimates are backed by the file analyzer."; }
         catch (const std::exception& error) { result.reset(); status = std::string("Analysis failed: ") + error.what(); }
