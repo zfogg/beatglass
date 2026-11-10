@@ -4566,10 +4566,10 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: visible ? "Estimate source: selected system output · combined mix" : "Estimate source unavailable"
                         Accessible.name: "Overlay estimate attribution, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                        Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; source retained" : "; source ready")
+                        Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending; source retained" : "; source ready")
                         Accessible.role: Accessible.StaticText
                         Accessible.description: visible
-                            ? text + ". Track and deck metadata are unavailable unless a separately supported source provides them." + (window.overlayDisplayRecoveryPending ? " The selected combined-output source is retained while recovery is pending." : "")
+                            ? text + ". Track and deck metadata are unavailable unless a separately supported source provides them." + (window.overlayCaptureEvidenceStale ? " Previously displayed estimates are stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " The selected combined-output source is retained while recovery is pending." : "")
                             : text
                         ToolTip.text: visible ? Accessible.description : "Overlay estimate source"
                         Layout.fillWidth: true

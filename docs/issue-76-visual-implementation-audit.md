@@ -761,6 +761,8 @@ Retry overlay capture repeats the same stale-evidence context in its accessible 
 
 The grouped live-evidence surface also reports stale capture context before its child controls, so screen-reader navigation announces freshness requirements at the recovery section boundary.
 
+Estimate attribution repeats the stale-capture marker as well, keeping the combined-output source label honest while its last accepted values await reacquisition.
+
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.
