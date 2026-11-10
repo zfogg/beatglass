@@ -3,6 +3,11 @@ import tempfile
 from pathlib import Path
 
 with tempfile.TemporaryDirectory() as directory:
+    for arguments in ([], ["one.json", "two.json", "three.json"]):
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", *arguments], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "usage: validate_native_host_provenance.py HOST.json [REPORT.json]" in result.stderr
+
     missing = Path(directory) / "missing.json"
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(missing)], capture_output=True, text=True)
     assert result.returncode != 0
