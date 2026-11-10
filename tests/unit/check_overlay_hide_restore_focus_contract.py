@@ -1103,6 +1103,12 @@ def test_overlay_pulse_status_exposes_tempo_period():
     assert "millisecond period" in label
 
 
+def test_live_evidence_description_mentions_pulse_period():
+    start = QML.index('objectName: "overlayLiveEvidenceGroup"')
+    body = QML[start : QML.index('objectName: "overlayEscapeHint"', start)]
+    assert "beat-pulse period" in body
+
+
 def test_recovery_pause_focus_helper_reports_target_result():
     start = QML.index("function focusOverlayRecoveryPauseState")
     body = QML[start : QML.index("    function resetOverlayRecoveryAttempts", start)]
