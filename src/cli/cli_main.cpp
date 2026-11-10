@@ -1356,8 +1356,9 @@ int main(int argc, char** argv) {
             live_key = music_state.rolling_key;
             live_chord = music_state.local_chord;
             if (music_state.rolling_key) presentation_snapshot.key_candidates.push_back({*music_state.rolling_key, music_state.rolling_key_strength.value_or(0.0f)});
-            if (music_state.local_chord && music_state.tonal_from && music_state.tonal_through) {
-              presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {*music_state.local_chord, music_state.local_chord_strength.value_or(0.0f)}});
+            if (music_state.tonal_from && music_state.tonal_through) {
+              for (const auto& label : live_tonal_history)
+                presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {label, music_state.local_chord_strength.value_or(0.0f)}});
             }
 #endif
             if (live_bpm) {
@@ -1445,7 +1446,7 @@ int main(int argc, char** argv) {
             live_key = music_state.rolling_key;
             live_chord = music_state.local_chord;
             if (music_state.rolling_key) presentation_snapshot.key_candidates.push_back({*music_state.rolling_key, music_state.rolling_key_strength.value_or(0.0f)});
-            if (music_state.local_chord && music_state.tonal_from && music_state.tonal_through) presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {*music_state.local_chord, music_state.local_chord_strength.value_or(0.0f)}});
+            if (music_state.tonal_from && music_state.tonal_through) for (const auto& label : live_tonal_history) presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {label, music_state.local_chord_strength.value_or(0.0f)}});
 #endif
             if (live_bpm) { live_tempo_history.push_back(*live_bpm); if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin()); }
             presentation_snapshot.tempo_history = live_tempo_history;
