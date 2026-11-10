@@ -339,6 +339,9 @@ capture-node identifiers from becoming ambiguous provenance.
 The NaN-clock regression in
 `tests/unit/check_native_host_provenance_clock_nan.py` keeps non-finite timing
 measurements out of native evidence.
+The infinity-clock regression in
+`tests/unit/check_native_host_provenance_clock_infinity.py` closes the remaining
+non-finite clock accuracy case.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
