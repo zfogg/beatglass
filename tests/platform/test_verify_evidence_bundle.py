@@ -148,6 +148,16 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("environment exceeds 512 characters", module.verify(root, manifest))
 
+    def test_artifact_inventory_has_bounded_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            artifacts = [{"path": f"capture-{index}.txt", "sha256": "0" * 64} for index in range(1001)]
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": artifacts,
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifacts exceed 1000 entries", module.verify(root, manifest))
+
     def test_commit_provenance_must_be_lowercase(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
