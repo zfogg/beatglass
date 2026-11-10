@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
 
@@ -55,6 +56,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if (
             not isinstance(relative, str)
             or not isinstance(expected, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected)
             or not canonical
             or canonical != relative
             or canonical in seen
