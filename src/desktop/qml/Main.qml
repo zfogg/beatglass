@@ -4865,10 +4865,10 @@ ApplicationWindow {
                         text: window.overlayLaunchFallbackActive ? "Review recovery" : "Review overlay summary"
                         activeFocusOnTab: true
                         Accessible.name: text + ", " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                        Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "available") + "; settings revision " + window.overlaySettingsRevision
+                        Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending; live overlay evidence stale" : "available") + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Button
                         Accessible.description: "Focus the consolidated overlay settings summary for display, size, opacity, and recovery state; "
-                            + (window.overlayDisplayRecoveryPending ? "recovery is pending; " : "recovery is ready; ")
+                            + (window.overlayDisplayRecoveryPending ? "recovery is pending and live overlay evidence is stale; " : "recovery is ready; ")
                             + "current settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description
                         onClicked: {
