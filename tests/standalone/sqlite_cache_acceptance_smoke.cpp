@@ -209,6 +209,11 @@ int main() {
     assert(cache.publish("rollback", rollback_key, "recovered-after-rollback", {}, [] { return true; }) == Publish::committed);
     assert(cache.find(rollback_key, result) && result == "recovered-after-rollback");
     assert(cache.invalidate(rollback_key));
+    cache.begin("stale-recover", unknown);
+    assert(cache.publish("stale-recover", unknown, "recovered-result", {}, [] { return false; }) == Publish::stale_input);
+    assert(cache.publish("stale-recover", unknown, "recovered-result", {}, [] { return true; }) == Publish::committed);
+    assert(cache.find(unknown, result) && result == "recovered-result");
+    assert(cache.invalidate(unknown));
     bool empty_id_rejected = false;
     try { (void)cache.discard_retryable(""); } catch (const std::invalid_argument&) { empty_id_rejected = true; }
     bool nul_id_rejected = false;
