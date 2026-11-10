@@ -301,6 +301,8 @@ If a required parent path is occupied by a file, report emission fails as
 unwritable rather than replacing or modifying that file.
 Symlink report destinations are rejected as unwritable; qualification output
 never follows a link or modifies its target.
+Symlinked `HOST.json` inputs are rejected as unreadable so qualification does
+not silently follow an unexpected evidence target.
 Existing report destinations must be regular files; directories and other
 special filesystem objects are rejected before temporary output is created.
 The optional report path must differ from `HOST.json`; self-overwrite is
