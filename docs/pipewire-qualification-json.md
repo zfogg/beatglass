@@ -268,3 +268,5 @@ If present, host `clock_source_frequency_hz` must be a positive numeric source
 frequency; boolean values are invalid.
 If present, host `clock_source_phase_offset_ns` must be numeric; boolean values
 are invalid.
+If present, host `clock_source_stability` must be a non-empty string describing
+the selected source's stability classification.
