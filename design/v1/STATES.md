@@ -293,3 +293,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Restore button routing | Restore button invokes the shared restore action | Keep button and keyboard restore behavior identical and regression-tested. |
 | Show button routing | Show button invokes the shared show action | Keep launch/fallback behavior identical across button and keyboard recovery paths. |
 | Retry button routing | Retry button starts bounded native recovery | Route button behavior through a named action preserving attempt count, stale evidence, and display-status focus. |
+| Retry button routing implementation | Retry button invokes the named bounded-recovery action | Keep button behavior aligned with keyboard retry and regression-tested. |
