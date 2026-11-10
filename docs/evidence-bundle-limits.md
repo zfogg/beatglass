@@ -96,3 +96,6 @@ All ancestor components are checked, including missing nested directories that
 would otherwise be created beneath a symlinked workspace component.
 Its `--max-age-hours` value must be positive, preventing accidental
 configuration that marks every retained bundle stale.
+The verifier also rejects symlinked bundle roots and manifest inputs, and
+requires the root to be a directory and manifest to be a regular file before
+parsing.

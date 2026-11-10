@@ -258,6 +258,17 @@ class EvidenceBundleTest(unittest.TestCase):
                 self.skipTest("symlinks unavailable")
             self.assertEqual(["manifest must not be a symlink"], module.verify(root, manifest))
 
+    def test_manifest_directory_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"; manifest.mkdir()
+            self.assertEqual(["manifest must be a regular file"], module.verify(root, manifest))
+
+    def test_bundle_root_file_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "bundle"; root.write_text("not a directory", encoding="utf-8")
+            manifest = Path(tmp) / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            self.assertEqual(["bundle root must be a directory"], module.verify(root, manifest))
+
     def test_non_regular_artifacts_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); artifact = root / "capture-dir"; artifact.mkdir()
