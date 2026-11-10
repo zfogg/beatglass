@@ -31,3 +31,7 @@ The cache identity implementation uses the same predicate, so all publication
 and collection paths invalidate only after a verified `changed` outcome.
 Collection pruning reports that outcome as `changed: content identity changed;
 catalog entry removed`, making the destructive action explicit to callers.
+
+The cache-identity API clears supplied diagnostic strings before each operation;
+on non-success they contain the stable status label and optional detail, while
+matching observations leave the diagnostic empty.
