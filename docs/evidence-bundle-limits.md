@@ -130,6 +130,8 @@ Symlinked artifact entries are grouped under `artifact_symlink` for direct
 retained-file indirection triage.
 Symlinked bundle roots are grouped under `bundle_symlink` for direct workspace
 boundary triage.
+Symlinked manifest inputs are grouped under `manifest_symlink` for direct
+manifest-boundary triage.
 Unsupported platform identifiers are grouped under `platform` for direct
 qualification-environment triage.
 Environment descriptor length, whitespace, and control-character failures

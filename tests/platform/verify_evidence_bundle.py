@@ -234,6 +234,8 @@ def main() -> int:
                 category = "parse"
             elif error == "bundle root must not be a symlink":
                 category = "bundle_symlink"
+            elif error == "manifest must not be a symlink":
+                category = "manifest_symlink"
             elif error.startswith(("bundle root must ", "manifest must ")):
                 category = "input_topology"
             elif error.startswith("artifact exceeds "):
