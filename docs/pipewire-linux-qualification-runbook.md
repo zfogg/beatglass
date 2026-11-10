@@ -71,6 +71,8 @@ When a summary declares a schema, it must identify the supported
 are rejected rather than interpreted as native evidence.
 Commit provenance is preserved exactly and must not contain leading or trailing
 whitespace, preventing ambiguous build identities in the handoff.
+Pending reasons follow the same rule so rendered host guidance does not acquire
+ambiguous whitespace around its actionable explanation.
 The generator rechecks uniqueness after making external paths portable, rejecting
 basename collisions that would otherwise collapse distinct artifacts together.
 The summary's `qualified` field must be a JSON boolean; string status values fail

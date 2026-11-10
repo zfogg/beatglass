@@ -103,6 +103,11 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_reason), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid pending reason" not in result.stderr + result.stdout:
         raise SystemExit("malformed pending reason was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": " host unavailable"}), encoding="utf-8")
+    padded_reason = root / "padded-reason-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(padded_reason), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid pending reason" not in result.stderr + result.stdout:
+        raise SystemExit("whitespace-padded pending reason was accepted")
     summary.write_text(json.dumps({"qualified": True, "native_artifacts": ["evidence.zip"]}), encoding="utf-8")
     missing_commit = root / "missing-commit-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(missing_commit), "--summary", str(summary)], capture_output=True, text=True)

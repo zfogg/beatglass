@@ -51,7 +51,7 @@ if summary is not None:
         raise SystemExit("native qualification summary has invalid execution blockers")
     if "native_execution_blockers" in summary and len(set(summary["native_execution_blockers"])) != len(summary["native_execution_blockers"]):
         raise SystemExit("native qualification summary has duplicate execution blockers")
-    if summary.get("qualified") is False and (not isinstance(summary.get("pending_reason"), str) or not summary["pending_reason"].strip() or any(ord(char) < 32 for char in summary["pending_reason"])):
+    if summary.get("qualified") is False and (not isinstance(summary.get("pending_reason"), str) or not summary["pending_reason"].strip() or summary["pending_reason"] != summary["pending_reason"].strip() or any(ord(char) < 32 for char in summary["pending_reason"])):
         raise SystemExit("native qualification summary has invalid pending reason")
     if summary.get("qualified") is True and (not isinstance(summary.get("commit"), str) or not summary["commit"].strip() or summary["commit"] != summary["commit"].strip()):
         raise SystemExit("native qualification summary has missing commit provenance")
