@@ -31,6 +31,9 @@ timestamps = [event.get("timestamp_ns") for event in events if isinstance(event,
 if timestamps and (len(timestamps) != len(events) or any(not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in timestamps)
                   or timestamps != sorted(timestamps)):
     raise SystemExit("transition timestamps must be positive, complete, and monotonic")
+device_ids = [event.get("device_id") for event in events if isinstance(event, dict) and event.get("device_id") is not None]
+if device_ids and (len(device_ids) != len(events) or any(not isinstance(value, str) or not value.strip() for value in device_ids)):
+    raise SystemExit("transition device identities must be complete and non-empty")
 error_event = next(event for event in events if event.get("event") == "error")
 if error_event.get("discontinuity") is not True:
     raise SystemExit("transition evidence has no discontinuity marker")
@@ -47,6 +50,8 @@ if restart.get("epoch") <= start.get("epoch"):
     raise SystemExit("restart does not advance the capture epoch")
 if not isinstance(restart.get("serial"), str) or not restart["serial"].strip():
     raise SystemExit("restart event has no sink serial")
+if device_ids and (not isinstance(start.get("device_id"), str) or not isinstance(restart.get("device_id"), str)):
+    raise SystemExit("device identity is missing from lifecycle boundary")
 reacquisition = restart.get("reacquisition")
 if reacquisition is not None:
     if not isinstance(reacquisition, dict) or reacquisition.get("epoch") != restart.get("epoch"):
