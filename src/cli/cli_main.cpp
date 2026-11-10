@@ -818,6 +818,14 @@ int main(int argc, char** argv) {
     if (!library_storage->open({database}, &library_storage_status)) library_storage.reset();
     else library_retryable_count = library_storage->retryable_runs().size();
   }
+  if (library_storage) {
+#if defined(BEATGLASS_LIBRARY_FINGERPRINT)
+    for (const auto& track : tracks) {
+      std::string catalog_diagnostic;
+      library_storage->refresh_collection_file(track.path, &catalog_diagnostic);
+    }
+#endif
+  }
 #endif
 #ifdef _WIN32
   auto live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();

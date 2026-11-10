@@ -94,5 +94,32 @@ TEST_CASE("storage owner exposes completed analysis cache reuse") {
   std::string result; REQUIRE(owner.find_cached(identity, result)); CHECK(result == "cached");
   owner.close(); std::filesystem::remove(path, ec);
 }
+
+#if defined(BEATGLASS_LIBRARY_FINGERPRINT)
+TEST_CASE("storage owner refreshes a persistent catalog entry from source evidence") {
+  beatglass::library::StorageOwner owner;
+  const auto database = std::filesystem::temp_directory_path() / "beatglass-storage-owner-catalog.sqlite";
+  const auto source = std::filesystem::temp_directory_path() / "beatglass-storage-owner-catalog.wav";
+  std::error_code ec;
+  std::filesystem::remove(database, ec);
+  std::filesystem::remove(source, ec);
+  {
+    std::ofstream output(source, std::ios::binary);
+    output << "catalog evidence";
+  }
+  REQUIRE(owner.open({database}));
+  std::string diagnostic;
+  REQUIRE(owner.refresh_collection_file(source, &diagnostic));
+  CHECK(diagnostic == "ok");
+  const auto entry = owner.cache()->entry(source.string());
+  REQUIRE(entry);
+  CHECK(entry->name == source.filename().string());
+  CHECK(entry->kind == "audio");
+  CHECK(entry->size_bytes == 16);
+  owner.close();
+  std::filesystem::remove(database, ec);
+  std::filesystem::remove(source, ec);
+}
+#endif
 #include <filesystem>
 #include <system_error>

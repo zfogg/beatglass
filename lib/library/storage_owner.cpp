@@ -1,4 +1,7 @@
 #include "beatglass/library/storage_owner.hpp"
+#if defined(BEATGLASS_LIBRARY_FINGERPRINT)
+#include "beatglass/library/detail/cache_identity.hpp"
+#endif
 #include <stdexcept>
 namespace beatglass::library {
 bool StorageOwner::open(const StorageConfig& config, std::string* diagnostic) {
@@ -14,6 +17,24 @@ bool StorageOwner::open(const StorageConfig& config, std::string* diagnostic) {
   }
 }
 void StorageOwner::close() noexcept { cache_.reset(); }
+bool StorageOwner::refresh_collection_file(const std::filesystem::path& path, std::string* diagnostic) {
+#if !defined(BEATGLASS_LIBRARY_FINGERPRINT)
+  (void)path;
+  if (diagnostic) *diagnostic = "file fingerprint support is disabled";
+  return false;
+#else
+  if (!cache_) {
+    if (diagnostic) *diagnostic = "storage is closed";
+    return false;
+  }
+  try {
+    return library_detail::refresh_collection_file(*cache_, path, {}, diagnostic) == library_detail::FingerprintStatus::ok;
+  } catch (const std::exception& e) {
+    if (diagnostic) *diagnostic = e.what();
+    return false;
+  }
+#endif
+}
 std::vector<library_detail::RetryableRun> StorageOwner::retryable_runs(std::size_t limit) const {
   return cache_ ? cache_->retryable_runs(limit) : std::vector<library_detail::RetryableRun>{};
 }
