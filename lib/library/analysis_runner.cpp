@@ -4,7 +4,15 @@ RetryableAnalysis::RetryableAnalysis(AnalysisRunner& runner, AnalysisOperation o
     : runner_(&runner), operation_(std::move(operation)), priority_(priority) {}
 void RetryableAnalysis::cancel() {
   std::lock_guard lock(mutex_);
-  if (handle_) handle_->cancel();
+  if (handle_) {
+    handle_->cancel();
+    // A queued job may be removed before its worker lambda runs. Persist
+    // recovery at the controller boundary as well; the worker-side callback
+    // remains responsible for running jobs and the transition is idempotent.
+    if (operation_.recover_cancellation) {
+      try { operation_.recover_cancellation(); } catch (...) {}
+    }
+  }
 }
 bool RetryableAnalysis::retry(int priority) {
   std::lock_guard lock(mutex_);
