@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 #include "beatglass/library/job_lifecycle.hpp"
 #include "beatglass/library/store.hpp"
 using namespace beatglass;
@@ -7,6 +8,21 @@ TEST_CASE("job progress is monotonic and bounded when total is known") {
   REQUIRE(job.progress(20)); CHECK_FALSE(job.progress(19)); CHECK_FALSE(job.progress(101));
   CHECK(job.snapshot().frames_processed == 20); CHECK_FALSE(job.complete());
   REQUIRE(job.progress(100)); REQUIRE(job.complete()); CHECK_FALSE(job.cancel()); CHECK_FALSE(job.fail());
+}
+TEST_CASE("job snapshots expose bounded progress for presentation") {
+  JobLifecycle known(100);
+  REQUIRE(known.start()); REQUIRE(known.progress(25));
+  const auto snapshot = known.snapshot();
+  CHECK(snapshot.progress().frames_processed == 25);
+  REQUIRE(snapshot.fraction().has_value());
+  CHECK(*snapshot.fraction() == Catch::Approx(0.25));
+
+  JobLifecycle unknown;
+  REQUIRE(unknown.start());
+  CHECK_FALSE(unknown.snapshot().fraction().has_value());
+
+  JobLifecycle empty(0);
+  CHECK(empty.snapshot().fraction() == Catch::Approx(1.0));
 }
 TEST_CASE("job cancellation and completion are ordered terminal decisions") {
   JobLifecycle cancelled; REQUIRE(cancelled.cancel()); CHECK_FALSE(cancelled.start()); CHECK_FALSE(cancelled.complete());
