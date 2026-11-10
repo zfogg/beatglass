@@ -993,6 +993,20 @@ portable build, unit/integration contracts, documentation checks, and issue-76
 QML contract locally. It does not qualify real WASAPI, Core Audio, PipeWire,
 desktop overlay, packaging, or native device behavior.
 
+## macOS native build evidence — 2026-11-10
+
+On the logged-in `zachbook-pro` (macOS 26.7.2, Intel MacBookPro16,1, Xcode
+26.2, Clang 23.1.5), `tests/macos/run_qualification.sh` reached the native
+desktop build. The run exposed and the merged #4570 fixes corrected four
+cross-platform defects: the `FileReader` private mutation guard, Qt Automoc
+generation for `StorageRecoveryBridge`, desktop analysis identity/admission
+names, and file-fingerprint/OpenSSL linkage. The resulting
+`beatglass-desktop.app` linked successfully as Mach-O x86_64 with bundle ID
+`org.beatglass.desktop` and an output-capture usage description. The full
+Catch2 rebuild was not completed in this run; Core Audio smoke discovery also
+did not produce a bounded report in the non-interactive invocation. Real
+permission, endpoint capture, overlay and long-session checks remain pending.
+
 ## Design-system rendering evidence — 2026-11-10
 
 In `design/v1`, `npm install`, `npm run check`, and `npm run render output`
