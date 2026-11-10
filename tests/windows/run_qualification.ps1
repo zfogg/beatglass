@@ -48,7 +48,7 @@ try {
       "-S", $repoRoot, "-B", $buildDirectory,
       "-G", "Visual Studio 17 2022", "-A", "x64",
       "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_TESTING=ON",
-      "-DBEATGLASS_BUILD_SLICE=ON",
+      "-DVCPKG_MANIFEST_FEATURES=desktop",`n      "-DBEATGLASS_BUILD_SLICE=ON",
       "-DBEATGLASS_BUILD_DESKTOP=ON", "-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON"
     )
     "cmake $($configureArgs -join ' ')"
