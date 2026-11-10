@@ -1337,6 +1337,7 @@ int main(int argc, char** argv) {
             beatglass::Snapshot presentation_snapshot;
             presentation_snapshot.state = state.state;
             presentation_snapshot.observed_through = {state.epoch, state.observed_through};
+            presentation_snapshot.analysis_delay_frames = state.observed_through >= state.analyzed_through ? state.observed_through - state.analyzed_through : 0;
             presentation_snapshot.bpm = state.bpm;
             presentation_snapshot.confidence = live_signal_confidence;
             presentation_snapshot.beats.resize(state.beats);
@@ -1429,7 +1430,7 @@ int main(int argc, char** argv) {
             live_signal_confidence = std::clamp(std::max(static_cast<float>(std::sqrt(energy / static_cast<double>(std::max<std::size_t>(1, packet_frames)))), peak * 0.35f) * 2.0f, 0.0f, 1.0f);
             const auto state = live_replay->process(block);
             live_bpm = state.bpm; live_tracking_state = state.state; live_beats = state.beats;
-            beatglass::Snapshot presentation_snapshot; presentation_snapshot.state = state.state; presentation_snapshot.observed_through = {state.epoch, state.observed_through}; presentation_snapshot.bpm = state.bpm; presentation_snapshot.confidence = live_signal_confidence; presentation_snapshot.beats.resize(state.beats);
+            beatglass::Snapshot presentation_snapshot; presentation_snapshot.state = state.state; presentation_snapshot.observed_through = {state.epoch, state.observed_through}; presentation_snapshot.analysis_delay_frames = state.observed_through >= state.analyzed_through ? state.observed_through - state.analyzed_through : 0; presentation_snapshot.bpm = state.bpm; presentation_snapshot.confidence = live_signal_confidence; presentation_snapshot.beats.resize(state.beats);
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
             if (!live_music_replay) live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
             const auto music_state = live_music_replay->process(block, {}, [&](const beatglass::CausalTonalFrame& tonal) {
