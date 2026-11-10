@@ -1510,27 +1510,18 @@ ApplicationWindow {
         overlayInteractionMode.forceActiveFocus()
         return applied && clickThroughToggle.checked === requestedClickThrough
     }
-    function handleOverlayClickThroughShortcut() {
+    function handleOverlayClickThroughShortcutAction() {
         if (!window.overlayBridge) {
             window.focusOverlayAvailabilityRecovery("Overlay interaction shortcut is unavailable because the native overlay bridge is not connected.", clickThroughToggle)
             return false
         }
         const requested = !window.overlayBridge.clickThrough
-        if (!requested) {
-            window.unlockOverlayAndRestoreFocus()
-            return false
-        }
-        const applied = window.overlayBridge.setClickThrough(requested)
-        if (!applied) {
-            window.overlayCaptureEvidenceStale = true
-            window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active. Live evidence remains stale until fresh capture arrives.")
-            clickThroughToggle.forceActiveFocus()
-            return false
-        }
-        window.overlayCaptureEvidenceStale = true
-        window.announceCaptureRecoveryState("DJ overlay click-through enabled; press Escape to unlock interaction. Live evidence remains stale until fresh capture arrives.")
-        clickThroughToggle.forceActiveFocus()
-        return true
+        if (!requested)
+            return window.unlockOverlayAndRestoreFocus()
+        return window.handleOverlayClickThroughButtonAction(true)
+    }
+    function handleOverlayClickThroughShortcut() {
+        return window.handleOverlayClickThroughShortcutAction()
     }
     function handleOverlayRetryShortcut() {
         navigation.currentIndex = 1

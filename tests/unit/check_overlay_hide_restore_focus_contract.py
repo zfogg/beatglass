@@ -818,3 +818,12 @@ def test_size_shortcut_routes_named_result_helper():
     assert "handleOverlaySizeChangeResult" in body
     assert "return resized" in body
     assert "window.handleOverlaySizeShortcut()" in QML
+
+
+def test_click_through_shortcut_routes_named_action_result():
+    start = QML.index("function handleOverlayClickThroughShortcutAction")
+    body = QML[start : QML.index("    function handleOverlayClickThroughShortcut()", start)]
+    assert "unlockOverlayAndRestoreFocus()" in body
+    assert "handleOverlayClickThroughButtonAction(true)" in body
+    shortcut = QML[QML.index("function handleOverlayClickThroughShortcut()") : QML.index("    function handleOverlayRetryShortcut", QML.index("function handleOverlayClickThroughShortcut()"))]
+    assert "return window.handleOverlayClickThroughShortcutAction()" in shortcut
