@@ -356,8 +356,11 @@ def main() -> int:
     parser.add_argument("--report", type=Path, help="write a JSON retention/readiness report")
     parser.add_argument("--max-age-hours", type=float, default=168, help="reject evidence older than this (default: 168)")
     parser.add_argument("--max-report-bytes", type=int, default=MAX_REPORT_BYTES)
+    parser.add_argument("--json", action="store_true", help="emit the readiness report on stdout")
     args = parser.parse_args()
     errors = check(args.status, args.bundles, args.max_age_hours)
+    if args.json:
+        print(json.dumps(report(args.status, args.bundles, args.max_age_hours), sort_keys=True))
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         serialized = json.dumps(report(args.status, args.bundles, args.max_age_hours), indent=2) + "\n"
