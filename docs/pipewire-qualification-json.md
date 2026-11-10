@@ -270,6 +270,8 @@ The host evidence root must be a JSON object; scalar, null, and array roots are
 rejected before provenance fields are inspected.
 `node_id` must be a positive integer; JSON booleans are explicitly rejected
 even though some language runtimes represent them as integers.
+Zero and negative node IDs are rejected as well; `1` is the minimum accepted
+host node identifier.
 `secure_boot` must be a JSON boolean when present; numeric sentinel values are
 not accepted as native host evidence.
 `tpm_present` follows the same boolean-only contract; numeric sentinel values
