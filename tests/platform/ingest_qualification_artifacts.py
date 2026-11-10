@@ -201,7 +201,13 @@ def main() -> int:
                                                  max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries,
                                                  max_total_artifact_bytes=args.max_total_artifact_bytes)
     if args.json:
+        artifact_count = 0; artifact_bytes = 0
+        if args.output.is_file() and not errors:
+            generated = json.loads(args.output.read_text(encoding="utf-8"))
+            artifact_count = len(generated.get("artifacts", []))
+            artifact_bytes = sum((args.root / item["path"]).stat().st_size for item in generated.get("artifacts", []))
         print(json.dumps({"schema_version": 1, "valid": not errors, "error_count": len(errors), "errors": errors,
+                          "artifact_count": artifact_count, "artifact_bytes": artifact_bytes,
                           "output": str(args.output), "limits": {"max_artifact_bytes": args.max_artifact_bytes,
                           "max_manifest_bytes": args.max_manifest_bytes, "max_entries": args.max_entries,
                           "max_total_artifact_bytes": args.max_total_artifact_bytes}}, sort_keys=True))
