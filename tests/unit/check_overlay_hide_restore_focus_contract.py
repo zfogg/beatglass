@@ -371,6 +371,13 @@ def test_stop_recovery_button_and_shortcut_share_action():
     assert "onClicked: window.handleOverlayStopRecoveryAction()" in QML
 
 
+def test_retry_action_keeps_fallback_focusable_on_failure():
+    start = QML.index("function handleOverlayRetryAction")
+    body = QML[start : QML.index("    function handleOverlayClearSafeModeShortcut", start)]
+    assert "showOverlayAndHideControls()" in body
+    assert "retryOverlay.forceActiveFocus()" in body
+
+
 def test_hide_toggle_uses_explicit_visibility_state():
     start = QML.index("function handleOverlayHideToggleShortcut")
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]

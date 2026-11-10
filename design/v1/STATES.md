@@ -281,4 +281,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Recovery action focus contract | Multiple paused-recovery entry points request the Resume action | Keep one canonical recovery focus helper so announcements and evidence labels cannot diverge. |
 | Safe-mode clear action contract | Keyboard and button safe-mode clear actions are both available | Route both surfaces through one reset/announcement/focus action so Retry remains deterministic. |
 | Stop recovery action contract | Keyboard and button stop-recovery actions are both available | Route both surfaces through one pause/announcement/focus action so Resume remains deterministic. |
+| Retry action contract | Keyboard retry starts native recovery from the control page | Keep the fallback visible on failure and return focus to Retry for another attempt. |
 | Hide/restore toggle recovery | User invokes the hide/restore overlay shortcut | Branch on explicit user-hidden state, announce restore intent and stale evidence, and route to the matching visibility transition. |
