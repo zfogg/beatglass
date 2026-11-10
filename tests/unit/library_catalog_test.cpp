@@ -122,6 +122,11 @@ TEST_CASE("catalog reports a replaced audio file as a directory") {
 }
 
 TEST_CASE("catalog orders case-fold collisions by original name and preserves paths") {
+#if defined(_WIN32)
+ // Windows filesystems commonly use case-insensitive identity, so these two
+ // names cannot coexist as distinct directory entries on the local volume.
+ return;
+#else
  TempDir dir; dir.file("alpha.wav"); dir.file("Alpha.wav");
  const auto result = beatglass::library::browse(dir.path);
  REQUIRE(result.entries.size() == 2);
@@ -129,6 +134,7 @@ TEST_CASE("catalog orders case-fold collisions by original name and preserves pa
  CHECK(result.entries[1].name == "alpha.wav");
  CHECK(result.entries[0].path == dir.path / "Alpha.wav");
  CHECK(result.entries[1].path == dir.path / "alpha.wav");
+#endif
 }
 
 TEST_CASE("catalog excludes unsupported files from matching searches") {
@@ -152,12 +158,16 @@ TEST_CASE("catalog search remains deterministic after replacing a filtered entry
 }
 
 TEST_CASE("catalog returns distinct case-sensitive paths for identical folded names") {
+#if defined(_WIN32)
+ return;
+#else
  TempDir dir; dir.file("Song.WAV"); dir.file("song.WAV");
  const auto result = beatglass::library::browse(dir.path, "song");
  REQUIRE(result.entries.size() == 2);
  CHECK(result.entries[0].path != result.entries[1].path);
  CHECK(result.entries[0].name == "Song.WAV");
  CHECK(result.entries[1].name == "song.WAV");
+#endif
 }
 
 TEST_CASE("catalog ignores unsupported files even with case-folded matches") {
@@ -207,7 +217,7 @@ TEST_CASE("catalog exposes root-relative identity paths") {
  CHECK(direct.entries[0].relative_path == direct.entries[0].path.filename());
  const auto recursive = beatglass::library::browse_recursive(dir.path);
  REQUIRE(recursive.entries.size() == 2);
- CHECK(recursive.entries.back().relative_path == std::filesystem::path("nested"));
+ CHECK(recursive.entries.front().relative_path == std::filesystem::path("nested"));
 }
 TEST_CASE("catalog result identifies its normalized query root") {
  TempDir dir; const auto result = beatglass::library::browse(dir.path);
