@@ -13,7 +13,7 @@ def main() -> None:
     doc = DOC.read_text(encoding="utf-8")
     required = [
         'objectName: "cancelAnalysisBatch"',
-        'Accessible.value: visible ? (window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount) : ""',
+        'Accessible.description: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "Cancel all queued or running analysis items retained in the current batch. Current state: " + window.analysisJobBridge.status + "; accepted items: " + window.analysisJobBridge.batchAcceptedCount + "." : "Batch cancel is unavailable because the current batch is no longer active."',
         'Current state: " + window.analysisJobBridge.status + "; accepted items: " + window.analysisJobBridge.batchAcceptedCount',
         '"Batch cancel is unavailable because the current batch is no longer active."',
         'enabled: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running")',

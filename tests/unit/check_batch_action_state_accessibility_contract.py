@@ -13,7 +13,7 @@ def main() -> None:
     doc = DOC.read_text(encoding="utf-8")
     required = [
         'objectName: "retryAnalysisBatch"',
-        'Accessible.value: visible ? (window.analysisJobBridge.status + "; accepted items " + window.analysisJobBridge.batchAcceptedCount) : ""',
+        'Accessible.description: visible ? text + ". " + window.analysisJobBridge.batchAcceptedCount + " accepted item(s) are represented; actions retain source audio and return focus after completion." : "No analysis batch actions are available."',
         'Current state: " + window.analysisJobBridge.status',
         'objectName: "discardAnalysisBatch"',
         'Accessible.description: visible ? "Clear the terminal batch recovery state without changing source audio.',
