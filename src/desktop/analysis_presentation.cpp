@@ -1,2 +1,13 @@
 #include "analysis_presentation.hpp"
-void AnalysisPresentation::publish(const beatglass::Snapshot& s){bpm_=s.bpm?QString::number(*s.bpm,'f',1):QStringLiteral("—");key_=s.key_candidates.empty()?QStringLiteral("—"):QString::fromStdString(s.key_candidates.front().label);beats_=s.beats.size();frames_=s.observed_through.frame;emit changed();}
+
+void AnalysisPresentation::publish(const beatglass::Snapshot& snapshot) {
+  const auto displayed = beatglass::present_snapshot(snapshot);
+  bpm_ = QString::fromStdString(displayed.tempo);
+  key_ = QString::fromStdString(displayed.key);
+  chord_ = QString::fromStdString(displayed.chord);
+  confidence_ = displayed.confidence ? *displayed.confidence : -1.0;
+  stale_ = displayed.stale;
+  beats_ = displayed.beat_count;
+  frames_ = displayed.observed_frames;
+  emit changed();
+}
