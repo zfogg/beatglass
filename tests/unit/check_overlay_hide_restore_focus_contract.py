@@ -452,3 +452,7 @@ def test_retry_button_named_attempt_action():
     body = QML[start : QML.index("    function handleOverlayShowAction", start)]
     assert "overlayRecoveryAttemptCount += 1" in body
     assert "overlayDisplayStatus.forceActiveFocus()" in body
+
+
+def test_retry_button_routes_to_named_action():
+    assert "onClicked: window.handleOverlayRetryButtonAction()" in QML
