@@ -1289,6 +1289,12 @@ ApplicationWindow {
         if (window.catalogDiagnostic !== "") return "This folder could not be read: " + window.catalogDiagnostic
         return "No matching audio files or folders. Try a different search or choose another folder."
     }
+    function markOverlayRecoveryStale(reason) {
+        window.overlayCaptureEvidenceStale = true
+        window.overlayDisplayRecoveryPending = true
+        if (reason !== "")
+            window.announceCaptureRecoveryState(reason + " Live evidence is stale until fresh capture arrives.")
+    }
     function restoreOverlayFallbackControls(reason) {
         window.overlayLaunchFallbackActive = true
         window.overlayDisplayRecoveryPending = true
@@ -1304,7 +1310,7 @@ ApplicationWindow {
         window.overlayHiddenByUser = false
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
             const savedDisplay = window.overlayPreferredDisplayName !== "" ? window.overlayPreferredDisplayName : "the saved display"
             window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback. Persisted settings for " + savedDisplay + " remain retained for the next retry.")
             overlayDisplay.forceActiveFocus()
@@ -1312,7 +1318,7 @@ ApplicationWindow {
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback.")
             window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             overlayDisplay.forceActiveFocus()
             return false
@@ -1321,7 +1327,7 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = false
         if (!window.overlayBridge.showOverlay()) {
             window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
             window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             window.restoreOverlayFallbackControls("")
             overlayDisplay.forceActiveFocus()
