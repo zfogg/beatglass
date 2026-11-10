@@ -844,6 +844,7 @@ ApplicationWindow {
         function onScreenNamesChanged() {
             if (!window.overlayBridge)
                 return
+            const wasRecoveryPending = window.overlayDisplayRecoveryPending
             const savedName = window.overlayPreferredDisplayName
             const savedIndex = savedName !== "" ? window.overlayBridge.screenNames.indexOf(savedName) : -1
             if (savedIndex >= 0) {
@@ -852,6 +853,8 @@ ApplicationWindow {
                 window.overlayDisplayRecoveryPending = false
                 if (typeof overlayDisplayControl !== "undefined")
                     overlayDisplayControl.currentIndex = savedIndex
+                if (wasRecoveryPending && typeof retryOverlay !== "undefined")
+                    retryOverlay.forceActiveFocus()
             } else {
                 window.restoreOverlayDisplaySelectionFromBridge()
             }
