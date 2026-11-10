@@ -56,4 +56,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_attempt), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid execution attempt" not in result.stderr + result.stdout:
         raise SystemExit("malformed native execution attempt was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "native_execution_blockers": "Linux host"}), encoding="utf-8")
+    invalid_blockers = root / "invalid-blockers-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(invalid_blockers), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid execution blockers" not in result.stderr + result.stdout:
+        raise SystemExit("malformed native execution blockers were accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
