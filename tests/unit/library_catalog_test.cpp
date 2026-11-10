@@ -196,6 +196,20 @@ TEST_CASE("catalog reports a file path as an invalid browse root") {
  CHECK(result.entries.empty());
  CHECK_FALSE(result.diagnostic.empty());
 }
+TEST_CASE("catalog fails closed when the entry budget is exceeded") {
+ TempDir dir; dir.file("one.wav"); dir.file("two.flac");
+ const auto result = beatglass::library::browse(dir.path, {}, 1);
+ CHECK(result.entries.empty());
+ CHECK(result.diagnostic == "catalog entry limit exceeded");
+}
+TEST_CASE("recursive catalog applies the entry budget") {
+ TempDir dir; const auto root = dir.path;
+ std::filesystem::create_directories(root / "nested");
+ std::ofstream(root / "nested" / "deep.wav") << "x";
+ const auto result = beatglass::library::browse_recursive(root, {}, 1);
+ CHECK(result.entries.empty());
+ CHECK(result.diagnostic == "catalog entry limit exceeded");
+}
 TEST_CASE("catalog skips symlinked files and directories") {
   TempDir dir; dir.file("real.wav");
   std::error_code ec;
