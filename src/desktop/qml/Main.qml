@@ -891,11 +891,13 @@ ApplicationWindow {
         window.overlayDisplaySelectionRequired = true
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState(message + " Live evidence is stale until fresh capture arrives.")
+        return true
     }
     function focusOverlayCaptureStartupFailure() {
         window.overlayCaptureEvidenceStale = true
         window.overlayDisplayRecoveryPending = true
         window.announceCaptureRecoveryState("Overlay capture is unavailable; displayed estimates are stale until monitoring connects. Recovery remains available from the control window.")
+        return true
     }
     function focusOverlayRecoveryAction(message) {
         navigation.currentIndex = 1
