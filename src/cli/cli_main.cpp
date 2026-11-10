@@ -1228,7 +1228,10 @@ int main(int argc, char** argv) {
     const auto spectrum_view = vbox({text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum)});
     const auto waveform_view = vbox({text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, shared_observed_frames)});
     std::string beat_grid(32, '.');
-    for (std::size_t index = 0; index < std::min<std::uint64_t>(shared_beat_count, beat_grid.size()); ++index) beat_grid[beat_grid.size() - 1 - index] = '*';
+    for (const auto frame : live_presentation.beat_frames) {
+      const auto position = shared_observed_frames ? std::min<std::size_t>(beat_grid.size() - 1, static_cast<std::size_t>(frame * beat_grid.size() / shared_observed_frames)) : beat_grid.size() - 1;
+      beat_grid[position] = '*';
+    }
     const auto beat_grid_view = vbox({text("Beat grid") | bold | color(Color::YellowLight), text("|" + beat_grid + "|") | color(Color::YellowLight) | bgcolor(Color::RGB(35, 28, 8)), text("Recent beats: " + std::to_string(shared_beat_count)) | color(Color::GrayLight)});
     const auto tonal_history_view = vbox({text("Tonal history") | bold | color(Color::BlueLight), text(live_tonal_label) | color(Color::BlueLight), text("Key: " + live_key_label + "   Chord: " + live_chord_label) | color(Color::White)});
     const auto visualization = (visual_mode == "waveform" ? waveform_view : visual_mode == "spectrum" ? spectrum_view : visual_mode == "beat_grid" ? beat_grid_view : visual_mode == "tonal_history" ? tonal_history_view : vbox({spectrum_view, waveform_view})) | size(HEIGHT, LESS_THAN, 5);
