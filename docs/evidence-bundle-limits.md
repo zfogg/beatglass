@@ -118,6 +118,8 @@ Malformed scenario evidence references are grouped under `scenario_reference`
 for direct retained-evidence naming triage.
 Unsupported scenario fields are grouped under `scenario_schema` for direct
 manifest-contract triage.
+Shared scenario evidence ownership is grouped under `scenario_identity` for
+direct coverage and deduplication triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.

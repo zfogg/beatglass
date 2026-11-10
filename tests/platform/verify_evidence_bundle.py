@@ -254,6 +254,8 @@ def main() -> int:
                 category = "environment"
             elif error.startswith("commit "):
                 category = "commit"
+            elif error.startswith(("scenario evidence shared:", "scenario evidence role mismatch:")):
+                category = "scenario_identity"
             elif error.startswith("scenario evidence"):
                 category = "scenario_evidence"
             elif error.startswith("invalid scenario:"):
