@@ -140,6 +140,7 @@ struct AnalysisView {
   std::optional<std::string> key;
   std::optional<std::string> chord;
   std::vector<std::string> tonal_history;
+  bool from_persistent_cache{};
 };
 struct AnalysisBatch {
   std::vector<std::pair<std::filesystem::path, AnalysisView>> results;
@@ -643,6 +644,7 @@ int main(int argc, char** argv) {
           if (admission.cached) {
             if (auto cached = decode_cached_analysis(*admission.cached, path)) {
               if (cached->waveform.empty()) cached->waveform = decode_waveform(path, stop_token);
+              cached->from_persistent_cache = true;
               batch.results.emplace_back(path, std::move(*cached));
               ++batch.cache_hits;
               batch_completed.fetch_add(1, std::memory_order_acq_rel);
@@ -939,7 +941,7 @@ int main(int argc, char** argv) {
       if (!query.empty() && searchable.find(query) == std::string::npos) continue;
       auto label = tracks[i].title + "  •  " + tracks[i].path.filename().string();
       if (analysis_errors.contains(tracks[i].path)) label += "  [failed]";
-      else if (completed_analyses.contains(tracks[i].path)) label += "  [analyzed]";
+      else if (const auto analyzed = completed_analyses.find(tracks[i].path); analyzed != completed_analyses.end()) label += analyzed->second.from_persistent_cache ? "  [cached]" : "  [analyzed]";
       if (tracks[i].metadata) label += "  " + format_duration(*tracks[i].metadata);
       library_labels.push_back(std::move(label)); library_indices.push_back(i);
       if (i == selected) library_visible_selected = static_cast<int>(library_labels.size()) - 1;
