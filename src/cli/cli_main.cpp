@@ -974,10 +974,25 @@ int main(int argc, char** argv) {
   std::uint64_t live_visualization_revision = 0;
   beatglass::VisualizationProcessor live_visualization([](void*) noexcept {}, nullptr);
 #endif
+  std::string live_tonal_candidate_key;
+  std::string live_tonal_candidate_chord;
+  unsigned live_tonal_candidate_streak = 0;
   auto update_fft_tonal = [&] {
-    if (live_key && live_chord) return;
     const auto estimate = estimate_tonal_labels(live_spectrum, live_sample_rate);
     if (estimate.key.empty() || estimate.chord.empty()) return;
+    if (estimate.key == live_tonal_candidate_key && estimate.chord == live_tonal_candidate_chord) {
+      live_tonal_candidate_streak = std::min(3u, live_tonal_candidate_streak + 1u);
+    } else {
+      live_tonal_candidate_key = estimate.key;
+      live_tonal_candidate_chord = estimate.chord;
+      live_tonal_candidate_streak = 1;
+    }
+    // Require three consecutive display frames before changing a displayed
+    // label. This keeps the causal FFT fallback responsive to real changes
+    // while avoiding single-frame spectral spikes.
+    if (live_tonal_candidate_streak < 3) return;
+    const auto changed = !live_key || !live_chord || *live_key != estimate.key || *live_chord != estimate.chord;
+    if (!changed) return;
     live_key = estimate.key;
     live_chord = estimate.chord;
     live_tonal_history.push_back(estimate.chord);
@@ -1399,6 +1414,9 @@ int main(int argc, char** argv) {
     live_bpm.reset();
     live_key.reset();
     live_chord.reset();
+    live_tonal_candidate_key.clear();
+    live_tonal_candidate_chord.clear();
+    live_tonal_candidate_streak = 0;
     live_tonal_history.clear();
     live_tracking_state = beatglass::TrackingState::stopped;
     live_sample_rate = 0;

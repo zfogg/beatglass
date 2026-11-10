@@ -18,6 +18,8 @@ def main() -> int:
         raise SystemExit("CLI provisional tonal evidence is not published through the shared presentation snapshot")
     if "live_endpoint_preference, live_endpoint_name_preference" not in tui:
         raise SystemExit("CLI settings persistence can discard the selected live endpoint")
+    if "live_tonal_candidate_streak" not in tui or "live_tonal_candidate_streak < 3" not in tui:
+        raise SystemExit("CLI Live tonal fallback has no bounded candidate hysteresis")
     if "Analysis delay: " not in tui: raise SystemExit("CLI Live view does not expose shared analysis delay")
     if "present_analysis_view" not in tui or "beatglass::present_snapshot(snapshot)" not in tui: raise SystemExit("CLI Library details do not use shared analysis presentation")
     readme = (root / "README.md").read_text(encoding="utf-8")
