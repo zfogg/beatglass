@@ -204,4 +204,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Safe mode stale state | Native overlay retries are paused after the bounded limit | Keep monitoring availability clear while naming stale live evidence and the fresh-capture exit condition. |
 | Safe mode shortcut stale state | User reviews the keyboard shortcut for clearing safe mode | Keep the recovery shortcut actionable while announcing the stale-evidence boundary. |
 | Recovery attempt stale state | User reviews bounded native overlay recovery progress | Keep attempt progress visible while identifying stale live evidence and the fresh-capture exit condition. |
+| Stop recovery shortcut stale state | User reviews the keyboard shortcut for stopping bounded recovery | Keep the stop action actionable while announcing stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
