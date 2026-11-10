@@ -297,6 +297,9 @@ platform values cannot enter the evidence path in place of canonical strings.
 The null regression in
 `tests/unit/check_native_host_provenance_platform_null.py` keeps missing platform
 identity fail-closed even when other evidence fields are present.
+The empty-value regression in
+`tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
+platform identity rather than treating it as an unknown alias.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
