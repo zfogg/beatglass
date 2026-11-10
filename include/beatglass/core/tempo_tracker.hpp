@@ -3,9 +3,15 @@
 #include <memory>
 #include <optional>
 #include <span>
+#include <vector>
 namespace beatglass {
 /** Optional estimated BPM and count of detected beats since acquisition/reset. */
-struct TempoEstimate { std::optional<float> bpm; std::uint64_t beats{}; };
+struct TempoEstimate {
+  std::optional<float> bpm;
+  std::uint64_t beats{};
+  /** Recent detected beat boundaries, oldest first, bounded by the tracker. */
+  std::vector<std::uint64_t> beat_frames;
+};
 // Worker-thread only. Input is mono float PCM at the configured rate. Frame
 // offsets are authoritative within an epoch. Gaps, epoch changes and explicit
 // discontinuities discard all partial windows and restart acquisition.

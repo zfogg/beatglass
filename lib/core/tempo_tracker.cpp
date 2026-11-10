@@ -34,7 +34,10 @@ void TempoTracker::process(std::span<const float> samples, std::uint64_t epoch, 
     if (s.used == Impl::hop) {
       aubio_tempo_do(s.tracker, s.input, s.output); s.used = 0;
       if (s.output->data[0] != 0) {
-        ++s.result.beats; const auto bpm = aubio_tempo_get_bpm(s.tracker);
+        ++s.result.beats;
+        s.result.beat_frames.push_back(s.next);
+        if (s.result.beat_frames.size() > 64) s.result.beat_frames.erase(s.result.beat_frames.begin());
+        const auto bpm = aubio_tempo_get_bpm(s.tracker);
         if (std::isfinite(bpm) && bpm > 0) s.result.bpm = bpm;
       }
     }

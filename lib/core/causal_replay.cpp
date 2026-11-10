@@ -48,7 +48,7 @@ struct CausalTempoReplay::Impl {
     hop_first += hop; result.analyzed_through = hop_first;
     const auto current = tracker->estimate();
     if (current.bpm && lifecycle.state() != TrackingState::silent && !lifecycle.accept(lifecycle.token())) throw std::runtime_error("Could not accept tracking evidence");
-    result.state = lifecycle.state(); result.beats = current.beats;
+    result.state = lifecycle.state(); result.beats = current.beats; result.beat_frames = current.beat_frames;
     result.bpm = result.state == TrackingState::tracking ? current.bpm : std::nullopt;
     if (observer) observer({result.epoch, first, rate, reset_next || reset || resumed, mono}, result.state);
     if (failed) throw std::logic_error("Replay observer reentered process");
