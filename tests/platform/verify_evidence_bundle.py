@@ -33,7 +33,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
     if isinstance(environment, str) and any(ord(char) < 32 and char not in "\t" for char in environment):
         errors.append("environment must not contain control characters")
     commit = data.get("commit")
-    if isinstance(commit, str) and commit.strip() and not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
+    if isinstance(commit, str) and commit.strip() and not re.fullmatch(r"[0-9a-f]{40}", commit):
         errors.append("commit must be a 40-character hexadecimal SHA-1")
     captured_at = data.get("captured_at")
     if isinstance(captured_at, str) and captured_at.strip():
