@@ -128,6 +128,7 @@ ApplicationWindow {
         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
         onActivated: window.navigateLibraryParentFolder()
     }
+    Shortcut { objectName: "libraryChooseFolderShortcut"; sequence: "Ctrl+Alt+F"; context: Qt.ApplicationShortcut; onActivated: { navigation.currentIndex = 0; folderPicker.open() } }
     Shortcut {
         objectName: "librarySortShortcut"
         sequence: "Ctrl+Alt+S"
