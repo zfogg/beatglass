@@ -100,6 +100,8 @@ if isinstance(payload, dict):
                 or isinstance(host["clock_sync_interval_ms"], bool)
                 or host["clock_sync_interval_ms"] < 0):
             raise SystemExit("transition host provenance has invalid sync interval")
+        if host.get("clock_sync_method") is not None and (not isinstance(host["clock_sync_method"], str) or not host["clock_sync_method"].strip()):
+            raise SystemExit("transition host provenance has no sync method")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
