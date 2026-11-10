@@ -105,3 +105,13 @@ def test_capture_monitor_status_changes_share_one_transition_handler():
     assert "transitionCaptureEvidence(false" in body
     connections = QML[QML.index("target: window.captureMonitorBridge") : start]
     assert "window.handleCaptureMonitorStatusChanged()" in connections
+
+
+def test_endpoint_changes_share_overlay_stale_recovery_handler():
+    start = QML.index("function handleOverlayEndpointChanged")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "overlayDisplayRecoveryPending = true" in body
+    assert "endpointSelector.forceActiveFocus()" in body
+    connections = QML[QML.index("target: window.endpointSelectionBridge") : start]
+    assert "window.handleOverlayEndpointChanged()" in connections

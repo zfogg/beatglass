@@ -1996,16 +1996,19 @@ ApplicationWindow {
     }
     Connections {
         target: window.endpointSelectionBridge
-        function onChanged() {
-            window.clearVisualizationForCaptureState("Selection cleared because the capture endpoint changed.")
-            if (window.endpointSelectionBridge.status.indexOf("Error") >= 0)
-                window.announceVisualizationRecovery("Capture endpoint retry failed; check permission and reacquire a device.")
-            else if (window.endpointSelectionBridge.endpoints.length === 0)
-                window.announceVisualizationRecovery("No capture endpoint is available; connect a device and refresh.")
-            else
-                window.announceVisualizationRecovery("Capture endpoint changed; waiting for a fresh accepted snapshot.")
-            endpointSelector.forceActiveFocus()
-        }
+        function onChanged() { window.handleOverlayEndpointChanged() }
+    }
+    function handleOverlayEndpointChanged() {
+        window.overlayCaptureEvidenceStale = true
+        window.overlayDisplayRecoveryPending = true
+        window.clearVisualizationForCaptureState("Selection cleared because the capture endpoint changed.")
+        if (window.endpointSelectionBridge.status.indexOf("Error") >= 0)
+            window.announceVisualizationRecovery("Capture endpoint retry failed; check permission and reacquire a device. Overlay evidence is stale until fresh capture arrives.")
+        else if (window.endpointSelectionBridge.endpoints.length === 0)
+            window.announceVisualizationRecovery("No capture endpoint is available; connect a device and refresh. Overlay evidence is stale until fresh capture arrives.")
+        else
+            window.announceVisualizationRecovery("Capture endpoint changed; waiting for a fresh accepted snapshot. Overlay evidence is stale until fresh capture arrives.")
+        endpointSelector.forceActiveFocus()
     }
     Connections {
         target: window.captureMonitorBridge
