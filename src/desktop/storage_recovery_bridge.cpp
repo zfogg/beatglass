@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <algorithm>
 
+
 class StorageRecoveryBridge::Worker final : public QObject {
   Q_OBJECT
 public slots:
@@ -303,6 +304,11 @@ void StorageRecoveryBridge::findCached(QString content, QString engine, QString 
     emit statusChanged();
   }
 }
+
+// This translation unit defines the private Worker QObject inline; include
+// the generated meta-object implementation so Qt's automoc build is valid on
+// all generators and platforms.
+#include "storage_recovery_bridge.moc"
 void StorageRecoveryBridge::invalidateCached(QString content, QString engine, QString configuration, QString mode) {
   if (content.trimmed().isEmpty()) {
     status_ = QStringLiteral("Cache invalidation rejected: content identity is required");
