@@ -1394,7 +1394,12 @@ int main(int argc, char** argv) {
           } catch (const std::exception& error) { live_tracking_state = beatglass::TrackingState::error; live_status = std::string("Live analysis failed: ") + error.what(); live_pipewire->stop(); }
         }
         const auto pipewire_status = live_pipewire->poll_status();
-        if (pipewire_status.requires_reacquisition()) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status = "PipeWire capture needs reacquisition; restart monitoring for a fresh epoch."; }
+        // A newly negotiated stream deliberately reports one discontinuity so
+        // downstream DSP starts a fresh epoch. That marker is not itself a
+        // failed stream; only loss of activity, restart, overflow, or an error
+        // requires clearing evidence and reacquiring. MonitorStatus::requires_reacquisition
+        // remains the broad contract; this UI path distinguishes its boundary marker.
+        if (!pipewire_status.active || pipewire_status.needs_restart || pipewire_status.overflowed || pipewire_status.has_error()) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status = "PipeWire capture needs reacquisition; restart monitoring for a fresh epoch."; }
         if (live_has_packet && std::chrono::steady_clock::now() - live_last_packet > std::chrono::milliseconds(1500)) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status = "Capture is running but no fresh PipeWire packets arrived; reacquiring…"; live_has_packet = false; }
       }
 #endif
