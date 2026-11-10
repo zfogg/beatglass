@@ -19,6 +19,6 @@ if host.get("secure_boot") is not None and not isinstance(host["secure_boot"], b
 if host.get("tpm_present") is not None and not isinstance(host["tpm_present"], bool):
     raise SystemExit("host provenance has an invalid TPM flag")
 if len(sys.argv) == 3:
-    report = {"valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
+    report = {"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
     Path(sys.argv[2]).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
 print("native host provenance verified")
