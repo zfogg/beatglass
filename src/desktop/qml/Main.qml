@@ -2852,7 +2852,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    Button { id: chooseFolder; text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: window.openLibraryFolderChooser() }
+                    Button { id: chooseFolder; text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.value: window.browseFolder.toString() || "No folder selected"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: window.openLibraryFolderChooser() }
                     Button {
                         id: addFolderRecursively
                         text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
