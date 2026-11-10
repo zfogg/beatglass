@@ -415,3 +415,10 @@ def test_unlock_button_shares_unlock_focus_action():
     assert "unlockOverlayAndRestoreFocus()" in body
     assert "overlayInteractionMode.forceActiveFocus()" in body
     assert "onClicked: window.handleOverlayUnlockAction()" in QML
+
+
+def test_hide_button_shares_hide_action():
+    start = QML.index("function handleOverlayHideAction")
+    body = QML[start : QML.index("    function handleOverlayRestoreAction", start)]
+    assert "hideOverlayAndRestoreControls()" in body
+    assert "onClicked: window.handleOverlayHideAction()" in QML
