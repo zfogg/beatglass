@@ -87,6 +87,7 @@
 | Overlay controls recovering | Display and size controls remain visible while the native destination is recovering | Expose recovery and stale-evidence semantics at the group level so assistive-technology users understand why restore/retry is gated. |
 | Overlay recovery paused status | User pauses native overlay recovery while monitoring remains active | State that overlay evidence is stale until recovery succeeds, retain control-window monitoring, and offer an explicit retry path. |
 | Overlay recovery attempts | Native overlay retries are in progress within the bounded limit | Expose attempt progress and the stale-evidence boundary accessibly while keeping monitoring and stop-recovery controls available. |
+| Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
 | DJ | Monitoring selected output, activity and combined-mix caveat | Start/stop, select default or explicit output, half/double BPM, reset/reacquire. |
