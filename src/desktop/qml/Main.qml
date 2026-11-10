@@ -4945,6 +4945,7 @@ ApplicationWindow {
                         }
                     }
                     Button {
+                    id: retryOverlay
                         objectName: "overlayCaptureRecoveryAction"
                         visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
                         text: "Retry overlay capture"
@@ -5071,6 +5072,7 @@ ApplicationWindow {
                     ToolTip.text: "Overlay destination display and window size; current display is announced when available" + (window.overlayCaptureEvidenceStale ? "; live evidence is stale until fresh capture" : "")
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
+                        id: overlayDisplay
                         objectName: "overlayDisplay"
                         activeFocusOnTab: true
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
