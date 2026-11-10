@@ -9,6 +9,11 @@ assert "host provenance report has invalid checked fields" in source
 assert "host provenance report omits required provenance fields" in source
 print("Native host provenance report validator verified")
 
+for arguments in ([], ["one.json", "two.json"]):
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance_report.py", *arguments], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "usage: validate_native_host_provenance_report.py REPORT.json" in result.stderr
+
 with tempfile.TemporaryDirectory() as directory:
     report = Path(directory) / "invalid-report.json"
     report.write_text(json.dumps({

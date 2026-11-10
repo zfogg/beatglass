@@ -294,6 +294,8 @@ Pass a second path to emit a deterministic validation report for the bundle:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 Validate that generated report before packaging with:
 `python tests/pipewire/validate_native_host_provenance_report.py REPORT.json`.
+The report validator accepts exactly one report path; missing or extra
+arguments fail with the usage contract before any file is opened.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
