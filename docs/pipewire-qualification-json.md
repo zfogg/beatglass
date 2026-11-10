@@ -43,5 +43,8 @@ positive integer no earlier than the restart timestamp.
 Reacquisition evidence may include `drop_count`; when supplied it must be a
 non-negative integer so overflow accounting remains trustworthy through recovery.
 
+Reacquisition evidence may include `error_code`; when supplied it must be a
+non-zero integer preserving native recovery error provenance.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
