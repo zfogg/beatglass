@@ -3919,9 +3919,6 @@ ApplicationWindow {
                                         ? "This removes only retry record " + storageRecovery.selectedRunId + ". The source audio file is not changed."
                                         : "This removes only the retry record. The source audio file is not changed."
                                     wrapMode: Text.WordWrap
-                                    Accessible.name: "Discard saved analysis run confirmation"
-                                    Accessible.description: "Confirm to remove only the selected retry record. Cancel is focused first; press Tab to reach the destructive OK action, Enter confirms, and Escape cancels. The source audio file is never changed. Cancel returns focus to the discard control."
-                                    Accessible.role: Accessible.StaticText
                                     Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                         ? "Discard retryable run " + storageRecovery.selectedRunId + " confirmation"
                                         : "Discard retryable run confirmation"
