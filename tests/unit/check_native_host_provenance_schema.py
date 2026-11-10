@@ -15,4 +15,7 @@ assert schema["required"] == ["platform", "name"]
 assert schema["properties"]["node_id"]["minimum"] == 1
 assert schema["properties"]["secure_boot"]["type"] == "boolean"
 assert schema["properties"]["clock_accuracy_ns"]["minimum"] == 0
+assert schema["properties"]["clock_accuracy_ns"]["type"] == "integer"
+assert schema["properties"]["clock_source_count"]["type"] == "integer"
+assert schema["properties"]["clock_source_count"]["minimum"] == 1
 print("Native host provenance schema verified")
