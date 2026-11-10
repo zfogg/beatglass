@@ -13,6 +13,13 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode != 0
     assert "host provenance is unreadable" in result.stderr
 
+    for value in ("null", "[]", "42"):
+        scalar = Path(directory) / "scalar.json"
+        scalar.write_text(value, encoding="utf-8")
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(scalar)], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "host provenance must be an object" in result.stderr
+
     malformed = Path(directory) / "malformed.json"
     malformed.write_text("{not-json", encoding="utf-8")
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(malformed)], capture_output=True, text=True)
