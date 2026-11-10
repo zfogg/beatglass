@@ -4602,6 +4602,18 @@ ApplicationWindow {
                         wrapMode: Text.WordWrap
                     }
                     Label {
+                        objectName: "overlayTrackMetadataUnavailable"
+                        visible: window.overlayBridge !== null
+                        text: "Track info unavailable"
+                        Accessible.name: "Overlay track information unavailable"
+                        Accessible.value: text
+                        Accessible.role: Accessible.Status
+                        Accessible.description: "The combined system output does not identify individual tracks or decks. Beatglass will not attribute metadata without a separately supported source."
+                        ToolTip.text: Accessible.description
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
                         objectName: "overlaySettingsRetentionStatus"
                         activeFocusOnTab: true
                         visible: window.overlayBridge !== null
