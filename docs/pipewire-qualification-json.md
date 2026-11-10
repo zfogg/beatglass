@@ -321,6 +321,9 @@ identity evidence from being accepted when producers repeat the platform key.
 The duplicate-name regression in
 `tests/unit/check_native_host_provenance_name_duplicate.py` applies the same
 fail-closed rule to repeated host identity keys.
+The duplicate-clock regression in
+`tests/unit/check_native_host_provenance_clock_duplicate.py` keeps repeated
+timing measurements from becoming last-writer-wins evidence.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
