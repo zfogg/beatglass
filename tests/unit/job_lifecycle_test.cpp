@@ -39,6 +39,16 @@ TEST_CASE("job lifecycle retry uses shared terminal predicate") {
   CHECK(isTerminal(JobStatus::complete));
   CHECK_FALSE(isTerminal(JobStatus::running));
 }
+TEST_CASE("shared job contract rejects terminal resurrection and invalid progress") {
+  CHECK(canTransition(JobStatus::queued, JobStatus::running));
+  CHECK(canTransition(JobStatus::running, JobStatus::complete));
+  CHECK(canTransition(JobStatus::running, JobStatus::cancelled));
+  CHECK_FALSE(canTransition(JobStatus::complete, JobStatus::running));
+  CHECK_FALSE(canTransition(JobStatus::failed, JobStatus::queued));
+  CHECK(isValidProgress(JobProgress{0, 0, JobStatus::queued}));
+  CHECK(isValidProgress(JobProgress{4, 8, JobStatus::running}));
+  CHECK_FALSE(isValidProgress(JobProgress{9, 8, JobStatus::running}));
+}
 TEST_CASE("known total predicate distinguishes unknown and zero totals") {
   CHECK_FALSE(hasKnownTotal(std::optional<std::uint64_t>{}));
   CHECK(hasKnownTotal(std::optional<std::uint64_t>{0}));
