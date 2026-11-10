@@ -160,6 +160,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
     for scenario in scenarios or []:
         if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
                 or not scenario.get("id") or not isinstance(scenario.get("status"), str)
+                or len(scenario.get("id", "")) > 128
                 or scenario.get("status") not in {"PASS", "FAIL", "UNRUN", "PENDING"}):
             errors.append(f"invalid scenario: {scenario}"); continue
         if scenario["status"] not in {"UNRUN", "PENDING"}:
