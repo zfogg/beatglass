@@ -883,6 +883,8 @@ Native playback start now announces the selected-output admission request, makin
 
 Refreshing playback outputs now returns focus to the output-device selector, making the refreshed device list immediately actionable from the keyboard.
 
+Retry native playback now rechecks the live bridge error at click time and announces when a stale retry action has been invalidated by a state transition.
+
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
 Active analysis failure reasons, recovery status, and persisted queue errors now expose their live text as accessible status values, so assistive technology receives the same diagnostics visible in the recovery surface.
 The display selector now includes recovery-pending state in its accessible value and description, so assistive technology receives the same recovery context as the surrounding display status.
