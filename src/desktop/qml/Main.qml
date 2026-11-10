@@ -1623,11 +1623,12 @@ ApplicationWindow {
     function handleOverlayClearSafeModeAction() {
         if (window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit) {
             window.focusOverlayRecoveryPauseState("Overlay safe mode is not active; Retry overlay remains available when the display is ready.", retryOverlay)
-            return
+            return false
         }
         window.resetOverlayRecoveryAttempts()
         window.announceCaptureRecoveryState("Overlay safe mode cleared; Retry overlay is available and focused. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : ""))
         retryOverlay.forceActiveFocus()
+        return true
     }
     function handleOverlayStopShortcut() {
         navigation.currentIndex = 1
