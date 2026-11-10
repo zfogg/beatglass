@@ -299,6 +299,7 @@ class EvidenceBundleTest(unittest.TestCase):
                                      "--root", str(root), "--manifest", str(manifest), "--json"],
                                     capture_output=True, text=True, check=False)
             report = json.loads(result.stdout)
+            self.assertEqual(report["schema_version"], 1)
             self.assertFalse(report["valid"])
             self.assertTrue(report["errors"])
             self.assertEqual(report["error_count"], len(report["errors"]))
