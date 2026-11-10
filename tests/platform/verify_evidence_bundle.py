@@ -95,6 +95,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or len(relative) > 512
             or relative != unicodedata.normalize("NFC", relative)
             or any((0xFDD0 <= ord(char) <= 0xFDEF) or (ord(char) & 0xFFFF) in {0xFFFE, 0xFFFF} for char in relative)
+            or any(0x202A <= ord(char) <= 0x202E or 0x2066 <= ord(char) <= 0x2069 for char in relative)
             or relative != relative.strip()
             or "\\" in relative
             or any(ord(char) < 32 for char in relative)
