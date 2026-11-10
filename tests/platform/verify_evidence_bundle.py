@@ -230,7 +230,9 @@ def main() -> int:
     if args.json:
         error_categories = {}
         for error in errors:
-            if error.startswith(("bundle root must ", "manifest must ")):
+            if error.startswith("invalid manifest JSON"):
+                category = "parse"
+            elif error.startswith(("bundle root must ", "manifest must ")):
                 category = "input_topology"
             elif error.startswith(("manifest exceeds ", "artifact exceeds ", "artifacts exceed ", "total artifact bytes exceed ", "too many artifacts")):
                 category = "resource_limit"
