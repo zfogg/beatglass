@@ -1364,6 +1364,10 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Reapply settings is unavailable until the native overlay and a destination display are ready.", overlayDisplay)
+            return false
+        }
         window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Retained settings are current."))
         return window.handleOverlayReapplyAction()
     }
