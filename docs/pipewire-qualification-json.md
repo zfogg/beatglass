@@ -126,3 +126,6 @@ event, preventing recovery evidence from being attributed to a different sink.
 When reacquisition evidence includes `format`, its `sample_rate` and `channels`
 must be positive integers, preventing loosely typed values from passing native
 format validation.
+
+Any transition event that includes `format` follows the same positive-integer
+requirements for `sample_rate` and `channels`.

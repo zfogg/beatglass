@@ -276,7 +276,13 @@ if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("chann
     raise SystemExit("restart event has no negotiated format")
 for event in events:
     event_format = event.get("format")
-    if event_format is not None and (not isinstance(event_format, dict) or event_format.get("sample_rate", 0) <= 0 or event_format.get("channels", 0) <= 0):
+    if event_format is not None and (not isinstance(event_format, dict)
+            or not isinstance(event_format.get("sample_rate"), int)
+            or isinstance(event_format.get("sample_rate"), bool)
+            or event_format["sample_rate"] <= 0
+            or not isinstance(event_format.get("channels"), int)
+            or isinstance(event_format.get("channels"), bool)
+            or event_format["channels"] <= 0):
         raise SystemExit("transition event has an invalid negotiated format")
     if event_format is not None and event_format != fmt and event.get("event") == "process":
         raise SystemExit("process format disagrees with restart format")
