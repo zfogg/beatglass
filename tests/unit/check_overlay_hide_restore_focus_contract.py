@@ -946,3 +946,12 @@ def test_reset_appearance_uses_shared_theme_and_motion_actions():
     button_start = QML.index('objectName: "resetAppearance"')
     button = QML[button_start : QML.index('objectName: "themePreviews"', button_start)]
     assert "window.resetAppearancePreferences()" in button
+
+
+def test_click_through_button_requires_available_overlay():
+    start = QML.index("function handleOverlayClickThroughButtonAction")
+    body = QML[start : QML.index("    function handleOverlayClickThroughShortcutAction", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body

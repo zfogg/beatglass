@@ -1526,8 +1526,8 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
     }
     function handleOverlayClickThroughButtonAction(requestedClickThrough) {
-        if (!window.overlayBridge) {
-            window.focusOverlayAvailabilityRecovery("Overlay interaction mode is unavailable because the native overlay bridge is not connected.", clickThroughToggle)
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay interaction mode is unavailable until the native overlay and a destination display are ready.", clickThroughToggle)
             return false
         }
         const applied = window.overlayBridge.setClickThrough(requestedClickThrough)
