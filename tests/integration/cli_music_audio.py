@@ -63,3 +63,4 @@ with tempfile.TemporaryDirectory() as directory:
     assert path.read_bytes() == before
     missing = subprocess.run([exe, str(path.parent / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0
+    assert missing.stderr.startswith("error: "), missing.stderr
