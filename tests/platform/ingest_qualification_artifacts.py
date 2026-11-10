@@ -14,6 +14,8 @@ SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
 MAX_ARTIFACT_BYTES = 1 << 30
 MAX_MANIFEST_BYTES = 16 << 20
 MAX_ENTRIES = 1000
+MAX_IDENTITY_BYTES = 64 << 10
+MAX_HASHES_BYTES = 16 << 20
 
 
 def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_BYTES,
@@ -28,6 +30,8 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
     identity_path = root / "qualification-manifest.txt"
     if identity_path.is_symlink():
         errors.append("symlinked qualification-manifest.txt")
+    elif identity_path.is_file() and identity_path.stat().st_size > MAX_IDENTITY_BYTES:
+        errors.append(f"qualification identity exceeds {MAX_IDENTITY_BYTES} bytes")
     elif identity_path.is_file():
         for line in identity_path.read_text(encoding="utf-8").splitlines():
             if "=" in line:
@@ -69,6 +73,8 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
     hashes_path = root / "qualification-artifacts.sha256"
     if hashes_path.is_symlink():
         errors.append("symlinked qualification-artifacts.sha256")
+    elif hashes_path.is_file() and hashes_path.stat().st_size > MAX_HASHES_BYTES:
+        errors.append(f"qualification hash list exceeds {MAX_HASHES_BYTES} bytes")
     elif not hashes_path.is_file():
         errors.append("missing qualification-artifacts.sha256")
     else:

@@ -33,3 +33,6 @@ suffix so manifests from different hosts compare consistently.
 Generated manifests are written through a same-directory temporary file,
 flushed, and atomically replaced so interrupted ingestion cannot leave a
 partially written manifest.
+The identity and hash-list inputs are bounded to 64 KiB and 16 MiB
+respectively, preventing untrusted qualification directories from forcing
+unbounded text reads before artifact validation begins.

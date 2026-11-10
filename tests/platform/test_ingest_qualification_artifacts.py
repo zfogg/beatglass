@@ -358,3 +358,18 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertEqual(ingest.ingest(root, output), [])
             self.assertTrue(output.is_file())
             self.assertEqual(list(root.glob(".manifest.json.*.tmp")), [])
+
+    def test_oversized_identity_input_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("x" * (ingest.MAX_IDENTITY_BYTES + 1), encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn(f"qualification identity exceeds {ingest.MAX_IDENTITY_BYTES} bytes", errors)
+
+    def test_oversized_hash_input_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("x" * (ingest.MAX_HASHES_BYTES + 1), encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn(f"qualification hash list exceeds {ingest.MAX_HASHES_BYTES} bytes", errors)
