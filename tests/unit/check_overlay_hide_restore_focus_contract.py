@@ -1153,3 +1153,11 @@ def test_display_loss_and_geometry_failure_propagate_focus_results():
     assert "return window.focusOverlayAvailabilityRecovery" in geometry
     assert "overlayDisplayRecoveryPending = true" in loss
     assert "overlayCaptureEvidenceStale = true" in geometry
+
+
+def test_display_selection_required_propagates_focus_result():
+    start = QML.index("function focusOverlayDisplaySelectionRequired")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    assert "overlayDisplayRecoveryPending = true" in body
+    assert "return window.focusOverlayAvailabilityRecovery" in body

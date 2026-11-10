@@ -2481,7 +2481,7 @@ ApplicationWindow {
         window.overlayDisplaySelectionRequired = true
         window.overlayDisplayRecoveryPending = true
         window.overlayCaptureEvidenceStale = true
-        window.focusOverlayAvailabilityRecovery("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.", overlayDisplay)
+        return window.focusOverlayAvailabilityRecovery("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.", overlayDisplay)
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
