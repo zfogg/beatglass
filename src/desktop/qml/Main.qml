@@ -393,12 +393,7 @@ ApplicationWindow {
         enabled: window.overlayBridge && window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: {
-            if (window.overlayHiddenByUser)
-                window.showOverlayAndHideControls()
-            else
-                window.hideOverlayAndRestoreControls()
-        }
+        onActivated: window.handleOverlayHideToggleShortcut()
     }
     Shortcut {
         objectName: "overlayOpacityResetShortcut"
@@ -1502,6 +1497,14 @@ ApplicationWindow {
     }
     function handleOverlayPausedPageShortcut() {
         window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlayHideToggleShortcut() {
+        if (window.overlayHiddenByUser) {
+            window.announceCaptureRecoveryState("Restoring the user-hidden DJ overlay; persisted settings will be reapplied." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+            window.showOverlayAndHideControls()
+        } else {
+            window.hideOverlayAndRestoreControls()
+        }
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
