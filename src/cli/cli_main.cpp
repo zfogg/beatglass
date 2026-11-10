@@ -324,6 +324,18 @@ int main(int argc, char** argv) {
     playback.stop();
     status = "Playback stopped.";
   });
+  auto select_relative = [&](int direction) {
+    if (library_indices.empty()) return;
+    auto current = std::find(library_indices.begin(), library_indices.end(), selected);
+    auto visible = current == library_indices.end() ? 0 : static_cast<int>(std::distance(library_indices.begin(), current));
+    visible = (visible + direction + static_cast<int>(library_indices.size())) % static_cast<int>(library_indices.size());
+    selected = library_indices[static_cast<std::size_t>(visible)];
+    library_visible_selected = visible;
+    result.reset(); waveform.clear();
+    status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play.";
+  };
+  auto previous_button = Button(" Prev ", [&] { select_relative(-1); });
+  auto next_button = Button(" Next ", [&] { select_relative(1); });
   auto seek_back_button = Button(" − ", [&] {
 #ifdef _WIN32
     playback.seek_seconds(-seek_step());
@@ -345,7 +357,7 @@ int main(int argc, char** argv) {
     if (library_visible_selected >= 0 && library_visible_selected < static_cast<int>(library_indices.size())) selected = library_indices[static_cast<std::size_t>(library_visible_selected)];
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, play_button, pause_button, stop_button})});
+  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, play_button, pause_button, stop_button})});
   auto library_container = Container::Vertical({library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
@@ -390,7 +402,7 @@ int main(int argc, char** argv) {
     }
 #endif
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0, playback_fraction), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   ←/→ or Prev/Next   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto toggle_live = [&] {
 #ifdef _WIN32
@@ -460,16 +472,37 @@ int main(int argc, char** argv) {
     auto library_render = library_tab->Render();
     auto live_render = live_tab->Render();
     auto settings_render = settings_tab->Render();
-    if (tab == 0) library_render = library_render | color(Color::Black) | bgcolor(Color::Cyan) | bold | underlined;
-    if (tab == 1) live_render = live_render | color(Color::Black) | bgcolor(Color::GreenLight) | bold | underlined;
-    if (tab == 2) settings_render = settings_render | color(Color::Black) | bgcolor(Color::YellowLight) | bold | underlined;
+    const auto active_tab = [](Element element, Color accent) {
+      return element | color(Color::White) | bgcolor(accent) | bold | underlined | borderRounded;
+    };
+    if (tab == 0) library_render = active_tab(library_render, Color::RGB(25, 92, 112));
+    else library_render = library_render | color(Color::GrayLight);
+    if (tab == 1) live_render = active_tab(live_render, Color::RGB(25, 102, 68));
+    else live_render = live_render | color(Color::GrayLight);
+    if (tab == 2) settings_render = active_tab(settings_render, Color::RGB(112, 78, 22));
+    else settings_render = settings_render | color(Color::GrayLight);
     return hbox({library_render, text(" "), live_render, text(" "), settings_render}) | center;
   });
-  auto root_component = CatchEvent(Container::Vertical({tab_bar, tabs}), [&](Event event) {
+  auto body = Renderer(Container::Vertical({tab_bar, tabs}), [&]() -> Element {
+    const auto compact = !snapshot && (screen.dimx() < 100 || screen.dimy() < 28);
+    if (compact) {
+      return vbox({tab_bar->Render(), separator(), filler(),
+                   text("Beatglass CLI needs more room") | bold | underlined | color(Color::YellowLight) | center,
+                   text("Resize the terminal to at least 100 columns × 28 rows.") | italic | color(Color::GrayLight) | center,
+                   filler(), separator(), text("Current: " + std::to_string(screen.dimx()) + " × " + std::to_string(screen.dimy())) | color(Color::GrayDark) | center}) |
+          bgcolor(Color::RGB(10, 15, 22)) | flex;
+    }
+    return vbox({tab_bar->Render(), tabs->Render() | flex}) | bgcolor(Color::RGB(10, 15, 22)) | flex;
+  });
+  auto root_component = CatchEvent(body, [&](Event event) {
     if (event == Event::Character("q") || event == Event::Escape) { screen.Exit(); return true; }
     if (event == Event::Character("1")) { tab = 0; return true; }
     if (event == Event::Character("2")) { tab = 1; return true; }
     if (event == Event::Character("3")) { tab = 2; return true; }
+    if (event == Event::Tab) { tab = (tab + 1) % 3; return true; }
+    if (event == Event::Character("o") && tab == 0) { open_folder_button->OnEvent(Event::Return); return true; }
+    if (tab == 0 && event == Event::Character("[")) { select_relative(-1); return true; }
+    if (tab == 0 && event == Event::Character("]")) { select_relative(1); return true; }
     if (event == Event::Return && tab == 0) { analyze(); return true; }
     if (event == Event::Character(" ")) {
       if (tab == 0) {
