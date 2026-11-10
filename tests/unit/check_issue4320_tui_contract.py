@@ -16,6 +16,9 @@ def main() -> int:
         raise SystemExit("CLI playback buffers exceed the shared bounded session capacity")
     if "beatglass/desktop/macos_playback_session.hpp" not in tui or "macOS AudioUnit output" not in tui:
         raise SystemExit("CLI macOS playback is not wired to the native bounded AudioUnit session")
+    for marker in ("beatglass/capture/coreaudio_source_internal.hpp", "class MacMonitorBackend", "CoreAudio output sources discovered", "TapState::interrupted"):
+        if marker not in tui:
+            raise SystemExit("CLI macOS Live contract missing: " + marker)
     if "no fresh packets arrived; reacquiring" not in tui:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
     if "library_folder" not in tui or "std::quoted(preferences.library_folder)" not in tui:
