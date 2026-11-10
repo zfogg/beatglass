@@ -12,6 +12,8 @@ try:
     input_path = Path(sys.argv[1])
     if input_path.is_symlink():
         raise OSError("host provenance input is a symbolic link")
+    if not input_path.is_file():
+        raise OSError("host provenance input is not a regular file")
     def reject_duplicate_keys(pairs):
         result = {}
         for key, value in pairs:

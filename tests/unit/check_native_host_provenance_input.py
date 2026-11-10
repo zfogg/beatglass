@@ -13,6 +13,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(missing)], capture_output=True, text=True)
     assert result.returncode != 0
     assert "host provenance is unreadable" in result.stderr
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", directory], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "host provenance is unreadable" in result.stderr
 
     for value in ("null", "[]", "42"):
         scalar = Path(directory) / "scalar.json"
