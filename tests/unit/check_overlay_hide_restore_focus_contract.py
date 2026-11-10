@@ -139,3 +139,11 @@ def test_interaction_state_changes_share_stale_evidence_announcement():
     assert "overlaySettingsRevision += 1" in body
     assert "overlayCaptureEvidenceStale = true" in body
     assert "handleOverlayInteractionStateChanged()" in QML[QML.index("function onClickThroughChanged") : start]
+
+
+def test_opacity_changes_share_stale_recovery_handler():
+    start = QML.index("function handleOverlayOpacityChanged")
+    body = QML[start : QML.index("    function focusOverlayDisplaySelectionRequired", start)]
+    assert "overlayOpacityEditInFlight" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "handleOverlayOpacityChanged()" in QML[QML.index("function onOpacityChanged") : start]
