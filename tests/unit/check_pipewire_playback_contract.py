@@ -13,6 +13,8 @@ required = {
     "callback dequeue": "self.queue.pop",
     "underrun silence": "std::fill_n(output, capacity, 0.0f)",
     "epoch admission": "block.epoch == session_.epoch()",
+    "transactional pause": "pw_stream_set_active(impl_->stream, false)",
+    "transactional resume": "pw_stream_set_active(impl_->stream, true)",
     "CLI wiring": "beatglass::pipewire::PlaybackSession output",
 }
 for label, marker in required.items():

@@ -141,11 +141,33 @@ bool PlaybackSession::submit(const AudioBlock& block) noexcept {
 bool PlaybackSession::active() const noexcept { return impl_->active.load(std::memory_order_acquire); }
 bool PlaybackSession::pause() noexcept {
   if (!session_.pause()) return false;
+  if (!impl_->loop || !impl_->loop_started || !impl_->stream) {
+    session_.resume();
+    return false;
+  }
+  pw_thread_loop_lock(impl_->loop);
+  const auto result = pw_stream_set_active(impl_->stream, false);
+  pw_thread_loop_unlock(impl_->loop);
+  if (result < 0) {
+    session_.resume();
+    return false;
+  }
   { std::lock_guard lock(impl_->status_mutex); impl_->status = "Playback paused."; }
   return true;
 }
 bool PlaybackSession::resume() noexcept {
   if (!session_.resume()) return false;
+  if (!impl_->loop || !impl_->loop_started || !impl_->stream) {
+    session_.pause();
+    return false;
+  }
+  pw_thread_loop_lock(impl_->loop);
+  const auto result = pw_stream_set_active(impl_->stream, true);
+  pw_thread_loop_unlock(impl_->loop);
+  if (result < 0) {
+    session_.pause();
+    return false;
+  }
   { std::lock_guard lock(impl_->status_mutex); impl_->status = "Playback resumed."; }
   return true;
 }
