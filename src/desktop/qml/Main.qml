@@ -2729,8 +2729,6 @@ ApplicationWindow {
                                               + ", foreground " + window.themeForegrounds[index]
                                               + ". Motion is " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full") + ". Use Left and Right to move, Home and End to jump, or Escape to return to the theme selector."
                         Accessible.role: Accessible.RadioButton
-                        Accessible.value: (checked ? "selected" : "not selected")
-                                              + "; " + window.themeAccentColors[index] + " accent"
                         ToolTip.text: checked ? window.themeNames[index] + " theme is selected" : "Select " + window.themeNames[index] + " theme"
                         background: Rectangle {
                             objectName: "themePreviewSurface" + index
