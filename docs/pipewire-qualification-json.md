@@ -21,6 +21,9 @@ Reacquisition evidence may include `device_id`; when supplied it must be a
 non-empty identity matching the restart event's device. This prevents recovery
 samples from being attributed to a different device after a switch.
 
+Reacquisition evidence may include `format`; when supplied it must contain positive
+sample rate and channel count and match the restart event's negotiated format.
+
 If any event supplies `epoch`, every event must supply a positive integer epoch.
 Partial epoch annotations are rejected so lifecycle evidence cannot silently mix
 attributed and unattributed records.
