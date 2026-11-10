@@ -297,3 +297,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Retry button routing implementation | Retry button invokes the named bounded-recovery action | Keep button behavior aligned with keyboard retry and regression-tested. |
 | Opacity reset action contract | Keyboard opacity reset invokes the native setting transition | Route reset through one named action/result path and keep Opacity focused. |
 | Click-through button routing | Click-through checkbox changes native interaction mode | Route button changes through one action/result handler preserving stale evidence and interaction focus. |
+| Opacity edit focus recovery | User finishes a pointer drag or a failed opacity edit | Keep the slider focused for immediate keyboard adjustment, announce the persisted value/error, and retain stale or pending evidence guidance. |
