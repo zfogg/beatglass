@@ -18,3 +18,7 @@ The ingest step uses the same policy before hashing native artifacts and before
 writing its generated manifest. Pass the same three options to
 `tests/platform/ingest_qualification_artifacts.py` to keep generation and
 verification budgets aligned.
+
+Ingestion also enforces the verifier's portable manifest contract: artifact
+hashes are lowercase hexadecimal, and paths reject non-portable separators,
+reserved characters, and invalid Unicode before files are hashed.

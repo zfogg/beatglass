@@ -304,3 +304,21 @@ class QualificationIngestTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.assertEqual(["resource limits must be positive"], ingest.ingest(root, root / "manifest.json", max_entries=0))
+
+    def test_uppercase_artifact_hash_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            artifact = root / "capture.log"; artifact.write_text("native evidence", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest().upper()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("invalid artifact hash" in error for error in errors))
+
+    def test_nonportable_artifact_path_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text(f"{'0' * 64}  capture?.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("non-portable artifact path" in error for error in errors))
