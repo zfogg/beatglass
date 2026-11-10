@@ -375,6 +375,17 @@ TestCase {
         compare(retry.ToolTip.text, "Retry monitoring the selected output source")
         app.destroy()
     }
+    function test_captureLossMarksOverlayEvidenceStaleUntilMonitoring() {
+        let app = shellWithOverlay.createObject(null)
+        fakeCapture.status = "Error"
+        let tempo = findChild(app, "overlayTempo")
+        verify(app.overlayCaptureEvidenceStale)
+        verify(tempo.Accessible.value.indexOf("stale until fresh capture") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("fresh snapshot") >= 0)
+        fakeCapture.status = "Monitoring"
+        verify(!app.overlayCaptureEvidenceStale)
+        app.destroy()
+    }
     function test_overlayUnavailableStateIsAccessible() {
         let app = shell.createObject(null)
         let state = findChild(app, "overlayUnavailable")

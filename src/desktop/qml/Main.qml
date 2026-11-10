@@ -72,6 +72,7 @@ ApplicationWindow {
         ? ""
         : (selectedName + "|generation:" + visualizationPresentation.generation + "|revision:" + visualizationPresentation.revision)
     property bool overlayVisualStateRecoveryRequired: false
+    property bool overlayCaptureEvidenceStale: false
     property string overlayRecoveryAnnouncement: ""
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
@@ -1626,8 +1627,8 @@ ApplicationWindow {
                     ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
                 }
-                Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live tempo estimate; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
-                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live key and chord estimate; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
+                Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live tempo estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
+                Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live key and chord estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                 Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current output capture status; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                 Button {
                     objectName: "overlayRetryCapture"
@@ -1944,10 +1945,15 @@ ApplicationWindow {
     Connections {
         target: window.captureMonitorBridge
         function onChanged() {
-            if (window.captureMonitorBridge.status === "Error")
+            if (window.captureMonitorBridge.status === "Error") {
+                window.overlayCaptureEvidenceStale = true
                 window.announceCaptureRecoveryState("No output device or permission; retry monitoring to acquire a fresh snapshot.")
-            else if (window.captureMonitorBridge.status === "Reacquiring")
+            } else if (window.captureMonitorBridge.status === "Reacquiring") {
+                window.overlayCaptureEvidenceStale = true
                 window.announceCaptureRecoveryState("Output device reacquiring; visualization focus restored when fresh audio arrives.")
+            } else if (window.captureMonitorBridge.status === "Monitoring") {
+                window.overlayCaptureEvidenceStale = false
+            }
         }
     }
     Connections {

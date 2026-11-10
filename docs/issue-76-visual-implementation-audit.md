@@ -739,6 +739,8 @@ Invalid persisted position is a separate visible recovery state: restore rejects
 
 Invalid persisted size is also a separate visible recovery state: restore rejects non-finite native width or height, keeps the control-window fallback visible, and announces that the saved overlay size is unavailable before any native presentation.
 
+Capture loss is a distinct stale-source state: Error and Reacquiring mark the last tempo/harmony values stale in their accessible values and descriptions until Monitoring returns, while the recovery announcement directs the user to retry for a fresh accepted snapshot.
+
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.
