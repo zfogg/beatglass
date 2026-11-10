@@ -303,6 +303,9 @@ for previous, current in zip(process_positions, process_positions[1:]):
     if previous[1] is not None and current[0] < previous[0] + previous[1]:
         raise SystemExit("process sample positions overlap captured samples")
 process_events = [event for event in events if event.get("event") == "process"]
+process_timestamps = [event["timestamp_ns"] for event in process_events if event.get("timestamp_ns") is not None]
+if process_timestamps and any(previous > current for previous, current in zip(process_timestamps, process_timestamps[1:])):
+    raise SystemExit("process timestamps must be monotonic")
 for event in process_events:
     if event.get("sample_position") is not None and (
             not isinstance(event["sample_position"], int)
