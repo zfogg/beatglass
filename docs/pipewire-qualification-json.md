@@ -282,6 +282,9 @@ non-ASCII host names survive UTF-8 evidence production and consumption.
 The combined Unicode/timing check in
 `tests/unit/check_native_host_provenance_unicode_timing.py` verifies that
 non-ASCII identity and timing metadata coexist in a valid sorted report.
+The name-boundary regression in
+`tests/unit/check_native_host_provenance_name_boundary.py` keeps whitespace-only
+host identities out of otherwise well-formed timing evidence.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
