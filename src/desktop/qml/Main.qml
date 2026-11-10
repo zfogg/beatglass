@@ -3356,7 +3356,7 @@ ApplicationWindow {
                         Label {
                             objectName: "detailsAvailability"
                             ToolTip.text: "Current analysis and playback detail status"
-                            text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
+                            text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Chord " + analysisPresentation.chord + " · Beats " + analysisPresentation.beatCount + " · Confidence " + (analysisPresentation.confidence >= 0 ? Math.round(analysisPresentation.confidence * 100) + "%" : "unknown") + (analysisPresentation.stale ? " · stale evidence" : "") + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status: " + text
                             Accessible.value: text
