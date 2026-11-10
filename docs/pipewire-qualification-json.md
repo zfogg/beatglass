@@ -262,3 +262,5 @@ If present, host `clock_source_latency_ns` must be a non-negative numeric
 measurement of source latency; boolean values are invalid.
 If present, host `clock_source_noise_ns` must be a non-negative numeric
 measurement of source timing noise; boolean values are invalid.
+If present, host `clock_source_phase_noise` must be a non-negative numeric
+phase-noise measurement; boolean values are invalid.
