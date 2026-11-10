@@ -4908,7 +4908,7 @@ ApplicationWindow {
                             ? (window.overlayBridge.clickThrough ? "Keyboard recovery: press Escape to unlock overlay (Ctrl+Alt+U focuses Unlock)" : "Keyboard recovery: overlay controls are interactive")
                             : "Keyboard recovery unavailable"
                         Accessible.name: "Overlay keyboard recovery status"
-                        Accessible.value: text + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
+                        Accessible.value: text + "; Ctrl+Alt+Shift+B focuses beat pulse status" + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayBridge.clickThrough
                             ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window."
