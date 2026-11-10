@@ -88,3 +88,11 @@ def test_startup_attach_and_sync_failures_share_fallback_state():
     assert "overlayDisplaySelectionRequired = true" in body
     completed = QML[QML.index("Component.onCompleted") : QML.index("    function focusOverlayAttachFailure")]
     assert completed.count("window.focusOverlayAttachFailure(") == 2
+
+
+def test_capture_startup_failure_marks_stale_pending_recovery():
+    start = QML.index("function focusOverlayCaptureStartupFailure")
+    body = QML[start : QML.index("    function focusOverlayRecoveryAction", start)]
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "overlayDisplayRecoveryPending = true" in body
+    assert "focusOverlayCaptureStartupFailure()" in QML[QML.index("Component.onCompleted") : start]
