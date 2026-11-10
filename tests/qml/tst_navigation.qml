@@ -412,6 +412,8 @@ TestCase {
         verify(app.overlayCaptureEvidenceStale)
         verify(tempo.Accessible.value.indexOf("stale until fresh capture") >= 0)
         verify(captureStatus.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
+        let retry = findChild(app, "overlayCaptureRecoveryAction")
+        verify(retry.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("fresh snapshot") >= 0)
         fakeCapture.status = "Monitoring"
         verify(!app.overlayCaptureEvidenceStale)
