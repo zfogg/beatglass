@@ -270,6 +270,12 @@ int main(int argc, char** argv) {
   auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); result.reset(); waveform.clear(); status = std::to_string(tracks.size()) + " tracks indexed."; };
   auto filter_input = Input(&filter, "Filter songs");
   auto folder_input = Input(&folder_text, "Audio folder");
+  std::string seek_step_text = "5";
+  auto seek_step_input = Input(&seek_step_text, "seconds");
+  auto seek_step = [&] {
+    try { return std::clamp(std::stoi(seek_step_text), 1, 60); }
+    catch (...) { return 5; }
+  };
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
   auto refresh_button = Button(" Refresh ", refresh);
   auto open_folder_button = Button(" Open folder ", [&] {
@@ -301,17 +307,17 @@ int main(int argc, char** argv) {
     playback.stop();
     status = "Playback stopped.";
   });
-  auto seek_back_button = Button(" −5s ", [&] {
+  auto seek_back_button = Button(" − ", [&] {
 #ifdef _WIN32
-    playback.seek_seconds(-5);
+    playback.seek_seconds(-seek_step());
     status = "Playback seek backward requested.";
 #else
     status = "Native playback seek is unavailable in this build.";
 #endif
   });
-  auto seek_forward_button = Button(" +5s ", [&] {
+  auto seek_forward_button = Button(" + ", [&] {
 #ifdef _WIN32
-    playback.seek_seconds(5);
+    playback.seek_seconds(seek_step());
     status = "Playback seek forward requested.";
 #else
     status = "Native playback seek is unavailable in this build.";
@@ -403,12 +409,13 @@ int main(int argc, char** argv) {
     return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render()}), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
-  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox}), [&] {
+  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input}), [&] {
     return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold,
       text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
       text("Preferences are session-scoped for this prototype."), separator(),
       text("PRESENTATION") | bold, reduce_motion_checkbox->Render(),
       text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight),
+      text("PLAYBACK") | bold, hbox({text("Seek step (1–60 seconds): "), seek_step_input->Render() | size(WIDTH, LESS_THAN, 8)}),
       separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."),
       text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
