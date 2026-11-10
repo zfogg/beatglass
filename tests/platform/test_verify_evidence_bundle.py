@@ -248,6 +248,16 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("artifact must not be a symlink: capture.txt", module.verify(root, manifest))
 
+    def test_symlink_manifest_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); target = root / "real.json"; target.write_text("{}", encoding="utf-8")
+            manifest = root / "manifest.json"
+            try:
+                manifest.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            self.assertEqual(["manifest must not be a symlink"], module.verify(root, manifest))
+
     def test_non_regular_artifacts_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); artifact = root / "capture-dir"; artifact.mkdir()
