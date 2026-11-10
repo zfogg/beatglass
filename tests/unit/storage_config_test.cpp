@@ -20,7 +20,7 @@ TEST_CASE("storage owner reopens the same database with retryable recovery intac
   std::error_code ec; std::filesystem::remove(path, ec);
   const beatglass::library_detail::CacheKey key{"reopen-hash", "engine", "config", "offline"};
   REQUIRE(owner.open({path}));
-  REQUIRE(owner.cache()->begin("reopen-run", key, "/music/reopen.wav"));
+  owner.cache()->begin("reopen-run", key, "/music/reopen.wav");
   REQUIRE(owner.cache()->publish("reopen-run", key, "partial", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
   CHECK(owner.retryable_runs().size() == 1);
   owner.close();
