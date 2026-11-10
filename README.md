@@ -104,7 +104,9 @@ resize prompt. Standard builds show Key/Chord as unavailable; when
 the optional causal tonal replay path and displays its real key/chord estimates
 plus a bounded recent tonal history.
 
-The TUI never writes tags or modifies source audio. On macOS and Linux, native
+Library keyboard shortcuts include `a` for Analyze all visible, `r` for refresh,
+`s` for sort, and `o` for the folder action; text inputs retain normal character
+editing when focused. The TUI never writes tags or modifies source audio. On macOS and Linux, native
 loopback capture is not yet implemented in this prototype and the Live tab says
 so explicitly. Native desktop, capture, playback, and overlay qualification
 remain platform-specific work; see [macOS overlay status](docs/macos-overlay.md)
