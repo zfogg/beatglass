@@ -1015,3 +1015,5 @@ Fresh capture preserves stale overlay evidence while the control-window fallback
 Fresh capture preserves stale overlay evidence while visual-state recovery is required; opacity, size, and position must be reapplied before live overlay state is presented.
 
 Fresh capture preserves stale overlay evidence while availability-loss recovery still expects the prior overlay to be restored; capture remains visible as monitoring continuity, not overlay readiness.
+
+Capture freshness cannot clear stale overlay evidence while the native bridge is unavailable; accepted audio remains independent from overlay readiness.
