@@ -1,6 +1,7 @@
 #include "beatglass/core/file_analysis.hpp"
 #include "beatglass/core/causal_replay.hpp"
 #include "beatglass/core/audio.hpp"
+#include "beatglass/core/presentation.hpp"
 #include "beatglass/capture/file_reader.hpp"
 #include "beatglass/core/playback_session.hpp"
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
@@ -357,6 +358,7 @@ int main(int argc, char** argv) {
   std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
   std::string live_status = "Capture stopped.";
   std::optional<float> live_bpm;
+  beatglass::PresentationState live_presentation;
   beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
   std::uint32_t live_sample_rate = 0;
   std::uint64_t live_observed_frames = 0;
@@ -375,6 +377,7 @@ int main(int argc, char** argv) {
 #else
   std::string live_status = "Native loopback capture is unavailable in this build.";
   std::optional<float> live_bpm;
+  beatglass::PresentationState live_presentation;
   beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
   std::uint32_t live_sample_rate = 0;
   std::uint64_t live_observed_frames = 0;
@@ -844,6 +847,11 @@ int main(int argc, char** argv) {
             const auto state = live_replay->process(block);
             live_bpm = state.bpm;
             live_tracking_state = state.state;
+            beatglass::Snapshot presentation_snapshot;
+            presentation_snapshot.state = state.state;
+            presentation_snapshot.observed_through = {state.epoch, state.observed_through};
+            presentation_snapshot.bpm = state.bpm;
+            live_presentation = beatglass::present_snapshot(presentation_snapshot);
             live_beats = state.beats;
             if (live_bpm) {
               live_tempo_history.push_back(*live_bpm);
