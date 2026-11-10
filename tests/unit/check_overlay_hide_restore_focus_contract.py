@@ -338,6 +338,13 @@ def test_paused_page_shortcut_preserves_stale_boundary():
     assert "Live evidence remains stale" in body
 
 
+def test_paused_focus_shortcut_preserves_stale_boundary():
+    start = QML.index("function handleOverlayPausedFocusShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "focusOverlayRecoveryAction" in body
+    assert "Live evidence remains stale" in body
+
+
 def test_hide_toggle_uses_explicit_visibility_state():
     start = QML.index("function handleOverlayHideToggleShortcut")
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
