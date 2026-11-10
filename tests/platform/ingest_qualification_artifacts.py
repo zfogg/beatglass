@@ -100,9 +100,10 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
             canonical = path.relative_to(root.resolve()).as_posix()
             if normalized != canonical:
                 errors.append(f"non-canonical artifact path: {relative}"); continue
-            if normalized in seen_paths:
+            collision_key = normalized.casefold()
+            if collision_key in seen_paths:
                 errors.append(f"duplicate artifact path: {normalized}"); continue
-            seen_paths.add(normalized)
+            seen_paths.add(collision_key)
             if path.stat().st_size == 0:
                 errors.append(f"empty qualification artifact: {normalized}"); continue
             if path.stat().st_size > max_artifact_bytes:
@@ -115,7 +116,7 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
         key: identity[key] for key in ("playback_evidence", "overlay_evidence", "display_topology", "audio_inventory")
         if identity.get(key)
     }
-    known_paths = {item["path"] for item in artifacts}
+    known_paths = {item["path"].casefold() for item in artifacts}
     referenced_paths = set()
     for key, relative in referenced.items():
         candidate = root / relative
@@ -129,13 +130,14 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
             errors.append(f"non-canonical referenced evidence path: {relative}"); continue
         if path.stat().st_size == 0:
             errors.append(f"empty referenced evidence: {normalized}"); continue
-        if normalized in known_paths:
+        collision_key = normalized.casefold()
+        if collision_key in known_paths:
             errors.append(f"duplicate referenced evidence path: {normalized}")
             continue
-        if normalized in referenced_paths:
+        if collision_key in referenced_paths:
             errors.append(f"duplicate referenced evidence path: {normalized}")
             continue
-        referenced_paths.add(normalized)
+        referenced_paths.add(collision_key)
         artifacts.append({"path": normalized, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "role": key})
     if len(artifacts) > max_entries:
         errors.append(f"qualification artifacts exceed {max_entries} entries")

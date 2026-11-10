@@ -38,7 +38,7 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
             (root / "qualification-artifacts.sha256").write_text(f"{digest}  build/app.bin\n{digest}  ./build/app.bin\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
-            self.assertTrue(any("duplicate artifact path" in error for error in errors))
+            self.assertTrue(any("duplicate artifact path" in error or "non-canonical artifact path" in error for error in errors))
 
     def test_rejects_escaping_artifact_entry(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -373,3 +373,15 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-artifacts.sha256").write_text("x" * (ingest.MAX_HASHES_BYTES + 1), encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertIn(f"qualification hash list exceeds {ingest.MAX_HASHES_BYTES} bytes", errors)
+
+    def test_case_colliding_artifact_paths_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            first = root / "Capture.log"; second = root / "capture.log"
+            first.write_text("one", encoding="utf-8"); second.write_text("two", encoding="utf-8")
+            digest = hashlib.sha256(first.read_bytes()).hexdigest()
+            digest2 = hashlib.sha256(second.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  Capture.log\n{digest2}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("duplicate artifact path" in error or "non-canonical artifact path" in error for error in errors))
