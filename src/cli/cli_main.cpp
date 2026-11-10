@@ -7,16 +7,20 @@
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cctype>
 #include <cstdint>
 #include <filesystem>
+#include <future>
 #include <iomanip>
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
+#include <thread>
+#include <chrono>
 #include <vector>
 
 namespace {
@@ -81,12 +85,13 @@ int main(int argc, char** argv) {
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result; bool busy = false;
   int spinner_frame = 0;
+  std::future<beatglass::TempoResult> analysis_future;
+  auto screen = ScreenInteractive::TerminalOutput();
   auto analyze = [&] {
     if (selected < 0 || selected >= static_cast<int>(tracks.size()) || busy) return;
     busy = true; status = "Analyzing " + tracks[selected].title + "…";
-    try { result = beatglass::analyze_file(tracks[selected].path); status = "Analysis complete — estimates are backed by the file analyzer."; }
-    catch (const std::exception& error) { result.reset(); status = std::string("Analysis failed: ") + error.what(); }
-    busy = false;
+    const auto path = tracks[selected].path;
+    analysis_future = std::async(std::launch::async, [path] { return beatglass::analyze_file(path); });
   };
   auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); status = std::to_string(tracks.size()) + " tracks indexed."; };
   auto filter_input = Input(&filter, "Filter songs");
@@ -123,21 +128,34 @@ int main(int argc, char** argv) {
     if (tab == 2) settings_render = settings_render | color(Color::Cyan) | bold;
     return hbox({library_render, text(" "), live_render, text(" "), settings_render}) | center;
   });
-  auto screen = ScreenInteractive::TerminalOutput();
   auto root_component = CatchEvent(Container::Vertical({tab_bar, tabs}), [&](Event event) {
     if (event == Event::Character("q") || event == Event::Escape) { screen.Exit(); return true; }
     if (event == Event::Return && tab == 0) { analyze(); return true; }
     if (event == Event::ArrowDown && tab == 0 && !tracks.empty()) { selected = std::min(selected + 1, static_cast<int>(tracks.size()) - 1); return true; }
     if (event == Event::ArrowUp && tab == 0 && !tracks.empty()) { selected = std::max(selected - 1, 0); return true; }
+    if (event == Event::Custom) {
+      ++spinner_frame;
+      if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+        try { result = analysis_future.get(); status = "Analysis complete — estimates are backed by the file analyzer."; }
+        catch (const std::exception& error) { result.reset(); status = std::string("Analysis failed: ") + error.what(); }
+        busy = false;
+      }
+      return true;
+    }
     return false;
   });
   if (snapshot) {
     if (argc > 3) tab = std::clamp(std::stoi(argv[3]), 0, 2);
-    if (tab == 0) analyze();
+    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); result = analysis_future.get(); status = "Analysis complete — estimates are backed by the file analyzer."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
     std::cout << rendered.ToString();
     return 0;
   }
-  screen.Loop(root_component); return 0;
+  std::atomic_bool running{true};
+  std::thread ticker([&] { while (running.load()) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); screen.PostEvent(Event::Custom); } });
+  screen.Loop(root_component);
+  running.store(false);
+  ticker.join();
+  return 0;
 }
