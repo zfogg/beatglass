@@ -182,3 +182,5 @@ If present, host `hypervisor` must be a non-empty string identifying the
 hypervisor when evidence was captured in a virtual machine.
 If present, host `secure_boot` must be a boolean indicating whether secure boot
 was enabled during qualification.
+If present, host `tpm_present` must be a boolean indicating whether a TPM was
+available during qualification.
