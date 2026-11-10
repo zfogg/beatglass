@@ -61,6 +61,8 @@ Readiness reports are also written atomically, preventing interrupted
 qualification summaries from replacing a previously complete report.
 The standalone readiness report generator uses the same atomic output
 contract, so all report-producing qualification tools are interruption-safe.
+Its report size is capped at 16 MiB by default and can be tightened with
+`--max-report-bytes` before any output file is created.
 Readiness output is capped at 16 MiB by default; constrained environments can
 override this with `--max-report-bytes`.
 Automation can pass `--json` to receive the complete readiness object on

@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 
 PLATFORMS = ("windows", "macos", "linux")
+MAX_REPORT_BYTES = 16 << 20
 SCENARIOS = ("capture", "display", "output", "overlay", "playback", "recovery")
 
 
@@ -117,10 +118,17 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("bundles", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--max-report-bytes", type=int, default=MAX_REPORT_BYTES)
     args = parser.parse_args()
     report = build_report(args.bundles)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    if args.max_report_bytes <= 0:
+        print("report size limit must be positive")
+        return 1
+    if len(serialized.encode("utf-8")) > args.max_report_bytes:
+        print(f"readiness report exceeds {args.max_report_bytes} bytes")
+        return 1
     temporary = None
     try:
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=args.output.parent,

@@ -32,6 +32,14 @@ class GenerateReadinessReportTest(unittest.TestCase):
             self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["exit_gate_status"], "PENDING")
             self.assertEqual(list(output.parent.glob(".readiness.json.*.tmp")), [])
 
+    def test_cli_rejects_report_over_size_limit(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "readiness.json"
+            with mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(output), "--max-report-bytes", "1"]):
+                self.assertEqual(module.main(), 1)
+            self.assertFalse(output.exists())
+
     def test_missing_artifact_remains_fail_closed(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
