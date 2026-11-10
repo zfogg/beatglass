@@ -1408,8 +1408,8 @@ ApplicationWindow {
             restoreOverlay.forceActiveFocus()
         else
             hideOverlay.forceActiveFocus()
-        return true
         window.announceCaptureRecoveryState("Hide overlay control focused; " + (window.overlayHiddenByUser ? "Restore is ready." : "Hide is ready.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
     }
     function focusOverlaySizeShortcut() {
         navigation.currentIndex = 1
