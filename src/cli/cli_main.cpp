@@ -50,6 +50,7 @@ Element metric(std::string label, std::string value, Color accent) {
 struct AnalysisView {
   beatglass::TempoResult result;
   std::vector<float> waveform;
+  std::vector<std::uint64_t> beat_frames;
 };
 struct AnalysisBatch {
   std::vector<std::pair<std::filesystem::path, AnalysisView>> results;
@@ -78,13 +79,13 @@ std::vector<float> decode_waveform(const std::filesystem::path& path, std::stop_
   }
   return peaks;
 }
-Element waveform_chart(const std::vector<float>& waveform, std::uint64_t beats, float playback_fraction = -1.0f) {
+Element waveform_chart(const std::vector<float>& waveform, const std::vector<std::uint64_t>& beat_frames, std::uint64_t total_frames, float playback_fraction = -1.0f) {
   return vbox({text("WAVEFORM") | bold | underlined | color(Color::GreenLight),
                graph([=](int width, int height) {
                  std::vector<int> values(width);
                  for (int x = 0; x < width; ++x) {
                    const auto sample = waveform.empty() ? 0.08f : waveform[std::min<std::size_t>(waveform.size() - 1, static_cast<std::size_t>(x * waveform.size() / std::max(1, width)))];
-                   const auto beat_marker = !waveform.empty() && beats > 0 && x % std::max(1, width / static_cast<int>(std::min<std::uint64_t>(beats, 16))) == 0 ? 0.12f : 0.0f;
+                   const auto beat_marker = !waveform.empty() && total_frames > 0 && std::ranges::any_of(beat_frames, [&](const auto frame) { return static_cast<int>(frame * width / total_frames) == x; }) ? 0.12f : 0.0f;
                    const auto cursor = playback_fraction >= 0.0f && x == std::clamp(static_cast<int>(playback_fraction * width), 0, width - 1) ? 0.85f : 0.0f;
                    values[x] = std::clamp(static_cast<int>((sample + beat_marker + cursor) * height), 0, height - 1);
                  }
@@ -274,6 +275,7 @@ int main(int argc, char** argv) {
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result;
   std::vector<float> waveform;
+  std::vector<std::uint64_t> beat_frames;
   std::filesystem::path analysis_path;
   bool busy = false;
   bool reduce_motion = false;
@@ -341,10 +343,11 @@ int main(int argc, char** argv) {
         if (stop_token.stop_requested()) break;
         const auto metadata = beatglass::read_metadata(path);
         analysis_total.store(metadata.frames, std::memory_order_release);
-        const auto result = beatglass::replay_file(path, [&](std::uint64_t observed, const beatglass::TempoResult&) { analysis_frames.store(observed, std::memory_order_release); }, {}, stop_token);
+        std::vector<std::uint64_t> beat_frames;
+        const auto result = beatglass::replay_file(path, [&](std::uint64_t observed, const beatglass::TempoResult&) { analysis_frames.store(observed, std::memory_order_release); }, [&](const beatglass::ReplayBeat& beat) { beat_frames.push_back(beat.frame); }, stop_token);
         auto waveform = decode_waveform(path, stop_token);
         if (stop_token.stop_requested()) break;
-        batch.results.emplace_back(path, AnalysisView{result, std::move(waveform)});
+        batch.results.emplace_back(path, AnalysisView{result, std::move(waveform), std::move(beat_frames)});
         batch_completed.fetch_add(1, std::memory_order_acq_rel);
       }
       return batch;
@@ -371,7 +374,7 @@ int main(int argc, char** argv) {
       }
     }
     if (selected < 0 && !tracks.empty()) selected = 0;
-    result.reset(); waveform.clear();
+    result.reset(); waveform.clear(); beat_frames.clear();
     completed_analyses.clear();
     status = std::to_string(tracks.size()) + " tracks indexed; selection preserved by path." +
         (cancelling ? " Cancelling the previous analysis." : "");
@@ -460,10 +463,11 @@ int main(int argc, char** argv) {
     }
     selected = library_indices[static_cast<std::size_t>(visible)];
     library_visible_selected = visible;
-    result.reset(); waveform.clear();
+    result.reset(); waveform.clear(); beat_frames.clear();
     if (const auto cached = completed_analyses.find(tracks[selected].path); cached != completed_analyses.end()) {
       result = cached->second.result;
       waveform = cached->second.waveform;
+      beat_frames = cached->second.beat_frames;
     }
     status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
@@ -497,10 +501,11 @@ int main(int argc, char** argv) {
       analysis_stop.request_stop();
     }
     selected = next;
-    result.reset(); waveform.clear();
+    result.reset(); waveform.clear(); beat_frames.clear();
     if (const auto cached = completed_analyses.find(tracks[selected].path); cached != completed_analyses.end()) {
       result = cached->second.result;
       waveform = cached->second.waveform;
+      beat_frames = cached->second.beat_frames;
     }
     status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
@@ -553,7 +558,7 @@ int main(int argc, char** argv) {
       playback_fraction = static_cast<float>(playback_frame) / static_cast<float>(playback_total);
     }
 #endif
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0, playback_fraction), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("beat markers") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), sort_button->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), analyze_all_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), cancel_analysis_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Analyze all visible   Sort title/path   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
@@ -663,7 +668,7 @@ int main(int argc, char** argv) {
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(live_status) | color(Color::GrayLight) | italic;
     const auto corrected_bpm = live_bpm ? std::optional<float>(*live_bpm * live_bpm_multiplier) : std::nullopt;
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
-    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render(), text(" "), reset_live_button->Render()}), hbox({text("Tempo interpretation: ") | italic, half_bpm_button->Render(), text(" "), normal_bpm_button->Render(), text(" "), double_bpm_button->Render(), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render(), text(" "), reset_live_button->Render()}), hbox({text("Tempo interpretation: ") | italic, half_bpm_button->Render(), text(" "), normal_bpm_button->Render(), text(" "), double_bpm_button->Render(), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, {}, live_observed_frames), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input}), [&] {
@@ -760,7 +765,7 @@ int main(int argc, char** argv) {
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; const auto cached = !selection_changed && completed_analyses.find(analysis_path) != completed_analyses.end(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; completed track results remain available."; } else if (!cached) { result.reset(); waveform.clear(); status = "Analysis finished for a previous track; select a completed track to view its result."; } else { result = completed_analyses.at(analysis_path).result; waveform = completed_analyses.at(analysis_path).waveform; status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
+        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; const auto cached = !selection_changed && completed_analyses.find(analysis_path) != completed_analyses.end(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; completed track results remain available."; } else if (!cached) { result.reset(); waveform.clear(); beat_frames.clear(); status = "Analysis finished for a previous track; select a completed track to view its result."; } else { result = completed_analyses.at(analysis_path).result; waveform = completed_analyses.at(analysis_path).waveform; beat_frames = completed_analyses.at(analysis_path).beat_frames; status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
         catch (const std::exception& error) { result.reset(); waveform.clear(); status = std::string("Analysis failed: ") + error.what(); }
         busy = false;
       }
@@ -779,7 +784,7 @@ int main(int argc, char** argv) {
         return 2;
       }
     }
-    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; } status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
+    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; beat_frames = cached->second.beat_frames; } status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
     std::cout << rendered.ToString();
