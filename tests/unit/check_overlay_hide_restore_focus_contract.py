@@ -772,3 +772,12 @@ def test_display_focus_shortcut_returns_bridge_availability():
     assert "overlayDisplay.forceActiveFocus()" in body
     assert "announceCaptureRecoveryState" in body
     assert "return window.overlayBridge !== null" in body
+
+
+def test_retry_button_returns_native_result():
+    start = QML.index("function handleOverlayRetryButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowButtonAction", start)]
+    assert "return false" in body
+    assert "const retried" in body
+    assert "overlayDisplayStatus.forceActiveFocus()" in body
+    assert "return retried" in body

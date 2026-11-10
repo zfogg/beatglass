@@ -1553,8 +1553,9 @@ ApplicationWindow {
         window.overlayRecoveryPausedByUser = false
         window.overlayRecoveryAttemptCount += 1
         window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
-        window.showOverlayAndHideControls()
+        const retried = window.showOverlayAndHideControls()
         overlayDisplayStatus.forceActiveFocus()
+        return retried
     }
     function handleOverlayShowButtonAction() {
         if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
