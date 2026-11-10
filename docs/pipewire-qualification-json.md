@@ -272,6 +272,8 @@ rejected before provenance fields are inspected.
 even though some language runtimes represent them as integers.
 Zero and negative node IDs are rejected as well; `1` is the minimum accepted
 host node identifier.
+String-encoded node IDs are rejected; host evidence must carry the numeric JSON
+type rather than a display-formatted substitute.
 `secure_boot` must be a JSON boolean when present; numeric sentinel values are
 not accepted as native host evidence.
 `tpm_present` follows the same boolean-only contract; numeric sentinel values
