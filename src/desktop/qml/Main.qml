@@ -898,6 +898,7 @@ ApplicationWindow {
         window.requestActivate()
         window.announceCaptureRecoveryState(message + " " + window.overlayRecoveryEvidenceLabel + ".")
         resumeOverlayRecovery.forceActiveFocus()
+        return true
     }
 
     function restoreOverlayDisplaySelectionFromBridge() {
