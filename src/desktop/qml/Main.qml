@@ -3298,7 +3298,6 @@ ApplicationWindow {
                             text: "Metadata could not be read. Retry this file or clear the selection and choose another source."
                             visible: window.metadataStatus.indexOf("Error:") === 0
                             Accessible.name: "Metadata error recovery guidance: " + text
-                            Accessible.value: text
                             Accessible.role: Accessible.Status
                             Accessible.description: text + " Use Retry metadata to try the selected source again, or Clear selection to choose another source."
                             ToolTip.text: "Metadata error recovery guidance"
