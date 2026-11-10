@@ -3699,6 +3699,7 @@ ApplicationWindow {
                                 TextField { id: cacheContent; objectName: "analysisCacheContent"; placeholderText: "content identity"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache content identity"; Accessible.description: "Content identity used to look up or invalidate a completed analysis cache entry."; Layout.fillWidth: true }
                                 TextField { id: cacheEngine; objectName: "analysisCacheEngine"; placeholderText: "engine"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache engine"; Accessible.description: "Analysis engine identity used for the cache lookup."; Layout.fillWidth: true }
                                 TextField { id: cacheConfig; objectName: "analysisCacheConfig"; placeholderText: "configuration"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache configuration"; Accessible.description: "Analysis configuration identity used for the cache lookup."; Layout.fillWidth: true }
+                                 ComboBox { id: cacheMode; objectName: "analysisCacheMode"; model: ["offline", "live"]; currentIndex: 0; Accessible.name: "Analysis cache mode"; Accessible.description: "Choose whether the cache identity applies to offline or live analysis."; Layout.preferredWidth: 120 }
                                 Button {
                                     objectName: "lookupAnalysisCache"
                                     text: "Check cache"
@@ -3958,7 +3959,7 @@ ApplicationWindow {
                             Button {
                                 id: retryAnalysis
                                 text: "Retry analysis"
-                                objectName: "retryAnalysis"
+                                objectName: "retryAdmittedAnalysis"
                                 activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
                                 enabled: visible && window.analysisJobBridge.canRetry
@@ -3990,7 +3991,7 @@ ApplicationWindow {
                                 onAccepted: { if (!window.analysisJobBridge || !window.analysisJobBridge.canRetry) { window.announceVisualizationRecovery("Analysis recovery changed before discard; no recovery was discarded. Retry remains available when the worker reaches a terminal state."); retryAnalysis.forceActiveFocus() } else { window.analysisJobBridge.discard(); window.clearVisualizationForCaptureState("Analysis recovery discarded; previous visualization evidence is stale until a new accepted result."); window.announceVisualizationRecovery("Analysis recovery discarded; focus remains on the recovery controls."); retryAnalysis.forceActiveFocus() } }
                             }
                             Button {
-                                objectName: "cancelAnalysis"
+                                objectName: "cancelAdmittedAnalysis"
                                 text: "Cancel analysis"
                                 activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
