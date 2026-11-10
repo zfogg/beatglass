@@ -51,6 +51,7 @@ namespace {
 struct CliPreferences {
   bool reduce_motion{};
   int seek_step{5};
+  std::string visual_mode{"combined"};
 };
 
 std::filesystem::path preferences_path() {
@@ -77,6 +78,7 @@ CliPreferences load_preferences() {
     else if (key == "seek_step") {
       try { preferences.seek_step = std::clamp(std::stoi(value), 1, 60); } catch (...) {}
     }
+    else if (key == "visual_mode" && (value == "waveform" || value == "spectrum" || value == "combined")) preferences.visual_mode = value;
   }
   return preferences;
 }
@@ -88,7 +90,7 @@ void save_preferences(const CliPreferences& preferences) {
   std::filesystem::create_directories(path.parent_path(), error);
   if (error) return;
   std::ofstream output(path, std::ios::trunc);
-  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\n";
+  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\n";
 }
 using namespace ftxui;
 struct Track { std::filesystem::path path; std::string title; std::optional<beatglass::FileMetadata> metadata; };
@@ -626,16 +628,18 @@ int main(int argc, char** argv) {
     return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 32) | borderRounded, text(" "), action(clear_search_button->Render(), Color::Cyan)});
   });
   std::string seek_step_text = std::to_string(preferences.seek_step);
+  std::string visual_mode = preferences.visual_mode;
   auto seek_step_input = Input(&seek_step_text, "seconds");
   auto seek_step = [&] {
     try { return std::clamp(std::stoi(seek_step_text), 1, 60); }
     catch (...) { return 5; }
   };
   auto persist_preferences = [&] {
-    try { save_preferences(CliPreferences{reduce_motion, std::clamp(std::stoi(seek_step_text), 1, 60)}); } catch (...) { save_preferences(CliPreferences{reduce_motion, 5}); }
+    try { save_preferences(CliPreferences{reduce_motion, std::clamp(std::stoi(seek_step_text), 1, 60), visual_mode}); } catch (...) { save_preferences(CliPreferences{reduce_motion, 5, visual_mode}); }
   };
   bool last_saved_reduce_motion = reduce_motion;
   std::string last_saved_seek_step = seek_step_text;
+  std::string last_saved_visual_mode = visual_mode;
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
   auto refresh_button = Button(" Refresh ", refresh);
   std::string sort_button_label = " Sort: title ";
@@ -935,12 +939,18 @@ int main(int argc, char** argv) {
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(live_status) | color(Color::GrayLight) | italic;
     const auto corrected_bpm = live_bpm ? std::optional<float>(*live_bpm * live_bpm_multiplier) : std::nullopt;
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
+    const auto spectrum_view = vbox({text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum)});
+    const auto waveform_view = vbox({text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, live_observed_frames)});
+    const auto visualization = visual_mode == "waveform" ? waveform_view : visual_mode == "spectrum" ? spectrum_view : vbox({spectrum_view, waveform_view});
     std::vector<std::string> tempo_labels;
     for (const auto bpm : live_tempo_history) tempo_labels.push_back(format_bpm(bpm));
-    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({action(live_button->Render(), Color::GreenLight), text(" "), action(refresh_live_button->Render(), Color::Cyan), text(" "), action(reset_live_button->Render(), Color::YellowLight)}), hbox({text("Tempo interpretation: ") | italic, action(half_bpm_button->Render(), Color::YellowLight), text(" "), action(normal_bpm_button->Render(), Color::GreenLight), text(" "), action(double_bpm_button->Render(), Color::YellowLight), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   beats " + std::to_string(live_beats) + "   discontinuities " + std::to_string(live_discontinuities)), text("Signal confidence: " + std::to_string(static_cast<int>(live_signal_confidence * 100.0f)) + "% (RMS/peak health)") | color(Color::MagentaLight), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), text("Tempo history: " + (tempo_labels.empty() ? std::string("waiting for tracking") : join_history(tempo_labels))) | color(Color::YellowLight), text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum), text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, live_observed_frames), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({action(live_button->Render(), Color::GreenLight), text(" "), action(refresh_live_button->Render(), Color::Cyan), text(" "), action(reset_live_button->Render(), Color::YellowLight)}), hbox({text("Tempo interpretation: ") | italic, action(half_bpm_button->Render(), Color::YellowLight), text(" "), action(normal_bpm_button->Render(), Color::GreenLight), text(" "), action(double_bpm_button->Render(), Color::YellowLight), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   beats " + std::to_string(live_beats) + "   discontinuities " + std::to_string(live_discontinuities)), text("Signal confidence: " + std::to_string(static_cast<int>(live_signal_confidence * 100.0f)) + "% (RMS/peak health)") | color(Color::MagentaLight), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), text("Tempo history: " + (tempo_labels.empty() ? std::string("waiting for tracking") : join_history(tempo_labels))) | color(Color::YellowLight), visualization, filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
-  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input}), [&] {
+  auto waveform_mode_button = Button(" Waveform ", [&] { visual_mode = "waveform"; });
+  auto spectrum_mode_button = Button(" Spectrum ", [&] { visual_mode = "spectrum"; });
+  auto combined_mode_button = Button(" Combined ", [&] { visual_mode = "combined"; });
+  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button}), [&] {
     return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
       text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
       text("Tonal engine: optional Essentia music-replay build (disabled in this standard CLI build).") | color(Color::GrayLight) | italic,
@@ -948,6 +958,8 @@ int main(int argc, char** argv) {
       text("PRESENTATION") | bold | underlined, reduce_motion_checkbox->Render(),
       text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight) | italic,
       text("PLAYBACK") | bold | underlined, hbox({text("Seek step (1–60 seconds): ") | italic, seek_step_input->Render() | size(WIDTH, LESS_THAN, 8)}),
+      text("LIVE VISUALIZATION") | bold | underlined,
+      hbox({text("Mode: " + visual_mode + "  ") | italic, action(waveform_mode_button->Render(), Color::GreenLight), text(" "), action(spectrum_mode_button->Render(), Color::MagentaLight), text(" "), action(combined_mode_button->Render(), Color::Cyan)}),
       separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."),
       text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
@@ -1002,10 +1014,11 @@ int main(int argc, char** argv) {
       return true;
     }
     if (event == Event::Custom) {
-      if (reduce_motion != last_saved_reduce_motion || seek_step_text != last_saved_seek_step) {
+      if (reduce_motion != last_saved_reduce_motion || seek_step_text != last_saved_seek_step || visual_mode != last_saved_visual_mode) {
         persist_preferences();
         last_saved_reduce_motion = reduce_motion;
         last_saved_seek_step = seek_step_text;
+        last_saved_visual_mode = visual_mode;
       }
       if (!reduce_motion) ++spinner_frame;
 #ifdef _WIN32
