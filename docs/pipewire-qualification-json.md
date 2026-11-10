@@ -210,3 +210,5 @@ If present, host `fan_state` must be a non-empty string describing fan or
 cooling state during qualification.
 If present, host `battery_state` must be a non-empty string describing battery
 or mains-power state during qualification.
+If present, host `network_state` must be a non-empty string describing network
+connectivity state during qualification.
