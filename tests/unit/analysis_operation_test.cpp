@@ -331,7 +331,7 @@ TEST_CASE("coordinator resubmits persisted endpoint retry after restart") {
   operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   const auto handle = coordinator.resubmit_retryable(pending.front().id, std::move(operation));
   REQUIRE(handle);
-  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::milliseconds(1));
   REQUIRE(handle->state() == beatglass::library_detail::TrackedState::completed);
   std::string result;
   REQUIRE(coordinator.storage().cache()->find(key, result));
