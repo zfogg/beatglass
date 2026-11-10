@@ -287,6 +287,10 @@ Optional `secure_boot` and `tpm_present` schema properties are boolean-typed,
 matching runtime rejection of numeric sentinels.
 The host schema permits additional properties for forward-compatible native
 provenance fields; validator checks remain authoritative for known fields.
+The executable acceptance check in
+`tests/unit/check_native_host_provenance_timing_acceptance.py` also confirms
+that the boundary values zero nanoseconds and one source are accepted when
+provided by a producer.
 Unknown-but-well-formed host fields are retained in checked_fields metadata so
 future producers do not silently lose provenance during report generation.
 Before packaging a native run, validate the extracted host object directly:
