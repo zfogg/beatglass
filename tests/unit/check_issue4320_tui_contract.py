@@ -10,6 +10,8 @@ def main() -> int:
     if missing: raise SystemExit("Missing issue #4320 TUI markers: " + ", ".join(missing))
     if "open_folder_in_file_manager" not in tui or "ShellExecuteW" not in tui or "xdg-open --" not in tui or "shell_quote" not in tui or "'\\\\''" not in tui:
         raise SystemExit("CLI Open folder action is not wired to a platform file manager")
+    if "UINT take_device_id()" not in tui or "start_device(take_device_id()" not in tui:
+        raise SystemExit("CLI playback device selection is not synchronized with the playback worker")
     if "Analysis delay: " not in tui: raise SystemExit("CLI Live view does not expose shared analysis delay")
     if "present_analysis_view" not in tui or "beatglass::present_snapshot(snapshot)" not in tui: raise SystemExit("CLI Library details do not use shared analysis presentation")
     readme = (root / "README.md").read_text(encoding="utf-8")

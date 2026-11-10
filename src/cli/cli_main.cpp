@@ -557,6 +557,7 @@ private:
   void request(Command command) { { std::lock_guard lock(mutex_); command_ = command; } condition_.notify_one(); }
   Command take_command() { std::lock_guard lock(mutex_); const auto command = command_; command_ = Command::none; return command; }
   std::int64_t take_seek_delta_seconds() { std::lock_guard lock(mutex_); const auto delta = seek_delta_seconds_; seek_delta_seconds_ = 0; return delta; }
+  UINT take_device_id() { std::lock_guard lock(mutex_); return device_id_; }
   void set_status(std::string status) { std::lock_guard lock(mutex_); status_ = std::move(status); }
   void run() {
     std::unique_ptr<beatglass::FileReader> reader;
@@ -580,7 +581,7 @@ private:
           const auto& metadata = reader->metadata();
           current_frame_.store(0, std::memory_order_release);
           total_frames_.store(metadata.frames, std::memory_order_release);
-          if (!output.start_device(device_id_, metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
+          if (!output.start_device(take_device_id(), metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
           epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through native output.");
         } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
       } else if (command == Command::resume) {
@@ -597,7 +598,7 @@ private:
               : std::min<std::uint64_t>(metadata.frames, current_frame + static_cast<std::uint64_t>(delta));
           output.stop(); reader->seek(target, ++next_epoch);
           std::string error;
-          if (!output.start_device(device_id_, metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
+          if (!output.start_device(take_device_id(), metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
           current_frame = target; epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback seeked to frame " + std::to_string(target) + ".");
           current_frame_.store(target, std::memory_order_release);
         } catch (const std::exception& error) { set_status(std::string("Playback seek failed: ") + error.what()); }
