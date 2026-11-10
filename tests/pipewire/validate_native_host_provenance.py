@@ -37,7 +37,10 @@ if len(sys.argv) == 3:
     report = {"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
     temporary_path = None
     try:
+        input_path = Path(sys.argv[1]).resolve()
         destination = Path(sys.argv[2])
+        if destination.resolve() == input_path:
+            raise OSError("report destination matches host input")
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.is_symlink():
             raise OSError("report destination is a symbolic link")
