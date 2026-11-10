@@ -2,6 +2,7 @@
 #include "beatglass/core/causal_replay.hpp"
 #include "beatglass/core/audio.hpp"
 #include "beatglass/core/presentation.hpp"
+#include "beatglass/core/visualization.hpp"
 #include "beatglass/capture/file_reader.hpp"
 #include "beatglass/core/playback_session.hpp"
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
@@ -512,12 +513,15 @@ int main(int argc, char** argv) {
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
   std::vector<float> live_tempo_history;
+  std::optional<beatglass::VisualizationFrame> live_visualization_frame;
+  beatglass::VisualizationProcessor live_visualization([](void*) noexcept {}, nullptr);
   live_session = std::make_unique<beatglass::windows::LoopbackSession>(live_epochs, [&] {
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
     live_bpm.reset();
     live_tracking_state = beatglass::TrackingState::reacquiring;
     live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
     live_beats = 0; live_tempo_history.clear(); live_spectrum.assign(live_spectrum.size(), 0.0f);
+    live_visualization.reset(); live_visualization_frame.reset();
     live_signal_confidence = 0.0f;
   });
 #else
@@ -1155,24 +1159,27 @@ int main(int argc, char** argv) {
               live_tempo_history.push_back(*live_bpm);
               if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin());
             }
-            for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) {
-              const auto first = bin * packet.sample_count / live_waveform.size();
-              const auto last = std::max(first + 1, (bin + 1) * packet.sample_count / live_waveform.size());
-              float peak = 0.0f;
-              for (auto sample = first; sample < std::min<std::size_t>(last, packet.sample_count); ++sample) peak = std::max(peak, std::abs(packet.samples[sample]));
-              live_waveform[bin] = peak;
+            std::vector<float> mono(packet.sample_count / std::max<std::uint32_t>(1, packet.channels));
+            for (std::size_t frame = 0; frame < mono.size(); ++frame) {
+              float sum = 0.0f;
+              for (std::uint32_t channel = 0; channel < std::max<std::uint32_t>(1, packet.channels); ++channel) sum += packet.samples[frame * packet.channels + channel];
+              mono[frame] = sum / static_cast<float>(std::max<std::uint32_t>(1, packet.channels));
             }
-            const auto spectrum_samples = std::min<std::size_t>(packet.sample_count, 256);
-            for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) {
-              const auto frequency = static_cast<float>(bin + 1) / static_cast<float>(live_spectrum.size());
-              float real = 0.0f, imaginary = 0.0f;
-              for (std::size_t sample = 0; sample < spectrum_samples; ++sample) {
-                constexpr float pi = 3.14159265358979323846f;
-                const auto phase = 2.0f * pi * frequency * static_cast<float>(sample) / static_cast<float>(spectrum_samples);
-                const auto value = packet.samples[sample * packet.channels];
-                real += value * std::cos(phase); imaginary -= value * std::sin(phase);
+            for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) {
+              const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset);
+              if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate,
+                                                          std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) live_visualization_frame = std::move(frame);
+            }
+            if (live_visualization_frame) {
+              const auto& frame = *live_visualization_frame;
+              for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) {
+                const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size()));
+                live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source]));
               }
-              live_spectrum[bin] = std::clamp(std::sqrt(real * real + imaginary * imaginary) / std::max<std::size_t>(1, spectrum_samples) * 12.0f, 0.0f, 1.0f);
+              for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) {
+                const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size()));
+                live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f);
+              }
             }
             live_status = "Receiving OS sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) {
