@@ -21,6 +21,10 @@ If any event supplies `epoch`, every event must supply a positive integer epoch.
 Partial epoch annotations are rejected so lifecycle evidence cannot silently mix
 attributed and unattributed records.
 
+When any `error` event includes `error_code`, every error event must include a
+non-zero integer code. This keeps native failure provenance complete across repeated
+discontinuities.
+
 Process events may also include `serial`. If present, it must be a non-empty string
 on every process event and must match the sink serial for that event's capture epoch:
 the start serial before restart and the restart serial afterward. This preserves
