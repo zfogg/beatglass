@@ -827,3 +827,13 @@ def test_click_through_shortcut_routes_named_action_result():
     assert "handleOverlayClickThroughButtonAction(true)" in body
     shortcut = QML[QML.index("function handleOverlayClickThroughShortcut()") : QML.index("    function handleOverlayRetryShortcut", QML.index("function handleOverlayClickThroughShortcut()"))]
     assert "return window.handleOverlayClickThroughShortcutAction()" in shortcut
+
+
+def test_retry_shortcut_routes_named_action_result():
+    start = QML.index("function handleOverlayRetryShortcutAction")
+    body = QML[start : QML.index("    function handleOverlayRetryShortcut()", start)]
+    assert "window.show()" in body
+    assert "handleOverlayRetryButtonAction()" in body
+    shortcut_start = QML.index("function handleOverlayRetryShortcut()")
+    shortcut = QML[shortcut_start : QML.index("    function handleOverlayRetryAction", shortcut_start)]
+    assert "return window.handleOverlayRetryShortcutAction()" in shortcut
