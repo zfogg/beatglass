@@ -4963,10 +4963,10 @@ ApplicationWindow {
                         && !window.overlayPersistedDiagnosticDismissed
                         && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled")
                     text: visible ? "Persisted analysis admission result (not current visualization): " + storageRecovery.analysisAdmissionResult : ""
-                    Accessible.name: "Overlay persisted recovery diagnostic: " + text
-                    Accessible.value: text
+                    Accessible.name: "Overlay persisted recovery diagnostic (historical, live evidence stale until fresh capture): " + text
+                    Accessible.value: text + "; live evidence stale until fresh capture"
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Persisted bridge feedback is historical and must not be treated as the current visualization result."
+                    Accessible.description: "Persisted bridge feedback is historical and must not be treated as the current visualization result. Live evidence is stale until fresh capture arrives."
                     ToolTip.text: "Historical persisted analysis admission feedback"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
