@@ -51,6 +51,15 @@ try {
       "-DBEATGLASS_BUILD_SLICE=ON", "-DBEATGLASS_BUILD_DESKTOP=ON", "-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON",
       "-DBEATGLASS_FETCH_SQLITE3=ON"
     )
+    if ($env:VCPKG_ROOT) {
+      $toolchain = Join-Path $env:VCPKG_ROOT "scripts/buildsystems/vcpkg.cmake"
+      if (Test-Path -LiteralPath $toolchain) {
+        $configureArgs += "-DCMAKE_TOOLCHAIN_FILE=$toolchain"
+        $configureArgs += "-DVCPKG_MANIFEST_FEATURES=desktop;tui"
+      } else {
+        "VCPKG toolchain not found at $toolchain; continuing with host dependencies."
+      }
+    }
     "cmake $($configureArgs -join ' ')"
     & cmake @configureArgs
     if ($LASTEXITCODE -ne 0) { throw "CMake configure failed with exit code $LASTEXITCODE" }
