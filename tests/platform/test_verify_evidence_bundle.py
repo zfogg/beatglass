@@ -43,6 +43,15 @@ class EvidenceBundleTest(unittest.TestCase):
             errors = module.verify(root, manifest)
             self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
 
+    def test_artifact_unknown_fields_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "size": 1}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("unsupported artifact fields: ['size']", module.verify(root, manifest))
+
     def test_artifact_hash_must_be_a_sha256_digest(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("x\n", encoding="utf-8")
