@@ -280,6 +280,18 @@ struct AnalysisView {
   std::vector<std::string> tonal_history;
   bool from_persistent_cache{};
 };
+beatglass::PresentationState present_analysis_view(const AnalysisView& view) {
+  beatglass::Snapshot snapshot;
+  snapshot.state = view.result.state;
+  snapshot.observed_through = {1, view.result.metadata.frames};
+  snapshot.bpm = view.result.bpm;
+  for (const auto frame : view.beat_frames) snapshot.beats.push_back({{1, frame}, 1.0f});
+  if (view.key) snapshot.key_candidates.push_back({*view.key, 0.0f});
+  for (const auto& label : view.tonal_history) {
+    if (!label.empty()) snapshot.chords.push_back({{1, 0}, {1, view.result.metadata.frames}, {label, 0.0f}});
+  }
+  return beatglass::present_snapshot(snapshot);
+}
 struct AnalysisBatch {
   std::vector<std::pair<std::filesystem::path, AnalysisView>> results;
   std::vector<std::pair<std::filesystem::path, std::string>> errors;
@@ -1225,7 +1237,8 @@ int main(int argc, char** argv) {
     const auto duration = result ? format_duration(result->metadata)
         : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata
             ? format_duration(*tracks[selected].metadata) : "—";
-    Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
+    const auto analysis_display = result ? present_analysis_view(AnalysisView{*result, waveform, beat_frames, key, chord, tonal_history, false}) : beatglass::PresentationState{};
+    Elements cards = {metric("TEMPO", result ? analysis_display.tempo + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(analysis_display.beat_count) : "—", Color::YellowLight), metric("STATE", result ? analysis_display.status : "waiting", Color::Cyan)};
     cards.push_back(text("Analyze selected") | color(Color::GreenLight));
     cards.push_back(text("Analyze all") | color(Color::GreenLight));
     cards.push_back(text("Sort: title") | color(Color::YellowLight));
@@ -1260,7 +1273,7 @@ int main(int argc, char** argv) {
     const auto format = result ? result->metadata.format : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->format : "—";
     const auto sample_rate = result ? result->metadata.sample_rate : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->sample_rate : 0;
     const auto channels = result ? result->metadata.channels : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->channels : 0;
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 6), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction) | size(HEIGHT, EQUAL, 5), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(format == "—" ? "Select a supported track to inspect it" : "Format: " + format) | bold, text(sample_rate ? "Sample rate: " + std::to_string(sample_rate) + " Hz   Channels: " + std::to_string(channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (key ? *key : "—") + "   Chord: " + (chord ? *chord : "—")) | color(key || chord ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + join_history(tonal_history)) | color(tonal_history.empty() ? Color::GrayLight : Color::GreenLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 6), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction) | size(HEIGHT, EQUAL, 5), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(format == "—" ? "Select a supported track to inspect it" : "Format: " + format) | bold, text(sample_rate ? "Sample rate: " + std::to_string(sample_rate) + " Hz   Channels: " + std::to_string(channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (result ? analysis_display.key : std::string("—")) + "   Chord: " + (result ? analysis_display.chord : std::string("—"))) | color(result && (analysis_display.key != "—" || analysis_display.chord != "—") ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + (result ? join_history(analysis_display.tonal_history) : std::string("—"))) | color(result && !analysis_display.tonal_history.empty() ? Color::GreenLight : Color::GrayLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(retry_analysis_button->Render(), Color::YellowLight),
 #ifdef BEATGLASS_CLI_LIBRARY
       text(" "), action(recover_persisted_button->Render(), Color::MagentaLight),
