@@ -26,3 +26,9 @@ for token in ("--help", "-h", "--version", "-V"):
 if "beatglass-music-cli" in music_source and "beatglass-music-cli" not in README:
     raise SystemExit("README is missing beatglass-music-cli documentation")
 print("README music CLI alias coverage verified")
+
+cli_source = (ROOT / "src/cli/main.cpp").read_text(encoding="utf-8")
+for token in ("--help", "-h", "--version", "-V"):
+    if token in cli_source and token not in README:
+        raise SystemExit(f"README is missing main CLI token: {token}")
+print("README main CLI alias coverage verified")
