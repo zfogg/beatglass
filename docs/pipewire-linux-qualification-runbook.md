@@ -55,6 +55,8 @@ Pending summaries must include a non-empty `pending_reason`; this keeps an
 unqualified platform handoff actionable instead of producing a blank status.
 Qualified summaries must include a non-empty `commit` value so native evidence
 cannot be detached from the code identity that produced it.
+If a pending summary includes `commit`, it must still be a non-empty string;
+malformed provenance is rejected rather than silently omitted.
 Qualified summaries must also set `native_execution_attempted` to `true`; a
 portable or pending-only result cannot claim qualification.
 Qualified summaries must not retain execution blockers; any remaining blocker
