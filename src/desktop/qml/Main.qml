@@ -735,6 +735,14 @@ ApplicationWindow {
         if (target)
             target.forceActiveFocus()
     }
+    function focusOverlayRestoredState(message, target) {
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Fresh capture can now be accepted."))
+        if (target)
+            target.forceActiveFocus()
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -2049,11 +2057,7 @@ ApplicationWindow {
                     overlayDisplay.forceActiveFocus()
                 } else {
                     window.overlayDisplayRecoveryPending = false
-                    window.announceCaptureRecoveryState("DJ overlay recovered; Show, Restore, and Reapply actions are available.")
-                    window.show()
-                    window.raise()
-                    window.requestActivate()
-                    overlaySettingsRetentionReviewAction.forceActiveFocus()
+                    window.focusOverlayRestoredState("DJ overlay recovered; Show, Restore, and Reapply actions are available.", overlaySettingsRetentionReviewAction)
                 }
             }
         }
