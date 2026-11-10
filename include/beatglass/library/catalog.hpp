@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <cstdint>
 #include <string>
+#include <stop_token>
 #include <vector>
 
 namespace beatglass::library {
@@ -15,6 +16,8 @@ namespace beatglass::library {
  */
 struct CatalogEntry {
   std::filesystem::path path;
+  /** Stable path relative to the query root; never contains machine roots. */
+  std::filesystem::path relative_path;
   std::string name;
   /** Display title fallback derived from the filename stem; not embedded metadata. */
   std::string title;
@@ -29,14 +32,34 @@ struct CatalogEntry {
   double duration_seconds{-1.0};
 };
 
+/** Machine-readable outcome of a synchronous catalog query. */
+enum class CatalogStatus {
+  ok,
+  invalid_root,
+  filesystem_error,
+  entry_limit_exceeded,
+};
+
 /** Result of a synchronous folder query performed by a non-audio worker.
  * On filesystem failure, entries is empty and diagnostic contains the
  * platform error. The query never follows directory entries recursively.
  */
 struct CatalogResult {
+  /** Normalized absolute root used to produce this snapshot. */
+  std::filesystem::path query_root;
   std::vector<CatalogEntry> entries;
   std::string diagnostic;
+  CatalogStatus status{CatalogStatus::ok};
+  /** True when the caller cancelled before a complete snapshot was built. */
+  bool cancelled{};
 };
+
+/** Return the canonical display format for a supported audio path.
+ * The result is one of `WAV`, `FLAC`, `MP3`, or `AIFF`; an empty string means
+ * the extension is not part of the qualified catalog set. This is a pure
+ * filename policy helper and does not access the filesystem.
+ */
+std::string audio_format_for_path(const std::filesystem::path& path);
 
 /** Enumerate one local folder for the Library view.
  * The search is case-insensitive against entry names. Results are sorted by
@@ -45,13 +68,17 @@ struct CatalogResult {
  * audio callback; it does not create, delete, or modify user files.
  */
 CatalogResult browse(const std::filesystem::path& folder,
-                     std::string search = {});
+                     std::string search = {},
+                     std::size_t max_entries = 10000,
+                     std::stop_token stop = {});
 
 /** Enumerate a local folder and all descendant folders without following links.
  * The result uses the same supported-format and deterministic ordering rules
  * as browse(); filesystem errors return an empty result with a diagnostic.
  */
 CatalogResult browse_recursive(const std::filesystem::path& folder,
-                               std::string search = {});
+                               std::string search = {},
+                               std::size_t max_entries = 10000,
+                               std::stop_token stop = {});
 
 } // namespace beatglass::library

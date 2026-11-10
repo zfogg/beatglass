@@ -29,6 +29,24 @@ TEST_CASE("retryable recovery looks up one persisted run by ID") {
   CHECK(found->decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
   CHECK_FALSE(cache.retryable_run("missing-recovery-id"));
 }
+TEST_CASE("retryable recovery survives storage reopen") {
+  const auto path = std::filesystem::temp_directory_path() / "beatglass-recovery-reopen.sqlite";
+  std::filesystem::remove(path);
+  const beatglass::library_detail::CacheKey key{"reopen-id", "engine", "config", "offline"};
+  {
+    beatglass::library_detail::SqliteCache cache(path.string());
+    cache.begin("reopen-id", key, "/music/reopen.flac", beatglass::library::kFileDecoderSnapshot);
+    REQUIRE(cache.publish("reopen-id", key, "stale", {}, [] { return false; }) == beatglass::library_detail::Publish::stale_input);
+  }
+  {
+    beatglass::library_detail::SqliteCache cache(path.string());
+    const auto recovered = cache.retryable_run("reopen-id");
+    REQUIRE(recovered.has_value());
+    CHECK(recovered->source_path == "/music/reopen.flac");
+    CHECK(recovered->decoder_snapshot == beatglass::library::kFileDecoderSnapshot);
+  }
+  std::filesystem::remove(path);
+}
 TEST_CASE("analysis admission accepts a compatible snapshot cache hit") {
   beatglass::library_detail::SqliteCache cache(":memory:");
   beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};

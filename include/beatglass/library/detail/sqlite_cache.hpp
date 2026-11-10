@@ -81,9 +81,9 @@ public:
   /** Copy a completed cached blob into result; return false on miss, throw on storage error. */
   bool find(const CacheKey& key, std::string& result);
   /** Return 1–10000 persisted runs left retryable by cancellation, stale input, or restart. */
-  std::vector<RetryableRun> retryable_runs(std::size_t limit = 100);
+  std::vector<RetryableRun> retryable_runs(std::size_t limit = 100, std::stop_token stop = {});
   /** Return one persisted retryable run by ID, including source and decoder metadata; lookup is independent of the bounded list page. */
-  std::optional<RetryableRun> retryable_run(const std::string& id);
+  std::optional<RetryableRun> retryable_run(const std::string& id, std::stop_token stop = {});
   /** Discard one retryable run record without touching its source file; throws for an empty, NUL-containing, or overlong ID. */
   bool discard_retryable(const std::string& id);
   /** Atomically discard the supplied retryable run IDs; validates every ID before deleting any row and returns the number removed. */

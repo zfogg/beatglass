@@ -1,0 +1,77 @@
+"""Validate a host provenance object against the qualification contract."""
+import json
+import os
+import stat
+import sys
+import tempfile
+from pathlib import Path
+
+if len(sys.argv) not in (2, 3):
+    raise SystemExit("usage: validate_native_host_provenance.py HOST.json [REPORT.json]")
+try:
+    input_path = Path(sys.argv[1])
+    if input_path.is_symlink():
+        raise OSError("host provenance input is a symbolic link")
+    if not input_path.is_file():
+        raise OSError("host provenance input is not a regular file")
+    def reject_duplicate_keys(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate key: {key}")
+            result[key] = value
+        return result
+    host = json.loads(input_path.read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_keys)
+except (OSError, UnicodeError, json.JSONDecodeError) as error:
+    raise SystemExit(f"host provenance is unreadable: {error}")
+except ValueError as error:
+    raise SystemExit(f"host provenance is ambiguous: {error}")
+if not isinstance(host, dict):
+    raise SystemExit("host provenance must be an object")
+if host.get("platform") not in ("linux", "windows", "macos"):
+    raise SystemExit("host provenance has an invalid platform")
+if not isinstance(host.get("name"), str) or not host["name"].strip():
+    raise SystemExit("host provenance has no name")
+if host.get("node_id") is not None and (not isinstance(host["node_id"], int) or isinstance(host["node_id"], bool) or host["node_id"] < 1):
+    raise SystemExit("host provenance has an invalid node id")
+if host.get("secure_boot") is not None and not isinstance(host["secure_boot"], bool):
+    raise SystemExit("host provenance has an invalid secure boot flag")
+if host.get("tpm_present") is not None and not isinstance(host["tpm_present"], bool):
+    raise SystemExit("host provenance has an invalid TPM flag")
+if host.get("clock_accuracy_ns") is not None and (not isinstance(host["clock_accuracy_ns"], int) or isinstance(host["clock_accuracy_ns"], bool) or host["clock_accuracy_ns"] < 0):
+    raise SystemExit("host provenance has invalid clock accuracy")
+if host.get("clock_source_count") is not None and (not isinstance(host["clock_source_count"], int) or isinstance(host["clock_source_count"], bool) or host["clock_source_count"] < 1):
+    raise SystemExit("host provenance has invalid clock source count")
+if len(sys.argv) == 3:
+    report = {"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
+    temporary_path = None
+    try:
+        input_path = Path(sys.argv[1]).resolve()
+        destination = Path(sys.argv[2])
+        if destination.resolve() == input_path or (destination.exists() and os.path.samefile(input_path, destination)):
+            raise OSError("report destination matches host input")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.is_symlink():
+            raise OSError("report destination is a symbolic link")
+        if destination.exists() and not destination.is_file():
+            raise OSError("report destination is not a regular file")
+        existing_mode = stat.S_IMODE(destination.stat().st_mode) if destination.exists() else None
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent, delete=False) as temporary:
+            temporary.write(json.dumps(report, indent=2) + "\n")
+            temporary.flush()
+            os.fsync(temporary.fileno())
+            temporary_path = Path(temporary.name)
+        if existing_mode is not None:
+            os.chmod(temporary_path, existing_mode)
+        os.replace(temporary_path, destination)
+        if os.name != "nt":
+            directory_fd = os.open(destination.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
+    except OSError as error:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+        raise SystemExit(f"host provenance report is unwritable: {error}")
+print("native host provenance verified")

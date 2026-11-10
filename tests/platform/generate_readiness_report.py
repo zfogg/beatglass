@@ -6,10 +6,22 @@ always PENDING until a separate, human-reviewed native gate changes them.
 import argparse
 import hashlib
 import json
+import os
+import tempfile
 from pathlib import Path
 
 PLATFORMS = ("windows", "macos", "linux")
+MAX_REPORT_BYTES = 16 << 20
 SCENARIOS = ("capture", "display", "output", "overlay", "playback", "recovery")
+
+
+def has_symlinked_parent(path: Path) -> bool:
+    current = path.parent
+    while current != current.parent:
+        if current.is_symlink():
+            return True
+        current = current.parent
+    return False
 
 
 def _sha(path: Path) -> str:
@@ -103,11 +115,19 @@ def build_report(root: Path) -> dict:
                      "errors": errors})
     status = [{"platform": p, "status": "experimental"} for p in PLATFORMS]
     generation_errors = [f"{row['platform']}: {error}" for row in rows for error in row.get("errors", [])]
+    error_categories = {}
+    for error in generation_errors:
+        category = error.split(":", 1)[-1].strip().split(":", 1)[0]
+        error_categories[category] = error_categories.get(category, 0) + 1
+    retained_artifact_count = sum(len(row.get("artifact_inventory", [])) for row in rows)
+    retained_artifact_bytes = sum(sum(item.get("bytes", 0) for item in row.get("artifact_inventory", [])) for row in rows)
     return {"readiness_report_schema": 1, "support_language": "experimental",
             "native_qualification_required": True, "exit_gate_status": "PENDING",
             "exit_gate_reason_codes": ["native_qualification_required", "generated_report_pending_review"],
             "ready": False, "platform_support_status": status, "platforms": rows,
-            "generation_errors": generation_errors, "handoff_check_errors": [],
+            "generation_errors": generation_errors, "generation_error_count": len(generation_errors),
+            "generation_error_categories": error_categories, "handoff_check_errors": [],
+            "retained_artifact_count": retained_artifact_count, "retained_artifact_bytes": retained_artifact_bytes,
             "documentation_check_errors": [], "ingestion_errors": []}
 
 
@@ -115,11 +135,37 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("bundles", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--max-report-bytes", type=int, default=MAX_REPORT_BYTES)
+    parser.add_argument("--json", action="store_true", help="emit the generated report on stdout")
     args = parser.parse_args()
     report = build_report(args.bundles)
+    if args.output.is_symlink():
+        print("readiness report output must not be a symlink")
+        return 1
+    if has_symlinked_parent(args.output):
+        print("readiness report output parent must not be a symlink")
+        return 1
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"wrote conservative readiness report: {args.output}")
+    serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    if args.max_report_bytes <= 0:
+        print("report size limit must be positive")
+        return 1
+    if len(serialized.encode("utf-8")) > args.max_report_bytes:
+        print(f"readiness report exceeds {args.max_report_bytes} bytes")
+        return 1
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=args.output.parent,
+                                         prefix=f".{args.output.name}.", suffix=".tmp", delete=False) as stream:
+            temporary = Path(stream.name); stream.write(serialized); stream.flush(); os.fsync(stream.fileno())
+        os.replace(temporary, args.output); temporary = None
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+    if args.json:
+        print(serialized, end="")
+    else:
+        print(f"wrote conservative readiness report: {args.output}")
     return 0
 
 

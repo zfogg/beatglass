@@ -549,6 +549,10 @@ The issue-76 contract suite now checks each runtime status branch explicitly—E
 
 The visualization status group now includes a state-aware Clear selection action. It is enabled only when a waveform or FFT position is selected, reports available/unavailable through its accessible value, and keeps keyboard and pointer recovery paths available from the same responsive status layout.
 
+The clear action now adapts its label and width in compact headers, while its accessible description and tooltip include the current capture transition. This keeps the action understandable while Starting, Reacquiring, Error, or steady-state monitoring changes around it.
+
+The parent visualization status group now carries the selection-clear availability alongside capture and data state, so assistive navigation announces both the live runtime condition and whether an actionable selection exists.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
@@ -831,6 +835,8 @@ Relaunch hydration now validates native geometry and opacity as well. Valid pers
 
 Invalid persisted opacity now falls back to a safe 90% value before any overlay show operation and announces the correction, preventing malformed native settings from producing an unusable or invisible overlay.
 
+Every overlay show, retry, and restore path now reapplies validated visual state immediately before the native show call, keeping geometry and opacity recovery consistent after relaunch, display replacement, and transient native failures.
+
 Overlay hide now always restores and activates the control window, including the overlay's own close affordance. A dedicated Quit Beatglass action hides the native overlay before exiting, preserving persisted overlay settings and making the shutdown lifecycle explicit to assistive status consumers.
 Overlay availability recovery now synchronizes the action surface as a single transition: losing the native bridge marks recovery pending, while a reconnect refreshes the settings revision and distinguishes “no display available” from “display selection required.” Accessible focus and announcements direct the user to the display selector when actions cannot yet be used; once the selected display is valid, the recovery marker clears and Show, Restore, and Reapply report availability together.
 
@@ -876,6 +882,8 @@ Successful seek-to-frame admission now announces the requested frame, making the
 Native playback start now announces the selected-output admission request, making the transition observable while the bridge moves to its running state.
 
 Refreshing playback outputs now returns focus to the output-device selector, making the refreshed device list immediately actionable from the keyboard.
+
+Retry native playback now rechecks the live bridge error at click time and announces when a stale retry action has been invalidated by a state transition.
 
 The shared fallback-control helper now restores display-selector focus after activation, ensuring every caller that presents the control window provides the same keyboard recovery entry point.
 Active analysis failure reasons, recovery status, and persisted queue errors now expose their live text as accessible status values, so assistive technology receives the same diagnostics visible in the recovery surface.

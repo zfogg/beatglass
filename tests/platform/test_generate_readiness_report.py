@@ -21,6 +21,10 @@ class GenerateReadinessReportTest(unittest.TestCase):
         self.assertEqual({r["platform"] for r in report["platforms"]}, set(module.PLATFORMS))
         self.assertTrue(all(a["hash_valid"] for r in report["platforms"] for a in r["artifact_inventory"]))
         self.assertTrue(all(row["commit"] and row["captured_at"] and row["environment"] for row in report["platforms"]))
+        self.assertEqual(report["generation_error_count"], len(report["generation_errors"]))
+        self.assertEqual(sum(report["generation_error_categories"].values()), report["generation_error_count"])
+        self.assertEqual(report["retained_artifact_count"], sum(len(row["artifact_inventory"]) for row in report["platforms"]))
+        self.assertGreaterEqual(report["retained_artifact_bytes"], 0)
 
     def test_cli_creates_nested_output_directory(self):
         root = Path(__file__).parent / "fixtures/readiness-bundles"
@@ -30,6 +34,47 @@ class GenerateReadinessReportTest(unittest.TestCase):
                 self.assertEqual(module.main(), 0)
             self.assertTrue(output.is_file())
             self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["exit_gate_status"], "PENDING")
+            self.assertEqual(list(output.parent.glob(".readiness.json.*.tmp")), [])
+
+    def test_cli_rejects_report_over_size_limit(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / "readiness.json"
+            with mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(output), "--max-report-bytes", "1"]):
+                self.assertEqual(module.main(), 1)
+            self.assertFalse(output.exists())
+
+    def test_cli_json_emits_generated_report(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp, mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(Path(temp) / "report.json"), "--json"]):
+            with mock.patch("builtins.print") as printer:
+                self.assertEqual(module.main(), 0)
+                self.assertTrue(printer.called)
+
+    def test_cli_rejects_symlinked_output_parent(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp) / "target"; target.mkdir()
+            parent = Path(temp) / "reports"
+            try:
+                parent.symlink_to(target, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            with mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(parent / "readiness.json")]):
+                self.assertEqual(module.main(), 1)
+
+    def test_cli_rejects_symlinked_output(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp) / "target.json"; target.write_text("old", encoding="utf-8")
+            output = Path(temp) / "readiness.json"
+            try:
+                output.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            with mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(output)]):
+                self.assertEqual(module.main(), 1)
+            self.assertEqual(target.read_text(encoding="utf-8"), "old")
 
     def test_missing_artifact_remains_fail_closed(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -155,3 +155,411 @@ When both timestamps and durations are provided, adjacent process intervals
 must not overlap.
 Lifecycle events must occur in `start`, `process`, `error`, `restart` order;
 duplicate lifecycle boundaries are rejected.
+When present, top-level `event_count` must be a positive integer equal to the
+number of evidence events.
+
+When reacquisition evidence provides `event_count`, it must equal the number
+of process events recorded in the restarted epoch.
+When `host` provenance is present, it must include a non-empty `name` and a
+supported `platform` (`linux`, `windows`, or `macos`).
+If present, host `node_id` must be a positive integer.
+If present, host `build_id` must be a non-empty string identifying the native
+build that produced the evidence.
+If present, host `kernel` must be a non-empty string describing the host kernel.
+If present, host `os_version` must be a non-empty string identifying the host OS
+release.
+If present, host `arch` must be a non-empty string identifying the CPU
+architecture.
+If present, host `container_id` must be a non-empty string identifying the
+container or sandbox that produced the evidence.
+If present, host `timezone` must be a non-empty string describing the host
+clock timezone used for human-readable timestamps.
+If present, host `distro` must be a non-empty string identifying the OS
+distribution or platform family.
+If present, host `virtualization` must be a non-empty string describing the
+virtualization or bare-metal context.
+If present, host `hypervisor` must be a non-empty string identifying the
+hypervisor when evidence was captured in a virtual machine.
+If present, host `secure_boot` must be a boolean indicating whether secure boot
+was enabled during qualification.
+If present, host `tpm_present` must be a boolean indicating whether a TPM was
+available during qualification.
+If present, host `attestation` must be a non-empty string describing the host
+attestation or measurement record.
+If present, host `firmware` must be a non-empty string identifying the host
+firmware release.
+If present, host `bios` must be a non-empty string identifying the BIOS or boot
+firmware version.
+If present, host `board` must be a non-empty string identifying the hardware
+board or machine model.
+If present, host `serial_number` must be a non-empty string identifying the
+qualified host instance.
+If present, host `cloud_provider` must be a non-empty string identifying the
+cloud or hosting provider.
+If present, host `region` must be a non-empty string identifying the provider
+region or site.
+If present, host `availability_zone` must be a non-empty string identifying
+the provider availability zone or physical site.
+If present, host `rack_id` must be a non-empty string identifying the physical
+rack or placement.
+If present, host `power_state` must be a non-empty string describing the host
+power state during qualification.
+If present, host `thermal_state` must be a non-empty string describing thermal
+conditions during qualification.
+If present, host `fan_state` must be a non-empty string describing fan or
+cooling state during qualification.
+If present, host `battery_state` must be a non-empty string describing battery
+or mains-power state during qualification.
+If present, host `network_state` must be a non-empty string describing network
+connectivity state during qualification.
+If present, host `dns_state` must be a non-empty string describing DNS
+resolution state during qualification.
+If present, host `ntp_state` must be a non-empty string describing clock
+synchronization state during qualification.
+If present, host `clock_source` must be a non-empty string identifying the
+clock used for qualification timestamps.
+If present, host `clock_accuracy_ns` must be a non-negative integer describing
+the timestamp clock's accuracy bound.
+If present, host `clock_drift_ppm` must be a numeric clock drift measurement;
+boolean values are invalid.
+If present, host `clock_jitter_ns` must be a non-negative numeric jitter
+measurement; boolean values are invalid.
+If present, host `clock_leap_state` must be a non-empty string describing leap
+second handling during qualification.
+If present, host `clock_sync_interval_ms` must be a non-negative integer
+describing the clock synchronization interval.
+If present, host `clock_sync_method` must be a non-empty string naming the
+clock synchronization method.
+If present, host `clock_sync_offset_ns` must be numeric; boolean values are
+invalid.
+If present, host `clock_holdover_state` must be a non-empty string describing
+clock holdover behavior during qualification.
+If present, host `clock_quality` must be a non-empty string describing the
+clock quality classification.
+If present, host `clock_stratum` must be a positive integer identifying the
+clock synchronization stratum.
+If present, host `clock_poll_interval_ms` must be a non-negative integer
+describing clock status polling cadence.
+If present, host `clock_source_count` must be a positive integer describing
+the number of available synchronization sources.
+If present, host `clock_source_primary` must be a boolean indicating whether
+the recorded source was the host's primary synchronization source.
+If present, host `clock_source_id` must be a non-empty string identifying the
+selected synchronization source.
+If present, host `clock_source_type` must be a non-empty string classifying the
+selected synchronization source.
+If present, host `clock_source_status` must be a non-empty string describing
+the selected source's qualification status.
+If present, host `clock_source_failover` must be a boolean indicating whether
+the source was selected through failover.
+If present, host `clock_source_switch_count` must be a non-negative integer
+counting synchronization-source switches during qualification.
+If present, host `clock_source_last_switch_ns` must be a non-negative integer
+timestamp for the latest synchronization-source switch.
+If present, host `clock_source_health` must be a non-empty string describing
+the selected source's health.
+
+The machine-readable host contract is captured in
+`tests/pipewire/native_host_provenance_schema.json`; validator behavior remains
+the qualification authority and native execution evidence is still required.
+The cross-platform behavior check in
+`tests/unit/check_native_host_provenance_timing_platforms.py` exercises the
+timing-bearing report path for Linux, Windows, and macOS values; it validates
+contract portability, not native platform execution.
+Platform identity remains fail-closed even when timing metadata is otherwise
+well-formed; `tests/unit/check_native_host_provenance_timing_platform_rejection.py`
+keeps unsupported platform values from entering the qualification path.
+Timing metadata remains optional for legacy host producers: the behavior check
+in `tests/unit/check_native_host_provenance_timing_optional.py` verifies a
+minimal platform/name object still produces a valid identity-only report.
+The producer/consumer identity check in
+`tests/unit/check_native_host_provenance_identity_report.py` additionally
+ensures the report validator accepts that minimal evidence without adding
+absent timing fields.
+The Unicode identity check in
+`tests/unit/check_native_host_provenance_unicode_identity.py` verifies valid
+non-ASCII host names survive UTF-8 evidence production and consumption.
+The combined Unicode/timing check in
+`tests/unit/check_native_host_provenance_unicode_timing.py` verifies that
+non-ASCII identity and timing metadata coexist in a valid sorted report.
+The name-boundary regression in
+`tests/unit/check_native_host_provenance_name_boundary.py` keeps whitespace-only
+host identities out of otherwise well-formed timing evidence.
+Platform identifiers are also case-sensitive; the regression in
+`tests/unit/check_native_host_provenance_platform_case.py` prevents aliases such
+as `Linux` from being mistaken for the canonical `linux` value.
+The whitespace regression in
+`tests/unit/check_native_host_provenance_platform_whitespace.py` similarly
+rejects padded platform identifiers instead of normalizing producer errors.
+The type regression in
+`tests/unit/check_native_host_provenance_platform_type.py` ensures numeric
+platform values cannot enter the evidence path in place of canonical strings.
+The null regression in
+`tests/unit/check_native_host_provenance_platform_null.py` keeps missing platform
+identity fail-closed even when other evidence fields are present.
+The array-platform regression in
+`tests/unit/check_native_host_provenance_platform_array.py` rejects structured
+platform values instead of accepting a list containing a canonical alias.
+The object-platform regression in
+`tests/unit/check_native_host_provenance_platform_object.py` similarly rejects
+nested platform identity structures.
+The boolean-platform regression in
+`tests/unit/check_native_host_provenance_platform_bool.py` rejects JSON boolean
+values rather than treating them as platform aliases.
+The float-platform regression in
+`tests/unit/check_native_host_provenance_platform_float.py` rejects fractional
+platform values rather than coercing them into canonical labels.
+The non-finite-platform regression in
+`tests/unit/check_native_host_provenance_platform_nan.py` rejects NaN platform
+values before they can enter qualification.
+The infinity-platform regression in
+`tests/unit/check_native_host_provenance_platform_infinity.py` rejects the other
+non-finite numeric platform form as well.
+The duplicate-platform regression in
+`tests/unit/check_native_host_provenance_platform_duplicate.py` keeps ambiguous
+identity evidence from being accepted when producers repeat the platform key.
+The duplicate-name regression in
+`tests/unit/check_native_host_provenance_name_duplicate.py` applies the same
+fail-closed rule to repeated host identity keys.
+The duplicate-clock regression in
+`tests/unit/check_native_host_provenance_clock_duplicate.py` keeps repeated
+timing measurements from becoming last-writer-wins evidence.
+The duplicate-source-count regression in
+`tests/unit/check_native_host_provenance_clock_source_duplicate.py` applies the
+same ambiguity protection to source-count metadata.
+The duplicate-secure-boot regression in
+`tests/unit/check_native_host_provenance_secure_boot_duplicate.py` preserves the
+same fail-closed rule for boolean platform-security evidence.
+The duplicate-TPM regression in
+`tests/unit/check_native_host_provenance_tpm_duplicate.py` applies the same
+ambiguity protection to hardware-presence evidence.
+The duplicate-node regression in
+`tests/unit/check_native_host_provenance_node_duplicate.py` keeps repeated
+capture-node identifiers from becoming ambiguous provenance.
+The NaN-clock regression in
+`tests/unit/check_native_host_provenance_clock_nan.py` keeps non-finite timing
+measurements out of native evidence.
+The infinity-clock regression in
+`tests/unit/check_native_host_provenance_clock_infinity.py` closes the remaining
+non-finite clock accuracy case.
+The negative-infinity clock regression in
+`tests/unit/check_native_host_provenance_clock_negative_infinity.py` also keeps
+signed non-finite measurements out of evidence.
+The empty-value regression in
+`tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
+platform identity rather than treating it as an unknown alias.
+The null-name regression in
+`tests/unit/check_native_host_provenance_name_null.py` keeps absent host identity
+fail-closed even when platform and timing evidence are present.
+The name-type regression in
+`tests/unit/check_native_host_provenance_name_type.py` rejects numeric identity
+values rather than coercing them into display text.
+The boolean-name regression in
+`tests/unit/check_native_host_provenance_name_bool.py` prevents JSON booleans
+from being accepted as host identity strings.
+The array-name regression in
+`tests/unit/check_native_host_provenance_name_array.py` likewise rejects
+structured identity values instead of coercing them into text.
+The object-name regression in
+`tests/unit/check_native_host_provenance_name_object.py` keeps nested identity
+objects out of the scalar host-name field.
+The float-name regression in
+`tests/unit/check_native_host_provenance_name_float.py` rejects fractional
+identity values rather than converting them into host labels.
+The non-finite-name regression in
+`tests/unit/check_native_host_provenance_name_nan.py` rejects JSON NaN identity
+values as well, preserving finite string-only host names.
+The infinity-name regression in
+`tests/unit/check_native_host_provenance_name_infinity.py` closes the remaining
+non-finite numeric identity case.
+The negative-name regression in
+`tests/unit/check_native_host_provenance_name_negative.py` rejects signed numeric
+identity values as well.
+The schema title is `Beatglass native host provenance` and its required
+identity fields are exactly `platform` and `name`.
+The host schema platform enum is exactly `linux`, `windows`, and `macos`,
+matching executable validation.
+The host schema also requires `name` to have `minLength: 1`, complementing the
+validator's visible-text check.
+Its optional `node_id` property carries `minimum: 1`, matching positive
+integer validation and rejection of zero/negative IDs.
+The schema also pins `node_id` to JSON integer type, excluding strings and
+fractional measurements.
+The core timing summary fields are typed as integers too: `clock_accuracy_ns`
+is non-negative and `clock_source_count` is positive. These constraints define
+the evidence shape only; validation does not manufacture timing measurements,
+and native qualification still requires actual host evidence.
+Runtime host validation rejects negative, fractional, boolean, and string values
+for these timing counters, preserving the schema's integer contract before a
+report is emitted.
+The regression behavior check in
+`tests/unit/check_native_host_provenance_timing_behavior.py` exercises these
+rejections through the validator entry point rather than only inspecting source
+text.
+Optional `secure_boot` and `tpm_present` schema properties are boolean-typed,
+matching runtime rejection of numeric sentinels.
+The host schema permits additional properties for forward-compatible native
+provenance fields; validator checks remain authoritative for known fields.
+The executable acceptance check in
+`tests/unit/check_native_host_provenance_timing_acceptance.py` also confirms
+that the boundary values zero nanoseconds and one source are accepted when
+provided by a producer.
+Report generation preserves timing provenance in sorted `checked_fields`; the
+behavior check in `tests/unit/check_native_host_provenance_timing_report.py`
+verifies both timing keys survive into the emitted evidence report.
+Forward-compatible timing labels are preserved as well: the behavior check in
+`tests/unit/check_native_host_provenance_timing_unknown_field.py` confirms an
+unknown clock-source label remains visible in sorted evidence metadata.
+The producer/consumer behavior check in
+`tests/unit/check_native_host_provenance_timing_report_schema.py` verifies that
+timing-bearing reports remain acceptable to the report validator, preserving
+the boundary between evidence production and qualification consumption.
+Unknown-but-well-formed host fields are retained in checked_fields metadata so
+future producers do not silently lose provenance during report generation.
+Before packaging a native run, validate the extracted host object directly:
+`python tests/pipewire/validate_native_host_provenance.py HOST.json`.
+The host validator accepts one host path and an optional report path; missing
+or extra arguments fail before any evidence file is opened.
+The host evidence root must be a JSON object; scalar, null, and array roots are
+rejected before provenance fields are inspected.
+Host `name` must contain visible non-whitespace text; empty and whitespace-only
+names are rejected as unusable provenance.
+The platform value is a case-sensitive enum (`linux`, `windows`, or `macos`);
+unknown, empty, and differently cased values are rejected.
+`node_id` must be a positive integer; JSON booleans are explicitly rejected
+even though some language runtimes represent them as integers.
+Zero and negative node IDs are rejected as well; `1` is the minimum accepted
+host node identifier.
+String-encoded node IDs are rejected; host evidence must carry the numeric JSON
+type rather than a display-formatted substitute.
+Fractional numeric node IDs are rejected too; node identifiers are integral
+host identity values, not measurements.
+`secure_boot` must be a JSON boolean when present; numeric sentinel values are
+not accepted as native host evidence.
+`tpm_present` follows the same boolean-only contract; numeric sentinel values
+are rejected rather than interpreted as availability evidence.
+Validated optional fields are retained in sorted `checked_fields` report
+metadata, allowing reviewers to see which host attributes were actually
+qualified without claiming native execution.
+Malformed or ambiguous host JSON is rejected before any host fields are
+trusted; duplicate keys are not silently normalized.
+Missing host evidence files are rejected through the same unreadable-input path;
+the validator never treats an absent file as an empty host object.
+When emitting `REPORT.json`, an unwritable destination is also rejected with an
+explicit error rather than leaving a partially written qualification artifact.
+Reports are assembled in the destination directory and atomically replaced so
+readers never observe a partially written JSON report.
+Missing parent directories for the requested report path are created before the
+temporary file is opened, which supports clean per-run evidence directories.
+If a required parent path is occupied by a file, report emission fails as
+unwritable rather than replacing or modifying that file.
+Symlink report destinations are rejected as unwritable; qualification output
+never follows a link or modifies its target.
+Symlinked `HOST.json` inputs are rejected as unreadable so qualification does
+not silently follow an unexpected evidence target.
+Host input paths must be regular files; directories and special files are
+rejected before any read operation begins.
+Existing report destinations must be regular files; directories and other
+special filesystem objects are rejected before temporary output is created.
+The optional report path must differ from `HOST.json`; self-overwrite is
+rejected before any output write begins.
+The comparison uses resolved paths, so relative aliases of `HOST.json` are
+protected as well.
+Hard-link aliases are rejected through a same-file check, preventing a path
+with a different name from overwriting the host evidence inode.
+The temporary file is flushed and synchronized before replacement so a
+successful validation report is durable across an abrupt process exit.
+If replacement fails, the temporary file is removed so failed qualification
+does not leave orphaned evidence artifacts beside the requested report.
+Cleanup also covers failures while writing or synchronizing the temporary file
+itself, before the destination can be replaced.
+When replacing an existing report, its permission mode is preserved across the
+atomic replacement where the host filesystem supports it.
+On POSIX hosts the containing directory is synchronized after replacement as
+well; Windows uses the compatible atomic-replace path without directory fsync.
+Pass a second path to emit a deterministic validation report for the bundle:
+`python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
+The host validator's optional report output uses the same atomic temporary-file,
+flush, and synchronization contract as the standalone report validator.
+Its replacement path also preserves an existing report's permission mode on
+POSIX hosts.
+After host validation emits `REPORT.json`, run the standalone report validator
+as a round-trip check before packaging the evidence bundle.
+Validate that generated report before packaging with:
+`python tests/pipewire/validate_native_host_provenance_report.py REPORT.json`.
+The report validator accepts exactly one report path; missing or extra
+arguments fail with the usage contract before any file is opened.
+Reports with `valid: false` are rejected even when their other fields are
+well-formed; failed qualification cannot be packaged as evidence.
+The `valid` field must be the JSON boolean `true`, not a truthy number or
+string.
+The report schema identifier must exactly equal
+`beatglass-native-host-provenance-v1`; missing, numeric, and older identifiers
+are rejected.
+Report names follow the host contract and must contain visible non-whitespace
+text.
+Report names must also be JSON strings; null, numeric, and array values are
+rejected before packaging.
+Report platforms must use the same exact lowercase enum as host evidence;
+numeric, null, or padded values are rejected.
+`checked_fields` must be a JSON array of non-empty strings; objects, scalars,
+and null values are rejected as malformed report metadata.
+An empty array is also rejected because every valid report must identify at
+least its `platform` and `name` provenance fields.
+The machine-readable schema encodes this minimum with `minItems: 2` in
+addition to the executable validator checks.
+Each schema item also carries `minLength: 1`, matching rejection of blank
+field names.
+The report schema pins JSON Schema draft 2020-12 for tooling that validates the
+machine-readable contract independently.
+Its canonical title is `Beatglass native host provenance report`, making the
+artifact identifiable in schema tooling and review output.
+Its platform enum is intentionally limited to `linux`, `windows`, and `macos`,
+matching the host provenance validator.
+The schema also encodes a minimum length of one for report names, alongside
+the validator's visible-text check.
+It encodes `valid: true` as a constant, so failed or truthy-but-non-boolean
+reports cannot satisfy the machine-readable contract.
+The report schema disallows unknown top-level properties, matching the
+executable validator's closed-shape check.
+Reports that list only one required field, or neither, are rejected for the
+same reason; checked metadata must prove both identity dimensions.
+Required field names are case-sensitive; display-cased variants such as
+`Name` or `Platform` do not satisfy the contract.
+The array must be lexicographically sorted to keep generated reports
+deterministic and comparable across runs.
+Every array entry must be non-empty; blank field names are rejected as
+unverifiable metadata.
+Whitespace-only entries are rejected as blank names as well.
+Field names must also be unpadded; leading or trailing whitespace is rejected
+instead of silently normalized.
+The report shape is documented in
+`tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
+both required provenance fields (`platform` and `name`) in `checked_fields`.
+The list must also be sorted and contain each field only once; duplicate or
+out-of-order fields are rejected before packaging.
+Every checked-field entry must be a non-empty JSON string; malformed values are
+rejected as invalid evidence rather than raising an internal validator error.
+The generated report has a closed top-level shape; unknown report properties are
+rejected so producers cannot silently bypass the qualification contract.
+Unreadable files and malformed JSON are also rejected with a concise validation
+error; they do not produce a traceback or a partially trusted report.
+Files that are not valid UTF-8 are treated as unreadable and rejected by the
+same check.
+Duplicate JSON object keys are rejected as ambiguous evidence instead of being
+silently overwritten by the parser.
+If present, host `clock_source_latency_ns` must be a non-negative numeric
+measurement of source latency; boolean values are invalid.
+If present, host `clock_source_noise_ns` must be a non-negative numeric
+measurement of source timing noise; boolean values are invalid.
+If present, host `clock_source_phase_noise` must be a non-negative numeric
+phase-noise measurement; boolean values are invalid.
+If present, host `clock_source_frequency_hz` must be a positive numeric source
+frequency; boolean values are invalid.
+If present, host `clock_source_phase_offset_ns` must be numeric; boolean values
+are invalid.
+If present, host `clock_source_stability` must be a non-empty string describing
+the selected source's stability classification.
+On POSIX hosts this mode-preservation behavior is covered by an executable
+permission regression test; Windows qualification uses the platform's native
+permission semantics.

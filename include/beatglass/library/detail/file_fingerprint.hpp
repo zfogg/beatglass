@@ -12,6 +12,30 @@ enum class FingerprintStatus {
   /** File size or modification time changed during the read. */ changed,
   /** The file could not be read or the digest failed. */ error
 };
+/** Stable user-facing label for a fingerprint outcome. */
+inline const char* fingerprint_status_label(FingerprintStatus status) noexcept {
+  switch (status) {
+    case FingerprintStatus::ok: return "ok";
+    case FingerprintStatus::cancelled: return "cancelled";
+    case FingerprintStatus::changed: return "changed";
+    case FingerprintStatus::error: return "error";
+  }
+  return "error";
+}
+/** Return whether an outcome can be retried without changing the source. */
+inline bool fingerprint_status_is_retryable(FingerprintStatus status) noexcept {
+  return status == FingerprintStatus::cancelled || status == FingerprintStatus::error;
+}
+/** Return whether cached identity must be refreshed before another attempt. */
+inline bool fingerprint_status_requires_refresh(FingerprintStatus status) noexcept {
+  return status == FingerprintStatus::changed;
+}
+/** Combine a stable status label with optional diagnostic detail. */
+inline std::string fingerprint_status_diagnostic(FingerprintStatus status,
+                                                 const std::string& detail = {}) {
+  const std::string label = fingerprint_status_label(status);
+  return detail.empty() ? label : label + ": " + detail;
+}
 /** SHA-256 evidence for the bytes observed by one read, with file attributes around that read. It is not an opened-decoder identity or immunity to concurrent mutation. */
 struct FileFingerprint {
   /** Outcome; only ok permits use of remaining fields. */ FingerprintStatus status{FingerprintStatus::error};

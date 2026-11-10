@@ -25,6 +25,8 @@ void optional_number(const std::optional<float>& value) { if(value) std::cout <<
 int wmain(int argc, wchar_t** argv) {
 #else
 int main(int argc, char** argv) {
+  if (argc == 2 && (std::string_view(argv[1]) == "--help" || std::string_view(argv[1]) == "-h")) { std::cout << "Usage: beatglass-music-cli [--help] [--version] <audio-file>\n"; return 0; }
+  if (argc == 2 && (std::string_view(argv[1]) == "--version" || std::string_view(argv[1]) == "-V")) { std::cout << "beatglass-music-cli " << BEATGLASS_VERSION << "\n"; return 0; }
 #endif
   if (argc != 2) { std::cerr << "Usage: beatglass-music-cli <audio-file>\n"; return 2; }
   std::cout.imbue(std::locale::classic()); std::cout << std::setprecision(9);
@@ -63,5 +65,5 @@ int main(int argc, char** argv) {
     std::cout << ",\"tonal_from\":"; if(result.tonal_from) std::cout << *result.tonal_from; else std::cout << "null";
     std::cout << ",\"tonal_through\":"; if(result.tonal_through) std::cout << *result.tonal_through; else std::cout << "null";
     std::cout << "}\n";
-  } catch(const std::exception& e) { std::cerr << e.what() << '\n'; return 1; }
+  } catch(const std::exception& e) { std::cerr << "error: " << e.what() << '\n'; return 1; }
 }

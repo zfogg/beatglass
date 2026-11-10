@@ -526,6 +526,7 @@ def main() -> int:
         "overlay visual geometry restore": "Persisted overlay geometry and opacity restored.",
         "overlay visual geometry fallback": "Persisted overlay geometry unavailable; control-window fallback remains active.",
         "overlay invalid opacity fallback": "Persisted overlay opacity unavailable; safe 90 percent opacity applied.",
+        "overlay show reapplies visual state": "window.restoreOverlayVisualStateFromBridge()\n        if (!window.overlayBridge.showOverlay())",
         "overlay opacity applied before show": "window.overlayBridge.setOpacity(savedOpacity)",
         "overlay saved target restore": "saved display target selected by name.",
         "overlay selection persistence": "window.overlayPreferredScreenIndex = index",
@@ -627,6 +628,7 @@ def main() -> int:
         "visualization capture status shrinks": "Layout.fillWidth: true; Layout.minimumWidth: 0; wrapMode: Text.WordWrap",
         "visualization selection responsive spacing": "spacing: window.compactHeader ? 4 : 8",
         "visualization selection alignment": "Layout.alignment: Qt.AlignTop",
+        "visualization status runtime state": 'window.liveBridge.status === "Error" ? "capture error"',
         "waveform mode dynamic description": "Accessible.name: \"Waveform view\"; Accessible.description: checked ? \"Waveform view is selected; show the selectable time-domain waveform.\"",
         "fft mode dynamic description": "Accessible.name: \"FFT view\"; Accessible.description: checked ? \"FFT view is selected; show the selectable frequency-domain FFT.\"",
         "navigation current page value": "Accessible.name: \"Primary navigation\"\n                Accessible.value: currentIndex === 0 ? \"Library\"",
@@ -672,7 +674,10 @@ def main() -> int:
         "ready state": "visualizationCanvas.modeHasData ? \"ready\"",
         "waiting state": ": \"waiting\"))",
         "clear selection control": 'objectName: "visualizationClearSelection"',
-        "clear selection state": 'text: enabled ? "Clear selection" : "No selection"',
+        "clear selection state": 'text: enabled ? (window.compactHeader ? "Clear" : "Clear selection") : "No selection"',
+        "clear selection compact layout": 'Layout.preferredWidth: window.compactHeader ? 120 : 180',
+        "clear selection capture context": 'capture status is " + window.liveBridge.status',
+        "group selection availability": 'selection " + (visualizationCanvas.selectedPosition >= 0 ? "clear available" : "clear unavailable")',
     }
     state_missing = [name for name, marker in runtime_states.items() if marker not in qml]
     if state_missing:

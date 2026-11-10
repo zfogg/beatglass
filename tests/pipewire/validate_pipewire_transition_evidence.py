@@ -16,6 +16,163 @@ if isinstance(payload, dict):
     if host is not None:
         if not isinstance(host, dict) or host.get("platform") not in ("linux", "windows", "macos"):
             raise SystemExit("transition host provenance has an invalid platform")
+        if not isinstance(host.get("name"), str) or not host["name"].strip():
+            raise SystemExit("transition host provenance has no host name")
+        if host.get("node_id") is not None and (
+                not isinstance(host["node_id"], int)
+                or isinstance(host["node_id"], bool)
+                or host["node_id"] <= 0):
+            raise SystemExit("transition host provenance has an invalid node id")
+        if host.get("build_id") is not None and (not isinstance(host["build_id"], str) or not host["build_id"].strip()):
+            raise SystemExit("transition host provenance has no build id")
+        if host.get("kernel") is not None and (not isinstance(host["kernel"], str) or not host["kernel"].strip()):
+            raise SystemExit("transition host provenance has no kernel")
+        if host.get("os_version") is not None and (not isinstance(host["os_version"], str) or not host["os_version"].strip()):
+            raise SystemExit("transition host provenance has no OS version")
+        if host.get("arch") is not None and (not isinstance(host["arch"], str) or not host["arch"].strip()):
+            raise SystemExit("transition host provenance has no architecture")
+        if host.get("container_id") is not None and (not isinstance(host["container_id"], str) or not host["container_id"].strip()):
+            raise SystemExit("transition host provenance has no container id")
+        if host.get("timezone") is not None and (not isinstance(host["timezone"], str) or not host["timezone"].strip()):
+            raise SystemExit("transition host provenance has no timezone")
+        if host.get("distro") is not None and (not isinstance(host["distro"], str) or not host["distro"].strip()):
+            raise SystemExit("transition host provenance has no distro")
+        if host.get("virtualization") is not None and (not isinstance(host["virtualization"], str) or not host["virtualization"].strip()):
+            raise SystemExit("transition host provenance has no virtualization context")
+        if host.get("hypervisor") is not None and (not isinstance(host["hypervisor"], str) or not host["hypervisor"].strip()):
+            raise SystemExit("transition host provenance has no hypervisor")
+        if host.get("secure_boot") is not None and not isinstance(host["secure_boot"], bool):
+            raise SystemExit("transition host provenance has an invalid secure boot flag")
+        if host.get("tpm_present") is not None and not isinstance(host["tpm_present"], bool):
+            raise SystemExit("transition host provenance has an invalid TPM flag")
+        if host.get("attestation") is not None and (not isinstance(host["attestation"], str) or not host["attestation"].strip()):
+            raise SystemExit("transition host provenance has no attestation")
+        if host.get("firmware") is not None and (not isinstance(host["firmware"], str) or not host["firmware"].strip()):
+            raise SystemExit("transition host provenance has no firmware")
+        if host.get("bios") is not None and (not isinstance(host["bios"], str) or not host["bios"].strip()):
+            raise SystemExit("transition host provenance has no BIOS")
+        if host.get("board") is not None and (not isinstance(host["board"], str) or not host["board"].strip()):
+            raise SystemExit("transition host provenance has no board")
+        if host.get("serial_number") is not None and (not isinstance(host["serial_number"], str) or not host["serial_number"].strip()):
+            raise SystemExit("transition host provenance has no serial number")
+        if host.get("cloud_provider") is not None and (not isinstance(host["cloud_provider"], str) or not host["cloud_provider"].strip()):
+            raise SystemExit("transition host provenance has no cloud provider")
+        if host.get("region") is not None and (not isinstance(host["region"], str) or not host["region"].strip()):
+            raise SystemExit("transition host provenance has no region")
+        if host.get("availability_zone") is not None and (not isinstance(host["availability_zone"], str) or not host["availability_zone"].strip()):
+            raise SystemExit("transition host provenance has no availability zone")
+        if host.get("rack_id") is not None and (not isinstance(host["rack_id"], str) or not host["rack_id"].strip()):
+            raise SystemExit("transition host provenance has no rack id")
+        if host.get("power_state") is not None and (not isinstance(host["power_state"], str) or not host["power_state"].strip()):
+            raise SystemExit("transition host provenance has no power state")
+        if host.get("thermal_state") is not None and (not isinstance(host["thermal_state"], str) or not host["thermal_state"].strip()):
+            raise SystemExit("transition host provenance has no thermal state")
+        if host.get("fan_state") is not None and (not isinstance(host["fan_state"], str) or not host["fan_state"].strip()):
+            raise SystemExit("transition host provenance has no fan state")
+        if host.get("battery_state") is not None and (not isinstance(host["battery_state"], str) or not host["battery_state"].strip()):
+            raise SystemExit("transition host provenance has no battery state")
+        if host.get("network_state") is not None and (not isinstance(host["network_state"], str) or not host["network_state"].strip()):
+            raise SystemExit("transition host provenance has no network state")
+        if host.get("dns_state") is not None and (not isinstance(host["dns_state"], str) or not host["dns_state"].strip()):
+            raise SystemExit("transition host provenance has no DNS state")
+        if host.get("ntp_state") is not None and (not isinstance(host["ntp_state"], str) or not host["ntp_state"].strip()):
+            raise SystemExit("transition host provenance has no NTP state")
+        if host.get("clock_source") is not None and (not isinstance(host["clock_source"], str) or not host["clock_source"].strip()):
+            raise SystemExit("transition host provenance has no clock source")
+        if host.get("clock_accuracy_ns") is not None and (
+                not isinstance(host["clock_accuracy_ns"], int)
+                or isinstance(host["clock_accuracy_ns"], bool)
+                or host["clock_accuracy_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid clock accuracy")
+        if host.get("clock_drift_ppm") is not None and (
+                not isinstance(host["clock_drift_ppm"], (int, float))
+                or isinstance(host["clock_drift_ppm"], bool)):
+            raise SystemExit("transition host provenance has invalid clock drift")
+        if host.get("clock_jitter_ns") is not None and (
+                not isinstance(host["clock_jitter_ns"], (int, float))
+                or isinstance(host["clock_jitter_ns"], bool)
+                or host["clock_jitter_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid clock jitter")
+        if host.get("clock_leap_state") is not None and (not isinstance(host["clock_leap_state"], str) or not host["clock_leap_state"].strip()):
+            raise SystemExit("transition host provenance has no leap state")
+        if host.get("clock_sync_interval_ms") is not None and (
+                not isinstance(host["clock_sync_interval_ms"], int)
+                or isinstance(host["clock_sync_interval_ms"], bool)
+                or host["clock_sync_interval_ms"] < 0):
+            raise SystemExit("transition host provenance has invalid sync interval")
+        if host.get("clock_sync_method") is not None and (not isinstance(host["clock_sync_method"], str) or not host["clock_sync_method"].strip()):
+            raise SystemExit("transition host provenance has no sync method")
+        if host.get("clock_sync_offset_ns") is not None and (
+                not isinstance(host["clock_sync_offset_ns"], (int, float))
+                or isinstance(host["clock_sync_offset_ns"], bool)):
+            raise SystemExit("transition host provenance has invalid sync offset")
+        if host.get("clock_holdover_state") is not None and (not isinstance(host["clock_holdover_state"], str) or not host["clock_holdover_state"].strip()):
+            raise SystemExit("transition host provenance has no holdover state")
+        if host.get("clock_quality") is not None and (not isinstance(host["clock_quality"], str) or not host["clock_quality"].strip()):
+            raise SystemExit("transition host provenance has no clock quality")
+        if host.get("clock_stratum") is not None and (
+                not isinstance(host["clock_stratum"], int)
+                or isinstance(host["clock_stratum"], bool)
+                or host["clock_stratum"] <= 0):
+            raise SystemExit("transition host provenance has invalid clock stratum")
+        if host.get("clock_poll_interval_ms") is not None and (
+                not isinstance(host["clock_poll_interval_ms"], int)
+                or isinstance(host["clock_poll_interval_ms"], bool)
+                or host["clock_poll_interval_ms"] < 0):
+            raise SystemExit("transition host provenance has invalid poll interval")
+        if host.get("clock_source_count") is not None and (
+                not isinstance(host["clock_source_count"], int)
+                or isinstance(host["clock_source_count"], bool)
+                or host["clock_source_count"] <= 0):
+            raise SystemExit("transition host provenance has invalid source count")
+        if host.get("clock_source_primary") is not None and not isinstance(host["clock_source_primary"], bool):
+            raise SystemExit("transition host provenance has an invalid primary-source flag")
+        if host.get("clock_source_id") is not None and (not isinstance(host["clock_source_id"], str) or not host["clock_source_id"].strip()):
+            raise SystemExit("transition host provenance has no clock source id")
+        if host.get("clock_source_type") is not None and (not isinstance(host["clock_source_type"], str) or not host["clock_source_type"].strip()):
+            raise SystemExit("transition host provenance has no clock source type")
+        if host.get("clock_source_status") is not None and (not isinstance(host["clock_source_status"], str) or not host["clock_source_status"].strip()):
+            raise SystemExit("transition host provenance has no clock source status")
+        if host.get("clock_source_failover") is not None and not isinstance(host["clock_source_failover"], bool):
+            raise SystemExit("transition host provenance has an invalid failover flag")
+        if host.get("clock_source_switch_count") is not None and (
+                not isinstance(host["clock_source_switch_count"], int)
+                or isinstance(host["clock_source_switch_count"], bool)
+                or host["clock_source_switch_count"] < 0):
+            raise SystemExit("transition host provenance has invalid switch count")
+        if host.get("clock_source_last_switch_ns") is not None and (
+                not isinstance(host["clock_source_last_switch_ns"], int)
+                or isinstance(host["clock_source_last_switch_ns"], bool)
+                or host["clock_source_last_switch_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid last switch time")
+        if host.get("clock_source_health") is not None and (not isinstance(host["clock_source_health"], str) or not host["clock_source_health"].strip()):
+            raise SystemExit("transition host provenance has no clock source health")
+        if host.get("clock_source_latency_ns") is not None and (
+                not isinstance(host["clock_source_latency_ns"], (int, float))
+                or isinstance(host["clock_source_latency_ns"], bool)
+                or host["clock_source_latency_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid source latency")
+        if host.get("clock_source_noise_ns") is not None and (
+                not isinstance(host["clock_source_noise_ns"], (int, float))
+                or isinstance(host["clock_source_noise_ns"], bool)
+                or host["clock_source_noise_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid source noise")
+        if host.get("clock_source_phase_noise") is not None and (
+                not isinstance(host["clock_source_phase_noise"], (int, float))
+                or isinstance(host["clock_source_phase_noise"], bool)
+                or host["clock_source_phase_noise"] < 0):
+            raise SystemExit("transition host provenance has invalid phase noise")
+        if host.get("clock_source_frequency_hz") is not None and (
+                not isinstance(host["clock_source_frequency_hz"], (int, float))
+                or isinstance(host["clock_source_frequency_hz"], bool)
+                or host["clock_source_frequency_hz"] <= 0):
+            raise SystemExit("transition host provenance has invalid source frequency")
+        if host.get("clock_source_phase_offset_ns") is not None and (
+                not isinstance(host["clock_source_phase_offset_ns"], (int, float))
+                or isinstance(host["clock_source_phase_offset_ns"], bool)):
+            raise SystemExit("transition host provenance has invalid phase offset")
+        if host.get("clock_source_stability") is not None and (not isinstance(host["clock_source_stability"], str) or not host["clock_source_stability"].strip()):
+            raise SystemExit("transition host provenance has no source stability")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
@@ -50,7 +207,8 @@ if not isinstance(events, list) or not events:
 if any(not isinstance(event.get("event"), str) or not event["event"].strip() for event in events):
     raise SystemExit("transition events must have a non-empty event name")
 if isinstance(payload, dict) and payload.get("event_count") is not None:
-    if not isinstance(payload["event_count"], int) or isinstance(payload["event_count"], bool) or payload["event_count"] != len(events):
+    if (not isinstance(payload["event_count"], int) or isinstance(payload["event_count"], bool)
+            or payload["event_count"] <= 0 or payload["event_count"] != len(events)):
         raise SystemExit("transition event count does not match artifact")
 if any(not isinstance(event, dict) for event in events):
     raise SystemExit("transition evidence contains a non-object event")
@@ -169,6 +327,9 @@ if reacquisition is not None:
                 or isinstance(reacquisition["event_count"], bool)
                 or reacquisition["event_count"] <= 0):
             raise SystemExit("reacquisition evidence has an invalid event count")
+        restart_process_count = sum(event.get("event") == "process" and event.get("epoch") == restart.get("epoch") for event in events)
+        if reacquisition["event_count"] != restart_process_count:
+            raise SystemExit("reacquisition event count does not match restart samples")
     if reacquisition.get("artifact_id") is not None:
         if not isinstance(reacquisition["artifact_id"], str) or not reacquisition["artifact_id"].strip():
             raise SystemExit("reacquisition evidence has an empty artifact identity")

@@ -7,8 +7,11 @@
 namespace beatglass::library_detail {
 /** Result of deriving a cache key from one bounded content observation. */
 struct CacheIdentityResult {
+  /** Fingerprint outcome; only ok makes key valid for publication. */
   FingerprintStatus status{FingerprintStatus::error};
+  /** Content/configuration identity; unspecified when status is not ok. */
   CacheKey key{};
+  /** Stable status-prefixed diagnostic for non-ok outcomes. */
   std::string diagnostic;
 };
 /**
@@ -25,13 +28,16 @@ CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
 
 /** Refresh one regular-file catalog row from a validated content observation.
  * A changed, cancelled, or failed fingerprint leaves the previous row intact.
+ * The optional diagnostic is cleared on entry and receives a stable status
+ * label plus detail when observation does not succeed.
  */
 FingerprintStatus refresh_collection_file(SqliteCache& cache, const std::filesystem::path& path,
                                           std::stop_token stop = {},
                                           std::string* diagnostic = nullptr);
 /** Recompute a file fingerprint and compare it with a previously published key.
  * Returns `ok` only when the observed digest equals expected_content; callers
- * should treat every other result as a cache miss or stale-input outcome.
+ * should treat every other result as a cache miss or stale-input outcome. The
+ * optional diagnostic is cleared on entry and is safe to display to a user.
  */
 FingerprintStatus revalidate_file_identity(const std::filesystem::path& path,
                                            const std::string& expected_content,

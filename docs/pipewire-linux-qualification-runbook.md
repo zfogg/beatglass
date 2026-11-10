@@ -37,6 +37,75 @@ it records Linux, Windows, and macOS targets, status, and pending reasons while
 native evidence is collected on each host.
 Pass `--summary evidence/native-summary.json` to merge a runner summary's
 qualified status and artifact paths into the host's matrix entry.
+The summary's `native_artifacts` field must be a JSON array; malformed summary
+shapes fail before a matrix is emitted instead of being iterated as text.
+The summary itself must be a JSON object; arrays and scalar JSON values fail
+with a controlled validation error before matrix generation.
+Malformed, unreadable, or non-UTF-8 summary files likewise fail with a
+controlled handoff error rather than exposing a parser traceback.
+Matrix output paths must be regular files; symbolic-link and non-file outputs
+are rejected before generation to avoid overwriting unrelated targets.
+The output directory itself must also be a real directory, preventing a
+symlinked parent from redirecting retained evidence outside the handoff area.
+Matrix emission is atomic and fsynced before replacement, so an interrupted
+generation cannot leave a partially written qualification matrix.
+On POSIX hosts the containing directory is fsynced after replacement as well,
+making the rename durable before the handoff reports success.
+When replacing an existing matrix, its permission mode is copied to the
+temporary file before replacement so atomic updates do not broaden or remove
+the handoff file's access policy.
+If parent-directory creation or another output operation fails, the handoff
+reports a controlled `qualification matrix output is unwritable` error rather
+than exposing a raw filesystem traceback.
+Every artifact entry must be a non-empty string path; numeric or blank entries
+fail before matrix generation.
+Artifact paths must also be printable text without control characters so
+retained evidence remains safe to transport and review.
+Artifact paths must also be unique so one retained file cannot be counted twice
+as independent qualification evidence.
+Execution blockers in pending summaries must likewise be printable, non-empty,
+and unique; malformed blocker metadata is rejected before it can be rendered
+as host qualification guidance.
+When a summary declares a schema, it must identify the supported
+`beatglass-native-qualification-summary-v1` contract; unknown schema versions
+are rejected rather than interpreted as native evidence.
+Commit provenance is preserved exactly and must not contain leading or trailing
+whitespace, preventing ambiguous build identities in the handoff.
+Pending reasons follow the same rule so rendered host guidance does not acquire
+ambiguous whitespace around its actionable explanation.
+Summary inputs must be regular files rather than symbolic links, preventing a
+qualification handoff from silently reading evidence from an unexpected path.
+Their parent directory must also be a real directory rather than a symbolic
+link, keeping summary provenance within the intended handoff area.
+Declared host identities must match exactly, including surrounding whitespace,
+so evidence cannot be attributed to a subtly different host label.
+Qualification matrix generation is limited to the supported Linux, Windows, and
+macOS host families; unknown host identities fail closed instead of producing
+an incomplete matrix.
+The generator rechecks uniqueness after making external paths portable, rejecting
+basename collisions that would otherwise collapse distinct artifacts together.
+The summary's `qualified` field must be a JSON boolean; string status values fail
+before generation rather than being silently downgraded to pending.
+When present, `native_execution_attempted` must also be a JSON boolean so a
+string cannot masquerade as native execution evidence.
+When present, `native_execution_blockers` must be a non-empty-string array;
+malformed blocker values fail before matrix generation.
+Pending summaries must include a non-empty `pending_reason`; this keeps an
+unqualified platform handoff actionable instead of producing a blank status.
+Pending reasons must also be printable text without control characters so
+review reports remain readable and safe to transport.
+Qualified summaries must include a non-empty `commit` value so native evidence
+cannot be detached from the code identity that produced it.
+If a pending summary includes `commit`, it must still be a non-empty string;
+malformed provenance is rejected rather than silently omitted.
+Commit provenance must also be printable text without control characters so
+review output remains safe to transport.
+When present, `host_os` must match the runner host generating the matrix, so
+evidence cannot be attributed to the wrong platform.
+Qualified summaries must also set `native_execution_attempted` to `true`; a
+portable or pending-only result cannot claim qualification.
+Qualified summaries must not retain execution blockers; any remaining blocker
+keeps the platform pending until the native run is actually complete.
 The matrix behavior fixture validates this merge, including pending reasons and
 evidence paths, with `python tests/unit/check_pipewire_qualification_matrix_behavior.py`.
 It covers both pending and qualified host summaries so the report can advance

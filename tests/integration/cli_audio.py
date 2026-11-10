@@ -8,6 +8,10 @@ import tempfile
 import wave
 
 exe = sys.argv[1]
+missing_argument = subprocess.run([exe], capture_output=True, text=True)
+assert missing_argument.returncode == 2 and "Usage: beatglass-cli" in missing_argument.stdout
+extra_argument = subprocess.run([exe, "one.wav", "two.wav"], capture_output=True, text=True)
+assert extra_argument.returncode == 2 and "Usage: beatglass-cli" in extra_argument.stdout
 with tempfile.TemporaryDirectory() as directory:
     root = pathlib.Path(directory)
     def make(path, clicks, stereo=False):
@@ -65,12 +69,14 @@ with tempfile.TemporaryDirectory() as directory:
     assert "state: tracking" in resume_lines[-1], resume_lines[-1]
     missing = subprocess.run([exe, str(root / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0
+    assert missing.stderr.startswith("error: "), missing.stderr
     import json
     quiet_json = json.loads(subprocess.run([exe, "--json", str(silence)], capture_output=True, text=True, check=True).stdout)
     assert quiet_json["schema_version"] == 1 and quiet_json["type"] == "result"
     assert quiet_json["bpm"] is None and quiet_json["state"] == "silent"
     result_json = json.loads(subprocess.run([exe, "--json", str(clicks)], capture_output=True, text=True, check=True).stdout)
     assert result_json["sample_rate"] == 44100 and result_json["frames"] == 44100 * 20
+    assert result_json["duration_seconds"] == 20.0
     assert abs(result_json["bpm"] - bpm) < .01
     replay_json = [json.loads(line) for line in subprocess.run([exe, "--json", "--replay", str(clicks)], capture_output=True, text=True, check=True).stdout.splitlines()]
     assert replay_json[-1] == result_json
@@ -96,6 +102,7 @@ with tempfile.TemporaryDirectory() as directory:
             assert earlier[field] == full[field], (field, earlier, full)
     assert len(prefix_json) < len(observations)
     assert subprocess.run([exe, "--json", "--json", str(clicks)], capture_output=True).returncode == 2
+    assert subprocess.run([exe, "--replay", "--replay", str(clicks)], capture_output=True).returncode == 2
     dash_path = root / "-clicks.wav"
     dash_path.write_bytes(clicks.read_bytes())
     dash_result = subprocess.run([exe, "--json", "--", "-clicks.wav"], cwd=root, capture_output=True, text=True, check=True)

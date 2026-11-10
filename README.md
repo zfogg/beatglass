@@ -19,6 +19,22 @@ Retryable analysis storage schema v2 persists `source_path` and `decoder_snapsho
 
 Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, and platform recovery contracts. End-to-end persistence, playback, native capture, and full native qualification remain in progress.
 
+The implementation is C++20. C callers can interoperate today through the
+documented CLI/process boundary; a stable C ABI adapter is not yet shipped.
+Objective-C callers can invoke that boundary from `.m`, while
+Objective-C++ callers can bridge to C++ headers from `.mm`. ABI stability is
+not yet promised.
+
+Minimal C integration (using the installed C adapter) looks like:
+
+```c
+#include <stdlib.h>
+
+int main(void) {
+    return system("beatglass-cli --json song.wav");
+}
+```
+
 The intended stack is C++20, CMake, Qt 6 Quick, SQLite, aubio and Essentia, with PipeWire, Core Audio taps and WASAPI loopback for Linux, macOS and Windows respectively. Dependency availability, versions and licenses must be verified before selection. No account or network service should be required at runtime.
 
 ## Current status and prerequisites
@@ -49,7 +65,7 @@ cmake --build build --target beatglass_all_tests --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For example on Ubuntu 22.04:
+The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; run `beatglass-tui [audio-folder]` to browse local files and launch real analysis. For example on Ubuntu 22.04:
 
 ```sh
 sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript
@@ -60,26 +76,169 @@ ctest --test-dir build --output-on-failure
 ./build/beatglass-desktop
 ```
 
-For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below. The CLI accepts one file, prints an aubio estimate or unknown, and never modifies the input. The Library page displays basic decoded metadata; it does not launch analysis. The DJ page reports that capture is unavailable. On macOS it also exposes an experimental overlay; its native behavior is unqualified and described in [macOS overlay status](docs/macos-overlay.md). The native evidence procedure is [the macOS qualification checklist](docs/macos-qualification.md). Actual support depends on decoder build options. No GUI, capture or overlay has been qualified on any platform.
+For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. An experimental LLVM/Clang toolchain can also be installed with Scoop (`scoop install llvm`) and selected through CMake's `-T ClangCL` generator toolset or an explicit `CMAKE_CXX_COMPILER`; this is a development option, not a pinned qualification environment. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below. The CLI accepts one file, prints an aubio estimate or unknown, and never modifies the input. The Library page displays basic decoded metadata; it does not launch analysis. The DJ page reports that capture is unavailable. On macOS it also exposes an experimental overlay; its native behavior is unqualified and described in [macOS overlay status](docs/macos-overlay.md). The native evidence procedure is [the macOS qualification checklist](docs/macos-qualification.md). Actual support depends on decoder build options. No GUI, capture or overlay has been qualified on any platform.
 
 On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
 
-## Binary command-line flags
+The shipped `beatglass-cli` and `beatglass-music-cli` report decoder/analysis
+failures on stderr with an `error: ` prefix and exit with status 1;
+argument/usage errors exit with status 2.
 
-The shipped binaries intentionally expose a small interface. `beatglass-cli`
-accepts one required positional `<audio-file>` and these three switches:
+## Qualification evidence index
 
-| Binary | Flag | Meaning |
+Use [progress](docs/progress.md) for the implementation ledger and open work,
+[platform qualification status](docs/platform-qualification-status.md) for the
+current evidence boundary and remaining gates, and the platform handoff plans
+for [Windows](docs/windows-qualification.md), [macOS](docs/macos-qualification.md),
+and [Linux](docs/linux-qualification-plan.md). Portable checks prepare these
+handoffs; they do not substitute for retained native evidence.
+
+Portable evidence boundary checks:
+
+```text
+python tests/platform/check_cli_evidence_status.py
+python tests/platform/check_progress_cli_evidence.py
+python tests/platform/check_qualification_index.py
+```
+
+## Command-line and qualification-tool options
+
+The following reference is generated from the authoritative parsers in
+`src/cli/main.cpp`, `src/desktop/main.cpp`, and `tests/platform/*.py`. Paths
+are read-only unless an option explicitly names an output; tools fail closed
+with a nonzero exit status and report errors on stderr.
+
+### Binary command-line flags
+
+These are the only options accepted by the shipped `beatglass-cli` and
+`beatglass-desktop` binaries. They are separate from the developer and
+qualification-script flags below.
+
+Usage: `beatglass-cli [--help] [--version] [--replay] [--json] [--] <audio-file>`.
+The music analysis binary uses `beatglass-music-cli [--help] [--version] <audio-file>`.
+
+| Binary | Argument | Meaning |
 | --- | --- | --- |
-| `beatglass-cli` | `--replay` | Emit causal estimates for each observed block without real-time pacing. |
-| `beatglass-cli` | `--json` | Emit machine-readable JSON; with `--replay`, emit JSON Lines. |
-| `beatglass-cli` | `--` | Stop option parsing so an input path beginning with `-` is accepted. |
+| `beatglass-cli` | `<audio-file>` (required) | Analyze one audio file without modifying it. |
+| `beatglass-cli` | `--help`, `-h` | Print usage and exit successfully. |
+| `beatglass-cli` | `--version`, `-V` | Print the project version and exit successfully. |
+| `beatglass-music-cli` | `--version`, `-V` | Print the project version and exit successfully. |
+| `beatglass-music-cli` | `--help`, `-h` | Print usage and exit successfully. |
+| `beatglass-cli` | `--replay <file>` | Run causal replay without real-time pacing. |
+| `beatglass-cli` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
+| `beatglass-cli` | `--` | End option parsing so a filename beginning with `-` is accepted. |
+| `beatglass-desktop` | `--database <path>` | Select the SQLite storage path; the first occurrence wins. |
 
-`beatglass-desktop` additionally accepts `--database <path>` to select its
-SQLite storage path. Unknown options, duplicate `--replay`/`--json`, missing
-values, and a missing audio path fail with status 2. The many `--...` options
-used by qualification and evidence scripts below are developer-tool flags,
-not flags accepted by these binaries.
+Unknown options, missing values, duplicate `--replay`/`--json`, and a missing
+`<audio-file>` return status 2 and print usage/error text to stderr. `--json`
+and `--replay` may be combined. The desktop binary passes unrelated arguments
+through to Qt after consuming `--database`.
+
+### Developer and qualification-script flags
+
+The following options belong to repository tools and are not accepted by the
+shipped binaries.
+
+| Command | Option | Default / values | Behavior and interactions |
+| --- | --- | --- | --- |
+| `beatglass-cli` | `<audio-file>` | required positional path | Analyzes one input; the input is never modified. |
+| `beatglass-cli` | `--replay <file>` | off | Emits incremental causal estimates without real-time pacing; may end with a partial JSON-Lines stream on error. |
+| `beatglass-cli` | `--json` | off | Emits one JSON result, or JSON Lines with `--replay`; `bpm` may be `null`. |
+| `beatglass-cli` | `--` | none | Ends option parsing so an input beginning with `-` is treated as a path. |
+| `beatglass-desktop` | `--database <path>` | application default | Selects the SQLite storage path; the first occurrence wins and later arguments are passed to Qt. |
+
+Unknown CLI options, missing values, duplicate `--replay`/`--json`, and a
+missing audio path exit with status 2. `--json` and `--replay` may be combined.
+
+### Readiness, evidence, and release tools
+
+| Tool | Positional arguments | Options (default) |
+| --- | --- | --- |
+| `check_evidence_readiness.py` | `--status`, `--bundles` (both required) | `--report` (none), `--max-age-hours` (168; must be positive), `--max-report-bytes` (16 MiB), `--json` (off) |
+| `generate_readiness_report.py` | `bundles output` | `--max-report-bytes` (16 MiB), `--json` (off) |
+| `run_readiness_handoff.py` | `bundles output` | `--status`, `--max-age-hours` (168), `--check-docs`, `--consume`, `--native-output`, `--native-platform {windows,macos,linux}`, `--review-output`, `--require-ready`, `--review-json`, `--consume-review`, `--decision-output`, `--native-review-output`, `--native-reviewer` |
+| `ingest_qualification_artifacts.py` | `root output` | `--max-artifact-bytes` (1 GiB), `--max-manifest-bytes` (16 MiB), `--max-entries` (1000), `--max-total-artifact-bytes` (8 GiB), `--json` |
+| `verify_evidence_bundle.py` | `--root`, `--manifest` (both required) | `--max-artifact-bytes` (1 GiB), `--max-manifest-bytes` (16 MiB), `--max-entries` (1000), `--max-total-artifact-bytes` (8 GiB), `--json` |
+| `validate_readiness_report.py` | `report` | `--bundles` (none; enables retained-bundle verification) |
+| `consume_readiness_handoff.py` | `report` | none |
+| `consume_review_packet.py` | `packet` | `--report` (none) |
+| `consume_review_bundle.py` | `bundle` | `--report-name` (`readiness-report.json`), `--packet-name` (`review.json`) |
+| `review_readiness_handoff.py` | `report output` | `--require-ready`, `--json-output` (none) |
+| `review_release_decision.py` | `bundle output` | none |
+| `review_native_evidence.py` | `report reviewer output` | none |
+| `retain_review_bundle.py` | `report packet destination` | none |
+| `promote_review_bundle.py` | `source destination` | none |
+| `record_release_signoff.py` | `decision reviewer output` | none |
+| `prepare_release_bundle.py` | `report packet retained release` | `--signoff` (none; when present, required and verified) |
+| `verify_release_manifest.py` | `release_root` | `--signoff` (none; requires and verifies manual signoff when present) |
+| `verify_release_bundle.py` | `release_root` | none |
+
+The readiness chain is intentionally ordered: ingest/retain evidence, run the
+handoff, review/consume the decision, record signoff, promote, then verify the
+manifest and final release bundle. `--require-ready` and `--consume-review`
+are conservative gates; they do not replace native platform evidence.
+
+### PipeWire and qualification helper flags
+
+The Linux/native helper scripts are also user-facing and are covered by the
+same reference:
+
+| Tool | Flags |
+| --- | --- |
+| `tests/pipewire/check_linux_native_prerequisites.py` | `--report <path>` |
+| `tests/pipewire/run_linux_native_qualification.py` | `--source <path>` (repository root), `--build <path>` (`build-pipewire`), `--summary <path>`, `--transitions <path>`, `--archive <path>`, `--capture-plan <path>`; `--archive` requires `--summary` |
+| `tests/pipewire/qualification_matrix.py` | `--summary <path>` |
+| `tests/pipewire/validate_qualification_artifacts.py` | `--json` |
+| `tests/platform/verify_evidence_bundle.py` | `--root`, `--manifest`, `--max-artifact-bytes`, `--max-manifest-bytes`, `--max-entries`, `--max-total-artifact-bytes`, `--json` |
+| `tests/platform/validate_readiness_report.py` | `--bundles` |
+| `tests/platform/verify_release_manifest.py` | `--signoff` |
+
+`--report`, `--summary`, `--transitions`, `--archive`, and `--capture-plan`
+write evidence only when their parent workflow reaches that stage. PipeWire
+qualification remains pending until a real native host run supplies the
+artifacts; `--json` changes output format and does not claim qualification.
+
+### CMake configuration flags
+
+The documented CMake feature switches are `-DBUILD_TESTING=ON`,
+`-DBEATGLASS_BUILD_SLICE=ON`, `-DBEATGLASS_BUILD_DESKTOP=ON`,
+`-DBEATGLASS_BUILD_PIPEWIRE=ON`, `-DBEATGLASS_BUILD_TONAL_SPIKE=ON`,
+`-DBEATGLASS_BUILD_MUSIC_REPLAY=ON`,
+`-DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`,
+`-DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON`,
+`-DBEATGLASS_FETCH_SQLITE3=ON`, and `-DBEATGLASS_TEST_V1_CODECS=OFF`.
+These are experimental build switches, not runtime CLI flags; combine only
+the options described by each section above.
+
+On Windows, Scoop's main bucket can be made explicit before installing the
+experimental LLVM toolchain:
+
+```powershell
+scoop bucket add main
+scoop install llvm
+clang --version
+clang-cl --version
+cmake -S . -B build-clang -G "Visual Studio 17 2022" -A x64 -T ClangCL
+```
+
+The compiler selection and Scoop package are development conveniences, not a
+cross-platform qualification result or a pinned release toolchain.
+
+### Complete repository flag inventory
+
+The repository also invokes downstream tool flags while running qualification
+helpers. They are intentionally documented here so copy/paste commands are
+auditable: `--backend-*` (CMake backend selector), `--cflags`, `--libs`,
+`--modversion`, and `--exists` belong to `pkg-config`; `--show-only` and
+`--no-tests` belong to CTest discovery; `--output-junit`, `--timeout`, and
+`--version` are native-test runner options; `--output-on-failure` and
+`--test-dir` are CTest options; `--keep-going` belongs to Sphinx; and
+`--variable` belongs to the CMake metadata helper. These are downstream tool
+options, not Beatglass parser flags, but they are part of the reproducible
+qualification commands. The repository-wide checker below verifies that this
+entire set, plus every Beatglass-defined flag, remains visible in this file.
+The native matrix helper also accepts `--record` when recording a qualification
+attempt; it is distinct from the evidence `--report` output.
 
 ## API documentation
 
@@ -178,6 +337,6 @@ The fallback is opt-in, verifies the upstream archive SHA-256, and is intended f
 This is an isolated review increment, not a functioning library backend. File hashing and file-version validation, actual DSP integration, typed public outcomes, individual job cancellation/progress, result schema, database location and pinning remain open. Do not use the prototype for user data. It does not write audio or tags.
 
 
-The experimental CLI also accepts `--json`, alone or with `--replay`. Normal JSON output is one object; replay emits one JSON object per observed block followed by a final result object (JSON Lines). `schema_version` is 1, `observed_through` is an exclusive frame boundary, and `bpm: null` means unknown. The beat count covers the current acquisition. These are preliminary tempo-only outputs: they do not contain key or chord estimates, and replay runs without real-time pacing. Errors are reported on stderr with a nonzero exit status; a replay error can leave a partial JSON Lines stream without a final result.
+The experimental CLI also accepts `--json`, alone or with `--replay`. Normal JSON output is one object; replay emits one JSON object per observed block followed by a final result object (JSON Lines). `schema_version` is 1, `observed_through` is an exclusive frame boundary, `duration_seconds` is derived from decoded frames and sample rate, and `bpm: null` means unknown. The beat count covers the current acquisition. These are preliminary tempo-only outputs: they do not contain key or chord estimates, and replay runs without real-time pacing. Errors are reported on stderr with a nonzero exit status; a replay error can leave a partial JSON Lines stream without a final result.
 
 The optional `BEATGLASS_BUILD_LIBRARY_FINGERPRINT` setting (with `BEATGLASS_BUILD_LIBRARY_PROTOTYPE`) builds provisional bounded SHA-256 file evidence using OpenSSL. Its digest identifies the observed byte stream, not a separately opened decoder or a stable filesystem identity; it must not alone authorize cache reuse.

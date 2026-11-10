@@ -53,3 +53,29 @@ TEST_CASE("file fingerprint reports observer exceptions") {
   auto failed = fingerprint_file(f.path, {}, [](auto) { throw std::runtime_error("observer failed"); });
   REQUIRE(failed.status == FingerprintStatus::error); REQUIRE(failed.diagnostic == "observer failed");
 }
+TEST_CASE("file fingerprint statuses have stable labels") {
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::ok)) == "ok");
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::cancelled)) == "cancelled");
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::changed)) == "changed");
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::error)) == "error");
+}
+
+TEST_CASE("file fingerprint retry policy distinguishes transient outcomes") {
+ CHECK(fingerprint_status_is_retryable(FingerprintStatus::cancelled));
+ CHECK(fingerprint_status_is_retryable(FingerprintStatus::error));
+ CHECK_FALSE(fingerprint_status_is_retryable(FingerprintStatus::ok));
+ CHECK_FALSE(fingerprint_status_is_retryable(FingerprintStatus::changed));
+}
+
+TEST_CASE("file fingerprint refresh policy isolates changed sources") {
+ CHECK(fingerprint_status_requires_refresh(FingerprintStatus::changed));
+ CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::ok));
+ CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::cancelled));
+ CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::error));
+}
+
+TEST_CASE("file fingerprint diagnostics preserve stable status labels") {
+ CHECK(fingerprint_status_diagnostic(FingerprintStatus::changed) == "changed");
+ CHECK(fingerprint_status_diagnostic(FingerprintStatus::error, "cannot open") ==
+       "error: cannot open");
+}

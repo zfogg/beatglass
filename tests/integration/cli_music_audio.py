@@ -8,6 +8,14 @@ import tempfile
 import wave
 
 exe = sys.argv[1]
+missing_argument = subprocess.run([exe], capture_output=True, text=True)
+assert missing_argument.returncode == 2 and "Usage: beatglass-music-cli" in missing_argument.stderr
+extra_argument = subprocess.run([exe, "one.wav", "two.wav"], capture_output=True, text=True)
+assert extra_argument.returncode == 2 and "Usage: beatglass-music-cli" in extra_argument.stderr
+help_result = subprocess.run([exe, "--help"], capture_output=True, text=True)
+assert help_result.returncode == 0 and "Usage: beatglass-music-cli" in help_result.stdout
+version = subprocess.run([exe, "--version"], capture_output=True, text=True)
+assert version.returncode == 0 and version.stdout.startswith("beatglass-music-cli ")
 rate = 44100
 with tempfile.TemporaryDirectory() as directory:
     path = pathlib.Path(directory) / "synthetic.wav"
@@ -30,6 +38,8 @@ with tempfile.TemporaryDirectory() as directory:
     result = rows[-1]
     assert result["epoch"] > 0 and all(row["epoch"] == result["epoch"] for row in rows), rows
     assert result["schema_version"] == 1 and result["sample_rate"] == rate and result["bpm"] is not None and result["state"] == "tracking", result
+    assert result["duration_seconds"] == 12.0, result
+    assert all(row["duration_seconds"] == 12.0 for row in rows if "duration_seconds" in row), rows
     assert result["rolling_key"] is not None and result["local_chord"] == "A minor", result
     assert result["tonal_through"] <= result["analyzed_through"] <= result["observed_through"] == rate * 12
     beats = [row for row in rows[:-1] if row["type"] == "beat"]
@@ -57,3 +67,4 @@ with tempfile.TemporaryDirectory() as directory:
     assert path.read_bytes() == before
     missing = subprocess.run([exe, str(path.parent / "missing.wav")], capture_output=True, text=True)
     assert missing.returncode != 0
+    assert missing.stderr.startswith("error: "), missing.stderr

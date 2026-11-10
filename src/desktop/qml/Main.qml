@@ -73,7 +73,9 @@ ApplicationWindow {
         : (selectedName + "|generation:" + visualizationPresentation.generation + "|revision:" + visualizationPresentation.revision)
     property bool overlayVisualStateRecoveryRequired: false
     property bool overlayCaptureEvidenceStale: false
+    readonly property string overlayRecoveryEvidenceLabel: overlayCaptureEvidenceStale ? "Live evidence stale until fresh capture" : "Live evidence current"
     property string overlayRecoveryAnnouncement: ""
+    property string overlayPulseAnnouncement: "Beat pulse is idle until fresh Monitoring capture and valid BPM are available."
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     readonly property bool analysisCacheIdentityReady: cacheContent.text.trim() !== "" && cacheEngine.text.trim() !== "" && cacheConfig.text.trim() !== "" && cacheMode.acceptableInput
@@ -195,19 +197,19 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        objectName: "overlayPulseStatusFocusShortcut"
+        sequence: "Ctrl+Alt+Shift+B"
+        context: Qt.ApplicationShortcut
+        enabled: window.overlayBridge !== null
+        onActivated: window.focusOverlayPulseStatus()
+    }
+    Shortcut {
         objectName: "overlayRetryFocusShortcut"
         sequence: "Ctrl+Alt+Shift+Y"
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && !window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
-        onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            retryOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Retry overlay control focused.")
-        }
+        onActivated: window.focusOverlayRetryShortcut()
     }
     Shortcut {
         objectName: "overlayReapplyFocusShortcut"
@@ -245,12 +247,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            unlockOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction.")
+            window.focusOverlayUnlockShortcut()
         }
     }
     Shortcut {
@@ -259,9 +256,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge !== null
         onActivated: {
-            navigation.currentIndex = 1
-            overlaySettingsSummaryReviewAction.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+            window.focusOverlaySummaryReviewShortcut()
         }
     }
     Shortcut {
@@ -270,15 +265,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && window.overlayBridge.available
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            if (hidden)
-            hideOverlay.forceActiveFocus()
-        else
-            restoreOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Hide overlay control focused.")
+            window.focusOverlayHideShortcut()
         }
     }
     Shortcut {
@@ -289,12 +276,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            showOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Show overlay control focused.")
+            window.focusOverlayShowShortcut()
         }
     }
     Shortcut {
@@ -305,12 +287,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlaySize.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + ".")
+            window.focusOverlaySizeShortcut()
         }
     }
     Shortcut {
@@ -321,12 +298,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            clickThroughToggle.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay click-through control focused; current mode is " + (window.overlayBridge.clickThrough ? "enabled" : "disabled") + ".")
+            window.focusOverlayClickThroughShortcut()
         }
     }
     Shortcut {
@@ -337,12 +309,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayOpacityControl.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay opacity control focused; current value is " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
+            window.focusOverlayOpacityShortcut()
         }
     }
     Shortcut {
@@ -352,23 +319,7 @@ ApplicationWindow {
         enabled: window.overlayBridge && window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: {
-            const requested = !window.overlayBridge.clickThrough
-            if (!requested) {
-                window.unlockOverlayAndRestoreFocus()
-                return
-            }
-            const applied = window.overlayBridge.setClickThrough(requested)
-            if (!applied) {
-                window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active.")
-                clickThroughToggle.forceActiveFocus()
-                return
-            }
-            window.announceCaptureRecoveryState(requested
-                ? "DJ overlay click-through enabled; press Escape to unlock interaction."
-                : "DJ overlay interaction restored; keyboard and pointer input are available.")
-            clickThroughToggle.forceActiveFocus()
-        }
+        onActivated: window.handleOverlayClickThroughShortcut()
     }
     Shortcut {
         objectName: "overlayRetryShortcut"
@@ -377,24 +328,21 @@ ApplicationWindow {
         enabled: window.overlayBridge && !window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: {
-            window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until recovery succeeds.")
-            window.showOverlayAndHideControls()
-        }
+        onActivated: window.handleOverlayRetryShortcut()
     }
     Shortcut {
         objectName: "overlayClearSafeModeShortcut"
         sequence: "Ctrl+Alt+Shift+C"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit
-        onActivated: window.resetOverlayRecoveryAttempts()
+        onActivated: window.handleOverlayClearSafeModeShortcut()
     }
     Shortcut {
         objectName: "overlayStopRecoveryShortcut"
         sequence: "Ctrl+Alt+Shift+X"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryAttemptCount > 0 && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit
-        onActivated: window.stopOverlayRecoveryAttempts()
+        onActivated: window.handleOverlayStopShortcut()
     }
     Shortcut {
         objectName: "overlayResumeRecoveryShortcut"
@@ -403,47 +351,28 @@ ApplicationWindow {
         enabled: window.overlayRecoveryPausedByUser && window.overlayBridge
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: resumeOverlayRecovery.clicked()
+        onActivated: window.handleOverlayResumeShortcut()
     }
     Shortcut {
         objectName: "overlayPausedRecoveryFocusShortcut"
         sequence: "Escape"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryPausedByUser && (!window.overlayBridge || !window.overlayBridge.clickThrough)
-        onActivated: {
-            window.announceCaptureRecoveryState("Paused overlay recovery; Resume recovery focused.")
-            resumeOverlayRecovery.forceActiveFocus()
-        }
+        onActivated: window.handleOverlayPausedFocusShortcut()
     }
     Shortcut {
         objectName: "overlayPausedRecoveryPageShortcut"
         sequence: "Ctrl+Alt+Shift+Pause"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryPausedByUser
-        onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            window.announceCaptureRecoveryState("Paused overlay recovery page opened; Resume recovery is ready.")
-            resumeOverlayRecovery.forceActiveFocus()
-        }
+        onActivated: window.handleOverlayPausedPageShortcut()
     }
     Shortcut {
         objectName: "overlayDisplayFocusShortcut"
         sequence: "Ctrl+Alt+D"
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0
-        onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
-            window.announceCaptureRecoveryState(window.overlayDisplaySelectionRequired
-                ? "Overlay display selection required; choose an available display."
-                : "Overlay display selector focused.")
-        }
+        onActivated: window.focusOverlayDisplayShortcut()
     }
     Shortcut {
         objectName: "overlayReapplyShortcut"
@@ -453,9 +382,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity.")
-            window.reapplyOverlaySettingsAndRestore()
-            reapplyOverlaySettings.forceActiveFocus()
+            window.focusOverlayReapplyShortcut()
         }
     }
     Shortcut {
@@ -465,12 +392,7 @@ ApplicationWindow {
         enabled: window.overlayBridge && window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: {
-            if (window.overlayHiddenByUser)
-                window.showOverlayAndHideControls()
-            else
-                window.hideOverlayAndRestoreControls()
-        }
+        onActivated: window.handleOverlayHideToggleShortcut()
     }
     Shortcut {
         objectName: "overlayOpacityResetShortcut"
@@ -481,18 +403,7 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             const resetOpacity = 0.9
-            const applied = window.overlayBridge.setOpacity(resetOpacity)
-            if (applied) {
-                window.overlayOpacityEditInFlight = true
-                window.overlayPendingOpacity = resetOpacity
-                window.overlaySettingsRevision += 1
-                window.announceCaptureRecoveryState("DJ overlay opacity reset to 90 percent.")
-                overlayOpacityControl.forceActiveFocus()
-            } else {
-                window.syncOverlaySettingsStateFromBridge()
-                window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active.")
-                overlayOpacityControl.forceActiveFocus()
-            }
+            window.handleOverlayOpacityResetAction(resetOpacity)
         }
     }
     Shortcut {
@@ -503,19 +414,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            const sizes = [[250, 110], [310, 130], [430, 180]]
-            const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
-            const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
-            if (resized) {
-                window.overlayPreferredSizeIndex = nextIndex
-                window.overlaySettingsRevision += 1
-                window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
-                overlaySize.forceActiveFocus()
-            } else {
-                window.syncOverlaySettingsStateFromBridge()
-                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
-                overlaySize.forceActiveFocus()
-            }
+            window.handleOverlaySizeShortcut()
         }
     }
     Shortcut {
@@ -719,6 +618,74 @@ ApplicationWindow {
             window.announceVisualizationRecovery("Persisted recovery discard focused for " + runId + "; press Enter to review the confirmation dialog.")
         }
     }
+    function transitionCaptureEvidence(stale, message, focusTarget) {
+        window.overlayCaptureEvidenceStale = stale
+        if (message !== "")
+            window.announceCaptureRecoveryState(message + " " + (stale ? "Live evidence is stale until fresh capture arrives." : "Fresh accepted capture is available."))
+        if (focusTarget)
+            focusTarget.forceActiveFocus()
+        return focusTarget !== null && focusTarget !== undefined
+    }
+    function focusOverlayAvailabilityRecovery(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Retained settings remain available."))
+        if (target)
+            target.forceActiveFocus()
+        return target !== null && target !== undefined
+    }
+    function focusOverlayBridgeSettingsFailure(message, target) {
+        window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
+        return window.focusOverlayAvailabilityRecovery(message + " Persisted settings remain retained for retry.", target)
+    }
+    function focusOverlayRestoredState(message, target) {
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Fresh capture can now be accepted."))
+        if (target)
+            target.forceActiveFocus()
+        return target !== null && target !== undefined
+    }
+    function focusOverlayHiddenState(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Retained settings remain available."))
+        if (target)
+            target.forceActiveFocus()
+        return target !== null && target !== undefined
+    }
+    function focusOverlayRestoreFailure(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " Live evidence is stale until a fresh capture arrives.")
+        if (target)
+            target.forceActiveFocus()
+        return target !== null && target !== undefined
+    }
+    function focusOverlayUnlockState(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Interaction state is current."))
+        if (target)
+            target.forceActiveFocus()
+        return target !== null && target !== undefined
+    }
+    function focusOverlaySettingsRecoveryFailure(message, target) {
+        window.overlayCaptureEvidenceStale = true
+        window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
+        return window.focusOverlayRestoreFailure(message, target)
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -816,6 +783,35 @@ ApplicationWindow {
     readonly property var themeForegrounds: ["#142c2c", "#f1f6f7", "#ffffff", "#f9f5ff", "#effaff", "#fff9e8"]
     readonly property var themeAccentColors: ["#126f60", "#8ee5cc", "#8cffe2", "#d4a8ff", "#75d9ff", "#ffd45e"]
     property int selectedThemeIndex: themePreferencesBridge ? themePreferencesBridge.themeIndex : 0
+    function selectThemeIndex(index) {
+        const nextIndex = Math.max(0, Math.min(window.themeNames.length - 1, index))
+        window.selectedThemeIndex = nextIndex
+        window.selectedTheme = window.themeNames[nextIndex]
+        window.themePreferenceAnnouncement = "Theme selected: " + window.selectedTheme + ". " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "Reduced motion is enabled." : "Full motion is enabled.")
+        if (window.themePreferencesBridge)
+            window.themePreferencesBridge.themeIndex = nextIndex
+        if (typeof visualizationCanvas !== "undefined")
+            visualizationCanvas.requestPaint()
+        return true
+    }
+    function setReduceMotionPreference(enabled) {
+        if (!window.themePreferencesBridge)
+            return false
+        window.themePreferencesBridge.reduceMotion = enabled
+        window.themePreferenceAnnouncement = enabled
+            ? "Reduced motion enabled for " + window.selectedTheme + "; beat pulse and presentation transitions are minimized."
+            : "Reduced motion disabled for " + window.selectedTheme + "; standard presentation transitions restored."
+        return true
+    }
+    function resetAppearancePreferences() {
+        if (!window.themePreferencesBridge)
+            return false
+        window.themePreferencesBridge.reset()
+        window.selectThemeIndex(0)
+        window.setReduceMotionPreference(false)
+        window.themePreferenceAnnouncement = "Appearance reset to Light theme with full motion."
+        return true
+    }
     // Keep the visual selection synchronized when preferences are restored or
     // changed by another settings surface. Assignments from the controls below
     // intentionally remain immediate; this connection handles external changes.
@@ -865,18 +861,14 @@ ApplicationWindow {
                 if (synced) {
                     window.announceCaptureRecoveryState("Overlay actions restored; native display settings are available.")
                 } else {
-                    window.overlayLaunchFallbackActive = true
-                    window.overlayDisplayRecoveryPending = true
-                    window.announceCaptureRecoveryState("Overlay bridge recovered, but settings remain unavailable; control-window fallback remains active.")
-                    window.show()
-                    window.raise()
-                    window.requestActivate()
-                    retryOverlay.forceActiveFocus()
+                    window.focusOverlayBridgeSettingsFailure("Overlay bridge recovered, but settings remain unavailable; control-window fallback remains active.", retryOverlay)
                 }
                 if (synced && window.overlayWasVisibleBeforeAvailabilityLoss) {
                     window.overlayWasVisibleBeforeAvailabilityLoss = false
-                    if (!window.overlayRecoveryPausedByUser)
+                    if (!window.overlayRecoveryPausedByUser) {
                         window.recoverOverlayAfterDisplayChange()
+                        window.focusOverlayRestoredState("DJ overlay display restored; retry is available while native overlay recovery completes.", retryOverlay)
+                    }
                     else
                         window.announceCaptureRecoveryState("DJ overlay bridge recovered; recovery remains paused until Resume recovery is chosen.")
                 }
@@ -885,20 +877,15 @@ ApplicationWindow {
     }
     Component.onCompleted: {
         if (overlayBridge && !overlayBridge.attach(djOverlay, window)) {
-            window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.announceCaptureRecoveryState("Native overlay attachment failed; control-window fallback remains active.")
+            window.focusOverlayAttachFailure("Native overlay attachment failed; control-window fallback remains active.")
         } else {
             const synced = window.syncOverlaySettingsFromBridge()
             if (!synced) {
-                window.overlayLaunchFallbackActive = true
-                window.overlayDisplayRecoveryPending = true
+                window.focusOverlayAttachFailure("Native overlay attached, but retained settings are unavailable; control-window fallback remains active.")
             }
         }
         if (window.overlayBridge && !window.captureMonitorBridge) {
-            window.overlayCaptureEvidenceStale = true
-            window.announceCaptureRecoveryState("Overlay capture is unavailable; displayed estimates are stale until monitoring connects.")
+            window.focusOverlayCaptureStartupFailure()
         }
         refreshCatalog()
         if (typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== "") {
@@ -906,11 +893,35 @@ ApplicationWindow {
             refreshCatalog()
         }
     }
+    function focusOverlayAttachFailure(message) {
+        window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        return window.focusOverlayAvailabilityRecovery(message + " Live evidence is stale until fresh capture arrives.", overlayDisplay)
+    }
+    function focusOverlayCaptureStartupFailure() {
+        window.overlayCaptureEvidenceStale = true
+        window.overlayDisplayRecoveryPending = true
+        window.announceCaptureRecoveryState("Overlay capture is unavailable; displayed estimates are stale until monitoring connects. Recovery remains available from the control window.")
+        return true
+    }
+    function focusOverlayRecoveryAction(message) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + window.overlayRecoveryEvidenceLabel + ".")
+        resumeOverlayRecovery.forceActiveFocus()
+        return true
+    }
+
     function restoreOverlayDisplaySelectionFromBridge() {
         if (!window.overlayBridge) {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
+            window.overlayCaptureEvidenceStale = true
             return false
         }
         if (window.overlayBridge.displayName !== "")
@@ -1280,42 +1291,48 @@ ApplicationWindow {
         if (window.catalogDiagnostic !== "") return "This folder could not be read: " + window.catalogDiagnostic
         return "No matching audio files or folders. Try a different search or choose another folder."
     }
+    function markOverlayRecoveryStale(reason) {
+        window.overlayCaptureEvidenceStale = true
+        window.overlayDisplayRecoveryPending = true
+        if (reason !== "")
+            window.announceCaptureRecoveryState(reason + " Live evidence is stale until fresh capture arrives.")
+    }
     function restoreOverlayFallbackControls(reason) {
         window.overlayLaunchFallbackActive = true
         window.overlayDisplayRecoveryPending = true
+        window.overlayCaptureEvidenceStale = true
         window.overlayHiddenByUser = false
         window.show()
         window.raise()
         window.requestActivate()
         overlayDisplay.forceActiveFocus()
         if (reason !== "")
-            window.announceCaptureRecoveryState(reason)
+            window.announceCaptureRecoveryState(reason + " Live evidence is stale until fresh capture arrives.")
     }
     function showOverlayAndHideControls() {
         window.overlayHiddenByUser = false
         if (!window.overlayBridge || !window.overlayBridge.available) {
             window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
             const savedDisplay = window.overlayPreferredDisplayName !== "" ? window.overlayPreferredDisplayName : "the saved display"
             window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback. Persisted settings for " + savedDisplay + " remain retained for the next retry.")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayRestoreFailure("DJ overlay unavailable; control window remains available as the tray/taskbar fallback and persisted settings remain retained.", overlayDisplay)
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback.")
             window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayRestoreFailure("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings remain retained.", overlayDisplay)
             return false
         }
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplayRecoveryPending = false
         if (!window.overlayBridge.showOverlay()) {
             window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
+            window.markOverlayRecoveryStale("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
             window.restoreOverlayFallbackControls("")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayRestoreFailure("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.", overlayDisplay)
             return false
         }
         const restoredGeometry = window.overlayBridge.geometry
@@ -1333,55 +1350,409 @@ ApplicationWindow {
         if (!window.overlayBridge.setClickThrough(false)) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("DJ overlay could not be unlocked; control-window fallback remains available.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            if (typeof unlockOverlay !== "undefined")
-                unlockOverlay.forceActiveFocus()
+            window.focusOverlayUnlockState("DJ overlay could not be unlocked; control-window fallback remains available.", unlockOverlay)
             return false
         }
         window.overlayLaunchFallbackActive = false
         window.overlayDisplayRecoveryPending = false
-        window.announceCaptureRecoveryState("DJ overlay unlocked; keyboard and pointer interaction restored.")
-        if (typeof unlockOverlay !== "undefined")
-            unlockOverlay.forceActiveFocus()
+        window.focusOverlayUnlockState("DJ overlay unlocked; keyboard and pointer interaction restored.", unlockOverlay)
         return true
     }
     function reapplyOverlaySettingsAndRestore() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
-            window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlaySettingsRecoveryFailure("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.", overlayDisplay)
             return false
         }
         if (window.overlayBridge.screenIndex >= 0)
             if (!window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)) {
-                window.overlayLaunchFallbackActive = true
-                window.overlayDisplayRecoveryPending = true
-                window.announceCaptureRecoveryState("Persisted overlay display is unavailable; choose another display before restoring the overlay.")
-                window.show()
-                window.raise()
-                window.requestActivate()
-                overlayDisplay.forceActiveFocus()
+                window.focusOverlaySettingsRecoveryFailure("Persisted overlay display is unavailable; choose another display before restoring the overlay.", overlayDisplay)
                 return false
             }
         if (!window.restoreOverlayVisualStateFromBridge()) {
-            window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("Persisted overlay visual state is unavailable; choose a display and try restoring again.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlaySettingsRecoveryFailure("Persisted overlay visual state is unavailable; choose a display and try restoring again.", overlayDisplay)
             return false
         }
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
         return window.showOverlayAndHideControls()
+    }
+    function focusOverlayReapplyShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Reapply settings is unavailable until the native overlay and a destination display are ready.", overlayDisplay)
+            return false
+        }
+        window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Retained settings are current."))
+        return window.handleOverlayReapplyAction()
+    }
+    function handleOverlayReapplyAction() {
+        return window.handleOverlayReapplyButtonAction()
+    }
+    function handleOverlayReapplyButtonAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Choose an available display before reapplying saved overlay settings.", overlayDisplay)
+            return false
+        }
+        const reapplied = window.reapplyOverlaySettingsAndRestore()
+        if (reapplied)
+            reapplyOverlaySettings.forceActiveFocus()
+        return reapplied
+    }
+    function handleOverlayUnlockAction() {
+        if (!window.overlayBridge || !window.overlayBridge.available || !window.overlayBridge.clickThrough) {
+            window.focusOverlayAvailabilityRecovery("Overlay unlock is unavailable because click-through mode is not active or the native overlay is unavailable.", unlockOverlay)
+            return false
+        }
+        const restored = window.unlockOverlayAndRestoreFocus()
+        if (restored)
+            overlayInteractionMode.forceActiveFocus()
+        return restored
+    }
+    function focusOverlaySummaryReviewShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        overlaySettingsSummaryReviewAction.forceActiveFocus()
+        window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : ".") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : " Live evidence is current."))
+        return true
+    }
+    function focusOverlayUnlockShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || !window.overlayBridge.clickThrough) {
+            window.focusOverlayAvailabilityRecovery("Unlock overlay is unavailable because click-through mode is not active or the native overlay is unavailable.", unlockOverlay)
+            return false
+        }
+        unlockOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function focusOverlayShowShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Show overlay is unavailable until an available display is selected.", overlayDisplay)
+            return false
+        }
+        showOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Show overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function focusOverlayHideShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Hide overlay is unavailable because the native overlay or destination display is not available; control-window fallback remains active.", showOverlay)
+            return false
+        }
+        if (window.overlayHiddenByUser)
+            restoreOverlay.forceActiveFocus()
+        else
+            hideOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Hide overlay control focused; " + (window.overlayHiddenByUser ? "Restore is ready." : "Hide is ready.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function focusOverlaySizeShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay size is unavailable until the native overlay and a destination display are ready.", overlaySize)
+            return false
+        }
+        overlaySize.forceActiveFocus()
+        window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + "." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function focusOverlayClickThroughShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay click-through is unavailable until the native overlay and a destination display are ready.", clickThroughToggle)
+            return false
+        }
+        clickThroughToggle.forceActiveFocus()
+        window.announceCaptureRecoveryState("Overlay click-through control focused; current mode is " + (window.overlayBridge.clickThrough ? "enabled" : "disabled") + "." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function focusOverlayOpacityShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay opacity is unavailable until the native overlay and a destination display are ready.", overlayOpacityControl)
+            return false
+        }
+        overlayOpacityControl.forceActiveFocus()
+        window.announceCaptureRecoveryState("Overlay opacity control focused; current value is " + Math.round(window.overlayBridge.opacity * 100) + " percent." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function handleOverlayOpacityResetResult(applied, resetOpacity) {
+        if (applied) {
+            window.overlayOpacityEditInFlight = true
+            window.overlayPendingOpacity = resetOpacity
+            window.overlaySettingsRevision += 1
+            window.announceCaptureRecoveryState("DJ overlay opacity reset to 90 percent.")
+        } else {
+            window.overlayCaptureEvidenceStale = true
+            window.syncOverlaySettingsStateFromBridge()
+            window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active. Live evidence remains stale until fresh capture arrives.")
+        }
+        overlayOpacityControl.forceActiveFocus()
+    }
+    function handleOverlayOpacityResetAction(resetOpacity) {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay opacity reset is unavailable until the native overlay and a destination display are ready.", overlayOpacityControl)
+            return false
+        }
+        const applied = window.overlayBridge.setOpacity(resetOpacity)
+        window.handleOverlayOpacityResetResult(applied, resetOpacity)
+        return applied
+    }
+    function handleOverlaySizeShortcut() {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay size shortcut is unavailable until the native overlay and a destination display are ready.", overlaySize)
+            return false
+        }
+        const sizes = [[250, 110], [310, 130], [430, 180]]
+        const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
+        const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
+        window.handleOverlaySizeChangeResult(resized, nextIndex)
+        return resized
+    }
+    function focusOverlayOpacityEditRecovery(message) {
+        overlayOpacityControl.forceActiveFocus()
+        window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+        return true
+    }
+    function focusOverlayDisplaySelectionRecovery(message) {
+        overlayDisplay.forceActiveFocus()
+        window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+        return true
+    }
+    function focusOverlayDisplayRecoveryFailure(message, target) {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        return window.focusOverlayAvailabilityRecovery(message, target || overlayDisplay)
+    }
+    function focusOverlaySizeRecovery(message) {
+        overlaySize.forceActiveFocus()
+        window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+        return true
+    }
+    function handleOverlayClickThroughButtonAction(requestedClickThrough) {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay interaction mode is unavailable until the native overlay and a destination display are ready.", clickThroughToggle)
+            return false
+        }
+        const applied = window.overlayBridge.setClickThrough(requestedClickThrough)
+        clickThroughToggle.checked = window.overlayBridge.clickThrough
+        if (!applied || clickThroughToggle.checked !== requestedClickThrough) {
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again. Live evidence remains stale until fresh capture arrives.")
+        } else {
+            window.overlaySettingsRevision += 1
+            window.overlayLaunchFallbackActive = false
+            window.overlayDisplayRecoveryPending = false
+            window.announceCaptureRecoveryState(requestedClickThrough ? "DJ overlay click-through enabled; press Escape or use Unlock overlay to restore interaction." : "DJ overlay interaction restored; keyboard and pointer input are available.")
+        }
+        overlayInteractionMode.forceActiveFocus()
+        return applied && clickThroughToggle.checked === requestedClickThrough
+    }
+    function handleOverlayClickThroughShortcutAction() {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay interaction shortcut is unavailable until the native overlay and a destination display are ready.", clickThroughToggle)
+            return false
+        }
+        const requested = !window.overlayBridge.clickThrough
+        if (!requested)
+            return window.unlockOverlayAndRestoreFocus()
+        return window.handleOverlayClickThroughButtonAction(true)
+    }
+    function handleOverlayClickThroughShortcut() {
+        return window.handleOverlayClickThroughShortcutAction()
+    }
+    function handleOverlayRetryShortcutAction() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        return window.handleOverlayRetryButtonAction()
+    }
+    function handleOverlayRetryShortcut() {
+        return window.handleOverlayRetryShortcutAction()
+    }
+    function handleOverlayRetryAction() {
+        if (window.overlayRecoveryPausedByUser) {
+            window.focusOverlayRecoveryPauseState("Overlay recovery is paused; Resume recovery before retrying.", resumeOverlayRecovery)
+            return false
+        }
+        const restored = window.showOverlayAndHideControls()
+        if (!restored)
+            retryOverlay.forceActiveFocus()
+        return restored
+    }
+    function handleOverlayRetryButtonAction() {
+        if (window.overlayRecoveryPausedByUser) {
+            window.focusOverlayRecoveryPauseState("Overlay recovery is paused; Resume recovery before retrying.", resumeOverlayRecovery)
+            return false
+        }
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Overlay retry is unavailable until the native overlay and a destination display are ready.", overlayDisplay)
+            return false
+        }
+        window.overlayRecoveryPausedByUser = false
+        window.overlayRecoveryAttemptCount += 1
+        window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
+        const retried = window.showOverlayAndHideControls()
+        overlayDisplayStatus.forceActiveFocus()
+        return retried
+    }
+    function handleOverlayShowButtonAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Choose an available display before showing the overlay.", overlayDisplay)
+            return false
+        }
+        window.announceCaptureRecoveryState("DJ overlay launch requested on the selected display; restoring persisted settings." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return window.handleOverlayShowAction()
+    }
+    function handleOverlayShowAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Choose an available display before showing the overlay.", overlayDisplay)
+            return false
+        }
+        const restored = window.showOverlayAndHideControls()
+        if (!restored) {
+            window.overlayCaptureEvidenceStale = true
+            retryOverlay.forceActiveFocus()
+        }
+        return restored
+    }
+    function focusOverlayDisplayShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Display selection is unavailable until the native overlay and a destination display are ready.", overlayDisplay)
+            return false
+        }
+        overlayDisplay.forceActiveFocus()
+        window.announceCaptureRecoveryState((window.overlayDisplaySelectionRequired
+            ? "Overlay display selection required; choose an available display."
+            : "Overlay display selector focused.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function focusOverlayRetryShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Retry overlay control is unavailable until the native overlay and a destination display are ready.", retryOverlay)
+            return false
+        }
+        retryOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Retry overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
+    }
+    function handleOverlayResumeShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        return window.handleOverlayResumeRecoveryAction()
+    }
+    function handleOverlayResumeRecoveryAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Overlay recovery cannot resume until the native overlay and a destination display are ready.", overlayDisplay)
+            return false
+        }
+        window.overlayRecoveryPausedByUser = false
+        window.overlayRecoveryAttemptCount = 1
+        window.announceCaptureRecoveryState("DJ overlay recovery resumed (attempt 1); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
+        const resumed = window.showOverlayAndHideControls()
+        overlayDisplayStatus.forceActiveFocus()
+        return resumed
+    }
+    function handleOverlayClearSafeModeShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        return window.handleOverlayClearSafeModeAction()
+    }
+    function handleOverlayClearSafeModeAction() {
+        if (window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit) {
+            window.focusOverlayRecoveryPauseState("Overlay safe mode is not active; Retry overlay remains available when the display is ready.", retryOverlay)
+            return false
+        }
+        window.resetOverlayRecoveryAttempts()
+        window.announceCaptureRecoveryState("Overlay safe mode cleared; Retry overlay is available and focused. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : ""))
+        retryOverlay.forceActiveFocus()
+        return true
+    }
+    function handleOverlayStopShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        return window.handleOverlayStopRecoveryAction()
+    }
+    function handleOverlayStopRecoveryAction() {
+        if (window.overlayRecoveryPausedByUser) {
+            window.focusOverlayRecoveryPauseState("Overlay recovery is already paused; Resume recovery remains available.", resumeOverlayRecovery)
+            return false
+        }
+        window.stopOverlayRecoveryAttempts()
+        window.announceCaptureRecoveryState("Overlay recovery paused; Resume recovery is available. Live evidence remains stale until fresh capture arrives.")
+        resumeOverlayRecovery.forceActiveFocus()
+        return true
+    }
+    function handleOverlayPausedPageShortcut() {
+        return window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlayPausedFocusShortcut() {
+        return window.focusOverlayRecoveryAction("Paused overlay recovery; Resume recovery focused. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlayHideToggleShortcut() {
+        if (window.overlayHiddenByUser) {
+            return window.handleOverlayRestoreAction()
+        } else {
+            return window.handleOverlayHideAction()
+        }
+    }
+    function handleOverlayRestoreAction() {
+        return window.handleOverlayRestoreButtonAction()
+    }
+    function handleOverlayRestoreButtonAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Choose an available display before restoring the overlay.", overlayDisplay)
+            return false
+        }
+        window.announceCaptureRecoveryState("Restoring the user-hidden DJ overlay; persisted settings will be reapplied." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return window.handleOverlayShowAction()
+    }
+    function handleOverlayHideAction() {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay hide is unavailable because the native overlay or destination display is not available; control-window fallback remains active.", showOverlay)
+            return false
+        }
+        return window.hideOverlayAndRestoreControls()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
@@ -1398,7 +1769,8 @@ ApplicationWindow {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay. Live evidence is stale until fresh capture arrives.")
             overlayDisplay.forceActiveFocus()
             return false
         }
@@ -1407,7 +1779,8 @@ ApplicationWindow {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied.")
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied. Live evidence is stale until fresh capture arrives.")
             overlayDisplay.forceActiveFocus()
             return false
         }
@@ -1423,7 +1796,7 @@ ApplicationWindow {
                 const hiddenGeometry = window.overlayBridge.geometry
                 const hiddenGeometrySummary = hiddenGeometry && hiddenGeometry.width > 0 && hiddenGeometry.height > 0
                     ? " at position " + hiddenGeometry.x + ", " + hiddenGeometry.y + ", size " + hiddenGeometry.width + " by " + hiddenGeometry.height + " pixels" : ""
-                window.announceCaptureRecoveryState("DJ overlay display recovered" + hiddenGeometrySummary + "; it remains hidden by user request. Use Restore overlay when ready.")
+                window.focusOverlayRestoredState("DJ overlay display recovered" + hiddenGeometrySummary + "; it remains hidden by user request. Use Restore overlay when ready.", restoreOverlay)
                 return true
             }
             if (!window.overlayBridge.showOverlay()) {
@@ -1446,63 +1819,39 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = ""
         window.overlayPreferredScreenIndex = -1
         window.overlaySettingsRevision += 1
-        window.overlayLaunchFallbackActive = true
-        window.overlayDisplaySelectionRequired = true
-        window.overlayDisplayRecoveryPending = true
-        window.announceCaptureRecoveryState("Saved overlay display cleared; choose an available display to restore monitoring.")
+        window.focusOverlayDisplayRecoveryFailure("Saved overlay display cleared; choose an available display to restore monitoring.", overlayDisplay)
     }
     function persistOverlayDisplaySelection(index, name) {
         if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
             window.overlayPreferredScreenIndex = -1
             window.overlayPreferredDisplayName = ""
-            overlayDisplay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selection could not be persisted; choose an available display before restoring monitoring.", overlayDisplay)
             return false
         }
         if (!window.overlayBridge.moveToScreen(index)) {
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selection could not be applied; control-window fallback remains active.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selection could not be applied; control-window fallback remains active.", overlayDisplay)
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selected, but persisted visual state could not be reapplied.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selected, but persisted visual state could not be reapplied.", overlayDisplay)
             return false
         }
         if (!window.syncOverlaySettingsStateFromBridge()) {
-            window.overlayDisplayRecoveryPending = true
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selected, but settings synchronization failed; choose or reconnect a display.", overlayDisplay)
+            return false
+        }
+        if (!window.restoreOverlayVisualStateFromBridge()) {
+            window.markOverlayRecoveryStale("Overlay display selected, but persisted visual state could not be reapplied.")
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selected, but settings synchronization failed; choose or reconnect a display.")
             window.show()
             window.raise()
             window.requestActivate()
             overlayDisplay.forceActiveFocus()
             return false
         }
-        if (!window.restoreOverlayVisualStateFromBridge()) {
-            window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("Overlay display selected, but persisted visual state could not be reapplied.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            return false
-        }
+        window.syncOverlaySettingsStateFromBridge()
+        window.syncOverlaySettingsStateFromBridge()
         window.overlayPreferredScreenIndex = index
         window.overlayPreferredDisplayName = name
         window.overlaySettingsRevision += 1
@@ -1510,7 +1859,7 @@ ApplicationWindow {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplaySelectionRequired = false
         window.overlayDisplayRecoveryPending = false
-        window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.")
+        window.focusOverlayRestoredState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.", overlaySettingsRetentionReviewAction)
         return true
     }
     function hideOverlayAndRestoreControls() {
@@ -1523,26 +1872,31 @@ ApplicationWindow {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
         }
-        window.announceCaptureRecoveryState(hidden
+        const message = hidden
             ? (window.overlayBridge ? "DJ overlay hidden; output monitoring remains available in the control window." : "DJ overlay bridge unavailable; control window restored as the fallback.")
-            : "DJ overlay could not be hidden; control-window fallback remains active.")
+            : "DJ overlay could not be hidden; control-window fallback remains active."
+        window.focusOverlayHiddenState(message, hidden ? restoreOverlay : hideOverlay)
+    }
+    function focusOverlayRecoveryPauseState(message, target) {
+        navigation.currentIndex = 1
         window.show()
         window.raise()
         window.requestActivate()
-        hideOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Live evidence is current."))
+        if (target)
+            target.forceActiveFocus()
+        return target !== null && target !== undefined
     }
     function resetOverlayRecoveryAttempts() {
         window.overlayRecoveryAttemptCount = 0
         window.overlayRecoveryPausedByUser = false
-        navigation.currentIndex = 1
-        window.announceCaptureRecoveryState("DJ overlay safe mode cleared; retry is available when a display is ready.")
-        retryOverlay.forceActiveFocus()
+        window.focusOverlayRecoveryPauseState("DJ overlay safe mode cleared; retry is available when a display is ready.", retryOverlay)
     }
     function stopOverlayRecoveryAttempts() {
         window.overlayRecoveryAttemptCount = 0
         window.overlayRecoveryPausedByUser = true
-        window.announceCaptureRecoveryState("DJ overlay recovery paused; monitoring continues and retry can be started again from this page.")
-        resumeOverlayRecovery.forceActiveFocus()
+        window.overlayCaptureEvidenceStale = true
+        window.focusOverlayRecoveryPauseState("DJ overlay recovery paused; monitoring continues and retry can be started again from this page.", resumeOverlayRecovery)
     }
     function quitApplication() {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
@@ -1552,6 +1906,14 @@ ApplicationWindow {
             window.overlayBridge.hideOverlay()
         window.announceCaptureRecoveryState("Beatglass is quitting; overlay hidden and persisted settings retained.")
         Qt.quit()
+    }
+    function focusOverlayPulseStatus() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        overlayPulseStatus.forceActiveFocus()
+        window.announceCaptureRecoveryState("Overlay beat pulse status focused. " + window.overlayPulseAnnouncement)
     }
     property var libraryCatalogBridge: typeof libraryCatalog !== "undefined" ? libraryCatalog : null
     onBrowseFolderChanged: refreshCatalog()
@@ -1574,19 +1936,27 @@ ApplicationWindow {
             id: overlaySurface
             anchors.fill: parent; radius: 12
             color: window.themeBackgrounds[window.selectedThemeIndex]
-            border.color: window.themeAccentColors[window.selectedThemeIndex]
+            property color pulseColor: (window.selectedTheme === "Light" || window.selectedTheme === "Yellow")
+                ? Qt.darker(window.themeBackgrounds[window.selectedThemeIndex], 1.35)
+                : Qt.lighter(window.themeBackgrounds[window.selectedThemeIndex], 1.35)
+            border.color: pulseOpacity > 0 ? pulseColor : window.themeAccentColors[window.selectedThemeIndex]
             property real pulseOpacity: 0.0
+            Accessible.name: "Overlay beat pulse"
+            Accessible.role: Accessible.Status
+            Accessible.value: pulseOpacity > 0 ? "active" : "idle"
+            Accessible.description: "Beat-synchronized visual metronome; " + (window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0 ? "tracking at " + window.liveBridge.tempo + " BPM" : "waiting for valid live BPM") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "; reduced motion disables pulsing" : ".")
             border.width: 1 + pulseOpacity * 3
+            Behavior on pulseOpacity { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
             Behavior on border.width { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 100 } }
             Timer {
                 id: beatPulse
                 objectName: "beatPulse"
                 repeat: true
                 interval: { var bpm = Number(window.liveBridge.tempo); return isFinite(bpm) && bpm > 0 ? Math.max(120, 60000 / bpm) : 1000 }
-                running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && window.liveBridge.status === "Tracking"
+                running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && !window.overlayCaptureEvidenceStale && window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" && window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0
                 onTriggered: { overlaySurface.pulseOpacity = 1.0; pulseFade.restart() }
             }
-            Timer { id: pulseFade; interval: 120; onTriggered: overlaySurface.pulseOpacity = 0.0 }
+            Timer { id: pulseFade; interval: Math.min(180, Math.max(80, beatPulse.interval * 0.2)); onTriggered: overlaySurface.pulseOpacity = 0.0 }
             Connections {
                 target: window.themePreferencesBridge
                 function onReduceMotionChanged() {
@@ -1594,9 +1964,11 @@ ApplicationWindow {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse disabled because reduced motion is enabled."
                         window.themePreferenceAnnouncement = "Reduced motion enabled for " + window.selectedTheme + "; overlay beat pulse disabled."
-                    } else if (djOverlay.visible && window.liveBridge.status === "Tracking") {
+                    } else if (djOverlay.visible && window.liveBridge.status === "Tracking" && !window.overlayCaptureEvidenceStale && window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0) {
                         beatPulse.restart()
+                        window.overlayPulseAnnouncement = "Beat pulse restored for fresh Monitoring capture."
                         window.themePreferenceAnnouncement = "Reduced motion disabled for " + window.selectedTheme + "; overlay beat pulse restored."
                     }
                 }
@@ -1604,8 +1976,57 @@ ApplicationWindow {
             Connections {
                 target: window.liveBridge
                 function onChanged() {
-                    if (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion)
+                    const bpm = Number(window.liveBridge.tempo)
+                    const tracking = window.liveBridge.status === "Tracking" && !window.overlayCaptureEvidenceStale && window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" && isFinite(bpm) && bpm > 0
+                    if (tracking && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion))
                         beatPulse.restart()
+                    else {
+                        beatPulse.stop()
+                        pulseFade.stop()
+                        overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse paused until fresh Monitoring capture and valid BPM are available."
+                    }
+                }
+            }
+            Connections {
+                target: window.captureMonitorBridge
+                function onChanged() {
+                    const bpm = Number(window.liveBridge.tempo)
+                    const tracking = window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" && window.liveBridge.status === "Tracking" && !window.overlayCaptureEvidenceStale && isFinite(bpm) && bpm > 0
+                    if (tracking && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion))
+                        beatPulse.restart()
+                    else {
+                        beatPulse.stop()
+                        pulseFade.stop()
+                        overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse paused while capture monitoring is unavailable or reacquiring."
+                    }
+                }
+            }
+            Connections {
+                target: djOverlay
+                function onVisibleChanged() {
+                    if (!djOverlay.visible) {
+                        beatPulse.stop()
+                        pulseFade.stop()
+                        overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse cleared while the overlay is hidden."
+                    } else if (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion) {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse remains disabled because reduced motion is enabled."
+                    } else if (window.overlayCaptureEvidenceStale || !window.captureMonitorBridge || window.captureMonitorBridge.status !== "Monitoring") {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse is waiting for fresh Monitoring capture."
+                    } else if (window.liveBridge.status !== "Tracking" || !isFinite(Number(window.liveBridge.tempo)) || Number(window.liveBridge.tempo) <= 0) {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse is waiting for valid live BPM."
+                    } else {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse is ready for fresh live evidence."
+                    }
+                }
+            }
+            Connections {
+                target: overlayPulseStatus
+                function onActiveFocusChanged() {
+                    if (overlayPulseStatus.activeFocus)
+                        window.overlayPulseAnnouncement = "Beat pulse status focused; " + (beatPulse.running ? "pulse is active." : "pulse is idle.")
                 }
             }
             MouseArea {
@@ -1628,11 +2049,14 @@ ApplicationWindow {
             ColumnLayout {
                 objectName: "overlayLiveEvidenceGroup"
                 anchors.fill: parent; anchors.margins: 14; spacing: 4
-                Accessible.name: "Overlay live evidence"
+                Accessible.name: "Overlay live evidence; Ctrl+Alt+Shift+B focuses beat pulse status"
                 Accessible.value: (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable")
                     + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "")
+                    + "; beat pulse " + (beatPulse.running ? "active" : "idle")
+                    + "; combined output may be ambiguous"
+                    + "; Ctrl+Alt+Shift+B focuses beat pulse status"
                 Accessible.role: Accessible.Grouping
-                Accessible.description: "Current live status, tempo, harmony, capture state, and recovery action for the DJ overlay." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
+                Accessible.description: "Capture-only DJ overlay: current live status, tempo, harmony, beat-pulse period, capture state, and recovery action. Live tempo, key, and chord estimates are provisional evidence, not calibrated certainty. Track and deck metadata are unavailable without an explicitly configured DJ-app integration. The selected output may also include system notifications and other routed audio; selecting one endpoint does not capture every device or bypassed audio path. Combined output may contain overlapping decks, so tempo, key, and chord evidence can be ambiguous. Ctrl+Alt+Shift+B focuses the beat pulse status." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
                 ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true
@@ -1643,6 +2067,8 @@ ApplicationWindow {
                         onClicked: window.hideOverlayAndRestoreControls()
                     }
                 }
+                Label { text: "Live evidence stale until fresh capture arrives"; objectName: "overlayStaleEvidenceBanner"; visible: window.overlayCaptureEvidenceStale; color: window.themeForegrounds[window.selectedThemeIndex]; font.bold: true; Accessible.name: "Live evidence stale"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: "Previously displayed tempo, key, and chord values are stale until fresh capture arrives."; ToolTip.text: "Previously displayed live estimates are stale until fresh capture arrives"; Layout.fillWidth: true }
+                Label { text: "Capture-only · " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable") + " · combined output; track/deck metadata unavailable"; objectName: "overlayCaptureScope"; color: window.themeForegrounds[window.selectedThemeIndex]; wrapMode: Text.WordWrap; Accessible.name: "Capture-only overlay scope"; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : ""); Accessible.role: Accessible.Status; Accessible.description: "This overlay analyzes the selected output mix; capture lifecycle is " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable") + ". It does not provide track or deck metadata without an explicitly configured DJ-app integration."; ToolTip.text: "The overlay analyzes selected output audio; current capture state: " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable"); Layout.fillWidth: true }
                 Label {
                     objectName: "overlayEscapeHint"
                     visible: window.overlayBridge && window.overlayBridge.clickThrough
@@ -1655,17 +2081,18 @@ ApplicationWindow {
                     Accessible.description: text
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live tempo estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
+                    Label { text: "Beat pulse " + (beatPulse.running ? "active · " + beatPulse.interval + " ms · " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") : (window.overlayCaptureEvidenceStale ? "idle · stale" : "idle") + " · " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "capture unavailable") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? " · reduced" : "")); objectName: "overlayPulseStatus"; color: window.themeForegrounds[window.selectedThemeIndex]; activeFocusOnTab: true; padding: 3; background: Rectangle { color: "transparent"; border.width: overlayPulseStatus.activeFocus ? 2 : 0; border.color: window.themeAccentColors[window.selectedThemeIndex]; radius: 3 } Accessible.name: "Overlay beat pulse status"; Accessible.value: text + "; capture " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "; reduced motion" : "") + (window.overlayCaptureEvidenceStale ? "; evidence stale" : "") + "; announcement: " + window.overlayPulseAnnouncement; Accessible.role: Accessible.Status; Accessible.focusable: true; Accessible.description: "Beat-synchronized visual metronome status; " + window.overlayPulseAnnouncement + " " + (beatPulse.running ? "Active for valid live BPM with a " + beatPulse.interval + " millisecond period and " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") + " contrast" : "Idle until a Monitoring capture bridge, valid live BPM, and full motion are available") + ". Keyboard shortcut Ctrl+Alt+Shift+B focuses this status."; ToolTip.text: "Beat-synchronized visual pulse status; Ctrl+Alt+Shift+B focuses this status" }
                 Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live key and chord estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                 Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "Previously displayed evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current output capture status; " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                 Button {
                     objectName: "overlayRetryCapture"
                     visible: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" && window.captureMonitorBridge.start
                     text: "Retry capture"
-                    ToolTip.text: "Retry monitoring the selected output source; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
+                    ToolTip.text: "Retry monitoring the selected output source; " + (window.overlayCaptureEvidenceStale ? "previous evidence is stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.name: "Retry overlay capture"
-                    Accessible.value: window.overlayDisplayRecoveryPending ? "available; overlay recovery pending" : "available; overlay ready"
+                    Accessible.value: window.overlayCaptureEvidenceStale ? "available; previous evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "available; overlay recovery pending" : "available; overlay ready"
                     Accessible.role: Accessible.Button
-                    Accessible.description: "Retry monitoring the selected output source; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
+                    Accessible.description: "Retry monitoring the selected output source; " + (window.overlayCaptureEvidenceStale ? "previous evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                     onClicked: window.captureMonitorBridge.start()
                 }
             }
@@ -1921,7 +2348,9 @@ ApplicationWindow {
                     || window.liveBridge.status === "Starting"
                     || window.liveBridge.status === "Reacquiring")
                 window.clearVisualizationForCaptureState()
-            if (window.liveBridge.status === "Starting")
+            if (window.liveBridge.status === "Stopped")
+                window.announceVisualizationRecovery("Output monitoring stopped; start monitoring from the DJ controls when an output endpoint is available.")
+            else if (window.liveBridge.status === "Starting")
                 window.announceVisualizationRecovery("Output monitoring is starting; waiting for the first accepted visualization snapshot.")
             else if (window.liveBridge.status === "Reacquiring")
                 window.announceVisualizationRecovery("Output monitoring is reacquiring; previous visualization selection was cleared.")
@@ -1958,36 +2387,35 @@ ApplicationWindow {
     }
     Connections {
         target: window.endpointSelectionBridge
-        function onChanged() {
-            window.clearVisualizationForCaptureState("Selection cleared because the capture endpoint changed.")
-            if (window.endpointSelectionBridge.status.indexOf("Error") >= 0)
-                window.announceVisualizationRecovery("Capture endpoint retry failed; check permission and reacquire a device.")
-            else if (window.endpointSelectionBridge.endpoints.length === 0)
-                window.announceVisualizationRecovery("No capture endpoint is available; connect a device and refresh.")
-            else
-                window.announceVisualizationRecovery("Capture endpoint changed; waiting for a fresh accepted snapshot.")
-            endpointSelector.forceActiveFocus()
-        }
+        function onChanged() { window.handleOverlayEndpointChanged() }
+    }
+    function handleOverlayEndpointChanged() {
+        window.overlayCaptureEvidenceStale = true
+        window.overlayDisplayRecoveryPending = true
+        window.clearVisualizationForCaptureState("Selection cleared because the capture endpoint changed.")
+        if (window.endpointSelectionBridge.status.indexOf("Error") >= 0)
+            window.announceVisualizationRecovery("Capture endpoint retry failed; check permission and reacquire a device. Overlay evidence is stale until fresh capture arrives.")
+        else if (window.endpointSelectionBridge.endpoints.length === 0)
+            window.announceVisualizationRecovery("No capture endpoint is available; connect a device and refresh. Overlay evidence is stale until fresh capture arrives.")
+        else
+            window.announceVisualizationRecovery("Capture endpoint changed; waiting for a fresh accepted snapshot. Overlay evidence is stale until fresh capture arrives.")
+        endpointSelector.forceActiveFocus()
     }
     Connections {
         target: window.captureMonitorBridge
-        function onChanged() {
-            if (window.captureMonitorBridge.status === "Error") {
-                window.overlayCaptureEvidenceStale = true
-                window.announceCaptureRecoveryState("No output device or permission; retry monitoring to acquire a fresh snapshot.")
-                overlayCaptureRecoveryAction.forceActiveFocus()
-            } else if (window.captureMonitorBridge.status === "Reacquiring") {
-                window.overlayCaptureEvidenceStale = true
-                window.announceCaptureRecoveryState("Output device reacquiring; visualization focus restored when fresh audio arrives.")
-                overlayLiveMonitoringState.forceActiveFocus()
-            } else if (window.captureMonitorBridge.status === "Monitoring") {
-                const recovered = window.overlayCaptureEvidenceStale
-                window.overlayCaptureEvidenceStale = false
-                if (recovered) {
-                    window.announceCaptureRecoveryState("Overlay capture recovered; fresh accepted snapshot is available.")
-                    overlayLiveMonitoringState.forceActiveFocus()
-                }
-            }
+        function onChanged() { window.handleCaptureMonitorStatusChanged() }
+    }
+    function handleCaptureMonitorStatusChanged() {
+        if (!window.captureMonitorBridge)
+            return
+        if (window.captureMonitorBridge.status === "Error") {
+            window.transitionCaptureEvidence(true, "No output device or permission; retry monitoring to acquire a fresh snapshot.", overlayCaptureRecoveryAction)
+        } else if (window.captureMonitorBridge.status === "Reacquiring") {
+            window.transitionCaptureEvidence(true, "Output device reacquiring; visualization focus restored when fresh audio arrives.", overlayLiveMonitoringState)
+        } else if (window.captureMonitorBridge.status === "Stopped") {
+            window.transitionCaptureEvidence(true, "Output monitoring stopped; previously displayed live evidence is stale until monitoring resumes.", overlayLiveMonitoringState)
+        } else if (window.captureMonitorBridge.status === "Monitoring" && window.overlayCaptureEvidenceStale) {
+            window.transitionCaptureEvidence(false, "Overlay capture recovered; fresh accepted snapshot is available.", overlayLiveMonitoringState)
         }
     }
     Connections {
@@ -1995,48 +2423,35 @@ ApplicationWindow {
         function onAvailableChanged() {
             if (window.overlayBridge && !window.overlayBridge.available) {
                 window.overlayDisplayRecoveryPending = true
+                window.overlayCaptureEvidenceStale = true
                 clickThroughToggle.checked = false
-                window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
-                window.show()
-                window.raise()
-                window.requestActivate()
-                retryOverlay.forceActiveFocus()
+                window.focusOverlayAvailabilityRecovery("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.", retryOverlay)
             } else if (window.overlayBridge) {
                 window.overlayRecoveryAttemptCount = 0
                 window.overlayRecoveryPausedByUser = false
                 clickThroughToggle.checked = window.overlayBridge.clickThrough
                 window.syncOverlaySettingsStateFromBridge()
                 if (window.overlayBridge.screenNames.length === 0) {
-                    window.overlayDisplayRecoveryPending = true
-                    window.overlayDisplaySelectionRequired = true
-                    window.announceCaptureRecoveryState("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.")
-                    overlayDisplay.forceActiveFocus()
+                    window.focusOverlayNoDisplayRecovery()
                 } else if (window.overlayDisplaySelectionRequired) {
-                    window.announceCaptureRecoveryState("DJ overlay recovered; choose a display to re-enable overlay actions.")
-                    overlayDisplay.forceActiveFocus()
+                    window.focusOverlayAvailabilityRecovery("DJ overlay recovered; choose a display to re-enable overlay actions.", overlayDisplay)
                 } else {
                     window.overlayDisplayRecoveryPending = false
-                    window.announceCaptureRecoveryState("DJ overlay recovered; Show, Restore, and Reapply actions are available.")
-                    window.show()
-                    window.raise()
-                    window.requestActivate()
-                    overlaySettingsRetentionReviewAction.forceActiveFocus()
+                    window.focusOverlayRestoredState("DJ overlay recovered; Show, Restore, and Reapply actions are available.", overlaySettingsRetentionReviewAction)
                 }
             }
         }
+    function focusOverlayNoDisplayRecovery() {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        return window.focusOverlayAvailabilityRecovery("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.", overlayDisplay)
+    }
         function onScreensChanged() {
             if (window.overlayBridge && window.overlayBridge.displayName !== "")
                 window.overlayPreferredDisplayName = window.overlayBridge.displayName
             if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
-                {
-                    window.overlayDisplayRecoveryPending = true
-                    window.overlayDisplaySelectionRequired = true
-                    window.show()
-                    window.raise()
-                    window.requestActivate()
-                    window.announceCaptureRecoveryState("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.")
-                    overlayDisplay.forceActiveFocus()
-                }
+                window.focusOverlayDisplayLoss()
             else {
                 const savedNameIndex = window.overlayPreferredDisplayName !== ""
                     ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName) : -1
@@ -2049,57 +2464,106 @@ ApplicationWindow {
                         window.recoverOverlayAfterDisplayChange()
                     else {
                         window.overlayDisplayRecoveryPending = false
-                        window.show()
-                        window.raise()
-                        window.requestActivate()
-                        window.announceCaptureRecoveryState("DJ overlay display restored; recovery remains paused until Resume recovery is chosen.")
+                        window.focusOverlayAvailabilityRecovery("DJ overlay display restored; recovery remains paused until Resume recovery is chosen.", resumeOverlayRecovery)
                     }
-                    if (window.overlayRecoveryPausedByUser)
-                        resumeOverlayRecovery.forceActiveFocus()
-                    else
+                    if (!window.overlayRecoveryPausedByUser)
                         retryOverlay.forceActiveFocus()
                 } else {
-                    window.overlayDisplaySelectionRequired = true
-                    window.overlayDisplayRecoveryPending = true
-                    window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.")
-                    overlayDisplay.forceActiveFocus()
+                    window.focusOverlayDisplaySelectionRequired()
                 }
             }
         }
         function onClickThroughChanged() {
-            window.overlaySettingsRevision += 1
-            if (window.overlayBridge && window.overlayBridge.clickThrough)
-                window.announceCaptureRecoveryState("DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.")
-            else
-                window.announceCaptureRecoveryState("DJ overlay interaction restored; keyboard and pointer input are available.")
+            window.handleOverlayInteractionStateChanged()
         }
         function onOpacityChanged() {
-            if (window.overlayBridge && window.overlayOpacityEditInFlight
-                    && Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) {
-                window.overlayOpacityEditInFlight = false
-                window.overlayPendingOpacity = -1
-            } else if (window.overlayBridge && !window.overlayOpacityEditInFlight)
-                window.overlaySettingsRevision += 1
-            if (window.overlayBridge)
-                window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
+            window.handleOverlayOpacityChanged()
         }
         function onGeometryChanged() {
-            window.syncOverlaySettingsStateFromBridge()
+            if (!window.syncOverlaySettingsStateFromBridge())
+                window.focusOverlayGeometrySyncFailure()
             if (window.overlayDisplayRecoveryPending && window.overlayBridge
                     && window.overlayBridge.screenNames.length > 0
                     && !window.overlayDisplaySelectionRequired) {
-                if (!window.overlayRecoveryPausedByUser)
-                    window.recoverOverlayAfterDisplayChange()
-                else
-                    window.announceCaptureRecoveryState("DJ overlay geometry restored; recovery remains paused until Resume recovery is chosen.")
-                if (window.overlayRecoveryPausedByUser)
-                    resumeOverlayRecovery.forceActiveFocus()
-                else
-                    retryOverlay.forceActiveFocus()
+                window.handleOverlayGeometryRecovery()
             }
-            if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
-                window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
+            window.announceOverlayGeometryState()
         }
+    }
+    function handleOverlayInteractionStateChanged() {
+        window.overlaySettingsRevision += 1
+        if (!window.overlayBridge)
+            return
+        window.overlayCaptureEvidenceStale = true
+        window.announceCaptureRecoveryState(window.overlayBridge.clickThrough
+            ? "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction. Live evidence is stale until fresh capture arrives."
+            : "DJ overlay interaction restored; keyboard and pointer input are available. Live evidence remains stale until fresh capture arrives.")
+        if (window.overlayBridge.clickThrough)
+            unlockOverlay.forceActiveFocus()
+        else
+            overlayInteractionMode.forceActiveFocus()
+    }
+    function handleOverlayOpacityChanged() {
+        if (!window.overlayBridge)
+            return
+        if (window.overlayOpacityEditInFlight
+                && Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) {
+            window.overlayOpacityEditInFlight = false
+            window.overlayPendingOpacity = -1
+        } else if (!window.overlayOpacityEditInFlight) {
+            window.overlaySettingsRevision += 1
+            overlayOpacityControl.forceActiveFocus()
+        }
+        window.overlayCaptureEvidenceStale = true
+        window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlaySizeChangeResult(resized, nextIndex) {
+        if (resized) {
+            window.overlayPreferredSizeIndex = nextIndex
+            window.overlaySettingsRevision += 1
+            window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
+        } else {
+            window.overlayCaptureEvidenceStale = true
+            window.syncOverlaySettingsStateFromBridge()
+            window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active. Live evidence remains stale until fresh capture arrives.")
+        }
+        overlaySize.forceActiveFocus()
+    }
+    function handleOverlayGeometryRecovery() {
+        window.overlayCaptureEvidenceStale = true
+        if (!window.overlayRecoveryPausedByUser)
+            window.recoverOverlayAfterDisplayChange()
+        else
+            window.announceCaptureRecoveryState("DJ overlay geometry restored; recovery remains paused until Resume recovery is chosen. Live evidence remains stale until fresh capture arrives.")
+        if (window.overlayRecoveryPausedByUser)
+            resumeOverlayRecovery.forceActiveFocus()
+        else
+            retryOverlay.forceActiveFocus()
+    }
+    function focusOverlayDisplayLoss() {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        return window.focusOverlayAvailabilityRecovery("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.", overlayDisplay)
+    }
+    function announceOverlayGeometryState() {
+        if (!window.overlayBridge || !window.overlayBridge.geometry || window.overlayBridge.geometry.width <= 0)
+            return false
+        window.overlayCaptureEvidenceStale = true
+        window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels. Live evidence remains stale until fresh capture arrives.")
+        return true
+    }
+    function focusOverlayGeometrySyncFailure() {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        return window.focusOverlayAvailabilityRecovery("Overlay geometry changed, but retained settings could not be synchronized; choose a display before retrying.", overlayDisplay)
+    }
+    function focusOverlayDisplaySelectionRequired() {
+        window.overlayDisplaySelectionRequired = true
+        window.overlayDisplayRecoveryPending = true
+        window.overlayCaptureEvidenceStale = true
+        return window.focusOverlayAvailabilityRecovery("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.", overlayDisplay)
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
@@ -2152,9 +2616,7 @@ ApplicationWindow {
                 Accessible.description: "Choose one of six color themes for the Beatglass desktop; current theme " + currentText
                 ToolTip.text: "Choose a color theme; current theme: " + currentText
                 onActivated: {
-                    window.selectedThemeIndex = currentIndex
-                    window.selectedTheme = currentText
-                    if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = currentIndex
+                    window.selectThemeIndex(currentIndex)
                 }
             }
             Switch {
@@ -2168,7 +2630,7 @@ ApplicationWindow {
                 Accessible.role: Accessible.CheckBox
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
                 ToolTip.text: checked ? "Reduced motion is enabled; disable to restore transitions" : "Enable reduced motion to minimize animation and transitions"
-                onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
+                onClicked: window.setReduceMotionPreference(checked)
             }
             Label {
                 objectName: "themePreferenceAnnouncement"
@@ -2192,11 +2654,8 @@ ApplicationWindow {
                 Accessible.description: "Restore the default Light theme and turn off reduced motion. Current settings: " + window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion") + "."
                 ToolTip.text: "Reset " + window.selectedTheme + " and " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full") + " motion to defaults"
                 onClicked: {
-                    if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
-                    window.selectedThemeIndex = 0
-                    window.selectedTheme = window.themeNames[0]
+                    window.resetAppearancePreferences()
                     themeSelector.currentIndex = 0
-                    window.themePreferenceAnnouncement = "Appearance reset to Light theme with full motion."
                     resetAppearance.forceActiveFocus()
                 }
             }
@@ -2279,36 +2738,28 @@ ApplicationWindow {
                         }
                         Keys.onLeftPressed: {
                             const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length
-                            window.selectedThemeIndex = nextIndex
-                            window.selectedTheme = window.themeNames[nextIndex]
+                            window.selectThemeIndex(nextIndex)
                             themeSelector.currentIndex = nextIndex
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
                             themePreviews.children[nextIndex].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onRightPressed: {
                             const nextIndex = (index + 1) % window.themeNames.length
-                            window.selectedThemeIndex = nextIndex
-                            window.selectedTheme = window.themeNames[nextIndex]
+                            window.selectThemeIndex(nextIndex)
                             themeSelector.currentIndex = nextIndex
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
                             themePreviews.children[nextIndex].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onHomePressed: {
-                            window.selectedThemeIndex = 0
-                            window.selectedTheme = window.themeNames[0]
+                            window.selectThemeIndex(0)
                             themeSelector.currentIndex = 0
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = 0
                             themePreviews.children[0].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onEndPressed: {
                             const lastIndex = window.themeNames.length - 1
-                            window.selectedThemeIndex = lastIndex
-                            window.selectedTheme = window.themeNames[lastIndex]
+                            window.selectThemeIndex(lastIndex)
                             themeSelector.currentIndex = lastIndex
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = lastIndex
                             themePreviews.children[lastIndex].forceActiveFocus()
                             event.accepted = true
                         }
@@ -2317,10 +2768,8 @@ ApplicationWindow {
                             event.accepted = true
                         }
                         onClicked: {
-                            window.selectedThemeIndex = index
-                            window.selectedTheme = window.themeNames[index]
+                            window.selectThemeIndex(index)
                             themeSelector.currentIndex = index
-                                if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = index
                         }
                     }
                 }
@@ -3444,7 +3893,7 @@ ApplicationWindow {
                                 standardButtons: Dialog.Ok | Dialog.Cancel
                                 Accessible.role: Accessible.Dialog
                                 Accessible.name: "Discard saved analysis run confirmation"
-                                Accessible.description: "Confirm to remove only the selected retry record. Cancel is focused first; press Tab to reach the destructive OK action. The source audio file is never changed. Cancel returns focus to the discard control."
+                                Accessible.description: "Confirm to remove only the selected retry record. Cancel is focused first; press Tab to reach the destructive OK action, Enter confirms, and Escape cancels. The source audio file is never changed. Cancel returns focus to the discard control."
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
                                 contentItem: Label {
                                     text: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
@@ -3718,10 +4167,10 @@ ApplicationWindow {
                         requestPaint()
                         event.accepted = true
                     }
-                    Keys.onHomePressed: { selectedPosition = 0; requestPaint(); event.accepted = true }
-                    Keys.onEndPressed: { selectedPosition = 1; requestPaint(); event.accepted = true }
-                    Keys.onPageUpPressed: { selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint(); event.accepted = true }
-                    Keys.onPageDownPressed: { selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint(); event.accepted = true }
+                    Keys.onHomePressed: { if (viewMode === "spectrum") selectedSpectrumBin = 0; else selectedPosition = 0; requestPaint(); event.accepted = true }
+                    Keys.onEndPressed: { if (viewMode === "spectrum") selectedSpectrumBin = Math.max(0, renderedSpectrum.length - 1); else selectedPosition = 1; requestPaint(); event.accepted = true }
+                    Keys.onPageUpPressed: { if (viewMode === "spectrum") selectedSpectrumBin = Math.max(0, (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) - 10); else selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint(); event.accepted = true }
+                    Keys.onPageDownPressed: { if (viewMode === "spectrum") selectedSpectrumBin = Math.min(Math.max(0, renderedSpectrum.length - 1), (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) + 10); else selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1); requestPaint(); event.accepted = true }
                     Keys.onReturnPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onEnterPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
@@ -3905,16 +4354,17 @@ ApplicationWindow {
                 Button {
                     objectName: "visualizationClearSelection"
                     enabled: visualizationCanvas.selectedPosition >= 0
-                    text: enabled ? "Clear selection" : "No selection"
+                    text: enabled ? (window.compactHeader ? "Clear" : "Clear selection") : "No selection"
                     Accessible.name: "Clear visualization selection, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.value: enabled ? "available" : "unavailable"
                     Accessible.role: Accessible.Button
                     Accessible.description: enabled
                         ? "Clear the selected waveform or FFT position; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                         : "There is no selected waveform or FFT position to clear; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
-                    ToolTip.text: (enabled ? "Clear the selected visualization position" : "No visualization position is selected") + "; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
+                    ToolTip.text: (enabled ? "Clear the selected visualization position" : "No visualization position is selected") + "; capture: " + window.liveBridge.status + "; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     contentItem: Text { text: parent.text; color: window.themeBackgrounds[window.selectedThemeIndex]; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; opacity: parent.enabled ? 1 : 0.65 }
                     background: Rectangle { color: window.themeForegrounds[window.selectedThemeIndex]; radius: 5; opacity: parent.enabled ? 1 : 0.35 }
+                    Layout.preferredWidth: window.compactHeader ? 120 : 180
                     onClicked: window.clearVisualizationPositionAndFocus()
                 }
                 Label {
@@ -3954,7 +4404,7 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignTop
                     spacing: window.compactHeader ? 4 : 8
                     Accessible.name: "Visualization data and capture status, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
-                    Accessible.value: (window.liveBridge.status === "Error" ? "capture error" : (window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring" ? window.liveBridge.status.toLowerCase() : (visualizationCanvas.modeHasData ? "ready" : "waiting"))) + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
+                    Accessible.value: (window.liveBridge.status === "Error" ? "capture error" : (window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring" ? window.liveBridge.status.toLowerCase() : (visualizationCanvas.modeHasData ? "ready" : "waiting"))) + "; selection " + (visualizationCanvas.selectedPosition >= 0 ? "clear available" : "clear unavailable") + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Current waveform or FFT availability, generation, and capture state; " + (window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                     ToolTip.text: "Visualization data, generation, and capture status: " + (window.liveBridge.status === "Error" ? "capture error" : (visualizationCanvas.modeHasData ? "ready" : "waiting")) + "; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
@@ -4402,31 +4852,31 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     Accessible.name: "Overlay actions"
                     Accessible.value: window.overlayBridge && window.overlayBridge.available
-                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings retained; revision " + window.overlaySettingsRevision
-                        : "unavailable; control-window fallback active; settings retained"
+                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings retained; revision " + window.overlaySettingsRevision + "; Ctrl+Alt+Shift+B focuses beat pulse status"
+                        : "unavailable; control-window fallback active; settings retained; Ctrl+Alt+Shift+B focuses beat pulse status"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: window.overlayLaunchFallbackActive
-                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained."
+                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained. Ctrl+Alt+Shift+B focuses beat pulse status."
                         : window.overlayDisplayRecoveryPending
-                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending, the control-window fallback remains available, and persisted settings are retained."
-                        : "Show, unlock, or hide the DJ overlay window."
+                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending, the control-window fallback remains available, and persisted settings are retained. Ctrl+Alt+Shift+B focuses beat pulse status."
+                        : "Show, unlock, or hide the DJ overlay window. Ctrl+Alt+Shift+B focuses beat pulse status."
                     ToolTip.text: window.overlayBridge && window.overlayBridge.available
-                        ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available"))
-                        : "Overlay window actions are unavailable; control-window fallback is active; overlay settings are retained"
-                    Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Show the DJ overlay window" : (window.overlayDisplaySelectionRequired ? "Choose an available display before showing the overlay" : "Native overlay unavailable; keep using the control-window fallback"); ToolTip.text: enabled ? "Show the DJ overlay and hide the control window" : (window.overlayDisplaySelectionRequired ? "Choose a display before showing the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.announceCaptureRecoveryState("DJ overlay launch requested on the selected display; restoring persisted settings."); window.showOverlayAndHideControls() } }
-                    Button { text: window.overlayHiddenByUser ? "Restore hidden overlay" : "Restore overlay"; objectName: "restoreOverlay"; Accessible.name: "Restore DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "hidden by user" : (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available")) : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user using its persisted display, position, size, and opacity." : "Restore the DJ overlay using its persisted display, position, size, and opacity") : (window.overlayDisplaySelectionRequired ? "Choose an available display before restoring the overlay" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user with persisted settings" : "Restore the overlay with persisted settings") : (window.overlayDisplaySelectionRequired ? "Choose a display before restoring the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.announceCaptureRecoveryState("DJ overlay restore requested; reapplying persisted display, geometry, and opacity."); window.showOverlayAndHideControls() } }
-                    Button { text: "Reapply saved settings"; objectName: "reapplyOverlaySettings"; Accessible.name: "Reapply saved overlay settings"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Reapply the saved display, position, size, and opacity before restoring the DJ overlay" : (window.overlayDisplaySelectionRequired ? "Choose an available display before reapplying saved settings" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? "Reapply saved overlay display, geometry, and opacity" : (window.overlayDisplaySelectionRequired ? "Choose a display before reapplying settings" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.reapplyOverlaySettingsAndRestore(); overlayDisplayStatus.forceActiveFocus() } }
-                    Button { id: unlockOverlay; text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : "unavailable"; Accessible.description: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode or is unavailable"; ToolTip.text: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode"; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough; onClicked: { const restored = window.unlockOverlayAndRestoreFocus(); if (restored) overlayInteractionMode.forceActiveFocus() } }
-                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "already hidden" : "available") : "unavailable"; Accessible.description: enabled ? "Hide the DJ overlay window and restore the control window" : "Native overlay unavailable; control-window fallback is active"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: { window.announceCaptureRecoveryState("DJ overlay hidden; control-window fallback restored and overlay settings retained."); window.hideOverlayAndRestoreControls(); restoreOverlay.forceActiveFocus() } }
+                        ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available")) + "; Ctrl+Alt+Shift+B focuses beat pulse status"
+                        : "Overlay window actions are unavailable; control-window fallback is active; overlay settings are retained; Ctrl+Alt+Shift+B focuses beat pulse status"
+                    Button { text: "Show overlay"; objectName: "showOverlay"; Accessible.name: "Show DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Show the DJ overlay window" : (window.overlayDisplaySelectionRequired ? "Choose an available display before showing the overlay" : "Native overlay unavailable; keep using the control-window fallback"); ToolTip.text: enabled ? "Show the DJ overlay and hide the control window" : (window.overlayDisplaySelectionRequired ? "Choose a display before showing the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: window.handleOverlayShowButtonAction() }
+                    Button { text: window.overlayHiddenByUser ? "Restore hidden overlay" : "Restore overlay"; objectName: "restoreOverlay"; Accessible.name: "Restore DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "hidden by user" : (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available")) : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user using its persisted display, position, size, and opacity." : "Restore the DJ overlay using its persisted display, position, size, and opacity") : (window.overlayDisplaySelectionRequired ? "Choose a display before restoring the overlay" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user with persisted settings" : "Restore the overlay with persisted settings") : (window.overlayDisplaySelectionRequired ? "Choose a display before restoring the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: window.handleOverlayRestoreButtonAction() }
+                    Button { text: "Reapply saved settings"; objectName: "reapplyOverlaySettings"; Accessible.name: "Reapply saved overlay settings"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Reapply the saved display, position, size, and opacity before restoring the DJ overlay" : (window.overlayDisplaySelectionRequired ? "Choose an available display before reapplying saved settings" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? "Reapply saved overlay display, geometry, and opacity" : (window.overlayDisplaySelectionRequired ? "Choose a display before reapplying settings" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: window.handleOverlayReapplyButtonAction() }
+                    Button { id: unlockOverlay; text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayCaptureEvidenceStale ? "available; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : "unavailable"; Accessible.description: enabled ? "Restore keyboard and pointer access to the overlay" + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : "") : "Overlay is not in click-through mode or is unavailable"; ToolTip.text: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode"; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough; onClicked: window.handleOverlayUnlockAction() }
+                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "already hidden" : "available") : "unavailable"; Accessible.description: enabled ? "Hide the DJ overlay window and restore the control window" : "Native overlay unavailable; control-window fallback is active"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.handleOverlayHideAction() }
                     Button { text: "Quit Beatglass"; objectName: "quitBeatglass"; Accessible.name: "Quit Beatglass"; Accessible.role: Accessible.Button; Accessible.value: "available; overlay settings retained"; Accessible.description: "Hide the DJ overlay and quit Beatglass while retaining persisted settings"; ToolTip.text: "Quit Beatglass and retain overlay settings"; onClicked: { window.announceCaptureRecoveryState("Beatglass quitting; overlay display, geometry, size, opacity, and interaction settings are retained."); window.quitApplication() } }
                 }
                 Label {
                     objectName: "overlayShortcutHelp"
-                    text: "Keyboard: Esc unlocks · Ctrl+Alt+U focuses unlock · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+J focuses hide · Ctrl+Alt+W focuses show · Ctrl+Alt+Shift+W focuses restore · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+Shift+Y focuses retry · Ctrl+Alt+O cycles size · Ctrl+Alt+Z focuses size · Ctrl+Alt+Shift+O resets opacity · Ctrl+Alt+L focuses opacity · Ctrl+Alt+Shift+R reapplies saved settings · Ctrl+Alt+Shift+P focuses reapply · Ctrl+Alt+Shift+S reviews retained settings · Ctrl+Alt+Shift+M reviews overlay summary"
+                    text: "Keyboard: Esc unlocks · Ctrl+Alt+U focuses unlock · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+J focuses hide · Ctrl+Alt+W focuses show · Ctrl+Alt+Shift+W focuses restore · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+Shift+Y focuses retry · Ctrl+Alt+O cycles size · Ctrl+Alt+Z focuses size · Ctrl+Alt+Shift+O resets opacity · Ctrl+Alt+L focuses opacity · Ctrl+Alt+Shift+R reapplies saved settings · Ctrl+Alt+Shift+P focuses reapply · Ctrl+Alt+Shift+S reviews retained settings · Ctrl+Alt+Shift+M reviews overlay summary · Ctrl+Alt+Shift+B focuses beat pulse status"
                     Accessible.name: "Overlay keyboard shortcuts"
-                    Accessible.value: text + (window.overlayBridge !== null ? "; retained-settings review shortcut available" : "; retained-settings review unavailable")
+                    Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "") + (window.overlayBridge !== null ? "; retained-settings review shortcut available" : "; retained-settings review unavailable")
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Keyboard shortcuts for unlocking, hiding, restoring, reapplying retained settings, and reviewing the overlay summary."
+                    Accessible.description: "Keyboard shortcuts for unlocking, hiding, restoring, reapplying retained settings, reviewing the overlay summary, and focusing beat pulse status." + (window.overlayCaptureEvidenceStale ? " Live evidence is stale until fresh capture arrives." : "")
                     ToolTip.text: text
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
@@ -4436,43 +4886,28 @@ ApplicationWindow {
                     objectName: "overlayRoutingControls"
                     Accessible.name: "Overlay interaction and opacity controls"
                     Accessible.value: window.overlayBridge
-                        ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity, settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending" : "")
+                        ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity, settings revision " + window.overlaySettingsRevision + (window.overlayCaptureEvidenceStale ? ", live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? ", recovery pending" : "")
                         : "unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Configure pointer click-through and overlay opacity." + (window.overlayDisplayRecoveryPending ? " Recovery is pending." : "")
+                    Accessible.description: "Configure pointer click-through and overlay opacity." + (window.overlayCaptureEvidenceStale ? " Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery is pending." : "")
                     ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
                     CheckBox {
                         id: clickThroughToggle
                         text: "Click through"; objectName: "clickThrough"
                         activeFocusOnTab: true
                         Accessible.name: checked ? "Disable click-through" : "Enable click-through"
-                        Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
+                        Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                         Accessible.role: Accessible.CheckBox
-                        Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled")
-                        ToolTip.text: "Toggle pointer click-through for the overlay"
+                        Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled") + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : "")
+                        ToolTip.text: "Toggle pointer click-through for the overlay" + (window.overlayCaptureEvidenceStale ? "; live evidence is stale until fresh capture" : "")
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
-                        onClicked: if (window.overlayBridge) {
-                            const requestedClickThrough = checked
-                            const applied = window.overlayBridge.setClickThrough(requestedClickThrough)
-                            checked = window.overlayBridge.clickThrough
-                            if (!applied || checked !== requestedClickThrough)
-                                window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again.")
-                            else {
-                                window.overlaySettingsRevision += 1
-                                window.overlayLaunchFallbackActive = false
-                                window.overlayDisplayRecoveryPending = false
-                                window.announceCaptureRecoveryState(requestedClickThrough
-                                    ? "DJ overlay click-through enabled; press Escape or use Unlock overlay to restore interaction."
-                                    : "DJ overlay interaction restored; keyboard and pointer input are available.")
-                            }
-                            overlayInteractionMode.forceActiveFocus()
-                        }
+                        onClicked: window.handleOverlayClickThroughButtonAction(checked)
                         Connections {
                             target: window.overlayBridge
                             function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
                         }
                     }
-                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text + (window.overlayDisplayRecoveryPending ? ", recovery pending" : ", ready"); Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; settings retained" : ""); Accessible.role: Accessible.StaticText; Accessible.description: text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending; overlay settings are retained." : ""); ToolTip.text: "Current overlay pointer interaction mode" }
+                    Label { objectName: "overlayInteractionMode"; text: window.overlayBridge ? (window.overlayBridge.clickThrough ? "Input mode: click-through" : "Input mode: interactive") : "Input mode unavailable"; Accessible.name: "Overlay interaction mode: " + text + (window.overlayCaptureEvidenceStale ? ", live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? ", recovery pending" : ", ready"); Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending; settings retained" : ""); Accessible.role: Accessible.StaticText; Accessible.description: text + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? ". Recovery is pending; overlay settings are retained." : ""); ToolTip.text: "Current overlay pointer interaction mode" }
                     Label {
                         objectName: "overlayKeyboardRecoveryStatus"
                         visible: window.overlayBridge !== null
@@ -4480,10 +4915,10 @@ ApplicationWindow {
                             ? (window.overlayBridge.clickThrough ? "Keyboard recovery: press Escape to unlock overlay (Ctrl+Alt+U focuses Unlock)" : "Keyboard recovery: overlay controls are interactive")
                             : "Keyboard recovery unavailable"
                         Accessible.name: "Overlay keyboard recovery status"
-                        Accessible.value: text
+                        Accessible.value: text + "; Ctrl+Alt+Shift+B focuses beat pulse status" + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayBridge.clickThrough
-                            ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window."
+                            ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window. Ctrl+Alt+Shift+B focuses beat pulse status."
                             : visible ? text + ". Click-through can be enabled or disabled from the overlay controls." : text
                         ToolTip.text: visible ? Accessible.description : "Overlay keyboard recovery"
                         Layout.fillWidth: true
@@ -4497,10 +4932,10 @@ ApplicationWindow {
                             ? "Overlay endpoint: " + window.endpointSelectionBridge.selectedEndpoint
                             : "Overlay endpoint: none selected"
                         Accessible.name: "Overlay capture endpoint status, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                        Accessible.value: text
+                        Accessible.value: text + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
-                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
+                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? " Live overlay evidence is stale until fresh capture arrives." : "")
                             : text + ". Choose an output endpoint before starting monitoring." + (window.overlayDisplayRecoveryPending ? " The last endpoint selection remains retained while recovery is pending." : "")
                         ToolTip.text: visible ? Accessible.description : "Overlay capture endpoint"
                         Layout.fillWidth: true
@@ -4512,9 +4947,9 @@ ApplicationWindow {
                         text: "Refresh overlay endpoint"
                         enabled: visible && window.endpointSelectionBridge !== null
                         Accessible.name: text
-                        Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "refresh available; recovery pending" : "refresh available; ready") : "refresh unavailable"
+                        Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "refresh available; recovery pending" : "refresh available; ready") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "") : "refresh unavailable"
                         Accessible.role: Accessible.Button
-                        Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring. " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.") : "Output endpoint refresh is unavailable."
+                        Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring. " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? " Live overlay evidence is stale until fresh capture arrives." : "") : "Output endpoint refresh is unavailable."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             window.endpointSelectionBridge.refresh()
@@ -4528,13 +4963,28 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: visible ? ("Overlay monitoring: " + window.liveBridge.status
                             + (window.liveBridge.status === "Tracking" ? " · live estimates updating" : " · waiting for accepted output")) : "Overlay monitoring unavailable"
-                        Accessible.name: "Overlay live monitoring state, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.name: "Overlay live monitoring state, " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: visible ? text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "") : ""
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.liveBridge.status === "Tracking"
                             ? text + ". Estimates are attributed to the monitored combined output." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "") + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
-                            : visible ? text + ". The overlay remains available while capture recovers; the selected endpoint remains retained." : text
+                            : visible ? text + ". The overlay remains available while capture recovers; the selected endpoint remains retained." + (window.overlayCaptureEvidenceStale ? " Live overlay evidence is stale until fresh capture arrives." : "") : text
                         ToolTip.text: visible ? Accessible.description : "Overlay monitoring state"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        objectName: "overlayCaptureRecoveryStatus"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null
+                            && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
+                        text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring"
+                            ? "Monitoring paused · reacquiring selected output"
+                            : "Monitoring paused · selected output unavailable"
+                        Accessible.name: "Overlay capture recovery status"
+                        Accessible.value: text + "; no estimates"
+                        Accessible.role: Accessible.Status
+                        Accessible.description: text + ". No new estimates are published while the output is unavailable; retry capture after reconnecting or choosing another output."
+                        ToolTip.text: Accessible.description
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
@@ -4550,8 +5000,8 @@ ApplicationWindow {
                             + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : "; ready")
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled
-                            ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
-                            : "Monitoring is transitioning; wait for the current capture state."
+                            ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.") + (window.overlayCaptureEvidenceStale ? " Live overlay evidence is stale until fresh capture arrives." : "")
+                            : "Monitoring is transitioning; live overlay evidence is stale until the current capture state produces a fresh accepted snapshot."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             if (!window.captureMonitorBridge) return
@@ -4560,6 +5010,7 @@ ApplicationWindow {
                                 window.overlayCaptureEvidenceStale = true
                                 window.announceCaptureRecoveryState("Overlay monitoring stopped; overlay settings remain available.")
                             } else {
+                                window.overlayCaptureEvidenceStale = true
                                 window.captureMonitorBridge.start()
                                 window.announceCaptureRecoveryState("Overlay monitoring requested; waiting for accepted output data.")
                             }
@@ -4568,33 +5019,65 @@ ApplicationWindow {
                     }
                     Button {
                         objectName: "overlayCaptureRecoveryAction"
-                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && window.captureMonitorBridge.status === "Error"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
                         text: "Retry overlay capture"
                         enabled: visible && window.captureMonitorBridge.start !== undefined
                         Accessible.name: text
-                        Accessible.value: enabled ? (window.overlayCaptureEvidenceStale ? "retry available; evidence stale until fresh capture" : "retry available; capture status error") : "retry unavailable"
+                        Accessible.value: enabled ? (window.overlayCaptureEvidenceStale ? "retry available; evidence stale until fresh capture" : (window.captureMonitorBridge.status === "Reacquiring" ? "retry available; reacquiring" : "retry available; capture status error")) : "retry unavailable"
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled
                             ? "Retry the selected output capture for the overlay and wait for a fresh accepted snapshot; " + (window.overlayCaptureEvidenceStale ? "current evidence is stale; " : "") + "settings revision " + window.overlaySettingsRevision + "."
                             : "Overlay capture retry is unavailable; settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description
                         onClicked: {
+                            window.overlayCaptureEvidenceStale = true
                             window.captureMonitorBridge.start()
                             window.announceCaptureRecoveryState("Overlay capture retry requested; waiting for a fresh accepted snapshot.")
                             overlayLiveMonitoringState.forceActiveFocus()
+                        }
+                    }
+                    Button {
+                        objectName: "chooseOverlayOutput"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null
+                            && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
+                        text: "Choose output"
+                        enabled: visible && window.endpointSelectionBridge !== null
+                        Accessible.name: "Choose overlay output"
+                        Accessible.value: enabled ? "available; capture recovery" : "unavailable"
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled
+                            ? "Choose another system output for overlay monitoring before retrying capture; current estimates remain unavailable until fresh output is accepted."
+                            : "Output selection is unavailable while overlay capture recovers."
+                        ToolTip.text: Accessible.description
+                        onClicked: {
+                            window.endpointSelectionBridge.refresh()
+                            window.announceCaptureRecoveryState("Choose an output endpoint before retrying overlay capture.")
+                            endpointSelector.forceActiveFocus()
                         }
                     }
                     Label {
                         objectName: "overlayEstimateAttribution"
                         visible: window.overlayBridge !== null
                         text: visible ? "Estimate source: selected system output · combined mix" : "Estimate source unavailable"
-                        Accessible.name: "Overlay estimate attribution, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.name: "Overlay estimate attribution, " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending; source retained" : "; source ready")
                         Accessible.role: Accessible.StaticText
                         Accessible.description: visible
                             ? text + ". Track and deck metadata are unavailable unless a separately supported source provides them." + (window.overlayCaptureEvidenceStale ? " Previously displayed estimates are stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " The selected combined-output source is retained while recovery is pending." : "")
                             : text
                         ToolTip.text: visible ? Accessible.description : "Overlay estimate source"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Label {
+                        objectName: "overlayTrackMetadataUnavailable"
+                        visible: window.overlayBridge !== null
+                        text: "Track info unavailable"
+                        Accessible.name: "Overlay track information unavailable"
+                        Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "")
+                        Accessible.role: Accessible.Status
+                        Accessible.description: "The combined system output does not identify individual tracks or decks. Beatglass will not attribute metadata without a separately supported source."
+                        ToolTip.text: Accessible.description
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
@@ -4607,7 +5090,7 @@ ApplicationWindow {
                                 ? "Overlay settings retained while recovery is pending"
                                 : "Overlay settings retained: display, geometry, opacity, and interaction mode")
                             : "Overlay settings retention unavailable"
-                        Accessible.name: "Overlay settings retention, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready") + ", revision " + window.overlaySettingsRevision
+                        Accessible.name: "Overlay settings retention, " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready") + ", revision " + window.overlaySettingsRevision
                         Accessible.value: text + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Status
                         Accessible.description: visible
@@ -4624,10 +5107,10 @@ ApplicationWindow {
                         activeFocusOnTab: true
                         enabled: visible
                         Accessible.name: text
-                        Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "settings retained") + "; settings revision " + window.overlaySettingsRevision
+                        Accessible.value: (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "settings retained") + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Button
                         Accessible.description: window.overlayDisplayRecoveryPending
-                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending; current settings revision " + window.overlaySettingsRevision + "."
+                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending; current settings revision " + window.overlaySettingsRevision + (window.overlayCaptureEvidenceStale ? ". Previously displayed evidence is stale until fresh capture arrives." : ".")
                             : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings; current settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
@@ -4643,23 +5126,23 @@ ApplicationWindow {
                         text: visible
                             ? (visualizationCanvas.modeHasData ? "Overlay estimates: accepted snapshot ready" : "Overlay estimates: waiting for accepted snapshot")
                             : "Overlay estimates unavailable"
-                        Accessible.name: "Overlay estimate readiness, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.name: "Overlay estimate readiness, " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; snapshot retained" : "; recovery ready")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && visualizationCanvas.modeHasData
-                            ? text + ". The overlay is showing data from the current accepted visualization snapshot." + (window.overlayDisplayRecoveryPending ? " The accepted snapshot remains retained while recovery is pending." : "")
+                            ? text + ". The overlay is showing data from the current accepted visualization snapshot." + (window.overlayCaptureEvidenceStale ? " The accepted snapshot is stale until fresh capture arrives." : "") + (window.overlayDisplayRecoveryPending ? " The accepted snapshot remains retained while recovery is pending." : "")
                             : visible ? text + ". The overlay will update after monitoring accepts a replacement snapshot." + (window.overlayDisplayRecoveryPending ? " The last accepted snapshot remains retained while recovery is pending." : "") : text
                         ToolTip.text: visible ? Accessible.description : "Overlay estimate readiness"
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
                     Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
-                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%" + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { const applied = window.overlayBridge.setOpacity(value); if (!applied) { value = window.overlayBridge.opacity; window.announceCaptureRecoveryState("DJ overlay opacity could not be changed; persisted opacity remains active."); return } window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlaySettingsRevision += 1 } }; onPressedChanged: if (!pressed) overlayInteractionMode.forceActiveFocus() }
+                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%" + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%" + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { const applied = window.overlayBridge.setOpacity(value); if (!applied) { value = window.overlayBridge.opacity; window.focusOverlayOpacityEditRecovery("DJ overlay opacity could not be changed; persisted opacity remains active."); return } window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlaySettingsRevision += 1 } }; onPressedChanged: if (!pressed) window.focusOverlayOpacityEditRecovery("DJ overlay opacity edit complete; opacity control remains focused for keyboard adjustment.") }
                     Connections {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge && (!window.overlayOpacityEditInFlight || Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) ) overlayOpacityControl.value = window.overlayBridge.opacity }
                     }
-                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text; ToolTip.text: "Current overlay opacity value" }
+                    Label { objectName: "overlayOpacityValue"; text: window.overlayBridge ? "Current opacity: " + Math.round(window.overlayBridge.opacity * 100) + "%" : "Opacity unavailable"; Accessible.name: "Current overlay opacity: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : ""); Accessible.role: Accessible.StaticText; Accessible.description: text + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : ""); ToolTip.text: "Current overlay opacity value" }
                 }
                 RowLayout {
                     visible: window.overlayBridge !== null
@@ -4667,23 +5150,23 @@ ApplicationWindow {
                     Accessible.name: "Overlay display and size controls"
                     Accessible.value: (window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "unavailable") + (window.overlayDisplayRecoveryPending ? "; recovery pending; live evidence stale" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Choose the overlay destination display and window size." + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : "") + (window.overlayDisplayRecoveryPending ? " Recovery is pending and live overlay evidence is stale until a display is confirmed." : "")
-                    ToolTip.text: "Overlay destination display and window size; current display is announced when available"
+                    Accessible.description: "Choose the overlay destination display and window size." + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : "") + (window.overlayCaptureEvidenceStale ? " Live overlay evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery is pending and live overlay evidence is stale until a display is confirmed." : "")
+                    ToolTip.text: "Overlay destination display and window size; current display is announced when available" + (window.overlayCaptureEvidenceStale ? "; live evidence is stale until fresh capture" : "")
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
                         objectName: "overlayDisplay"
                         activeFocusOnTab: true
-                    Accessible.name: "Overlay display"; Accessible.value: (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Choose the display where the overlay is shown"
+                    Accessible.name: "Overlay display"; Accessible.value: (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the display where the overlay is shown; current display " + (currentIndex >= 0 && count > currentIndex ? currentText : "unavailable") + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Choose the display where the overlay is shown"
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
                         currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
                         onActivated: {
                             const requestedIndex = currentIndex
                             if (window.persistOverlayDisplaySelection(requestedIndex, currentText))
-                                overlayDisplayStatus.forceActiveFocus()
+                                window.focusOverlayDisplaySelectionRecovery("Overlay display selected: " + currentText + ". Display selection is ready for recovery.")
                             else {
                                 currentIndex = window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
-                                forceActiveFocus()
+                                window.focusOverlayDisplaySelectionRecovery("Overlay display selection could not be applied; persisted display remains active.")
                             }
                         }
                         Layout.fillWidth: true
@@ -4695,8 +5178,8 @@ ApplicationWindow {
                         activeFocusOnTab: true
                         Accessible.name: "Forget saved overlay display"
                         Accessible.role: Accessible.Button
-                        Accessible.description: "Clear the unavailable saved display so another display can be selected"
-                        ToolTip.text: "Clear the unavailable saved display and choose a replacement"
+                        Accessible.description: "Clear the unavailable saved display so another display can be selected" + (window.overlayCaptureEvidenceStale ? ". Live overlay evidence is stale until fresh capture arrives." : "")
+                        ToolTip.text: "Clear the unavailable saved display and choose a replacement" + (window.overlayCaptureEvidenceStale ? "; live evidence is stale until fresh capture" : "")
                         onClicked: {
                             window.forgetUnavailableOverlayDisplay()
                             window.announceCaptureRecoveryState("Saved overlay display cleared; choose a replacement display.")
@@ -4709,11 +5192,11 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: visible ? (window.overlayHiddenByUser ? "Overlay visibility: hidden by user" : "Overlay visibility: available") : "Overlay visibility unavailable"
                         Accessible.name: "Overlay visibility status"
-                        Accessible.value: text
+                        Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayHiddenByUser
                             ? text + ". Use Restore overlay to return the persisted overlay without losing monitoring or invalidating live evidence."
-                            : visible ? text + ". Hide overlay preserves monitoring and live evidence, then restores the control window." : text
+                            : visible ? text + ". Hide overlay preserves monitoring and live evidence, then restores the control window." + (window.overlayCaptureEvidenceStale ? " Live evidence is stale until fresh capture arrives." : "") : text
                         ToolTip.text: visible ? Accessible.description : "Overlay visibility status"
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
@@ -4724,8 +5207,8 @@ ApplicationWindow {
                         text: visible
                             ? (window.overlayDisplayRecoveryPending ? "Overlay recovery: waiting for a compatible display · live evidence stale" : (window.overlayHiddenByUser ? "Overlay recovery: restore is available" : "Overlay recovery: ready"))
                             : "Overlay recovery unavailable"
-                        Accessible.name: "Overlay recovery action status"
-                        Accessible.value: text
+                        Accessible.name: "Overlay recovery action status" + (window.overlayCaptureEvidenceStale ? ", evidence stale until fresh capture" : "")
+                        Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayDisplayRecoveryPending
                             ? text + ". Keep the control window available; live overlay evidence is stale until you choose or reconnect a display before restoring."
@@ -4738,8 +5221,8 @@ ApplicationWindow {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
                         text: "No displays are available for the overlay."
-                        Accessible.name: "Overlay display empty state"
-                        Accessible.value: text
+                        Accessible.name: "Overlay display empty state, live evidence stale until fresh capture"
+                        Accessible.value: text + "; live evidence stale until fresh capture"
                         Accessible.role: Accessible.Status
                         Accessible.description: text + " Live overlay evidence is stale while no display is available; monitoring continues in the control window. Connect a display before choosing an overlay destination."
                         ToolTip.text: "Connect a display before choosing an overlay destination"
@@ -4748,7 +5231,7 @@ ApplicationWindow {
                         objectName: "overlayMissingDisplayRecovery"
                         visible: window.overlayDisplaySelectionRequired && window.overlayPreferredDisplayName !== ""
                         text: "Saved display unavailable: " + window.overlayPreferredDisplayName + ". Connect it or choose another display."
-                        Accessible.name: "Overlay saved display recovery: " + text
+                        Accessible.name: "Overlay saved display recovery, live evidence stale until fresh capture: " + text
                         Accessible.value: text + "; live overlay evidence stale"
                         Accessible.role: Accessible.Status
                         Accessible.description: "The native overlay bridge saved a display that is not currently enumerated. Live overlay evidence is stale while the saved display is missing; monitoring continues in the control window."
@@ -4759,7 +5242,7 @@ ApplicationWindow {
                     Label { text: "Size"; Accessible.name: "Overlay size control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay window size" }
                     ComboBox {
                         objectName: "overlaySize"
-                    Accessible.name: "Overlay size"; Accessible.value: currentText; Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the overlay window size; current size " + currentText; ToolTip.text: "Choose Compact, Medium, or Large overlay size"
+                    Accessible.name: "Overlay size"; Accessible.value: currentText + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : ""); Accessible.role: Accessible.ComboBox; Accessible.description: "Choose the overlay window size; current size " + currentText + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : ""); ToolTip.text: "Choose Compact, Medium, or Large overlay size"
                         model: ["Compact", "Medium", "Large"]; currentIndex: window.overlayPreferredSizeIndex
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onActivated: if (window.overlayBridge) {
@@ -4770,12 +5253,11 @@ ApplicationWindow {
                             if (resized) {
                                 window.overlayPreferredSizeIndex = requestedIndex
                                 window.overlaySettingsRevision += 1
-                                window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
-                                overlayGeometryStatus.forceActiveFocus()
+                                window.focusOverlaySizeRecovery("DJ overlay size set to " + currentText + ".")
                             } else {
                                 window.syncOverlaySettingsStateFromBridge()
                                 currentIndex = window.overlayPreferredSizeIndex
-                                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
+                                window.focusOverlaySizeRecovery("DJ overlay size could not be changed; persisted size remains active.")
                             }
                         }
                     }
@@ -4829,8 +5311,8 @@ ApplicationWindow {
                     text: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
                         ? "Overlay position/size: " + window.overlayBridge.geometry.x + "," + window.overlayBridge.geometry.y + " · " + window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height
                         : "Overlay geometry unavailable; control-window fallback remains active."
-                    Accessible.name: "Overlay geometry status: " + text + (window.overlayDisplayRecoveryPending ? " (recovery pending)" : "")
-                    Accessible.value: text + "; geometry revision " + window.overlayGeometryRevision + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
+                    Accessible.name: "Overlay geometry status: " + text + (window.overlayCaptureEvidenceStale ? " (live evidence stale until fresh capture)" : window.overlayDisplayRecoveryPending ? " (recovery pending)" : "")
+                    Accessible.value: text + "; geometry revision " + window.overlayGeometryRevision + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
                         ? "Persisted overlay position and size: " + text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending; settings are retained." : "") + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : ".")
@@ -4865,16 +5347,20 @@ ApplicationWindow {
                         + (window.overlayLaunchFallbackActive ? " · launch fallback active" : "")
                         + " · settings revision " + window.overlaySettingsRevision
                         + (window.overlayDisplayRecoveryPending ? " · recovery pending · settings retained" : (window.overlayLaunchFallbackActive ? " · settings retained" : ""))
-                    Accessible.name: "Overlay settings summary, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                    Accessible.value: text
+                    Accessible.name: "Overlay settings summary, " + (window.overlayCaptureEvidenceStale ? "live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                    Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: "Current overlay display, size, opacity, and settings revision. "
-                        + (window.overlayDisplayRecoveryPending
+                        + (window.overlayCaptureEvidenceStale
+                            ? "Live overlay evidence is stale until fresh capture arrives; persisted settings remain available."
+                            : window.overlayDisplayRecoveryPending
                             ? "Recovery is pending; persisted settings are retained while the display is restored."
                             : (window.overlayLaunchFallbackActive
                                 ? "The overlay is using its launch fallback while persisted settings remain available."
                                 : "The overlay is ready with persisted settings applied."))
-                    ToolTip.text: window.overlayDisplayRecoveryPending
+                    ToolTip.text: window.overlayCaptureEvidenceStale
+                        ? "Overlay live evidence is stale until fresh capture; persisted display settings are retained"
+                        : window.overlayDisplayRecoveryPending
                         ? "Overlay recovery pending; persisted display settings are retained"
                         : (window.overlayLaunchFallbackActive
                             ? "Overlay launch fallback active; persisted display settings are available"
@@ -4887,16 +5373,16 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: window.overlayLaunchFallbackActive ? "Review recovery" : "Review overlay summary"
                         activeFocusOnTab: true
-                        Accessible.name: text + ", " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                        Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending; live overlay evidence stale" : "available") + "; settings revision " + window.overlaySettingsRevision
+                        Accessible.name: text + ", " + (window.overlayCaptureEvidenceStale ? "live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.value: (window.overlayCaptureEvidenceStale ? "live overlay evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending; live overlay evidence stale" : "available") + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Button
                         Accessible.description: "Focus the consolidated overlay settings summary for display, size, opacity, and recovery state; "
-                            + (window.overlayDisplayRecoveryPending ? "recovery is pending and live overlay evidence is stale; " : "recovery is ready; ")
+                            + (window.overlayCaptureEvidenceStale ? "live overlay evidence is stale until fresh capture; " : window.overlayDisplayRecoveryPending ? "recovery is pending and live overlay evidence is stale; " : "recovery is ready; ")
                             + "current settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description
                         onClicked: {
                             overlaySettingsSummary.forceActiveFocus()
-                            window.announceCaptureRecoveryState((window.overlayLaunchFallbackActive ? "Overlay recovery reviewed" : "Overlay summary reviewed") + "; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+                            window.announceCaptureRecoveryState((window.overlayLaunchFallbackActive ? "Overlay recovery reviewed" : "Overlay summary reviewed") + "; settings revision " + window.overlaySettingsRevision + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
                         }
                     }
                 Label {
@@ -4908,26 +5394,26 @@ ApplicationWindow {
                         && !window.overlayPersistedDiagnosticDismissed
                         && (storageRecovery.analysisStatus === "Analysis failed" || storageRecovery.analysisStatus === "Analysis cancelled")
                     text: visible ? "Persisted analysis admission result (not current visualization): " + storageRecovery.analysisAdmissionResult : ""
-                    Accessible.name: "Overlay persisted recovery diagnostic: " + text
-                    Accessible.value: text
+                    Accessible.name: "Overlay persisted recovery diagnostic (historical, live evidence stale until fresh capture): " + text
+                    Accessible.value: text + "; live evidence stale until fresh capture"
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Persisted bridge feedback is historical and must not be treated as the current visualization result."
+                    Accessible.description: "Persisted bridge feedback is historical and must not be treated as the current visualization result. Live evidence is stale until fresh capture arrives."
                     ToolTip.text: "Historical persisted analysis admission feedback"
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
-                Label { id: overlaySafeModeStatus; objectName: "overlaySafeModeStatus"; visible: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit; text: "Safe mode active · monitoring continues without the native overlay"; Accessible.name: "Overlay safe mode status"; Accessible.role: Accessible.Status; Accessible.value: text; Accessible.description: "Native overlay retries are paused after the limit; live overlay evidence is stale until the overlay is restored; clear safe mode to try again."; ToolTip.text: "Native overlay recovery is paused; monitoring remains available"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                Label { id: overlaySafeModeShortcutHint; objectName: "overlaySafeModeShortcutHint"; visible: overlaySafeModeStatus.visible; text: "Shortcut: Ctrl+Alt+Shift+C clears safe mode"; Accessible.name: "Overlay safe mode shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text; Accessible.description: "Keyboard shortcut for clearing native overlay safe mode"; ToolTip.text: "Clear safe mode from the keyboard"; Layout.fillWidth: true }
-                Label { id: overlayRecoveryAttemptStatus; objectName: "overlayRecoveryAttemptStatus"; visible: window.overlayRecoveryAttemptCount > 0 && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit; text: "Recovery attempts: " + window.overlayRecoveryAttemptCount + "/" + window.overlayRecoveryAttemptLimit + " · live overlay evidence stale"; Accessible.name: "Overlay recovery attempt status"; Accessible.role: Accessible.Status; Accessible.value: text; Accessible.description: "Bounded native overlay recovery attempt progress; live overlay evidence is stale until the overlay is restored."; ToolTip.text: "Native overlay recovery attempt progress; overlay evidence is stale"; Layout.fillWidth: true }
-                Label { id: overlayRecoveryPausedStatus; objectName: "overlayRecoveryPausedStatus"; visible: window.overlayRecoveryPausedByUser; text: "Recovery paused · monitoring continues · live overlay evidence stale"; Accessible.name: "Overlay recovery paused status"; Accessible.role: Accessible.Status; Accessible.value: text; Accessible.description: "Native overlay recovery is paused by user choice; live overlay evidence is stale until recovery succeeds; start another retry when ready."; ToolTip.text: "Recovery is paused by user choice; monitoring remains available and overlay evidence is stale"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                Button { id: resumeOverlayRecovery; objectName: "resumeOverlayRecovery"; visible: window.overlayRecoveryPausedByUser; text: "Resume recovery"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Resume overlay recovery"; Accessible.role: Accessible.Button; Accessible.description: "Resume native overlay recovery with a new bounded attempt while keeping monitoring available"; ToolTip.text: "Resume native overlay recovery"; onClicked: { window.overlayRecoveryPausedByUser = false; window.overlayRecoveryAttemptCount = 1; window.announceCaptureRecoveryState("DJ overlay recovery resumed (attempt 1); control window remains visible until the overlay is restored."); window.showOverlayAndHideControls(); overlayDisplayStatus.forceActiveFocus() } }
-                Label { id: overlayResumeRecoveryShortcutHint; objectName: "overlayResumeRecoveryShortcutHint"; visible: window.overlayRecoveryPausedByUser; text: "Shortcut: Ctrl+Alt+Shift+R resumes recovery"; Accessible.name: "Overlay resume recovery shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text; Accessible.description: "Keyboard shortcut for resuming native overlay recovery"; ToolTip.text: "Resume recovery from the keyboard"; Layout.fillWidth: true }
-                Label { id: overlayPausedRecoveryPageShortcutHint; objectName: "overlayPausedRecoveryPageShortcutHint"; visible: window.overlayRecoveryPausedByUser; text: "Shortcut: Ctrl+Alt+Shift+Pause opens recovery"; Accessible.name: "Overlay paused recovery page shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text; Accessible.description: "Keyboard shortcut for opening the paused overlay recovery page"; ToolTip.text: "Open recovery from the keyboard"; Layout.fillWidth: true }
-                Label { id: overlayRecoveryPausedDisplayStatus; objectName: "overlayRecoveryPausedDisplayStatus"; visible: window.overlayRecoveryPausedByUser && window.overlayDisplayRecoveryPending; text: "Display recovery pending · resume remains manual"; Accessible.name: "Overlay paused display recovery status"; Accessible.role: Accessible.Status; Accessible.value: text; Accessible.description: "A display is being recovered while native overlay retries remain paused by user choice."; ToolTip.text: "Display recovery is pending; resume recovery when ready"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
-                Label { id: overlayStopRecoveryShortcutHint; objectName: "overlayStopRecoveryShortcutHint"; visible: overlayRecoveryAttemptStatus.visible; text: "Shortcut: Ctrl+Alt+Shift+X stops recovery"; Accessible.name: "Overlay stop recovery shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text; Accessible.description: "Keyboard shortcut for stopping native overlay recovery"; ToolTip.text: "Stop recovery from the keyboard"; Layout.fillWidth: true }
-                Button { id: stopOverlayRecovery; visible: window.overlayRecoveryAttemptCount > 0 && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit; text: "Stop recovery"; objectName: "stopOverlayRecovery"; activeFocusOnTab: true; enabled: true; Accessible.name: "Stop overlay recovery"; Accessible.role: Accessible.Button; Accessible.description: "Pause native overlay recovery attempts while keeping monitoring available; live overlay evidence remains stale until recovery succeeds"; ToolTip.text: "Stop retrying and keep monitoring; overlay evidence remains stale"; onClicked: window.stopOverlayRecoveryAttempts() }
-                Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available; attempt " + (window.overlayRecoveryAttemptCount + 1) : (window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit ? "safe mode after " + window.overlayRecoveryAttemptLimit + " attempts" : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display")); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display; attempt " + (window.overlayRecoveryAttemptCount + 1) : (window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit ? "Native overlay retry limit reached; reconnect a display or use settings to leave safe mode" : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay")); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit ? "Retry limit reached; overlay remains in safe mode" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay")); onClicked: { window.overlayRecoveryPausedByUser = false; window.overlayRecoveryAttemptCount += 1; window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored."); window.showOverlayAndHideControls(); overlayDisplayStatus.forceActiveFocus() } }
-                Button { id: clearOverlaySafeMode; visible: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit; text: "Clear safe mode"; objectName: "clearOverlaySafeMode"; activeFocusOnTab: true; enabled: true; Accessible.name: "Clear overlay safe mode"; Accessible.role: Accessible.Button; Accessible.description: "Clear the native overlay retry limit and make Retry overlay available again"; ToolTip.text: "Clear safe mode and allow another overlay retry"; onClicked: { window.resetOverlayRecoveryAttempts(); window.announceCaptureRecoveryState("Overlay safe mode cleared; Retry overlay is available and focused."); retryOverlay.forceActiveFocus() } }
+                Label { id: overlaySafeModeStatus; objectName: "overlaySafeModeStatus"; visible: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit; text: "Safe mode active · monitoring continues without the native overlay"; Accessible.name: "Overlay safe mode status, live evidence stale until fresh capture"; Accessible.role: Accessible.Status; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "Native overlay retries are paused after the limit; live overlay evidence is stale until the overlay is restored and fresh capture arrives; clear safe mode to try again."; ToolTip.text: "Native overlay recovery is paused; monitoring remains available"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                Label { id: overlaySafeModeShortcutHint; objectName: "overlaySafeModeShortcutHint"; visible: overlaySafeModeStatus.visible; text: "Shortcut: Ctrl+Alt+Shift+C clears safe mode"; Accessible.name: "Overlay safe mode shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "Keyboard shortcut for clearing native overlay safe mode; live evidence is stale until fresh capture arrives"; ToolTip.text: "Clear safe mode from the keyboard"; Layout.fillWidth: true }
+                Label { id: overlayRecoveryAttemptStatus; objectName: "overlayRecoveryAttemptStatus"; visible: window.overlayRecoveryAttemptCount > 0 && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit; text: "Recovery attempts: " + window.overlayRecoveryAttemptCount + "/" + window.overlayRecoveryAttemptLimit + " · live overlay evidence stale"; Accessible.name: "Overlay recovery attempt status, live evidence stale until fresh capture"; Accessible.role: Accessible.Status; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "Bounded native overlay recovery attempt progress; live overlay evidence is stale until the overlay is restored and fresh capture arrives."; ToolTip.text: "Native overlay recovery attempt progress; overlay evidence is stale"; Layout.fillWidth: true }
+                Label { id: overlayRecoveryPausedStatus; objectName: "overlayRecoveryPausedStatus"; visible: window.overlayRecoveryPausedByUser; text: "Recovery paused · monitoring continues · live overlay evidence stale"; Accessible.name: "Overlay recovery paused status, live evidence stale until fresh capture"; Accessible.role: Accessible.Status; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "Native overlay recovery is paused by user choice; live overlay evidence is stale until recovery succeeds and fresh capture arrives; start another retry when ready."; ToolTip.text: "Recovery is paused by user choice; monitoring remains available; overlay evidence is stale until fresh capture"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                Button { id: resumeOverlayRecovery; objectName: "resumeOverlayRecovery"; visible: window.overlayRecoveryPausedByUser; text: "Resume recovery"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Resume overlay recovery"; Accessible.role: Accessible.Button; Accessible.description: "Resume native overlay recovery with a new bounded attempt while keeping monitoring available; live evidence is stale until fresh capture arrives"; ToolTip.text: "Resume native overlay recovery; live evidence is stale until fresh capture"; onClicked: window.handleOverlayResumeRecoveryAction() }
+                Label { id: overlayResumeRecoveryShortcutHint; objectName: "overlayResumeRecoveryShortcutHint"; visible: window.overlayRecoveryPausedByUser; text: "Shortcut: Ctrl+Alt+Shift+R resumes recovery"; Accessible.name: "Overlay resume recovery shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "Keyboard shortcut for resuming native overlay recovery; live evidence is stale until fresh capture arrives"; ToolTip.text: "Resume recovery from the keyboard; live evidence is stale until fresh capture"; Layout.fillWidth: true }
+                Label { id: overlayPausedRecoveryPageShortcutHint; objectName: "overlayPausedRecoveryPageShortcutHint"; visible: window.overlayRecoveryPausedByUser; text: "Shortcut: Ctrl+Alt+Shift+Pause opens recovery"; Accessible.name: "Overlay paused recovery page shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "Keyboard shortcut for opening the paused overlay recovery page; live evidence is stale until fresh capture arrives"; ToolTip.text: "Open recovery from the keyboard"; Layout.fillWidth: true }
+                Label { id: overlayRecoveryPausedDisplayStatus; objectName: "overlayRecoveryPausedDisplayStatus"; visible: window.overlayRecoveryPausedByUser && window.overlayDisplayRecoveryPending; text: "Display recovery pending · resume remains manual"; Accessible.name: "Overlay paused display recovery status, live evidence stale until fresh capture"; Accessible.role: Accessible.Status; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "A display is being recovered while native overlay retries remain paused by user choice; live evidence is stale until fresh capture arrives."; ToolTip.text: "Display recovery is pending; resume recovery when ready; live evidence is stale until fresh capture"; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                Label { id: overlayStopRecoveryShortcutHint; objectName: "overlayStopRecoveryShortcutHint"; visible: overlayRecoveryAttemptStatus.visible; text: "Shortcut: Ctrl+Alt+Shift+X stops recovery"; Accessible.name: "Overlay stop recovery shortcut hint"; Accessible.role: Accessible.StaticText; Accessible.value: text + "; live evidence stale until fresh capture"; Accessible.description: "Keyboard shortcut for stopping native overlay recovery; live evidence is stale until fresh capture arrives"; ToolTip.text: "Stop recovery from the keyboard"; Layout.fillWidth: true }
+                Button { id: stopOverlayRecovery; visible: window.overlayRecoveryAttemptCount > 0 && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit; text: "Stop recovery"; objectName: "stopOverlayRecovery"; activeFocusOnTab: true; enabled: true; Accessible.name: "Stop overlay recovery"; Accessible.role: Accessible.Button; Accessible.description: "Pause native overlay recovery attempts while keeping monitoring available; live overlay evidence remains stale until recovery succeeds"; ToolTip.text: "Stop retrying and keep monitoring; overlay evidence remains stale"; onClicked: window.handleOverlayStopRecoveryAction() }
+                Button { id: retryOverlay; visible: window.overlayBridge !== null && !window.overlayBridge.available; text: "Retry overlay"; objectName: "retryOverlay"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit; Accessible.name: "Retry DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? "available; attempt " + (window.overlayRecoveryAttemptCount + 1) : (window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit ? "safe mode after " + window.overlayRecoveryAttemptLimit + " attempts" : (window.overlayDisplaySelectionRequired ? "select a display first" : "waiting for a display")); Accessible.description: enabled ? "Retry showing the native DJ overlay on the selected display; attempt " + (window.overlayRecoveryAttemptCount + 1) : (window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit ? "Native overlay retry limit reached; reconnect a display or use settings to leave safe mode" : (window.overlayDisplaySelectionRequired ? "Select an output display before retrying the native DJ overlay" : "Connect or restore a display before retrying the native DJ overlay")); ToolTip.text: enabled ? "Retry the native DJ overlay on the selected display" : (window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit ? "Retry limit reached; overlay remains in safe mode" : (window.overlayDisplaySelectionRequired ? "Select a display before retrying the overlay" : "Waiting for a display before retrying the overlay")); onClicked: window.handleOverlayRetryButtonAction() }
+                Button { id: clearOverlaySafeMode; visible: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit; text: "Clear safe mode"; objectName: "clearOverlaySafeMode"; activeFocusOnTab: true; enabled: true; Accessible.name: "Clear overlay safe mode"; Accessible.role: Accessible.Button; Accessible.description: "Clear the native overlay retry limit and make Retry overlay available again"; ToolTip.text: "Clear safe mode and allow another overlay retry"; onClicked: window.handleOverlayClearSafeModeAction() }
                 Item { Layout.fillHeight: true }
             }
         }
@@ -4956,11 +5442,11 @@ ApplicationWindow {
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
                                     Accessible.name: "Output capture endpoint"
-                                    Accessible.value: currentText + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
+                                    Accessible.value: currentText + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                                     Accessible.role: Accessible.ComboBox
-                                    Accessible.description: (currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
+                                    Accessible.description: (currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? " Live overlay evidence is stale until fresh capture arrives." : "")
                                     ToolTip.text: "Choose the output endpoint used for live capture; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
-                                    onActivated: { if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id); window.announceVisualizationRecovery("Output endpoint selected; capture will refresh the accepted visualization snapshot."); endpointSelector.forceActiveFocus() }
+                                    onActivated: { window.overlayCaptureEvidenceStale = true; if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id); if (window.captureMonitorBridge && window.captureMonitorBridge.start) window.captureMonitorBridge.start(); window.announceVisualizationRecovery("Output endpoint selected; monitoring restarted and prior evidence is stale until the new endpoint provides a fresh accepted snapshot."); endpointSelector.forceActiveFocus() }
                                 }
                                 Button { text: "Refresh"; objectName: "refreshEndpoints"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.role: Accessible.Button; Accessible.description: "Refresh the available output capture endpoints." + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready."); ToolTip.text: "Refresh available output capture endpoints; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); onClicked: { window.endpointSelectionBridge.refresh(); window.announceVisualizationRecovery("Output endpoint refresh requested; focus remains on endpoint recovery controls."); endpointSelector.forceActiveFocus() } }
                             }

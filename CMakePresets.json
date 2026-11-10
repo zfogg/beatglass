@@ -32,16 +32,27 @@
         "VCPKG_MANIFEST_FEATURES": "desktop",
         "BEATGLASS_BUILD_DESKTOP": "ON"
       }
+    },
+    {
+      "name": "vcpkg-tui",
+      "inherits": "vcpkg-core",
+      "binaryDir": "${sourceDir}/build/vcpkg-tui",
+      "cacheVariables": {
+        "VCPKG_MANIFEST_FEATURES": "tui",
+        "BEATGLASS_BUILD_TUI": "ON"
+      }
     }
   ],
   "buildPresets": [
     { "name": "vcpkg-core", "configurePreset": "vcpkg-core", "configuration": "Debug" },
     { "name": "prebuilt-qt-desktop", "configurePreset": "prebuilt-qt-desktop", "configuration": "Debug" },
     { "name": "vcpkg-desktop", "configurePreset": "vcpkg-desktop", "configuration": "Debug" }
+    ,{ "name": "vcpkg-tui", "configurePreset": "vcpkg-tui", "configuration": "Debug" }
   ],
   "testPresets": [
     { "name": "vcpkg-core", "configurePreset": "vcpkg-core", "configuration": "Debug", "output": { "outputOnFailure": true } },
     { "name": "prebuilt-qt-desktop", "configurePreset": "prebuilt-qt-desktop", "configuration": "Debug", "output": { "outputOnFailure": true } },
     { "name": "vcpkg-desktop", "configurePreset": "vcpkg-desktop", "configuration": "Debug", "output": { "outputOnFailure": true } }
+    ,{ "name": "vcpkg-tui", "configurePreset": "vcpkg-tui", "configuration": "Debug", "output": { "outputOnFailure": true } }
   ]
 }

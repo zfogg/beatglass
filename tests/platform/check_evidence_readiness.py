@@ -3,15 +3,27 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import os
+import tempfile
 from pathlib import Path
 import sys
 from datetime import datetime, timezone
 import re
 from collections import Counter
+MAX_REPORT_BYTES = 16 << 20
 
 spec = importlib.util.spec_from_file_location("verify_bundle", Path(__file__).with_name("verify_evidence_bundle.py"))
 verifier = importlib.util.module_from_spec(spec); assert spec.loader
 spec.loader.exec_module(verifier)
+
+
+def has_symlinked_parent(path: Path) -> bool:
+    current = path.parent
+    while current != current.parent:
+        if current.is_symlink():
+            return True
+        current = current.parent
+    return False
 
 
 def platforms_from_status(path: Path) -> list[str]:
@@ -352,11 +364,38 @@ def main() -> int:
     parser.add_argument("--bundles", type=Path, required=True)
     parser.add_argument("--report", type=Path, help="write a JSON retention/readiness report")
     parser.add_argument("--max-age-hours", type=float, default=168, help="reject evidence older than this (default: 168)")
+    parser.add_argument("--max-report-bytes", type=int, default=MAX_REPORT_BYTES)
+    parser.add_argument("--json", action="store_true", help="emit the readiness report on stdout")
     args = parser.parse_args()
+    if args.max_age_hours <= 0:
+        print("max age hours must be positive", file=sys.stderr)
+        return 1
     errors = check(args.status, args.bundles, args.max_age_hours)
+    if args.json:
+        print(json.dumps(report(args.status, args.bundles, args.max_age_hours), sort_keys=True))
     if args.report:
+        if args.report.is_symlink():
+            print("readiness report output must not be a symlink", file=sys.stderr)
+            return 1
+        if has_symlinked_parent(args.report):
+            print("readiness report output parent must not be a symlink", file=sys.stderr)
+            return 1
         args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(report(args.status, args.bundles, args.max_age_hours), indent=2) + "\n", encoding="utf-8")
+        serialized = json.dumps(report(args.status, args.bundles, args.max_age_hours), indent=2) + "\n"
+        if args.max_report_bytes <= 0:
+            print("report size limit must be positive", file=sys.stderr); return 1
+        if len(serialized.encode("utf-8")) > args.max_report_bytes:
+            print(f"readiness report exceeds {args.max_report_bytes} bytes", file=sys.stderr); return 1
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=args.report.parent,
+                                             prefix=f".{args.report.name}.", suffix=".tmp", delete=False) as stream:
+                temporary = Path(stream.name)
+                stream.write(serialized); stream.flush(); os.fsync(stream.fileno())
+            os.replace(temporary, args.report); temporary = None
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1

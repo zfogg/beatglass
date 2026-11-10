@@ -4,6 +4,8 @@ import tempfile
 import unittest
 import hashlib
 import json
+import subprocess
+import sys
 
 spec = importlib.util.spec_from_file_location("ingest", Path(__file__).with_name("ingest_qualification_artifacts.py"))
 ingest = importlib.util.module_from_spec(spec); assert spec.loader
@@ -38,7 +40,7 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
             (root / "qualification-artifacts.sha256").write_text(f"{digest}  build/app.bin\n{digest}  ./build/app.bin\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
-            self.assertTrue(any("duplicate artifact path" in error for error in errors))
+            self.assertTrue(any("duplicate artifact path" in error or "non-canonical artifact path" in error for error in errors))
 
     def test_rejects_escaping_artifact_entry(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -289,3 +291,140 @@ class QualificationIngestTest(unittest.TestCase):
                 f"{digest}  linked.log\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertTrue(any("symlinked qualification artifact" in error for error in errors))
+
+    def test_nonportable_referenced_evidence_path_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\nplayback_evidence=capture?.json\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("non-portable referenced evidence path: capture?.json", errors)
+
+    def test_referenced_evidence_uses_artifact_size_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            evidence = root / "playback.json"; evidence.write_text("large", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\nplayback_evidence=playback.json\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json", max_artifact_bytes=1)
+            self.assertIn("referenced evidence exceeds 1 bytes: playback.json", errors)
+
+    def test_total_artifact_size_limit_is_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            artifact = root / "capture.log"; artifact.write_text("large", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json", max_total_artifact_bytes=1)
+            self.assertIn("qualification artifacts exceed total 1 bytes", errors)
+
+    def test_cli_json_report_is_machine_readable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "manifest.json"
+            result = subprocess.run([sys.executable, str(Path(__file__).with_name("ingest_qualification_artifacts.py")),
+                                     str(root), str(output), "--json"], capture_output=True, text=True, check=False)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["schema_version"], 1)
+            self.assertFalse(report["valid"])
+            self.assertEqual(report["error_count"], len(report["errors"]))
+            self.assertEqual(sum(report["error_categories"].values()), report["error_count"])
+            self.assertIn("max_total_artifact_bytes", report["limits"])
+            self.assertEqual(report["artifact_count"], 0)
+            self.assertEqual(report["artifact_bytes"], 0)
+
+    def test_custom_artifact_limit_is_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            artifact = root / "capture.log"; artifact.write_text("native evidence", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json", max_artifact_bytes=1)
+            self.assertTrue(any("qualification artifact exceeds 1 bytes" in error for error in errors))
+
+    def test_invalid_resource_limits_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.assertEqual(["resource limits must be positive"], ingest.ingest(root, root / "manifest.json", max_entries=0))
+
+    def test_uppercase_artifact_hash_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            artifact = root / "capture.log"; artifact.write_text("native evidence", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest().upper()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("invalid artifact hash" in error for error in errors))
+
+    def test_nonportable_artifact_path_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text(f"{'0' * 64}  capture?.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("non-portable artifact path" in error for error in errors))
+
+    def test_identity_provenance_is_canonicalized(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "A" * 40 + "\nplatform=Windows\nenvironment= host\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("source commit identity must be lowercase", errors)
+            self.assertIn("invalid platform identity", errors)
+            self.assertIn("invalid environment identity", errors)
+
+    def test_future_capture_timestamp_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            future = (ingest.datetime.now(ingest.timezone.utc) + ingest.timedelta(hours=1)).isoformat()
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=" + future + "\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("capture timestamp cannot be in the future", errors)
+
+    def test_capture_timestamp_is_emitted_as_canonical_utc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T01:00:00-05:00\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            self.assertEqual(ingest.ingest(root, root / "manifest.json"), [])
+            data = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(data["captured_at"], "2026-01-01T06:00:00Z")
+
+    def test_generated_manifest_is_written_atomically_without_temp_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            output = root / "manifest.json"
+            self.assertEqual(ingest.ingest(root, output), [])
+            self.assertTrue(output.is_file())
+            self.assertEqual(list(root.glob(".manifest.json.*.tmp")), [])
+
+    def test_oversized_identity_input_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("x" * (ingest.MAX_IDENTITY_BYTES + 1), encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn(f"qualification identity exceeds {ingest.MAX_IDENTITY_BYTES} bytes", errors)
+
+    def test_oversized_hash_input_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("x" * (ingest.MAX_HASHES_BYTES + 1), encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn(f"qualification hash list exceeds {ingest.MAX_HASHES_BYTES} bytes", errors)
+
+    def test_case_colliding_artifact_paths_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            first = root / "Capture.log"; second = root / "capture.log"
+            first.write_text("one", encoding="utf-8"); second.write_text("two", encoding="utf-8")
+            digest = hashlib.sha256(first.read_bytes()).hexdigest()
+            digest2 = hashlib.sha256(second.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  Capture.log\n{digest2}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertTrue(any("duplicate artifact path" in error or "non-canonical artifact path" in error for error in errors))

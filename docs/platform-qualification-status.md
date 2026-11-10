@@ -1,5 +1,17 @@
 # Platform qualification status
 
+## Current portable CLI/library evidence (2026-11-10)
+
+The shipped CLI and music CLI expose documented `--help`/`-h` and
+`--version`/`-V` entry points. JSON and human-readable analysis output expose
+decoded duration, and generated WAV/AIFF/FLAC/MP3 integration checks validate
+duration consistency and source immutability. These are portable development
+checks only; they do not advance any native Windows, macOS, or Linux gate.
+
+Remaining CLI/library gates are native decoder/runtime availability, packaged
+dependency verification, real playback/output-device qualification, and the
+platform evidence bundles listed below.
+
 Readiness evidence for shortcut recovery must show that stop/resume shortcuts update an accessible announcement (`queued`, `running`, `cancelled`, `retry`, or `complete`), preserve focus, and do not leave stale results presented. Run the portable contract with `python tests/unit/check_desktop_analysis_transition.py`; native screen-reader and assistive-technology timing still require platform runs.
 
 Native readiness evidence must verify keyboard parity for playback recovery: focus reaches pause/resume, retry, endpoint refresh, and reacquisition controls; accessible names expose current state; and stale-result clearing is announced without pointer input. Reproduce the portable audit with `python tests/unit/check_desktop_analysis_transition.py`; this does not replace native UI/accessibility qualification.
@@ -191,6 +203,15 @@ The Linux capture gate also requires a documented sample-position clock mapping.
 ## Local evidence audit (2026-11-08)
 
 The preparation scripts are executable on their respective hosts, but this Windows session is not a substitute for native qualification: it cannot produce WASAPI, Core Audio, or PipeWire device evidence. The current actionable handoff is therefore:
+
+Qualification matrices normalize absolute runner artifact paths to paths relative
+to the summary directory before handoff. This keeps retained evidence portable
+and allows the matrix validator's traversal checks to remain fail-closed.
+For local handoff review, `validate_qualification_matrix.py MATRIX.json ROOT`
+additionally verifies every listed evidence artifact exists beneath `ROOT`;
+the original one-argument shape remains a portable schema-only check.
+The evidence-root check resolves each artifact before containment testing, so a
+symlink inside the retained root cannot point to evidence outside that root.
 
 | Evidence class | Windows session result | Required native owner/action |
 | --- | --- | --- |

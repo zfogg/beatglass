@@ -13,6 +13,12 @@ struct TempDir {
 };
 }
 
+TEST_CASE("catalog exposes canonical audio format policy") {
+  CHECK(beatglass::library::audio_format_for_path("track.WAV") == "WAV");
+  CHECK(beatglass::library::audio_format_for_path("track.aif") == "AIFF");
+  CHECK(beatglass::library::audio_format_for_path("notes.txt").empty());
+}
+
 TEST_CASE("catalog lists folders and supported audio in deterministic order") {
   TempDir dir; dir.file("zeta.WAV"); dir.file("Alpha.mp3"); dir.file("notes.txt");
   std::filesystem::create_directory(dir.path / "Mixes");
@@ -189,6 +195,64 @@ TEST_CASE("catalog reports a file path as an invalid browse root") {
  const auto result = beatglass::library::browse(dir.path / "track.wav");
  CHECK(result.entries.empty());
  CHECK_FALSE(result.diagnostic.empty());
+ CHECK(result.status == beatglass::library::CatalogStatus::invalid_root);
+}
+TEST_CASE("catalog exposes root-relative identity paths") {
+ TempDir dir; std::filesystem::create_directory(dir.path / "nested");
+ dir.file("track.wav");
+ const auto direct = beatglass::library::browse(dir.path);
+ REQUIRE(direct.entries.size() == 2);
+ CHECK(direct.entries[0].relative_path == direct.entries[0].path.filename());
+ const auto recursive = beatglass::library::browse_recursive(dir.path);
+ REQUIRE(recursive.entries.size() == 2);
+ CHECK(recursive.entries.back().relative_path == std::filesystem::path("nested"));
+}
+TEST_CASE("catalog result identifies its normalized query root") {
+ TempDir dir; const auto result = beatglass::library::browse(dir.path);
+ REQUIRE(result.status == beatglass::library::CatalogStatus::ok);
+ CHECK(result.query_root == std::filesystem::absolute(dir.path));
+}
+TEST_CASE("catalog relative identity is computed without throwing") {
+ TempDir dir; dir.file("track.wav");
+ const auto result = beatglass::library::browse(dir.path);
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.status == beatglass::library::CatalogStatus::ok);
+ CHECK(result.entries.front().relative_path == std::filesystem::path("track.wav"));
+}
+TEST_CASE("recursive catalog ordering is rooted in relative identity") {
+ TempDir dir; std::filesystem::create_directories(dir.path / "z");
+ std::ofstream(dir.path / "z" / "track.wav") << "x";
+ const auto result = beatglass::library::browse_recursive(dir.path);
+ REQUIRE(result.entries.size() == 2);
+ CHECK(result.entries[0].relative_path.generic_string() == "z");
+ CHECK(result.entries[1].relative_path.generic_string() == "z/track.wav");
+}
+TEST_CASE("catalog cancellation returns no partial snapshot") {
+ TempDir dir; dir.file("track.wav");
+ std::stop_source source; source.request_stop();
+ const auto result = beatglass::library::browse(dir.path, {}, 10000, source.get_token());
+ CHECK(result.entries.empty());
+ CHECK(result.cancelled);
+ CHECK(result.diagnostic == "catalog query cancelled");
+}
+TEST_CASE("catalog exposes a stable status for entry limits") {
+ TempDir dir; dir.file("one.wav"); dir.file("two.flac");
+ const auto result = beatglass::library::browse(dir.path, {}, 1);
+ CHECK(result.status == beatglass::library::CatalogStatus::entry_limit_exceeded);
+}
+TEST_CASE("catalog fails closed when the entry budget is exceeded") {
+ TempDir dir; dir.file("one.wav"); dir.file("two.flac");
+ const auto result = beatglass::library::browse(dir.path, {}, 1);
+ CHECK(result.entries.empty());
+ CHECK(result.diagnostic == "catalog entry limit exceeded");
+}
+TEST_CASE("recursive catalog applies the entry budget") {
+ TempDir dir; const auto root = dir.path;
+ std::filesystem::create_directories(root / "nested");
+ std::ofstream(root / "nested" / "deep.wav") << "x";
+ const auto result = beatglass::library::browse_recursive(root, {}, 1);
+ CHECK(result.entries.empty());
+ CHECK(result.diagnostic == "catalog entry limit exceeded");
 }
 TEST_CASE("catalog skips symlinked files and directories") {
   TempDir dir; dir.file("real.wav");

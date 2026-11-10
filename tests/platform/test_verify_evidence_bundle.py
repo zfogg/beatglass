@@ -1,6 +1,8 @@
 import importlib.util
 import hashlib
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -41,7 +43,846 @@ class EvidenceBundleTest(unittest.TestCase):
                     "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
             manifest.write_text(json.dumps(data), encoding="utf-8")
             errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid artifact hash" in error or "invalid or duplicate artifact entry" in error for error in errors))
+
+    def test_artifact_unknown_fields_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "size": 1}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("unsupported artifact fields: ['size']", module.verify(root, manifest))
+
+    def test_artifact_hash_must_be_a_sha256_digest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("x\n", encoding="utf-8")
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "not-a-digest", "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid artifact hash" in error or "invalid or duplicate artifact entry" in error for error in errors))
+
+    def test_artifact_hash_must_be_lowercase(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("x\n", encoding="utf-8")
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "A" * 64, "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
             self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
+
+    def test_capture_timestamp_must_be_timezone_aware_iso8601(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "not-a-time",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertIn("captured_at must be ISO-8601", errors)
+            data["captured_at"] = "2020-01-01T00:00:00"
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("captured_at must include timezone", module.verify(root, manifest))
+
+    def test_capture_timestamp_cannot_be_in_the_future(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2999-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("captured_at cannot be in the future", module.verify(root, manifest))
+
+    def test_commit_provenance_must_be_a_sha1(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "main", "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("commit must be a 40-character hexadecimal SHA-1", module.verify(root, manifest))
+
+    def test_platform_provenance_must_be_supported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "android", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("unsupported platform: android", module.verify(root, manifest))
+
+    def test_artifact_role_must_be_nonempty_string_when_present(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": []}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact role must be a nonempty string: capture.txt", module.verify(root, manifest))
+
+    def test_artifact_role_must_be_trimmed_when_present(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": " capture "}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact role must not have leading or trailing whitespace: capture.txt", module.verify(root, manifest))
+
+    def test_artifact_role_has_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": "x" * 129}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact role exceeds 128 characters: capture.txt", module.verify(root, manifest))
+
+    def test_artifact_path_with_nul_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u0000.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_be_trimmed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": " capture.txt ", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_use_forward_slashes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "captures\\capture.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_dot_segments(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "captures/./capture.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_empty_segments(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "captures//capture.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_has_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "a" * 513, "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_colons(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "captures:report.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_control_characters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\n.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_del_control_character(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u007f.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_paths_must_not_collide_case_insensitively(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "Capture.txt", "sha256": "0" * 64}, {"path": "capture.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_symlink_artifacts_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); outside = root.parent / "evidence-outside.txt"; outside.write_text("secret", encoding="utf-8")
+            link = root / "capture.txt"
+            try:
+                link.symlink_to(outside)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact must not be a symlink: capture.txt", module.verify(root, manifest))
+
+    def test_symlink_manifest_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); target = root / "real.json"; target.write_text("{}", encoding="utf-8")
+            manifest = root / "manifest.json"
+            try:
+                manifest.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            self.assertEqual(["manifest must not be a symlink"], module.verify(root, manifest))
+
+    def test_manifest_directory_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"; manifest.mkdir()
+            self.assertEqual(["manifest must be a regular file"], module.verify(root, manifest))
+
+    def test_bundle_root_file_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "bundle"; root.write_text("not a directory", encoding="utf-8")
+            manifest = Path(tmp) / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            self.assertEqual(["bundle root must be a directory"], module.verify(root, manifest))
+
+    def test_json_groups_input_topology_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "bundle"; root.write_text("not a directory", encoding="utf-8")
+            manifest = Path(tmp) / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertEqual(1, payload["error_categories"]["input_topology"])
+
+    def test_json_groups_resource_limit_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"artifacts": [{"path": "a"}, {"path": "b"}]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--max-entries", "1", "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertEqual(1, payload["error_categories"].get("entry_count", payload["error_categories"].get("resource_limit", 0)))
+
+    def test_json_groups_schema_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"artifacts": [], "scenarios": [], "unexpected": True}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["schema"], 1)
+
+    def test_json_groups_provenance_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"artifacts": [], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["provenance"], 1)
+
+    def test_json_groups_scenario_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"artifacts": [], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["scenario"], 1)
+
+    def test_json_groups_artifact_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"artifacts": [{"path": "missing.txt", "sha256": "a"*64}], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_missing", payload["error_categories"].get("artifact", 0)), 1)
+
+    def test_json_groups_temporal_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"x","commit":"a"*40,"captured_at":"2099-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("freshness", payload["error_categories"].get("temporal", 0)), 1)
+
+    def test_json_groups_scenario_evidence_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"x","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS", "evidence": "missing.txt"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["scenario_evidence"], 1)
+
+    def test_json_groups_manifest_parse_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"; manifest.write_text("{not-json", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertEqual(1, payload["error_categories"]["parse"])
+
+    def test_json_groups_status_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "BROKEN"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["status"], 1)
+
+    def test_json_groups_scenario_reference_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS", "evidence": "bad<name"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("scenario_path", payload["error_categories"].get("scenario_reference", 0)), 1)
+
+    def test_json_groups_scenario_schema_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS", "unexpected": True} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["scenario_schema"], 1)
+
+    def test_json_groups_scenario_identity_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("x", encoding="utf-8")
+            manifest = root / "manifest.json"
+            entries = [{"path": "capture.txt", "sha256": hashlib.sha256(b"x").hexdigest(), "role": x} for x in module.REQUIRED_SCENARIOS]
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": entries, "scenarios": [{"id": x, "status": "PASS", "evidence": "capture.txt"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["scenario_identity"], 1)
+
+    def test_json_groups_role_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"; (root / "capture.txt").write_text("x", encoding="utf-8")
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256": hashlib.sha256(b"x").hexdigest()}], "scenarios": [{"id": x, "status": "PASS", "evidence": "capture.txt"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("role", 0), 1)
+
+    def test_json_groups_artifact_role_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("x", encoding="utf-8"); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256": hashlib.sha256(b"x").hexdigest(), "role":""}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["artifact_role"], 1)
+
+    def test_json_groups_hash_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("x", encoding="utf-8"); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256": "0"*64}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["hash"], 1)
+
+    def test_json_groups_size_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").write_text("long", encoding="utf-8"); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256": hashlib.sha256(b"long").hexdigest()}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--max-artifact-bytes", "1", "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("size", 0), 1)
+
+    def test_json_groups_identity_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "a.txt").write_text("a", encoding="utf-8")
+            manifest = root / "manifest.json"
+            artifact = {"path": "a.txt", "sha256": hashlib.sha256(b"a").hexdigest()}
+            manifest.write_text(json.dumps({"platform":"x","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [artifact, artifact], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["identity"], 1)
+
+    def test_json_groups_path_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"x","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path": "../escape.txt", "sha256": "a"*64}], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_path", payload["error_categories"].get("path", 0)), 1)
+
+    def test_json_groups_artifact_path_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"../escape.txt", "sha256":"0"*64}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_path", 0), 1)
+
+    def test_json_groups_missing_artifact_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"missing.txt", "sha256":"0"*64}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_missing", 0), 1)
+
+    def test_json_groups_artifact_type_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").mkdir(); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256":"0"*64}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_type", 0), 1)
+
+    def test_json_groups_artifact_symlink_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); target = root / "real.txt"; target.write_text("x", encoding="utf-8"); link = root / "capture.txt"
+            try:
+                link.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256":"0"*64}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_symlink", 0), 1)
+
+    def test_json_groups_bundle_symlink_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); target = parent / "bundle"; target.mkdir(); root = parent / "link"
+            try:
+                root.symlink_to(target, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            manifest = parent / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("bundle_symlink", 0), 1)
+
+    def test_json_groups_manifest_symlink_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); target = root / "real.json"; target.write_text("{}", encoding="utf-8"); manifest = root / "manifest.json"
+            try:
+                manifest.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("manifest_symlink", 0), 1)
+
+    def test_json_groups_manifest_type_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"; manifest.mkdir()
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("manifest_type", 0), 1)
+
+    def test_json_groups_platform_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"unsupported","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["platform"], 1)
+
+    def test_json_groups_environment_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x"*513, "artifacts": [], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["environment"], 1)
+
+    def test_json_groups_commit_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"not-a-sha","captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["commit"], 1)
+
+    def test_non_regular_artifacts_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture-dir"; artifact.mkdir()
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture-dir", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue("missing artifact: capture-dir" in errors or "artifact must be a regular file: capture-dir" in errors)
+
+    def test_oversized_artifacts_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.bin"
+            with artifact.open("wb") as stream:
+                stream.truncate(module.MAX_ARTIFACT_BYTES + 1)
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.bin", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact exceeds 1073741824 bytes: capture.bin", module.verify(root, manifest))
+
+    def test_custom_resource_limits_are_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("xx", encoding="utf-8")
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact exceeds 1 bytes: capture.txt", module.verify(root, manifest, max_artifact_bytes=1))
+            self.assertIn("resource limits must be positive", module.verify(root, manifest, max_entries=0))
+
+    def test_total_artifact_size_limit_is_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("xx", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest(); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": digest, "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifacts exceed total 1 bytes", module.verify(root, manifest, max_total_artifact_bytes=1))
+
+    def test_cli_json_report_is_machine_readable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(__file__).with_name("verify_evidence_bundle.py")),
+                                     "--root", str(root), "--manifest", str(manifest), "--json"],
+                                    capture_output=True, text=True, check=False)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["schema_version"], 1)
+            self.assertFalse(report["valid"])
+            self.assertTrue(report["errors"])
+            self.assertEqual(report["error_count"], len(report["errors"]))
+            self.assertEqual(sum(report["error_categories"].values()), report["error_count"])
+            self.assertIn("max_total_artifact_bytes", report["limits"])
+            self.assertEqual(report["artifact_count"], 0)
+            self.assertEqual(report["artifact_bytes"], 0)
+            self.assertNotEqual(result.returncode, 0)
+
+    def test_oversized_manifests_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text("{" + " " * module.MAX_MANIFEST_BYTES + "}", encoding="utf-8")
+            self.assertIn("manifest exceeds 16777216 bytes", module.verify(root, manifest))
+
+    def test_scenario_inventory_has_bounded_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": "capture", "status": "PENDING"} for _ in range(1001)]
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("scenarios exceed 1000 entries", module.verify(root, manifest))
+
+    def test_scenario_id_has_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": "c" * 129, "status": "PENDING"}]
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid scenario" in error for error in module.verify(root, manifest)))
+
+    def test_scenario_unknown_fields_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["notes"] = "extra"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("unsupported scenario fields: ['notes']", module.verify(root, manifest))
+
+    def test_scenario_evidence_reference_has_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "x" * 513
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_scenario_evidence_matches_case_insensitive_artifact_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "Capture.txt"; artifact.write_text("x", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+            manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0] = {"id": "capture", "status": "PASS", "evidence": "capture.txt"}
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "Capture.txt", "sha256": digest, "role": "capture"}], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertNotIn("scenario evidence is not retained: capture", module.verify(root, manifest))
+
+    def test_scenario_evidence_reference_must_be_canonical_unicode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "capture\u0301.txt"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_scenario_evidence_reference_must_be_portable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "capture?.txt"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_scenario_evidence_reference_components_have_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "x" * 256
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_scenario_evidence_reference_must_not_use_colons(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "capture:report.txt"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_scenario_evidence_reference_must_use_forward_slashes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "captures\\capture.txt"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_scenario_evidence_reference_must_not_use_dot_segments(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "captures/./capture.txt"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_scenario_evidence_reference_must_not_use_device_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "CON.txt"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
+    def test_artifact_path_segments_must_be_windows_safe(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture. ", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_windows_device_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "CON.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_windows_reserved_characters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture?.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_components_have_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "a" * 256, "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_use_nfc_unicode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "cafe\u0301.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_unicode_noncharacters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\ufdd0.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_bidi_controls(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u202e.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_format_controls(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u200b.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_unicode_line_separators(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u2028.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_unicode_space_separators(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u00a0.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_surrogate_codepoints(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\ud800.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_replacement_character(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\ufffd.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_private_use_characters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\ue000.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_artifact_path_must_not_use_unassigned_codepoints(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u0378.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
+    def test_environment_provenance_rejects_control_characters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "host\nidentity", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("environment must not contain control characters", module.verify(root, manifest))
+
+    def test_platform_provenance_must_be_lowercase(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "Windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("platform must be lowercase", module.verify(root, manifest))
+
+    def test_environment_provenance_must_be_trimmed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": " host", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("environment must not have leading or trailing whitespace", module.verify(root, manifest))
+
+    def test_environment_provenance_has_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "x" * 513, "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("environment exceeds 512 characters", module.verify(root, manifest))
+
+    def test_artifact_inventory_has_bounded_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            artifacts = [{"path": f"capture-{index}.txt", "sha256": "0" * 64} for index in range(1001)]
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": artifacts,
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifacts exceed 1000 entries", module.verify(root, manifest))
+
+    def test_commit_provenance_must_be_lowercase(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "A" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("commit must be a 40-character hexadecimal SHA-1", module.verify(root, manifest))
 
     def test_scenario_id_must_be_hashable_string(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -532,6 +1373,85 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertFalse(result["platforms"][0]["retention_ok"])
             self.assertEqual(result["platforms"][0]["error_count"], len(result["platforms"][0]["errors"]))
 
+
+    def test_json_groups_manifest_size_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--max-manifest-bytes", "1", "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("manifest_size", 0), 1)
+
+    def test_json_groups_entry_count_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"a"},{"path":"b"}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--max-entries", "1", "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("entry_count", 0), 1)
+
+    def test_json_groups_artifact_schema_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"a", "unexpected": True}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_schema", 0), 1)
+
+    def test_json_groups_manifest_schema_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text("[]", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("manifest_schema", 0), 1)
+
+    def test_json_groups_clock_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00","environment":"x", "artifacts": [], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("clock", 0), 1)
+
+    def test_json_groups_timestamp_format_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"not-a-timestamp","environment":"x", "artifacts": [], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("timestamp_format", 0), 1)
+
+    def test_json_groups_freshness_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2099-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("freshness", 0), 1)
+
+    def test_json_groups_hash_format_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"a", "sha256":"bad"}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("hash_format", 0), 1)
+
+    def test_json_groups_artifact_entry_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": ["not-an-object"], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_entry", 0), 1)
+
+    def test_json_groups_scenario_entry_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": ["not-an-object"]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("scenario_entry", 0), 1)
 
 if __name__ == "__main__":
     unittest.main()
