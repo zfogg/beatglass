@@ -3149,6 +3149,7 @@ ApplicationWindow {
                         Accessible.description: enabled ? "Fingerprint and queue the first available recursive audio results; the bounded queue reports accepted and rejected items." : "An analysis batch is already active; wait for completion or cancel before submitting another batch."
                         ToolTip.text: "Queue the first recursive audio results for offline analysis"
                         onClicked: {
+                            window.clearSelectedAudio()
                             const paths = []
                             for (let i = 0; i < window.recursiveCatalogRows.length && paths.length < 2; ++i) {
                                 const row = window.recursiveCatalogRows[i]
