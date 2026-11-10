@@ -106,11 +106,16 @@ def build_report(root: Path) -> dict:
                      "errors": errors})
     status = [{"platform": p, "status": "experimental"} for p in PLATFORMS]
     generation_errors = [f"{row['platform']}: {error}" for row in rows for error in row.get("errors", [])]
+    error_categories = {}
+    for error in generation_errors:
+        category = error.split(":", 1)[-1].strip().split(":", 1)[0]
+        error_categories[category] = error_categories.get(category, 0) + 1
     return {"readiness_report_schema": 1, "support_language": "experimental",
             "native_qualification_required": True, "exit_gate_status": "PENDING",
             "exit_gate_reason_codes": ["native_qualification_required", "generated_report_pending_review"],
             "ready": False, "platform_support_status": status, "platforms": rows,
-            "generation_errors": generation_errors, "handoff_check_errors": [],
+            "generation_errors": generation_errors, "generation_error_count": len(generation_errors),
+            "generation_error_categories": error_categories, "handoff_check_errors": [],
             "documentation_check_errors": [], "ingestion_errors": []}
 
 
