@@ -86,5 +86,7 @@ target and requiring explicit replacement of regular files only.
 The readiness checker enforces the same symlink-free parent-path rule for its
 `--report` output.
 It also refuses to replace an existing symlink at that output path.
+All ancestor components are checked, including missing nested directories that
+would otherwise be created beneath a symlinked workspace component.
 Its `--max-age-hours` value must be positive, preventing accidental
 configuration that marks every retained bundle stale.
