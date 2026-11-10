@@ -208,6 +208,11 @@ if reacquisition is not None:
     if reacquisition.get("source_name") is not None:
         if not isinstance(reacquisition["source_name"], str) or not reacquisition["source_name"].strip():
             raise SystemExit("reacquisition evidence has an empty source name")
+    if reacquisition.get("commit") is not None:
+        if not isinstance(reacquisition["commit"], str) or not reacquisition["commit"].strip():
+            raise SystemExit("reacquisition evidence has an empty commit")
+        if isinstance(payload, dict) and payload.get("commit") and reacquisition["commit"] != payload["commit"]:
+            raise SystemExit("reacquisition commit does not match artifact")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
