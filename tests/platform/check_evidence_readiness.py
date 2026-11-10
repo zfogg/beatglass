@@ -3,6 +3,8 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import os
+import tempfile
 from pathlib import Path
 import sys
 from datetime import datetime, timezone
@@ -356,7 +358,17 @@ def main() -> int:
     errors = check(args.status, args.bundles, args.max_age_hours)
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(report(args.status, args.bundles, args.max_age_hours), indent=2) + "\n", encoding="utf-8")
+        serialized = json.dumps(report(args.status, args.bundles, args.max_age_hours), indent=2) + "\n"
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=args.report.parent,
+                                             prefix=f".{args.report.name}.", suffix=".tmp", delete=False) as stream:
+                temporary = Path(stream.name)
+                stream.write(serialized); stream.flush(); os.fsync(stream.fileno())
+            os.replace(temporary, args.report); temporary = None
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
