@@ -16,6 +16,10 @@ def main() -> int:
         raise SystemExit("CLI playback buffers exceed the shared bounded session capacity")
     if "no fresh packets arrived; reacquiring" not in tui:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
+    if "library_folder" not in tui or "std::quoted(preferences.library_folder)" not in tui:
+        raise SystemExit("CLI Library folder preference is not persisted as a quoted path")
+    if "!explicit_root && !preferences.library_folder.empty()" not in tui:
+        raise SystemExit("CLI Library folder preference is not restored on startup")
     if 'Button(" Recover persisted "' not in tui:
         raise SystemExit("CLI Library does not expose persisted recovery action")
     for marker in ("live_endpoint_id", "live_endpoint_name", "live_endpoint_preference", "updated.live_endpoint_id", "updated.live_endpoint_name"):
