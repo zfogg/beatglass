@@ -1096,6 +1096,13 @@ def test_live_evidence_group_reports_pulse_status():
     assert "beatPulse.running" in body
 
 
+def test_overlay_pulse_status_exposes_tempo_period():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert "beatPulse.interval" in label
+    assert "millisecond period" in label
+
+
 def test_recovery_pause_focus_helper_reports_target_result():
     start = QML.index("function focusOverlayRecoveryPauseState")
     body = QML[start : QML.index("    function resetOverlayRecoveryAttempts", start)]
