@@ -1260,6 +1260,8 @@ def test_overlay_exposes_visible_capture_scope_label():
     assert "Capture-only" in body
     assert "track/deck metadata unavailable" in body
     assert "selected output mix" in body
+    assert "captureMonitorBridge.status" in body
+    assert "evidence stale until fresh capture" in body
     assert "; combined output may be ambiguous" in body
 
 
