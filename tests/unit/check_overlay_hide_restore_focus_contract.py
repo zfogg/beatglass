@@ -147,3 +147,12 @@ def test_opacity_changes_share_stale_recovery_handler():
     assert "overlayOpacityEditInFlight" in body
     assert "overlayCaptureEvidenceStale = true" in body
     assert "handleOverlayOpacityChanged()" in QML[QML.index("function onOpacityChanged") : start]
+
+
+def test_geometry_recovery_preserves_stale_state_and_focuses_next_action():
+    start = QML.index("function handleOverlayGeometryRecovery")
+    body = QML[start : QML.index("    function focusOverlayDisplaySelectionRequired", start)]
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "recoverOverlayAfterDisplayChange()" in body
+    assert "retryOverlay.forceActiveFocus()" in body
+    assert "handleOverlayGeometryRecovery()" in QML[QML.index("function onGeometryChanged") : start]

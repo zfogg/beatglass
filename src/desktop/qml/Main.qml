@@ -2096,14 +2096,7 @@ ApplicationWindow {
             if (window.overlayDisplayRecoveryPending && window.overlayBridge
                     && window.overlayBridge.screenNames.length > 0
                     && !window.overlayDisplaySelectionRequired) {
-                if (!window.overlayRecoveryPausedByUser)
-                    window.recoverOverlayAfterDisplayChange()
-                else
-                    window.announceCaptureRecoveryState("DJ overlay geometry restored; recovery remains paused until Resume recovery is chosen.")
-                if (window.overlayRecoveryPausedByUser)
-                    resumeOverlayRecovery.forceActiveFocus()
-                else
-                    retryOverlay.forceActiveFocus()
+                window.handleOverlayGeometryRecovery()
             }
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
@@ -2130,6 +2123,17 @@ ApplicationWindow {
         }
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlayGeometryRecovery() {
+        window.overlayCaptureEvidenceStale = true
+        if (!window.overlayRecoveryPausedByUser)
+            window.recoverOverlayAfterDisplayChange()
+        else
+            window.announceCaptureRecoveryState("DJ overlay geometry restored; recovery remains paused until Resume recovery is chosen. Live evidence remains stale until fresh capture arrives.")
+        if (window.overlayRecoveryPausedByUser)
+            resumeOverlayRecovery.forceActiveFocus()
+        else
+            retryOverlay.forceActiveFocus()
     }
     function focusOverlayDisplaySelectionRequired() {
         window.overlayDisplaySelectionRequired = true
