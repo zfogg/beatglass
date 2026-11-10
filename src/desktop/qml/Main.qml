@@ -1534,6 +1534,12 @@ ApplicationWindow {
         overlayDisplay.forceActiveFocus()
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
     }
+    function focusOverlayDisplayRecoveryFailure(message, target) {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        return window.focusOverlayAvailabilityRecovery(message, target || overlayDisplay)
+    }
     function focusOverlaySizeRecovery(message) {
         overlaySize.forceActiveFocus()
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))

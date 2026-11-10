@@ -1181,3 +1181,12 @@ def test_capture_startup_and_attach_failures_report_handled_result():
     assert "return true" in attach
     assert "overlayDisplayRecoveryPending = true" in startup
     assert "return true" in startup
+
+
+def test_display_recovery_failure_helper_is_defined_and_propagates_result():
+    start = QML.index("function focusOverlayDisplayRecoveryFailure")
+    body = QML[start : QML.index("    function focusOverlaySizeRecovery", start)]
+    assert "overlayDisplayRecoveryPending = true" in body
+    assert "overlayDisplaySelectionRequired = true" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "return window.focusOverlayAvailabilityRecovery" in body
