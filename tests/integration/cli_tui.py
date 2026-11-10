@@ -2,9 +2,31 @@ import pathlib
 import re
 import subprocess
 import sys
+import os
+import tempfile
 
 exe = sys.argv[1]
 root = pathlib.Path(sys.argv[2])
+
+with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
+    cache_env = os.environ.copy()
+    if os.name == "nt":
+        cache_env["APPDATA"] = config_dir
+    else:
+        cache_env["XDG_CONFIG_HOME"] = config_dir
+    first = subprocess.run(
+        [exe, "--snapshot", str(root), "library"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace", env=cache_env,
+    )
+    assert first.returncode == 0, first.stderr
+    second = subprocess.run(
+        [exe, "--snapshot", str(root), "library"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace", env=cache_env,
+    )
+    assert second.returncode == 0, second.stderr
+    second_plain = re.sub(r"\x1b\[[0-9;]*m", "", second.stdout)
+    assert "persisted cache hits" in second_plain
+    assert "[cached]" in second_plain
 
 for tab, heading in (("library", "LIBRARY"), ("live", "LIVE"), ("settings", "SETTINGS")):
     result = subprocess.run(

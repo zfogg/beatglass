@@ -49,6 +49,7 @@
 #ifdef BEATGLASS_CLI_LIBRARY
 #include "beatglass/library/storage_owner.hpp"
 #include "beatglass/library/analysis_operation.hpp"
+#include "beatglass/library/file_analysis_operation.hpp"
 #endif
 #include <mutex>
 
@@ -478,7 +479,7 @@ int main(int argc, char** argv) {
   std::unique_ptr<beatglass::library::StorageOwner> library_storage = std::make_unique<beatglass::library::StorageOwner>();
   std::string library_storage_status;
   std::size_t library_retryable_count = 0;
-  if (!snapshot) if (const auto config = preferences_path(); !config.empty()) {
+  if (const auto config = preferences_path(); !config.empty()) {
     std::error_code storage_error;
     std::filesystem::create_directories(config.parent_path(), storage_error);
     const auto database = config.parent_path() / "library.sqlite3";
@@ -665,7 +666,7 @@ int main(int argc, char** argv) {
 #ifdef BEATGLASS_CLI_LIBRARY
         if (library_storage_ptr) {
           cache_identity = cache_source(path);
-          const auto admission = library_storage_ptr->admit_analysis(cache_identity->run_id, cache_identity->identity, path.string(), "cli-aubio-v1");
+          const auto admission = library_storage_ptr->admit_analysis(cache_identity->run_id, cache_identity->identity, path.string(), beatglass::library::kCliDecoderSnapshot);
           if (admission.cached) {
             if (auto cached = decode_cached_analysis(*admission.cached, path)) {
               if (cached->waveform.empty()) cached->waveform = decode_waveform(path, stop_token);
@@ -699,7 +700,7 @@ int main(int argc, char** argv) {
           beatglass::library::AnalysisOperation operation;
           operation.source = cache_identity->source;
           operation.identity = identity;
-          operation.decoder_snapshot = "cli-aubio-v1";
+          operation.decoder_snapshot = beatglass::library::kCliDecoderSnapshot;
           const auto encoded = encode_cached_analysis(completed);
           operation.serialize = [encoded] { return encoded; };
           operation.verify = [source = cache_identity->source](std::stop_token cancel) {
