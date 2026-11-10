@@ -234,3 +234,14 @@ def test_show_shortcut_announces_stale_boundary():
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
     assert "showOverlay.forceActiveFocus()" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_hide_shortcut_uses_explicit_hidden_state_for_focus():
+    start = QML.index("function focusOverlayHideShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "window.overlayHiddenByUser" in body
+    assert "restoreOverlay.forceActiveFocus()" in body
+    assert "hideOverlay.forceActiveFocus()" in body
+    shortcut = QML[QML.index("objectName: \"overlayHideFocusShortcut\"") : start]
+    assert "window.focusOverlayHideShortcut()" in shortcut
+    assert "if (hidden)" not in shortcut
