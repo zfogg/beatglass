@@ -7,7 +7,13 @@ from pathlib import Path
 if len(sys.argv) not in (2, 4) or (len(sys.argv) == 4 and sys.argv[2] != "--summary"):
     raise SystemExit("usage: qualification_matrix.py OUTPUT.json [--summary SUMMARY.json]")
 output = Path(sys.argv[1])
-summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8")) if len(sys.argv) == 4 else None
+if len(sys.argv) == 4:
+    try:
+        summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise SystemExit(f"malformed native qualification summary: {error}")
+else:
+    summary = None
 summary_path = Path(sys.argv[3]).resolve() if len(sys.argv) == 4 else None
 host = platform.system()
 platforms = {

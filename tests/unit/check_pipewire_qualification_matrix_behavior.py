@@ -117,4 +117,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(non_object), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "summary must be an object" not in result.stderr + result.stdout:
         raise SystemExit("non-object summary was accepted")
+    summary.write_text("{malformed", encoding="utf-8")
+    malformed_summary = root / "malformed-summary-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(malformed_summary), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "malformed native qualification summary" not in result.stderr + result.stdout:
+        raise SystemExit("malformed summary JSON was not reported cleanly")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
