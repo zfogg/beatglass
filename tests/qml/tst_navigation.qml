@@ -221,6 +221,16 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("already pending") >= 0)
         app.destroy()
     }
+    function test_geometryAnnouncementRejectsMalformedSnapshot() {
+        let app = shellWithOverlay.createObject(null)
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: NaN })
+        verify(!app.announceOverlayGeometryState())
+        verify(app.overlayDisplayRecoveryPending)
+        verify(app.overlayDisplaySelectionRequired)
+        verify(app.overlayRecoveryAnnouncement.indexOf("geometry changed") >= 0)
+        app.destroy()
+        fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
