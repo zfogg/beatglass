@@ -12,6 +12,7 @@ std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_i
     // mutually-exclusive operation contract valid after replacing the source
     // of the serialized result.
     operation.serialize = {};
+    operation.verify = [](std::stop_token) { return FileVerificationResult{FileVerificationOutcome::match}; };
   }
   if (!operation.valid()) return {};
   const auto recovery_id = run_id;
@@ -19,7 +20,7 @@ std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_i
   operation.recover_cancellation = [cache = storage_.cache(), recovery_id, recovery_key] {
     if (cache) cache->mark_retryable(recovery_id, recovery_key);
   };
-  operation.publish_transaction = make_transactional_publisher(*storage_.cache(), std::move(run_id), operation.identity, operation.verify);
+  operation.publish_transaction = admission.cached ? std::function<bool(const std::string&, std::stop_token)>([](const std::string&, std::stop_token) { return true; }) : make_transactional_publisher(*storage_.cache(), std::move(run_id), operation.identity, operation.verify);
   return runner_.submit_retryable(std::move(operation), priority);
 }
 AnalysisCoordinator::Submission AnalysisCoordinator::submit_admitted(std::string run_id, AnalysisOperation operation, int priority) {
