@@ -2115,10 +2115,10 @@ ApplicationWindow {
                     ToolTip.text: "Press Escape to restore overlay keyboard and pointer controls"
                     Accessible.description: text
                 }
-                    Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live tempo estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
+                    Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live tempo estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                     Label { id: overlayPulseStatus; text: "Beat pulse " + (beatPulse.running ? "active · " + beatPulse.interval + " ms · " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") : (window.overlayCaptureEvidenceStale ? "idle · stale" : "idle") + " · " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "capture unavailable") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? " · reduced" : "")); objectName: "overlayPulseStatus"; color: window.themeForegrounds[window.selectedThemeIndex]; activeFocusOnTab: true; padding: 3; background: Rectangle { color: "transparent"; border.width: overlayPulseStatus.activeFocus ? 2 : 0; border.color: window.themeAccentColors[window.selectedThemeIndex]; radius: 3 } Accessible.name: "Overlay beat pulse status"; Accessible.role: Accessible.Status; Accessible.focusable: true; Accessible.description: "Beat-synchronized visual metronome status; " + window.overlayPulseAnnouncement + " " + (beatPulse.running ? "Active for valid live BPM with a " + beatPulse.interval + " millisecond period and " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") + " contrast" : "Idle until a Monitoring capture bridge, valid live BPM, and full motion are available") + ". Keyboard shortcut Ctrl+Alt+Shift+B focuses this status."; ToolTip.text: "Beat-synchronized visual pulse status; Ctrl+Alt+Shift+B focuses this status" }
-                    Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live key and chord estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
-                    Label { id: overlayCaptureStatus; text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "Previously displayed evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current output capture status; " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
+                    Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony: " + text; Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live key and chord estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
+                    Label { id: overlayCaptureStatus; text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "Previously displayed evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current output capture status; " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                     QtObject { objectName: "captureStatus"; readonly property string text: overlayCaptureStatus.text }
                 Button {
                     objectName: "overlayRetryCapture"
@@ -3398,7 +3398,6 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.failureReason !== ""
                                 text: visible ? ("Analysis issue: " + window.analysisJobBridge.failureReason) : ""
                                 Accessible.name: "Analysis failure reason"
-                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text + ". Use Retry analysis or discard recovery when the status permits." : "No analysis failure has been reported."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -3410,7 +3409,6 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.recoveryStatus !== ""
                                 text: visible ? ("Recovery status: " + window.analysisJobBridge.recoveryStatus) : ""
                                 Accessible.name: "Analysis recovery status"
-                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text + ". Review admission and queue status before choosing Retry or discard recovery." : "No recovery reset has been performed."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -3598,7 +3596,6 @@ ApplicationWindow {
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisError !== ""
                                 text: visible ? storageRecovery.analysisError : ""
                                 Accessible.name: "Analysis queue error"
-                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text : "No analysis queue error is present."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -4627,7 +4624,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationDataStatus"
                     text: visualizationCanvas.renderedWaveform.length + " waveform samples · " + visualizationCanvas.renderedSpectrum.length + " spectrum bins"
-                    Accessible.name: "Visualization data status"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text
+                    Accessible.name: "Visualization data status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -4771,7 +4768,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationCaptureStatus"
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
-                    Accessible.name: "Visualization capture status"; Accessible.value: text
+                    Accessible.name: "Visualization capture status: " + text
                     Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
