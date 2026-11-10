@@ -1002,3 +1002,12 @@ def test_show_paths_require_available_overlay():
     assert "overlayBridge.available" in action
     assert "screenNames.length === 0" in button
     assert "screenNames.length === 0" in action
+
+
+def test_click_through_shortcut_requires_available_overlay():
+    start = QML.index("function handleOverlayClickThroughShortcutAction")
+    body = QML[start : QML.index("    function handleOverlayClickThroughShortcut()", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
