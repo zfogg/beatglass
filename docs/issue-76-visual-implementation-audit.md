@@ -1029,3 +1029,5 @@ Failed visual-state restore now sets the recovery-required marker, keeping the U
 Native resize or opacity application failures now retain the recovery-required marker, so partial visual restoration cannot be reported as ready.
 
 An invalid persisted opacity now keeps the visual recovery marker set even when safe 90 percent opacity is applied, making the fallback explicit until settings are reviewed.
+
+Failed size-preference synchronization now retains the visual recovery marker, preventing invalid geometry from appearing restored before a valid overlay state is applied.
