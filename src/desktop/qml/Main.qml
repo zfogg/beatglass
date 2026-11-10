@@ -395,7 +395,7 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             const resetOpacity = 0.9
-            window.handleOverlayOpacityResetShortcut(resetOpacity)
+            window.handleOverlayOpacityResetAction(resetOpacity)
         }
     }
     Shortcut {
@@ -406,10 +406,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            const sizes = [[250, 110], [310, 130], [430, 180]]
-            const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
-            const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
-            window.handleOverlaySizeChangeResult(resized, nextIndex)
+            window.handleOverlaySizeShortcut()
         }
     }
     Shortcut {
@@ -1475,8 +1472,12 @@ ApplicationWindow {
         window.handleOverlayOpacityResetResult(applied, resetOpacity)
         return applied
     }
-    function handleOverlayOpacityResetShortcut(resetOpacity) {
-        return window.handleOverlayOpacityResetAction(resetOpacity)
+    function handleOverlaySizeShortcut() {
+        const sizes = [[250, 110], [310, 130], [430, 180]]
+        const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
+        const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
+        window.handleOverlaySizeChangeResult(resized, nextIndex)
+        return resized
     }
     function focusOverlayOpacityEditRecovery(message) {
         overlayOpacityControl.forceActiveFocus()
