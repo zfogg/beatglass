@@ -1,5 +1,15 @@
 # Progress and handoff
 
+## Current native qualification snapshot (2026-11-10)
+
+The current main line has passing Windows qualification contracts for cache
+lookup, the Windows qualification manifest and script syntax, and the Issue
+76 QML aggregate contract. Focused macOS Qt 6.12 runs pass the persisted
+overlay visual-restore, display reconnect, and paused display-reorder
+scenarios. These checks are not a full v1 qualification claim: native Linux
+capture/desktop qualification and the complete cross-platform UI/audio matrix
+remain open.
+
 Overlay settings now provide a focused endpoint refresh action that keeps
 selection and retry recovery in one workflow. Portable coverage is in
 `python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
