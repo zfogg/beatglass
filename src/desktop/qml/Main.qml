@@ -2816,7 +2816,6 @@ ApplicationWindow {
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                     Accessible.name: "Library catalog status: " + text
-                    Accessible.value: text + "; summary review available"
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Current catalog result count"
                     Accessible.description: text
