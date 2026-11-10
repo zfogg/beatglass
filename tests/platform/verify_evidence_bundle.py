@@ -234,7 +234,9 @@ def main() -> int:
                 category = "input_topology"
             elif error.startswith(("manifest exceeds ", "artifact exceeds ", "artifacts exceed ", "total artifact bytes exceed ", "too many artifacts")):
                 category = "resource_limit"
-            elif error.startswith(("missing provenance field", "scenarios must", "missing required scenarios", "unsupported manifest", "unsupported artifact fields", "invalid or duplicate artifact entry")):
+            elif error.startswith("missing provenance field"):
+                category = "provenance"
+            elif error.startswith(("scenarios must", "missing required scenarios", "unsupported manifest", "unsupported artifact fields", "invalid or duplicate artifact entry")):
                 category = "schema"
             else:
                 category = error.split(":", 1)[0]
