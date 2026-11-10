@@ -1434,8 +1434,8 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
-        if (!window.overlayBridge || !window.overlayBridge.available) {
-            window.focusOverlayAvailabilityRecovery("Hide overlay is unavailable because the native overlay is not available; control-window fallback remains active.", showOverlay)
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Hide overlay is unavailable because the native overlay or destination display is not available; control-window fallback remains active.", showOverlay)
             return false
         }
         if (window.overlayHiddenByUser)

@@ -361,3 +361,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Display focus availability contract | Display-focus shortcut runs after native overlay/display loss | Focus display recovery and return explicit failure until a destination display is available. |
 | Retry focus availability contract | Retry-focus shortcut runs after native overlay/display loss | Focus availability recovery and return explicit failure until retry can be meaningfully activated. |
 | Reapply focus availability contract | Reapply-settings shortcut runs after native overlay/display loss | Reject before announcing a misleading restore attempt, focus display recovery, and return explicit failure. |
+| Hide focus destination contract | Hide-focus shortcut runs after destination display loss | Reject focus transition, preserve control-window fallback, and return explicit failure until a display is available. |
