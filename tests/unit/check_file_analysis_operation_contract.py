@@ -11,7 +11,7 @@ required = {
     "source availability": "is_regular_file(path, ec)",
     "decode handoff": "op.decode = [path]",
     "serialized frame result": "decoded_frames=",
-    "wrapped progress handoff": "op.decode(stop, op.progress)",
+    "wrapped progress handoff": "op.decode = [path](std::stop_token stop, const auto& progress)",
 }
 missing = [name for name, marker in required.items() if marker not in header + source + runner]
 if missing: raise SystemExit("Missing file analysis operation markers: " + ", ".join(missing))
