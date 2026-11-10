@@ -1633,8 +1633,8 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
-        if (!window.overlayBridge) {
-            window.focusOverlayAvailabilityRecovery("Retry overlay control is unavailable because the native overlay bridge is not connected.", retryOverlay)
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Retry overlay control is unavailable until the native overlay and a destination display are ready.", retryOverlay)
             return false
         }
         retryOverlay.forceActiveFocus()
