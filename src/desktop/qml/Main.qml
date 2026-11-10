@@ -2642,7 +2642,6 @@ ApplicationWindow {
                 objectName: "navigation"
                 Layout.fillWidth: true
                 Accessible.name: "Primary navigation"
-                Accessible.value: currentIndex === 0 ? "Library" : (currentIndex === 1 ? "DJ" : (currentIndex === 2 ? "Settings" : "no page selected"))
                 Accessible.role: Accessible.Toolbar
                 Accessible.description: "Switch between Library, DJ, and Settings pages. Use Ctrl+Shift+1 for Library, Ctrl+Shift+2 for DJ, or Ctrl+Shift+3 for Settings."
                 ToolTip.text: "Primary workspace navigation; current page: " + (currentIndex === 0 ? "Library" : (currentIndex === 1 ? "DJ" : (currentIndex === 2 ? "Settings" : "none")))
