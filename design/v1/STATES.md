@@ -374,3 +374,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Bridge settings failure contract | Persisted overlay settings cannot be applied because the bridge is unavailable | Mark fallback/recovery pending and propagate the availability-focus result for callers. |
 | Settings recovery failure contract | Persisted overlay settings cannot be reapplied | Mark stale/fallback/pending state and propagate the restore-failure focus result. |
 | No-display recovery contract | Overlay recovers while no destination display is present | Mark display selection pending/stale and propagate availability-recovery focus result. |
+| Display-loss recovery contract | Active display disappears or retained geometry cannot synchronize | Mark display recovery pending/stale and propagate availability-recovery focus result. |
