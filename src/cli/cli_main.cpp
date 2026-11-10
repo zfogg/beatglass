@@ -1157,7 +1157,8 @@ int main(int argc, char** argv) {
 #else
         false;
 #endif
-    auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(live_status) | color(Color::GrayLight) | italic;
+    const auto displayed_live_status = live_presentation.stale ? live_status + "  [stale evidence — reacquiring]" : live_status;
+    auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(displayed_live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(displayed_live_status) | color(Color::GrayLight) | italic;
     const auto corrected_bpm = live_bpm ? std::optional<float>(*live_bpm * live_bpm_multiplier) : std::nullopt;
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
     const auto live_key_label = live_presentation.key;
