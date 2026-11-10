@@ -4884,6 +4884,7 @@ ApplicationWindow {
                     QtObject {
                         objectName: "clickThrough"
                         property bool checked: clickThroughToggle.checked
+                        readonly property bool activeFocus: clickThroughToggle.activeFocus
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() { clickThroughToggle.toggle() }
                     }
