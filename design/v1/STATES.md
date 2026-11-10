@@ -126,6 +126,7 @@
 | Display controls tooltip stale state | User hovers the display/size controls during recovery | Align the concise controls hint with the stale-evidence boundary. |
 | Settings summary stale state | User reviews the combined overlay settings summary during recovery | Keep persisted settings available while clearly separating them from stale live evidence. |
 | Settings summary tooltip stale state | User hovers the combined settings summary during recovery | Keep the compact summary hint aligned with the stale-evidence boundary. |
+| Settings summary value stale state | Assistive technology reads the combined settings summary during recovery | Include stale evidence in the status value while preserving persisted settings context. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
