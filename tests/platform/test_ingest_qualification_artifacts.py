@@ -339,3 +339,12 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=" + future + "\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertIn("capture timestamp cannot be in the future", errors)
+
+    def test_capture_timestamp_is_emitted_as_canonical_utc(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T01:00:00-05:00\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            self.assertEqual(ingest.ingest(root, root / "manifest.json"), [])
+            data = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(data["captured_at"], "2026-01-01T06:00:00Z")
