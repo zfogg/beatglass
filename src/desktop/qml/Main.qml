@@ -6,6 +6,7 @@ import Qt.labs.folderlistmodel
 
 ApplicationWindow {
     property alias unlockOverlay: clickThroughToggle
+    property alias navigation: navigation
     id: window
     objectName: "mainWindow"
     visible: true
