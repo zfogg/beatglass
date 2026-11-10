@@ -282,3 +282,11 @@ def test_click_through_toggle_result_preserves_stale_boundary():
     assert "setClickThrough(requested)" in body
     assert "overlayCaptureEvidenceStale = true" in body
     assert "clickThroughToggle.forceActiveFocus()" in body
+
+
+def test_retry_shortcut_keeps_fallback_actionable():
+    start = QML.index("function handleOverlayRetryShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "showOverlayAndHideControls()" in body
+    assert "retryOverlay.forceActiveFocus()" in body
+    assert "overlayCaptureEvidenceStale" in body

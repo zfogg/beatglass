@@ -336,10 +336,7 @@ ApplicationWindow {
         enabled: window.overlayBridge && !window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: {
-            window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until recovery succeeds.")
-            window.showOverlayAndHideControls()
-        }
+        onActivated: window.handleOverlayRetryShortcut()
     }
     Shortcut {
         objectName: "overlayClearSafeModeShortcut"
@@ -1464,6 +1461,16 @@ ApplicationWindow {
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState("DJ overlay click-through enabled; press Escape to unlock interaction. Live evidence remains stale until fresh capture arrives.")
         clickThroughToggle.forceActiveFocus()
+    }
+    function handleOverlayRetryShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until recovery succeeds. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : ""))
+        const restored = window.showOverlayAndHideControls()
+        if (!restored)
+            retryOverlay.forceActiveFocus()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
