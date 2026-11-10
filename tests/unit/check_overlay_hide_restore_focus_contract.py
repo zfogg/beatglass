@@ -761,3 +761,8 @@ def test_stop_recovery_action_returns_result():
     assert "stopOverlayRecoveryAttempts()" in body
     assert "resumeOverlayRecovery.forceActiveFocus()" in body
     assert "return true" in body
+def test_hide_restore_toggle_shortcut_propagates_selected_action_result():
+    start = QML.index("function handleOverlayHideToggleShortcut")
+    body = QML[start : QML.index("    function handleOverlayRestoreAction", start)]
+    assert "return window.handleOverlayRestoreAction()" in body
+    assert "return window.handleOverlayHideAction()" in body
