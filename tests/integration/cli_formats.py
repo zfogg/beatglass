@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 exe, root = sys.argv[1], pathlib.Path(sys.argv[2])
-for extension in ("aiff", "flac", "mp3"):
+for extension in ("wav", "aiff", "flac", "mp3"):
     path = root / f"tone.{extension}"
     before = hashlib.sha256(path.read_bytes()).digest()
     result = subprocess.run([exe, "--replay", str(path)], capture_output=True, text=True)
