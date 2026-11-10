@@ -274,6 +274,8 @@ Reports are assembled in the destination directory and atomically replaced so
 readers never observe a partially written JSON report.
 The temporary file is flushed and synchronized before replacement so a
 successful validation report is durable across an abrupt process exit.
+If replacement fails, the temporary file is removed so failed qualification
+does not leave orphaned evidence artifacts beside the requested report.
 On POSIX hosts the containing directory is synchronized after replacement as
 well; Windows uses the compatible atomic-replace path without directory fsync.
 Pass a second path to emit a deterministic validation report for the bundle:
