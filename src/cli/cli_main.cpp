@@ -914,13 +914,32 @@ int main(int argc, char** argv) {
     return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(retry_analysis_button->Render(), Color::YellowLight), text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
+#ifdef _WIN32
+  auto clear_live_evidence = [&] {
+    live_bpm.reset();
+#ifdef BEATGLASS_CLI_MUSIC_REPLAY
+    live_key.reset();
+    live_chord.reset();
+    live_tonal_history.clear();
+#endif
+    live_tracking_state = beatglass::TrackingState::stopped;
+    live_sample_rate = 0;
+    live_observed_frames = 0;
+    live_discontinuities = 0;
+    live_beats = 0;
+    live_signal_confidence = 0.0f;
+    live_waveform.assign(live_waveform.size(), 0.0f);
+    live_spectrum.assign(live_spectrum.size(), 0.0f);
+    live_tempo_history.clear();
+    live_visualization.reset();
+    live_visualization_frame.reset();
+  };
+#endif
   auto toggle_live = [&] {
 #ifdef _WIN32
     if (live_session && live_session->state() != beatglass::SourceState::stopped) {
       live_session->stop();
-      live_tracking_state = beatglass::TrackingState::stopped;
-      live_bpm.reset();
-      live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+      clear_live_evidence();
       live_status = "Capture stopped.";
       live_button_label = " Start monitoring ";
       return;
@@ -946,9 +965,7 @@ int main(int argc, char** argv) {
     const auto stopped_for_refresh = live_session && live_session->state() != beatglass::SourceState::stopped;
     if (stopped_for_refresh) {
       live_session->stop();
-      live_tracking_state = beatglass::TrackingState::stopped;
-      live_bpm.reset();
-      live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+      clear_live_evidence();
       live_button_label = " Start monitoring ";
       live_status = "Capture stopped while render sinks were refreshed.";
     }
@@ -973,12 +990,8 @@ int main(int argc, char** argv) {
     live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
     live_key.reset(); live_chord.reset(); live_tonal_history.clear();
 #endif
-    live_bpm.reset();
+    clear_live_evidence();
     live_tracking_state = beatglass::TrackingState::reacquiring;
-    live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
-    live_waveform.assign(live_waveform.size(), 0.0f);
-    live_visualization.reset();
-    live_visualization_frame.reset();
     live_button_label = " Start monitoring ";
     live_status = "Analysis reset; start monitoring to reacquire.";
 #else
