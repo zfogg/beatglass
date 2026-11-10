@@ -99,7 +99,10 @@ SourceStartResult SourceAdapter::start(const std::string& id, AudioSource::Consu
 }
 bool SourceAdapter::stop() noexcept {
   if (delivering_) {
-    status_ = {SourceState::error, SourceError::busy, "Cannot stop Core Audio capture during PCM delivery"};
+    // A stop request from the borrowed-block callback is rejected while the
+    // adapter is still delivering.  The callback does not own lifecycle
+    // teardown, so refusing the request must not fabricate an error state or
+    // invalidate the running epoch underneath the active pump.
     return false;
   }
   lifecycle_.stop(); pending_.reset(); attempt_.reset(); format_.reset(); anchor_.reset();
