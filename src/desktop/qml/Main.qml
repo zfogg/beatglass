@@ -1992,6 +1992,7 @@ ApplicationWindow {
                 Accessible.name: "Overlay live evidence"
                 Accessible.value: (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable")
                     + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "")
+                    + "; beat pulse " + (beatPulse.running ? "active" : "idle")
                 Accessible.role: Accessible.Grouping
                 Accessible.description: "Current live status, tempo, harmony, capture state, and recovery action for the DJ overlay." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
                 ToolTip.text: "Overlay live evidence and capture recovery"
