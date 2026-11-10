@@ -545,7 +545,23 @@ int main(int argc, char** argv) {
     live_status = "Native sink discovery is unavailable in this build.";
 #endif
   });
-  auto endpoint_picker = Radiobox(&live_endpoints, &live_selected);
+  RadioboxOption endpoint_picker_option;
+  endpoint_picker_option.on_change = [&] {
+    if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoints.size())) return;
+#ifdef _WIN32
+    if (live_session && live_session->state() != beatglass::SourceState::stopped) {
+      live_session->stop();
+      live_tracking_state = beatglass::TrackingState::stopped;
+      live_bpm.reset();
+      live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+      live_button_label = " Start monitoring ";
+      live_status = "Capture stopped because the selected sink changed.";
+      return;
+    }
+#endif
+    live_status = "Selected sink: " + live_endpoints[static_cast<std::size_t>(live_selected)];
+  };
+  auto endpoint_picker = Radiobox(&live_endpoints, &live_selected, endpoint_picker_option);
   auto live = Renderer(Container::Vertical({endpoint_picker, Container::Horizontal({live_button, refresh_live_button})}), [&] {
     Elements endpoints;
     for (std::size_t index = 0; index < live_endpoints.size(); ++index) {
