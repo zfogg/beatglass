@@ -231,6 +231,8 @@ int main(int argc, char** argv) {
   std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
   std::future<AnalysisView> analysis_future;
+  std::atomic<std::uint64_t> analysis_frames{0};
+  std::atomic<std::uint64_t> analysis_total{0};
   std::vector<std::string> library_labels;
   std::vector<int> library_indices;
   int library_visible_selected = 0;
@@ -263,9 +265,14 @@ int main(int argc, char** argv) {
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze = [&] {
     if (selected < 0 || selected >= static_cast<int>(tracks.size()) || busy) return;
-    busy = true; status = "Analyzing " + tracks[selected].title + "…";
+    busy = true; analysis_frames.store(0); analysis_total.store(0); status = "Analyzing " + tracks[selected].title + "…";
     const auto path = tracks[selected].path;
-    analysis_future = std::async(std::launch::async, [path] { return AnalysisView{beatglass::analyze_file(path), decode_waveform(path)}; });
+    analysis_future = std::async(std::launch::async, [path, &analysis_frames, &analysis_total] {
+      const auto metadata = beatglass::read_metadata(path);
+      analysis_total.store(metadata.frames, std::memory_order_release);
+      const auto result = beatglass::replay_file(path, [&](std::uint64_t observed, const beatglass::TempoResult&) { analysis_frames.store(observed, std::memory_order_release); });
+      return AnalysisView{result, decode_waveform(path)};
+    });
   };
   auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); result.reset(); waveform.clear(); status = std::to_string(tracks.size()) + " tracks indexed."; };
   auto filter_input = Input(&filter, "Filter songs");
@@ -348,7 +355,10 @@ int main(int argc, char** argv) {
             std::to_string(result->metadata.frames / result->metadata.sample_rate % 60)
         : "—";
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
-    auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status)}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
+    const auto progress_total = analysis_total.load(std::memory_order_acquire);
+    const auto progress_frames = analysis_frames.load(std::memory_order_acquire);
+    const auto progress = progress_total ? std::min<std::uint64_t>(100, progress_frames * 100 / progress_total) : 0;
+    auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + (progress_total ? "  " + std::to_string(progress) + "%" : ""))}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
     const auto playback_status =
 #ifdef _WIN32
