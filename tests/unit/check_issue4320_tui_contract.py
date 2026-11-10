@@ -30,6 +30,8 @@ def main() -> int:
         raise SystemExit("CLI snapshot path does not expose persisted cache hits")
     if 'live_status = std::string("Displayed tempo correction set' not in tui or 'persist_preferences();' not in tui[tui.find('auto set_live_multiplier'):tui.find('auto half_bpm_button')]:
         raise SystemExit("CLI BPM interpretation setting is not persisted when changed")
+    if 'auto set_visual_mode = [&](std::string mode)' not in tui or 'set_visual_mode("tonal_history")' not in tui:
+        raise SystemExit("CLI visualization mode changes are not persisted when selected")
     if 'Button(" Recover persisted "' not in tui:
         raise SystemExit("CLI Library does not expose persisted recovery action")
     for marker in ("live_endpoint_id", "live_endpoint_name", "live_endpoint_preference", "updated.live_endpoint_id", "updated.live_endpoint_name"):
