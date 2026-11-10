@@ -250,6 +250,8 @@ def main() -> int:
                 category = "path"
             elif error.startswith("unsupported platform"):
                 category = "platform"
+            elif error.startswith("environment "):
+                category = "environment"
             elif error.startswith("scenario evidence"):
                 category = "scenario_evidence"
             elif error.startswith(("missing artifact", "artifact must", "artifact path", "artifact hash", "artifact size")):
