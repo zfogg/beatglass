@@ -1952,7 +1952,12 @@ ApplicationWindow {
                 window.overlayCaptureEvidenceStale = true
                 window.announceCaptureRecoveryState("Output device reacquiring; visualization focus restored when fresh audio arrives.")
             } else if (window.captureMonitorBridge.status === "Monitoring") {
+                const recovered = window.overlayCaptureEvidenceStale
                 window.overlayCaptureEvidenceStale = false
+                if (recovered) {
+                    window.announceCaptureRecoveryState("Overlay capture recovered; fresh accepted snapshot is available.")
+                    overlayLiveMonitoringState.forceActiveFocus()
+                }
             }
         }
     }
