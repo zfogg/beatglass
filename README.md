@@ -96,6 +96,7 @@ qualification-script flags below.
 | Binary | Argument | Meaning |
 | --- | --- | --- |
 | `beatglass-cli` | `<audio-file>` (required) | Analyze one audio file without modifying it. |
+| `beatglass-cli` | `--help`, `-h` | Print usage and exit successfully. |
 | `beatglass-cli` | `--replay <file>` | Run causal replay without real-time pacing. |
 | `beatglass-cli` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
 | `beatglass-cli` | `--` | End option parsing so a filename beginning with `-` is accepted. |

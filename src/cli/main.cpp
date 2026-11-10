@@ -7,6 +7,7 @@
 #include <string_view>
 
 namespace {
+void usage() { std::cout << "Usage: beatglass-cli [--help] [--replay] [--json] [--] <audio-file>\n"; }
 void json_string(std::string_view s) {
   constexpr char hex[] = "0123456789abcdef";
   std::cout << '"';
@@ -41,12 +42,13 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     const std::filesystem::path arg(argv[i]);
     if (!positional_only && arg == std::filesystem::path("--")) positional_only = true;
+    else if (!positional_only && (arg == std::filesystem::path("--help") || arg == std::filesystem::path("-h"))) { usage(); return 0; }
     else if (!positional_only && arg == std::filesystem::path("--replay") && !replay) replay = true;
     else if (!positional_only && arg == std::filesystem::path("--json") && !json) json = true;
     else if (path.empty() && arg.native().size() && (positional_only || arg.native()[0] != '-')) path = arg;
-    else { std::cerr << "Usage: beatglass-cli [--replay] [--json] [--] <audio-file>\n"; return 2; }
+    else { usage(); return 2; }
   }
-  if (path.empty()) { std::cerr << "Usage: beatglass-cli [--replay] [--json] [--] <audio-file>\n"; return 2; }
+  if (path.empty()) { usage(); return 2; }
   try {
     const auto r = replay ? beatglass::replay_file(path, [json](std::uint64_t frame, const beatglass::TempoResult& state) {
       if (json) { json_result("replay", state, frame); return; }
