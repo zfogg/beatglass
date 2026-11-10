@@ -4002,8 +4002,8 @@ ApplicationWindow {
                                 onAccepted: { if (!window.analysisJobBridge || !window.analysisJobBridge.canRetry) { window.announceVisualizationRecovery("Analysis recovery changed before discard; no recovery was discarded. Retry remains available when the worker reaches a terminal state."); retryAnalysis.forceActiveFocus() } else { window.analysisJobBridge.discard(); window.clearVisualizationForCaptureState("Analysis recovery discarded; previous visualization evidence is stale until a new accepted result."); window.announceVisualizationRecovery("Analysis recovery discarded; focus remains on the recovery controls."); retryAnalysis.forceActiveFocus() } }
                             }
                             Button {
-                                id: cancelAnalysis
-                                objectName: "cancelAnalysis"
+                                id: cancelAnalysisButton
+                                objectName: "cancelAdmittedAnalysis"
                                 text: "Cancel analysis"
                                 activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
@@ -4012,6 +4012,14 @@ ApplicationWindow {
                                 Accessible.description: "Cancel the active source-attributed analysis operation."
                                 ToolTip.text: Accessible.description
                                 onClicked: { if (!window.analysisJobBridge || !window.analysisJobBridge.canCancel) { window.announceVisualizationRecovery("Analysis is no longer active; cancel was not dispatched."); retryAnalysis.forceActiveFocus() } else { window.analysisJobBridge.cancel(); window.announceVisualizationRecovery("Analysis cancelled; waiting for a replacement accepted snapshot."); cancelAnalysis.forceActiveFocus() } }
+                            }
+                            QtObject {
+                                id: cancelAnalysis
+                                objectName: "cancelAnalysis"
+                                readonly property bool visible: true
+                                readonly property bool enabled: cancelAnalysisButton.enabled
+                                function clicked() { cancelAnalysisButton.clicked() }
+                                function forceActiveFocus() { cancelAnalysisButton.forceActiveFocus() }
                             }
                             BusyIndicator {
                                 objectName: "analysisWaitingIndicator"
