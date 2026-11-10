@@ -957,7 +957,9 @@ ApplicationWindow {
             window.overlayCaptureEvidenceStale = true
             return false
         }
-        if (window.overlayBridge.displayName !== "")
+        if (window.overlayBridge.displayName !== ""
+                && (window.overlayPreferredDisplayName === ""
+                    || window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName) < 0))
             window.overlayPreferredDisplayName = window.overlayBridge.displayName
         if (window.overlayBridge.screenIndex >= 0)
             window.overlayPreferredScreenIndex = window.overlayBridge.screenIndex
