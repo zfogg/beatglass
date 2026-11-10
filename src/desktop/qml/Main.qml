@@ -1528,6 +1528,9 @@ ApplicationWindow {
         }
     }
     function handleOverlayRestoreAction() {
+        window.handleOverlayRestoreButtonAction()
+    }
+    function handleOverlayRestoreButtonAction() {
         window.announceCaptureRecoveryState("Restoring the user-hidden DJ overlay; persisted settings will be reapplied." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
         window.handleOverlayShowAction()
     }
