@@ -345,6 +345,14 @@ def test_paused_focus_shortcut_preserves_stale_boundary():
     assert "Live evidence remains stale" in body
 
 
+def test_recovery_action_focus_has_one_canonical_definition():
+    assert QML.count("function focusOverlayRecoveryAction(message)") == 1
+    start = QML.index("function focusOverlayRecoveryAction(message)")
+    body = QML[start : QML.index("    function restoreOverlayDisplaySelectionFromBridge", start)]
+    assert "overlayRecoveryEvidenceLabel" in body
+    assert "resumeOverlayRecovery.forceActiveFocus()" in body
+
+
 def test_hide_toggle_uses_explicit_visibility_state():
     start = QML.index("function handleOverlayHideToggleShortcut")
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]

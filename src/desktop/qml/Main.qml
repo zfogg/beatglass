@@ -87,15 +87,6 @@ ApplicationWindow {
             if (recursiveCatalogRows[i].audio) ++count
         return count
     }
-    function focusOverlayRecoveryAction(message) {
-        navigation.currentIndex = 1
-        window.show()
-        window.raise()
-        window.requestActivate()
-        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Live evidence is current."))
-        resumeOverlayRecovery.forceActiveFocus()
-    }
-
     Shortcut {
         objectName: "libraryFilterFocusShortcut"
         sequence: "Ctrl+L"
