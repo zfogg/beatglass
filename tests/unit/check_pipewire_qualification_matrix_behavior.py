@@ -148,6 +148,17 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(malformed_summary), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed native qualification summary" not in result.stderr + result.stdout:
         raise SystemExit("malformed summary JSON was not reported cleanly")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": "host unavailable"}), encoding="utf-8")
+    linked_summary = root / "linked-summary.json"
+    try:
+        linked_summary.symlink_to(summary)
+    except OSError:
+        pass
+    else:
+        linked_matrix = root / "linked-summary-matrix.json"
+        result = subprocess.run([sys.executable, str(script), str(linked_matrix), "--summary", str(linked_summary)], capture_output=True, text=True)
+        if result.returncode == 0 or "summary is a symbolic link" not in result.stderr + result.stdout:
+            raise SystemExit("symbolic-link native summary was accepted")
     outside = root / "outside-matrix.json"
     outside.write_text("existing", encoding="utf-8")
     linked_output = root / "linked-matrix.json"

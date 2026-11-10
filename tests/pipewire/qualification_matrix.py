@@ -17,8 +17,11 @@ if output.exists() and not output.is_file():
 if output.parent.is_symlink():
     raise SystemExit("qualification matrix output directory is a symbolic link")
 if len(sys.argv) == 4:
+    summary_input = Path(sys.argv[3])
+    if summary_input.is_symlink():
+        raise SystemExit("native qualification summary is a symbolic link")
     try:
-        summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
+        summary = json.loads(summary_input.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise SystemExit(f"malformed native qualification summary: {error}")
 else:
