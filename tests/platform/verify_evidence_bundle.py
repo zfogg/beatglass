@@ -24,8 +24,11 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if not isinstance(data.get(field), str) or not data[field].strip():
             errors.append(f"missing provenance field: {field}")
     platform = data.get("platform")
-    if isinstance(platform, str) and platform.strip() and platform.lower() not in SUPPORTED_PLATFORMS:
-        errors.append(f"unsupported platform: {platform}")
+    if isinstance(platform, str) and platform.strip():
+        if platform != platform.lower():
+            errors.append("platform must be lowercase")
+        elif platform not in SUPPORTED_PLATFORMS:
+            errors.append(f"unsupported platform: {platform}")
     environment = data.get("environment")
     if isinstance(environment, str) and any(ord(char) < 32 and char not in "\t" for char in environment):
         errors.append("environment must not contain control characters")
