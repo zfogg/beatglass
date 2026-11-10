@@ -27,9 +27,9 @@ class MacAudioUnitPlayback final {
   /** Queue one decoded block for the render callback. */
   bool submit(const AudioBlock& block) noexcept;
   /** Pause queue admission while retaining the current source epoch. */
-  bool pause() noexcept { return session_.pause(); }
+  bool pause() noexcept;
   /** Resume queue admission for the current source epoch. */
-  bool resume() noexcept { return session_.resume(); }
+  bool resume() noexcept;
   bool running() const noexcept { return unit_ != nullptr; }
 
  private:

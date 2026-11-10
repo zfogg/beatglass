@@ -72,6 +72,24 @@ bool MacAudioUnitPlayback::submit(const AudioBlock& block) noexcept {
   return queue_ && session_.state() == PlaybackState::playing && block.epoch == session_.epoch() && queue_->push(block);
 }
 
+bool MacAudioUnitPlayback::pause() noexcept {
+  if (!unit_ || !session_.pause()) return false;
+  if (AudioOutputUnitStop(unit_) != noErr) {
+    session_.resume();
+    return false;
+  }
+  return true;
+}
+
+bool MacAudioUnitPlayback::resume() noexcept {
+  if (!unit_ || !session_.resume()) return false;
+  if (AudioOutputUnitStart(unit_) != noErr) {
+    session_.pause();
+    return false;
+  }
+  return true;
+}
+
 OSStatus MacAudioUnitPlayback::render(void* ref, AudioUnitRenderActionFlags*,
                                       const AudioTimeStamp*, UInt32,
                                       UInt32 frames, AudioBufferList* io) noexcept {
