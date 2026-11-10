@@ -128,6 +128,13 @@ if reacquisition is not None:
                 or isinstance(reacquisition["sample_position"], bool)
                 or reacquisition["sample_position"] < 0):
             raise SystemExit("reacquisition evidence has an invalid sample position")
+    if reacquisition.get("timestamp_ns") is not None:
+        if (not isinstance(reacquisition["timestamp_ns"], int)
+                or isinstance(reacquisition["timestamp_ns"], bool)
+                or reacquisition["timestamp_ns"] <= 0):
+            raise SystemExit("reacquisition evidence has an invalid timestamp")
+        if isinstance(restart.get("timestamp_ns"), int) and reacquisition["timestamp_ns"] < restart["timestamp_ns"]:
+            raise SystemExit("reacquisition timestamp precedes restart")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
