@@ -177,6 +177,15 @@ if reacquisition is not None:
     if reacquisition.get("capture_command") is not None:
         if not isinstance(reacquisition["capture_command"], str) or not reacquisition["capture_command"].strip():
             raise SystemExit("reacquisition evidence has an empty capture command")
+    if reacquisition.get("capture_started_at") is not None:
+        if not isinstance(reacquisition["capture_started_at"], str):
+            raise SystemExit("reacquisition evidence has an invalid start timestamp")
+        try:
+            reacquisition_started_at = datetime.fromisoformat(reacquisition["capture_started_at"].replace("Z", "+00:00"))
+        except ValueError:
+            raise SystemExit("reacquisition evidence has an invalid start timestamp")
+        if reacquisition_started_at.tzinfo is None:
+            raise SystemExit("reacquisition start timestamp has no timezone")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
