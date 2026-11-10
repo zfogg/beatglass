@@ -8,6 +8,7 @@ assert schema["properties"]["valid"]["const"] is True
 assert schema["additionalProperties"] is False
 assert schema["properties"]["checked_fields"]["uniqueItems"] is True
 assert schema["properties"]["checked_fields"]["minItems"] == 2
+assert schema["properties"]["checked_fields"]["items"]["minLength"] == 1
 assert schema["properties"]["platform"]["enum"] == ["linux", "windows", "macos"]
 assert schema["properties"]["name"]["minLength"] == 1
 assert schema["properties"]["valid"]["const"] is True
