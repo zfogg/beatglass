@@ -1453,6 +1453,10 @@ ApplicationWindow {
         if (!restored)
             retryOverlay.forceActiveFocus()
     }
+    function handleOverlayShowButtonAction() {
+        window.announceCaptureRecoveryState("DJ overlay launch requested on the selected display; restoring persisted settings." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        window.handleOverlayShowAction()
+    }
     function handleOverlayShowAction() {
         const restored = window.showOverlayAndHideControls()
         if (!restored) {

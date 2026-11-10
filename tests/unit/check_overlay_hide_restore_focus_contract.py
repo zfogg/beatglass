@@ -422,3 +422,10 @@ def test_hide_button_shares_hide_action():
     body = QML[start : QML.index("    function handleOverlayRestoreAction", start)]
     assert "hideOverlayAndRestoreControls()" in body
     assert "onClicked: window.handleOverlayHideAction()" in QML
+
+
+def test_show_button_action_announces_evidence_boundary():
+    start = QML.index("function handleOverlayShowButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowAction", start)]
+    assert "handleOverlayShowAction()" in body
+    assert "overlayCaptureEvidenceStale" in body
