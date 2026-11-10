@@ -194,6 +194,10 @@ int main(int argc, char** argv) {
   live_error = "Native sink enumeration is platform-specific and not enabled in this build.";
 #endif
   int tab = 0, selected = tracks.empty() ? -1 : 0;
+  int live_selected = 0;
+#ifdef _WIN32
+  for (int index = 0; index < static_cast<int>(endpoint_snapshot.endpoints.size()); ++index) if (endpoint_snapshot.endpoints[index].is_default) live_selected = index;
+#endif
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result;
   std::vector<float> waveform;
@@ -292,21 +296,21 @@ int main(int argc, char** argv) {
       return;
     }
     if (live_endpoint_ids.empty()) { live_status = "No render endpoint is available."; return; }
-    const auto endpoint = std::find_if(endpoint_snapshot.endpoints.begin(), endpoint_snapshot.endpoints.end(), [](const auto& value) { return value.is_default; });
-    const auto index = endpoint == endpoint_snapshot.endpoints.end() ? 0u : static_cast<unsigned>(std::distance(endpoint_snapshot.endpoints.begin(), endpoint));
-    if (live_session->start(live_endpoint_ids[index])) live_status = "Starting capture…";
+    if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoint_ids.size())) { live_status = "Select an available render endpoint first."; return; }
+    if (live_session->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)])) live_status = "Starting capture…";
     else live_status = "Capture could not start; inspect endpoint permissions or device state.";
 #else
     live_status = "Native loopback capture is unavailable in this build.";
 #endif
   };
   auto live_button = Button(" Start monitoring ", toggle_live);
-  auto live = Renderer(live_button, [&] {
+  auto endpoint_picker = Radiobox(&live_endpoints, &live_selected);
+  auto live = Renderer(Container::Vertical({endpoint_picker, live_button}), [&] {
     Elements endpoints;
     for (const auto& endpoint : live_endpoints) endpoints.push_back(text("●  " + endpoint) | color(Color::YellowLight));
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
     const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
-    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Enumerated by the native output adapter."), separator(), vbox(endpoints), live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), live_button->Render(), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), live_button->Render(), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto settings = Renderer([&] { return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold, text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"), text("Terminal motion: enabled"), separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."), text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto tabs = Container::Tab({library, live, settings}, &tab);
