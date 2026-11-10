@@ -32,4 +32,17 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(collision / "report.json")], capture_output=True, text=True)
     assert result.returncode != 0
     assert "host provenance report is unwritable" in result.stderr
+
+    symlink_target = Path(directory) / "target.json"
+    symlink_target.write_text("untouched", encoding="utf-8")
+    symlink = Path(directory) / "link.json"
+    try:
+        symlink.symlink_to(symlink_target)
+    except (OSError, NotImplementedError):
+        pass
+    else:
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(symlink)], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "host provenance report is unwritable" in result.stderr
+        assert symlink_target.read_text(encoding="utf-8") == "untouched"
 print("Native host provenance input rejection verified")

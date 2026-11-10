@@ -39,6 +39,8 @@ if len(sys.argv) == 3:
     try:
         destination = Path(sys.argv[2])
         destination.parent.mkdir(parents=True, exist_ok=True)
+        if destination.is_symlink():
+            raise OSError("report destination is a symbolic link")
         existing_mode = stat.S_IMODE(destination.stat().st_mode) if destination.exists() else None
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent, delete=False) as temporary:
             temporary.write(json.dumps(report, indent=2) + "\n")

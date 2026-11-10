@@ -276,6 +276,8 @@ Missing parent directories for the requested report path are created before the
 temporary file is opened, which supports clean per-run evidence directories.
 If a required parent path is occupied by a file, report emission fails as
 unwritable rather than replacing or modifying that file.
+Symlink report destinations are rejected as unwritable; qualification output
+never follows a link or modifies its target.
 The temporary file is flushed and synchronized before replacement so a
 successful validation report is durable across an abrupt process exit.
 If replacement fails, the temporary file is removed so failed qualification
