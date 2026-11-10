@@ -1113,6 +1113,7 @@ ApplicationWindow {
     }
     function toggleLibrarySort(target) {
         window.sortDescending = !window.sortDescending
+        browser.currentIndex = -1
         window.announceVisualizationRecovery("Library sorted by file name in " + (window.sortDescending ? "descending" : "ascending") + " order.")
         target.forceActiveFocus()
     }
