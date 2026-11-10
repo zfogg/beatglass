@@ -113,4 +113,13 @@ with tempfile.TemporaryDirectory() as directory:
         assert result.returncode != 0
         assert "host provenance report is unwritable" in result.stderr
         assert symlink_target.read_text(encoding="utf-8") == "untouched"
+    host_link = Path(directory) / "host-link.json"
+    try:
+        host_link.symlink_to(host)
+    except (OSError, NotImplementedError):
+        pass
+    else:
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host_link)], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "host provenance is unreadable" in result.stderr
 print("Native host provenance input rejection verified")

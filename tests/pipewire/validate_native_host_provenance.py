@@ -9,6 +9,9 @@ from pathlib import Path
 if len(sys.argv) not in (2, 3):
     raise SystemExit("usage: validate_native_host_provenance.py HOST.json [REPORT.json]")
 try:
+    input_path = Path(sys.argv[1])
+    if input_path.is_symlink():
+        raise OSError("host provenance input is a symbolic link")
     def reject_duplicate_keys(pairs):
         result = {}
         for key, value in pairs:
@@ -16,7 +19,7 @@ try:
                 raise ValueError(f"duplicate key: {key}")
             result[key] = value
         return result
-    host = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_keys)
+    host = json.loads(input_path.read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_keys)
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"host provenance is unreadable: {error}")
 except ValueError as error:
