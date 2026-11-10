@@ -17,7 +17,7 @@ Decoder snapshot validation is fail-closed: a retry is eligible only when the pe
 
 Retryable analysis storage schema v2 persists `source_path` and `decoder_snapshot` beside content/engine/configuration/mode identity. The recovery bridge uses these fields for metadata-gated coordinator resubmission; missing or mismatched metadata remains a rejection.
 
-Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, and platform recovery contracts. End-to-end persistence, playback, native capture, and full native qualification remain in progress.
+Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, persistent SQLite Library cache/recovery, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, native Windows/macOS playback/capture paths, experimental Linux PipeWire capture, and platform recovery contracts. End-to-end production parity and full native qualification remain in progress.
 
 The implementation is C++20. C callers can interoperate today through the
 documented CLI/process boundary; a stable C ABI adapter is not yet shipped.
@@ -45,7 +45,7 @@ Production implementation belongs in `src/` for applications and `lib/` for reus
 
 The desktop shell currently exposes six persisted appearance themes (Light, Dark, High contrast, Purple, Blue, and Yellow) plus a reduced-motion preference; native QML palette values are aligned with the `design/v1` tokens, while native desktop qualification remains pending.
 
-The current `main` branch includes the bounded analysis queue and retry lifecycle, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, and Windows endpoint-loss recovery. These are implemented slices, not a v1 completion claim: native capture, playback, full persistence workflows, and interactive qualification remain open.
+The current `main` branch includes the bounded analysis queue and retry lifecycle, persistent CLI Library cache/recovery, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, Windows endpoint-loss recovery, and native macOS AudioUnit playback/CoreAudio Live integration. These are implemented slices, not a v1 completion claim: Linux native playback, optional tonal dependencies, and interactive qualification remain open.
 
 ## Build and test the groundwork
 
@@ -93,9 +93,11 @@ currently visible filtered tracks sequentially with shared cancellation and
 progress, isolates per-track decoder errors so one corrupt file does not abort the
 batch, clears a stale failure badge when retrying a track succeeds, sorts the visible collection by title or path while preserving selection
 identity, provides a case-insensitive search across title, filename, and full path, performs a safe metadata preflight so duration/format are visible before analysis, shows filtered visible/analyzed/failed counts, renders a colored PCM waveform with analyzer-detected beat frames and playback position, and recursively indexes folders selected through either path entry or the native picker. It exposes native
-folder selection and Windows playback controls. Live discovers Windows render
-sinks, captures the selected OS output through native loopback, and displays
-real tempo, telemetry, and a colored live waveform. Live also exposes explicit
+folder selection and Windows/macOS playback controls. Live discovers Windows
+render sinks, macOS CoreAudio output sources, or Linux PipeWire sinks when the
+corresponding backend is built; it captures the selected OS output through the
+native backend and displays real tempo, telemetry, and a colored live waveform.
+Live also exposes explicit
 half/normal/double tempo interpretation and reset/reacquire controls. Settings
 controls reduced motion and the seek step. Mouse tab selection and `Tab`/`1`/`2`/`3` keyboard
 navigation are supported; terminals below 100 columns or 28 rows show a clear
@@ -106,13 +108,12 @@ plus a bounded recent tonal history.
 
 Library keyboard shortcuts include `a` for Analyze all visible, `r` for refresh,
 `s` for sort, and `o` for the folder action; text inputs retain normal character
-editing when focused. The TUI never writes tags or modifies source audio. On macOS and Linux, native
-loopback capture is not yet implemented in this prototype and the Live tab says
-so explicitly. Native desktop, capture, playback, and overlay qualification
+editing when focused. The TUI never writes tags or modifies source audio. Native
+desktop, capture, playback, and overlay qualification
 remain platform-specific work; see [macOS overlay status](docs/macos-overlay.md)
 and [the macOS qualification checklist](docs/macos-qualification.md).
 
-On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
+On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery/capture and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). Native Linux playback and a real daemon qualification run remain open. See [Linux platform status](docs/linux-platform-increment.md).
 
 The shipped `beatglass-cli` and `beatglass-music-cli` report decoder/analysis
 failures on stderr with an `error: ` prefix and exit with status 1;
