@@ -1134,3 +1134,11 @@ def test_settings_recovery_failure_propagates_focus_result():
     assert "overlayCaptureEvidenceStale = true" in body
     assert "overlayDisplayRecoveryPending = true" in body
     assert "return window.focusOverlayRestoreFailure" in body
+
+
+def test_no_display_recovery_propagates_focus_result():
+    start = QML.index("function focusOverlayNoDisplayRecovery")
+    body = QML[start : QML.index("        function onScreensChanged", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "return window.focusOverlayAvailabilityRecovery" in body
