@@ -45,7 +45,7 @@ TEST_CASE("analysis operation validity rejects embedded NUL identity data") { au
 TEST_CASE("analysis runner retains cancellable worker operation") {
   beatglass::library_detail::JobExecutor executor(1); beatglass::library::AnalysisRunner runner(executor); std::stop_source gate;
   beatglass::library::AnalysisOperation op; op.source.size_bytes=10; op.identity.mode="offline"; op.serialize=[] { return std::string("x"); }; op.verify=[](std::stop_token){ return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match,{}}; };
-  auto handle=runner.submit(std::move(op)); REQUIRE(handle); handle->cancel(); REQUIRE((handle->state()==beatglass::library_detail::TrackedState::cancelled || handle->state()==beatglass::library_detail::TrackedState::completed));
+  auto handle=runner.submit(std::move(op)); REQUIRE(handle); handle->cancel(); wait_for_terminal(handle); REQUIRE((handle->state()==beatglass::library_detail::TrackedState::cancelled || handle->state()==beatglass::library_detail::TrackedState::completed));
 }
 TEST_CASE("analysis runner submits bounded batches in source order") {
   beatglass::library_detail::JobExecutor executor(1); beatglass::library::AnalysisRunner runner(executor);

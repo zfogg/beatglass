@@ -87,7 +87,7 @@ TEST_CASE("storage owner exposes completed analysis cache reuse") {
   const auto path = std::filesystem::temp_directory_path() / "beatglass-storage-owner-cache.sqlite";
   std::error_code ec; std::filesystem::remove(path, ec);
   REQUIRE(owner.open({path}));
-  const beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  const beatglass::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
   const beatglass::library_detail::CacheKey key{"hash", "engine", "config", "offline"};
   owner.cache()->begin("run", key);
   REQUIRE(owner.cache()->publish("run", key, "cached", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);

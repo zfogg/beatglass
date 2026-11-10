@@ -20,6 +20,8 @@ public:
   virtual ~OverlayNative() = default;
   /** Configure the native window, including its requested input mode. */
   virtual bool apply(QQuickWindow* window, bool clickThrough) = 0;
+  /** Clear adapter-side input-mode state after the Qt window has been destroyed. */
+  virtual void reset() noexcept {}
 };
 /** Create the AppKit implementation on macOS. Caller owns the result. */
 std::unique_ptr<OverlayNative> makeOverlayNative();

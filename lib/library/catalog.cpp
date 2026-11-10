@@ -3,9 +3,6 @@
 #include <algorithm>
 #include <cctype>
 #include <system_error>
-#ifdef _WIN32
-#include <windows.h>
-#endif
 
 namespace beatglass::library {
 namespace {
@@ -32,16 +29,6 @@ std::string audio_format_for_path(const std::filesystem::path& path) {
 
 namespace {
 bool supported_audio(const std::filesystem::path& path) { return !audio_format_for_path(path).empty(); }
-bool link_like(const std::filesystem::directory_entry& entry, std::error_code& error) {
-  const auto status = entry.symlink_status(error);
-  if (error) return false;
-  if (status.type() == std::filesystem::file_type::symlink) return true;
-#ifdef _WIN32
-  const auto attributes = ::GetFileAttributesW(entry.path().c_str());
-  if (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_REPARSE_POINT)) return true;
-#endif
-  return false;
-}
 }
 
 CatalogResult browse(const std::filesystem::path& folder, std::string search,
@@ -62,7 +49,11 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
     const auto& entry = *it;
     // Library browsing is intentionally one level deep; do not follow links
     // into unrelated trees or expose a linked source under a misleading path.
-    if (link_like(entry, error)) { if (error) break; continue; }
+    const auto link_status = entry.symlink_status(error);
+    if (error) break;
+    if (link_status.type() == std::filesystem::file_type::symlink) {
+      continue;
+    }
     const bool directory = entry.is_directory(error);
     if (error) break;
     if (!directory && (!entry.is_regular_file(error) || !supported_audio(entry.path()))) {
@@ -124,7 +115,12 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
   for (; it != end && !error; it.increment(error)) {
     if (stop.stop_requested()) { result.entries.clear(); result.cancelled = true; result.diagnostic = "catalog query cancelled"; return result; }
     const auto& entry = *it;
-    if (link_like(entry, error)) { if (error) break; it.disable_recursion_pending(); continue; }
+    const auto link_status = entry.symlink_status(error);
+    if (error) break;
+    if (link_status.type() == std::filesystem::file_type::symlink) {
+      it.disable_recursion_pending();
+      continue;
+    }
     const bool directory = entry.is_directory(error);
     if (error) break;
     if (!directory && (!entry.is_regular_file(error) || !supported_audio(entry.path()))) {

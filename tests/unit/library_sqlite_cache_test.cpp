@@ -6,6 +6,14 @@
 #include "beatglass/library/detail/sqlite_cache.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
 using namespace beatglass::library_detail;
+namespace {
+std::string embedded_nul_path() {
+  return std::string("/music/a") + '\0' + ".flac";
+}
+std::string embedded_nul_search() {
+  return std::string("a") + '\0';
+}
+}
 TEST_CASE("SQLite cache replaces only completed revalidated runs") {
   SqliteCache cache(":memory:"); CacheKey key{"sha256:a", "engine1", "config1", "offline"};
   auto valid = [] { return true; }; std::string result;
@@ -317,7 +325,7 @@ TEST_CASE("SQLite collection reads expose typed cancellation") {
 TEST_CASE("SQLite exact catalog lookup rejects unsafe paths") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.entry(""), std::invalid_argument);
-  CHECK_THROWS_AS(cache.entry(std::string("/music/a\0.flac", 14)), std::invalid_argument);
+  CHECK_THROWS_AS(cache.entry(embedded_nul_path()), std::invalid_argument);
 }
 TEST_CASE("SQLite catalog prefix queries bound search input") {
   SqliteCache cache(":memory:");
@@ -369,10 +377,10 @@ TEST_CASE("SQLite collection removal uses the path bound") {
 TEST_CASE("SQLite collection metadata rejects unsafe text before SQLite binding") {
   SqliteCache cache(":memory:");
   CHECK_THROWS_AS(cache.put_entry({"", "name", "audio", "hash", 1, 1}), std::invalid_argument);
-  CHECK_THROWS_AS(cache.put_entry({std::string("/music/a\0.flac", 14), "a.flac", "audio", "hash", 1, 1}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.put_entry({embedded_nul_path(), "a.flac", "audio", "hash", 1, 1}), std::invalid_argument);
   CHECK_THROWS_AS(cache.put_entry({"/music/a.flac", "a.flac", "audio", "", 1, 1}), std::invalid_argument);
-  CHECK_THROWS_AS(cache.remove_entry(std::string("/music/a\0.flac", 14)), std::invalid_argument);
-  CHECK_THROWS_AS(cache.entries({std::string("a\0", 2), 0, 10}), std::invalid_argument);
+  CHECK_THROWS_AS(cache.remove_entry(embedded_nul_path()), std::invalid_argument);
+  CHECK_THROWS_AS(cache.entries({embedded_nul_search(), 0, 10}), std::invalid_argument);
 }
 TEST_CASE("SQLite cache invalidates one active identity without deleting its source") {
   SqliteCache cache(":memory:"); CacheKey key{"hash", "engine", "config", "offline"};

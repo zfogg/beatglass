@@ -1,6 +1,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include "beatglass/capture/file_reader.hpp"
 #include "beatglass/core/stream_continuity.hpp"
 #include <array>

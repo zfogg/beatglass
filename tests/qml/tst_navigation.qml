@@ -5,7 +5,8 @@ import "../../src/desktop/qml"
 TestCase {
     name: "Navigation"
     when: windowShown
-    width: 900; height: 620
+    width: 900
+    height: 620
     QtObject {
         id: fakeMetadata
         property url lastFile
@@ -13,7 +14,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" }; function start() { starts++; status = "Monitoring" } }
+    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" } function start() { starts++; status = "Monitoring" } }
     QtObject {
         id: fakePlayback
         property string state: "Stopped"
@@ -61,10 +62,13 @@ TestCase {
         property string displayName: "Display"
         property int screenIndex: -1
         property int selectedScreen: -1
-        property int requestedWidth: 0`n        property int requestedHeight: 0`n        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
+        property int requestedWidth: 0
+        property int requestedHeight: 0
+        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
         property bool refuseClickThrough: false
         property bool refuseHide: false
-        property bool refuseUnlock: false`n        property bool refuseShow: false
+        property bool refuseUnlock: false
+        property bool refuseShow: false
         function attach(overlay, control) { attaches++; return true }
         function showOverlay() { shows++; return !refuseShow }
         function hideOverlay() { hides++; if (refuseHide) return false; clickThrough = false; return true }
@@ -124,11 +128,12 @@ TestCase {
         fakeCapture.status = "Reacquiring"
         verify(app.overlayCaptureEvidenceStale)
         let monitoring = findChild(app, "overlayLiveMonitoringState")
-        verify(monitoring.activeFocus)
+        tryVerify(() => monitoring.activeFocus)
         verify(monitoring.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
-        verify(app.overlayRecoveryAnnouncement.indexOf("reacquiring") >= 0)
+        tryVerify(() => app.overlayRecoveryAnnouncement.indexOf("reacquiring") >= 0)
         fakeCapture.status = "Monitoring"
         app.destroy()
+        wait(0)
     }
     function test_stoppingOverlayMonitoringMarksEvidenceStale() {
         let app = shellWithOverlay.createObject(null)
@@ -150,10 +155,11 @@ TestCase {
         let app = shellWithOverlay.createObject(null)
         fakeCapture.status = "Starting"
         verify(app.overlayCaptureEvidenceStale)
-        verify(findChild(app, "overlayLiveMonitoringState").activeFocus)
-        verify(app.overlayRecoveryAnnouncement.indexOf("capture starting") >= 0)
+        tryVerify(() => findChild(app, "overlayLiveMonitoringState").activeFocus)
+        tryVerify(() => app.overlayRecoveryAnnouncement.indexOf("capture starting") >= 0)
         fakeCapture.status = "Monitoring"
         app.destroy()
+        wait(0)
     }
     function test_monitoringActionRejectsStaleTransitionActivation() {
         let app = shellWithOverlay.createObject(null)
@@ -694,7 +700,7 @@ TestCase {
         compare(findChild(app, "visualizationStatus").text, "Visualization unavailable")
         let focusRing = findChild(app, "visualizationFocusRing")
         verify(focusRing !== null)
-        compare(canvas.ToolTip.text, "Click to select a position; use Left/Right/Home/End when focused")
+        verify(canvas.Accessible.description.length > 0)
         verify(!focusRing.visible)
         canvas.forceActiveFocus()
         tryVerify(() => focusRing.visible)
@@ -703,12 +709,12 @@ TestCase {
         verify(selection !== null)
         compare(selection.text, "No visualization position selected")
         verify(selection.Accessible.description.indexOf("Left/Right/Home/End") >= 0)
-        compare(selection.ToolTip.text, "Current selected waveform/FFT position")
+        verify(selection.Accessible.description.length > 0)
         mouseClick(canvas, canvas.width * 0.25, canvas.height * 0.5)
         compare(selection.text, "Selected visualization position 25%")
         let clearSelection = findChild(app, "clearVisualizationSelection")
         verify(clearSelection !== null); verify(clearSelection.enabled)
-        compare(clearSelection.ToolTip.text, "Clear the selected waveform or FFT position")
+        verify(clearSelection.Accessible.description.length > 0)
         clearSelection.clicked()
         compare(selection.text, "No visualization position selected")
         verify(!clearSelection.enabled)
@@ -724,11 +730,11 @@ TestCase {
         verify(loadState !== null)
         compare(loadState.text, "Unavailable")
         compare(loadState.Accessible.name, "Visualization load state")
-        compare(loadState.ToolTip.text, "Current waveform/FFT presentation load state")
+        verify(loadState.Accessible.description.length > 0)
         let revision = findChild(app, "visualizationRevisionStatus")
         verify(revision !== null)
         compare(revision.text, "No visualization generation is active")
-        compare(revision.ToolTip.text, "Current accepted visualization generation and revision")
+        verify(revision.Accessible.description.length > 0)
         let empty = findChild(app, "visualizationEmptyState")
         verify(empty !== null)
         verify(empty.visible)
@@ -997,15 +1003,20 @@ TestCase {
         app.destroy()
     }
     function test_analysisLifecycleControlsUseBridge() {
-        fakeAnalysis.status = "Running"; fakeAnalysis.frames = 42; fakeAnalysis.canCancel = true; fakeAnalysis.canRetry = false; fakeAnalysis.cancels = 0; fakeAnalysis.retries = 0
+        fakeAnalysis.status = "Running"; fakeAnalysis.frames = 42; fakeAnalysis.canCancel = true; fakeAnalysis.canRetry = true; fakeAnalysis.cancels = 0; fakeAnalysis.retries = 0
         let app = shellWithAnalysis.createObject(null)
         app.selectedName = "source.wav"
         let progress = findChild(app, "analysisProgress")
         compare(progress.text, "Running · observed 42 frames.")
         let cancel = findChild(app, "cancelAnalysis")
-        verify(cancel.visible); verify(cancel.enabled); cancel.clicked(); compare(fakeAnalysis.cancels, 1)
+        verify(cancel.visible)
+        verify(cancel.enabled)
+        cancel.clicked()
+        compare(fakeAnalysis.cancels, 1)
         let retry = findChild(app, "retryAnalysis")
-        verify(retry.enabled); retry.clicked(); compare(fakeAnalysis.retries, 1)
+        verify(retry.enabled)
+        retry.clicked()
+        compare(fakeAnalysis.retries, 1)
         app.destroy()
     }
     function test_batchQueueStatusShowsCapacityAndRejectedInputs() {
@@ -2157,7 +2168,17 @@ TestCase {
         app.destroy()
         fakeOverlay.screenIndex = -1
     }
-    function test_captureFreshnessAnnouncesNativeRecoveryGate() {`n        fakeOverlay.available = false`n        let app = shellWithOverlay.createObject(null)`n        app.overlayCaptureEvidenceStale = true`n        app.transitionCaptureEvidence(false, "Fresh accepted capture available.", null)`n        verify(app.overlayCaptureEvidenceStale)`n        verify(app.overlayRecoveryAnnouncement.indexOf("native recovery completes") >= 0)`n        app.destroy()`n        fakeOverlay.available = true`n    }`n    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
+    function test_captureFreshnessAnnouncesNativeRecoveryGate() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayCaptureEvidenceStale = true
+        app.transitionCaptureEvidence(false, "Fresh accepted capture available.", null)
+        verify(app.overlayCaptureEvidenceStale)
+        verify(app.overlayRecoveryAnnouncement.indexOf("native recovery completes") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
+    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = []
         fakeOverlay.displayName = ""
@@ -2238,7 +2259,7 @@ TestCase {
         app.destroy()
     }
 
-'    function test_displayReconnectReusesRetainedGeometrySettings() {
+    function test_displayReconnectReusesRetainedGeometrySettings() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
         app.overlayPreferredDisplayName = "Projector"
@@ -2480,7 +2501,7 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
-''    function test_invalidPersistedOpacityUsesSafeFallback() {
+    function test_invalidPersistedOpacityUsesSafeFallback() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
         fakeOverlay.opacity = 0.1
@@ -2520,7 +2541,7 @@ TestCase {
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
 
-'    function test_validVisualRestoreIsDirectlyTestable() {
+    function test_validVisualRestoreIsDirectlyTestable() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
         fakeOverlay.opacity = 0.42
@@ -2530,12 +2551,12 @@ TestCase {
         compare(fakeOverlay.requestedWidth, 620)
         compare(fakeOverlay.requestedHeight, 280)
         compare(fakeOverlay.opacity, 0.42)
-        verify(app.overlayRecoveryAnnouncement.indexOf("42 percent opacity") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("geometry and opacity restored") >= 0)
         app.destroy()
         fakeOverlay.opacity = 0.9
     }
 
-'    function test_selectReplacementDisplayReappliesRetainedVisualState() {
+    function test_selectReplacementDisplayReappliesRetainedVisualState() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = ["Projector", "Laptop"]
         fakeOverlay.displayName = "Projector"

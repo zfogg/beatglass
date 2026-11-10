@@ -10,9 +10,11 @@
 #include "beatglass/library/analysis_commit.hpp"
 #include "beatglass/library/analysis_admission.hpp"
 #include "beatglass/library/storage_owner.hpp"
+#include "beatglass/library/analysis_coordinator.hpp"
+#include "beatglass/library/jobs.hpp"
 TEST_CASE("analysis admission rejects incompatible decoder snapshots") {
   beatglass::library_detail::SqliteCache cache(":memory:");
-  beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  beatglass::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
   const auto rejected = beatglass::library::admit_analysis(cache, "bad-snapshot", identity, "/music/a.flac", "file-reader-v0");
   CHECK_FALSE(rejected.decoder_compatible);
   CHECK_FALSE(rejected.analysis_reserved);
@@ -49,7 +51,7 @@ TEST_CASE("retryable recovery survives storage reopen") {
 }
 TEST_CASE("analysis admission accepts a compatible snapshot cache hit") {
   beatglass::library_detail::SqliteCache cache(":memory:");
-  beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  beatglass::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
   cache.begin("seed", {"hash", "engine", "config", "offline"}, "/music/a.flac", beatglass::library::kFileDecoderSnapshot);
   REQUIRE(cache.publish("seed", {"hash", "engine", "config", "offline"}, "cached", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
   const auto hit = beatglass::library::admit_analysis(cache, "unused", identity, "/music/a.flac", beatglass::library::kFileDecoderSnapshot);
@@ -121,9 +123,9 @@ TEST_CASE("storage owner exposes cache admission boundary") {
 }
 TEST_CASE("storage owner invalidates one cached identity without affecting another") {
   beatglass::library::StorageOwner owner;
-  REQUIRE(owner.open_storage({":memory:"}));
-  const beatglass::library::AnalysisIdentity first{"first", "engine", "config", "offline"};
-  const beatglass::library::AnalysisIdentity second{"second", "engine", "config", "offline"};
+  REQUIRE(owner.open({":memory:"}));
+  const beatglass::AnalysisIdentity first{"first", "engine", "config", "offline"};
+  const beatglass::AnalysisIdentity second{"second", "engine", "config", "offline"};
   owner.cache()->begin("first-run", {"first", "engine", "config", "offline"});
   REQUIRE(owner.cache()->publish("first-run", {"first", "engine", "config", "offline"}, "first-result", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
   owner.cache()->begin("second-run", {"second", "engine", "config", "offline"});
@@ -136,8 +138,8 @@ TEST_CASE("storage owner invalidates one cached identity without affecting anoth
 }
 TEST_CASE("invalidated identity is admitted for fresh reanalysis") {
   beatglass::library::StorageOwner owner;
-  REQUIRE(owner.open_storage({":memory:"}));
-  const beatglass::library::AnalysisIdentity identity{"reanalyze", "engine", "config", "offline"};
+  REQUIRE(owner.open({":memory:"}));
+  const beatglass::AnalysisIdentity identity{"reanalyze", "engine", "config", "offline"};
   const beatglass::library_detail::CacheKey key{"reanalyze", "engine", "config", "offline"};
   owner.cache()->begin("reanalyze-seed", key, "track.wav", beatglass::library::kFileDecoderSnapshot);
   REQUIRE(owner.cache()->publish("reanalyze-seed", key, "old", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
@@ -165,7 +167,7 @@ TEST_CASE("coordinator admission replaces decoder on cache hit") {
   op.decode = [&decoder_called](std::stop_token, const auto&) { decoder_called.store(true); return std::string("unexpected"); };
   auto handle = coordinator.submit("cache-hit", std::move(op));
   REQUIRE(handle);
-  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
   REQUIRE(handle->state() == beatglass::library_detail::TrackedState::completed);
   CHECK_FALSE(decoder_called.load());
 }
@@ -193,7 +195,7 @@ TEST_CASE("coordinator cancellation does not publish a stale result") {
   auto handle = coordinator.submit("cancel-run", std::move(op));
   REQUIRE(handle);
   handle->cancel();
-  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
   CHECK(handle->state() == beatglass::library_detail::TrackedState::cancelled);
   CHECK_FALSE(published.load());
   const auto recovered = coordinator.storage().retryable_run("cancel-run");
@@ -210,7 +212,7 @@ TEST_CASE("decoder failure retains a retryable recovery record") {
   op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   auto handle = coordinator.submit("decoder-failure", std::move(op));
   REQUIRE(handle);
-  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
   CHECK(handle->state() == beatglass::library_detail::TrackedState::failed);
   const auto recovered = coordinator.storage().retryable_run("decoder-failure");
   REQUIRE(recovered);
@@ -329,7 +331,7 @@ TEST_CASE("coordinator resubmits persisted endpoint retry after restart") {
   operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   const auto handle = coordinator.resubmit_retryable(pending.front().id, std::move(operation));
   REQUIRE(handle);
-  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::milliseconds(1));
   REQUIRE(handle->state() == beatglass::library_detail::TrackedState::completed);
   std::string result;
   REQUIRE(coordinator.storage().cache()->find(key, result));
@@ -458,7 +460,7 @@ TEST_CASE("coordinator missing source retry fails closed without a cache result"
   operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::unverifiable, "source file is unavailable"}; };
   const auto handle = coordinator.submit("missing-source-run", std::move(operation));
   REQUIRE(handle);
-  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
+  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
   CHECK(handle->state() == beatglass::library_detail::TrackedState::failed);
   std::string result;
   CHECK_FALSE(coordinator.storage().cache()->find({"missing-source", "engine", "config", "offline"}, result));
