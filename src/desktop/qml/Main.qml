@@ -2067,6 +2067,7 @@ ApplicationWindow {
                         onClicked: window.hideOverlayAndRestoreControls()
                     }
                 }
+                Label { text: "Capture-only · combined output; track/deck metadata unavailable"; objectName: "overlayCaptureScope"; color: window.themeForegrounds[window.selectedThemeIndex]; wrapMode: Text.WordWrap; Accessible.name: "Capture-only overlay scope"; Accessible.value: text; Accessible.role: Accessible.Status; Accessible.description: "This overlay analyzes the selected output mix. It does not provide track or deck metadata without an explicitly configured DJ-app integration."; ToolTip.text: "The overlay analyzes selected output audio and does not identify individual tracks or decks"; Layout.fillWidth: true }
                 Label {
                     objectName: "overlayEscapeHint"
                     visible: window.overlayBridge && window.overlayBridge.clickThrough

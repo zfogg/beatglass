@@ -388,6 +388,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Combined-mix ambiguity value contract | Accessibility client reads compact live-evidence status | Include a concise combined-output ambiguity qualifier in the group value, not only the detailed description. |
 | Output capture scope contract | DJ overlay monitors a selected OS output endpoint | Explain that system notifications and other audio routed through that endpoint may be included in live evidence. |
 | Endpoint coverage limitation contract | User selects one output endpoint while other devices or bypassed paths are active | State that one endpoint does not capture every device or exclusive/bypassed audio path. |
+| Visible capture scope contract | User views the DJ overlay live panel | Show a concise non-color capture-only label that track/deck metadata is unavailable and the panel represents selected output mix evidence. |
 | Overlay available tooltip pulse shortcut contract | Pointer user hovers available overlay actions | Include pulse-status shortcut guidance in the normal tooltip as well as fallback guidance. |
 | Live evidence pulse summary contract | Overlay live-evidence grouping is announced to assistive technology | Include beat-pulse active/idle state alongside capture status and stale-evidence state. |
 | Beat pulse period status contract | Valid BPM drives a running pulse | Expose the computed millisecond beat period in the visible/accessibility status for timing transparency. |
