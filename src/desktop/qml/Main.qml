@@ -1552,7 +1552,12 @@ ApplicationWindow {
     function stopOverlayRecoveryAttempts() {
         window.overlayRecoveryAttemptCount = 0
         window.overlayRecoveryPausedByUser = true
-        window.announceCaptureRecoveryState("DJ overlay recovery paused; monitoring continues and retry can be started again from this page.")
+        window.overlayCaptureEvidenceStale = true
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState("DJ overlay recovery paused; monitoring continues and retry can be started again from this page. Live evidence is stale until fresh capture arrives.")
         resumeOverlayRecovery.forceActiveFocus()
     }
     function quitApplication() {
