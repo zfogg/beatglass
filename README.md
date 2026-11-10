@@ -17,7 +17,7 @@ Decoder snapshot validation is fail-closed: a retry is eligible only when the pe
 
 Retryable analysis storage schema v2 persists `source_path` and `decoder_snapshot` beside content/engine/configuration/mode identity. The recovery bridge uses these fields for metadata-gated coordinator resubmission; missing or mismatched metadata remains a rejection.
 
-Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, persistent SQLite Library cache/recovery, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, native Windows/macOS playback/capture paths, experimental Linux PipeWire capture, and platform recovery contracts. End-to-end production parity and full native qualification remain in progress.
+Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, persistent SQLite Library cache/recovery, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, native Windows/macOS playback/capture paths, bounded Linux PipeWire playback/capture, and platform recovery contracts. End-to-end production parity and full native qualification remain in progress.
 
 The implementation is C++20. C callers can interoperate today through the
 documented CLI/process boundary; a stable C ABI adapter is not yet shipped.
