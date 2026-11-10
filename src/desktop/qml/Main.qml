@@ -4775,8 +4775,8 @@ ApplicationWindow {
                         text: visible
                             ? (window.overlayDisplayRecoveryPending ? "Overlay recovery: waiting for a compatible display · live evidence stale" : (window.overlayHiddenByUser ? "Overlay recovery: restore is available" : "Overlay recovery: ready"))
                             : "Overlay recovery unavailable"
-                        Accessible.name: "Overlay recovery action status"
-                        Accessible.value: text
+                        Accessible.name: "Overlay recovery action status" + (window.overlayCaptureEvidenceStale ? ", evidence stale until fresh capture" : "")
+                        Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayDisplayRecoveryPending
                             ? text + ". Keep the control window available; live overlay evidence is stale until you choose or reconnect a display before restoring."
