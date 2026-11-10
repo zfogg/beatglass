@@ -1164,6 +1164,14 @@ def test_overlay_pulse_fades_with_reduced_motion_aware_easing():
     assert "reduceMotion" in body
 
 
+def test_overlay_pulse_fade_scales_with_tempo_period():
+    start = QML.index("id: beatPulse")
+    body = QML[start : QML.index("            Connections", start)]
+    assert "beatPulse.interval * 0.2" in body
+    assert "Math.min(180" in body
+    assert "Math.max(80" in body
+
+
 def test_live_evidence_group_reports_pulse_status():
     start = QML.index('objectName: "overlayLiveEvidenceGroup"')
     body = QML[start : QML.index('objectName: "overlayEscapeHint"', start)]
