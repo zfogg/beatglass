@@ -190,3 +190,5 @@ If present, host `firmware` must be a non-empty string identifying the host
 firmware release.
 If present, host `bios` must be a non-empty string identifying the BIOS or boot
 firmware version.
+If present, host `board` must be a non-empty string identifying the hardware
+board or machine model.
