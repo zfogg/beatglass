@@ -4642,7 +4642,7 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: "Track info unavailable"
                         Accessible.name: "Overlay track information unavailable"
-                        Accessible.value: text
+                        Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: "The combined system output does not identify individual tracks or decks. Beatglass will not attribute metadata without a separately supported source."
                         ToolTip.text: Accessible.description
@@ -4760,11 +4760,11 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: visible ? (window.overlayHiddenByUser ? "Overlay visibility: hidden by user" : "Overlay visibility: available") : "Overlay visibility unavailable"
                         Accessible.name: "Overlay visibility status"
-                        Accessible.value: text
+                        Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayHiddenByUser
                             ? text + ". Use Restore overlay to return the persisted overlay without losing monitoring or invalidating live evidence."
-                            : visible ? text + ". Hide overlay preserves monitoring and live evidence, then restores the control window." : text
+                            : visible ? text + ". Hide overlay preserves monitoring and live evidence, then restores the control window." + (window.overlayCaptureEvidenceStale ? " Live evidence is stale until fresh capture arrives." : "") : text
                         ToolTip.text: visible ? Accessible.description : "Overlay visibility status"
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
