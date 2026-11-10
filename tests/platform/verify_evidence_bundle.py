@@ -164,7 +164,9 @@ def verify(root: Path, manifest: Path) -> list[str]:
                 errors.append(f"unsupported scenario fields: {sorted(unknown_fields)}"); continue
             evidence_value = scenario.get("evidence")
             if isinstance(evidence_value, str) and (len(evidence_value) > 512
-                    or evidence_value != evidence_value.strip()):
+                    or evidence_value != evidence_value.strip()
+                    or evidence_value != unicodedata.normalize("NFC", evidence_value)
+                    or any(unicodedata.category(char) == "Cc" for char in evidence_value)):
                 errors.append(f"invalid scenario evidence: {scenario.get('id')}"); continue
         if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
                 or not scenario.get("id") or not isinstance(scenario.get("status"), str)
