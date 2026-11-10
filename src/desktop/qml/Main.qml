@@ -1557,6 +1557,10 @@ ApplicationWindow {
         window.handleOverlayStopRecoveryAction()
     }
     function handleOverlayStopRecoveryAction() {
+        if (window.overlayRecoveryPausedByUser) {
+            window.focusOverlayRecoveryPauseState("Overlay recovery is already paused; Resume recovery remains available.", resumeOverlayRecovery)
+            return
+        }
         window.stopOverlayRecoveryAttempts()
         window.announceCaptureRecoveryState("Overlay recovery paused; Resume recovery is available. Live evidence remains stale until fresh capture arrives.")
         resumeOverlayRecovery.forceActiveFocus()
