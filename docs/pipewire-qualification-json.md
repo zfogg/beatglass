@@ -188,3 +188,5 @@ If present, host `attestation` must be a non-empty string describing the host
 attestation or measurement record.
 If present, host `firmware` must be a non-empty string identifying the host
 firmware release.
+If present, host `bios` must be a non-empty string identifying the BIOS or boot
+firmware version.
