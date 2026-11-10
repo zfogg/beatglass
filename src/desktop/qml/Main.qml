@@ -1437,6 +1437,10 @@ ApplicationWindow {
         overlayDisplay.forceActiveFocus()
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
     }
+    function focusOverlaySizeRecovery(message) {
+        overlaySize.forceActiveFocus()
+        window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+    }
     function handleOverlayClickThroughButtonAction(requestedClickThrough) {
         if (!window.overlayBridge)
             return
@@ -5009,12 +5013,11 @@ ApplicationWindow {
                             if (resized) {
                                 window.overlayPreferredSizeIndex = requestedIndex
                                 window.overlaySettingsRevision += 1
-                                window.announceCaptureRecoveryState("DJ overlay size set to " + currentText + ".")
-                                overlayGeometryStatus.forceActiveFocus()
+                                window.focusOverlaySizeRecovery("DJ overlay size set to " + currentText + ".")
                             } else {
                                 window.syncOverlaySettingsStateFromBridge()
                                 currentIndex = window.overlayPreferredSizeIndex
-                                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
+                                window.focusOverlaySizeRecovery("DJ overlay size could not be changed; persisted size remains active.")
                             }
                         }
                     }
