@@ -335,14 +335,22 @@ int main(int argc, char** argv) {
   };
   auto refresh = [&] {
     const auto cancelling = busy;
+    const auto previous_path = selected >= 0 && selected < static_cast<int>(tracks.size())
+        ? tracks[static_cast<std::size_t>(selected)].path : std::filesystem::path{};
     if (cancelling) {
       analysis_cancelled.store(true, std::memory_order_release);
       analysis_stop.request_stop();
     }
     tracks = discover(root, recursive);
-    selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1);
+    selected = -1;
+    if (!previous_path.empty()) {
+      for (int index = 0; index < static_cast<int>(tracks.size()); ++index) {
+        if (tracks[static_cast<std::size_t>(index)].path == previous_path) { selected = index; break; }
+      }
+    }
+    if (selected < 0 && !tracks.empty()) selected = 0;
     result.reset(); waveform.clear();
-    status = std::to_string(tracks.size()) + " tracks indexed." +
+    status = std::to_string(tracks.size()) + " tracks indexed; selection preserved by path." +
         (cancelling ? " Cancelling the previous analysis." : "");
   };
   auto filter_input = Input(&filter, "Filter songs");
