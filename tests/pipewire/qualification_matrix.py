@@ -25,6 +25,9 @@ if summary is not None:
         raise SystemExit("native qualification summary has invalid qualified status")
     if "native_execution_attempted" in summary and not isinstance(summary["native_execution_attempted"], bool):
         raise SystemExit("native qualification summary has invalid execution attempt")
+    if "native_execution_blockers" in summary and (not isinstance(summary["native_execution_blockers"], list) or
+            any(not isinstance(blocker, str) or not blocker.strip() for blocker in summary["native_execution_blockers"])):
+        raise SystemExit("native qualification summary has invalid execution blockers")
     current = platforms.get(host)
     if current is not None:
         current["status"] = "qualified" if summary.get("qualified") is True else "pending"
