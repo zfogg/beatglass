@@ -9,6 +9,7 @@ def main() -> int:
     missing = [name for name, marker in required.items() if marker not in (tool if name == "tool rename" else tui)]
     if missing: raise SystemExit("Missing issue #4320 TUI markers: " + ", ".join(missing))
     if "Analysis delay: " not in tui: raise SystemExit("CLI Live view does not expose shared analysis delay")
+    if "stale evidence" not in tui: raise SystemExit("CLI Live confidence must suppress stale evidence")
     if "[cached]" not in tui: raise SystemExit("CLI Library does not distinguish persisted cache hits")
     if "std::vector<float> decoded(4096), render(4096)" not in tui:
         raise SystemExit("CLI playback buffers exceed the shared bounded session capacity")
