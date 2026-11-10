@@ -186,3 +186,5 @@ If present, host `tpm_present` must be a boolean indicating whether a TPM was
 available during qualification.
 If present, host `attestation` must be a non-empty string describing the host
 attestation or measurement record.
+If present, host `firmware` must be a non-empty string identifying the host
+firmware release.
