@@ -429,3 +429,11 @@ def test_show_button_action_announces_evidence_boundary():
     body = QML[start : QML.index("    function handleOverlayShowAction", start)]
     assert "handleOverlayShowAction()" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_restore_action_has_one_shared_restore_transition():
+    start = QML.index("function handleOverlayRestoreButtonAction")
+    body = QML[start : QML.index("    function handleOverlayHideAction", start)]
+    assert "handleOverlayShowAction()" in body
+    assert "overlayCaptureEvidenceStale" in body
+    assert "handleOverlayRestoreButtonAction()" in QML[QML.index("function handleOverlayRestoreAction") : start]
