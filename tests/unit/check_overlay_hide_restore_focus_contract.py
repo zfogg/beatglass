@@ -362,6 +362,15 @@ def test_safe_mode_clear_button_and_shortcut_share_action():
     assert "onClicked: window.handleOverlayClearSafeModeAction()" in QML
 
 
+def test_stop_recovery_button_and_shortcut_share_action():
+    start = QML.index("function handleOverlayStopRecoveryAction")
+    body = QML[start : QML.index("    function handleOverlayStopShortcut", start)]
+    assert "stopOverlayRecoveryAttempts()" in body
+    assert "resumeOverlayRecovery.forceActiveFocus()" in body
+    assert "handleOverlayStopRecoveryAction()" in QML[QML.index("function handleOverlayStopShortcut") : start]
+    assert "onClicked: window.handleOverlayStopRecoveryAction()" in QML
+
+
 def test_hide_toggle_uses_explicit_visibility_state():
     start = QML.index("function handleOverlayHideToggleShortcut")
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
