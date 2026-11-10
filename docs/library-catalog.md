@@ -11,6 +11,15 @@ Callers that need filesystem metadata must perform that work on a non-audio
 worker. Symlink traversal and recursive enumeration remain governed by the
 catalog functions, not this extension policy.
 
+## Cancellation
+
+`browse` and `browse_recursive` accept an optional C++20 `std::stop_token`.
+Workers should pass the token for a user-cancelled refresh or shutdown. The
+implementation checks it before filesystem work and between entries; when
+requested it discards any partial snapshot, sets `CatalogResult::cancelled`,
+and returns the diagnostic `catalog query cancelled`. Cancelled results never
+look like a successful partial library listing.
+
 ## Bounded enumeration
 
 `browse` and `browse_recursive` accept an optional `max_entries` budget (the
