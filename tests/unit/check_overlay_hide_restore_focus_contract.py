@@ -58,3 +58,10 @@ def test_display_selection_persistence_failures_share_recovery_focus():
     selection = QML[QML.index("function persistOverlayDisplaySelection") : QML.index("    function forgetUnavailableOverlayDisplay")]
     assert selection.count("window.focusOverlayDisplayRecoveryFailure(") == 4
     assert "overlayPreferredScreenIndex = -1" in selection
+
+
+def test_forgetting_display_uses_shared_recovery_focus():
+    start = QML.index("function forgetUnavailableOverlayDisplay")
+    body = QML[start : QML.index("    function persistOverlayDisplaySelection", start)]
+    assert "window.focusOverlayDisplayRecoveryFailure(" in body
+    assert "overlayPreferredDisplayName = \"\"" in body

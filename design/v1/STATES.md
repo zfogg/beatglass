@@ -242,3 +242,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
 | Display selection persistence focus workflow | A selected display cannot be persisted, moved to, or restored with saved visual state | Route every persistence failure through stale recovery and focus display selection for retry. |
+| Forgotten display recovery focus workflow | User clears an unavailable saved display destination | Route the reset through the shared stale transition, activate recovery controls, and focus display selection for the next choice. |
