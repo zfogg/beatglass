@@ -1707,8 +1707,8 @@ ApplicationWindow {
         return window.handleOverlayShowAction()
     }
     function handleOverlayHideAction() {
-        if (!window.overlayBridge || !window.overlayBridge.available) {
-            window.focusOverlayAvailabilityRecovery("Overlay hide is unavailable because the native overlay is not available; control-window fallback remains active.", showOverlay)
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay hide is unavailable because the native overlay or destination display is not available; control-window fallback remains active.", showOverlay)
             return false
         }
         return window.hideOverlayAndRestoreControls()

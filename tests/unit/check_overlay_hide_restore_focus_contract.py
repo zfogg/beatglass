@@ -955,3 +955,12 @@ def test_click_through_button_requires_available_overlay():
     assert "screenNames.length === 0" in body
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
+
+
+def test_hide_action_requires_destination_display():
+    start = QML.index("function handleOverlayHideAction")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
