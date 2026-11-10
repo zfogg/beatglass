@@ -855,9 +855,9 @@ ApplicationWindow {
                 if (typeof overlayDisplayControl !== "undefined")
                     overlayDisplayControl.currentIndex = savedIndex
                 if (wasRecoveryPending || previousIndex !== savedIndex) {
-                    if (window.overlayRecoveryPausedByUser && typeof resumeOverlayRecovery !== "undefined")
+                    if (window.overlayRecoveryPausedByUser)
                         resumeOverlayRecovery.forceActiveFocus()
-                    else if (typeof retryOverlay !== "undefined")
+                    else
                         retryOverlay.forceActiveFocus()
                 }
             } else {
