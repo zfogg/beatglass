@@ -1558,7 +1558,7 @@ ApplicationWindow {
     function handleOverlayShowButtonAction() {
         if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayDisplayRecoveryFailure("Choose an available display before showing the overlay.", overlayDisplay)
-            return
+            return false
         }
         window.announceCaptureRecoveryState("DJ overlay launch requested on the selected display; restoring persisted settings." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
         return window.handleOverlayShowAction()
