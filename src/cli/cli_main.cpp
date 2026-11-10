@@ -1000,7 +1000,7 @@ int main(int argc, char** argv) {
     return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
       text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
       text("Tonal engine: optional Essentia music-replay build (disabled in this standard CLI build).") | color(Color::GrayLight) | italic,
-      text("Preferences are session-scoped for this prototype."), separator(),
+      text("Preferences persist in the platform Beatglass CLI config."), text("Config: " + preferences_path().string()) | color(Color::GrayLight) | italic, separator(),
       text("PRESENTATION") | bold | underlined, reduce_motion_checkbox->Render(),
       text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight) | italic,
       text("PLAYBACK") | bold | underlined, hbox({text("Seek step (1–60 seconds): ") | italic, seek_step_input->Render() | size(WIDTH, LESS_THAN, 8)}),
