@@ -268,3 +268,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Size shortcut recovery | User invokes the overlay size focus shortcut | Activate controls, focus Size, and announce the current size with the evidence freshness boundary. |
 | Click-through shortcut recovery | User invokes the click-through focus shortcut | Activate controls, focus the interaction toggle, and announce current mode plus evidence freshness. |
 | Opacity shortcut recovery | User invokes the overlay opacity focus shortcut | Activate controls, focus Opacity, and announce the current value with the evidence freshness boundary. |
+| Opacity reset recovery | User invokes the reset-opacity shortcut | Preserve in-flight reset state, keep persisted opacity authoritative on failure, and focus Opacity with stale evidence guidance. |

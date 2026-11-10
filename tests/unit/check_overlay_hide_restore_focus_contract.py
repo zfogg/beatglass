@@ -266,3 +266,11 @@ def test_opacity_shortcut_announces_stale_boundary():
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
     assert "overlayOpacityControl.forceActiveFocus()" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_opacity_reset_result_preserves_persisted_state_and_focus():
+    start = QML.index("function handleOverlayOpacityResetResult")
+    body = QML[start : QML.index("    function focusOverlayDisplaySelectionRequired", start)]
+    assert "overlayOpacityEditInFlight = true" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "overlayOpacityControl.forceActiveFocus()" in body
