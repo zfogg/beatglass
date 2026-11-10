@@ -2824,9 +2824,9 @@ ApplicationWindow {
                 Label { text: "Library"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 28; font.bold: true; Accessible.name: "Library"; Accessible.role: Accessible.Heading; ToolTip.text: "Browse local audio files and folders" }
                 Label {
                     objectName: "catalogStatus"
-                    text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
+                    text: window.browseFolder && files.count > 0 ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
-                    Accessible.name: "Library catalog status: " + text
+                    Accessible.name: "Library catalog status"
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Current catalog result count"
                     Accessible.description: text
