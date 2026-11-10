@@ -37,6 +37,8 @@ def main() -> int:
     for marker in ("beatglass/capture/coreaudio_source_internal.hpp", "class MacMonitorBackend", "CoreAudio output sources discovered", "TapState::interrupted"):
         if marker not in tui:
             raise SystemExit("CLI macOS Live contract missing: " + marker)
+    if "bool reacquire(const std::string& id" not in tui:
+        raise SystemExit("CLI macOS Live wrapper does not expose epoch-safe reacquisition")
     if "no fresh packets arrived; reacquiring" not in tui:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
     if "live_pipewire->reacquire(" not in tui or "live_next_reacquire" not in tui:
