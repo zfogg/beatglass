@@ -2092,7 +2092,8 @@ ApplicationWindow {
             window.handleOverlayOpacityChanged()
         }
         function onGeometryChanged() {
-            window.syncOverlaySettingsStateFromBridge()
+            if (!window.syncOverlaySettingsStateFromBridge())
+                window.focusOverlayGeometrySyncFailure()
             if (window.overlayDisplayRecoveryPending && window.overlayBridge
                     && window.overlayBridge.screenNames.length > 0
                     && !window.overlayDisplaySelectionRequired) {
@@ -2139,6 +2140,12 @@ ApplicationWindow {
             return
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels. Live evidence remains stale until fresh capture arrives.")
+    }
+    function focusOverlayGeometrySyncFailure() {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        window.focusOverlayAvailabilityRecovery("Overlay geometry changed, but retained settings could not be synchronized; choose a display before retrying.", overlayDisplay)
     }
     function focusOverlayDisplaySelectionRequired() {
         window.overlayDisplaySelectionRequired = true

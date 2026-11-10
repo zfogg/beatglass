@@ -164,3 +164,12 @@ def test_geometry_status_announcement_preserves_stale_boundary():
     assert "overlayCaptureEvidenceStale = true" in body
     assert "Live evidence remains stale until fresh capture arrives." in body
     assert "announceOverlayGeometryState()" in QML[QML.index("function onGeometryChanged") : start]
+
+
+def test_geometry_sync_failure_routes_to_display_recovery_focus():
+    start = QML.index("function focusOverlayGeometrySyncFailure")
+    body = QML[start : QML.index("    function focusOverlayDisplaySelectionRequired", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    geometry = QML[QML.index("function onGeometryChanged") : start]
+    assert "focusOverlayGeometrySyncFailure()" in geometry
