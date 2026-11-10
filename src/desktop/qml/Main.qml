@@ -4529,6 +4529,7 @@ ApplicationWindow {
                             if (!window.captureMonitorBridge) return
                             if (window.captureMonitorBridge.status === "Monitoring") {
                                 window.captureMonitorBridge.stop()
+                                window.overlayCaptureEvidenceStale = true
                                 window.announceCaptureRecoveryState("Overlay monitoring stopped; overlay settings remain available.")
                             } else {
                                 window.captureMonitorBridge.start()

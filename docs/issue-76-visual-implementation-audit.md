@@ -751,6 +751,8 @@ The capture status itself now exposes the stale-evidence marker as an accessible
 
 The live monitoring focus target repeats that stale-evidence context during Reacquiring, so keyboard users receive the same source-freshness explanation at the point where recovery focus is restored.
 
+Explicit Stop overlay monitoring now marks the last tempo/harmony snapshot stale immediately; restarting monitoring must return to Monitoring before those values are presented as current again.
+
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.
