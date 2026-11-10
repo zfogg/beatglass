@@ -268,6 +268,7 @@ int main(int argc, char** argv) {
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result;
   std::vector<float> waveform;
+  std::filesystem::path analysis_path;
   bool busy = false;
   bool reduce_motion = false;
 #ifdef _WIN32
@@ -323,6 +324,7 @@ int main(int argc, char** argv) {
     }
     busy = true; analysis_cancelled.store(false, std::memory_order_release); analysis_stop = std::stop_source{}; analysis_frames.store(0); analysis_total.store(0); status = "Analyzing " + tracks[selected].title + "…";
     const auto path = tracks[selected].path;
+    analysis_path = path;
     const auto stop_token = analysis_stop.get_token();
     analysis_future = std::async(std::launch::async, [path, stop_token, &analysis_frames, &analysis_total] {
       const auto metadata = beatglass::read_metadata(path);
@@ -627,7 +629,7 @@ int main(int argc, char** argv) {
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-        try { auto analysis = analysis_future.get(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; select the track and press Enter to retry."; } else { result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
+        try { auto analysis = analysis_future.get(); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; select the track and press Enter to retry."; } else if (selection_changed) { result.reset(); waveform.clear(); status = "Analysis finished for a previous track; select it to view the result."; } else { result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
         catch (const std::exception& error) { result.reset(); waveform.clear(); status = std::string("Analysis failed: ") + error.what(); }
         busy = false;
       }
