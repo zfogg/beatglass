@@ -915,6 +915,11 @@ int main(int argc, char** argv) {
   });
   std::string live_button_label = " Start monitoring ";
 #ifdef _WIN32
+  auto set_live_presentation_state = [&](beatglass::TrackingState state) {
+    beatglass::Snapshot snapshot;
+    snapshot.state = state;
+    live_presentation = beatglass::present_snapshot(snapshot);
+  };
   auto clear_live_evidence = [&] {
     live_bpm.reset();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
@@ -933,6 +938,7 @@ int main(int argc, char** argv) {
     live_tempo_history.clear();
     live_visualization.reset();
     live_visualization_frame.reset();
+    set_live_presentation_state(beatglass::TrackingState::stopped);
   };
 #endif
   auto toggle_live = [&] {
@@ -951,6 +957,7 @@ int main(int argc, char** argv) {
       return;
     }
     if (live_session->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)])) {
+      set_live_presentation_state(beatglass::TrackingState::reacquiring);
       live_status = "Starting capture…";
       live_button_label = " Stop monitoring ";
     }
@@ -992,6 +999,7 @@ int main(int argc, char** argv) {
 #endif
     clear_live_evidence();
     live_tracking_state = beatglass::TrackingState::reacquiring;
+    set_live_presentation_state(beatglass::TrackingState::reacquiring);
     live_button_label = " Start monitoring ";
     live_status = "Analysis reset; start monitoring to reacquire.";
 #else
@@ -1217,6 +1225,9 @@ int main(int argc, char** argv) {
             live_status = "Receiving OS sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) {
             live_tracking_state = beatglass::TrackingState::error;
+            beatglass::Snapshot error_snapshot;
+            error_snapshot.state = beatglass::TrackingState::error;
+            live_presentation = beatglass::present_snapshot(error_snapshot);
             live_status = std::string("Live analysis failed: ") + error.what();
             live_session->stop();
           }
