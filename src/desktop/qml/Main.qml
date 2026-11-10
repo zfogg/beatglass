@@ -676,7 +676,7 @@ ApplicationWindow {
         window.overlayCaptureEvidenceStale = true
         window.overlayLaunchFallbackActive = true
         window.overlayDisplayRecoveryPending = true
-        window.focusOverlayRestoreFailure(message, target)
+        return window.focusOverlayRestoreFailure(message, target)
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
