@@ -298,3 +298,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Opacity reset action contract | Keyboard opacity reset invokes the native setting transition | Route reset through one named action/result path and keep Opacity focused. |
 | Click-through button routing | Click-through checkbox changes native interaction mode | Route button changes through one action/result handler preserving stale evidence and interaction focus. |
 | Opacity edit focus recovery | User finishes a pointer drag or a failed opacity edit | Keep the slider focused for immediate keyboard adjustment, announce the persisted value/error, and retain stale or pending evidence guidance. |
+| Display selection focus recovery | User chooses or fails to choose an overlay destination | Keep the display selector focused for immediate keyboard correction, announce the selected or persisted destination, and retain stale or pending evidence guidance. |

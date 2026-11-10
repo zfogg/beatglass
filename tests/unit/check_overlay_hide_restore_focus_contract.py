@@ -488,3 +488,11 @@ def test_opacity_edit_recovery_keeps_slider_focused():
     assert "announceCaptureRecoveryState(message" in body
     assert 'window.focusOverlayOpacityEditRecovery("DJ overlay opacity could not be changed' in QML
     assert 'window.focusOverlayOpacityEditRecovery("DJ overlay opacity edit complete' in QML
+
+def test_display_selection_recovery_keeps_selector_focused():
+    start = QML.index("function focusOverlayDisplaySelectionRecovery")
+    body = QML[start : QML.index("    function handleOverlayClickThroughButtonAction", start)]
+    assert "overlayDisplay.forceActiveFocus()" in body
+    assert "announceCaptureRecoveryState(message" in body
+    assert 'window.focusOverlayDisplaySelectionRecovery("Overlay display selected: "' in QML
+    assert 'window.focusOverlayDisplaySelectionRecovery("Overlay display selection could not be applied' in QML
