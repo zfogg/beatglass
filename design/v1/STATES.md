@@ -201,4 +201,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Settings summary review value stale state | Assistive technology reads the summary review action during recovery | Include stale evidence in the action value while preserving settings revision context. |
 | Settings summary review announcement stale state | User activates the consolidated summary review action during recovery | Announce the stale-evidence boundary after focus moves to the persisted settings summary. |
 | Historical recovery diagnostic stale state | User reviews persisted bridge feedback while the native overlay is unavailable | Make historical/non-current evidence and the fresh-capture boundary explicit together. |
+| Safe mode stale state | Native overlay retries are paused after the bounded limit | Keep monitoring availability clear while naming stale live evidence and the fresh-capture exit condition. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
