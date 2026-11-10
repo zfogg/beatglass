@@ -1039,3 +1039,5 @@ Native settings synchronization now retains the visual recovery marker when opac
 Successful startup synchronization now clears the visual recovery marker after native geometry and opacity are accepted, completing the recovery lifecycle.
 
 A successful native visual restore now clears pending display recovery alongside the visual marker, so direct restore paths cannot leave the UI reporting recovery after state is valid.
+
+Successful native visual restore now clears the control-window fallback marker with pending recovery, so a valid overlay state cannot remain labeled as fallback.
