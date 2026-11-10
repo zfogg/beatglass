@@ -1242,7 +1242,7 @@ int main(int argc, char** argv) {
   auto folder_input = Input(&folder_text, "Audio folder");
   auto clear_search_button = Button(" Clear search ", [&] { filter.clear(); status = "Library search cleared."; });
   auto search_bar = Renderer(Container::Horizontal(Components{filter_input, clear_search_button}), [&] {
-    return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 32) | borderRounded, text(" "), action(clear_search_button->Render(), Color::Cyan)});
+    return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 20) | borderRounded, text(" "), action(clear_search_button->Render(), Color::Cyan)});
   });
   std::string seek_step_text = std::to_string(preferences.seek_step);
   std::string visual_mode = preferences.visual_mode;
@@ -1476,12 +1476,11 @@ int main(int argc, char** argv) {
     else rows.push_back(library_menu->Render() | vscroll_indicator | frame);
     const auto analyzed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return completed_analyses.contains(tracks[index].path); });
     const auto failed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return analysis_errors.contains(tracks[index].path); });
-    auto library_summary = hbox({text(std::to_string(library_indices.size())) | bold | color(Color::Cyan), text(" visible  •  "), text(std::to_string(analyzed_count)) | bold | color(Color::GreenLight), text(" analyzed  •  "), text(std::to_string(failed_count)) | bold | color(failed_count ? Color::RedLight : Color::GrayLight), text(" failed")
-      , text("  •  "), text(std::to_string(library_cache_hits)) | bold | color(library_cache_hits ? Color::MagentaLight : Color::GrayLight), text(" persisted cache hits")
+    Elements summary_parts = {text(std::to_string(library_indices.size())) | bold | color(Color::Cyan), text(" visible  •  "), text(std::to_string(analyzed_count)) | bold | color(Color::GreenLight), text(" analyzed  •  "), text(std::to_string(failed_count)) | bold | color(failed_count ? Color::RedLight : Color::GrayLight), text(" failed"), text("  •  "), text(std::to_string(library_cache_hits)) | bold | color(library_cache_hits ? Color::MagentaLight : Color::GrayLight), text(" persisted cache hits")};
 #ifdef BEATGLASS_CLI_LIBRARY
-      , text("  •  "), text(std::to_string(library_retryable_count)) | bold | color(library_retryable_count ? Color::YellowLight : Color::GrayLight), text(" recovery")
+    if (library_retryable_count != 0) summary_parts.insert(summary_parts.end(), {text("  •  "), text(std::to_string(library_retryable_count)) | bold | color(Color::YellowLight), text(" recovery")});
 #endif
-      }) | italic;
+    auto library_summary = hbox(std::move(summary_parts)) | italic;
     const auto name = selected >= 0 ? tracks[selected].title : "No track selected";
     const auto duration = result ? format_duration(result->metadata)
         : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata
@@ -1526,7 +1525,10 @@ int main(int argc, char** argv) {
 #endif
       text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight)});
     const auto library_seek = hbox({action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Directory: ") | italic, folder_input->Render() | flex}), hbox({action(choose_folder_button->Render(), Color::Cyan), text(" "), action(add_folder_button->Render(), Color::GreenLight), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), library_navigation, library_recovery, library_seek, separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Add directory (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    const auto directory_actions = hbox({text("Directory: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(add_folder_button->Render(), Color::GreenLight), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)});
+    const auto summary_search = hbox({library_summary | flex, text("  "), search_bar->Render()});
+    const auto command_strip = vbox({library_navigation, hbox({library_recovery, text("  "), library_seek})});
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), directory_actions, summary_search, command_strip, separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Add directory (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
   auto set_live_presentation_state = [&](beatglass::TrackingState state) {
@@ -1821,15 +1823,20 @@ int main(int argc, char** argv) {
       text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto tabs = Container::Tab(Components{library, live, settings}, &tab);
-  auto library_tab = Button("  [1] Library  ", [&] { tab = 0; });
-  auto live_tab = Button("  [2] Live  ", [&] { tab = 1; });
-  auto settings_tab = Button("  [3] Settings  ", [&] { tab = 2; });
+  ButtonOption tab_button_option;
+  tab_button_option.transform = [](const EntryState& state) {
+    auto label = text(state.label) | color(state.focused ? Color::White : Color::GrayLight);
+    return state.focused ? label | bold : label;
+  };
+  auto library_tab = Button("[1] Library", [&] { tab = 0; }, tab_button_option);
+  auto live_tab = Button("[2] Live", [&] { tab = 1; }, tab_button_option);
+  auto settings_tab = Button("[3] Settings", [&] { tab = 2; }, tab_button_option);
   auto tab_bar = Renderer(Container::Horizontal(Components{library_tab, live_tab, settings_tab}), [&] {
     auto library_render = library_tab->Render();
     auto live_render = live_tab->Render();
     auto settings_render = settings_tab->Render();
     const auto active_tab = [](Element element, Color accent) {
-      return element | color(Color::White) | bgcolor(accent) | bold | underlined | borderRounded;
+      return element | color(Color::White) | bgcolor(accent) | bold | underlined;
     };
     if (tab == 0) library_render = active_tab(library_render, Color::RGB(25, 92, 112));
     else library_render = library_render | color(Color::GrayLight);
