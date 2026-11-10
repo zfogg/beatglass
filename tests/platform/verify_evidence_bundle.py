@@ -290,7 +290,9 @@ def main() -> int:
                 category = "scenario_path"
             elif error.startswith("unsupported scenario fields:"):
                 category = "scenario_schema"
-            elif error.startswith(("missing artifact", "artifact must", "artifact path", "artifact hash", "artifact size")):
+            elif error.startswith("missing artifact:"):
+                category = "artifact_missing"
+            elif error.startswith(("artifact must", "artifact path", "artifact hash", "artifact size")):
                 category = "artifact"
             else:
                 category = error.split(":", 1)[0]
