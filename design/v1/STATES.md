@@ -110,6 +110,7 @@
 | Visibility status stale state | User reviews overlay visibility while capture recovers | Keep hide/restore semantics clear while announcing that live evidence remains stale until fresh capture. |
 | Recovery action stale status | User reviews overlay recovery action while the display or capture is unavailable | Keep recovery guidance actionable and label stale evidence directly in the recovery status. |
 | Empty display stale state | No compatible displays are enumerated during overlay recovery | Make the no-display boundary and stale live evidence explicit while keeping control-window monitoring available. |
+| Missing saved display stale naming | A preferred display is not currently enumerated | Identify the missing-display recovery state and stale evidence directly in the status name. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
