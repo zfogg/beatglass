@@ -364,6 +364,16 @@ class EvidenceBundleTest(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertGreaterEqual(payload["error_categories"]["scenario_schema"], 1)
 
+    def test_json_groups_scenario_identity_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("x", encoding="utf-8")
+            manifest = root / "manifest.json"
+            entries = [{"path": "capture.txt", "sha256": hashlib.sha256(b"x").hexdigest(), "role": x} for x in module.REQUIRED_SCENARIOS]
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": entries, "scenarios": [{"id": x, "status": "PASS", "evidence": "capture.txt"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["scenario_identity"], 1)
+
     def test_json_groups_identity_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); (root / "a.txt").write_text("a", encoding="utf-8")
