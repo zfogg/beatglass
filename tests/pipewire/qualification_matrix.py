@@ -1,7 +1,9 @@
 """Create an auditable cross-platform native qualification status matrix."""
 import json
+import os
 import platform
 import sys
+import tempfile
 from pathlib import Path
 
 if len(sys.argv) not in (2, 4) or (len(sys.argv) == 4 and sys.argv[2] != "--summary"):
@@ -78,5 +80,16 @@ matrix = {"schema": "beatglass-native-qualification-matrix-v1", "host_os": host,
 if summary is not None and isinstance(summary.get("commit"), str) and summary["commit"].strip():
     matrix["commit"] = summary["commit"]
 output.parent.mkdir(parents=True, exist_ok=True)
-output.write_text(json.dumps(matrix, indent=2) + "\n", encoding="utf-8")
+temporary = None
+try:
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent, delete=False) as handle:
+        temporary = Path(handle.name)
+        handle.write(json.dumps(matrix, indent=2) + "\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.replace(temporary, output)
+except OSError as error:
+    if temporary is not None:
+        temporary.unlink(missing_ok=True)
+    raise SystemExit(f"qualification matrix output is unwritable: {error}")
 print(f"Wrote qualification matrix for {len(platforms)} platforms to {output}")
