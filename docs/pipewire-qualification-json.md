@@ -349,6 +349,8 @@ An empty array is also rejected because every valid report must identify at
 least its `platform` and `name` provenance fields.
 Reports that list only one required field, or neither, are rejected for the
 same reason; checked metadata must prove both identity dimensions.
+The array must be lexicographically sorted to keep generated reports
+deterministic and comparable across runs.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
