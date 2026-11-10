@@ -159,6 +159,20 @@ with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run([sys.executable, str(script), str(linked_matrix), "--summary", str(linked_summary)], capture_output=True, text=True)
         if result.returncode == 0 or "summary is a symbolic link" not in result.stderr + result.stdout:
             raise SystemExit("symbolic-link native summary was accepted")
+    linked_summary_parent = root / "linked-summary-parent"
+    linked_summary_parent_target = root / "linked-summary-parent-target"
+    linked_summary_parent_target.mkdir()
+    try:
+        linked_summary_parent.symlink_to(linked_summary_parent_target, target_is_directory=True)
+    except OSError:
+        pass
+    else:
+        redirected_summary = linked_summary_parent / "summary.json"
+        redirected_summary.write_text(summary.read_text(encoding="utf-8"), encoding="utf-8")
+        redirected_matrix = root / "redirected-summary-matrix.json"
+        result = subprocess.run([sys.executable, str(script), str(redirected_matrix), "--summary", str(redirected_summary)], capture_output=True, text=True)
+        if result.returncode == 0 or "summary directory is a symbolic link" not in result.stderr + result.stdout:
+            raise SystemExit("symbolic-link native summary directory was accepted")
     outside = root / "outside-matrix.json"
     outside.write_text("existing", encoding="utf-8")
     linked_output = root / "linked-matrix.json"
