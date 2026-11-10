@@ -246,3 +246,5 @@ If present, host `clock_source_primary` must be a boolean indicating whether
 the recorded source was the host's primary synchronization source.
 If present, host `clock_source_id` must be a non-empty string identifying the
 selected synchronization source.
+If present, host `clock_source_type` must be a non-empty string classifying the
+selected synchronization source.
