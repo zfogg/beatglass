@@ -14,7 +14,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" }; function start() { starts++; status = "Monitoring" } }
+    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" } function start() { starts++; status = "Monitoring" } }
     QtObject {
         id: fakePlayback
         property string state: "Stopped"
@@ -2494,7 +2494,7 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
-''    function test_invalidPersistedOpacityUsesSafeFallback() {
+    function test_invalidPersistedOpacityUsesSafeFallback() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
         fakeOverlay.opacity = 0.1
