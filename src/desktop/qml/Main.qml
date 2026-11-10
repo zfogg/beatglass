@@ -3151,7 +3151,6 @@ ApplicationWindow {
                     visible: window.recursiveCatalogActive
                     Layout.fillWidth: true; Layout.preferredHeight: 220
                     Accessible.name: "Recursive library results"
-                    Accessible.value: window.recursiveCatalogRows.length + " results"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Supported audio files found below the selected folder. Select an audio file to inspect its metadata and queue analysis."
                     ListView {
