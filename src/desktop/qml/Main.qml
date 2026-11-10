@@ -545,6 +545,7 @@ ApplicationWindow {
     Shortcut { objectName: "libraryBatchResultFocusShortcut"; sequence: "Ctrl+Alt+Shift+4"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchResult() }
     Shortcut { objectName: "libraryBatchPublicationFocusShortcut"; sequence: "Ctrl+Alt+Shift+3"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchPublication() }
     Shortcut { objectName: "libraryBatchSourceFocusShortcut"; sequence: "Ctrl+Alt+Shift+2"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null; onActivated: window.focusLibraryBatchSource() }
+    Shortcut { objectName: "libraryLatestPublishedSourceFocusShortcut"; sequence: "Ctrl+Alt+Shift+B"; context: Qt.ApplicationShortcut; enabled: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastSource !== ""; onActivated: window.focusLibraryLatestPublishedSource() }
     Shortcut { objectName: "libraryRecoveryNextActionFocusShortcut"; sequence: "Ctrl+Alt+Shift+1"; context: Qt.ApplicationShortcut; enabled: typeof storageRecovery !== "undefined"; onActivated: window.focusLibraryRecoveryNextAction() }
     Shortcut { objectName: "libraryMetadataErrorFocusShortcut"; sequence: "Ctrl+Alt+Shift+F"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== "" && window.metadataStatus.indexOf("Error:") === 0; onActivated: window.focusLibraryMetadataErrorGuidance() }
     Shortcut { objectName: "libraryClearShortcut"; sequence: "Ctrl+Alt+Backspace"; context: Qt.ApplicationShortcut; enabled: window.selectedAudioUrl.toString() !== ""; onActivated: window.resetLibraryBrowserSelection("Library selection cleared; choose another source for fresh analysis.") }
@@ -1282,6 +1283,11 @@ ApplicationWindow {
         navigation.currentIndex = 0
         analysisBatchLastSource.forceActiveFocus()
         window.announceVisualizationRecovery("Library analysis batch source focused.")
+    }
+    function focusLibraryLatestPublishedSource() {
+        navigation.currentIndex = 0
+        selectLatestPublishedSource.forceActiveFocus()
+        window.announceVisualizationRecovery("Latest published analysis source action focused.")
     }
     function focusLibraryBatchStatus() {
         navigation.currentIndex = 0
@@ -3578,6 +3584,7 @@ ApplicationWindow {
                                     window.selectedName = window.selectedAudioUrl.fileName
                                     if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
                                     window.announceVisualizationRecovery("Latest published analysis source selected.")
+                                    selectLatestPublishedSource.forceActiveFocus()
                                 }
                             }
                             Label {
