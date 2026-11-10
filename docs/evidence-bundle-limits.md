@@ -22,3 +22,7 @@ verification budgets aligned.
 Ingestion also enforces the verifier's portable manifest contract: artifact
 hashes are lowercase hexadecimal, and paths reject non-portable separators,
 reserved characters, and invalid Unicode before files are hashed.
+
+Identity fields are canonicalized at ingestion as well: platform names must
+be supported lowercase values, commits must be lowercase SHA-1 values, and
+environment strings must be trimmed, bounded, and free of control characters.

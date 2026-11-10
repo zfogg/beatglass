@@ -8,6 +8,7 @@ import unicodedata
 from datetime import datetime
 
 SCENARIOS = ("capture", "recovery", "output", "display", "playback", "overlay")
+SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
 MAX_ARTIFACT_BYTES = 1 << 30
 MAX_MANIFEST_BYTES = 16 << 20
 MAX_ENTRIES = 1000
@@ -35,10 +36,19 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
         errors.append("missing qualification-manifest.txt")
     if not re.fullmatch(r"[0-9a-fA-F]{40}", identity.get("commit", "")):
         errors.append("invalid source commit identity")
+    elif identity["commit"] != identity["commit"].lower():
+        errors.append("source commit identity must be lowercase")
+    platform = identity.get("platform", "")
+    if platform and (platform != platform.lower() or platform not in SUPPORTED_PLATFORMS):
+        errors.append("invalid platform identity")
     if "platform" in identity and not identity["platform"].strip():
         errors.append("empty platform identity")
     if "environment" in identity and not identity["environment"].strip():
         errors.append("empty environment identity")
+    if "environment" in identity and (identity["environment"] != identity["environment"].strip()
+            or len(identity["environment"]) > 512
+            or any(ord(char) < 32 and char not in "\t" for char in identity["environment"])):
+        errors.append("invalid environment identity")
     if not identity.get("captured_at", "").strip():
         errors.append("missing capture time")
     else:

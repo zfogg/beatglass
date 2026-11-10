@@ -322,3 +322,12 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-artifacts.sha256").write_text(f"{'0' * 64}  capture?.log\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertTrue(any("non-portable artifact path" in error for error in errors))
+
+    def test_identity_provenance_is_canonicalized(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "A" * 40 + "\nplatform=Windows\nenvironment= host\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("source commit identity must be lowercase", errors)
+            self.assertIn("invalid platform identity", errors)
+            self.assertIn("invalid environment identity", errors)
