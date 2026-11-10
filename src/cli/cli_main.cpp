@@ -41,10 +41,15 @@
 
 namespace {
 using namespace ftxui;
-struct Track { std::filesystem::path path; std::string title; };
+struct Track { std::filesystem::path path; std::string title; std::optional<beatglass::FileMetadata> metadata; };
 std::string format_bpm(const std::optional<float>& bpm) {
   if (!bpm) return "—";
   std::ostringstream out; out << std::fixed << std::setprecision(1) << *bpm; return out.str();
+}
+std::string format_duration(const beatglass::FileMetadata& metadata) {
+  if (!metadata.sample_rate) return "—";
+  const auto seconds = metadata.frames / metadata.sample_rate;
+  return std::to_string(seconds / 60) + ":" + (seconds % 60 < 10 ? "0" : "") + std::to_string(seconds % 60);
 }
 Element metric(std::string label, std::string value, Color accent) {
   return vbox({text(std::move(label)) | color(Color::GrayLight) | italic,
@@ -111,7 +116,11 @@ std::vector<Track> discover(const std::filesystem::path& root, bool recursive = 
   const auto visit = [&](const auto& entry) {
     if (!entry.is_regular_file()) return;
     const auto ext = entry.path().extension().string();
-    if (ext == ".wav" || ext == ".flac" || ext == ".mp3" || ext == ".aiff" || ext == ".aif") tracks.push_back({entry.path(), entry.path().stem().string()});
+    if (ext == ".wav" || ext == ".flac" || ext == ".mp3" || ext == ".aiff" || ext == ".aif") {
+      Track track{entry.path(), entry.path().stem().string(), std::nullopt};
+      try { track.metadata = beatglass::read_metadata(entry.path()); } catch (const std::exception&) { /* Keep browseability; analysis reports the full decoder error. */ }
+      tracks.push_back(std::move(track));
+    }
   };
   if (recursive) for (const auto& entry : std::filesystem::recursive_directory_iterator(root)) visit(entry);
   else for (const auto& entry : std::filesystem::directory_iterator(root)) visit(entry);
@@ -570,17 +579,16 @@ int main(int argc, char** argv) {
       auto label = tracks[i].title + "  •  " + tracks[i].path.filename().string();
       if (analysis_errors.contains(tracks[i].path)) label += "  [failed]";
       else if (completed_analyses.contains(tracks[i].path)) label += "  [analyzed]";
+      if (tracks[i].metadata) label += "  " + format_duration(*tracks[i].metadata);
       library_labels.push_back(std::move(label)); library_indices.push_back(i);
       if (i == selected) library_visible_selected = static_cast<int>(library_labels.size()) - 1;
     }
     if (library_labels.empty()) rows.push_back(text("No supported audio files in this folder.") | color(Color::GrayLight));
     else rows.push_back(library_menu->Render() | vscroll_indicator | frame);
     const auto name = selected >= 0 ? tracks[selected].title : "No track selected";
-    const auto duration = result && result->metadata.sample_rate != 0
-        ? std::to_string(result->metadata.frames / result->metadata.sample_rate / 60) + ":" +
-            (result->metadata.frames / result->metadata.sample_rate % 60 < 10 ? "0" : "") +
-            std::to_string(result->metadata.frames / result->metadata.sample_rate % 60)
-        : "—";
+    const auto duration = result ? format_duration(result->metadata)
+        : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata
+            ? format_duration(*tracks[selected].metadata) : "—";
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
     const auto progress_total = analysis_total.load(std::memory_order_acquire);
     const auto progress_frames = analysis_frames.load(std::memory_order_acquire);
@@ -609,7 +617,10 @@ int main(int argc, char** argv) {
       playback_fraction = static_cast<float>(playback_frame) / static_cast<float>(playback_total);
     }
 #endif
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction) | size(HEIGHT, EQUAL, 8), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (key ? *key : "—") + "   Chord: " + (chord ? *chord : "—")) | color(key || chord ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + join_history(tonal_history)) | color(tonal_history.empty() ? Color::GrayLight : Color::GreenLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
+    const auto format = result ? result->metadata.format : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->format : "—";
+    const auto sample_rate = result ? result->metadata.sample_rate : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->sample_rate : 0;
+    const auto channels = result ? result->metadata.channels : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->channels : 0;
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction) | size(HEIGHT, EQUAL, 8), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(format == "—" ? "Select a supported track to inspect it" : "Format: " + format) | bold, text(sample_rate ? "Sample rate: " + std::to_string(sample_rate) + " Hz   Channels: " + std::to_string(channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (key ? *key : "—") + "   Chord: " + (chord ? *chord : "—")) | color(key || chord ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + join_history(tonal_history)) | color(tonal_history.empty() ? Color::GrayLight : Color::GreenLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible   Sort title/path   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";

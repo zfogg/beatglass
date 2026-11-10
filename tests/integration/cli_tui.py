@@ -1,4 +1,5 @@
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -14,20 +15,21 @@ for tab, heading in (("library", "LIBRARY"), ("live", "LIVE"), ("settings", "SET
         errors="replace",
     )
     assert result.returncode == 0, result.stderr
-    assert heading in result.stdout, (tab, result.stdout)
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.stdout)
+    assert heading in plain, (tab, result.stdout)
     for shortcut in ("[1] Library", "[2] Live", "[3] Settings"):
-        assert shortcut in result.stdout, (tab, shortcut, result.stdout)
+        assert shortcut in plain, (tab, shortcut, result.stdout)
     if tab == "library":
-        assert "Analyze all" in result.stdout
-        assert "Analyze selected" in result.stdout
-        assert "Analyze all visible" in result.stdout
-        assert "Sort: title" in result.stdout
-        assert "Sort title/path" in result.stdout
-        assert "Source: " in result.stdout
-        assert "[analyzed]" in result.stdout
+        assert "Analyze all" in plain
+        assert "Analyze selected" in plain
+        assert "Analyze all visible" in plain
+        assert "Sort: title" in plain
+        assert "Sort title/path" in plain
+        assert "Source: " in plain
+        assert "[analyzed]" in plain
     if tab == "live":
         for control in ("Reset / reacquire", "½ BPM", "Normal BPM", "2× BPM"):
-            assert control in result.stdout, (tab, control, result.stdout)
+            assert control in plain, (tab, control, result.stdout)
 
 invalid = subprocess.run(
     [exe, "--snapshot", str(root), "not-a-tab"],
