@@ -174,6 +174,22 @@ cmake -S . -B build-clang -G "Visual Studio 17 2022" -A x64 -T ClangCL
 The compiler selection and Scoop package are development conveniences, not a
 cross-platform qualification result or a pinned release toolchain.
 
+### Complete repository flag inventory
+
+The repository also invokes downstream tool flags while running qualification
+helpers. They are intentionally documented here so copy/paste commands are
+auditable: `--backend-*` (CMake backend selector), `--cflags`, `--libs`,
+`--modversion`, and `--exists` belong to `pkg-config`; `--show-only` and
+`--no-tests` belong to CTest discovery; `--output-junit`, `--timeout`, and
+`--version` are native-test runner options; `--output-on-failure` and
+`--test-dir` are CTest options; `--keep-going` belongs to Sphinx; and
+`--variable` belongs to the CMake metadata helper. These are downstream tool
+options, not Beatglass parser flags, but they are part of the reproducible
+qualification commands. The repository-wide checker below verifies that this
+entire set, plus every Beatglass-defined flag, remains visible in this file.
+The native matrix helper also accepts `--record` when recording a qualification
+attempt; it is distinct from the evidence `--report` output.
+
 ## API documentation
 
 The [published documentation site](https://zfogg.github.io/beatglass/) combines three documentation tools:
