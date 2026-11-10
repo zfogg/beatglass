@@ -6,11 +6,16 @@ the visual audit documents; it does not replace native or runtime testing.
 """
 
 from pathlib import Path
+import re
 
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
     qml = (root / "src" / "desktop" / "qml" / "Main.qml").read_text(encoding="utf-8")
+    # QML formatting is intentionally compact in a few production sections;
+    # contract checks should validate semantics, not whether a declaration was
+    # wrapped across one or several physical lines.
+    qml_contract = re.sub(r"\s+", " ", qml)
     required = {
         "compact responsive header": "compactHeader",
         "visualization focus ring": "visualizationFocusRing",
@@ -652,7 +657,8 @@ def main() -> int:
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
-    missing = [name for name, marker in required.items() if marker not in qml]
+    missing = [name for name, marker in required.items()
+               if re.sub(r"\s+", " ", marker).strip() not in qml_contract]
     if missing:
         raise SystemExit("Missing issue #76 QML contract markers: " + ", ".join(missing))
     interaction_matrix = {
