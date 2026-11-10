@@ -4017,6 +4017,14 @@ ApplicationWindow {
                                 onClicked: { window.retryVisualizationAnalysis(); retryAnalysis.forceActiveFocus() }
                                 ToolTip.text: Accessible.description
                             }
+                            QtObject {
+                                id: retryAdmittedAnalysis
+                                objectName: "retryAdmittedAnalysis"
+                                readonly property bool visible: retryAnalysis.visible
+                                readonly property bool enabled: retryAnalysis.enabled
+                                function clicked() { retryAnalysis.clicked() }
+                                function forceActiveFocus() { retryAnalysis.forceActiveFocus() }
+                            }
                             Button {
                                 id: discardAnalysisButton
                                 objectName: "discardAnalysis"
