@@ -102,6 +102,8 @@ Missing retained evidence for a required scenario is grouped under
 `scenario_evidence` for direct coverage triage.
 Malformed manifest JSON is grouped under `parse`, keeping input decoding
 failures distinct from valid-but-invalid evidence contracts.
+Duplicate or conflicting artifact identities are grouped under `identity` in
+JSON output for direct manifest deduplication triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.
