@@ -1491,6 +1491,10 @@ ApplicationWindow {
         window.handleOverlayRetryAction()
     }
     function handleOverlayRetryAction() {
+        if (window.overlayRecoveryPausedByUser) {
+            window.focusOverlayRecoveryPauseState("Overlay recovery is paused; Resume recovery before retrying.", resumeOverlayRecovery)
+            return false
+        }
         const restored = window.showOverlayAndHideControls()
         if (!restored)
             retryOverlay.forceActiveFocus()
