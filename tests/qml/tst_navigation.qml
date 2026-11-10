@@ -181,6 +181,20 @@ TestCase {
         fakeLive.status = "Stopped"
         app.destroy()
     }
+    function test_visualizationRetryMarksOverlayEvidenceStale() {
+        let app = shellWithOverlay.createObject(null)
+        fakeLive.status = "Error"
+        fakeCapture.starts = 0
+        let retry = findChild(app, "visualizationRetryCapture")
+        verify(retry.visible)
+        retry.clicked()
+        verify(app.overlayCaptureEvidenceStale)
+        compare(fakeCapture.starts, 1)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Visualization capture retry requested") >= 0)
+        fakeCapture.status = "Monitoring"
+        fakeLive.status = "Tracking"
+        app.destroy()
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
