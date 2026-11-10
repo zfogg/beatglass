@@ -2258,6 +2258,7 @@ ApplicationWindow {
             visualizationCanvas.forceActiveFocus()
     }
     function announceCaptureRecoveryState(message) {
+        window.overlayRecoveryAnnouncement = message
         window.clearVisualizationForCaptureState(message)
         window.announceVisualizationRecovery(message)
     }
