@@ -22,6 +22,14 @@ bool known_audio_extension(const std::filesystem::path& path) {
 struct FileReader::Impl {
   SNDFILE* handle{}; SF_INFO info{}; FileMetadata metadata; std::filesystem::path path; std::filesystem::file_time_type initial_modified{}; std::uintmax_t initial_size{}; std::uint64_t epoch{}, position{}; bool ended{}, failed{};
   std::unique_ptr<detail::VirtualFileReader> virtual_reader;
+  bool source_changed() const noexcept {
+    if (path.empty()) return false;
+    std::error_code ec;
+    const auto size = std::filesystem::file_size(path, ec);
+    if (ec || size != initial_size) return true;
+    const auto modified = std::filesystem::last_write_time(path, ec);
+    return ec || modified != initial_modified;
+  }
   Impl(const std::filesystem::path& path, std::uint64_t initial) : path(path), epoch(initial) {
 #ifdef _WIN32
     handle = sf_wchar_open(path.c_str(), SFM_READ, &info);
@@ -65,9 +73,7 @@ FileReader::FileReader(ByteSource& source, std::uint64_t epoch, std::stop_token 
 FileReader::~FileReader() = default;
 const FileMetadata& FileReader::metadata() const noexcept { return impl_->metadata; }
 bool FileReader::source_changed() const noexcept {
-  if (impl_->path.empty()) return false;
-  std::error_code ec; const auto size = std::filesystem::file_size(impl_->path, ec); if (ec || size != impl_->initial_size) return true;
-  const auto modified = std::filesystem::last_write_time(impl_->path, ec); return ec || modified != impl_->initial_modified;
+  return impl_->source_changed();
 }
 FileReadResult FileReader::read(std::span<float> buffer, std::stop_token cancel) {
   auto& f = *impl_; if (f.failed) throw std::runtime_error("File reader failed");
