@@ -75,13 +75,13 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   if (!op.valid()) {
     failureReason_ = QStringLiteral("Analysis request is missing valid source identity or worker callbacks.");
     emit failureChanged();
-    if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+    if (frames_ != 0 || total_frames_ != 0 || progress_known_) { frames_ = 0; total_frames_ = 0; progress_known_ = false; emit progressChanged(); }
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     status_ = QStringLiteral("Failed");
     emit statusChanged();
     retryable_.reset(); return {};
   }
-  frames_ = 0;
+  frames_ = 0; total_frames_ = 0; progress_known_ = false;
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   result_.clear();
   emit resultChanged();
@@ -103,9 +103,11 @@ std::shared_ptr<beatglass::library::RetryableAnalysis> AnalysisJobBridge::submit
   op.progress = [weak_self = weak_self_, progress](auto done, auto total) {
     if (progress) progress(done, total);
     if (!weak_self) return;
-    QMetaObject::invokeMethod(weak_self, [weak_self, done] {
+    QMetaObject::invokeMethod(weak_self, [weak_self, done, total] {
       if (!weak_self) return;
       weak_self->frames_ = done;
+      weak_self->total_frames_ = total;
+      weak_self->progress_known_ = total > 0;
       emit weak_self->progressChanged();
     }, Qt::QueuedConnection);
   };
@@ -156,14 +158,14 @@ void AnalysisJobBridge::discard() {
   poll_timer_.stop();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
-  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (frames_ != 0 || total_frames_ != 0 || progress_known_) { frames_ = 0; total_frames_ = 0; progress_known_ = false; emit progressChanged(); }
   if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
   recoveryStatus_ = QStringLiteral("Single analysis recovery discarded"); emit statusChanged();
 }
 
 int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOperation> operations, int priority) {
   if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
-  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (frames_ != 0 || total_frames_ != 0 || progress_known_) { frames_ = 0; total_frames_ = 0; progress_known_ = false; emit progressChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
   if (retryable_ && canCancel()) retryable_->cancel();
   retryable_.reset();
@@ -217,7 +219,7 @@ bool AnalysisJobBridge::retryBatch() {
   if (accepted) {
     if (!recoveryStatus_.isEmpty()) { recoveryStatus_.clear(); emit statusChanged(); }
     if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
-    if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+    if (frames_ != 0 || total_frames_ != 0 || progress_known_) { frames_ = 0; total_frames_ = 0; progress_known_ = false; emit progressChanged(); }
     batchResultsPublished_ = batchFailedCount_ = batchCancelledCount_ = batchCompletedCount_ = 0; batchLastResult_.clear(); batchLastSource_.clear();
     if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
     poll_timer_.start(); emit statusChanged(); poll();
@@ -237,7 +239,7 @@ void AnalysisJobBridge::discardBatch() {
   poll_timer_.stop();
   if (!result_.isEmpty()) { result_.clear(); emit resultChanged(); }
   if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }
-  if (frames_ != 0) { frames_ = 0; emit progressChanged(); }
+  if (frames_ != 0 || total_frames_ != 0 || progress_known_) { frames_ = 0; total_frames_ = 0; progress_known_ = false; emit progressChanged(); }
   if (status_ != QStringLiteral("Idle")) { status_ = QStringLiteral("Idle"); emit statusChanged(); }
   recoveryStatus_ = QStringLiteral("Batch analysis recovery discarded"); emit statusChanged();
   emit batchChanged();

@@ -12,6 +12,9 @@
 class AnalysisJobBridge final : public QObject {
   Q_OBJECT
   Q_PROPERTY(qulonglong frames READ frames NOTIFY progressChanged)
+  Q_PROPERTY(qulonglong totalFrames READ totalFrames NOTIFY progressChanged)
+  Q_PROPERTY(bool progressKnown READ progressKnown NOTIFY progressChanged)
+  Q_PROPERTY(double progressFraction READ progressFraction NOTIFY progressChanged)
   Q_PROPERTY(QString status READ status NOTIFY statusChanged)
   Q_PROPERTY(QString result READ result NOTIFY resultChanged)
   Q_PROPERTY(QString sourcePath READ sourcePath NOTIFY sourceChanged)
@@ -36,6 +39,13 @@ public:
   explicit AnalysisJobBridge(beatglass::library_detail::JobExecutor&, QObject* parent = nullptr);
   std::shared_ptr<beatglass::library::RetryableAnalysis> submit(beatglass::library::AnalysisOperation);
   qulonglong frames() const noexcept { return frames_; }
+  qulonglong totalFrames() const noexcept { return total_frames_; }
+  bool progressKnown() const noexcept { return progress_known_; }
+  double progressFraction() const noexcept {
+    if (!progress_known_) return -1.0;
+    if (total_frames_ == 0) return 1.0;
+    return static_cast<double>(frames_) / static_cast<double>(total_frames_);
+  }
   QString status() const { return status_; }
   QString result() const { return result_; }
   QString sourcePath() const { return sourcePath_; }
@@ -107,6 +117,8 @@ private:
   QTimer poll_timer_;
   QPointer<AnalysisJobBridge> weak_self_{this};
   qulonglong frames_{};
+  qulonglong total_frames_{};
+  bool progress_known_{};
   QString status_{QStringLiteral("Idle")};
   QString result_;
   QString sourcePath_;

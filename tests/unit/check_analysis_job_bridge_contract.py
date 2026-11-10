@@ -35,7 +35,7 @@ class AnalysisJobBridgeContractTest(unittest.TestCase):
 
     def test_batch_submission_clears_previous_failure_diagnostic(self):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")
-        self.assertIn('if (frames_ != 0) { frames_ = 0; emit progressChanged(); }\n  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }', source)
+        self.assertIn('total_frames_ = 0; progress_known_ = false; emit progressChanged(); }\n  if (!failureReason_.isEmpty()) { failureReason_.clear(); emit failureChanged(); }', source)
 
     def test_single_submission_clears_batch_aggregates(self):
         source = (Path(__file__).parents[2] / "src/desktop/analysis_job_bridge.cpp").read_text(encoding="utf-8")

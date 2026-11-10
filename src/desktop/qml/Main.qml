@@ -3415,7 +3415,7 @@ ApplicationWindow {
                         }
                         RowLayout { Layout.fillWidth: true
                             Label {
-                                text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (window.analysisJobBridge ? (window.analysisJobBridge.status + " · observed " + window.analysisJobBridge.frames + " frames.") : "Analysis progress unavailable")
+                                text: !window.selectedName ? "Queued · select an audio source to begin analysis." : (window.analysisJobBridge ? (window.analysisJobBridge.status + " · " + (window.analysisJobBridge.progressKnown ? Math.round(window.analysisJobBridge.progressFraction * 100) + "% · " : "") + "observed " + window.analysisJobBridge.frames + (window.analysisJobBridge.progressKnown ? " of " + window.analysisJobBridge.totalFrames : "") + " frames.") : "Analysis progress unavailable")
                                 id: analysisProgress
                                 objectName: "analysisProgress"
                                 activeFocusOnTab: true
