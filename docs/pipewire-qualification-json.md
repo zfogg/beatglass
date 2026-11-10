@@ -274,6 +274,8 @@ Reports are assembled in the destination directory and atomically replaced so
 readers never observe a partially written JSON report.
 The temporary file is flushed and synchronized before replacement so a
 successful validation report is durable across an abrupt process exit.
+On POSIX hosts the containing directory is synchronized after replacement as
+well; Windows uses the compatible atomic-replace path without directory fsync.
 Pass a second path to emit a deterministic validation report for the bundle:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 Validate that generated report before packaging with:
