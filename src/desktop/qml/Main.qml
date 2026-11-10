@@ -100,6 +100,19 @@ ApplicationWindow {
         onActivated: window.requestLibraryRecursiveCatalog()
     }
     Shortcut {
+        objectName: "libraryFilterFocusShortcut"
+        sequence: "Ctrl+L"
+        context: Qt.ApplicationShortcut
+        onActivated: { search.forceActiveFocus(); search.selectAll(); window.announceVisualizationRecovery("Library filter focused.") }
+    }
+    Shortcut {
+        objectName: "libraryRecursiveCatalogShortcut"
+        sequence: "Ctrl+Alt+R"
+        context: Qt.ApplicationShortcut
+        enabled: window.browseFolder.toString() !== "" && !window.recursiveCatalogActive
+        onActivated: addFolderRecursively.click()
+    }
+    Shortcut {
         objectName: "libraryRefreshShortcut"
         sequence: "Ctrl+R"
         context: Qt.ApplicationShortcut
