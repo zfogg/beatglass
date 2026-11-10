@@ -22,6 +22,10 @@ inline const char* fingerprint_status_label(FingerprintStatus status) noexcept {
   }
   return "error";
 }
+/** Return whether an outcome can be retried without changing the source. */
+inline bool fingerprint_status_is_retryable(FingerprintStatus status) noexcept {
+  return status == FingerprintStatus::cancelled || status == FingerprintStatus::error;
+}
 /** SHA-256 evidence for the bytes observed by one read, with file attributes around that read. It is not an opened-decoder identity or immunity to concurrent mutation. */
 struct FileFingerprint {
   /** Outcome; only ok permits use of remaining fields. */ FingerprintStatus status{FingerprintStatus::error};

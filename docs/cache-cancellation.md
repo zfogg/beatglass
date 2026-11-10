@@ -15,3 +15,7 @@ its SQLite step.
 Recovery/UI code can use `fingerprint_status_label` for the stable labels
 `ok`, `cancelled`, `changed`, and `error`; diagnostics remain supplemental
 detail rather than machine-readable keys.
+
+Only `cancelled` and `error` are retryable outcomes. A `changed` result means
+the source identity must be refreshed before another attempt; it is not a
+transient failure and must not be blindly retried against the old identity.

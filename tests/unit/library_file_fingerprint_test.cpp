@@ -59,3 +59,10 @@ TEST_CASE("file fingerprint statuses have stable labels") {
  CHECK(std::string(fingerprint_status_label(FingerprintStatus::changed)) == "changed");
  CHECK(std::string(fingerprint_status_label(FingerprintStatus::error)) == "error");
 }
+
+TEST_CASE("file fingerprint retry policy distinguishes transient outcomes") {
+ CHECK(fingerprint_status_is_retryable(FingerprintStatus::cancelled));
+ CHECK(fingerprint_status_is_retryable(FingerprintStatus::error));
+ CHECK_FALSE(fingerprint_status_is_retryable(FingerprintStatus::ok));
+ CHECK_FALSE(fingerprint_status_is_retryable(FingerprintStatus::changed));
+}
