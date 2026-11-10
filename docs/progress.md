@@ -993,3 +993,11 @@ portable build, unit/integration contracts, documentation checks, and issue-76
 QML contract locally. It does not qualify real WASAPI, Core Audio, PipeWire,
 desktop overlay, packaging, or native device behavior.
 
+## Design-system rendering evidence — 2026-11-10
+
+In `design/v1`, `npm install`, `npm run check`, and `npm run render output`
+were run locally with the pinned Playwright dependency. The checker passed all
+60 theme/screen combinations, and the renderer produced 60 PNG screens in the
+gitignored `design/v1/output/` directory. These are visual design artifacts,
+not native Qt desktop qualification evidence.
+
