@@ -303,6 +303,7 @@ class EvidenceBundleTest(unittest.TestCase):
             self.assertFalse(report["valid"])
             self.assertTrue(report["errors"])
             self.assertEqual(report["error_count"], len(report["errors"]))
+            self.assertEqual(sum(report["error_categories"].values()), report["error_count"])
             self.assertIn("max_total_artifact_bytes", report["limits"])
             self.assertEqual(report["artifact_count"], 0)
             self.assertEqual(report["artifact_bytes"], 0)
