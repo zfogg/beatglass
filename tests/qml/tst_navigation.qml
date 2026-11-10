@@ -379,6 +379,7 @@ TestCase {
         let app = shellWithOverlay.createObject(null)
         fakeCapture.status = "Error"
         let tempo = findChild(app, "overlayTempo")
+        verify(findChild(app, "overlayCaptureRecoveryAction").activeFocus)
         verify(app.overlayCaptureEvidenceStale)
         verify(tempo.Accessible.value.indexOf("stale until fresh capture") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("fresh snapshot") >= 0)
