@@ -23,6 +23,7 @@ class LivePresentation : public QObject {
   Q_PROPERTY(qulonglong observedFrames READ observedFrames NOTIFY changed)
   Q_PROPERTY(qulonglong analysisDelayFrames READ analysisDelayFrames NOTIFY changed)
   Q_PROPERTY(double confidence READ confidence NOTIFY changed)
+  Q_PROPERTY(bool stale READ stale NOTIFY changed)
 public:
   /** Construct on the owning GUI thread; parent, if any, has the same thread. */
   explicit LivePresentation(QObject* parent = nullptr);
@@ -44,6 +45,8 @@ public:
   qulonglong analysisDelayFrames() const { return analysis_delay_frames_; }
   /** Signal-health confidence in [0, 1], or -1 when unavailable. */
   double confidence() const { return confidence_; }
+  /** True when the current state is not providing fresh tracking evidence. */
+  bool stale() const { return stale_; }
 signals:
   /** Emitted on the owning thread when a newer update is applied. */
   void changed();
@@ -53,4 +56,5 @@ private:
   QString tempo_ = QStringLiteral("\u2014"), key_ = QStringLiteral("\u2014"), chord_ = QStringLiteral("\u2014");
   qulonglong beat_count_ = 0, observed_frames_ = 0, analysis_delay_frames_ = 0;
   double confidence_ = -1.0;
+  bool stale_ = false;
 };

@@ -13,6 +13,7 @@ bool LivePresentation::apply(beatglass::PresentationUpdate update) {
   observed_frames_ = displayed.observed_frames;
   analysis_delay_frames_ = displayed.analysis_delay_frames;
   confidence_ = displayed.confidence ? *displayed.confidence : -1.0;
+  stale_ = displayed.stale;
   emit changed();
   return true;
 }

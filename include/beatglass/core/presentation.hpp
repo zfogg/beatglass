@@ -20,7 +20,7 @@ struct PresentationState { std::string status, tempo, key, chord; std::uint64_t 
 inline PresentationState present_snapshot(const Snapshot& snapshot) {
   PresentationState result{"Stopped", "—", "—", "—", 0, snapshot.observed_through.frame, snapshot.analysis_delay_frames, std::nullopt, false};
   result.beat_count = snapshot.beats.size();
-  if (snapshot.confidence && std::isfinite(*snapshot.confidence) && *snapshot.confidence >= 0.0f && *snapshot.confidence <= 1.0f) result.confidence = *snapshot.confidence;
+  result.stale = snapshot.state != TrackingState::tracking && snapshot.state != TrackingState::stopped;
   switch (snapshot.state) {
     case TrackingState::stopped: result.status = "Stopped"; break;
     case TrackingState::silent: result.status = "Silent"; break;
@@ -30,6 +30,7 @@ inline PresentationState present_snapshot(const Snapshot& snapshot) {
     case TrackingState::error: result.status = "Error"; break;
   }
   if (snapshot.state != TrackingState::tracking) return result;
+  if (snapshot.confidence && std::isfinite(*snapshot.confidence) && *snapshot.confidence >= 0.0f && *snapshot.confidence <= 1.0f) result.confidence = *snapshot.confidence;
   if (snapshot.bpm && std::isfinite(*snapshot.bpm) && *snapshot.bpm > 0) {
     std::ostringstream value;
     value << std::fixed << std::setprecision(1) << *snapshot.bpm;
