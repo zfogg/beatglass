@@ -354,6 +354,8 @@ An empty array is also rejected because every valid report must identify at
 least its `platform` and `name` provenance fields.
 Reports that list only one required field, or neither, are rejected for the
 same reason; checked metadata must prove both identity dimensions.
+Required field names are case-sensitive; display-cased variants such as
+`Name` or `Platform` do not satisfy the contract.
 The array must be lexicographically sorted to keep generated reports
 deterministic and comparable across runs.
 Every array entry must be non-empty; blank field names are rejected as
