@@ -345,3 +345,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Stop recovery result contract | Stop recovery pauses active overlay recovery | Return one unambiguous success result after focusing Resume, while preserving idempotent failure when already paused. |
 | Summary review focus contract | Summary review shortcut focuses persisted overlay settings | Report a successful focus transition after announcing the settings revision and recovery freshness state. |
 | Paused recovery focus contract | Paused-page and paused-focus shortcuts focus Resume recovery | Propagate the shared recovery-focus result so callers can observe whether the paused recovery control became actionable. |
+| Size shortcut availability contract | Size shortcut is invoked before native overlay/display readiness | Focus size recovery and return an explicit failure instead of calling the bridge when sizing is unavailable. |

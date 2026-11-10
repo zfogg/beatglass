@@ -1474,6 +1474,10 @@ ApplicationWindow {
         return applied
     }
     function handleOverlaySizeShortcut() {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay size shortcut is unavailable until the native overlay and a destination display are ready.", overlaySize)
+            return false
+        }
         const sizes = [[250, 110], [310, 130], [430, 180]]
         const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
         const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
