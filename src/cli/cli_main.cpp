@@ -25,6 +25,7 @@
 #endif
 #ifdef __APPLE__
 #include "beatglass/desktop/macos_playback_session.hpp"
+#include "beatglass/capture/coreaudio_source_internal.hpp"
 #endif
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -586,7 +587,11 @@ int main(int argc, char** argv) {
     live_endpoint_ids.push_back(endpoint.id);
   }
 #else
-#if defined(BEATGLASS_HAS_PIPEWIRE)
+#if defined(__APPLE__)
+  auto live_endpoint_snapshot = beatglass::coreaudio::make_native_backend()->enumerate();
+  live_error = live_endpoint_snapshot.diagnostic;
+  for (const auto& endpoint : live_endpoint_snapshot.sources) { live_endpoints.push_back(endpoint.name); live_endpoint_ids.push_back(endpoint.id); }
+#elif defined(BEATGLASS_HAS_PIPEWIRE)
   auto live_endpoint_snapshot = beatglass::pipewire::discover_sinks(std::chrono::milliseconds(500));
   live_error = live_endpoint_snapshot.error;
   for (const auto& endpoint : live_endpoint_snapshot.sinks) {
@@ -607,6 +612,11 @@ int main(int argc, char** argv) {
     if (live_endpoint_snapshot.endpoints[index].id == live_endpoint_preference) { live_selected = index; live_endpoint_identity_found = true; }
     else if (!live_endpoint_identity_found && (live_endpoint_snapshot.endpoints[index].name == live_endpoint_name_preference ||
              (live_endpoint_preference.empty() && live_endpoint_name_preference.empty() && live_endpoint_snapshot.endpoints[index].is_default))) live_selected = index;
+  }
+#elif defined(__APPLE__)
+  for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.sources.size()); ++index) {
+    if (live_endpoint_snapshot.sources[index].id == live_endpoint_preference) { live_selected = index; live_endpoint_identity_found = true; }
+    else if (!live_endpoint_identity_found && live_endpoint_snapshot.sources[index].name == live_endpoint_name_preference) live_selected = index;
   }
 #elif defined(BEATGLASS_HAS_PIPEWIRE)
   for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.sinks.size()); ++index)
@@ -700,6 +710,9 @@ int main(int argc, char** argv) {
 #if defined(BEATGLASS_HAS_PIPEWIRE)
   std::unique_ptr<beatglass::pipewire::MonitorBackend> live_pipewire = beatglass::pipewire::make_monitor_backend();
   std::uint64_t live_pipewire_epoch = 1;
+#elif defined(__APPLE__)
+  std::unique_ptr<beatglass::coreaudio::SourceBackend> live_coreaudio = beatglass::coreaudio::make_native_backend();
+  std::uint64_t live_coreaudio_epoch = 1;
 #endif
   std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
@@ -1184,6 +1197,15 @@ int main(int argc, char** argv) {
       live_button_label = " Stop monitoring ";
     }
     else live_status = "Capture could not start; inspect endpoint permissions or device state.";
+#elif defined(__APPLE__)
+    if (live_coreaudio && live_coreaudio->status().state == beatglass::coreaudio::TapState::running) {
+      live_coreaudio->stop(); clear_live_evidence(); live_status = "Capture stopped."; live_button_label = " Start monitoring "; return;
+    }
+    if (!live_coreaudio || live_endpoint_ids.empty()) { live_status = "No macOS output source is available."; return; }
+    if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoint_ids.size())) { live_status = "Select an available output source first."; return; }
+    if (live_coreaudio->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)], ++live_coreaudio_epoch)) {
+      set_live_presentation_state(beatglass::TrackingState::reacquiring); live_last_packet = std::chrono::steady_clock::now(); live_has_packet = false; live_status = "Starting CoreAudio output tap…"; live_button_label = " Stop monitoring ";
+    } else live_status = "CoreAudio output tap could not start; check recording permission.";
 #elif defined(BEATGLASS_HAS_PIPEWIRE)
     if (live_pipewire && live_pipewire->selected_active()) {
       live_pipewire->stop();
