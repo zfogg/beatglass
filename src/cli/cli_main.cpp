@@ -72,7 +72,7 @@ public:
   };
   MacMonitorBackend() : source_(beatglass::coreaudio::make_native_backend()) {}
   bool start_stream(const std::string& id, std::uint64_t epoch, std::uint32_t, std::uint32_t) { selected_ = id; epoch_ = epoch; return source_ && source_->start(id, epoch); }
-  bool selected_active() const { return source_ && source_->status().state == beatglass::coreaudio::TapState::running; }
+  bool selected_active() const { return source_ && source_->status().state != beatglass::coreaudio::TapState::stopped; }
   void stop() noexcept { if (source_) source_->stop(); }
   bool pop_current(beatglass::coreaudio::CaptureBlock& block) noexcept { return source_ && source_->pop(block) && block.epoch == epoch_; }
   Status poll_status() { Status out; if (!source_) { out.error = true; out.message = "CoreAudio source is unavailable."; return out; } const auto status = source_->status(); out.active = status.state == beatglass::coreaudio::TapState::running; out.needs_restart = status.state == beatglass::coreaudio::TapState::interrupted; out.error = status.state == beatglass::coreaudio::TapState::error; out.message = status.message; return out; }
