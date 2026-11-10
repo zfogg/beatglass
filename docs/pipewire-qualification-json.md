@@ -236,3 +236,5 @@ If present, host `clock_holdover_state` must be a non-empty string describing
 clock holdover behavior during qualification.
 If present, host `clock_quality` must be a non-empty string describing the
 clock quality classification.
+If present, host `clock_stratum` must be a positive integer identifying the
+clock synchronization stratum.
