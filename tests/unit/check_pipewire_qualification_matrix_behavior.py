@@ -83,6 +83,11 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_blockers), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid execution blockers" not in result.stderr + result.stdout:
         raise SystemExit("malformed native execution blockers were accepted")
+    summary.write_text(json.dumps({"schema": "future-summary-v2", "qualified": False, "native_artifacts": [], "pending_reason": "host unavailable"}), encoding="utf-8")
+    unsupported_schema = root / "unsupported-schema-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(unsupported_schema), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "unsupported schema" not in result.stderr + result.stdout:
+        raise SystemExit("unsupported native summary schema was accepted")
     summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "native_execution_blockers": ["audio\u0001permission"], "pending_reason": "host unavailable"}), encoding="utf-8")
     control_blockers = root / "control-blockers-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(control_blockers), "--summary", str(summary)], capture_output=True, text=True)
