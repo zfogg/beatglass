@@ -22,6 +22,7 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
     if root.is_symlink():
         errors.append("symlinked qualification root")
     identity = {}
+    canonical_captured_at = ""
     identity_path = root / "qualification-manifest.txt"
     if identity_path.is_symlink():
         errors.append("symlinked qualification-manifest.txt")
@@ -58,6 +59,8 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
                 errors.append("capture timestamp must include timezone")
             elif captured_at > datetime.now(timezone.utc) + timedelta(minutes=5):
                 errors.append("capture timestamp cannot be in the future")
+            else:
+                canonical_captured_at = captured_at.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
         except ValueError:
             errors.append("invalid capture timestamp")
     artifacts = []
@@ -130,7 +133,7 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
         errors.append(f"qualification artifacts exceed {max_entries} entries")
     artifacts.sort(key=lambda item: (item["path"], item["role"]))
     report = {"platform": identity.get("platform", "unknown"), "commit": identity.get("commit", ""),
-              "captured_at": identity.get("captured_at", ""), "environment": identity.get("environment", "native script output"),
+              "captured_at": canonical_captured_at, "environment": identity.get("environment", "native script output"),
               "artifacts": artifacts, "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in SCENARIOS]}
     if output.is_symlink():
         errors.append("symlinked evidence manifest output")

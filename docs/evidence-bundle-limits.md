@@ -28,3 +28,5 @@ be supported lowercase values, commits must be lowercase SHA-1 values, and
 environment strings must be trimmed, bounded, and free of control characters.
 Capture timestamps must include a timezone and cannot be more than five minutes
 in the future, preventing stale clock metadata from entering the bundle.
+Valid timestamps are emitted canonically as UTC ISO-8601 values with a `Z`
+suffix so manifests from different hosts compare consistently.
