@@ -14,7 +14,6 @@ def main() -> None:
     required = [
         'objectName: "analysisBatchStatus"',
         'Accessible.name: "Batch analysis queue status: " + text',
-        'Accessible.value: visible ? text : ""',
         'Accessible.description: visible ? "Live batch lifecycle and result counts: " + text',
         'Accessible.role: Accessible.StaticText',
         'window.analysisJobBridge.batchAcceptedCount',

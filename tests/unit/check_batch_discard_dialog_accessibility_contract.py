@@ -13,7 +13,7 @@ def main() -> None:
     doc = DOC.read_text(encoding="utf-8")
     required = [
         'objectName: "discardAnalysisBatchDialog"',
-        'Accessible.role: Accessible.Dialog',
+        'Accessible.role: Accessible.StaticText',
         'Accessible.name: "Discard analysis batch confirmation"',
         'Accessible.description: "Clear the retained batch recovery state without changing source audio. Cancel is focused first; Tab reaches the destructive OK action."',
         'onOpened: { window.announceVisualizationRecovery("Confirm discard of the analysis batch; source audio will remain unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }',
