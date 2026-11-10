@@ -283,6 +283,8 @@ int main(int argc, char** argv) {
   std::atomic_bool analysis_cancelled{false};
   std::atomic<std::uint64_t> analysis_frames{0};
   std::atomic<std::uint64_t> analysis_total{0};
+  std::atomic<std::size_t> batch_completed{0};
+  std::atomic<std::size_t> batch_total{0};
   std::vector<std::string> library_labels;
   std::vector<int> library_indices;
   int library_visible_selected = 0;
@@ -313,25 +315,36 @@ int main(int argc, char** argv) {
   std::vector<float> live_waveform(160, 0.0f);
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
-  auto analyze = [&] {
+  auto analyze_paths = [&](std::vector<std::filesystem::path> paths) {
     if (busy) {
       status = "Analysis already in progress; cancel it before starting another track.";
       return;
     }
-    if (selected < 0 || selected >= static_cast<int>(tracks.size())) {
+    if (paths.empty()) {
       status = "Select a supported audio file first.";
       return;
     }
-    busy = true; analysis_cancelled.store(false, std::memory_order_release); analysis_stop = std::stop_source{}; analysis_frames.store(0); analysis_total.store(0); status = "Analyzing " + tracks[selected].title + "…";
-    const auto path = tracks[selected].path;
-    analysis_path = path;
+    busy = true; analysis_cancelled.store(false, std::memory_order_release); analysis_stop = std::stop_source{}; analysis_frames.store(0); analysis_total.store(0); batch_completed.store(0); batch_total.store(paths.size()); status = paths.size() == 1 ? "Analyzing " + paths.front().stem().string() + "…" : "Analyzing " + std::to_string(paths.size()) + " tracks…";
+    const auto focus_path = selected >= 0 && selected < static_cast<int>(tracks.size()) ? tracks[selected].path : paths.front();
+    analysis_path = focus_path;
     const auto stop_token = analysis_stop.get_token();
-    analysis_future = std::async(std::launch::async, [path, stop_token, &analysis_frames, &analysis_total] {
-      const auto metadata = beatglass::read_metadata(path);
-      analysis_total.store(metadata.frames, std::memory_order_release);
-      const auto result = beatglass::replay_file(path, [&](std::uint64_t observed, const beatglass::TempoResult&) { analysis_frames.store(observed, std::memory_order_release); }, {}, stop_token);
-      return AnalysisView{result, decode_waveform(path, stop_token)};
+    analysis_future = std::async(std::launch::async, [paths = std::move(paths), focus_path, stop_token, &analysis_frames, &analysis_total, &batch_completed] {
+      AnalysisView focused{};
+      for (const auto& path : paths) {
+        if (stop_token.stop_requested()) break;
+        const auto metadata = beatglass::read_metadata(path);
+        analysis_total.store(metadata.frames, std::memory_order_release);
+        const auto result = beatglass::replay_file(path, [&](std::uint64_t observed, const beatglass::TempoResult&) { analysis_frames.store(observed, std::memory_order_release); }, {}, stop_token);
+        auto waveform = decode_waveform(path, stop_token);
+        if (path == focus_path) focused = AnalysisView{result, std::move(waveform)};
+        batch_completed.fetch_add(1, std::memory_order_acq_rel);
+      }
+      return focused;
     });
+  };
+  auto analyze = [&] {
+    if (selected < 0 || selected >= static_cast<int>(tracks.size())) { status = "Select a supported audio file first."; return; }
+    analyze_paths({tracks[selected].path});
   };
   auto refresh = [&] {
     const auto cancelling = busy;
@@ -368,6 +381,11 @@ int main(int argc, char** argv) {
     analysis_cancelled.store(true, std::memory_order_release);
     analysis_stop.request_stop();
     status = "Cancelling analysis…";
+  });
+  auto analyze_all_button = Button(" Analyze all ", [&] {
+    std::vector<std::filesystem::path> paths;
+    for (const auto index : library_indices) paths.push_back(tracks[static_cast<std::size_t>(index)].path);
+    analyze_paths(std::move(paths));
   });
   auto open_folder_button = Button(" Open folder ", [&] {
     const std::filesystem::path requested(folder_text);
@@ -463,7 +481,7 @@ int main(int argc, char** argv) {
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, play_button, pause_button, stop_button, cancel_analysis_button})});
+  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, analyze_all_button, play_button, pause_button, stop_button, cancel_analysis_button})});
   auto library_container = Container::Vertical({library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
@@ -486,7 +504,10 @@ int main(int argc, char** argv) {
     const auto progress_total = analysis_total.load(std::memory_order_acquire);
     const auto progress_frames = analysis_frames.load(std::memory_order_acquire);
     const auto progress = progress_total ? std::min<std::uint64_t>(100, progress_frames * 100 / progress_total) : 0;
-    auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + (progress_total ? "  " + std::to_string(progress) + "%" : ""))}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(status) | color(Color::GrayLight) | italic;
+    const auto completed = batch_completed.load(std::memory_order_acquire);
+    const auto total = batch_total.load(std::memory_order_acquire);
+    const auto batch_label = total > 1 ? "  [" + std::to_string(completed) + "/" + std::to_string(total) + " tracks]" : "";
+    auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + batch_label + (progress_total ? "  " + std::to_string(progress) + "%" : ""))}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(status) | color(Color::GrayLight) | italic;
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
     const auto playback_status =
 #ifdef _WIN32
@@ -508,7 +529,7 @@ int main(int argc, char** argv) {
     }
 #endif
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0, playback_fraction), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("beat markers") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), cancel_analysis_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   ←/→ or Prev/Next   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), analyze_all_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), cancel_analysis_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Analyze all visible   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
   auto toggle_live = [&] {
