@@ -53,3 +53,5 @@ Readiness reports are also written atomically, preventing interrupted
 qualification summaries from replacing a previously complete report.
 Readiness output is capped at 16 MiB by default; constrained environments can
 override this with `--max-report-bytes`.
+Automation can pass `--json` to receive the complete readiness object on
+stdout while retaining the normal readiness exit status.
