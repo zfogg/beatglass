@@ -17,6 +17,10 @@ When a transition artifact includes `sample_count` on any `process` event, every
 partial callback accounting from being accepted as native evidence. The artifact
 must still contain positive captured samples in the active epoch.
 
+Reacquisition evidence may include `device_id`; when supplied it must be a
+non-empty identity matching the restart event's device. This prevents recovery
+samples from being attributed to a different device after a switch.
+
 If any event supplies `epoch`, every event must supply a positive integer epoch.
 Partial epoch annotations are rejected so lifecycle evidence cannot silently mix
 attributed and unattributed records.
