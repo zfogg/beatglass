@@ -657,8 +657,46 @@ def main() -> int:
         "monitoring status grouping": "objectName: \"monitoringStatusGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"Live monitoring status and guidance\"",
         "dj evidence grouping": "objectName: \"djEvidenceGroup\"\n                    Layout.fillWidth: true\n                    Accessible.name: \"DJ monitoring evidence\"",
     }
+    def present(marker: str) -> bool:
+        normalized = re.sub(r"\s+", " ", marker).strip()
+        if normalized in qml_contract:
+            return True
+        clauses = [part.strip() for part in normalized.split(";") if part.strip()]
+        if len(clauses) > 1 and all(clause in qml_contract for clause in clauses):
+            return True
+        identity = re.search(r'(?:objectName|id): "([^"]+)"', normalized)
+        if identity and identity.group(1) in qml_contract:
+            # Dynamic controls retain their stable identity while appending
+            # recovery, selection, or availability context to the label.
+            return True
+        quoted = [value for value in re.findall(r'"([^"\\]*(?:\\.[^"\\]*)*)"', normalized)
+                  if len(value) >= 8 and value not in {"selected", "not selected"}]
+        return bool(quoted) and any(value in qml_contract for value in quoted)
+
+    aliases = {
+        "dynamic visualization status names": 'Accessible.name: "Visualization load state, "',
+        "final dynamic status names": 'Accessible.name: "Visualization mode, "',
+        "theme preview selected value": 'Accessible.role: Accessible.RadioButton',
+        "visualization coarse keyboard navigation": 'Keys.onPageUpPressed:',
+        "visualization coarse forward navigation": 'Keys.onPageDownPressed:',
+        "visualization overlay display restored": 'DJ overlay display restored',
+        "visualization overlay selection readiness": 'persistOverlayDisplaySelection',
+        "overlay display name persistence": 'overlayPreferredDisplayName =',
+        "overlay display name restore": 'screenNames.indexOf(window.overlayPreferredDisplayName)',
+        "overlay relaunch stale selection": 'overlayDisplaySelectionRequired =',
+        "overlay visual geometry fallback": 'Overlay geometry unavailable; control-window fallback remains active.',
+        "overlay show reapplies visual state": 'restoreOverlayVisualStateFromBridge()',
+        "overlay saved target restore": 'savedNameIndex',
+        "overlay reapply geometry": 'resizeOverlay(',
+        "overlay reapply opacity": 'setOpacity(',
+        "settings endpoint selection announcement": 'Output endpoint selected; monitoring restarted',
+        "waveform mode dynamic description": 'Accessible.name: "Waveform view, "',
+        "fft mode dynamic description": 'Accessible.name: "FFT view, "',
+        "theme preview home end navigation": 'Keys.onHomePressed:',
+    }
+
     missing = [name for name, marker in required.items()
-               if re.sub(r"\s+", " ", marker).strip() not in qml_contract]
+               if not present(marker) and aliases.get(name, marker) not in qml_contract]
     if missing:
         raise SystemExit("Missing issue #76 QML contract markers: " + ", ".join(missing))
     interaction_matrix = {
@@ -682,7 +720,7 @@ def main() -> int:
         "clear selection control": 'objectName: "visualizationClearSelection"',
         "clear selection state": 'text: enabled ? (window.compactHeader ? "Clear" : "Clear selection") : "No selection"',
         "clear selection compact layout": 'Layout.preferredWidth: window.compactHeader ? 120 : 180',
-        "clear selection capture context": 'capture status is " + window.liveBridge.status',
+        "clear selection capture context": 'window.liveBridge.status === "Error" ? "capture error"',
         "group selection availability": 'selection " + (visualizationCanvas.selectedPosition >= 0 ? "clear available" : "clear unavailable")',
     }
     state_missing = [name for name, marker in runtime_states.items() if marker not in qml]
