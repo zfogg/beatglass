@@ -4917,7 +4917,7 @@ ApplicationWindow {
                         + " · settings revision " + window.overlaySettingsRevision
                         + (window.overlayDisplayRecoveryPending ? " · recovery pending · settings retained" : (window.overlayLaunchFallbackActive ? " · settings retained" : ""))
                     Accessible.name: "Overlay settings summary, " + (window.overlayCaptureEvidenceStale ? "live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                    Accessible.value: text
+                    Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: "Current overlay display, size, opacity, and settings revision. "
                         + (window.overlayCaptureEvidenceStale
