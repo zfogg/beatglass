@@ -67,6 +67,15 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("captured_at must include timezone", module.verify(root, manifest))
 
+    def test_capture_timestamp_cannot_be_in_the_future(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2999-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("captured_at cannot be in the future", module.verify(root, manifest))
+
     def test_commit_provenance_must_be_a_sha1(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
