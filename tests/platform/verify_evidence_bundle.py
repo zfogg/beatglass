@@ -250,6 +250,10 @@ def main() -> int:
                 category = "scenario"
             elif error.startswith("unsupported artifact fields:"):
                 category = "artifact_schema"
+            elif error.startswith("unsupported manifest fields:"):
+                category = "manifest_schema"
+            elif error.startswith("manifest root must be"):
+                category = "manifest_schema"
             elif error.startswith(("artifacts must", "scenarios must", "missing required scenarios", "unsupported manifest")):
                 category = "schema"
             elif error.startswith(("invalid or duplicate artifact entry", "duplicate artifact")):
