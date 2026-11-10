@@ -270,6 +270,8 @@ The host evidence root must be a JSON object; scalar, null, and array roots are
 rejected before provenance fields are inspected.
 `node_id` must be a positive integer; JSON booleans are explicitly rejected
 even though some language runtimes represent them as integers.
+`secure_boot` must be a JSON boolean when present; numeric sentinel values are
+not accepted as native host evidence.
 Malformed or ambiguous host JSON is rejected before any host fields are
 trusted; duplicate keys are not silently normalized.
 Missing host evidence files are rejected through the same unreadable-input path;
