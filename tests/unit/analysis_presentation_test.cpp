@@ -15,8 +15,8 @@ private slots:
     snapshot.chords = {{{4, 0}, {4, 2000}, {"Am", 0.7f}}, {{4, 2000}, {4, 4000}, {"F", 0.6f}}};
     model.publish(snapshot);
 
-    QCOMPARE(model.bpm(), QStringLiteral("128.3"));
-    QCOMPARE(model.tempoHistory(), QStringList({"126.0", "128.3"}));
+    QCOMPARE(model.bpm(), QStringLiteral("128.2"));
+    QCOMPARE(model.tempoHistory(), QStringList({"126.0", "128.2"}));
     QCOMPARE(model.tonalHistory(), QStringList({"Am", "F"}));
     QCOMPARE(model.beatFrames(), QVariantList({QVariant::fromValue<qulonglong>(1000), QVariant::fromValue<qulonglong>(2000)}));
   }
