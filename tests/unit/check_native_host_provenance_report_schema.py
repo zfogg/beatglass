@@ -6,5 +6,6 @@ assert schema["required"] == ["schema", "valid", "platform", "name", "checked_fi
 assert schema["properties"]["schema"]["const"] == "beatglass-native-host-provenance-v1"
 assert schema["properties"]["valid"]["const"] is True
 assert schema["properties"]["checked_fields"]["uniqueItems"] is True
+assert schema["properties"]["checked_fields"]["minItems"] == 2
 assert schema["additionalProperties"] is False
 print("Native host provenance report schema verified")
