@@ -1093,3 +1093,11 @@ def test_hidden_state_focus_helper_reports_target_result():
     assert "target.forceActiveFocus()" in body
     assert "Retained settings remain available." in body
     assert "return target !== null && target !== undefined" in body
+
+
+def test_restore_failure_focus_helper_reports_target_result():
+    start = QML.index("function focusOverlayRestoreFailure")
+    body = QML[start : QML.index("    function focusOverlayUnlockState", start)]
+    assert "target.forceActiveFocus()" in body
+    assert "Live evidence is stale until a fresh capture arrives." in body
+    assert "return target !== null && target !== undefined" in body
