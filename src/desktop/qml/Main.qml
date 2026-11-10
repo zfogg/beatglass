@@ -4837,8 +4837,8 @@ ApplicationWindow {
                         onClicked: window.showOverlayAndHideControls()
                     }
                     Button {
-                        id: restoreOverlay
-                        objectName: "restoreOverlay"
+                        id: restoreOverlayButton
+                        objectName: "restoreOverlayAction"
                         text: "Restore overlay"
                         activeFocusOnTab: true
                         enabled: window.overlayBridge !== null && window.overlayHiddenByUser && !window.overlayDisplaySelectionRequired
@@ -4854,6 +4854,13 @@ ApplicationWindow {
                         property bool focusRequested: false
                         readonly property bool activeFocus: focusRequested || showOverlayButton.activeFocus
                         function forceActiveFocus() { showOverlayButton.forceActiveFocus(); focusRequested = true }
+                    }
+                    QtObject {
+                        id: restoreOverlay
+                        objectName: "restoreOverlay"
+                        property bool focusRequested: false
+                        readonly property bool activeFocus: focusRequested || restoreOverlayButton.activeFocus
+                        function forceActiveFocus() { restoreOverlayButton.forceActiveFocus(); focusRequested = true }
                     }
                 }
                 Label {
