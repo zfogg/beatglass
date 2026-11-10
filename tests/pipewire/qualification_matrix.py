@@ -32,6 +32,8 @@ if summary is not None:
         raise SystemExit("native qualification summary has invalid pending reason")
     if summary.get("qualified") is True and (not isinstance(summary.get("commit"), str) or not summary["commit"].strip()):
         raise SystemExit("native qualification summary has missing commit provenance")
+    if summary.get("qualified") is True and summary.get("native_execution_attempted") is not True:
+        raise SystemExit("native qualification summary lacks native execution attempt")
     current = platforms.get(host)
     if current is not None:
         current["status"] = "qualified" if summary.get("qualified") is True else "pending"
