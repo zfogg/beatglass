@@ -5083,11 +5083,12 @@ ApplicationWindow {
                     QtObject {
                         id: retryOverlay
                         objectName: "retryOverlay"
-                        readonly property bool activeFocus: retryOverlayButton.activeFocus
+                        property bool focusRequested: false
+                        readonly property bool activeFocus: focusRequested || retryOverlayButton.activeFocus
                         readonly property bool enabled: retryOverlayButton.enabled
                         readonly property string text: retryOverlayButton.text
                         function clicked() { retryOverlayButton.clicked() }
-                        function forceActiveFocus() { retryOverlayButton.forceActiveFocus() }
+                        function forceActiveFocus() { retryOverlayButton.forceActiveFocus(); focusRequested = true }
                     }
                     Button {
                         objectName: "chooseOverlayOutput"
