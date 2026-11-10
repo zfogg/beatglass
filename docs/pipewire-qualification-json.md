@@ -341,6 +341,8 @@ The `valid` field must be the JSON boolean `true`, not a truthy number or
 string.
 Report names follow the host contract and must contain visible non-whitespace
 text.
+Report platforms must use the same exact lowercase enum as host evidence;
+numeric, null, or padded values are rejected.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
