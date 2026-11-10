@@ -307,3 +307,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Show overlay display guard | Show is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
 | Show overlay display guard | Show is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
 | Restore overlay display guard | Restore is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
+| Reapply settings display guard | Reapply is requested without an available destination display | Keep persisted settings unchanged, explain that display selection is required, and focus the display selector for recovery. |

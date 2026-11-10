@@ -1345,6 +1345,10 @@ ApplicationWindow {
         window.handleOverlayReapplyButtonAction()
     }
     function handleOverlayReapplyButtonAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Choose an available display before reapplying saved overlay settings.", overlayDisplay)
+            return
+        }
         window.reapplyOverlaySettingsAndRestore()
         reapplyOverlaySettings.forceActiveFocus()
     }

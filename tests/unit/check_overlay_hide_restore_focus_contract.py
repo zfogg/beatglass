@@ -576,6 +576,10 @@ def test_show_button_requires_available_display():
 def test_restore_button_requires_available_display():
     start = QML.index("function handleOverlayRestoreButtonAction")
     body = QML[start : QML.index("    function handleOverlayHideAction", start)]
+
+def test_reapply_button_requires_available_display():
+    start = QML.index("function handleOverlayReapplyButtonAction")
+    body = QML[start : QML.index("    function handleOverlayUnlockAction", start)]
     assert "overlayDisplaySelectionRequired" in body
     assert "screenNames.length === 0" in body
     assert "focusOverlayDisplayRecoveryFailure" in body
