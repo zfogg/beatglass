@@ -4718,7 +4718,7 @@ ApplicationWindow {
                     Accessible.name: "Overlay display and size controls"
                     Accessible.value: (window.overlayBridge && window.overlayBridge.screenIndex >= 0 && window.overlayBridge.screenIndex < window.overlayBridge.screenNames.length ? window.overlayBridge.screenNames[window.overlayBridge.screenIndex] : "unavailable") + (window.overlayDisplayRecoveryPending ? "; recovery pending; live evidence stale" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
                     Accessible.role: Accessible.Grouping
-                    Accessible.description: "Choose the overlay destination display and window size." + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : "") + (window.overlayDisplayRecoveryPending ? " Recovery is pending and live overlay evidence is stale until a display is confirmed." : "")
+                    Accessible.description: "Choose the overlay destination display and window size." + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : "") + (window.overlayCaptureEvidenceStale ? " Live overlay evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery is pending and live overlay evidence is stale until a display is confirmed." : "")
                     ToolTip.text: "Overlay destination display and window size; current display is announced when available"
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
