@@ -230,3 +230,5 @@ If present, host `clock_sync_interval_ms` must be a non-negative integer
 describing the clock synchronization interval.
 If present, host `clock_sync_method` must be a non-empty string naming the
 clock synchronization method.
+If present, host `clock_sync_offset_ns` must be numeric; boolean values are
+invalid.
