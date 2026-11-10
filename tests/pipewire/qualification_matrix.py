@@ -8,6 +8,7 @@ if len(sys.argv) not in (2, 4) or (len(sys.argv) == 4 and sys.argv[2] != "--summ
     raise SystemExit("usage: qualification_matrix.py OUTPUT.json [--summary SUMMARY.json]")
 output = Path(sys.argv[1])
 summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8")) if len(sys.argv) == 4 else None
+summary_path = Path(sys.argv[3]).resolve() if len(sys.argv) == 4 else None
 host = platform.system()
 platforms = {
     "Linux": {"target": "Linux/PipeWire", "status": "pending", "evidence": [], "execution_blockers": ["Linux host", "PipeWire daemon", "libpipewire-0.3", "audio sink"]},
@@ -21,7 +22,16 @@ if summary is not None:
     current = platforms.get(host)
     if current is not None:
         current["status"] = "qualified" if summary.get("qualified") is True else "pending"
-        current["evidence"] = summary.get("native_artifacts", [])
+        evidence = []
+        for artifact in summary.get("native_artifacts", []):
+            artifact_path = Path(artifact)
+            if artifact_path.is_absolute() and summary_path is not None:
+                try:
+                    artifact = artifact_path.resolve().relative_to(summary_path.parent).as_posix()
+                except ValueError:
+                    artifact = artifact_path.name
+            evidence.append(artifact)
+        current["evidence"] = evidence
         current["native_execution_attempted"] = summary.get("native_execution_attempted", False)
         if current["status"] == "pending":
             current["execution_blockers"] = summary.get("native_execution_blockers", [])

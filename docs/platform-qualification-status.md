@@ -192,6 +192,10 @@ The Linux capture gate also requires a documented sample-position clock mapping.
 
 The preparation scripts are executable on their respective hosts, but this Windows session is not a substitute for native qualification: it cannot produce WASAPI, Core Audio, or PipeWire device evidence. The current actionable handoff is therefore:
 
+Qualification matrices normalize absolute runner artifact paths to paths relative
+to the summary directory before handoff. This keeps retained evidence portable
+and allows the matrix validator's traversal checks to remain fail-closed.
+
 | Evidence class | Windows session result | Required native owner/action |
 | --- | --- | --- |
 | Build identity and artifact inventory | Prepared by `tests/windows/run_qualification.ps1`; no native-device run claimed here | Run on supported Windows hardware with a logged-in desktop session and retain the generated evidence directory. |
