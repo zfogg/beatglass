@@ -4857,11 +4857,11 @@ ApplicationWindow {
                 }
                 Label {
                     objectName: "overlayShortcutHelp"
-                    text: "Keyboard: Esc unlocks · Ctrl+Alt+U focuses unlock · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+J focuses hide · Ctrl+Alt+W focuses show · Ctrl+Alt+Shift+W focuses restore · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+Shift+Y focuses retry · Ctrl+Alt+O cycles size · Ctrl+Alt+Z focuses size · Ctrl+Alt+Shift+O resets opacity · Ctrl+Alt+L focuses opacity · Ctrl+Alt+Shift+R reapplies saved settings · Ctrl+Alt+Shift+P focuses reapply · Ctrl+Alt+Shift+S reviews retained settings · Ctrl+Alt+Shift+M reviews overlay summary"
+                    text: "Keyboard: Esc unlocks · Ctrl+Alt+U focuses unlock · Ctrl+Alt+I toggles click-through · Ctrl+Alt+H hides/restores · Ctrl+Alt+J focuses hide · Ctrl+Alt+W focuses show · Ctrl+Alt+Shift+W focuses restore · Ctrl+Alt+D focuses display · Ctrl+Alt+Y retries overlay · Ctrl+Alt+Shift+Y focuses retry · Ctrl+Alt+O cycles size · Ctrl+Alt+Z focuses size · Ctrl+Alt+Shift+O resets opacity · Ctrl+Alt+L focuses opacity · Ctrl+Alt+Shift+R reapplies saved settings · Ctrl+Alt+Shift+P focuses reapply · Ctrl+Alt+Shift+S reviews retained settings · Ctrl+Alt+Shift+M reviews overlay summary · Ctrl+Alt+Shift+B focuses beat pulse status"
                     Accessible.name: "Overlay keyboard shortcuts"
                     Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : "") + (window.overlayBridge !== null ? "; retained-settings review shortcut available" : "; retained-settings review unavailable")
                     Accessible.role: Accessible.Status
-                    Accessible.description: "Keyboard shortcuts for unlocking, hiding, restoring, reapplying retained settings, and reviewing the overlay summary." + (window.overlayCaptureEvidenceStale ? " Live evidence is stale until fresh capture arrives." : "")
+                    Accessible.description: "Keyboard shortcuts for unlocking, hiding, restoring, reapplying retained settings, reviewing the overlay summary, and focusing beat pulse status." + (window.overlayCaptureEvidenceStale ? " Live evidence is stale until fresh capture arrives." : "")
                     ToolTip.text: text
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
