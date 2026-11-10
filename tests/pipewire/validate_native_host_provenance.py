@@ -44,7 +44,7 @@ if len(sys.argv) == 3:
     try:
         input_path = Path(sys.argv[1]).resolve()
         destination = Path(sys.argv[2])
-        if destination.resolve() == input_path:
+        if destination.resolve() == input_path or (destination.exists() and os.path.samefile(input_path, destination)):
             raise OSError("report destination matches host input")
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.is_symlink():
