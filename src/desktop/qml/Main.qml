@@ -2881,6 +2881,7 @@ ApplicationWindow {
                         id: parentFolder; text: "Up"; objectName: "parentFolder"
                         activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
+                        Accessible.value: enabled ? "available" : "at folder root"
                         onClicked: window.navigateLibraryParentFolder()
                         Accessible.name: "Go to parent folder"
                         Accessible.role: Accessible.Button
