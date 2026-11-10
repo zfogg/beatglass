@@ -8,6 +8,10 @@ import tempfile
 import wave
 
 exe = sys.argv[1]
+missing_argument = subprocess.run([exe], capture_output=True, text=True)
+assert missing_argument.returncode == 2 and "Usage: beatglass-music-cli" in missing_argument.stderr
+extra_argument = subprocess.run([exe, "one.wav", "two.wav"], capture_output=True, text=True)
+assert extra_argument.returncode == 2 and "Usage: beatglass-music-cli" in extra_argument.stderr
 help_result = subprocess.run([exe, "--help"], capture_output=True, text=True)
 assert help_result.returncode == 0 and "Usage: beatglass-music-cli" in help_result.stdout
 version = subprocess.run([exe, "--version"], capture_output=True, text=True)
