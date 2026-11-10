@@ -4873,7 +4873,8 @@ ApplicationWindow {
                     }
                     QtObject {
                         objectName: "clickThrough"
-                        readonly property bool checked: clickThroughToggle.checked
+                        property bool checked: clickThroughToggle.checked
+                        onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() { clickThroughToggle.toggle() }
                     }
                     Label {
