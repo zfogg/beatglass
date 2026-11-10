@@ -107,6 +107,8 @@ if not isinstance(restart.get("serial"), str) or not restart["serial"].strip():
     raise SystemExit("restart event has no sink serial")
 if device_ids and (not isinstance(start.get("device_id"), str) or not isinstance(restart.get("device_id"), str)):
     raise SystemExit("device identity is missing from lifecycle boundary")
+if start.get("device_id") is not None and restart.get("device_id") is not None and restart["device_id"] != start["device_id"]:
+    raise SystemExit("restart device identity does not match start")
 error_events = [event for event in events if event.get("event") == "error"]
 error_codes = [event.get("error_code") for event in error_events if event.get("error_code") is not None]
 if error_codes and (len(error_codes) != len(error_events)

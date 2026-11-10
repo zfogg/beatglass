@@ -132,3 +132,6 @@ requirements for `sample_rate` and `channels`.
 
 The required restart-event `format` uses these same strict positive-integer
 requirements for `sample_rate` and `channels`.
+
+When both lifecycle boundaries provide `device_id`, the restart identity must
+match the start identity so a recovery cannot silently switch devices.
