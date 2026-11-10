@@ -204,3 +204,5 @@ If present, host `rack_id` must be a non-empty string identifying the physical
 rack or placement.
 If present, host `power_state` must be a non-empty string describing the host
 power state during qualification.
+If present, host `thermal_state` must be a non-empty string describing thermal
+conditions during qualification.
