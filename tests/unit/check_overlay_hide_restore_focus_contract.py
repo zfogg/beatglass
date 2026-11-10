@@ -252,3 +252,10 @@ def test_size_shortcut_announces_stale_boundary():
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
     assert "overlaySize.forceActiveFocus()" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_click_through_shortcut_announces_stale_boundary():
+    start = QML.index("function focusOverlayClickThroughShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "clickThroughToggle.forceActiveFocus()" in body
+    assert "overlayCaptureEvidenceStale" in body
