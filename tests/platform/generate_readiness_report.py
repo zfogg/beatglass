@@ -110,12 +110,15 @@ def build_report(root: Path) -> dict:
     for error in generation_errors:
         category = error.split(":", 1)[-1].strip().split(":", 1)[0]
         error_categories[category] = error_categories.get(category, 0) + 1
+    retained_artifact_count = sum(len(row.get("artifact_inventory", [])) for row in rows)
+    retained_artifact_bytes = sum(sum(item.get("bytes", 0) for item in row.get("artifact_inventory", [])) for row in rows)
     return {"readiness_report_schema": 1, "support_language": "experimental",
             "native_qualification_required": True, "exit_gate_status": "PENDING",
             "exit_gate_reason_codes": ["native_qualification_required", "generated_report_pending_review"],
             "ready": False, "platform_support_status": status, "platforms": rows,
             "generation_errors": generation_errors, "generation_error_count": len(generation_errors),
             "generation_error_categories": error_categories, "handoff_check_errors": [],
+            "retained_artifact_count": retained_artifact_count, "retained_artifact_bytes": retained_artifact_bytes,
             "documentation_check_errors": [], "ingestion_errors": []}
 
 
