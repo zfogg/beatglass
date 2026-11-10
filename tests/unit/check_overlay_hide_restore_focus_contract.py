@@ -353,6 +353,15 @@ def test_recovery_action_focus_has_one_canonical_definition():
     assert "resumeOverlayRecovery.forceActiveFocus()" in body
 
 
+def test_safe_mode_clear_button_and_shortcut_share_action():
+    start = QML.index("function handleOverlayClearSafeModeAction")
+    body = QML[start : QML.index("    function handleOverlayStopShortcut", start)]
+    assert "resetOverlayRecoveryAttempts()" in body
+    assert "retryOverlay.forceActiveFocus()" in body
+    assert "handleOverlayClearSafeModeAction()" in QML[QML.index("function handleOverlayClearSafeModeShortcut") : start]
+    assert "onClicked: window.handleOverlayClearSafeModeAction()" in QML
+
+
 def test_hide_toggle_uses_explicit_visibility_state():
     start = QML.index("function handleOverlayHideToggleShortcut")
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
