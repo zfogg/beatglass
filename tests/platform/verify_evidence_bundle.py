@@ -246,6 +246,8 @@ def main() -> int:
                 category = "provenance"
             elif error == "captured_at must include timezone":
                 category = "clock"
+            elif error == "captured_at must be ISO-8601":
+                category = "timestamp_format"
             elif error.startswith("captured_at "):
                 category = "temporal"
             elif error.startswith(("scenarios must", "missing required scenarios")):

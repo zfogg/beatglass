@@ -1345,5 +1345,13 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertGreaterEqual(payload["error_categories"].get("clock", 0), 1)
 
+    def test_json_groups_timestamp_format_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"not-a-timestamp","environment":"x", "artifacts": [], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("timestamp_format", 0), 1)
+
 if __name__ == "__main__":
     unittest.main()
