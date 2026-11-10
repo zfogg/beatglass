@@ -422,7 +422,15 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps({"platform":"x","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path": "../escape.txt", "sha256": "a"*64}], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
             result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
             payload = json.loads(result.stdout)
-            self.assertGreaterEqual(payload["error_categories"]["path"], 1)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_path", payload["error_categories"].get("path", 0)), 1)
+
+    def test_json_groups_artifact_path_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"../escape.txt", "sha256":"0"*64}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_path", 0), 1)
 
     def test_json_groups_platform_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
