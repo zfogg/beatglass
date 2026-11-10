@@ -262,6 +262,10 @@ the selected source's health.
 The machine-readable host contract is captured in
 `tests/pipewire/native_host_provenance_schema.json`; validator behavior remains
 the qualification authority and native execution evidence is still required.
+The cross-platform behavior check in
+`tests/unit/check_native_host_provenance_timing_platforms.py` exercises the
+timing-bearing report path for Linux, Windows, and macOS values; it validates
+contract portability, not native platform execution.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
