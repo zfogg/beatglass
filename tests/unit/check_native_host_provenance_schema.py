@@ -6,6 +6,7 @@ assert schema["title"] == "Beatglass native host provenance"
 assert schema["required"] == ["platform", "name"]
 assert schema["properties"]["platform"]["enum"] == ["linux", "windows", "macos"]
 assert schema["properties"]["name"]["minLength"] == 1
+assert schema["properties"]["node_id"]["minimum"] == 1
 assert schema["required"] == ["platform", "name"]
 assert schema["properties"]["node_id"]["minimum"] == 1
 assert schema["properties"]["secure_boot"]["type"] == "boolean"

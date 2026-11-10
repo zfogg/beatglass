@@ -268,6 +268,8 @@ The host schema platform enum is exactly `linux`, `windows`, and `macos`,
 matching executable validation.
 The host schema also requires `name` to have `minLength: 1`, complementing the
 validator's visible-text check.
+Its optional `node_id` property carries `minimum: 1`, matching positive
+integer validation and rejection of zero/negative IDs.
 Before packaging a native run, validate the extracted host object directly:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json`.
 The host validator accepts one host path and an optional report path; missing
