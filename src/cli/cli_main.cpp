@@ -560,7 +560,10 @@ int main(int argc, char** argv) {
     library_labels.clear(); library_indices.clear();
     for (int i = 0; i < static_cast<int>(tracks.size()); ++i) {
       if (!query.empty() && lower(tracks[i].title).find(query) == std::string::npos) continue;
-      library_labels.push_back(tracks[i].title + "  •  " + tracks[i].path.filename().string()); library_indices.push_back(i);
+      auto label = tracks[i].title + "  •  " + tracks[i].path.filename().string();
+      if (analysis_errors.contains(tracks[i].path)) label += "  [failed]";
+      else if (completed_analyses.contains(tracks[i].path)) label += "  [analyzed]";
+      library_labels.push_back(std::move(label)); library_indices.push_back(i);
       if (i == selected) library_visible_selected = static_cast<int>(library_labels.size()) - 1;
     }
     if (library_labels.empty()) rows.push_back(text("No supported audio files in this folder.") | color(Color::GrayLight));
