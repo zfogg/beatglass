@@ -98,6 +98,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"artifact role must be a nonempty string: {relative}"); continue
         if "role" in entry and entry["role"] != entry["role"].strip():
             errors.append(f"artifact role must not have leading or trailing whitespace: {relative}"); continue
+        if "role" in entry and len(entry["role"]) > 128:
+            errors.append(f"artifact role exceeds 128 characters: {relative}"); continue
         seen.add(canonical)
         path = (root / canonical).resolve()
         if root.resolve() not in path.parents:

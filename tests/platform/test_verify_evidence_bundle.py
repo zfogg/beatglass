@@ -123,6 +123,15 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("artifact role must not have leading or trailing whitespace: capture.txt", module.verify(root, manifest))
 
+    def test_artifact_role_has_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": "x" * 129}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact role exceeds 128 characters: capture.txt", module.verify(root, manifest))
+
     def test_artifact_path_with_nul_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
