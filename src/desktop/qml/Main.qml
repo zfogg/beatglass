@@ -1754,6 +1754,10 @@ ApplicationWindow {
         return window.handleOverlayShowAction()
     }
     function handleOverlayHideAction() {
+        if (window.overlayHiddenByUser) {
+            window.focusOverlayHiddenState("Overlay is already hidden by user choice; Restore overlay remains available.", showOverlay)
+            return false
+        }
         if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayAvailabilityRecovery("Overlay hide is unavailable because the native overlay or destination display is not available; control-window fallback remains active.", showOverlay)
             return false

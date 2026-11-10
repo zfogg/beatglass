@@ -202,6 +202,16 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("no longer paused") >= 0)
         app.destroy()
     }
+    function test_hideRejectsAlreadyHiddenActivation() {
+        let app = shellWithOverlay.createObject(null)
+        fakeOverlay.hides = 0
+        app.overlayHiddenByUser = true
+        verify(!app.handleOverlayHideAction())
+        compare(fakeOverlay.hides, 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("already hidden") >= 0)
+        app.destroy()
+        app.overlayHiddenByUser = false
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)

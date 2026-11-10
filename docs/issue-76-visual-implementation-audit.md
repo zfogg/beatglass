@@ -775,6 +775,8 @@ The visualization-specific Retry monitoring control now enters the same stale-ev
 
 Resume recovery now rechecks the user-paused marker at activation time; a stale Resume click is rejected without another native show request and returns focus to the overlay recovery control.
 
+Hide overlay now rechecks user-hidden intent at activation time; a stale second Hide click is rejected without another native hide request and returns focus to Restore overlay.
+
 Estimate attribution repeats the stale-capture marker as well, keeping the combined-output source label honest while its last accepted values await reacquisition.
 
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
