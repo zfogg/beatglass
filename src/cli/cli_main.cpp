@@ -615,6 +615,9 @@ int main(int argc, char** argv) {
           }
         }
       }
+      if (live_session && live_session->state() == beatglass::SourceState::stopped) {
+        live_button_label = " Start monitoring ";
+      }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
         try { auto analysis = analysis_future.get(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; select the track and press Enter to retry."; } else { result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
