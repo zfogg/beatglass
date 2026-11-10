@@ -96,6 +96,7 @@
 | Overlay retry during reacquisition | Capture is reacquiring after a discontinuity | Keep Retry overlay capture visible and label it as reacquisition-aware so users can deliberately restart capture without mistaking stale evidence for a fresh result. |
 | Overlay capture retry admitted | User starts capture retry after Error/Reacquiring | Mark prior overlay evidence stale before starting the retry and clear it only after a fresh accepted snapshot arrives. |
 | Overlay monitoring start | User starts monitoring after stopped or unavailable capture | Mark any prior evidence stale before requesting capture and publish new estimates only after an accepted output snapshot. |
+| Overlay monitoring transition | Capture is Starting or Reacquiring | Keep the monitoring action status accessible and state that live overlay evidence remains stale until a fresh accepted snapshot arrives. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |

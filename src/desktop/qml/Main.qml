@@ -4569,7 +4569,7 @@ ApplicationWindow {
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled
                             ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
-                            : "Monitoring is transitioning; wait for the current capture state."
+                            : "Monitoring is transitioning; live overlay evidence is stale until the current capture state produces a fresh accepted snapshot."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             if (!window.captureMonitorBridge) return
