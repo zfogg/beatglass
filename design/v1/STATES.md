@@ -275,3 +275,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Retry focus shortcut recovery | User invokes the retry-control focus shortcut | Activate controls, focus Retry, and announce stale evidence until recovery provides fresh capture. |
 | Resume shortcut recovery | User resumes paused overlay recovery from the keyboard | Activate controls, announce stale evidence, and invoke Resume deterministically. |
 | Safe-mode clear shortcut recovery | User clears the bounded overlay retry safe mode from the keyboard | Activate controls, clear the retry bound, announce evidence freshness, and focus Retry. |
+| Stop shortcut recovery | User pauses bounded overlay recovery from the keyboard | Activate controls, pause recovery, announce stale evidence, and focus Resume. |
