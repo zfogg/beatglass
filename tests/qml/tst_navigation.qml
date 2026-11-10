@@ -5,7 +5,8 @@ import "../../src/desktop/qml"
 TestCase {
     name: "Navigation"
     when: windowShown
-    width: 900; height: 620
+    width: 900
+    height: 620
     QtObject {
         id: fakeMetadata
         property url lastFile
@@ -13,7 +14,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" }; function start() { starts++; status = "Monitoring" } }
+    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" } function start() { starts++; status = "Monitoring" } }
     QtObject {
         id: fakePlayback
         property string state: "Stopped"
@@ -61,10 +62,13 @@ TestCase {
         property string displayName: "Display"
         property int screenIndex: -1
         property int selectedScreen: -1
-        property int requestedWidth: 0`n        property int requestedHeight: 0`n        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
+        property int requestedWidth: 0
+        property int requestedHeight: 0
+        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
         property bool refuseClickThrough: false
         property bool refuseHide: false
-        property bool refuseUnlock: false`n        property bool refuseShow: false
+        property bool refuseUnlock: false
+        property bool refuseShow: false
         function attach(overlay, control) { attaches++; return true }
         function showOverlay() { shows++; return !refuseShow }
         function hideOverlay() { hides++; if (refuseHide) return false; clickThrough = false; return true }
@@ -2157,7 +2161,17 @@ TestCase {
         app.destroy()
         fakeOverlay.screenIndex = -1
     }
-    function test_captureFreshnessAnnouncesNativeRecoveryGate() {`n        fakeOverlay.available = false`n        let app = shellWithOverlay.createObject(null)`n        app.overlayCaptureEvidenceStale = true`n        app.transitionCaptureEvidence(false, "Fresh accepted capture available.", null)`n        verify(app.overlayCaptureEvidenceStale)`n        verify(app.overlayRecoveryAnnouncement.indexOf("native recovery completes") >= 0)`n        app.destroy()`n        fakeOverlay.available = true`n    }`n    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
+    function test_captureFreshnessAnnouncesNativeRecoveryGate() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayCaptureEvidenceStale = true
+        app.transitionCaptureEvidence(false, "Fresh accepted capture available.", null)
+        verify(app.overlayCaptureEvidenceStale)
+        verify(app.overlayRecoveryAnnouncement.indexOf("native recovery completes") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
+    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = []
         fakeOverlay.displayName = ""
@@ -2238,7 +2252,7 @@ TestCase {
         app.destroy()
     }
 
-'    function test_displayReconnectReusesRetainedGeometrySettings() {
+    function test_displayReconnectReusesRetainedGeometrySettings() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
         app.overlayPreferredDisplayName = "Projector"
@@ -2480,7 +2494,7 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
-''    function test_invalidPersistedOpacityUsesSafeFallback() {
+    function test_invalidPersistedOpacityUsesSafeFallback() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
         fakeOverlay.opacity = 0.1
@@ -2520,7 +2534,7 @@ TestCase {
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
 
-'    function test_validVisualRestoreIsDirectlyTestable() {
+    function test_validVisualRestoreIsDirectlyTestable() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
         fakeOverlay.opacity = 0.42
@@ -2535,7 +2549,7 @@ TestCase {
         fakeOverlay.opacity = 0.9
     }
 
-'    function test_selectReplacementDisplayReappliesRetainedVisualState() {
+    function test_selectReplacementDisplayReappliesRetainedVisualState() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = ["Projector", "Laptop"]
         fakeOverlay.displayName = "Projector"

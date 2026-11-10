@@ -984,7 +984,8 @@ ApplicationWindow {
             }
             window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe 90 percent opacity applied.")
         }
-        window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")\n        window.overlayRecoveryPausedByUser = false
+        window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
+        window.overlayRecoveryPausedByUser = false
         window.syncOverlaySizePreferenceFromGeometry(savedGeometry)
         return true
     }
@@ -2835,7 +2836,6 @@ ApplicationWindow {
                     text: window.browseFolder ? (files.count + " catalog entries shown. Use the search field or open a folder to browse.") : "Choose a folder to browse local audio files."
                     wrapMode: Text.WordWrap; Layout.fillWidth: true
                     Accessible.name: "Library catalog status: " + text
-                    ToolTip.text: "Library catalog status"
                     Accessible.value: text + "; summary review available"
                     Accessible.role: Accessible.StaticText
                     ToolTip.text: "Current catalog result count"
@@ -2902,7 +2902,6 @@ ApplicationWindow {
                     Button {
                         id: refreshFolder; text: "Refresh"; objectName: "refreshFolder"; activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== ""
-                        Accessible.value: enabled ? "available" : "choose a folder first"
                         Accessible.name: "Refresh folder contents"; Accessible.value: enabled ? "available; clears the current selection" : "unavailable; choose a folder first"; Accessible.role: Accessible.Button
                         Accessible.description: "Re-read the current folder so newly added, removed, or changed audio files are reflected."
                         ToolTip.text: "Refresh the current folder contents"
@@ -2923,7 +2922,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; ToolTip.text: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: { window.refreshCatalog(); browser.currentIndex = -1 }; onAccepted: { navigation.currentIndex = 0; window.announceVisualizationRecovery(files.count + " Library entries match the filter."); browser.forceActiveFocus(); event.accepted = true }; Keys.onEscapePressed: { window.clearLibraryFilter(browser); event.accepted = true } }
+                    TextField { id: search; objectName: "search"; placeholderText: "Filter file names"; Accessible.name: "Filter file names"; Accessible.role: Accessible.EditableText; Accessible.description: "Filter the current folder by audio or folder name"; ToolTip.text: "Filter the current folder by audio or folder name"; Layout.fillWidth: true; onTextChanged: { window.refreshCatalog(); browser.currentIndex = -1 } onAccepted: { navigation.currentIndex = 0; window.announceVisualizationRecovery(files.count + " Library entries match the filter."); browser.forceActiveFocus(); event.accepted = true } Keys.onEscapePressed: { window.clearLibraryFilter(browser); event.accepted = true } }
                     Button { id: sortOrder; objectName: "sortOrder"; text: window.sortDescending ? "Name ↓" : "Name ↑"; activeFocusOnTab: true; Accessible.name: "Reverse name sort order"; Accessible.value: window.sortDescending ? "descending" : "ascending"; Accessible.role: Accessible.Button; Accessible.description: "Current order: " + (window.sortDescending ? "descending" : "ascending") + ". Activate to reverse file-name order."; ToolTip.text: "Reverse file-name sort order"; onClicked: window.toggleLibrarySort(sortOrder) }
                 }
                 RowLayout {
@@ -3517,7 +3516,6 @@ ApplicationWindow {
                             }
                             ProgressBar {
                                 id: analysisBatchProgressBar
-                                id: analysisBatchProgressBar
                                 objectName: "analysisBatchProgressBar"
                                 activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
@@ -3611,7 +3609,6 @@ ApplicationWindow {
                                 + (visible && storageRecovery.status.indexOf("retryable recovery runs discarded") >= 0 ? " · " + storageRecovery.status : "")
                                 Accessible.name: "Persisted analysis recovery status: " + text
                                 Accessible.value: visible ? text : ""
-                                Accessible.description: (visible && storageRecovery.analysisStatus === "Analysis complete" ? "Analysis completed successfully; persisted retry selection is no longer active." : visible && (storageRecovery.analysisStatus === "Analysis cancelled" || storageRecovery.analysisStatus === "Analysis failed") ? storageRecovery.analysisStatus + "; persisted recovery remains retryable and the selected run stays actionable." : visible && storageRecovery.status === "Retryable run is active" && storageRecovery.selectedRunId !== "" ? "Selected run " + storageRecovery.selectedRunId + " is active; discard remains unavailable until it reaches a terminal state." : visible && storageRecovery.recoveryAvailable ? "Recovery status and " + storageRecovery.retryableRunIds.length + " persisted retryable run(s); select one to retry or discard." : "Recovery status and persisted retryable runs.") + " Source audio remains unchanged by persisted recovery actions."
                                 ToolTip.text: "Saved analysis recovery status and retryable runs"
                                 Accessible.role: Accessible.Status
                                 Accessible.description: visible ? text : "Persisted recovery status is unavailable."
@@ -3773,8 +3770,8 @@ ApplicationWindow {
                                 objectName: "analysisLifecycleControls"
                                 visible: typeof storageRecovery !== "undefined" && storageRecovery.analysisStatus !== undefined
                                 Label { text: visible ? storageRecovery.analysisStatus : ""; Accessible.name: "Analysis lifecycle status"; Layout.fillWidth: true }
-                                Button { id: cancelAdmittedAnalysis; objectName: "cancelAdmittedAnalysis"; text: "Cancel analysis"; activeFocusOnTab: true; visible: parent.visible && storageRecovery.cancelAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running"); onClicked: { storageRecovery.cancelAnalysis(); window.clearVisualizationForCaptureState("Analysis cancelled; previous visualization evidence is stale until a replacement accepted snapshot."); window.announceVisualizationRecovery("Analysis cancelled; waiting for a replacement accepted snapshot."); cancelAdmittedAnalysis.forceActiveFocus() }; Accessible.name: "Cancel admitted analysis"; Accessible.value: enabled ? "available; " + storageRecovery.analysisStatus : "unavailable; " + storageRecovery.analysisStatus; Accessible.description: "Cancel and keep keyboard focus on the analysis recovery controls." }
-                                Button { id: retryAdmittedAnalysis; objectName: "retryAdmittedAnalysis"; text: "Retry analysis"; activeFocusOnTab: true; visible: parent.visible && storageRecovery.retryAnalysis !== undefined; enabled: visible && storageRecovery.analysisRetryable; onClicked: { window.retryVisualizationAnalysis(); retryAdmittedAnalysis.forceActiveFocus() }; Accessible.name: "Retry admitted analysis"; Accessible.value: enabled ? "available; retryable" : "unavailable; " + storageRecovery.analysisStatus; Accessible.description: "Retry admitted with fresh evidence; stale result cleared and focus restored after acceptance." }
+                                Button { id: cancelAdmittedAnalysis; objectName: "cancelAdmittedAnalysis"; text: "Cancel analysis"; activeFocusOnTab: true; visible: parent.visible && storageRecovery.cancelAnalysis !== undefined; enabled: visible && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running"); onClicked: { storageRecovery.cancelAnalysis(); window.clearVisualizationForCaptureState("Analysis cancelled; previous visualization evidence is stale until a replacement accepted snapshot."); window.announceVisualizationRecovery("Analysis cancelled; waiting for a replacement accepted snapshot."); cancelAdmittedAnalysis.forceActiveFocus() } Accessible.name: "Cancel admitted analysis"; Accessible.value: enabled ? "available; " + storageRecovery.analysisStatus : "unavailable; " + storageRecovery.analysisStatus; Accessible.description: "Cancel and keep keyboard focus on the analysis recovery controls." }
+                                Button { id: retryAdmittedAnalysis; objectName: "retryAdmittedAnalysis"; text: "Retry analysis"; activeFocusOnTab: true; visible: parent.visible && storageRecovery.retryAnalysis !== undefined; enabled: visible && storageRecovery.analysisRetryable; onClicked: { window.retryVisualizationAnalysis(); retryAdmittedAnalysis.forceActiveFocus() } Accessible.name: "Retry admitted analysis"; Accessible.value: enabled ? "available; retryable" : "unavailable; " + storageRecovery.analysisStatus; Accessible.description: "Retry admitted with fresh evidence; stale result cleared and focus restored after acceptance." }
                             }
                             RowLayout {
                                 objectName: "analysisCacheLookupControls"
@@ -3784,7 +3781,7 @@ ApplicationWindow {
                                 TextField { id: cacheContent; objectName: "analysisCacheContent"; placeholderText: "content identity"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache content identity"; Accessible.description: "Content identity used to look up or invalidate a completed analysis cache entry."; Layout.fillWidth: true }
                                 TextField { id: cacheEngine; objectName: "analysisCacheEngine"; placeholderText: "engine"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache engine"; Accessible.description: "Analysis engine identity used for the cache lookup."; Layout.fillWidth: true }
                                 TextField { id: cacheConfig; objectName: "analysisCacheConfig"; placeholderText: "configuration"; onTextChanged: window.analysisCacheIdentityDirty = true; Accessible.name: "Analysis cache configuration"; Accessible.description: "Analysis configuration identity used for the cache lookup."; Layout.fillWidth: true }
-                                TextField { id: cacheMode; objectName: "analysisCacheMode"; placeholderText: "offline/live"; onTextChanged: window.analysisCacheIdentityDirty = true; validator: RegularExpressionValidator { regularExpression: /^(offline|live)$/ }; Accessible.name: "Analysis cache mode"; Accessible.value: acceptableInput ? text : "invalid; use offline or live"; Accessible.description: "Cache mode identity. Enter exactly offline or live."; Layout.preferredWidth: 100 }
+                                TextField { id: cacheMode; objectName: "analysisCacheMode"; placeholderText: "offline/live"; onTextChanged: window.analysisCacheIdentityDirty = true; validator: RegularExpressionValidator { regularExpression: /^(offline|live)$/ } Accessible.name: "Analysis cache mode"; Accessible.value: acceptableInput ? text : "invalid; use offline or live"; Accessible.description: "Cache mode identity. Enter exactly offline or live."; Layout.preferredWidth: 100 }
                                 Button { objectName: "clearAnalysisCacheIdentity"; text: "Clear identity"; enabled: cacheContent.text !== "" || cacheEngine.text !== "" || cacheConfig.text !== "" || cacheMode.text !== ""; Accessible.name: "Clear analysis cache identity"; Accessible.value: enabled ? "available; clears the cached identity" : "already clear"; Accessible.description: "Clear all cache identity fields and require a fresh lookup."; onClicked: { cacheContent.clear(); cacheEngine.clear(); cacheConfig.clear(); cacheMode.clear(); window.analysisCacheIdentityDirty = true; window.announceVisualizationRecovery("Analysis cache identity cleared; run Check cache before using cache actions again."); clearAnalysisCacheIdentity.forceActiveFocus() } }
                                 Button {
                                     objectName: "lookupAnalysisCache"
@@ -3925,7 +3922,6 @@ ApplicationWindow {
                                 Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Retry selected persisted analysis run " + storageRecovery.selectedRunId
                                     : "Retry selected persisted analysis run"
-                                Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
                                 Accessible.description: typeof storageRecovery !== "undefined" && (storageRecovery.analysisStatus === "Analysis queued" || storageRecovery.analysisStatus === "Analysis running") ? "The selected run is active; retry is unavailable until it reaches a terminal state." : typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                     ? "Retry persisted run " + storageRecovery.selectedRunId + " when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
                                     : "Retry the selected persisted run only when recovery state confirms retryable work. A persisted discard status clears when retry is admitted."
@@ -4402,8 +4398,6 @@ ApplicationWindow {
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
                     Layout.minimumWidth: 0
-                    Layout.preferredHeight: window.compactHeader ? 36 : 28
-                    wrapMode: Text.WordWrap
                     Layout.preferredHeight: window.compactHeader ? 36 : 28
                     wrapMode: Text.WordWrap
                 }
@@ -5216,7 +5210,7 @@ ApplicationWindow {
                         wrapMode: Text.WordWrap
                     }
                     Label { text: "Opacity"; Accessible.name: "Overlay opacity control"; Accessible.role: Accessible.Heading; ToolTip.text: "Adjust the overlay window opacity" }
-                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%" + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%" + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { const applied = window.overlayBridge.setOpacity(value); if (!applied) { value = window.overlayBridge.opacity; window.focusOverlayOpacityEditRecovery("DJ overlay opacity could not be changed; persisted opacity remains active."); return } window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlaySettingsRevision += 1 } }; onPressedChanged: if (!pressed) window.focusOverlayOpacityEditRecovery("DJ overlay opacity edit complete; opacity control remains focused for keyboard adjustment.") }
+                    Slider { id: overlayOpacityControl; objectName: "overlayOpacity"; Accessible.name: "Overlay opacity"; Accessible.role: Accessible.Slider; Accessible.value: Math.round(value * 100) + "%" + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : ""); Accessible.description: "Adjust the overlay window opacity; current value " + Math.round(value * 100) + "%" + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? ". Recovery is pending." : ""); ToolTip.text: "Adjust overlay opacity from 20% to 100%"; from: 0.2; to: 1; value: window.overlayBridge ? window.overlayBridge.opacity : 0.9; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0; onMoved: { if (window.overlayBridge) { const applied = window.overlayBridge.setOpacity(value); if (!applied) { value = window.overlayBridge.opacity; window.focusOverlayOpacityEditRecovery("DJ overlay opacity could not be changed; persisted opacity remains active."); return } window.overlayOpacityEditInFlight = true; window.overlayPendingOpacity = value; window.overlaySettingsRevision += 1 } } onPressedChanged: if (!pressed) window.focusOverlayOpacityEditRecovery("DJ overlay opacity edit complete; opacity control remains focused for keyboard adjustment.") }
                     Connections {
                         target: window.overlayBridge
                         function onOpacityChanged() { if (window.overlayBridge && (!window.overlayOpacityEditInFlight || Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) ) overlayOpacityControl.value = window.overlayBridge.opacity }

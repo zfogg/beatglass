@@ -10,9 +10,11 @@
 #include "beatglass/library/analysis_commit.hpp"
 #include "beatglass/library/analysis_admission.hpp"
 #include "beatglass/library/storage_owner.hpp"
+#include "beatglass/library/analysis_coordinator.hpp"
+#include "beatglass/library/jobs.hpp"
 TEST_CASE("analysis admission rejects incompatible decoder snapshots") {
   beatglass::library_detail::SqliteCache cache(":memory:");
-  beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  beatglass::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
   const auto rejected = beatglass::library::admit_analysis(cache, "bad-snapshot", identity, "/music/a.flac", "file-reader-v0");
   CHECK_FALSE(rejected.decoder_compatible);
   CHECK_FALSE(rejected.analysis_reserved);
@@ -49,7 +51,7 @@ TEST_CASE("retryable recovery survives storage reopen") {
 }
 TEST_CASE("analysis admission accepts a compatible snapshot cache hit") {
   beatglass::library_detail::SqliteCache cache(":memory:");
-  beatglass::library::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
+  beatglass::AnalysisIdentity identity{"hash", "engine", "config", "offline"};
   cache.begin("seed", {"hash", "engine", "config", "offline"}, "/music/a.flac", beatglass::library::kFileDecoderSnapshot);
   REQUIRE(cache.publish("seed", {"hash", "engine", "config", "offline"}, "cached", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
   const auto hit = beatglass::library::admit_analysis(cache, "unused", identity, "/music/a.flac", beatglass::library::kFileDecoderSnapshot);
@@ -121,9 +123,9 @@ TEST_CASE("storage owner exposes cache admission boundary") {
 }
 TEST_CASE("storage owner invalidates one cached identity without affecting another") {
   beatglass::library::StorageOwner owner;
-  REQUIRE(owner.open_storage({":memory:"}));
-  const beatglass::library::AnalysisIdentity first{"first", "engine", "config", "offline"};
-  const beatglass::library::AnalysisIdentity second{"second", "engine", "config", "offline"};
+  REQUIRE(owner.open({":memory:"}));
+  const beatglass::AnalysisIdentity first{"first", "engine", "config", "offline"};
+  const beatglass::AnalysisIdentity second{"second", "engine", "config", "offline"};
   owner.cache()->begin("first-run", {"first", "engine", "config", "offline"});
   REQUIRE(owner.cache()->publish("first-run", {"first", "engine", "config", "offline"}, "first-result", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
   owner.cache()->begin("second-run", {"second", "engine", "config", "offline"});
@@ -136,8 +138,8 @@ TEST_CASE("storage owner invalidates one cached identity without affecting anoth
 }
 TEST_CASE("invalidated identity is admitted for fresh reanalysis") {
   beatglass::library::StorageOwner owner;
-  REQUIRE(owner.open_storage({":memory:"}));
-  const beatglass::library::AnalysisIdentity identity{"reanalyze", "engine", "config", "offline"};
+  REQUIRE(owner.open({":memory:"}));
+  const beatglass::AnalysisIdentity identity{"reanalyze", "engine", "config", "offline"};
   const beatglass::library_detail::CacheKey key{"reanalyze", "engine", "config", "offline"};
   owner.cache()->begin("reanalyze-seed", key, "track.wav", beatglass::library::kFileDecoderSnapshot);
   REQUIRE(owner.cache()->publish("reanalyze-seed", key, "old", {}, [] { return true; }) == beatglass::library_detail::Publish::committed);
