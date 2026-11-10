@@ -1120,6 +1120,13 @@ def test_overlay_pulse_status_explains_capture_bridge_requirement():
     assert "Monitoring capture bridge" in label
 
 
+def test_overlay_pulse_visible_status_marks_stale_idle_state():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert '"idle · stale"' in label
+    assert "overlayCaptureEvidenceStale" in label
+
+
 def test_overlay_pulse_status_label_exposes_running_state():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
