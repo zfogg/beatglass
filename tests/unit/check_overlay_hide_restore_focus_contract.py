@@ -525,3 +525,13 @@ def test_size_recovery_keeps_selector_focused():
     assert "announceCaptureRecoveryState(message" in body
     assert 'window.focusOverlaySizeRecovery("DJ overlay size set to "' in QML
     assert 'window.focusOverlaySizeRecovery("DJ overlay size could not be changed' in QML
+
+
+def test_retry_button_respects_paused_recovery_boundary():
+    start = QML.index("function handleOverlayRetryButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowButtonAction", start)]
+    assert "overlayRecoveryPausedByUser" in body
+    assert "focusOverlayRecoveryPauseState" in body
+    assert "Resume recovery before retrying" in body
+    assert "return" in body
+    assert "overlayRecoveryAttemptCount += 1" in body
