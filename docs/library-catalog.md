@@ -20,6 +20,10 @@ callers must continue using the absolute `path` for filesystem operations.
 Relative-key conversion uses the non-throwing filesystem API. If the platform
 cannot compute a key, the query returns an empty result with a filesystem
 error diagnostic rather than allowing an exception to escape the worker.
+`CatalogResult::query_root` records the normalized absolute root used for the
+snapshot. A consumer can compare it with the current Library root before
+publishing an asynchronous result, preventing a stale refresh from replacing
+another folder's view.
 Recursive results are ordered by this relative identity (case-folded, then
 exact spelling), so ordering does not depend on the drive letter or absolute
 root used for the scan.
