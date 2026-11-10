@@ -383,6 +383,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Overlay actions pulse shortcut contract | Assistive technology enters the overlay actions group | Include the pulse-status shortcut in action values and fallback guidance alongside show, restore, unlock, and hide controls. |
 | Overlay fallback pulse shortcut contract | Overlay launch fallback or display recovery is active | Preserve pulse-status shortcut guidance in both fallback descriptions so recovery narration remains actionable. |
 | Overlay actions tooltip pulse shortcut contract | Pointer user hovers unavailable overlay actions | Include pulse-status shortcut guidance in the fallback tooltip as well as accessibility values and descriptions. |
+| Capture-only metadata contract | DJ overlay presents live output analysis without a configured DJ-app integration | State that track/deck metadata is unavailable and do not imply that combined output evidence identifies a deck or track. |
 | Overlay available tooltip pulse shortcut contract | Pointer user hovers available overlay actions | Include pulse-status shortcut guidance in the normal tooltip as well as fallback guidance. |
 | Live evidence pulse summary contract | Overlay live-evidence grouping is announced to assistive technology | Include beat-pulse active/idle state alongside capture status and stale-evidence state. |
 | Beat pulse period status contract | Valid BPM drives a running pulse | Expose the computed millisecond beat period in the visible/accessibility status for timing transparency. |
