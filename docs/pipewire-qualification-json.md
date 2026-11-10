@@ -358,6 +358,8 @@ Its platform enum is intentionally limited to `linux`, `windows`, and `macos`,
 matching the host provenance validator.
 The schema also encodes a minimum length of one for report names, alongside
 the validator's visible-text check.
+It encodes `valid: true` as a constant, so failed or truthy-but-non-boolean
+reports cannot satisfy the machine-readable contract.
 Reports that list only one required field, or neither, are rejected for the
 same reason; checked metadata must prove both identity dimensions.
 Required field names are case-sensitive; display-cased variants such as
