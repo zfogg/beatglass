@@ -107,4 +107,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_commit), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid commit provenance" not in result.stderr + result.stdout:
         raise SystemExit("malformed pending commit provenance was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": "host unavailable", "host_os": "Darwin"}), encoding="utf-8")
+    mismatched_host = root / "mismatched-host-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(mismatched_host), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "does not match runner host" not in result.stderr + result.stdout:
+        raise SystemExit("mismatched summary host was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")

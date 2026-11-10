@@ -40,6 +40,8 @@ if summary is not None:
         raise SystemExit("native qualification summary retains execution blockers")
     if "commit" in summary and (not isinstance(summary["commit"], str) or not summary["commit"].strip()):
         raise SystemExit("native qualification summary has invalid commit provenance")
+    if "host_os" in summary and summary["host_os"] != host:
+        raise SystemExit("native qualification summary host does not match runner host")
     current = platforms.get(host)
     if current is not None:
         current["status"] = "qualified" if summary.get("qualified") is True else "pending"
