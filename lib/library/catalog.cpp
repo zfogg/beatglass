@@ -11,11 +11,19 @@ std::string folded(std::string value) {
                  [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return value;
 }
-bool supported_audio(const std::filesystem::path& path) {
-  const auto extension = folded(path.extension().string());
-  return extension == ".wav" || extension == ".flac" || extension == ".mp3" ||
-         extension == ".aiff" || extension == ".aif";
 }
+
+std::string audio_format_for_path(const std::filesystem::path& path) {
+  const auto extension = folded(path.extension().string());
+  if (extension == ".wav") return "WAV";
+  if (extension == ".flac") return "FLAC";
+  if (extension == ".mp3") return "MP3";
+  if (extension == ".aiff" || extension == ".aif") return "AIFF";
+  return {};
+}
+
+namespace {
+bool supported_audio(const std::filesystem::path& path) { return !audio_format_for_path(path).empty(); }
 }
 
 CatalogResult browse(const std::filesystem::path& folder, std::string search) {
@@ -50,12 +58,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
     }
     std::string format;
     if (!directory) {
-      auto extension = entry.path().extension().string();
-      for (auto& c : extension) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-      if (extension == ".wav") format = "WAV";
-      else if (extension == ".flac") format = "FLAC";
-      else if (extension == ".mp3") format = "MP3";
-      else if (extension == ".aiff" || extension == ".aif") format = "AIFF";
+      format = audio_format_for_path(entry.path());
     }
     const auto title = entry.path().stem().string();
     // Duration requires opening and decoding the source. Catalog browsing is
@@ -99,11 +102,7 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
     if (!directory) { std::error_code size_error; bytes = entry.file_size(size_error); if (size_error) bytes = 0; }
     std::string format;
     if (!directory) {
-      auto extension = folded(entry.path().extension().string());
-      if (extension == ".wav") format = "WAV";
-      else if (extension == ".flac") format = "FLAC";
-      else if (extension == ".mp3") format = "MP3";
-      else if (extension == ".aiff" || extension == ".aif") format = "AIFF";
+      format = audio_format_for_path(entry.path());
     }
     result.entries.push_back({entry.path(), name, entry.path().stem().string(), {}, directory,
                               bytes, std::move(format), -1.0});

@@ -38,6 +38,13 @@ struct CatalogResult {
   std::string diagnostic;
 };
 
+/** Return the canonical display format for a supported audio path.
+ * The result is one of `WAV`, `FLAC`, `MP3`, or `AIFF`; an empty string means
+ * the extension is not part of the qualified catalog set. This is a pure
+ * filename policy helper and does not access the filesystem.
+ */
+std::string audio_format_for_path(const std::filesystem::path& path);
+
 /** Enumerate one local folder for the Library view.
  * The search is case-insensitive against entry names. Results are sorted by
  * case-insensitive name, then exact name, then path for deterministic UI and
