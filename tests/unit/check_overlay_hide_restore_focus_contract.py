@@ -437,3 +437,7 @@ def test_restore_action_has_one_shared_restore_transition():
     assert "handleOverlayShowAction()" in body
     assert "overlayCaptureEvidenceStale" in body
     assert "handleOverlayRestoreButtonAction()" in QML[QML.index("function handleOverlayRestoreAction") : start]
+
+
+def test_restore_button_routes_to_shared_action():
+    assert "onClicked: window.handleOverlayRestoreButtonAction()" in QML
