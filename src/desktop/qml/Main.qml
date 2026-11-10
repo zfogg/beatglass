@@ -1498,10 +1498,7 @@ ApplicationWindow {
         window.overlayPreferredDisplayName = ""
         window.overlayPreferredScreenIndex = -1
         window.overlaySettingsRevision += 1
-        window.overlayLaunchFallbackActive = true
-        window.overlayDisplaySelectionRequired = true
-        window.overlayDisplayRecoveryPending = true
-        window.markOverlayRecoveryStale("Saved overlay display cleared; choose an available display to restore monitoring.")
+        window.focusOverlayDisplayRecoveryFailure("Saved overlay display cleared; choose an available display to restore monitoring.", overlayDisplay)
     }
     function persistOverlayDisplaySelection(index, name) {
         if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
