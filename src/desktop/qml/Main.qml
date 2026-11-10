@@ -2092,9 +2092,14 @@ ApplicationWindow {
                     Label { text: "Beatglass · " + window.liveBridge.status; color: window.themeForegrounds[window.selectedThemeIndex]; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                     Button {
                         id: hideOverlay
-                        text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the overlay window and restore the control window"; ToolTip.text: "Hide the overlay and restore the control window"
+                        text: "×"; objectName: "hideOverlay"; Accessible.name: "Hide overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the overlay window and restore the control window"; ToolTip.text: "Hide the overlay and restore the control window"
                         visible: window.overlayBridge && !window.overlayBridge.clickThrough
                         onClicked: window.hideOverlayAndRestoreControls()
+                    }
+                    QtObject {
+                        objectName: "overlayWindowHide"
+                        readonly property bool visible: hideOverlay.visible
+                        function clicked() { hideOverlay.clicked() }
                     }
                 }
                 Label { text: "Live evidence stale until fresh capture arrives"; objectName: "overlayStaleEvidenceBanner"; visible: window.overlayCaptureEvidenceStale; color: window.themeForegrounds[window.selectedThemeIndex]; font.bold: true; Accessible.name: "Live evidence stale"; Accessible.role: Accessible.Status; Accessible.description: "Previously displayed tempo, key, and chord values are stale until fresh capture arrives."; ToolTip.text: "Previously displayed live estimates are stale until fresh capture arrives"; Layout.fillWidth: true }
@@ -4853,7 +4858,7 @@ ApplicationWindow {
                     ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
                     CheckBox {
                         id: clickThroughToggle
-                        text: "Click through"; objectName: "clickThrough"
+                        text: "Click through"; objectName: "unlockOverlay"
                         activeFocusOnTab: true
                         Accessible.name: checked ? "Disable click-through" : "Enable click-through"
                         Accessible.role: Accessible.CheckBox
@@ -4865,6 +4870,11 @@ ApplicationWindow {
                             target: window.overlayBridge
                             function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
                         }
+                    }
+                    QtObject {
+                        objectName: "clickThrough"
+                        readonly property bool checked: clickThroughToggle.checked
+                        function clicked() { clickThroughToggle.toggle() }
                     }
                     Label {
                         objectName: "overlayKeyboardRecoveryStatus"
