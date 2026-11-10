@@ -174,6 +174,9 @@ if reacquisition is not None:
     if reacquisition.get("daemon_version") is not None:
         if not isinstance(reacquisition["daemon_version"], str) or not reacquisition["daemon_version"].strip():
             raise SystemExit("reacquisition evidence has an empty daemon version")
+    if reacquisition.get("capture_command") is not None:
+        if not isinstance(reacquisition["capture_command"], str) or not reacquisition["capture_command"].strip():
+            raise SystemExit("reacquisition evidence has an empty capture command")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:

@@ -67,5 +67,8 @@ Reacquisition evidence may include `artifact_sha256`; when supplied it must be a
 Reacquisition evidence may include `daemon_version`; when supplied it must be a
 non-empty string identifying the native daemon that performed recovery.
 
+Reacquisition evidence may include `capture_command`; when supplied it must be a
+non-empty command string identifying how recovery capture was performed.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
