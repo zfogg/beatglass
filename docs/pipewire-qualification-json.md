@@ -157,3 +157,6 @@ Lifecycle events must occur in `start`, `process`, `error`, `restart` order;
 duplicate lifecycle boundaries are rejected.
 When present, top-level `event_count` must be a positive integer equal to the
 number of evidence events.
+
+When reacquisition evidence provides `event_count`, it must equal the number
+of process events recorded in the restarted epoch.

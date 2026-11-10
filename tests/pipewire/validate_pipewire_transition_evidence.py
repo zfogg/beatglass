@@ -170,6 +170,9 @@ if reacquisition is not None:
                 or isinstance(reacquisition["event_count"], bool)
                 or reacquisition["event_count"] <= 0):
             raise SystemExit("reacquisition evidence has an invalid event count")
+        restart_process_count = sum(event.get("event") == "process" and event.get("epoch") == restart.get("epoch") for event in events)
+        if reacquisition["event_count"] != restart_process_count:
+            raise SystemExit("reacquisition event count does not match restart samples")
     if reacquisition.get("artifact_id") is not None:
         if not isinstance(reacquisition["artifact_id"], str) or not reacquisition["artifact_id"].strip():
             raise SystemExit("reacquisition evidence has an empty artifact identity")
