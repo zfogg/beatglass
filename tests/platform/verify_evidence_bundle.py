@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import sys
 REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
 
@@ -35,6 +35,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
             parsed = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
             if parsed.tzinfo is None:
                 errors.append("captured_at must include timezone")
+            elif parsed > datetime.now(timezone.utc) + timedelta(minutes=5):
+                errors.append("captured_at cannot be in the future")
         except ValueError:
             errors.append("captured_at must be ISO-8601")
     artifacts = data.get("artifacts")
