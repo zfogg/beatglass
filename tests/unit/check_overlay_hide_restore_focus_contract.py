@@ -447,6 +447,14 @@ def test_show_button_routes_to_shared_action():
     assert "onClicked: window.handleOverlayShowButtonAction()" in QML
 
 
+def test_reapply_button_routes_to_named_action():
+    start = QML.index("function handleOverlayReapplyButtonAction")
+    body = QML[start : QML.index("    function focusOverlaySummaryReviewShortcut", start)]
+    assert "reapplyOverlaySettingsAndRestore()" in body
+    assert "reapplyOverlaySettings.forceActiveFocus()" in body
+    assert "onClicked: window.handleOverlayReapplyButtonAction()" in QML
+
+
 def test_retry_button_named_attempt_action():
     start = QML.index("function handleOverlayRetryButtonAction")
     body = QML[start : QML.index("    function handleOverlayShowAction", start)]
