@@ -1545,8 +1545,8 @@ ApplicationWindow {
         return applied && clickThroughToggle.checked === requestedClickThrough
     }
     function handleOverlayClickThroughShortcutAction() {
-        if (!window.overlayBridge) {
-            window.focusOverlayAvailabilityRecovery("Overlay interaction shortcut is unavailable because the native overlay bridge is not connected.", clickThroughToggle)
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay interaction shortcut is unavailable until the native overlay and a destination display are ready.", clickThroughToggle)
             return false
         }
         const requested = !window.overlayBridge.clickThrough
