@@ -4799,7 +4799,7 @@ ApplicationWindow {
                         objectName: "overlayMissingDisplayRecovery"
                         visible: window.overlayDisplaySelectionRequired && window.overlayPreferredDisplayName !== ""
                         text: "Saved display unavailable: " + window.overlayPreferredDisplayName + ". Connect it or choose another display."
-                        Accessible.name: "Overlay saved display recovery: " + text
+                        Accessible.name: "Overlay saved display recovery, live evidence stale until fresh capture: " + text
                         Accessible.value: text + "; live overlay evidence stale"
                         Accessible.role: Accessible.Status
                         Accessible.description: "The native overlay bridge saved a display that is not currently enumerated. Live overlay evidence is stale while the saved display is missing; monitoring continues in the control window."
