@@ -719,6 +719,13 @@ ApplicationWindow {
             window.announceVisualizationRecovery("Persisted recovery discard focused for " + runId + "; press Enter to review the confirmation dialog.")
         }
     }
+    function transitionCaptureEvidence(stale, message, focusTarget) {
+        window.overlayCaptureEvidenceStale = stale
+        if (message !== "")
+            window.announceCaptureRecoveryState(message + " " + (stale ? "Live evidence is stale until fresh capture arrives." : "Fresh accepted capture is available."))
+        if (focusTarget)
+            focusTarget.forceActiveFocus()
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -1999,19 +2006,13 @@ ApplicationWindow {
         target: window.captureMonitorBridge
         function onChanged() {
             if (window.captureMonitorBridge.status === "Error") {
-                window.overlayCaptureEvidenceStale = true
-                window.announceCaptureRecoveryState("No output device or permission; retry monitoring to acquire a fresh snapshot.")
-                overlayCaptureRecoveryAction.forceActiveFocus()
+                window.transitionCaptureEvidence(true, "No output device or permission; retry monitoring to acquire a fresh snapshot.", overlayCaptureRecoveryAction)
             } else if (window.captureMonitorBridge.status === "Reacquiring") {
-                window.overlayCaptureEvidenceStale = true
-                window.announceCaptureRecoveryState("Output device reacquiring; visualization focus restored when fresh audio arrives.")
-                overlayLiveMonitoringState.forceActiveFocus()
+                window.transitionCaptureEvidence(true, "Output device reacquiring; visualization focus restored when fresh audio arrives.", overlayLiveMonitoringState)
             } else if (window.captureMonitorBridge.status === "Monitoring") {
                 const recovered = window.overlayCaptureEvidenceStale
-                window.overlayCaptureEvidenceStale = false
                 if (recovered) {
-                    window.announceCaptureRecoveryState("Overlay capture recovered; fresh accepted snapshot is available.")
-                    overlayLiveMonitoringState.forceActiveFocus()
+                    window.transitionCaptureEvidence(false, "Overlay capture recovered; fresh accepted snapshot is available.", overlayLiveMonitoringState)
                 }
             }
         }
