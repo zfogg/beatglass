@@ -2055,7 +2055,7 @@ ApplicationWindow {
                     + "; beat pulse " + (beatPulse.running ? "active" : "idle")
                     + "; Ctrl+Alt+Shift+B focuses beat pulse status"
                 Accessible.role: Accessible.Grouping
-                    Accessible.description: "Current live status, tempo, harmony, beat-pulse period, capture state, and recovery action for the DJ overlay. Ctrl+Alt+Shift+B focuses the beat pulse status." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
+                Accessible.description: "Capture-only DJ overlay: current live status, tempo, harmony, beat-pulse period, capture state, and recovery action. Track and deck metadata are unavailable without an explicitly configured DJ-app integration. Ctrl+Alt+Shift+B focuses the beat pulse status." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
                 ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true
