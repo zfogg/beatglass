@@ -122,7 +122,9 @@ TestCase {
         let app = shellWithOverlay.createObject(null)
         fakeCapture.status = "Reacquiring"
         verify(app.overlayCaptureEvidenceStale)
-        verify(findChild(app, "overlayLiveMonitoringState").activeFocus)
+        let monitoring = findChild(app, "overlayLiveMonitoringState")
+        verify(monitoring.activeFocus)
+        verify(monitoring.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("reacquiring") >= 0)
         fakeCapture.status = "Monitoring"
         app.destroy()

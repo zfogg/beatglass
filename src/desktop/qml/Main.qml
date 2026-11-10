@@ -4501,10 +4501,10 @@ ApplicationWindow {
                         text: visible ? ("Overlay monitoring: " + window.liveBridge.status
                             + (window.liveBridge.status === "Tracking" ? " · live estimates updating" : " · waiting for accepted output")) : "Overlay monitoring unavailable"
                         Accessible.name: "Overlay live monitoring state, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                        Accessible.value: visible ? text : ""
+                        Accessible.value: visible ? text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "") : ""
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.liveBridge.status === "Tracking"
-                            ? text + ". Estimates are attributed to the monitored combined output." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
+                            ? text + ". Estimates are attributed to the monitored combined output." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "") + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
                             : visible ? text + ". The overlay remains available while capture recovers; the selected endpoint remains retained." : text
                         ToolTip.text: visible ? Accessible.description : "Overlay monitoring state"
                         Layout.fillWidth: true
