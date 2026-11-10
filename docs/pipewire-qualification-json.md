@@ -163,3 +163,5 @@ of process events recorded in the restarted epoch.
 When `host` provenance is present, it must include a non-empty `name` and a
 supported `platform` (`linux`, `windows`, or `macos`).
 If present, host `node_id` must be a positive integer.
+If present, host `build_id` must be a non-empty string identifying the native
+build that produced the evidence.
