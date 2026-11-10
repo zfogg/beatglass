@@ -1603,14 +1603,15 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
-        window.handleOverlayResumeRecoveryAction()
+        return window.handleOverlayResumeRecoveryAction()
     }
     function handleOverlayResumeRecoveryAction() {
         window.overlayRecoveryPausedByUser = false
         window.overlayRecoveryAttemptCount = 1
         window.announceCaptureRecoveryState("DJ overlay recovery resumed (attempt 1); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
-        window.showOverlayAndHideControls()
+        const resumed = window.showOverlayAndHideControls()
         overlayDisplayStatus.forceActiveFocus()
+        return resumed
     }
     function handleOverlayClearSafeModeShortcut() {
         navigation.currentIndex = 1
