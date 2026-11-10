@@ -755,6 +755,8 @@ Explicit Stop overlay monitoring now marks the last tempo/harmony snapshot stale
 
 When the native overlay is available but no capture bridge is connected at startup, the overlay marks displayed estimates stale and announces that monitoring must connect before fresh evidence can be presented.
 
+The Start/Stop overlay monitoring action now repeats the stale-evidence gate in its accessible value, keeping the required next action explicit while monitoring is stopped or reconnecting.
+
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.
