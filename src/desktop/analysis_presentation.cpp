@@ -10,6 +10,7 @@ void AnalysisPresentation::publish(const beatglass::Snapshot& snapshot) {
   stale_ = displayed.stale;
   beats_ = displayed.beat_count;
   frames_ = displayed.observed_frames;
+  analysis_delay_frames_ = displayed.analysis_delay_frames;
   tempo_history_.clear();
   for (const auto bpm : displayed.tempo_history) {
     if (std::isfinite(bpm) && bpm > 0.0f) tempo_history_.push_back(QString::fromStdString(beatglass::format_presentation_bpm(bpm)));
