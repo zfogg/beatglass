@@ -42,3 +42,6 @@ Referenced evidence fields use the same portable path checks as hashed
 artifacts, so scenario-linked files cannot bypass the canonical path policy.
 Referenced evidence also consumes the same per-artifact byte budget before it
 is hashed into the generated manifest.
+Ingestion additionally enforces an aggregate artifact budget (8 GiB by
+default), configurable with `--max-total-artifact-bytes`, to bound total disk
+and hashing work across a bundle.
