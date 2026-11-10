@@ -1033,3 +1033,5 @@ An invalid persisted opacity now keeps the visual recovery marker set even when 
 Failed size-preference synchronization now retains the visual recovery marker, preventing invalid geometry from appearing restored before a valid overlay state is applied.
 
 Native geometry synchronization failures now retain the visual recovery marker, keeping overlay readiness false until a valid geometry snapshot is accepted.
+
+Native settings synchronization now retains the visual recovery marker when opacity or geometry is invalid, preventing a partially synchronized overlay from appearing ready.
