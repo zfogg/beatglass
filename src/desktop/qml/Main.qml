@@ -1621,7 +1621,7 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
-        window.handleOverlayClearSafeModeAction()
+        return window.handleOverlayClearSafeModeAction()
     }
     function handleOverlayClearSafeModeAction() {
         if (window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit) {
