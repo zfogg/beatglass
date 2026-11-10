@@ -1090,6 +1090,14 @@ def test_capture_status_change_clears_pulse_immediately():
     assert "overlaySurface.pulseOpacity = 0.0" in body
 
 
+def test_capture_monitoring_restarts_pulse_when_evidence_is_valid():
+    start = QML.index("target: window.captureMonitorBridge")
+    body = QML[start : QML.index("            MouseArea", start)]
+    assert "status === \"Monitoring\"" in body
+    assert "liveBridge.status === \"Tracking\"" in body
+    assert "beatPulse.restart()" in body
+
+
 def test_overlay_pulse_status_label_exposes_running_state():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]

@@ -1972,7 +1972,11 @@ ApplicationWindow {
             Connections {
                 target: window.captureMonitorBridge
                 function onChanged() {
-                    if (!window.captureMonitorBridge || window.captureMonitorBridge.status !== "Monitoring") {
+                    const bpm = Number(window.liveBridge.tempo)
+                    const tracking = window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" && window.liveBridge.status === "Tracking" && !window.overlayCaptureEvidenceStale && isFinite(bpm) && bpm > 0
+                    if (tracking && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion))
+                        beatPulse.restart()
+                    else {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
