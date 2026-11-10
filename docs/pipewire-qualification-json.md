@@ -342,6 +342,9 @@ measurements out of native evidence.
 The infinity-clock regression in
 `tests/unit/check_native_host_provenance_clock_infinity.py` closes the remaining
 non-finite clock accuracy case.
+The negative-infinity clock regression in
+`tests/unit/check_native_host_provenance_clock_negative_infinity.py` also keeps
+signed non-finite measurements out of evidence.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
