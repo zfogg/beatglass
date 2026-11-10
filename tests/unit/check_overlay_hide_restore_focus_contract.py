@@ -471,3 +471,11 @@ def test_opacity_reset_uses_named_action():
     body = QML[start : QML.index("    function handleOverlayClickThroughShortcut", start)]
     assert "setOpacity(resetOpacity)" in body
     assert "handleOverlayOpacityResetResult" in body
+
+
+def test_click_through_button_routes_to_named_action():
+    start = QML.index("function handleOverlayClickThroughButtonAction")
+    body = QML[start : QML.index("    function handleOverlayClickThroughShortcut", start)]
+    assert "setClickThrough(requestedClickThrough)" in body
+    assert "overlayInteractionMode.forceActiveFocus()" in body
+    assert "onClicked: window.handleOverlayClickThroughButtonAction(checked)" in QML
