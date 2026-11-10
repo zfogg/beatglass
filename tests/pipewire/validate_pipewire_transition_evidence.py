@@ -222,6 +222,9 @@ if reacquisition is not None:
     if reacquisition.get("host") is not None:
         if not isinstance(reacquisition["host"], str) or not reacquisition["host"].strip():
             raise SystemExit("reacquisition evidence has an empty host")
+    if reacquisition.get("capture_id") is not None:
+        if not isinstance(reacquisition["capture_id"], str) or not reacquisition["capture_id"].strip():
+            raise SystemExit("reacquisition evidence has an empty capture id")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
