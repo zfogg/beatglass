@@ -746,3 +746,11 @@ def test_resume_action_propagates_native_result():
     assert "const resumed" in action_body
     assert "overlayDisplayStatus.forceActiveFocus()" in action_body
     assert "return resumed" in action_body
+
+def test_clear_safe_mode_action_returns_result():
+    start = QML.index("function handleOverlayClearSafeModeAction")
+    body = QML[start : QML.index("    function handleOverlayStopShortcut", start)]
+    assert "return false" in body
+    assert "return true" in body
+    assert "resetOverlayRecoveryAttempts()" in body
+    assert "retryOverlay.forceActiveFocus()" in body
