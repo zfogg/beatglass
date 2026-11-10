@@ -4017,7 +4017,7 @@ ApplicationWindow {
                                 id: cancelAnalysis
                                 objectName: "cancelAnalysis"
                                 readonly property bool visible: true
-                                readonly property bool enabled: cancelAnalysisButton.enabled
+                                readonly property bool enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canCancel === true
                                 function clicked() { cancelAnalysisButton.clicked() }
                                 function forceActiveFocus() { cancelAnalysisButton.forceActiveFocus() }
                             }
