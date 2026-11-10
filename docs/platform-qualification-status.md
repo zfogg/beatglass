@@ -195,6 +195,9 @@ The preparation scripts are executable on their respective hosts, but this Windo
 Qualification matrices normalize absolute runner artifact paths to paths relative
 to the summary directory before handoff. This keeps retained evidence portable
 and allows the matrix validator's traversal checks to remain fail-closed.
+For local handoff review, `validate_qualification_matrix.py MATRIX.json ROOT`
+additionally verifies every listed evidence artifact exists beneath `ROOT`;
+the original one-argument shape remains a portable schema-only check.
 
 | Evidence class | Windows session result | Required native owner/action |
 | --- | --- | --- |

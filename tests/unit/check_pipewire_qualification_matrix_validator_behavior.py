@@ -60,4 +60,15 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid qualification matrix host" not in result.stderr + result.stdout:
         raise SystemExit("invalid matrix host was accepted")
+    evidence_root = Path(directory) / "evidence"
+    evidence_root.mkdir()
+    (evidence_root / "windows.zip").write_bytes(b"evidence")
+    path.write_text(json.dumps(valid), encoding="utf-8")
+    result = subprocess.run([sys.executable, str(validator), str(path), str(evidence_root)], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise SystemExit(result.stderr or result.stdout)
+    (evidence_root / "windows.zip").unlink()
+    result = subprocess.run([sys.executable, str(validator), str(path), str(evidence_root)], capture_output=True, text=True)
+    if result.returncode == 0 or "missing evidence artifact" not in result.stderr + result.stdout:
+        raise SystemExit("missing evidence artifact was accepted")
 print("PipeWire qualification matrix validator behavior passed (9 scenarios)")
