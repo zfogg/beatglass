@@ -140,6 +140,11 @@ if isinstance(payload, dict):
                 or isinstance(host["clock_source_switch_count"], bool)
                 or host["clock_source_switch_count"] < 0):
             raise SystemExit("transition host provenance has invalid switch count")
+        if host.get("clock_source_last_switch_ns") is not None and (
+                not isinstance(host["clock_source_last_switch_ns"], int)
+                or isinstance(host["clock_source_last_switch_ns"], bool)
+                or host["clock_source_last_switch_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid last switch time")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():

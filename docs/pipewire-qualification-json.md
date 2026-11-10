@@ -254,3 +254,5 @@ If present, host `clock_source_failover` must be a boolean indicating whether
 the source was selected through failover.
 If present, host `clock_source_switch_count` must be a non-negative integer
 counting synchronization-source switches during qualification.
+If present, host `clock_source_last_switch_ns` must be a non-negative integer
+timestamp for the latest synchronization-source switch.
