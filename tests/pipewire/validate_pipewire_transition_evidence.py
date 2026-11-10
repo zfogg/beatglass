@@ -140,6 +140,11 @@ if reacquisition is not None:
                 or isinstance(reacquisition["drop_count"], bool)
                 or reacquisition["drop_count"] < 0):
             raise SystemExit("reacquisition evidence has an invalid drop count")
+    if reacquisition.get("error_code") is not None:
+        if (not isinstance(reacquisition["error_code"], int)
+                or isinstance(reacquisition["error_code"], bool)
+                or reacquisition["error_code"] == 0):
+            raise SystemExit("reacquisition evidence has an invalid error code")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
