@@ -3,7 +3,6 @@
 #if defined(BEATGLASS_HAS_PIPEWIRE)
 #include "beatglass/capture/detail/pipewire_stream_owner.hpp"
 #include <pipewire/pipewire.h>
-#include <spa/param/audio/format-utils.h>
 #include <cerrno>
 #include <spa/param/param.h>
 #include <spa/param/audio/format-utils.h>
@@ -15,7 +14,7 @@ namespace beatglass::pipewire::detail {
 // callback must dequeue only bounded buffers and hand copied float PCM to
 // MonitorStream; it must never allocate, block, or touch UI/database state.
 static_assert(PW_VERSION_STREAM_EVENTS > 0, "PipeWire stream callback ABI required");
-static_assert(SPA_PARAM_FORMAT > 0, "SPA format negotiation required");
+static_assert(SPA_PARAM_Format > 0, "SPA format negotiation required");
 
 class LinuxStreamOwner final : public StreamOwner {
 public:
@@ -121,19 +120,23 @@ private:
       return;
     }
     const auto& data_block = buffer->buffer->datas[0];
-    const auto sample_bytes = data_block.chunk.size;
+    if (!data_block.chunk) {
+      pw_stream_queue_buffer(owner.stream_, buffer);
+      return;
+    }
+    const auto sample_bytes = data_block.chunk->size;
     if (sample_bytes == 0 || sample_bytes % sizeof(float) != 0 ||
-        data_block.chunk.stride != static_cast<int32_t>(sizeof(float))) {
+        data_block.chunk->stride != static_cast<int32_t>(sizeof(float))) {
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
     }
-    if (data_block.chunk.offset % sizeof(float) != 0 ||
-        data_block.chunk.offset > data_block.maxsize ||
-        sample_bytes > data_block.maxsize - data_block.chunk.offset) {
+    if (data_block.chunk->offset % sizeof(float) != 0 ||
+        data_block.chunk->offset > data_block.maxsize ||
+        sample_bytes > data_block.maxsize - data_block.chunk->offset) {
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;
     }
-    const auto* sample_data = static_cast<const std::byte*>(data_block.data) + data_block.chunk.offset;
+    const auto* sample_data = static_cast<const std::byte*>(data_block.data) + data_block.chunk->offset;
     if (reinterpret_cast<std::uintptr_t>(sample_data) % alignof(float) != 0) {
       pw_stream_queue_buffer(owner.stream_, buffer);
       return;

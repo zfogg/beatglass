@@ -14,6 +14,12 @@ monitor stream, feeds the shared tempo/presentation and visualization pipeline,
 and clears/reacquires evidence on stream boundaries or packet timeouts. Native
 Linux verification remains pending until a host with PipeWire development
 headers and a running sink monitor is available.
+In the current WSL host, an isolated PipeWire 1.6.10 package tree plus locally
+built FTXUI 7.0.0 produced a successful `BEATGLASS_BUILD_PIPEWIRE=ON` CLI build;
+all three snapshots and the contract/snapshot tests passed. Runtime discovery
+then reached PipeWire and reported `Could not create PipeWire loop`, confirming
+that the remaining limitation is the absent daemon/session rather than a build
+or linkage failure.
 This is preparation evidence only: WSL is not native Linux qualification,
 PipeWire prerequisites were unavailable in that environment, macOS was not
 run, and the optional Essentia tonal runtime was not validated end-to-end.
