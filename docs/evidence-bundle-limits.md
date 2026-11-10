@@ -104,3 +104,6 @@ qualification dashboards to distinguish workspace setup errors from content
 validation failures.
 JSON output also groups manifest, artifact-count, and byte-budget violations
 under `resource_limit`, making capacity failures distinct from malformed data.
+Manifest contract failures such as missing provenance and required scenarios
+are grouped under `schema`, keeping evidence-shape failures distinct from
+workspace topology and capacity problems.
