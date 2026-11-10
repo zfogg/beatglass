@@ -220,7 +220,7 @@ def main() -> int:
                     max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries,
                     max_total_artifact_bytes=args.max_total_artifact_bytes)
     if args.json:
-        print(json.dumps({"valid": not errors, "error_count": len(errors), "errors": errors,
+        print(json.dumps({"schema_version": 1, "valid": not errors, "error_count": len(errors), "errors": errors,
                           "limits": {"max_artifact_bytes": args.max_artifact_bytes,
                                      "max_manifest_bytes": args.max_manifest_bytes,
                                      "max_entries": args.max_entries,

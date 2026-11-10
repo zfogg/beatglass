@@ -325,6 +325,7 @@ class QualificationIngestTest(unittest.TestCase):
             result = subprocess.run([sys.executable, str(Path(__file__).with_name("ingest_qualification_artifacts.py")),
                                      str(root), str(output), "--json"], capture_output=True, text=True, check=False)
             report = json.loads(result.stdout)
+            self.assertEqual(report["schema_version"], 1)
             self.assertFalse(report["valid"])
             self.assertEqual(report["error_count"], len(report["errors"]))
             self.assertIn("max_total_artifact_bytes", report["limits"])
