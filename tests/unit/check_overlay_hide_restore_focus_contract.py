@@ -535,3 +535,12 @@ def test_retry_button_respects_paused_recovery_boundary():
     assert "Resume recovery before retrying" in body
     assert "return" in body
     assert "overlayRecoveryAttemptCount += 1" in body
+
+def test_clear_safe_mode_is_idempotent_before_limit():
+    start = QML.index("function handleOverlayClearSafeModeAction")
+    body = QML[start : QML.index("    function handleOverlayStopShortcut", start)]
+    assert "overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit" in body
+    assert "focusOverlayRecoveryPauseState" in body
+    assert "safe mode is not active" in body
+    assert "return" in body
+    assert "resetOverlayRecoveryAttempts()" in body
