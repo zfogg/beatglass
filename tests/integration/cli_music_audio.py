@@ -8,6 +8,8 @@ import tempfile
 import wave
 
 exe = sys.argv[1]
+version = subprocess.run([exe, "--version"], capture_output=True, text=True)
+assert version.returncode == 0 and version.stdout.startswith("beatglass-music-cli ")
 rate = 44100
 with tempfile.TemporaryDirectory() as directory:
     path = pathlib.Path(directory) / "synthetic.wav"
