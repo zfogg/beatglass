@@ -292,6 +292,8 @@ def main() -> int:
                 category = "scenario_schema"
             elif error.startswith("missing artifact:"):
                 category = "artifact_missing"
+            elif error.startswith("artifact must not be a symlink:"):
+                category = "artifact_symlink"
             elif error.startswith("artifact must be a regular file:"):
                 category = "artifact_type"
             elif error.startswith(("artifact must", "artifact path", "artifact hash", "artifact size")):

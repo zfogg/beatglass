@@ -126,6 +126,8 @@ Missing retained artifact files are grouped under `artifact_missing` for direct
 evidence-retention triage.
 Non-regular artifact entries are grouped under `artifact_type` for direct
 retained-file type triage.
+Symlinked artifact entries are grouped under `artifact_symlink` for direct
+retained-file indirection triage.
 Unsupported platform identifiers are grouped under `platform` for direct
 qualification-environment triage.
 Environment descriptor length, whitespace, and control-character failures
