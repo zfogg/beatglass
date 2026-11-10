@@ -242,6 +242,8 @@ def main() -> int:
                 category = "scenario"
             elif error.startswith(("artifacts must", "scenarios must", "missing required scenarios", "unsupported manifest", "unsupported artifact fields", "invalid or duplicate artifact entry")):
                 category = "schema"
+            elif error.startswith("scenario evidence"):
+                category = "scenario_evidence"
             elif error.startswith(("missing artifact", "artifact must", "artifact path", "artifact hash", "artifact size")):
                 category = "artifact"
             else:
