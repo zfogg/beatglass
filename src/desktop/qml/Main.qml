@@ -2846,7 +2846,6 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     Accessible.name: "Library selection status: " + text
-                    Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: window.selectedAudioUrl.toString() === "" ? "No audio source is selected. Choose an audio file from the browser." : text + ". Playback and analysis actions apply to this source."
                     ToolTip.text: Accessible.description
@@ -2859,7 +2858,6 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     wrapMode: Text.WordWrap
                     Accessible.name: "Library keyboard shortcut help"
-                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: "Keyboard shortcuts for filtering, focusing results, reversing sort order, and clearing the current selection."
                     ToolTip.text: Accessible.description
