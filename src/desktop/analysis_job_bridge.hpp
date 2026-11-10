@@ -35,6 +35,9 @@ class AnalysisJobBridge final : public QObject {
   Q_PROPERTY(int batchCancelledCount READ batchCancelledCount NOTIFY batchChanged)
   Q_PROPERTY(int batchCompletedCount READ batchCompletedCount NOTIFY batchChanged)
   Q_PROPERTY(int batchQueuedCount READ batchQueuedCount NOTIFY batchChanged)
+  Q_PROPERTY(qulonglong batchTotalFrames READ batchTotalFrames NOTIFY batchChanged)
+  Q_PROPERTY(bool batchProgressKnown READ batchProgressKnown NOTIFY batchChanged)
+  Q_PROPERTY(double batchProgressFraction READ batchProgressFraction NOTIFY batchChanged)
 public:
   explicit AnalysisJobBridge(beatglass::library_detail::JobExecutor&, QObject* parent = nullptr);
   std::shared_ptr<beatglass::library::RetryableAnalysis> submit(beatglass::library::AnalysisOperation);
@@ -90,6 +93,13 @@ public:
   int batchCancelledCount() const noexcept { return batchCancelledCount_; }
   int batchCompletedCount() const noexcept { return batchCompletedCount_; }
   int batchQueuedCount() const noexcept { return batchAccepted_ - batchCompletedCount_ - batchFailedCount_ - batchCancelledCount_; }
+  qulonglong batchTotalFrames() const noexcept { return batch_total_frames_; }
+  bool batchProgressKnown() const noexcept { return batch_progress_known_; }
+  double batchProgressFraction() const noexcept {
+    if (!batch_progress_known_) return -1.0;
+    if (batch_total_frames_ == 0) return 1.0;
+    return static_cast<double>(frames_) / static_cast<double>(batch_total_frames_);
+  }
 signals:
   void progressChanged();
   void statusChanged();
@@ -113,6 +123,8 @@ private:
   int batchFailedCount_{};
   int batchCancelledCount_{};
   int batchCompletedCount_{};
+  qulonglong batch_total_frames_{};
+  bool batch_progress_known_{};
   const int batchCapacity_{2};
   QTimer poll_timer_;
   QPointer<AnalysisJobBridge> weak_self_{this};
