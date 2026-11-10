@@ -93,6 +93,7 @@
 | Overlay endpoint capture recovery | Selected endpoint is retained while capture is Error/Reacquiring | Preserve endpoint provenance but state that live overlay evidence is stale until fresh capture arrives. |
 | Overlay endpoint refresh recovery | User refreshes output endpoints during capture recovery | Keep stale-evidence context on the refresh action and return focus to endpoint selection for a deliberate retry. |
 | Overlay endpoint selector recovery | User chooses an output endpoint while capture is Error/Reacquiring | Keep selected endpoint context and stale-evidence boundary accessible until fresh capture is accepted. |
+| Overlay retry during reacquisition | Capture is reacquiring after a discontinuity | Keep Retry overlay capture visible and label it as reacquisition-aware so users can deliberately restart capture without mistaking stale evidence for a fresh result. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |

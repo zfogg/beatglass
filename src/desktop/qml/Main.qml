@@ -4586,11 +4586,11 @@ ApplicationWindow {
                     }
                     Button {
                         objectName: "overlayCaptureRecoveryAction"
-                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && window.captureMonitorBridge.status === "Error"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
                         text: "Retry overlay capture"
                         enabled: visible && window.captureMonitorBridge.start !== undefined
                         Accessible.name: text
-                        Accessible.value: enabled ? (window.overlayCaptureEvidenceStale ? "retry available; evidence stale until fresh capture" : "retry available; capture status error") : "retry unavailable"
+                        Accessible.value: enabled ? (window.overlayCaptureEvidenceStale ? "retry available; evidence stale until fresh capture" : (window.captureMonitorBridge.status === "Reacquiring" ? "retry available; reacquiring" : "retry available; capture status error")) : "retry unavailable"
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled
                             ? "Retry the selected output capture for the overlay and wait for a fresh accepted snapshot; " + (window.overlayCaptureEvidenceStale ? "current evidence is stale; " : "") + "settings revision " + window.overlaySettingsRevision + "."
