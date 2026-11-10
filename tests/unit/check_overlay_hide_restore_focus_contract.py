@@ -693,3 +693,13 @@ def test_opacity_focus_shortcut_requires_available_overlay():
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
     assert "return true" in body
+
+
+def test_opacity_reset_requires_available_overlay():
+    start = QML.index("function handleOverlayOpacityResetAction")
+    body = QML[start : QML.index("    function focusOverlayOpacityEditRecovery", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
+    assert "return applied" in body

@@ -1466,8 +1466,13 @@ ApplicationWindow {
         overlayOpacityControl.forceActiveFocus()
     }
     function handleOverlayOpacityResetAction(resetOpacity) {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay opacity reset is unavailable until the native overlay and a destination display are ready.", overlayOpacityControl)
+            return false
+        }
         const applied = window.overlayBridge.setOpacity(resetOpacity)
         window.handleOverlayOpacityResetResult(applied, resetOpacity)
+        return applied
     }
     function focusOverlayOpacityEditRecovery(message) {
         overlayOpacityControl.forceActiveFocus()
