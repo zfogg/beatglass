@@ -93,8 +93,9 @@ currently visible filtered tracks sequentially with shared cancellation and
 progress, renders a colored PCM waveform with beat markers and playback position, and exposes native
 folder selection and Windows playback controls. Live discovers Windows render
 sinks, captures the selected OS output through native loopback, and displays
-real tempo, telemetry, and a colored live waveform. Settings controls reduced
-motion and the seek step. Mouse tab selection and `Tab`/`1`/`2`/`3` keyboard
+real tempo, telemetry, and a colored live waveform. Live also exposes explicit
+half/normal/double tempo interpretation and reset/reacquire controls. Settings
+controls reduced motion and the seek step. Mouse tab selection and `Tab`/`1`/`2`/`3` keyboard
 navigation are supported; terminals below 100 columns or 28 rows show a clear
 resize prompt. Key/Chord remain explicitly unavailable unless the optional
 Essentia music-replay build is enabled.

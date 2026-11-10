@@ -249,6 +249,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> live_endpoints;
   std::vector<std::string> live_endpoint_ids;
   std::string live_error;
+  float live_bpm_multiplier = 1.0f;
 #ifdef _WIN32
   auto live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
   live_error = live_endpoint_snapshot.error;
@@ -583,6 +584,27 @@ int main(int argc, char** argv) {
     live_status = "Native sink discovery is unavailable in this build.";
 #endif
   });
+  auto reset_live_button = Button(" Reset / reacquire ", [&] {
+#ifdef _WIN32
+    if (live_session && live_session->state() != beatglass::SourceState::stopped) live_session->stop();
+    live_replay = std::make_unique<beatglass::CausalTempoReplay>();
+    live_bpm.reset();
+    live_tracking_state = beatglass::TrackingState::reacquiring;
+    live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+    live_waveform.assign(live_waveform.size(), 0.0f);
+    live_button_label = " Start monitoring ";
+    live_status = "Analysis reset; start monitoring to reacquire.";
+#else
+    live_status = "Native loopback capture is unavailable in this build.";
+#endif
+  });
+  auto set_live_multiplier = [&](float multiplier) {
+    live_bpm_multiplier = multiplier;
+    live_status = std::string("Displayed tempo correction set to ") + (multiplier < 1.0f ? "half" : multiplier > 1.0f ? "double" : "normal") + " BPM.";
+  };
+  auto half_bpm_button = Button(" ½ BPM ", [&] { set_live_multiplier(0.5f); });
+  auto normal_bpm_button = Button(" Normal BPM ", [&] { set_live_multiplier(1.0f); });
+  auto double_bpm_button = Button(" 2× BPM ", [&] { set_live_multiplier(2.0f); });
   RadioboxOption endpoint_picker_option;
   endpoint_picker_option.on_change = [&] {
     if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoints.size())) return;
@@ -600,7 +622,7 @@ int main(int argc, char** argv) {
     live_status = "Selected sink: " + live_endpoints[static_cast<std::size_t>(live_selected)];
   };
   auto endpoint_picker = Radiobox(&live_endpoints, &live_selected, endpoint_picker_option);
-  auto live = Renderer(Container::Vertical({endpoint_picker, Container::Horizontal({live_button, refresh_live_button})}), [&] {
+  auto live = Renderer(Container::Vertical({endpoint_picker, Container::Horizontal({live_button, refresh_live_button, reset_live_button, half_bpm_button, normal_bpm_button, double_bpm_button})}), [&] {
     Elements endpoints;
     for (std::size_t index = 0; index < live_endpoints.size(); ++index) {
       auto label = live_endpoints[index];
@@ -615,7 +637,9 @@ int main(int argc, char** argv) {
         false;
 #endif
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(live_status) | color(Color::GrayLight) | italic;
-    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render()}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    const auto corrected_bpm = live_bpm ? std::optional<float>(*live_bpm * live_bpm_multiplier) : std::nullopt;
+    const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
+    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render(), text(" "), reset_live_button->Render()}), hbox({text("Tempo interpretation: ") | italic, half_bpm_button->Render(), text(" "), normal_bpm_button->Render(), text(" "), double_bpm_button->Render(), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input}), [&] {
