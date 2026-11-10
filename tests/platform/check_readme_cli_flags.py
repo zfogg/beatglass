@@ -37,3 +37,8 @@ desktop_source = (ROOT / "src/desktop/main.cpp").read_text(encoding="utf-8")
 if "--database" in desktop_source and "--database" not in README:
     raise SystemExit("README is missing desktop --database documentation")
 print("README desktop flag coverage verified")
+
+for binary in ("beatglass-cli", "beatglass-music-cli"):
+    if f"Usage:" not in README or binary not in README:
+        raise SystemExit(f"README is missing usage contract for {binary}")
+print("README shipped usage coverage verified")
