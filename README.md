@@ -92,7 +92,7 @@ supported files, runs real decoder/aubio analysis asynchronously, can analyze al
 currently visible filtered tracks sequentially with shared cancellation and
 progress, isolates per-track decoder errors so one corrupt file does not abort the
 batch, clears a stale failure badge when retrying a track succeeds, sorts the visible collection by title or path while preserving selection
-identity, renders a colored PCM waveform with analyzer-detected beat frames and playback position, and exposes native
+identity, performs a safe metadata preflight so duration/format are visible before analysis, shows filtered visible/analyzed/failed counts, renders a colored PCM waveform with analyzer-detected beat frames and playback position, and exposes native
 folder selection and Windows playback controls. Live discovers Windows render
 sinks, captures the selected OS output through native loopback, and displays
 real tempo, telemetry, and a colored live waveform. Live also exposes explicit
