@@ -1270,6 +1270,8 @@ def test_overlay_shows_stale_evidence_banner():
     body = QML[start : QML.index('objectName: "overlayCaptureScope"', start)]
     assert "visible: window.overlayCaptureEvidenceStale" in body
     assert "Previously displayed tempo, key, and chord values are stale" in body
+    assert "themeForegrounds[window.selectedThemeIndex]" in body
+    assert "font.bold: true" in body
     assert "; combined output may be ambiguous" in body
 
 
