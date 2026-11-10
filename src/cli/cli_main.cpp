@@ -62,6 +62,7 @@ struct CliPreferences {
   int bpm_multiplier{0};
   std::string live_endpoint_id;
   std::string live_endpoint_name;
+  std::string library_folder;
 };
 
 std::filesystem::path preferences_path() {
@@ -82,8 +83,16 @@ CliPreferences load_preferences() {
   const auto path = preferences_path();
   if (path.empty()) return preferences;
   std::ifstream input(path);
-  std::string key, value;
-  while (input >> key >> value) {
+  std::string line;
+  while (std::getline(input, line)) {
+    std::istringstream fields(line);
+    std::string key, value;
+    if (!(fields >> key)) continue;
+    if (key == "library_folder") {
+      fields >> std::quoted(preferences.library_folder);
+      continue;
+    }
+    if (!(fields >> value)) continue;
     if (key == "reduce_motion") preferences.reduce_motion = value == "1";
     else if (key == "seek_step") {
       try { preferences.seek_step = std::clamp(std::stoi(value), 1, 60); } catch (...) {}
@@ -104,7 +113,7 @@ void save_preferences(const CliPreferences& preferences) {
   std::filesystem::create_directories(path.parent_path(), error);
   if (error) return;
   std::ofstream output(path, std::ios::trunc);
-  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << preferences.live_endpoint_id << "\nlive_endpoint_name " << preferences.live_endpoint_name << "\n";
+  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << preferences.live_endpoint_id << "\nlive_endpoint_name " << preferences.live_endpoint_name << "\nlibrary_folder " << std::quoted(preferences.library_folder) << "\n";
 }
 using namespace ftxui;
 
@@ -439,9 +448,12 @@ int main(int argc, char** argv) {
     return 0;
   }
   const bool snapshot = argc > 1 && std::string(argv[1]) == "--snapshot";
-  std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::current_path()) : (argc > 1 ? argv[1] : std::filesystem::current_path());
-  auto tracks = discover(root, true);
   const auto preferences = load_preferences();
+  const bool explicit_root = snapshot ? argc > 2 : argc > 1;
+  std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::path{}) : (argc > 1 ? argv[1] : std::filesystem::path{});
+  if (!explicit_root && !preferences.library_folder.empty()) root = preferences.library_folder;
+  if (root.empty()) root = std::filesystem::current_path();
+  auto tracks = discover(root, true);
   bool sort_by_path = false;
   std::string folder_text = root.string();
   std::string filter;
@@ -778,7 +790,7 @@ int main(int argc, char** argv) {
 #endif
     }();
     const auto bpm_setting = live_bpm_multiplier < 1.0f ? -1 : live_bpm_multiplier > 1.0f ? 1 : 0;
-    CliPreferences updated{reduce_motion, 5, visual_mode, selected_device_id, bpm_setting, {}, {}};
+    CliPreferences updated{reduce_motion, 5, visual_mode, selected_device_id, bpm_setting, {}, {}, root.string()};
     try { updated.seek_step = std::clamp(std::stoi(seek_step_text), 1, 60); } catch (...) {}
     if (live_selected >= 0 && live_selected < static_cast<int>(live_endpoint_ids.size())) {
       updated.live_endpoint_id = live_endpoint_ids[static_cast<std::size_t>(live_selected)];
