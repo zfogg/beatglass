@@ -98,6 +98,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or any(0x202A <= ord(char) <= 0x202E or 0x2066 <= ord(char) <= 0x2069 for char in relative)
             or any(unicodedata.category(char) == "Cf" for char in relative)
             or any(unicodedata.category(char) in {"Zl", "Zp"} for char in relative)
+            or any(unicodedata.category(char) == "Zs" for char in relative)
             or relative != relative.strip()
             or "\\" in relative
             or any(ord(char) < 32 for char in relative)
