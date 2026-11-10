@@ -118,6 +118,15 @@ TestCase {
         hide.clicked(); compare(fakeOverlay.hides, 1); tryCompare(app, "visible", true)
         app.destroy()
     }
+    function test_captureReacquiringFocusesLiveMonitoringState() {
+        let app = shellWithOverlay.createObject(null)
+        fakeCapture.status = "Reacquiring"
+        verify(app.overlayCaptureEvidenceStale)
+        verify(findChild(app, "overlayLiveMonitoringState").activeFocus)
+        verify(app.overlayRecoveryAnnouncement.indexOf("reacquiring") >= 0)
+        fakeCapture.status = "Monitoring"
+        app.destroy()
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
