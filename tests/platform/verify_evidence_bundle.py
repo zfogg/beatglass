@@ -236,6 +236,8 @@ def main() -> int:
                 category = "bundle_symlink"
             elif error == "manifest must not be a symlink":
                 category = "manifest_symlink"
+            elif error == "manifest must be a regular file":
+                category = "manifest_type"
             elif error.startswith(("bundle root must ", "manifest must ")):
                 category = "input_topology"
             elif error.startswith("artifact exceeds "):
