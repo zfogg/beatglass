@@ -4853,14 +4853,20 @@ ApplicationWindow {
                         objectName: "showOverlay"
                         property bool focusRequested: false
                         readonly property bool activeFocus: focusRequested || showOverlayButton.activeFocus
+                        readonly property bool enabled: showOverlayButton.enabled
+                        readonly property string text: showOverlayButton.text
                         function forceActiveFocus() { showOverlayButton.forceActiveFocus(); focusRequested = true }
+                        function clicked() { showOverlayButton.clicked() }
                     }
                     QtObject {
                         id: restoreOverlay
                         objectName: "restoreOverlay"
                         property bool focusRequested: false
                         readonly property bool activeFocus: focusRequested || restoreOverlayButton.activeFocus
+                        readonly property bool enabled: restoreOverlayButton.enabled
+                        readonly property string text: restoreOverlayButton.text
                         function forceActiveFocus() { restoreOverlayButton.forceActiveFocus(); focusRequested = true }
+                        function clicked() { restoreOverlayButton.clicked() }
                     }
                 }
                 Label {
