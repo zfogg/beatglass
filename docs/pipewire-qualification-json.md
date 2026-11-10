@@ -268,6 +268,8 @@ The host validator accepts one host path and an optional report path; missing
 or extra arguments fail before any evidence file is opened.
 The host evidence root must be a JSON object; scalar, null, and array roots are
 rejected before provenance fields are inspected.
+`node_id` must be a positive integer; JSON booleans are explicitly rejected
+even though some language runtimes represent them as integers.
 Malformed or ambiguous host JSON is rejected before any host fields are
 trusted; duplicate keys are not silently normalized.
 Missing host evidence files are rejected through the same unreadable-input path;

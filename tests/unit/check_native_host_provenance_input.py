@@ -20,6 +20,12 @@ with tempfile.TemporaryDirectory() as directory:
         assert result.returncode != 0
         assert "host provenance must be an object" in result.stderr
 
+    boolean_id = Path(directory) / "boolean-node.json"
+    boolean_id.write_text('{"platform":"linux","name":"qualification-host","node_id":true}', encoding="utf-8")
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(boolean_id)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "host provenance has an invalid node id" in result.stderr
+
     malformed = Path(directory) / "malformed.json"
     malformed.write_text("{not-json", encoding="utf-8")
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(malformed)], capture_output=True, text=True)
