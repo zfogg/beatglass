@@ -133,6 +133,7 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("reacquiring") >= 0)
         fakeCapture.status = "Monitoring"
         app.destroy()
+        wait(0)
     }
     function test_stoppingOverlayMonitoringMarksEvidenceStale() {
         let app = shellWithOverlay.createObject(null)
@@ -158,6 +159,7 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("capture starting") >= 0)
         fakeCapture.status = "Monitoring"
         app.destroy()
+        wait(0)
     }
     function test_monitoringActionRejectsStaleTransitionActivation() {
         let app = shellWithOverlay.createObject(null)
