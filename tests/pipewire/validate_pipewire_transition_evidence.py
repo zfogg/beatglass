@@ -142,6 +142,15 @@ sample_counts = [event.get("sample_count") for event in process_events if event.
 if sample_counts and (len(sample_counts) != len(process_events)
                       or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in sample_counts)):
     raise SystemExit("process sample counts must be complete and non-negative")
+process_serials = [event.get("serial") for event in process_events if event.get("serial") is not None]
+if process_serials and (len(process_serials) != len(process_events)
+                        or any(not isinstance(value, str) or not value.strip() for value in process_serials)):
+    raise SystemExit("process sink serials must be complete and non-empty")
+if process_serials:
+    for event in process_events:
+        expected_serial = restart.get("serial") if event.get("epoch") == restart.get("epoch") else start.get("serial")
+        if event.get("serial") != expected_serial:
+            raise SystemExit("process sink serial does not match active epoch")
 drop_counts = [event.get("drop_count") for event in process_events if event.get("drop_count") is not None]
 if drop_counts and (len(drop_counts) != len(process_events) or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in drop_counts)):
     raise SystemExit("process drop counts must be complete and non-negative")
