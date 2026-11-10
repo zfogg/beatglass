@@ -79,6 +79,11 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no NTP state")
         if host.get("clock_source") is not None and (not isinstance(host["clock_source"], str) or not host["clock_source"].strip()):
             raise SystemExit("transition host provenance has no clock source")
+        if host.get("clock_accuracy_ns") is not None and (
+                not isinstance(host["clock_accuracy_ns"], int)
+                or isinstance(host["clock_accuracy_ns"], bool)
+                or host["clock_accuracy_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid clock accuracy")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
