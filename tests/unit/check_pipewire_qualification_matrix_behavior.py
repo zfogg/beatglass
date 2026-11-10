@@ -51,4 +51,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_status), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid qualified status" not in result.stderr + result.stdout:
         raise SystemExit("malformed qualified summary status was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "native_execution_attempted": "false"}), encoding="utf-8")
+    invalid_attempt = root / "invalid-attempt-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(invalid_attempt), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid execution attempt" not in result.stderr + result.stdout:
+        raise SystemExit("malformed native execution attempt was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
