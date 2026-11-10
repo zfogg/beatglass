@@ -4201,7 +4201,7 @@ ApplicationWindow {
                             ? renderedWaveform.length > 0
                             : renderedSpectrum.length > 0)
                     Layout.fillWidth: true; Layout.preferredHeight: window.compactHeader ? 96 : 120; Layout.minimumHeight: window.compactHeader ? 72 : 96
-                    Accessible.name: "Live " + (visualizationCanvas.viewMode === "waveform" ? "waveform" : "FFT spectrum")
+                    Accessible.name: "Live waveform and spectrum"
                     Accessible.role: Accessible.Graphic
                     Accessible.description: (visualizationCanvas.viewMode === "waveform"
                         ? "Bounded time-domain waveform from the current output capture."
@@ -4876,9 +4876,9 @@ ApplicationWindow {
                 RowLayout {
                     visible: window.overlayBridge !== null
                     objectName: "overlayRoutingControls"
-                    Accessible.name: "Overlay interaction and opacity controls"
-                        ? (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity, settings revision " + window.overlaySettingsRevision + (window.overlayCaptureEvidenceStale ? ", live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? ", recovery pending" : "")
-                        : "unavailable; control-window fallback active"
+                    Accessible.name: window.overlayBridge
+                        ? "Overlay interaction and opacity controls: " + (window.overlayBridge.clickThrough ? "click-through" : "interactive") + ", " + Math.round(window.overlayBridge.opacity * 100) + "% opacity, settings revision " + window.overlaySettingsRevision + (window.overlayCaptureEvidenceStale ? ", live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? ", recovery pending" : "")
+                        : "Overlay interaction and opacity controls: unavailable; control-window fallback active"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Configure pointer click-through and overlay opacity." + (window.overlayCaptureEvidenceStale ? " Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery is pending." : "")
                     ToolTip.text: "Overlay interaction mode and opacity; current value is announced when available"
