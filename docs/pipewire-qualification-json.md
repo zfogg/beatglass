@@ -49,5 +49,8 @@ non-zero integer preserving native recovery error provenance.
 Reacquisition evidence may include `error_domain`; when supplied it must be a
 non-empty string identifying the native error domain.
 
+Reacquisition evidence may include `recovery_reason`; when supplied it must be a
+non-empty string describing why native capture was restarted.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
