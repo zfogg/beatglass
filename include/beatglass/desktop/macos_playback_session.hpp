@@ -7,6 +7,7 @@
 #if defined(__APPLE__)
 #include <AudioToolbox/AudioToolbox.h>
 #include <beatglass/capture/playback_pcm_queue.hpp>
+#include <beatglass/core/playback_session.hpp>
 
 namespace beatglass::macos {
 
@@ -25,6 +26,10 @@ class MacAudioUnitPlayback final {
   void stop() noexcept;
   /** Queue one decoded block for the render callback. */
   bool submit(const AudioBlock& block) noexcept;
+  /** Pause queue admission while retaining the current source epoch. */
+  bool pause() noexcept { return session_.pause(); }
+  /** Resume queue admission for the current source epoch. */
+  bool resume() noexcept { return session_.resume(); }
   bool running() const noexcept { return unit_ != nullptr; }
 
  private:
@@ -37,6 +42,7 @@ class MacAudioUnitPlayback final {
   std::unique_ptr<float[]> scratch_;
   std::size_t max_samples_{0};
   std::uint16_t channels_{0};
+  PlaybackSession session_;
 };
 
 }  // namespace beatglass::macos

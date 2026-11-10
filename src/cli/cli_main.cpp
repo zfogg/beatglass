@@ -518,9 +518,9 @@ private:
           epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through macOS AudioUnit output.");
         } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
       } else if (command == Command::resume) {
-        if (reader) { state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback resumed."); }
+        if (reader && output.resume()) { state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback resumed."); }
       } else if (command == Command::pause) {
-        if (reader && state_.load(std::memory_order_acquire) == beatglass::PlaybackState::playing) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
+        if (reader && output.pause()) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
       } else if (command == Command::seek && reader) {
         try {
           const auto metadata = reader->metadata();
@@ -542,7 +542,7 @@ private:
       while (!output.submit(read.block)) {
         const auto pending = take_command();
         if (pending == Command::stop || pending == Command::shutdown) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); shutdown = pending == Command::shutdown; break; }
-        if (pending == Command::pause) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); break; }
+        if (pending == Command::pause) { output.pause(); state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); break; }
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
       }
     }

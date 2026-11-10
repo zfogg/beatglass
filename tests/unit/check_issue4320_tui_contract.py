@@ -16,6 +16,9 @@ def main() -> int:
         raise SystemExit("CLI playback buffers exceed the shared bounded session capacity")
     if "beatglass/desktop/macos_playback_session.hpp" not in tui or "macOS AudioUnit output" not in tui:
         raise SystemExit("CLI macOS playback is not wired to the native bounded AudioUnit session")
+    mac_playback = (root / "src" / "desktop" / "platform" / "macos_playback_session.mm").read_text(encoding="utf-8")
+    if "session_.start(epoch)" not in mac_playback or "block.epoch == session_.epoch()" not in mac_playback:
+        raise SystemExit("macOS native playback does not enforce the shared PlaybackSession epoch")
     for marker in ("beatglass/capture/coreaudio_source_internal.hpp", "class MacMonitorBackend", "CoreAudio output sources discovered", "TapState::interrupted"):
         if marker not in tui:
             raise SystemExit("CLI macOS Live contract missing: " + marker)
