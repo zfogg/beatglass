@@ -3206,6 +3206,7 @@ ApplicationWindow {
                             text: name + (folder ? "  (folder)" : "")
                             onClicked: {
                                 recursiveResultsView.currentIndex = index
+                                navigation.currentIndex = 0
                                 window.clearVisualizationForCaptureState("Selection cleared because the audio source changed; the overlay awaits fresh accepted evidence.")
                                 window.selectedName = name
                                 window.selectedAudioUrl = Qt.resolvedUrl(path)
