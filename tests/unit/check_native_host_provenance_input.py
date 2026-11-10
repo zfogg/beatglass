@@ -25,6 +25,11 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(boolean_id)], capture_output=True, text=True)
     assert result.returncode != 0
     assert "host provenance has an invalid node id" in result.stderr
+    fractional_node = Path(directory) / "fractional-node.json"
+    fractional_node.write_text('{"platform":"linux","name":"qualification-host","node_id":1.5}', encoding="utf-8")
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(fractional_node)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "host provenance has an invalid node id" in result.stderr
 
     invalid_secure_boot = Path(directory) / "invalid-secure-boot.json"
     invalid_secure_boot.write_text('{"platform":"linux","name":"qualification-host","secure_boot":1}', encoding="utf-8")
