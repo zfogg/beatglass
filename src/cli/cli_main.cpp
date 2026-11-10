@@ -110,14 +110,16 @@ public:
   }
   void play(const std::filesystem::path& path) { { std::lock_guard lock(mutex_); path_ = path; command_ = Command::play; } condition_.notify_one(); }
   void pause() { request(Command::pause); }
+  void seek_seconds(std::int64_t seconds) { { std::lock_guard lock(mutex_); seek_delta_seconds_ = seconds; command_ = Command::seek; } condition_.notify_one(); }
   void stop() { request(Command::stop); }
   beatglass::PlaybackState state() const noexcept { return state_.load(std::memory_order_acquire); }
   std::uint64_t epoch() const noexcept { return epoch_.load(std::memory_order_acquire); }
   std::string status() const { std::lock_guard lock(mutex_); return status_; }
 private:
-  enum class Command { none, play, pause, stop, shutdown };
+  enum class Command { none, play, pause, seek, stop, shutdown };
   void request(Command command) { { std::lock_guard lock(mutex_); command_ = command; } condition_.notify_one(); }
   Command take_command() { std::lock_guard lock(mutex_); const auto command = command_; command_ = Command::none; return command; }
+  std::int64_t take_seek_delta_seconds() { std::lock_guard lock(mutex_); const auto delta = seek_delta_seconds_; seek_delta_seconds_ = 0; return delta; }
   void set_status(std::string status) { std::lock_guard lock(mutex_); status_ = std::move(status); }
   void run() {
     std::unique_ptr<beatglass::FileReader> reader;
@@ -125,6 +127,7 @@ private:
     std::vector<float> decoded(4096 * 2), render(4096 * 2);
     std::uint64_t next_epoch = 0;
     bool shutdown = false;
+    std::uint64_t current_frame = 0;
     while (!shutdown) {
       auto command = take_command();
       if (command == Command::shutdown) break;
@@ -132,6 +135,7 @@ private:
         output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
         try {
           reader = std::make_unique<beatglass::FileReader>(path_, ++next_epoch);
+          current_frame = 0;
           std::string error;
           const auto& metadata = reader->metadata();
           if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
@@ -139,6 +143,19 @@ private:
         } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
       } else if (command == Command::pause) {
         if (output.pause()) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
+      } else if (command == Command::seek && reader) {
+        try {
+          const auto metadata = reader->metadata();
+          const auto delta_seconds = take_seek_delta_seconds();
+          const auto delta = delta_seconds * static_cast<std::int64_t>(metadata.sample_rate);
+          const auto target = delta < 0 && current_frame < static_cast<std::uint64_t>(-delta)
+              ? 0 : delta < 0 ? current_frame - static_cast<std::uint64_t>(-delta)
+              : std::min<std::uint64_t>(metadata.frames, current_frame + static_cast<std::uint64_t>(delta));
+          output.stop(); reader->seek(target, ++next_epoch);
+          std::string error;
+          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
+          current_frame = target; epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback seeked to frame " + std::to_string(target) + ".");
+        } catch (const std::exception& error) { set_status(std::string("Playback seek failed: ") + error.what()); }
       } else if (command == Command::stop) {
         output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback stopped.");
       }
@@ -148,6 +165,7 @@ private:
       const auto read = reader->read(decoded);
       if (read.status == beatglass::FileReadStatus::end) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
       if (read.status != beatglass::FileReadStatus::data) continue;
+      current_frame = read.block.first_frame + read.block.samples.size() / std::max<std::size_t>(1, read.block.format.channels);
       while (!output.submit(read.block)) {
         output.render(render);
         command = take_command();
@@ -168,6 +186,7 @@ private:
   std::thread worker_;
   std::atomic<beatglass::PlaybackState> state_{beatglass::PlaybackState::stopped};
   std::atomic<std::uint64_t> epoch_{};
+  std::int64_t seek_delta_seconds_{};
 };
 #endif
 }  // namespace
@@ -282,6 +301,22 @@ int main(int argc, char** argv) {
     playback.stop();
     status = "Playback stopped.";
   });
+  auto seek_back_button = Button(" −5s ", [&] {
+#ifdef _WIN32
+    playback.seek_seconds(-5);
+    status = "Playback seek backward requested.";
+#else
+    status = "Native playback seek is unavailable in this build.";
+#endif
+  });
+  auto seek_forward_button = Button(" +5s ", [&] {
+#ifdef _WIN32
+    playback.seek_seconds(5);
+    status = "Playback seek forward requested.";
+#else
+    status = "Native playback seek is unavailable in this build.";
+#endif
+  });
   MenuOption library_menu_option;
   library_menu_option.on_change = [&] {
     if (library_visible_selected >= 0 && library_visible_selected < static_cast<int>(library_indices.size())) selected = library_indices[static_cast<std::size_t>(library_visible_selected)];
@@ -316,7 +351,7 @@ int main(int argc, char** argv) {
         std::string{};
 #endif
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), hbox({text("Folder: "), folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: "), filter_input->Render() | flex, text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), hbox({text("Folder: "), folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: "), filter_input->Render() | flex, text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto toggle_live = [&] {
 #ifdef _WIN32
