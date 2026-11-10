@@ -446,6 +446,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> live_endpoints;
   std::vector<std::string> live_endpoint_ids;
   std::string live_error;
+  std::string live_endpoint_preference = preferences.live_endpoint_id;
   float live_bpm_multiplier = preferences.bpm_multiplier < 0 ? 0.5f : preferences.bpm_multiplier > 0 ? 2.0f : 1.0f;
 #ifdef BEATGLASS_CLI_LIBRARY
   std::unique_ptr<beatglass::library::StorageOwner> library_storage = std::make_unique<beatglass::library::StorageOwner>();
@@ -484,12 +485,12 @@ int main(int argc, char** argv) {
   int live_selected = 0;
 #ifdef _WIN32
   for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.endpoints.size()); ++index) {
-    if (live_endpoint_snapshot.endpoints[index].id == preferences.live_endpoint_id) live_selected = index;
-    else if (preferences.live_endpoint_id.empty() && live_endpoint_snapshot.endpoints[index].is_default) live_selected = index;
+    if (live_endpoint_snapshot.endpoints[index].id == live_endpoint_preference) live_selected = index;
+    else if (live_endpoint_preference.empty() && live_endpoint_snapshot.endpoints[index].is_default) live_selected = index;
   }
 #elif defined(BEATGLASS_HAS_PIPEWIRE)
   for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.sinks.size()); ++index)
-    if (live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].serial == preferences.live_endpoint_id) live_selected = index;
+    if (live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].serial == live_endpoint_preference) live_selected = index;
 #endif
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::size_t library_cache_hits = 0;
@@ -771,7 +772,10 @@ int main(int argc, char** argv) {
     const auto bpm_setting = live_bpm_multiplier < 1.0f ? -1 : live_bpm_multiplier > 1.0f ? 1 : 0;
     CliPreferences updated{reduce_motion, 5, visual_mode, selected_device_id, bpm_setting, {}};
     try { updated.seek_step = std::clamp(std::stoi(seek_step_text), 1, 60); } catch (...) {}
-    if (live_selected >= 0 && live_selected < static_cast<int>(live_endpoint_ids.size())) updated.live_endpoint_id = live_endpoint_ids[static_cast<std::size_t>(live_selected)];
+    if (live_selected >= 0 && live_selected < static_cast<int>(live_endpoint_ids.size())) {
+      updated.live_endpoint_id = live_endpoint_ids[static_cast<std::size_t>(live_selected)];
+      live_endpoint_preference = updated.live_endpoint_id;
+    }
     save_preferences(updated);
   };
   bool last_saved_reduce_motion = reduce_motion;
@@ -1078,7 +1082,7 @@ int main(int argc, char** argv) {
     for (const auto& endpoint : live_endpoint_snapshot.endpoints) {
       live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
       live_endpoint_ids.push_back(endpoint.id);
-      if (endpoint.is_default) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
+      if (endpoint.id == live_endpoint_preference || (live_endpoint_preference.empty() && endpoint.is_default)) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
     }
     if (!stopped_for_refresh) live_status = std::to_string(live_endpoints.size()) + " render sinks discovered.";
 #elif defined(BEATGLASS_HAS_PIPEWIRE)
@@ -1090,6 +1094,7 @@ int main(int argc, char** argv) {
     for (const auto& endpoint : refreshed.sinks) {
       live_endpoints.push_back(endpoint.name.empty() ? endpoint.description : endpoint.name);
       live_endpoint_ids.push_back(endpoint.serial);
+      if (endpoint.serial == live_endpoint_preference) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
     }
     live_status = std::to_string(live_endpoints.size()) + " PipeWire output sinks discovered.";
 #else
