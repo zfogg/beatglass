@@ -800,5 +800,12 @@ def test_stop_recovery_shortcut_propagates_result():
     assert "return window.handleOverlayStopRecoveryAction()" in body
     action_start = QML.index("function handleOverlayStopRecoveryAction")
     action_body = QML[action_start : QML.index("    function handleOverlayPausedPageShortcut", action_start)]
+
+def test_clear_safe_mode_shortcut_propagates_result():
+    start = QML.index("function handleOverlayClearSafeModeShortcut")
+    body = QML[start : QML.index("    function handleOverlayClearSafeModeAction", start)]
+    assert "return window.handleOverlayClearSafeModeAction()" in body
+    action_start = QML.index("function handleOverlayClearSafeModeAction")
+    action_body = QML[action_start : QML.index("    function handleOverlayStopShortcut", action_start)]
     assert "return false" in action_body
     assert "return true" in action_body
