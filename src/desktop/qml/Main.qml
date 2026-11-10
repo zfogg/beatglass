@@ -5195,6 +5195,8 @@ ApplicationWindow {
                         objectName: "overlayDisplay"
                         property bool focusRequested: false
                         readonly property bool activeFocus: focusRequested || overlayDisplayControl.activeFocus
+                        readonly property alias enabled: overlayDisplayControl.enabled
+                        readonly property alias model: overlayDisplayControl.model
                         property alias currentIndex: overlayDisplayControl.currentIndex
                         readonly property alias currentText: overlayDisplayControl.currentText
                         function forceActiveFocus() { overlayDisplayControl.forceActiveFocus(); focusRequested = true }
