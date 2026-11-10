@@ -1250,6 +1250,7 @@ def test_live_evidence_group_discloses_pulse_status_shortcut():
     assert "Track and deck metadata are unavailable" in body
     assert "overlapping decks" in body
     assert "evidence can be ambiguous" in body
+    assert "system notifications and other routed audio" in body
     assert "; combined output may be ambiguous" in body
 
 
