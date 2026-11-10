@@ -632,3 +632,10 @@ def test_unlock_action_returns_native_restoration_result():
     assert "if (restored)" in body
     assert "return restored" in body
     assert "return false" in body
+def test_click_through_action_returns_application_result():
+    start = QML.index("function handleOverlayClickThroughButtonAction")
+    body = QML[start : QML.index("    function handleOverlayClickThroughShortcut", start)]
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
+    assert "return applied && clickThroughToggle.checked === requestedClickThrough" in body
+    assert "overlayInteractionMode.forceActiveFocus()" in body
