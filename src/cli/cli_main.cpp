@@ -151,17 +151,35 @@ CacheSource cache_source(const std::filesystem::path& path) {
 }
 std::string encode_cached_analysis(const AnalysisView& view) {
   std::ostringstream out;
-  out << view.result.metadata.sample_rate << ' ' << view.result.metadata.channels << ' ' << view.result.metadata.frames << ' '
+  out << "v2 " << view.result.metadata.sample_rate << ' ' << view.result.metadata.channels << ' ' << view.result.metadata.frames << ' '
       << std::quoted(view.result.metadata.format) << ' ' << (view.result.bpm ? *view.result.bpm : -1.0f) << ' '
-      << view.result.beats << ' ' << static_cast<int>(view.result.state);
+      << view.result.beats << ' ' << static_cast<int>(view.result.state) << ' ' << view.beat_frames.size();
+  for (const auto frame : view.beat_frames) out << ' ' << frame;
+  out << ' ' << view.waveform.size();
+  for (const auto value : view.waveform) out << ' ' << value;
+  out << ' ' << std::quoted(view.key.value_or(std::string{})) << ' ' << std::quoted(view.chord.value_or(std::string{})) << ' ' << view.tonal_history.size();
+  for (const auto& label : view.tonal_history) out << ' ' << std::quoted(label);
   return out.str();
 }
 std::optional<AnalysisView> decode_cached_analysis(const std::string& encoded, const std::filesystem::path& path) {
   std::istringstream in(encoded);
   AnalysisView view;
+  std::string version;
   float bpm = -1.0f;
   int state = 0;
-  if (!(in >> view.result.metadata.sample_rate >> view.result.metadata.channels >> view.result.metadata.frames >> std::quoted(view.result.metadata.format) >> bpm >> view.result.beats >> state)) return std::nullopt;
+  std::size_t beat_count = 0, waveform_count = 0, history_count = 0;
+  if (!(in >> version) || version != "v2" || !(in >> view.result.metadata.sample_rate >> view.result.metadata.channels >> view.result.metadata.frames >> std::quoted(view.result.metadata.format) >> bpm >> view.result.beats >> state >> beat_count)) return std::nullopt;
+  view.beat_frames.resize(beat_count);
+  for (auto& frame : view.beat_frames) if (!(in >> frame)) return std::nullopt;
+  if (!(in >> waveform_count)) return std::nullopt;
+  view.waveform.resize(waveform_count);
+  for (auto& value : view.waveform) if (!(in >> value)) return std::nullopt;
+  std::string key, chord;
+  if (!(in >> std::quoted(key) >> std::quoted(chord) >> history_count)) return std::nullopt;
+  if (!key.empty()) view.key = std::move(key);
+  if (!chord.empty()) view.chord = std::move(chord);
+  view.tonal_history.resize(history_count);
+  for (auto& label : view.tonal_history) if (!(in >> std::quoted(label))) return std::nullopt;
   view.result.bpm = bpm >= 0.0f ? std::optional<float>(bpm) : std::nullopt;
   view.result.state = static_cast<beatglass::TrackingState>(state);
   return view;
@@ -550,7 +568,7 @@ int main(int argc, char** argv) {
           const auto admission = library_storage_ptr->admit_analysis(cache_identity->run_id, cache_identity->identity, path.string(), "cli-aubio-v1");
           if (admission.cached) {
             if (auto cached = decode_cached_analysis(*admission.cached, path)) {
-              cached->waveform = decode_waveform(path, stop_token);
+              if (cached->waveform.empty()) cached->waveform = decode_waveform(path, stop_token);
               batch.results.emplace_back(path, std::move(*cached));
               ++batch.cache_hits;
               batch_completed.fetch_add(1, std::memory_order_acq_rel);
