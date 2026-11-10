@@ -1949,7 +1949,7 @@ ApplicationWindow {
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
                         window.themePreferenceAnnouncement = "Reduced motion enabled for " + window.selectedTheme + "; overlay beat pulse disabled."
-                    } else if (djOverlay.visible && window.liveBridge.status === "Tracking") {
+                    } else if (djOverlay.visible && window.liveBridge.status === "Tracking" && !window.overlayCaptureEvidenceStale && (!window.captureMonitorBridge || window.captureMonitorBridge.status === "Monitoring") && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0) {
                         beatPulse.restart()
                         window.themePreferenceAnnouncement = "Reduced motion disabled for " + window.selectedTheme + "; overlay beat pulse restored."
                     }
