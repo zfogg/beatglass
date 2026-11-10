@@ -45,6 +45,8 @@ Malformed, unreadable, or non-UTF-8 summary files likewise fail with a
 controlled handoff error rather than exposing a parser traceback.
 Matrix output paths must be regular files; symbolic-link and non-file outputs
 are rejected before generation to avoid overwriting unrelated targets.
+The output directory itself must also be a real directory, preventing a
+symlinked parent from redirecting retained evidence outside the handoff area.
 Matrix emission is atomic and fsynced before replacement, so an interrupted
 generation cannot leave a partially written qualification matrix.
 On POSIX hosts the containing directory is fsynced after replacement as well,
