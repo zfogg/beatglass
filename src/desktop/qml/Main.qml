@@ -3309,7 +3309,6 @@ ApplicationWindow {
                             text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status: " + text
-                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text + (window.libraryAnalysisResultReady ? " Analysis is source-linked and ready." : " Analysis is provisional until an accepted source-linked result is available.")
                         }
