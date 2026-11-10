@@ -279,6 +279,10 @@ and native qualification still requires actual host evidence.
 Runtime host validation rejects negative, fractional, boolean, and string values
 for these timing counters, preserving the schema's integer contract before a
 report is emitted.
+The regression behavior check in
+`tests/unit/check_native_host_provenance_timing_behavior.py` exercises these
+rejections through the validator entry point rather than only inspecting source
+text.
 Optional `secure_boot` and `tpm_present` schema properties are boolean-typed,
 matching runtime rejection of numeric sentinels.
 The host schema permits additional properties for forward-compatible native
