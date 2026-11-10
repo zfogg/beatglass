@@ -16,3 +16,8 @@ When a transition artifact includes `sample_count` on any `process` event, every
 `process` event must include a non-negative integer `sample_count`. This prevents
 partial callback accounting from being accepted as native evidence. The artifact
 must still contain positive captured samples in the active epoch.
+
+Process events may also include `serial`. If present, it must be a non-empty string
+on every process event and must match the sink serial for that event's capture epoch:
+the start serial before restart and the restart serial afterward. This preserves
+device-switch ordering in retained native evidence.
