@@ -4948,7 +4948,7 @@ ApplicationWindow {
                     }
                     Button {
                     id: retryOverlay
-                        objectName: "overlayCaptureRecoveryAction"
+                        objectName: "retryOverlay"
                         visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
                         text: "Retry overlay capture"
                         enabled: visible && window.captureMonitorBridge.start !== undefined
@@ -4964,6 +4964,11 @@ ApplicationWindow {
                             window.announceCaptureRecoveryState("Overlay capture retry requested; waiting for a fresh accepted snapshot.")
                             overlayLiveMonitoringState.forceActiveFocus()
                         }
+                    }
+                    QtObject {
+                        objectName: "overlayCaptureRecoveryAction"
+                        readonly property bool activeFocus: retryOverlay.activeFocus
+                        function clicked() { retryOverlay.clicked() }
                     }
                     Button {
                         objectName: "chooseOverlayOutput"
