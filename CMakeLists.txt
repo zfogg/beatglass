@@ -463,7 +463,11 @@ if(BUILD_TESTING)
     set_tests_properties(macos_overlay_controller PROPERTIES LABELS "unit;platform" TIMEOUT 30 ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic;QML_IMPORT_PATH=${BEATGLASS_OVERLAY_QT_PREFIX}/qml")
     set_property(TEST macos_overlay_controller PROPERTY ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${BEATGLASS_OVERLAY_QT_PREFIX}/bin")
     add_test(NAME macos_overlay_navigation COMMAND Qt6::qmltestrunner -input ${CMAKE_CURRENT_SOURCE_DIR}/tests/qml -import ${CMAKE_CURRENT_SOURCE_DIR}/src/desktop/qml)
-    set_tests_properties(macos_overlay_navigation PROPERTIES LABELS unit TIMEOUT 30 ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
+    # The QML navigation suite constructs the full desktop shell and is
+    # substantially slower on macOS's offscreen Qt platform than the native
+    # overlay smoke tests. Give it enough time to finish so assertion failures
+    # are reported instead of being collapsed into a process timeout.
+    set_tests_properties(macos_overlay_navigation PROPERTIES LABELS unit TIMEOUT 120 ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
     if(WIN32)
       if(TARGET Qt6::QOffscreenIntegrationPlugin)
         add_custom_command(TARGET macos_overlay_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:macos_overlay_tests>/platforms COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt6::QOffscreenIntegrationPlugin> $<TARGET_FILE_DIR:macos_overlay_tests>/platforms)
