@@ -273,3 +273,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Retry shortcut recovery | User invokes keyboard retry while native overlay is unavailable | Activate controls, announce stale evidence, attempt recovery, and focus Retry when the fallback remains active. |
 | Display focus shortcut recovery | User invokes the display selector focus shortcut | Activate controls, focus Display, and announce selection requirement plus evidence freshness. |
 | Retry focus shortcut recovery | User invokes the retry-control focus shortcut | Activate controls, focus Retry, and announce stale evidence until recovery provides fresh capture. |
+| Resume shortcut recovery | User resumes paused overlay recovery from the keyboard | Activate controls, announce stale evidence, and invoke Resume deterministically. |

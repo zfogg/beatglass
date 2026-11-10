@@ -305,3 +305,11 @@ def test_retry_focus_shortcut_announces_stale_boundary():
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
     assert "retryOverlay.forceActiveFocus()" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_resume_shortcut_activates_recovery_page():
+    start = QML.index("function handleOverlayResumeShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "navigation.currentIndex = 1" in body
+    assert "resumeOverlayRecovery.clicked()" in body
+    assert "Live evidence remains stale" in body
