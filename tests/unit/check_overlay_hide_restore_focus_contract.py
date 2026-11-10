@@ -195,3 +195,12 @@ def test_external_opacity_changes_focus_review_control():
     start = QML.index("function handleOverlayOpacityChanged")
     body = QML[start : QML.index("    function handleOverlayGeometryRecovery", start)]
     assert "overlayOpacityControl.forceActiveFocus()" in body
+
+
+def test_size_change_result_preserves_persisted_state_and_focus():
+    start = QML.index("function handleOverlaySizeChangeResult")
+    body = QML[start : QML.index("    function handleOverlayGeometryRecovery", start)]
+    assert "overlayPreferredSizeIndex = nextIndex" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "overlaySize.forceActiveFocus()" in body
+    assert "handleOverlaySizeChangeResult(resized, nextIndex)" in QML[QML.index("sequence: \"Ctrl+Alt+O\"") : start]
