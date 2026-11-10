@@ -252,6 +252,8 @@ def main() -> int:
                 category = "platform"
             elif error.startswith("environment "):
                 category = "environment"
+            elif error.startswith("commit "):
+                category = "commit"
             elif error.startswith("scenario evidence"):
                 category = "scenario_evidence"
             elif error.startswith(("missing artifact", "artifact must", "artifact path", "artifact hash", "artifact size")):
