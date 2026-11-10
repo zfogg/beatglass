@@ -79,3 +79,5 @@ Verifier JSON also reports retained `artifact_count` and `artifact_bytes`
 metrics, enabling consumers to compare evidence volume with configured limits.
 Errors include an `error_categories` count map for dashboards without requiring
 clients to parse human-readable diagnostic strings.
+Report generators reject symlinked output parents so a qualification command
+cannot redirect a report outside its intended workspace.
