@@ -2157,6 +2157,19 @@ TestCase {
         app.destroy()
         fakeOverlay.screenIndex = -1
     }
+    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = []
+        fakeOverlay.displayName = ""
+        let app = shellWithOverlay.createObject(null)
+        app.overlayCaptureEvidenceStale = false
+        verify(!app.restoreOverlayDisplaySelectionFromBridge())
+        verify(app.overlayDisplaySelectionRequired)
+        verify(app.overlayCaptureEvidenceStale)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
     function test_reapplyGeometryRecoveryCanRetryWithoutResettingSettings() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
