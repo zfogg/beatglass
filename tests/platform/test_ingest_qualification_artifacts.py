@@ -298,6 +298,15 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertIn("non-portable referenced evidence path: capture?.json", errors)
 
+    def test_referenced_evidence_uses_artifact_size_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            evidence = root / "playback.json"; evidence.write_text("large", encoding="utf-8")
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\nplayback_evidence=playback.json\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json", max_artifact_bytes=1)
+            self.assertIn("referenced evidence exceeds 1 bytes: playback.json", errors)
+
     def test_custom_artifact_limit_is_enforced(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -134,6 +134,8 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
             errors.append(f"non-canonical referenced evidence path: {relative}"); continue
         if path.stat().st_size == 0:
             errors.append(f"empty referenced evidence: {normalized}"); continue
+        if path.stat().st_size > max_artifact_bytes:
+            errors.append(f"referenced evidence exceeds {max_artifact_bytes} bytes: {normalized}"); continue
         collision_key = normalized.casefold()
         if collision_key in known_paths:
             errors.append(f"duplicate referenced evidence path: {normalized}")
