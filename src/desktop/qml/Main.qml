@@ -4828,6 +4828,7 @@ ApplicationWindow {
                         id: showOverlay
                         objectName: "showOverlay"
                         text: "Show overlay"
+                        activeFocusOnTab: true
                         enabled: window.overlayBridge !== null && !window.overlayDisplaySelectionRequired
                         Accessible.name: text
                         Accessible.role: Accessible.Button
@@ -4839,6 +4840,7 @@ ApplicationWindow {
                         id: restoreOverlay
                         objectName: "restoreOverlay"
                         text: "Restore overlay"
+                        activeFocusOnTab: true
                         enabled: window.overlayBridge !== null && window.overlayHiddenByUser && !window.overlayDisplaySelectionRequired
                         Accessible.name: text
                         Accessible.role: Accessible.Button
