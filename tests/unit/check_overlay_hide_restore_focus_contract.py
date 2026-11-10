@@ -1247,6 +1247,7 @@ def test_live_evidence_group_discloses_pulse_status_shortcut():
     body = QML[start : QML.index('objectName: "overlayEscapeHint"', start)]
     assert "Ctrl+Alt+Shift+B focuses the beat pulse status" in body
     assert "; Ctrl+Alt+Shift+B focuses beat pulse status" in body
+    assert "Track and deck metadata are unavailable" in body
 
 
 def test_live_evidence_group_name_discloses_pulse_status_shortcut():
