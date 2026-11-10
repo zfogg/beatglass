@@ -1167,6 +1167,13 @@ def test_overlay_pulse_status_has_keyboard_focus_path():
     assert "Accessible.focusable: true" in label
 
 
+def test_overlay_shortcut_help_discloses_pulse_status_focus():
+    start = QML.index('objectName: "overlayShortcutHelp"')
+    body = QML[start : QML.index('objectName: "overlayRoutingControls"', start)]
+    assert "Ctrl+Alt+Shift+B focuses beat pulse status" in body
+    assert "focusing beat pulse status" in body
+
+
 def test_overlay_pulse_transitions_update_accessible_announcement():
     start = QML.index("function onReduceMotionChanged()")
     body = QML[start : QML.index("            Connections", start)]
