@@ -210,6 +210,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Paused display recovery stale state | Display recovery is pending while user-paused retries remain manual | Keep resume guidance clear while marking live evidence stale until fresh capture. |
 | Resume recovery action stale state | User activates manual resume after pausing native overlay recovery | Keep resume action clear while identifying that fresh capture is still required. |
 | Paused recovery status stale state | Recovery is paused by user choice while monitoring continues | Keep pause semantics and monitoring availability clear while naming stale evidence and fresh-capture recovery. |
+| Paused recovery status tooltip stale state | User hovers paused recovery status during manual resume flow | Align the compact status hint with the fresh-capture boundary. |
 | Resume recovery tooltip stale state | User hovers manual resume after pausing native overlay recovery | Keep the action hint aligned with the stale-evidence boundary. |
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
