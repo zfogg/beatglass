@@ -302,6 +302,16 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("unsupported scenario fields: ['notes']", module.verify(root, manifest))
 
+    def test_scenario_evidence_reference_has_bounded_length(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]
+            scenarios[0]["evidence"] = "x" * 513
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any(error.startswith("invalid scenario evidence:") for error in module.verify(root, manifest)))
+
     def test_artifact_path_segments_must_be_windows_safe(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
