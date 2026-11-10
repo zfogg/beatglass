@@ -33,6 +33,10 @@ with tempfile.TemporaryDirectory() as directory:
     subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(optional_host), str(optional_report)], check=True)
     optional_result = json.loads(optional_report.read_text(encoding="utf-8"))
     assert optional_result["checked_fields"] == ["name", "node_id", "platform", "secure_boot", "tpm_present"]
+    if os.name != "nt":
+        os.chmod(optional_report, 0o640)
+        subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(optional_host), str(optional_report)], check=True)
+        assert stat.S_IMODE(optional_report.stat().st_mode) == 0o640
     result = json.loads(report.read_text())
     assert result["schema"] == "beatglass-native-host-provenance-v1"
     assert result["valid"] is True

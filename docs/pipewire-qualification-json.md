@@ -317,6 +317,8 @@ Pass a second path to emit a deterministic validation report for the bundle:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 The host validator's optional report output uses the same atomic temporary-file,
 flush, and synchronization contract as the standalone report validator.
+Its replacement path also preserves an existing report's permission mode on
+POSIX hosts.
 Validate that generated report before packaging with:
 `python tests/pipewire/validate_native_host_provenance_report.py REPORT.json`.
 The report validator accepts exactly one report path; missing or extra
