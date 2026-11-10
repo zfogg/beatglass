@@ -266,6 +266,9 @@ The cross-platform behavior check in
 `tests/unit/check_native_host_provenance_timing_platforms.py` exercises the
 timing-bearing report path for Linux, Windows, and macOS values; it validates
 contract portability, not native platform execution.
+Platform identity remains fail-closed even when timing metadata is otherwise
+well-formed; `tests/unit/check_native_host_provenance_timing_platform_rejection.py`
+keeps unsupported platform values from entering the qualification path.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
