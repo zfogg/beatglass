@@ -3,6 +3,11 @@ import tempfile
 from pathlib import Path
 
 with tempfile.TemporaryDirectory() as directory:
+    missing = Path(directory) / "missing.json"
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(missing)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "host provenance is unreadable" in result.stderr
+
     malformed = Path(directory) / "malformed.json"
     malformed.write_text("{not-json", encoding="utf-8")
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(malformed)], capture_output=True, text=True)
