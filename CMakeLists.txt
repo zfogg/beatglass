@@ -218,10 +218,14 @@ if(APPLE)
   option(BEATGLASS_BUILD_MACOS_TAP_SMOKE "Build the manual Core Audio tap smoke-test bundle" OFF)
   if(BEATGLASS_BUILD_MACOS_TAP_SMOKE)
     add_executable(beatglass-coreaudio-smoke MACOSX_BUNDLE tests/coreaudio/tap_smoke.cpp)
-    set_target_properties(beatglass-coreaudio-smoke PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/tap_smoke_info.plist")
+    set_target_properties(beatglass-coreaudio-smoke PROPERTIES
+      MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/tap_smoke_info.plist"
+      MACOSX_BUNDLE_EXECUTABLE_NAME "beatglass-coreaudio-smoke")
     target_link_libraries(beatglass-coreaudio-smoke PRIVATE beatglass_coreaudio)
     add_executable(beatglass-coreaudio-recovery MACOSX_BUNDLE tests/coreaudio/source_recovery_smoke.cpp)
-    set_target_properties(beatglass-coreaudio-recovery PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/recovery_smoke_info.plist")
+    set_target_properties(beatglass-coreaudio-recovery PROPERTIES
+      MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/recovery_smoke_info.plist"
+      MACOSX_BUNDLE_EXECUTABLE_NAME "beatglass-coreaudio-recovery")
     target_link_libraries(beatglass-coreaudio-recovery PRIVATE beatglass_coreaudio)
   endif()
 endif()
