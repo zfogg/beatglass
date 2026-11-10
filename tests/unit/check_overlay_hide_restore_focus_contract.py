@@ -884,3 +884,12 @@ def test_paused_recovery_shortcuts_propagate_focus_result():
     focus = QML[focus_start : QML.index("    function handleOverlayHideToggleShortcut", focus_start)]
     assert "return window.focusOverlayRecoveryAction" in page
     assert "return window.focusOverlayRecoveryAction" in focus
+
+
+def test_size_shortcut_handles_unavailable_overlay():
+    start = QML.index("function handleOverlaySizeShortcut")
+    body = QML[start : QML.index("    function focusOverlaySizeRecovery", start)]
+    assert "overlayBridge.available" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
+    assert "resizeOverlay" in body
