@@ -6,7 +6,7 @@
 #include <vector>
 using namespace beatglass::library;
 using namespace beatglass::library_detail;
-namespace { AnalysisOperation op(bool valid) { AnalysisOperation o; o.source.path="track.wav"; o.source.content_hash="sha256:test"; o.identity.content_hash="sha256:test"; o.identity.engine_version="engine"; o.identity.configuration_id="config"; o.identity.mode="offline"; o.source.size_bytes=12; o.serialize=[] { return std::string("result"); }; o.verify=[valid](std::stop_token){ return beatglass::FileVerificationResult{valid ? beatglass::FileVerificationOutcome::match : beatglass::FileVerificationOutcome::changed}; }; return o; } }
+namespace { AnalysisOperation op(bool valid) { AnalysisOperation o; o.source.path="track.wav"; o.source.content_hash="sha256:test"; o.identity.content_hash="sha256:test"; o.identity.engine_version="engine"; o.identity.configuration_id="config"; o.identity.mode="offline"; o.decoder_snapshot="libsndfile-test"; o.source.size_bytes=12; o.serialize=[] { return std::string("result"); }; o.verify=[valid](std::stop_token){ return beatglass::FileVerificationResult{valid ? beatglass::FileVerificationOutcome::match : beatglass::FileVerificationOutcome::changed}; }; return o; } }
 namespace { void wait_for_terminal(const std::shared_ptr<JobHandle>& handle) { for(int i=0;i<10000; ++i) { const auto state=handle->state(); if(state != TrackedState::queued && state != TrackedState::running) return; std::this_thread::sleep_for(std::chrono::microseconds(100)); } } }
 TEST_CASE("analysis runner cancellation never publishes a result") { JobExecutor executor(1); AnalysisRunner runner(executor); auto operation=op(true); operation.serialize=[] { return std::string("should not publish"); }; operation.verify=[](std::stop_token stop) { while(!stop.stop_requested()) std::this_thread::yield(); return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::cancelled}; }; auto h=runner.submit(std::move(operation)); REQUIRE(h); h->cancel(); wait_for_terminal(h); CHECK(h->state()==TrackedState::cancelled); CHECK(h->frames()==0); executor.shutdown(); }
 TEST_CASE("cancelled queued analysis releases executor capacity") {
@@ -86,6 +86,7 @@ TEST_CASE("decoder-only analysis publishes its decoded result") {
   AnalysisOperation operation; operation.source.path = "track.wav"; operation.source.content_hash = "sha256:test";
   operation.identity.content_hash = "sha256:test"; operation.identity.engine_version = "engine";
   operation.identity.configuration_id = "config"; operation.identity.mode = "offline"; operation.source.size_bytes = 12;
+  operation.decoder_snapshot = "libsndfile-test";
   operation.decode = [](std::stop_token stop, const auto& progress) { if (stop.stop_requested()) return std::string{}; progress(12); return std::string("decoded_frames=12"); };
   operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   operation.publish = [&](const std::string& result) { published = result; };
