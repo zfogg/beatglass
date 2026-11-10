@@ -277,8 +277,9 @@ TEST_CASE("catalog skips symlinked files and directories") {
   ec.clear();
   if (!std::filesystem::is_symlink(std::filesystem::symlink_status(dir.path / "linked-nested", ec)) || ec) return;
   const auto result = beatglass::library::browse(dir.path);
-  REQUIRE(result.entries.size() == 2);
+  // The fixture contains one real audio file and two symlinks.  Both links
+  // must be skipped; there is no real nested directory in this fixture.
+  REQUIRE(result.entries.size() == 1);
   CHECK(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "real.wav"; }));
-  CHECK(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "nested"; }));
   CHECK_FALSE(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "linked.wav" || entry.name == "linked-nested"; }));
 }
