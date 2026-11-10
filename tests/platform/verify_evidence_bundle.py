@@ -25,8 +25,12 @@ def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT
         return ["resource limits must be positive"]
     if root.is_symlink():
         return ["bundle root must not be a symlink"]
+    if not root.is_dir():
+        return ["bundle root must be a directory"]
     if manifest.is_symlink():
         return ["manifest must not be a symlink"]
+    if not manifest.is_file():
+        return ["manifest must be a regular file"]
     try:
         if manifest.stat().st_size > max_manifest_bytes:
             return [f"manifest exceeds {max_manifest_bytes} bytes"]
