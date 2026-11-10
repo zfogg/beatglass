@@ -270,6 +270,8 @@ The host schema also requires `name` to have `minLength: 1`, complementing the
 validator's visible-text check.
 Its optional `node_id` property carries `minimum: 1`, matching positive
 integer validation and rejection of zero/negative IDs.
+The schema also pins `node_id` to JSON integer type, excluding strings and
+fractional measurements.
 Optional `secure_boot` and `tpm_present` schema properties are boolean-typed,
 matching runtime rejection of numeric sentinels.
 The host schema permits additional properties for forward-compatible native

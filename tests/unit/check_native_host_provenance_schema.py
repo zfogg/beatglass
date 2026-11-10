@@ -7,6 +7,7 @@ assert schema["required"] == ["platform", "name"]
 assert schema["properties"]["platform"]["enum"] == ["linux", "windows", "macos"]
 assert schema["properties"]["name"]["minLength"] == 1
 assert schema["properties"]["node_id"]["minimum"] == 1
+assert schema["properties"]["node_id"]["type"] == "integer"
 assert schema["properties"]["secure_boot"]["type"] == "boolean"
 assert schema["properties"]["tpm_present"]["type"] == "boolean"
 assert schema["additionalProperties"] is True
