@@ -45,6 +45,8 @@ enum class CatalogStatus {
  * platform error. The query never follows directory entries recursively.
  */
 struct CatalogResult {
+  /** Normalized absolute root used to produce this snapshot. */
+  std::filesystem::path query_root;
   std::vector<CatalogEntry> entries;
   std::string diagnostic;
   CatalogStatus status{CatalogStatus::ok};

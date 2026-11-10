@@ -207,6 +207,11 @@ TEST_CASE("catalog exposes root-relative identity paths") {
  REQUIRE(recursive.entries.size() == 2);
  CHECK(recursive.entries.back().relative_path == std::filesystem::path("nested"));
 }
+TEST_CASE("catalog result identifies its normalized query root") {
+ TempDir dir; const auto result = beatglass::library::browse(dir.path);
+ REQUIRE(result.status == beatglass::library::CatalogStatus::ok);
+ CHECK(result.query_root == std::filesystem::absolute(dir.path));
+}
 TEST_CASE("catalog relative identity is computed without throwing") {
  TempDir dir; dir.file("track.wav");
  const auto result = beatglass::library::browse(dir.path);

@@ -41,6 +41,8 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
     result.diagnostic = error ? error.message() : "not a directory";
     return result;
   }
+  result.query_root = std::filesystem::absolute(folder, error);
+  if (error) { result.status = CatalogStatus::filesystem_error; result.diagnostic = error.message(); return result; }
   const auto query = folded(std::move(search));
   for (std::filesystem::directory_iterator it(folder, error), end; it != end && !error; it.increment(error)) {
     if (stop.stop_requested()) { result.entries.clear(); result.cancelled = true; result.diagnostic = "catalog query cancelled"; return result; }
@@ -103,6 +105,8 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
     result.diagnostic = error ? error.message() : "not a directory";
     return result;
   }
+  result.query_root = std::filesystem::absolute(folder, error);
+  if (error) { result.status = CatalogStatus::filesystem_error; result.diagnostic = error.message(); return result; }
   const auto query = folded(std::move(search));
   std::filesystem::recursive_directory_iterator it(
       folder, std::filesystem::directory_options::skip_permission_denied, error);
