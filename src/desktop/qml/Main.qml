@@ -4849,9 +4849,9 @@ ApplicationWindow {
                         : "unavailable; control-window fallback active; settings retained; Ctrl+Alt+Shift+B focuses beat pulse status"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: window.overlayLaunchFallbackActive
-                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained."
+                        ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained. Ctrl+Alt+Shift+B focuses beat pulse status."
                         : window.overlayDisplayRecoveryPending
-                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending, the control-window fallback remains available, and persisted settings are retained."
+                        ? "Show, unlock, or hide the DJ overlay window; recovery is pending, the control-window fallback remains available, and persisted settings are retained. Ctrl+Alt+Shift+B focuses beat pulse status."
                         : "Show, unlock, or hide the DJ overlay window. Ctrl+Alt+Shift+B focuses beat pulse status."
                     ToolTip.text: window.overlayBridge && window.overlayBridge.available
                         ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available"))
