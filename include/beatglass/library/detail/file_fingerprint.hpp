@@ -30,6 +30,12 @@ inline bool fingerprint_status_is_retryable(FingerprintStatus status) noexcept {
 inline bool fingerprint_status_requires_refresh(FingerprintStatus status) noexcept {
   return status == FingerprintStatus::changed;
 }
+/** Combine a stable status label with optional diagnostic detail. */
+inline std::string fingerprint_status_diagnostic(FingerprintStatus status,
+                                                 const std::string& detail = {}) {
+  const std::string label = fingerprint_status_label(status);
+  return detail.empty() ? label : label + ": " + detail;
+}
 /** SHA-256 evidence for the bytes observed by one read, with file attributes around that read. It is not an opened-decoder identity or immunity to concurrent mutation. */
 struct FileFingerprint {
   /** Outcome; only ok permits use of remaining fields. */ FingerprintStatus status{FingerprintStatus::error};

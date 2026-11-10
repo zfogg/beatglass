@@ -73,3 +73,9 @@ TEST_CASE("file fingerprint refresh policy isolates changed sources") {
  CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::cancelled));
  CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::error));
 }
+
+TEST_CASE("file fingerprint diagnostics preserve stable status labels") {
+ CHECK(fingerprint_status_diagnostic(FingerprintStatus::changed) == "changed");
+ CHECK(fingerprint_status_diagnostic(FingerprintStatus::error, "cannot open") ==
+       "error: cannot open");
+}
