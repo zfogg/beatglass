@@ -1488,6 +1488,10 @@ ApplicationWindow {
             retryOverlay.forceActiveFocus()
     }
     function handleOverlayRetryButtonAction() {
+        if (window.overlayRecoveryPausedByUser) {
+            window.focusOverlayRecoveryPauseState("Overlay recovery is paused; Resume recovery before retrying.", resumeOverlayRecovery)
+            return
+        }
         window.overlayRecoveryPausedByUser = false
         window.overlayRecoveryAttemptCount += 1
         window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
