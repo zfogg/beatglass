@@ -311,6 +311,8 @@ The optional report path must differ from `HOST.json`; self-overwrite is
 rejected before any output write begins.
 The comparison uses resolved paths, so relative aliases of `HOST.json` are
 protected as well.
+Hard-link aliases are rejected through a same-file check, preventing a path
+with a different name from overwriting the host evidence inode.
 The temporary file is flushed and synchronized before replacement so a
 successful validation report is durable across an abrupt process exit.
 If replacement fails, the temporary file is removed so failed qualification

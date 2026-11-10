@@ -92,6 +92,15 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode != 0
     assert "host provenance report is unwritable" in result.stderr
     assert json.loads(host.read_text(encoding="utf-8"))["name"] == "qualification-host"
+    hardlink = Path(directory) / "host-hardlink.json"
+    try:
+        hardlink.hardlink_to(host)
+    except (OSError, NotImplementedError):
+        pass
+    else:
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(hardlink)], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "host provenance report is unwritable" in result.stderr
     relative_self = Path(directory) / "nested" / ".." / "host.json"
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(relative_self)], capture_output=True, text=True)
     assert result.returncode != 0
