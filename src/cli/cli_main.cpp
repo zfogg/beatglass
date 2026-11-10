@@ -56,6 +56,7 @@ struct AnalysisView {
   std::vector<std::uint64_t> beat_frames;
   std::optional<std::string> key;
   std::optional<std::string> chord;
+  std::vector<std::string> tonal_history;
 };
 struct AnalysisBatch {
   std::vector<std::pair<std::filesystem::path, AnalysisView>> results;
@@ -112,6 +113,15 @@ std::vector<Track> discover(const std::filesystem::path& root, bool recursive = 
 std::string lower(std::string value) {
   std::ranges::transform(value, value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return value;
+}
+std::string join_history(const std::vector<std::string>& values) {
+  if (values.empty()) return "—";
+  std::string joined;
+  for (std::size_t i = 0; i < values.size(); ++i) {
+    if (i) joined += "  →  ";
+    joined += values[i];
+  }
+  return joined;
 }
 #ifdef _WIN32
 std::optional<std::filesystem::path> choose_audio_folder() {
@@ -283,6 +293,7 @@ int main(int argc, char** argv) {
   std::vector<std::uint64_t> beat_frames;
   std::optional<std::string> key;
   std::optional<std::string> chord;
+  std::vector<std::string> tonal_history;
   std::filesystem::path analysis_path;
   bool busy = false;
   bool reduce_motion = false;
@@ -353,9 +364,10 @@ int main(int argc, char** argv) {
         std::vector<std::uint64_t> beat_frames;
         std::optional<std::string> key;
         std::optional<std::string> chord;
+        std::vector<std::string> tonal_history;
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
         const auto tonal = beatglass::replay_music_file(path, 1, [&](const beatglass::CausalMusicBeat& beat) { beat_frames.push_back(beat.frame); }, stop_token,
-          [&](const beatglass::CausalTonalFrame& frame) { key = frame.rolling_key; chord = frame.local_chord; },
+          [&](const beatglass::CausalTonalFrame& frame) { key = frame.rolling_key; chord = frame.local_chord; if (frame.local_chord) { tonal_history.push_back(*frame.local_chord); if (tonal_history.size() > 8) tonal_history.erase(tonal_history.begin()); } },
           [&](const beatglass::CausalMusicState& state) { analysis_frames.store(state.tempo.observed_through, std::memory_order_release); });
         const beatglass::TempoResult result{metadata, tonal.tempo.bpm, static_cast<unsigned>(std::min<std::uint64_t>(tonal.tempo.beats, std::numeric_limits<unsigned>::max())), tonal.tempo.state};
 #else
@@ -363,7 +375,7 @@ int main(int argc, char** argv) {
 #endif
         auto waveform = decode_waveform(path, stop_token);
         if (stop_token.stop_requested()) break;
-        batch.results.emplace_back(path, AnalysisView{result, std::move(waveform), std::move(beat_frames), std::move(key), std::move(chord)});
+        batch.results.emplace_back(path, AnalysisView{result, std::move(waveform), std::move(beat_frames), std::move(key), std::move(chord), std::move(tonal_history)});
         batch_completed.fetch_add(1, std::memory_order_acq_rel);
       }
       return batch;
@@ -390,7 +402,7 @@ int main(int argc, char** argv) {
       }
     }
     if (selected < 0 && !tracks.empty()) selected = 0;
-    result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset();
+    result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear();
     completed_analyses.clear();
     status = std::to_string(tracks.size()) + " tracks indexed; selection preserved by path." +
         (cancelling ? " Cancelling the previous analysis." : "");
@@ -479,12 +491,13 @@ int main(int argc, char** argv) {
     }
     selected = library_indices[static_cast<std::size_t>(visible)];
     library_visible_selected = visible;
-    result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset();
+    result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear();
     if (const auto cached = completed_analyses.find(tracks[selected].path); cached != completed_analyses.end()) {
       result = cached->second.result;
       waveform = cached->second.waveform;
       beat_frames = cached->second.beat_frames;
       key = cached->second.key; chord = cached->second.chord;
+      tonal_history = cached->second.tonal_history;
     }
     status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
@@ -518,12 +531,13 @@ int main(int argc, char** argv) {
       analysis_stop.request_stop();
     }
     selected = next;
-    result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset();
+    result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear();
     if (const auto cached = completed_analyses.find(tracks[selected].path); cached != completed_analyses.end()) {
       result = cached->second.result;
       waveform = cached->second.waveform;
       beat_frames = cached->second.beat_frames;
       key = cached->second.key; chord = cached->second.chord;
+      tonal_history = cached->second.tonal_history;
     }
     status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
@@ -576,7 +590,7 @@ int main(int argc, char** argv) {
       playback_fraction = static_cast<float>(playback_frame) / static_cast<float>(playback_total);
     }
 #endif
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (key ? *key : "—") + "   Chord: " + (chord ? *chord : "—")) | color(key || chord ? Color::GreenLight : Color::GrayLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (key ? *key : "—") + "   Chord: " + (chord ? *chord : "—")) | color(key || chord ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + join_history(tonal_history)) | color(tonal_history.empty() ? Color::GrayLight : Color::GreenLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), sort_button->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), analyze_all_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), cancel_analysis_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Analyze all visible   Sort title/path   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
@@ -783,7 +797,7 @@ int main(int argc, char** argv) {
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; const auto cached = !selection_changed && completed_analyses.find(analysis_path) != completed_analyses.end(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; completed track results remain available."; } else if (!cached) { result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); status = "Analysis finished for a previous track; select a completed track to view its result."; } else { result = completed_analyses.at(analysis_path).result; waveform = completed_analyses.at(analysis_path).waveform; beat_frames = completed_analyses.at(analysis_path).beat_frames; key = completed_analyses.at(analysis_path).key; chord = completed_analyses.at(analysis_path).chord; status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
+        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; const auto cached = !selection_changed && completed_analyses.find(analysis_path) != completed_analyses.end(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; completed track results remain available."; } else if (!cached) { result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear(); status = "Analysis finished for a previous track; select a completed track to view its result."; } else { result = completed_analyses.at(analysis_path).result; waveform = completed_analyses.at(analysis_path).waveform; beat_frames = completed_analyses.at(analysis_path).beat_frames; key = completed_analyses.at(analysis_path).key; chord = completed_analyses.at(analysis_path).chord; tonal_history = completed_analyses.at(analysis_path).tonal_history; status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
         catch (const std::exception& error) { result.reset(); waveform.clear(); status = std::string("Analysis failed: ") + error.what(); }
         busy = false;
       }
@@ -802,7 +816,7 @@ int main(int argc, char** argv) {
         return 2;
       }
     }
-    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; beat_frames = cached->second.beat_frames; key = cached->second.key; chord = cached->second.chord; } status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
+    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; beat_frames = cached->second.beat_frames; key = cached->second.key; chord = cached->second.chord; tonal_history = cached->second.tonal_history; } status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
     std::cout << rendered.ToString();

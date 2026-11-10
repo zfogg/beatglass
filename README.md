@@ -100,7 +100,8 @@ controls reduced motion and the seek step. Mouse tab selection and `Tab`/`1`/`2`
 navigation are supported; terminals below 100 columns or 28 rows show a clear
 resize prompt. Standard builds show Key/Chord as unavailable; when
 `BEATGLASS_BUILD_MUSIC_REPLAY=ON` is enabled with Essentia, Library analysis uses
-the optional causal tonal replay path and displays its real key/chord estimates.
+the optional causal tonal replay path and displays its real key/chord estimates
+plus a bounded recent tonal history.
 
 The TUI never writes tags or modifies source audio. On macOS and Linux, native
 loopback capture is not yet implemented in this prototype and the Live tab says
