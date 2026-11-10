@@ -59,6 +59,31 @@
 
 namespace {
 
+#ifdef __APPLE__
+class MacMonitorBackend final {
+public:
+  struct Status {
+    bool active{};
+    bool needs_restart{};
+    bool overflowed{};
+    bool error{};
+    std::string message;
+    bool has_error() const noexcept { return error; }
+  };
+  MacMonitorBackend() : source_(beatglass::coreaudio::make_native_backend()) {}
+  bool start_stream(const std::string& id, std::uint64_t epoch, std::uint32_t, std::uint32_t) { selected_ = id; epoch_ = epoch; return source_ && source_->start(id, epoch); }
+  bool selected_active() const { return source_ && source_->status().state == beatglass::coreaudio::TapState::running; }
+  void stop() noexcept { if (source_) source_->stop(); }
+  bool pop_current(beatglass::coreaudio::CaptureBlock& block) noexcept { return source_ && source_->pop(block) && block.epoch == epoch_; }
+  Status poll_status() { Status out; if (!source_) { out.error = true; out.message = "CoreAudio source is unavailable."; return out; } const auto status = source_->status(); out.active = status.state == beatglass::coreaudio::TapState::running; out.needs_restart = status.state == beatglass::coreaudio::TapState::interrupted; out.error = status.state == beatglass::coreaudio::TapState::error; out.message = status.message; return out; }
+  beatglass::EnumerationResult enumerate() const { return source_ ? source_->enumerate() : beatglass::EnumerationResult{}; }
+private:
+  std::unique_ptr<beatglass::coreaudio::SourceBackend> source_;
+  std::string selected_;
+  std::uint64_t epoch_{};
+};
+#endif
+
 struct CliPreferences {
   bool reduce_motion{};
   int seek_step{5};
@@ -711,8 +736,8 @@ int main(int argc, char** argv) {
   std::unique_ptr<beatglass::pipewire::MonitorBackend> live_pipewire = beatglass::pipewire::make_monitor_backend();
   std::uint64_t live_pipewire_epoch = 1;
 #elif defined(__APPLE__)
-  std::unique_ptr<beatglass::coreaudio::SourceBackend> live_coreaudio = beatglass::coreaudio::make_native_backend();
-  std::uint64_t live_coreaudio_epoch = 1;
+  std::unique_ptr<MacMonitorBackend> live_pipewire = std::make_unique<MacMonitorBackend>();
+  std::uint64_t live_pipewire_epoch = 1;
 #endif
   std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
@@ -1197,16 +1222,7 @@ int main(int argc, char** argv) {
       live_button_label = " Stop monitoring ";
     }
     else live_status = "Capture could not start; inspect endpoint permissions or device state.";
-#elif defined(__APPLE__)
-    if (live_coreaudio && live_coreaudio->status().state == beatglass::coreaudio::TapState::running) {
-      live_coreaudio->stop(); clear_live_evidence(); live_status = "Capture stopped."; live_button_label = " Start monitoring "; return;
-    }
-    if (!live_coreaudio || live_endpoint_ids.empty()) { live_status = "No macOS output source is available."; return; }
-    if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoint_ids.size())) { live_status = "Select an available output source first."; return; }
-    if (live_coreaudio->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)], ++live_coreaudio_epoch)) {
-      set_live_presentation_state(beatglass::TrackingState::reacquiring); live_last_packet = std::chrono::steady_clock::now(); live_has_packet = false; live_status = "Starting CoreAudio output tap…"; live_button_label = " Stop monitoring ";
-    } else live_status = "CoreAudio output tap could not start; check recording permission.";
-#elif defined(BEATGLASS_HAS_PIPEWIRE)
+#elif defined(BEATGLASS_HAS_PIPEWIRE) || defined(__APPLE__)
     if (live_pipewire && live_pipewire->selected_active()) {
       live_pipewire->stop();
       clear_live_evidence();
@@ -1279,7 +1295,7 @@ int main(int argc, char** argv) {
     set_live_presentation_state(beatglass::TrackingState::reacquiring);
     live_button_label = " Start monitoring ";
     live_status = "Analysis reset; start monitoring to reacquire.";
-#elif defined(BEATGLASS_HAS_PIPEWIRE)
+#elif defined(BEATGLASS_HAS_PIPEWIRE) || defined(__APPLE__)
     if (live_pipewire && live_pipewire->selected_active()) live_pipewire->stop();
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
@@ -1317,7 +1333,7 @@ int main(int argc, char** argv) {
       return;
     }
 #endif
-#if defined(BEATGLASS_HAS_PIPEWIRE)
+#if defined(BEATGLASS_HAS_PIPEWIRE) || defined(__APPLE__)
     if (live_pipewire && live_pipewire->selected_active()) {
       live_pipewire->stop();
       clear_live_evidence();
@@ -1571,7 +1587,7 @@ int main(int argc, char** argv) {
       if (live_session && live_session->state() == beatglass::SourceState::stopped) {
         live_button_label = " Start monitoring ";
       }
-#elif defined(BEATGLASS_HAS_PIPEWIRE)
+#elif defined(BEATGLASS_HAS_PIPEWIRE) || defined(__APPLE__)
       if (live_pipewire && live_pipewire->selected_active()) {
         beatglass::coreaudio::CaptureBlock packet;
         while (live_pipewire->pop_current(packet)) {
