@@ -845,3 +845,11 @@ def test_retry_action_returns_restore_result():
     assert "const restored = window.showOverlayAndHideControls()" in body
     assert "return restored" in body
     assert "retryOverlay.forceActiveFocus()" in body
+
+
+def test_show_button_returns_failure_when_display_unavailable():
+    start = QML.index("function handleOverlayShowButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowAction", start)]
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return false" in body
+    assert "return window.handleOverlayShowAction()" in body
