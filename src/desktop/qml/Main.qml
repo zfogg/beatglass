@@ -1505,43 +1505,21 @@ ApplicationWindow {
     }
     function persistOverlayDisplaySelection(index, name) {
         if (!window.overlayBridge || index < 0 || index >= window.overlayBridge.screenNames.length) {
-            window.markOverlayRecoveryStale("Overlay display selection could not be persisted; choose an available display before restoring monitoring.")
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
             window.overlayPreferredScreenIndex = -1
             window.overlayPreferredDisplayName = ""
-            overlayDisplay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selection could not be persisted; choose an available display before restoring monitoring.", overlayDisplay)
             return false
         }
         if (!window.overlayBridge.moveToScreen(index)) {
-            window.markOverlayRecoveryStale("Overlay display selection could not be applied; control-window fallback remains active.")
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selection could not be applied; control-window fallback remains active.", overlayDisplay)
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
-            window.markOverlayRecoveryStale("Overlay display selected, but persisted visual state could not be reapplied.")
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selected, but persisted visual state could not be reapplied.", overlayDisplay)
             return false
         }
         if (!window.syncOverlaySettingsStateFromBridge()) {
-            window.markOverlayRecoveryStale("Overlay display selected, but settings synchronization failed; choose or reconnect a display.")
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selected, but settings synchronization failed; choose or reconnect a display.", overlayDisplay)
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
