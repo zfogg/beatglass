@@ -1460,7 +1460,7 @@ ApplicationWindow {
         window.raise()
         window.requestActivate()
         if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
-            window.focusOverlayDisplayRecoveryFailure("Show overlay is unavailable until an available display is selected.", overlayDisplay)
+            window.focusOverlayDisplayRecoveryFailure("Show overlay is unavailable until an available display is selected.", showOverlay)
             return false
         }
         showOverlay.forceActiveFocus()
