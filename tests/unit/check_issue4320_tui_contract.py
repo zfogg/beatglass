@@ -26,6 +26,8 @@ def main() -> int:
         raise SystemExit("CLI Library does not distinguish stale source analysis from failed analysis")
     if 'format_bpm(analyzed->second.result.bpm) + " BPM"' not in tui or '"  key " + *analyzed->second.key' not in tui:
         raise SystemExit("CLI Library rows do not expose analyzed BPM and key summaries")
+    if "library_cache_hits += analysis.cache_hits" not in tui:
+        raise SystemExit("CLI snapshot path does not expose persisted cache hits")
     if 'live_status = std::string("Displayed tempo correction set' not in tui or 'persist_preferences();' not in tui[tui.find('auto set_live_multiplier'):tui.find('auto half_bpm_button')]:
         raise SystemExit("CLI BPM interpretation setting is not persisted when changed")
     if 'Button(" Recover persisted "' not in tui:
