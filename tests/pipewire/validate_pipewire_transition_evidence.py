@@ -10,6 +10,14 @@ events = payload.get("events") if isinstance(payload, dict) else payload
 if isinstance(payload, dict):
     if payload.get("schema") != "beatglass-pipewire-transitions-v1" or not str(payload.get("commit", "")).strip():
         raise SystemExit("transition evidence has incomplete provenance")
+    host = payload.get("host")
+    if host is not None:
+        if not isinstance(host, dict) or host.get("platform") not in ("linux", "windows", "macos"):
+            raise SystemExit("transition host provenance has an invalid platform")
+        if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
+            raise SystemExit("transition host provenance has no daemon version")
+        if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
+            raise SystemExit("transition host provenance has no capture command")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
 if any(not isinstance(event, dict) for event in events):
