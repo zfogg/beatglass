@@ -87,7 +87,29 @@ The following reference is generated from the authoritative parsers in
 are read-only unless an option explicitly names an output; tools fail closed
 with a nonzero exit status and report errors on stderr.
 
-### Analysis and desktop executables
+### Binary command-line flags
+
+These are the only options accepted by the shipped `beatglass-cli` and
+`beatglass-desktop` binaries. They are separate from the developer and
+qualification-script flags below.
+
+| Binary | Argument | Meaning |
+| --- | --- | --- |
+| `beatglass-cli` | `<audio-file>` (required) | Analyze one audio file without modifying it. |
+| `beatglass-cli` | `--replay <file>` | Run causal replay without real-time pacing. |
+| `beatglass-cli` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
+| `beatglass-cli` | `--` | End option parsing so a filename beginning with `-` is accepted. |
+| `beatglass-desktop` | `--database <path>` | Select the SQLite storage path; the first occurrence wins. |
+
+Unknown options, missing values, duplicate `--replay`/`--json`, and a missing
+`<audio-file>` return status 2 and print usage/error text to stderr. `--json`
+and `--replay` may be combined. The desktop binary passes unrelated arguments
+through to Qt after consuming `--database`.
+
+### Developer and qualification-script flags
+
+The following options belong to repository tools and are not accepted by the
+shipped binaries.
 
 | Command | Option | Default / values | Behavior and interactions |
 | --- | --- | --- | --- |
