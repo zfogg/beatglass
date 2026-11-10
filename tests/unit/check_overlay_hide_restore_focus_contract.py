@@ -274,3 +274,11 @@ def test_opacity_reset_result_preserves_persisted_state_and_focus():
     assert "overlayOpacityEditInFlight = true" in body
     assert "overlayCaptureEvidenceStale = true" in body
     assert "overlayOpacityControl.forceActiveFocus()" in body
+
+
+def test_click_through_toggle_result_preserves_stale_boundary():
+    start = QML.index("function handleOverlayClickThroughShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "setClickThrough(requested)" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "clickThroughToggle.forceActiveFocus()" in body
