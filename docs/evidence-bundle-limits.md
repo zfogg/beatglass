@@ -98,6 +98,8 @@ Its `--max-age-hours` value must be positive, preventing accidental
 configuration that marks every retained bundle stale.
 Manifest byte-limit violations are grouped under `manifest_size` in JSON
 output for direct input-capacity triage.
+Artifact-count limit violations are grouped under `entry_count` for direct
+bundle-cardinality triage.
 Timestamp format, timezone, and future-capture failures are grouped under
 `temporal` in JSON output for clear freshness and clock-discipline reporting.
 Missing retained evidence for a required scenario is grouped under
