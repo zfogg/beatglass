@@ -2913,7 +2913,6 @@ ApplicationWindow {
                     activeFocusOnTab: true
                         text: window.browseFolder.toString() === "" ? "Catalog: choose a folder" : window.recursiveCatalogActive ? "Recursive catalog: " + window.recursiveCatalogRows.length + " entries" : "Catalog: " + window.catalogRows.length + " matching entries"
                     Accessible.name: "Catalog results: " + text
-                    Accessible.value: text
                     Accessible.role: Accessible.StaticText
                     Accessible.description: text
                     ToolTip.text: "Current filtered catalog result count"
