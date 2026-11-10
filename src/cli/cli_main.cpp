@@ -1029,7 +1029,7 @@ int main(int argc, char** argv) {
       endpoints.push_back(text("●  " + label) | color(Color::YellowLight));
     }
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
-    const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
+    const auto live_state = live_presentation.status;
     const auto live_starting =
 #ifdef _WIN32
         live_session && live_session->state() == beatglass::SourceState::starting;
@@ -1039,8 +1039,8 @@ int main(int argc, char** argv) {
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(live_status) | color(Color::GrayLight) | italic;
     const auto corrected_bpm = live_bpm ? std::optional<float>(*live_bpm * live_bpm_multiplier) : std::nullopt;
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
-    const auto live_key_label = live_key ? *live_key : "—";
-    const auto live_chord_label = live_chord ? *live_chord : "—";
+    const auto live_key_label = live_presentation.key;
+    const auto live_chord_label = live_presentation.chord;
     const auto live_tonal_label = live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history);
 #else
     const std::string live_key_label = "—";
@@ -1169,7 +1169,6 @@ int main(int argc, char** argv) {
             presentation_snapshot.state = state.state;
             presentation_snapshot.observed_through = {state.epoch, state.observed_through};
             presentation_snapshot.bpm = state.bpm;
-            live_presentation = beatglass::present_snapshot(presentation_snapshot);
             live_beats = state.beats;
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
             if (!live_music_replay) live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
@@ -1183,7 +1182,12 @@ int main(int argc, char** argv) {
             });
             live_key = music_state.rolling_key;
             live_chord = music_state.local_chord;
+            if (music_state.rolling_key) presentation_snapshot.key_candidates.push_back({*music_state.rolling_key, music_state.rolling_key_strength.value_or(0.0f)});
+            if (music_state.local_chord && music_state.tonal_from && music_state.tonal_through) {
+              presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {*music_state.local_chord, music_state.local_chord_strength.value_or(0.0f)}});
+            }
 #endif
+            live_presentation = beatglass::present_snapshot(presentation_snapshot);
             if (live_bpm) {
               live_tempo_history.push_back(*live_bpm);
               if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin());
