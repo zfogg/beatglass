@@ -19,6 +19,9 @@ class LivePresentation : public QObject {
   Q_PROPERTY(QString tempo READ tempo NOTIFY changed)
   Q_PROPERTY(QString key READ key NOTIFY changed)
   Q_PROPERTY(QString chord READ chord NOTIFY changed)
+  Q_PROPERTY(qulonglong beatCount READ beatCount NOTIFY changed)
+  Q_PROPERTY(qulonglong observedFrames READ observedFrames NOTIFY changed)
+  Q_PROPERTY(qulonglong analysisDelayFrames READ analysisDelayFrames NOTIFY changed)
 public:
   /** Construct on the owning GUI thread; parent, if any, has the same thread. */
   explicit LivePresentation(QObject* parent = nullptr);
@@ -32,6 +35,12 @@ public:
   QString key() const { return key_; }
   /** Most recent chord label, or an em dash if unavailable. */
   QString chord() const { return chord_; }
+  /** Number of beats in the accepted snapshot. */
+  qulonglong beatCount() const { return beat_count_; }
+  /** Exclusive captured frame boundary in the accepted snapshot. */
+  qulonglong observedFrames() const { return observed_frames_; }
+  /** Published analysis delay measured in frames. */
+  qulonglong analysisDelayFrames() const { return analysis_delay_frames_; }
 signals:
   /** Emitted on the owning thread when a newer update is applied. */
   void changed();
@@ -39,4 +48,5 @@ private:
   beatglass::PresentationGate gate_;
   QString status_ = QStringLiteral("Stopped");
   QString tempo_ = QStringLiteral("\u2014"), key_ = QStringLiteral("\u2014"), chord_ = QStringLiteral("\u2014");
+  qulonglong beat_count_ = 0, observed_frames_ = 0, analysis_delay_frames_ = 0;
 };

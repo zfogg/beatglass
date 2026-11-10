@@ -13,12 +13,17 @@ private slots:
     snapshot->bpm = 123.4f;
     snapshot->key_candidates.push_back({"C major", 0.4f});
     snapshot->observed_through = {1, 2};
+    snapshot->analysis_delay_frames = 17;
+    snapshot->beats.push_back({{1, 1}, 0.8f});
     snapshot->chords.push_back({{1, 0}, {1, 1}, {"Am", 0.5f}});
     QVERIFY(model.apply({1, snapshot}));
     QCOMPARE(model.status(), QString("Tracking"));
     QCOMPARE(model.tempo(), QString("123.4"));
     QCOMPARE(model.key(), QString("C major"));
     QCOMPARE(model.chord(), QString("Am"));
+    QCOMPARE(model.beatCount(), qulonglong(1));
+    QCOMPARE(model.observedFrames(), qulonglong(2));
+    QCOMPARE(model.analysisDelayFrames(), qulonglong(17));
     auto silent = std::make_shared<beatglass::Snapshot>(*snapshot);
     silent->state = beatglass::TrackingState::silent;
     QVERIFY(model.apply({2, silent}));
