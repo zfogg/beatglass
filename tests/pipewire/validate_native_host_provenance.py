@@ -1,6 +1,8 @@
 """Validate a host provenance object against the qualification contract."""
 import json
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 if len(sys.argv) not in (2, 3):
@@ -33,7 +35,14 @@ if host.get("tpm_present") is not None and not isinstance(host["tpm_present"], b
 if len(sys.argv) == 3:
     report = {"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
     try:
-        Path(sys.argv[2]).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        destination = Path(sys.argv[2])
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent, delete=False) as temporary:
+            temporary.write(json.dumps(report, indent=2) + "\n")
+            temporary_path = Path(temporary.name)
+        os.replace(temporary_path, destination)
     except OSError as error:
+        if "temporary_path" in locals():
+            temporary_path.unlink(missing_ok=True)
         raise SystemExit(f"host provenance report is unwritable: {error}")
 print("native host provenance verified")
