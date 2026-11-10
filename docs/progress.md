@@ -26,6 +26,12 @@ snapshots rendered successfully, and `issue4320_tui_contract` plus
 `cli_generated_audio` passed (2/2). This is cross-compiler preparation evidence;
 WSL does not qualify native PipeWire routing or desktop audio behavior.
 
+The persisted-recovery action and shared Live presentation projection also
+rebuild cleanly under the same GCC/FTXUI 7.0.0 WSL configuration. Library,
+Live, and Settings snapshots plus `issue4320_tui_contract` and
+`cli_generated_audio` passed again (2/2); native PipeWire qualification is
+still separate from this cross-compiler check.
+
 Overlay settings now provide a focused endpoint refresh action that keeps
 selection and retry recovery in one workflow. Portable coverage is in
 `python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
