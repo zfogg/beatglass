@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
   if (argc == 2 && (std::string_view(argv[1]) == "--help" || std::string_view(argv[1]) == "-h")) {
     std::cout << "Usage: beatglass-cli [audio-folder]\n"
                  "       beatglass-cli --snapshot <audio-folder> [tab]\n"
-                 "\nTabs: 1 Library  2 Live  3 Settings\n";
+                 "\nTabs: 1/library  2/live  3/settings\n";
     return 0;
   }
   const bool snapshot = argc > 1 && std::string(argv[1]) == "--snapshot";
