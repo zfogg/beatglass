@@ -135,4 +135,8 @@ process_positions = [(event.get("sample_position"), event.get("sample_count")) f
 for previous, current in zip(process_positions, process_positions[1:]):
     if previous[1] is not None and current[0] < previous[0] + previous[1]:
         raise SystemExit("process sample positions overlap captured samples")
+process_events = [event for event in events if event.get("event") == "process"]
+drop_counts = [event.get("drop_count") for event in process_events if event.get("drop_count") is not None]
+if drop_counts and (len(drop_counts) != len(process_events) or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in drop_counts)):
+    raise SystemExit("process drop counts must be complete and non-negative")
 print(f"PipeWire transition evidence verified ({len(events)} events)")
