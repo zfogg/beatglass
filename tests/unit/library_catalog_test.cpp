@@ -2,6 +2,7 @@
 #include "beatglass/library/catalog.hpp"
 #include <chrono>
 #include <fstream>
+#include <algorithm>
 
 namespace {
 struct TempDir {
@@ -274,6 +275,8 @@ TEST_CASE("catalog skips symlinked files and directories") {
   std::filesystem::create_directory(dir.path / "nested");
   std::filesystem::create_directory_symlink(dir.path / "nested", dir.path / "linked-nested", ec);
   const auto result = beatglass::library::browse(dir.path);
-  REQUIRE(result.entries.size() == 1);
-  CHECK(result.entries.front().name == "real.wav");
+  REQUIRE(result.entries.size() == 2);
+  CHECK(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "real.wav"; }));
+  CHECK(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "nested"; }));
+  CHECK_FALSE(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "linked.wav" || entry.name == "linked-nested"; }));
 }
