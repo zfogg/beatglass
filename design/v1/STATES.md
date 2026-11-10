@@ -121,6 +121,7 @@
 | Routing description stale state | Assistive technology enters interaction and opacity controls during recovery | Include the stale-evidence boundary in the group description and click-through value. |
 | Click-through stale description | User toggles pointer pass-through during capture recovery | Keep input-mode semantics clear while announcing stale live evidence. |
 | Click-through stale tooltip | User hovers or focuses pointer pass-through control during recovery | Keep the concise control hint aligned with the stale-evidence announcement. |
+| Shortcut guidance stale state | User reviews keyboard shortcuts while capture recovers | Keep recovery shortcuts actionable while announcing stale live evidence in the shortcut status. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
