@@ -592,4 +592,11 @@ def test_unlock_action_requires_available_click_through_overlay():
     assert "overlayBridge.available" in body
     assert "clickThrough" in body
     assert "focusOverlayAvailabilityRecovery" in body
+
+def test_hide_action_requires_available_overlay():
+    start = QML.index("function handleOverlayHideAction")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "overlayBridge.available" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "showOverlay" in body
     assert "return" in body
