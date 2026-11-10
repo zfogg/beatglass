@@ -217,7 +217,15 @@ if ! grep -Eq '[0-9]+% tests passed' "$overlay_log"; then
   echo "Overlay qualification log has no passing CTest summary" >&2
   exit 1
 fi
-for evidence in "$commands_log" "$output_discovery_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"; do
+cli_test_filter='^(issue4320_tui_contract|cli_tui_snapshots)$'
+record_command "ctest --test-dir $out_dir/build -R $cli_test_filter --output-on-failure"
+cli_log="$out_dir/cli-ctest.log"
+ctest --test-dir "$out_dir/build" -R "$cli_test_filter" --output-on-failure | tee "$cli_log"
+if ! grep -Eq '[0-9]+% tests passed' "$cli_log"; then
+  echo "CLI qualification log has no passing CTest summary" >&2
+  exit 1
+fi
+for evidence in "$commands_log" "$output_discovery_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log" "$cli_log"; do
   if [[ ! -s "$evidence" ]]; then
     echo "Qualification evidence file is missing or empty: $evidence" >&2
     exit 1
@@ -288,7 +296,7 @@ fi
   printf 'desktop_signing=%s\ntap_signing=%s\nrecovery_signing=%s\ndesktop_signing_log=%s\ntap_signing_log=%s\nrecovery_signing_log=%s\n' "$signing_state" "$tap_signing" "$recovery_signing" "$signing_log" "$tap_signing_log" "$recovery_signing_log"
   printf 'selected_output_uid=%s\n' "${BEATGLASS_MACOS_TAP_UID:-UNRUN}"
   printf 'permission_result=%s\n' "$permission_result"
-  printf 'commands=%s\noutput_discovery=%s\noverlay_discovery=%s\noverlay_output=%s\n' "$commands_log" "$output_discovery_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log"
+  printf 'commands=%s\noutput_discovery=%s\noverlay_discovery=%s\noverlay_output=%s\ncli_output=%s\n' "$commands_log" "$output_discovery_log" "$out_dir/overlay-ctest-discovery.log" "$overlay_log" "$cli_log"
   if [[ -n "${BEATGLASS_MACOS_TAP_UID:-}" ]]; then
     printf 'tap_output=%s\nrecovery_output=%s\n' "$out_dir/tap-smoke.log" "$out_dir/recovery-smoke.log"
   fi
