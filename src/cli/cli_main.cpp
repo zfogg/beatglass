@@ -486,16 +486,17 @@ int main(int argc, char** argv) {
 #endif
   int tab = 0, selected = tracks.empty() ? -1 : 0;
   int live_selected = 0;
+  bool live_endpoint_identity_found = false;
 #ifdef _WIN32
   for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.endpoints.size()); ++index) {
-    if (live_endpoint_snapshot.endpoints[index].id == live_endpoint_preference) live_selected = index;
-    else if ((live_endpoint_preference.empty() && live_endpoint_snapshot.endpoints[index].name == live_endpoint_name_preference) ||
-             (live_endpoint_preference.empty() && live_endpoint_name_preference.empty() && live_endpoint_snapshot.endpoints[index].is_default)) live_selected = index;
+    if (live_endpoint_snapshot.endpoints[index].id == live_endpoint_preference) { live_selected = index; live_endpoint_identity_found = true; }
+    else if (!live_endpoint_identity_found && (live_endpoint_snapshot.endpoints[index].name == live_endpoint_name_preference ||
+             (live_endpoint_preference.empty() && live_endpoint_name_preference.empty() && live_endpoint_snapshot.endpoints[index].is_default))) live_selected = index;
   }
 #elif defined(BEATGLASS_HAS_PIPEWIRE)
   for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.sinks.size()); ++index)
-    if (live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].serial == live_endpoint_preference ||
-        (live_endpoint_preference.empty() && (live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].name == live_endpoint_name_preference || live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].description == live_endpoint_name_preference))) live_selected = index;
+    if (live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].serial == live_endpoint_preference) { live_selected = index; live_endpoint_identity_found = true; }
+    else if (!live_endpoint_identity_found && (live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].name == live_endpoint_name_preference || live_endpoint_snapshot.sinks[static_cast<std::size_t>(index)].description == live_endpoint_name_preference)) live_selected = index;
 #endif
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::size_t library_cache_hits = 0;
@@ -1086,10 +1087,12 @@ int main(int argc, char** argv) {
     live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
     live_error = live_endpoint_snapshot.error;
     live_endpoints.clear(); live_endpoint_ids.clear(); live_selected = 0;
+    bool refreshed_identity_found = false;
     for (const auto& endpoint : live_endpoint_snapshot.endpoints) {
       live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
       live_endpoint_ids.push_back(endpoint.id);
-      if (endpoint.id == live_endpoint_preference || (live_endpoint_preference.empty() && (endpoint.name == live_endpoint_name_preference || (live_endpoint_name_preference.empty() && endpoint.is_default)))) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
+      if (endpoint.id == live_endpoint_preference) { live_selected = static_cast<int>(live_endpoint_ids.size()) - 1; refreshed_identity_found = true; }
+      else if (!refreshed_identity_found && (endpoint.name == live_endpoint_name_preference || (live_endpoint_preference.empty() && live_endpoint_name_preference.empty() && endpoint.is_default))) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
     }
     if (!stopped_for_refresh) live_status = std::to_string(live_endpoints.size()) + " render sinks discovered.";
 #elif defined(BEATGLASS_HAS_PIPEWIRE)
@@ -1098,10 +1101,12 @@ int main(int argc, char** argv) {
     const auto refreshed = beatglass::pipewire::discover_sinks(std::chrono::milliseconds(500));
     live_error = refreshed.error;
     live_endpoints.clear(); live_endpoint_ids.clear(); live_selected = 0;
+    bool refreshed_identity_found = false;
     for (const auto& endpoint : refreshed.sinks) {
       live_endpoints.push_back(endpoint.name.empty() ? endpoint.description : endpoint.name);
       live_endpoint_ids.push_back(endpoint.serial);
-      if (endpoint.serial == live_endpoint_preference || (live_endpoint_preference.empty() && (endpoint.name == live_endpoint_name_preference || endpoint.description == live_endpoint_name_preference))) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
+      if (endpoint.serial == live_endpoint_preference) { live_selected = static_cast<int>(live_endpoint_ids.size()) - 1; refreshed_identity_found = true; }
+      else if (!refreshed_identity_found && (endpoint.name == live_endpoint_name_preference || endpoint.description == live_endpoint_name_preference)) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
     }
     live_status = std::to_string(live_endpoints.size()) + " PipeWire output sinks discovered.";
 #else
