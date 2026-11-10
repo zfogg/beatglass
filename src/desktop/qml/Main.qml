@@ -1438,6 +1438,9 @@ ApplicationWindow {
         window.raise()
         window.requestActivate()
         window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until recovery succeeds. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : ""))
+        window.handleOverlayRetryAction()
+    }
+    function handleOverlayRetryAction() {
         const restored = window.showOverlayAndHideControls()
         if (!restored)
             retryOverlay.forceActiveFocus()
