@@ -2936,7 +2936,6 @@ ApplicationWindow {
                     text: visible ? ("Library storage: " + storageRecovery.status
                           + (storageRecovery.retryableRunIds.length > 0 ? " · " + storageRecovery.retryableRunIds.length + " saved run(s)" : " · no saved runs")) : ""
                     Accessible.name: "Library storage recovery health"
-                    Accessible.value: visible ? text : ""
                     Accessible.role: Accessible.Status
                     Accessible.description: visible && (storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0)
                         ? text + ". Reopen storage before retrying or discarding saved analysis runs."
