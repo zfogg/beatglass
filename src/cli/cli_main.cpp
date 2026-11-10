@@ -23,6 +23,9 @@
 #include "../desktop/platform/windows_playback_session.hpp"
 #include "../desktop/platform/windows_waveout_devices.hpp"
 #endif
+#ifdef __APPLE__
+#include "beatglass/desktop/macos_playback_session.hpp"
+#endif
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
@@ -444,6 +447,94 @@ private:
   UINT device_id_{WAVE_MAPPER};
 };
 #endif
+#ifdef __APPLE__
+class CliPlayback final {
+public:
+  CliPlayback() : worker_([this] { run(); }) {}
+  ~CliPlayback() {
+    { std::lock_guard lock(mutex_); command_ = Command::shutdown; }
+    condition_.notify_one();
+    worker_.join();
+  }
+  void play(const std::filesystem::path& path) { { std::lock_guard lock(mutex_); path_ = path; command_ = Command::play; } condition_.notify_one(); }
+  void resume() { request(Command::resume); }
+  void pause() { request(Command::pause); }
+  void seek_seconds(std::int64_t seconds) { { std::lock_guard lock(mutex_); seek_delta_seconds_ = seconds; command_ = Command::seek; } condition_.notify_one(); }
+  void stop() { request(Command::stop); }
+  beatglass::PlaybackState state() const noexcept { return state_.load(std::memory_order_acquire); }
+  std::uint64_t epoch() const noexcept { return epoch_.load(std::memory_order_acquire); }
+  std::uint64_t current_frame() const noexcept { return current_frame_.load(std::memory_order_acquire); }
+  std::uint64_t total_frames() const noexcept { return total_frames_.load(std::memory_order_acquire); }
+  std::string status() const { std::lock_guard lock(mutex_); return status_; }
+private:
+  enum class Command { none, play, resume, pause, seek, stop, shutdown };
+  void request(Command command) { { std::lock_guard lock(mutex_); command_ = command; } condition_.notify_one(); }
+  Command take_command() { std::lock_guard lock(mutex_); const auto command = command_; command_ = Command::none; return command; }
+  std::int64_t take_seek_delta_seconds() { std::lock_guard lock(mutex_); const auto delta = seek_delta_seconds_; seek_delta_seconds_ = 0; return delta; }
+  void set_status(std::string status) { std::lock_guard lock(mutex_); status_ = std::move(status); }
+  void run() {
+    std::unique_ptr<beatglass::FileReader> reader;
+    beatglass::macos::MacAudioUnitPlayback output;
+    std::vector<float> decoded(4096);
+    std::uint64_t next_epoch = 0;
+    bool shutdown = false;
+    while (!shutdown) {
+      const auto command = take_command();
+      if (command == Command::shutdown) break;
+      if (command == Command::play) {
+        output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
+        try {
+          reader = std::make_unique<beatglass::FileReader>(path_, ++next_epoch);
+          const auto& metadata = reader->metadata();
+          current_frame_.store(0, std::memory_order_release);
+          total_frames_.store(metadata.frames, std::memory_order_release);
+          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch)) { set_status("Playback unavailable: macOS AudioUnit could not start."); reader.reset(); continue; }
+          epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through macOS AudioUnit output.");
+        } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
+      } else if (command == Command::resume) {
+        if (reader) { state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback resumed."); }
+      } else if (command == Command::pause) {
+        if (reader && state_.load(std::memory_order_acquire) == beatglass::PlaybackState::playing) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
+      } else if (command == Command::seek && reader) {
+        try {
+          const auto metadata = reader->metadata();
+          const auto delta = take_seek_delta_seconds() * static_cast<std::int64_t>(metadata.sample_rate);
+          const auto current = current_frame_.load(std::memory_order_acquire);
+          const auto target = delta < 0 && current < static_cast<std::uint64_t>(-delta) ? 0 : delta < 0 ? current - static_cast<std::uint64_t>(-delta) : std::min<std::uint64_t>(metadata.frames, current + static_cast<std::uint64_t>(delta));
+          output.stop(); reader->seek(target, ++next_epoch);
+          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch)) throw std::runtime_error("macOS AudioUnit could not restart");
+          current_frame_.store(target, std::memory_order_release); epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback seeked to frame " + std::to_string(target) + ".");
+        } catch (const std::exception& error) { set_status(std::string("Playback seek failed: ") + error.what()); }
+      } else if (command == Command::stop) {
+        output.stop(); reader.reset(); current_frame_.store(0, std::memory_order_release); total_frames_.store(0, std::memory_order_release); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback stopped.");
+      }
+      if (!reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) { std::unique_lock lock(mutex_); condition_.wait_for(lock, std::chrono::milliseconds(20), [&] { return command_ != Command::none; }); continue; }
+      const auto read = reader->read(decoded);
+      if (read.status == beatglass::FileReadStatus::end) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
+      if (read.status != beatglass::FileReadStatus::data) continue;
+      current_frame_.store(read.block.first_frame + read.block.samples.size() / std::max<std::size_t>(1, read.block.format.channels), std::memory_order_release);
+      while (!output.submit(read.block)) {
+        const auto pending = take_command();
+        if (pending == Command::stop || pending == Command::shutdown) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); shutdown = pending == Command::shutdown; break; }
+        if (pending == Command::pause) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); break; }
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      }
+    }
+    output.stop();
+  }
+  mutable std::mutex mutex_;
+  std::condition_variable condition_;
+  std::filesystem::path path_;
+  Command command_{Command::none};
+  std::string status_{"Playback stopped."};
+  std::thread worker_;
+  std::atomic<beatglass::PlaybackState> state_{beatglass::PlaybackState::stopped};
+  std::atomic<std::uint64_t> epoch_{};
+  std::atomic<std::uint64_t> current_frame_{};
+  std::atomic<std::uint64_t> total_frames_{};
+  std::int64_t seek_delta_seconds_{};
+};
+#endif
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -533,13 +624,18 @@ int main(int argc, char** argv) {
   std::filesystem::path analysis_path;
   bool busy = false;
   bool reduce_motion = preferences.reduce_motion;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
   CliPlayback playback;
+#ifdef _WIN32
   const auto playback_devices = beatglass::windows::enumerate_waveout_devices();
   std::vector<std::string> playback_device_labels;
   for (const auto& device : playback_devices) playback_device_labels.push_back(std::to_string(device.id) + ": " + device.name);
   int playback_device_selected = 0;
   for (int index = 0; index < static_cast<int>(playback_devices.size()); ++index) if (playback_devices[static_cast<std::size_t>(index)].id == preferences.playback_device_id) playback_device_selected = index;
+#else
+  std::vector<std::string> playback_device_labels{"Default macOS output (AudioUnit)"};
+  int playback_device_selected = 0;
+#endif
 #else
   beatglass::PlaybackSession playback;
   std::vector<std::string> playback_device_labels;
@@ -559,7 +655,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> library_labels;
   std::vector<int> library_indices;
   int library_visible_selected = 0;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
   beatglass::SourceEpochAllocator live_epochs;
   std::unique_ptr<beatglass::windows::LoopbackSession> live_session;
   std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
@@ -863,8 +959,10 @@ int main(int argc, char** argv) {
       status = "Select a supported audio file before starting playback.";
       return;
     }
+#if defined(_WIN32) || defined(__APPLE__)
 #ifdef _WIN32
     if (!playback_devices.empty() && playback_device_selected >= 0 && playback_device_selected < static_cast<int>(playback_devices.size())) playback.set_device(playback_devices[static_cast<std::size_t>(playback_device_selected)].id);
+#endif
     if (playback.state() == beatglass::PlaybackState::paused) {
       playback.resume();
       status = "Resuming " + tracks[selected].title + " through the selected output.";
@@ -872,7 +970,7 @@ int main(int argc, char** argv) {
       playback.play(tracks[selected].path);
       status = "Playing " + tracks[selected].title + " through the selected output.";
     }
-#else
+#elif !defined(__APPLE__)
     status = "Native playback is unavailable in this build; analysis remains available.";
 #endif
   });
@@ -914,7 +1012,7 @@ int main(int argc, char** argv) {
   auto previous_button = Button(" Prev ", [&] { select_relative(-1); });
   auto next_button = Button(" Next ", [&] { select_relative(1); });
   auto seek_back_button = Button(" − ", [&] {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
     playback.seek_seconds(-seek_step());
     status = "Playback seek backward requested.";
 #else
@@ -922,7 +1020,7 @@ int main(int argc, char** argv) {
 #endif
   });
   auto seek_forward_button = Button(" + ", [&] {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
     playback.seek_seconds(seek_step());
     status = "Playback seek forward requested.";
 #else
