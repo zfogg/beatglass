@@ -36,3 +36,5 @@ partially written manifest.
 The identity and hash-list inputs are bounded to 64 KiB and 16 MiB
 respectively, preventing untrusted qualification directories from forcing
 unbounded text reads before artifact validation begins.
+Artifact inventories also use case-insensitive collision keys so manifests
+cannot contain two names that alias on Windows or other case-folding filesystems.
