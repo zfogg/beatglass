@@ -3438,7 +3438,7 @@ ApplicationWindow {
                         objectName: "visualizationLayoutState"
                         text: window.compactHeader ? "Compact visualization layout" : "Expanded visualization layout"
                         Accessible.name: "Visualization layout: " + text
-                        Accessible.value: text
+                        Accessible.value: text + "; live overlay evidence stale"
                         Accessible.role: Accessible.Status
                         Accessible.description: "Responsive visualization layout selected from the current control-window width."
                         ToolTip.text: text
@@ -4726,9 +4726,9 @@ ApplicationWindow {
                         visible: window.overlayDisplaySelectionRequired && window.overlayPreferredDisplayName !== ""
                         text: "Saved display unavailable: " + window.overlayPreferredDisplayName + ". Connect it or choose another display."
                         Accessible.name: "Overlay saved display recovery: " + text
-                        Accessible.value: text
+                        Accessible.value: text + "; live overlay evidence stale"
                         Accessible.role: Accessible.Status
-                        Accessible.description: "The native overlay bridge saved a display that is not currently enumerated."
+                        Accessible.description: "The native overlay bridge saved a display that is not currently enumerated. Live overlay evidence is stale while the saved display is missing; monitoring continues in the control window."
                         ToolTip.text: "Reconnect the saved display or choose another available display"
                         wrapMode: Text.WordWrap
                         Layout.fillWidth: true
