@@ -2791,18 +2791,12 @@ ApplicationWindow {
                             themePreviews.children[nextIndex].forceActiveFocus()
                             event.accepted = true
                         }
-                        Keys.onHomePressed: {
-                            window.selectThemeIndex(0)
-                            themeSelector.currentIndex = 0
-                            themePreviews.children[0].forceActiveFocus()
-                            event.accepted = true
-                        }
                         Keys.onPressed: {
-                            if (event.key === Qt.Key_End) {
-                                const lastIndex = window.themeNames.length - 1
-                                window.selectThemeIndex(lastIndex)
-                                themeSelector.currentIndex = lastIndex
-                                themePreviews.children[lastIndex].forceActiveFocus()
+                            if (event.key === Qt.Key_Home || event.key === Qt.Key_End) {
+                                const targetIndex = event.key === Qt.Key_Home ? 0 : window.themeNames.length - 1
+                                window.selectThemeIndex(targetIndex)
+                                themeSelector.currentIndex = targetIndex
+                                themePreviews.children[targetIndex].forceActiveFocus()
                                 event.accepted = true
                             }
                         }
