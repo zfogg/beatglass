@@ -290,3 +290,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Hide action contract | Hide button restores the control window | Route the button through the same hide transition as keyboard actions. |
 | Show action contract | Show button launches the native overlay | Route the button through one launch/fallback action with evidence guidance. |
 | Restore action contract | Restore button or keyboard toggle restores a user-hidden overlay | Route both surfaces through one restore/fallback action with evidence guidance. |
+| Restore button routing | Restore button invokes the shared restore action | Keep button and keyboard restore behavior identical and regression-tested. |
