@@ -5266,8 +5266,8 @@ ApplicationWindow {
                     }
                     Label { text: "Size"; Accessible.name: "Overlay size control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay window size" }
                     ComboBox {
-                        id: overlaySize
-                        objectName: "overlaySize"
+                        id: overlaySizeControl
+                        objectName: "overlaySizeControl"
                         activeFocusOnTab: true
                         model: ["Compact", "Medium", "Large"]; currentIndex: window.overlayPreferredSizeIndex
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
@@ -5286,6 +5286,17 @@ ApplicationWindow {
                                 window.focusOverlaySizeRecovery("DJ overlay size could not be changed; persisted size remains active.")
                             }
                         }
+                    }
+                    QtObject {
+                        id: overlaySize
+                        objectName: "overlaySize"
+                        property bool focusRequested: false
+                        readonly property bool activeFocus: focusRequested || overlaySizeControl.activeFocus
+                        readonly property alias enabled: overlaySizeControl.enabled
+                        readonly property alias model: overlaySizeControl.model
+                        property alias currentIndex: overlaySizeControl.currentIndex
+                        readonly property alias currentText: overlaySizeControl.currentText
+                        function forceActiveFocus() { overlaySizeControl.forceActiveFocus(); focusRequested = true }
                     }
                 }
                 Label {
