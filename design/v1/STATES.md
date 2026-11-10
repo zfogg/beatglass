@@ -225,6 +225,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Availability restored focus workflow | Native overlay returns with a compatible display and actions become available | Activate controls, announce stale/current evidence, and focus retained-settings review consistently. |
 | Display loss focus workflow | A previously selected display disappears during overlay monitoring | Mark evidence stale, require display selection, and route focus through the availability recovery helper. |
 | Display selection recovery focus | Overlay returns but the saved destination is not selected | Route selection-required focus through the same availability helper and preserve the evidence boundary. |
+| Paused display restoration focus | A compatible display returns while recovery is paused | Focus Resume through the availability workflow and keep retry focus for active recovery paths. |
 | Resume recovery tooltip stale state | User hovers manual resume after pausing native overlay recovery | Keep the action hint aligned with the stale-evidence boundary. |
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
