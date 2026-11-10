@@ -141,3 +141,5 @@ integers, with restart strictly advancing beyond start.
 
 When process events provide `sample_position`, it must be a non-negative
 integer so timeline overlap checks cannot accept loosely typed coordinates.
+
+When process events provide `timestamp_ns`, it must be a non-negative integer.
