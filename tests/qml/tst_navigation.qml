@@ -77,6 +77,7 @@ TestCase {
     Component { id: shellWithPlayback; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; playbackBridge: fakePlayback } }
     Component { id: shellWithAnalysis; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; analysisJobBridge: fakeAnalysis } }
     Component { id: shellWithOverlay; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay; captureMonitorBridge: fakeCapture } }
+    Component { id: shellWithOverlayWithoutCapture; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
     Component { id: shellWithOverlayPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay; captureMonitorBridge: fakeCapture; themePreferencesBridge: fakeThemePreferences } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
@@ -136,6 +137,12 @@ TestCase {
         action.clicked()
         verify(app.overlayCaptureEvidenceStale)
         verify(app.overlayRecoveryAnnouncement.indexOf("monitoring stopped") >= 0)
+        app.destroy()
+    }
+    function test_overlayWithoutCaptureBridgeStartsWithStaleEvidence() {
+        let app = shellWithOverlayWithoutCapture.createObject(null)
+        verify(app.overlayCaptureEvidenceStale)
+        verify(app.overlayRecoveryAnnouncement.indexOf("capture is unavailable") >= 0)
         app.destroy()
     }
     function test_overlayAvailabilityFailureRestoresControls() {
