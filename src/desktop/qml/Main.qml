@@ -52,6 +52,7 @@ ApplicationWindow {
     property bool sortDescending: false
     property string selectedName: ""
     property url selectedAudioUrl: ""
+    property string latestPublishedSourceSelectionStatus: ""
     property string metadataStatus: "Choose an audio file to inspect its metadata."
     property bool metadataRetryPending: false
     property string visualizationSelectionResetReason: ""
@@ -3585,9 +3586,21 @@ ApplicationWindow {
                                     window.selectedAudioUrl = Qt.resolvedUrl(window.analysisJobBridge.batchLastSource)
                                     window.selectedName = window.selectedAudioUrl.fileName
                                     if (window.metadataBridge) window.metadataBridge.inspect(window.selectedAudioUrl)
+                                    window.latestPublishedSourceSelectionStatus = "Selected latest published source: " + window.selectedName
                                     window.announceVisualizationRecovery("Latest published analysis source selected.")
                                     selectLatestPublishedSource.forceActiveFocus()
                                 }
+                            }
+                            Label {
+                                objectName: "latestPublishedSourceSelectionStatus"
+                                visible: window.latestPublishedSourceSelectionStatus !== ""
+                                text: visible ? window.latestPublishedSourceSelectionStatus : ""
+                                Accessible.name: "Latest published source selection status"
+                                Accessible.value: visible ? text : "no latest published source selected"
+                                Accessible.role: Accessible.Status
+                                Accessible.description: visible ? text + ". Metadata refresh was requested for the selected source." : "No latest published source selection has been made."
+                                Layout.fillWidth: true
+                                wrapMode: Text.WordWrap
                             }
                             Label {
                                 objectName: "persistedRecoveryStatus"
