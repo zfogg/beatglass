@@ -3090,7 +3090,6 @@ ApplicationWindow {
                                 visible: window.playbackBridge !== null && (window.playbackBridge.nativeError !== "" || !window.playbackMatchesSelection)
                                 text: visible && window.playbackBridge.nativeError !== "" ? "Playback recovery: " + window.playbackBridge.nativeError : visible ? "Playback recovery: reopen the selected source to align playback with the Library selection" : ""
                                 Accessible.name: "Playback recovery status: " + text
-                                Accessible.value: visible ? text : ""
                                 Accessible.role: Accessible.Status
                                 Accessible.description: visible ? text + ". The selected audio source remains unchanged." : "Playback recovery is not required."
                                 ToolTip.text: "Playback recovery and source alignment status"
