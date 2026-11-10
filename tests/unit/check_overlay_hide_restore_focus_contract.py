@@ -1174,6 +1174,14 @@ def test_overlay_shortcut_help_discloses_pulse_status_focus():
     assert "focusing beat pulse status" in body
 
 
+def test_overlay_pulse_status_has_visible_keyboard_focus_indicator():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert "activeFocus ? 2 : 0" in label
+    assert "themeAccentColors" in label
+    assert "padding: 3" in label
+
+
 def test_overlay_pulse_transitions_update_accessible_announcement():
     start = QML.index("function onReduceMotionChanged()")
     body = QML[start : QML.index("            Connections", start)]
