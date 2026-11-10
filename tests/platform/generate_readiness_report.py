@@ -15,6 +15,15 @@ MAX_REPORT_BYTES = 16 << 20
 SCENARIOS = ("capture", "display", "output", "overlay", "playback", "recovery")
 
 
+def has_symlinked_parent(path: Path) -> bool:
+    current = path.parent
+    while current != current.parent:
+        if current.is_symlink():
+            return True
+        current = current.parent
+    return False
+
+
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -133,7 +142,7 @@ def main() -> int:
     if args.output.is_symlink():
         print("readiness report output must not be a symlink")
         return 1
-    if args.output.parent.is_symlink():
+    if has_symlinked_parent(args.output):
         print("readiness report output parent must not be a symlink")
         return 1
     args.output.parent.mkdir(parents=True, exist_ok=True)
