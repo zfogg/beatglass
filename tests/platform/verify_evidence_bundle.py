@@ -158,6 +158,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if isinstance(entry, dict) and isinstance(entry.get("path"), str)
     }
     for scenario in scenarios or []:
+        if isinstance(scenario, dict):
+            unknown_fields = set(scenario) - {"id", "status", "evidence"}
+            if unknown_fields:
+                errors.append(f"unsupported scenario fields: {sorted(unknown_fields)}"); continue
         if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
                 or not scenario.get("id") or not isinstance(scenario.get("status"), str)
                 or len(scenario.get("id", "")) > 128
