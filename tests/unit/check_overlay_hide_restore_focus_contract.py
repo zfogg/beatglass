@@ -399,3 +399,11 @@ def test_hide_toggle_routes_restore_and_hide_through_action_helpers():
     body = QML[start : QML.index("    function handleOverlayRestoreAction", start)]
     assert "handleOverlayRestoreAction()" in body
     assert "handleOverlayHideAction()" in body
+
+
+def test_reapply_button_and_shortcut_share_action():
+    start = QML.index("function handleOverlayReapplyAction")
+    body = QML[start : QML.index("    function focusOverlaySummaryReviewShortcut", start)]
+    assert "reapplyOverlaySettingsAndRestore()" in body
+    assert "reapplyOverlaySettings.forceActiveFocus()" in body
+    assert "onClicked: window.handleOverlayReapplyAction()" in QML

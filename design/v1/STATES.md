@@ -285,3 +285,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Hide/restore toggle recovery | User invokes the hide/restore overlay shortcut | Branch on explicit user-hidden state, announce restore intent and stale evidence, and route to the matching visibility transition. |
 | Show action contract | Hide/restore toggle requests the hidden overlay become visible | Keep recovery fallback actionable on failure and focus Retry while evidence is stale. |
 | Hide/restore action contract | Keyboard hide/restore action branches on user-hidden state | Route Restore and Hide through explicit action helpers while preserving stale-evidence guidance. |
+| Reapply action contract | Keyboard and button reapply actions are both available | Route both surfaces through one persisted-settings reapply/focus action. |
