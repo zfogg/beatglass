@@ -1047,3 +1047,10 @@ def test_hide_focus_shortcut_requires_destination_display():
     assert "screenNames.length === 0" in body
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
+
+
+def test_paused_recovery_focus_helper_reports_success():
+    start = QML.index("function focusOverlayRecoveryAction")
+    body = QML[start : QML.index("    function restoreOverlayDisplaySelectionFromBridge", start)]
+    assert "resumeOverlayRecovery.forceActiveFocus()" in body
+    assert "return true" in body
