@@ -19,6 +19,7 @@ for tab, heading in (("library", "LIBRARY"), ("live", "LIVE"), ("settings", "SET
         assert shortcut in result.stdout, (tab, shortcut, result.stdout)
     if tab == "library":
         assert "Analyze all" in result.stdout
+        assert "Analyze selected" in result.stdout
         assert "Analyze all visible" in result.stdout
         assert "Sort: title" in result.stdout
         assert "Sort title/path" in result.stdout
