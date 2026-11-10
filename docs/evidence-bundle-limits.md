@@ -108,6 +108,8 @@ Traversal, separator, and canonicalization failures are grouped under `path`
 for direct workspace-boundary triage.
 Unsupported platform identifiers are grouped under `platform` for direct
 qualification-environment triage.
+Environment descriptor length, whitespace, and control-character failures
+are grouped under `environment` for direct runtime-identity triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.
