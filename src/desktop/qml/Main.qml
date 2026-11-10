@@ -21,6 +21,7 @@ ApplicationWindow {
     property var playbackBridge: typeof playbackSession !== "undefined" ? playbackSession : null
     property var liveBridge: livePresentation
     property var analysisJobBridge: typeof analysisJob !== "undefined" ? analysisJob : null
+    property var analysisPresentationBridge: typeof analysisPresentation !== "undefined" ? analysisPresentation : null
     readonly property bool analysisResultMatchesSelection: analysisJobBridge !== null
         && selectedAudioUrl.toString() !== ""
         && analysisJobBridge.sourcePath !== ""
@@ -29,6 +30,7 @@ ApplicationWindow {
     property var endpointSelectionBridge: typeof endpointSelection !== "undefined" ? endpointSelection : null
     property var themePreferencesBridge: typeof themePreferences !== "undefined" ? themePreferences : null
     property var overlayBridge: typeof macOverlayController !== "undefined" ? macOverlayController : null
+    property var storageRecoveryBridge: typeof storageRecovery !== "undefined" ? storageRecovery : null
     property bool overlayDisplaySelectionRequired: false
     property bool overlayDisplayRecoveryPending: false
     property bool overlayWasVisibleBeforeAvailabilityLoss: false
@@ -3307,7 +3309,7 @@ ApplicationWindow {
                         Label {
                             objectName: "detailsAvailability"
                             ToolTip.text: "Current analysis and playback detail status"
-                            text: window.selectedName ? ("BPM " + analysisPresentation.bpm + " · Key " + analysisPresentation.key + " · Beats " + analysisPresentation.beatCount + " · Observed frames " + analysisPresentation.observedFrames) : "Select an audio file to inspect its read-only details."
+                            text: window.selectedName && window.analysisPresentationBridge ? ("BPM " + window.analysisPresentationBridge.bpm + " · Key " + window.analysisPresentationBridge.key + " · Beats " + window.analysisPresentationBridge.beatCount + " · Observed frames " + window.analysisPresentationBridge.observedFrames) : "Select an audio file to inspect its read-only details."
                             Layout.fillWidth: true; wrapMode: Text.WordWrap
                             Accessible.name: "Analysis and playback status: " + text
                             Accessible.role: Accessible.StaticText
@@ -3721,7 +3723,7 @@ ApplicationWindow {
                                 Button {
                                     objectName: "reanalyzeInvalidatedCache"
                                     text: "Run reanalysis"
-                                    visible: storageRecovery.analysisStatus === "Analysis idle · reanalysis required"
+                                    visible: window.storageRecoveryBridge && window.storageRecoveryBridge.analysisStatus === "Analysis idle · reanalysis required"
                                     enabled: visible && window.analysisCacheIdentityReady && typeof storageRecovery !== "undefined" && storageRecovery.storageOpen === true && window.selectedAudioUrl.toLocalFile() !== ""
                                     Accessible.name: "Run fresh analysis"
                                     Accessible.description: "Invalidate this identity and admit fresh analysis work to the queue."
