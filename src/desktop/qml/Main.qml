@@ -506,16 +506,7 @@ ApplicationWindow {
             const sizes = [[250, 110], [310, 130], [430, 180]]
             const nextIndex = (window.overlayPreferredSizeIndex + 1) % sizes.length
             const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
-            if (resized) {
-                window.overlayPreferredSizeIndex = nextIndex
-                window.overlaySettingsRevision += 1
-                window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
-                overlaySize.forceActiveFocus()
-            } else {
-                window.syncOverlaySettingsStateFromBridge()
-                window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active.")
-                overlaySize.forceActiveFocus()
-            }
+            window.handleOverlaySizeChangeResult(resized, nextIndex)
         }
     }
     Shortcut {
@@ -2123,6 +2114,18 @@ ApplicationWindow {
         }
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlaySizeChangeResult(resized, nextIndex) {
+        if (resized) {
+            window.overlayPreferredSizeIndex = nextIndex
+            window.overlaySettingsRevision += 1
+            window.announceCaptureRecoveryState("DJ overlay size set to " + ["Compact", "Medium", "Large"][nextIndex] + ".")
+        } else {
+            window.overlayCaptureEvidenceStale = true
+            window.syncOverlaySettingsStateFromBridge()
+            window.announceCaptureRecoveryState("DJ overlay size could not be changed; persisted size remains active. Live evidence remains stale until fresh capture arrives.")
+        }
+        overlaySize.forceActiveFocus()
     }
     function handleOverlayGeometryRecovery() {
         window.overlayCaptureEvidenceStale = true

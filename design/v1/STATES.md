@@ -259,3 +259,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Display loss recovery focus | The native display list becomes empty during monitoring | Centralize pending/selection/stale state, restore control focus, and announce that overlay actions await a display. |
 | Click-through focus recovery | Native interaction changes into or out of click-through mode | Preserve stale evidence, announce the keyboard/pointer boundary, and focus Unlock when locked or interaction mode when restored. |
 | External opacity focus recovery | Native opacity changes outside an in-flight user edit | Preserve stale evidence and route focus to the opacity control so the retained value is reviewable. |
+| Overlay size recovery | Native resize succeeds or fails from the keyboard shortcut | Keep persisted size state authoritative, announce failure/stale evidence when needed, and focus the size control. |
