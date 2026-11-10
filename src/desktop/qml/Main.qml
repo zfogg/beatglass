@@ -4515,9 +4515,9 @@ ApplicationWindow {
                         text: "Refresh overlay endpoint"
                         enabled: visible && window.endpointSelectionBridge !== null
                         Accessible.name: text
-                        Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "refresh available; recovery pending" : "refresh available; ready") : "refresh unavailable"
+                        Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "refresh available; recovery pending" : "refresh available; ready") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "") : "refresh unavailable"
                         Accessible.role: Accessible.Button
-                        Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring. " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.") : "Output endpoint refresh is unavailable."
+                        Accessible.description: enabled ? "Refresh available output endpoints before starting or retrying overlay monitoring. " + (window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready.") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? " Live overlay evidence is stale until fresh capture arrives." : "") : "Output endpoint refresh is unavailable."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             window.endpointSelectionBridge.refresh()
