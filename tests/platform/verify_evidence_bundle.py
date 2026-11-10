@@ -94,6 +94,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or len(relative) > 512
             or relative != relative.strip()
             or "\\" in relative
+            or any(ord(char) < 32 for char in relative)
             or any(part == "." for part in relative.split("/"))
             or "//" in relative
             or relative.endswith("/")
