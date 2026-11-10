@@ -323,7 +323,7 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps({"platform":"x","commit":"a"*40,"captured_at":"2099-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
             result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
             payload = json.loads(result.stdout)
-            self.assertGreaterEqual(payload["error_categories"]["temporal"], 1)
+            self.assertGreaterEqual(payload["error_categories"].get("freshness", payload["error_categories"].get("temporal", 0)), 1)
 
     def test_json_groups_scenario_evidence_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1352,6 +1352,14 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
             payload = json.loads(result.stdout)
             self.assertGreaterEqual(payload["error_categories"].get("timestamp_format", 0), 1)
+
+    def test_json_groups_freshness_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2099-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("freshness", 0), 1)
 
 if __name__ == "__main__":
     unittest.main()
