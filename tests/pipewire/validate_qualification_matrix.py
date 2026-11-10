@@ -3,8 +3,9 @@ import json
 import sys
 from pathlib import Path
 
-if len(sys.argv) != 2:
-    raise SystemExit("usage: validate_qualification_matrix.py MATRIX.json")
+if len(sys.argv) not in (2, 3):
+    raise SystemExit("usage: validate_qualification_matrix.py MATRIX.json [EVIDENCE_ROOT]")
+evidence_root = Path(sys.argv[2]).resolve() if len(sys.argv) == 3 else None
 try:
     matrix = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 except (OSError, json.JSONDecodeError, UnicodeDecodeError):
@@ -28,6 +29,10 @@ for name, entry in platforms.items():
         raise SystemExit(f"qualified platform lacks evidence provenance: {name}")
     if any(not isinstance(path, str) or not path.strip() or path.startswith(("/", "\\")) or ".." in Path(path).parts or any(ord(char) < 32 for char in path) for path in entry["evidence"]):
         raise SystemExit(f"invalid evidence path: {name}")
+    if evidence_root is not None:
+        for path in entry["evidence"]:
+            if not (evidence_root / path).is_file():
+                raise SystemExit(f"missing evidence artifact: {name}: {path}")
     if len(set(entry["evidence"])) != len(entry["evidence"]):
         raise SystemExit(f"duplicate evidence path: {name}")
     if entry["status"] == "pending" and not isinstance(entry.get("pending_reason"), str):
