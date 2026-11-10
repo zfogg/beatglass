@@ -1306,13 +1306,12 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             self.assertEqual(result["platforms"][0]["error_count"], len(result["platforms"][0]["errors"]))
 
 
-    def test_json_groups_total_size_errors(self):
+    def test_json_groups_manifest_size_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp); (root / "capture.txt").write_text("long", encoding="utf-8"); manifest = root / "manifest.json"
-            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256": hashlib.sha256(b"long").hexdigest(), "role":"capture"}], "scenarios": [{"id": x, "status":"PENDING"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
-            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--max-total-artifact-bytes", "1", "--json"], capture_output=True, text=True, check=False)
+            root = Path(tmp); manifest = root / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--max-manifest-bytes", "1", "--json"], capture_output=True, text=True, check=False)
             payload = json.loads(result.stdout)
-            self.assertGreaterEqual(payload["error_categories"].get("total_size", 0), 1)
+            self.assertGreaterEqual(payload["error_categories"].get("manifest_size", 0), 1)
 
 if __name__ == "__main__":
     unittest.main()

@@ -96,8 +96,8 @@ All ancestor components are checked, including missing nested directories that
 would otherwise be created beneath a symlinked workspace component.
 Its `--max-age-hours` value must be positive, preventing accidental
 configuration that marks every retained bundle stale.
-Aggregate retained-byte budget violations are grouped under `total_size` in
-JSON output for direct bundle-capacity triage.
+Manifest byte-limit violations are grouped under `manifest_size` in JSON
+output for direct input-capacity triage.
 Timestamp format, timezone, and future-capture failures are grouped under
 `temporal` in JSON output for clear freshness and clock-discipline reporting.
 Missing retained evidence for a required scenario is grouped under

@@ -236,9 +236,9 @@ def main() -> int:
                 category = "input_topology"
             elif error.startswith("artifact exceeds "):
                 category = "size"
-            elif error.startswith("artifacts exceed total "):
-                category = "total_size"
-            elif error.startswith(("manifest exceeds ", "artifacts exceed ", "too many artifacts")):
+            elif error.startswith("manifest exceeds "):
+                category = "manifest_size"
+            elif error.startswith(("artifacts exceed ", "total artifact bytes exceed ", "too many artifacts")):
                 category = "resource_limit"
             elif error.startswith("missing provenance field"):
                 category = "provenance"
