@@ -210,6 +210,13 @@ public:
   };
   MacMonitorBackend() : source_(beatglass::coreaudio::make_native_backend()) {}
   bool start_stream(const std::string& id, std::uint64_t epoch, std::uint32_t, std::uint32_t) { selected_ = id; epoch_ = epoch; return source_ && source_->start(id, epoch); }
+  bool reacquire(const std::string& id, std::uint64_t epoch, std::uint32_t, std::uint32_t) {
+    if (!source_ || id.empty() || !epoch || epoch == epoch_) return false;
+    source_->stop();
+    selected_ = id;
+    epoch_ = epoch;
+    return source_->start(id, epoch);
+  }
   bool selected_active() const { return source_ && source_->status().state != beatglass::coreaudio::TapState::stopped; }
   void stop() noexcept { if (source_) source_->stop(); }
   bool pop_current(beatglass::coreaudio::CaptureBlock& block) noexcept { return source_ && source_->pop(block) && block.epoch == epoch_; }
