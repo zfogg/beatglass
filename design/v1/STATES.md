@@ -230,6 +230,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Display recovery failure | Saved display is unavailable or persisted visual state cannot be reapplied | Keep selection required/pending, mark evidence stale, and announce the fresh-capture boundary. |
 | Display selection persistence failure | A selected display cannot be persisted or an unavailable saved display is cleared | Route both failures through the stale transition while retaining selection-required recovery. |
 | Display move failure | Selected display cannot be applied to the native overlay | Mark evidence stale through the shared transition, retain fallback controls, and focus display selection. |
+| Display visual/settings sync failure | Display moves but persisted visual state or settings synchronization fails | Preserve selection-required fallback and route failures through the shared stale transition. |
 | Resume recovery tooltip stale state | User hovers manual resume after pausing native overlay recovery | Keep the action hint aligned with the stale-evidence boundary. |
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
