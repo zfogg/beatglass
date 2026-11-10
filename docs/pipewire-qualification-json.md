@@ -242,3 +242,5 @@ If present, host `clock_poll_interval_ms` must be a non-negative integer
 describing clock status polling cadence.
 If present, host `clock_source_count` must be a positive integer describing
 the number of available synchronization sources.
+If present, host `clock_source_primary` must be a boolean indicating whether
+the recorded source was the host's primary synchronization source.
