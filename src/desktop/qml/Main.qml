@@ -4568,7 +4568,7 @@ ApplicationWindow {
                             + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : "; ready")
                         Accessible.role: Accessible.Button
                         Accessible.description: enabled
-                            ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
+                            ? (window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring while keeping overlay settings available." : "Start live output monitoring for the overlay's combined-output estimates.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.") + (window.overlayCaptureEvidenceStale ? " Live overlay evidence is stale until fresh capture arrives." : "")
                             : "Monitoring is transitioning; live overlay evidence is stale until the current capture state produces a fresh accepted snapshot."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
