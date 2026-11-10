@@ -1339,19 +1339,20 @@ ApplicationWindow {
         window.raise()
         window.requestActivate()
         window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Retained settings are current."))
-        window.handleOverlayReapplyAction()
+        return window.handleOverlayReapplyAction()
     }
     function handleOverlayReapplyAction() {
-        window.handleOverlayReapplyButtonAction()
+        return window.handleOverlayReapplyButtonAction()
     }
     function handleOverlayReapplyButtonAction() {
         if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayDisplayRecoveryFailure("Choose an available display before reapplying saved overlay settings.", overlayDisplay)
-            return
+            return false
         }
         const reapplied = window.reapplyOverlaySettingsAndRestore()
         if (reapplied)
             reapplyOverlaySettings.forceActiveFocus()
+        return reapplied
     }
     function handleOverlayUnlockAction() {
         if (!window.overlayBridge || !window.overlayBridge.available || !window.overlayBridge.clickThrough) {
