@@ -2410,6 +2410,8 @@ ApplicationWindow {
             window.transitionCaptureEvidence(true, "No output device or permission; retry monitoring to acquire a fresh snapshot.", overlayCaptureRecoveryAction)
         } else if (window.captureMonitorBridge.status === "Reacquiring") {
             window.transitionCaptureEvidence(true, "Output device reacquiring; visualization focus restored when fresh audio arrives.", overlayLiveMonitoringState)
+        } else if (window.captureMonitorBridge.status === "Stopped") {
+            window.transitionCaptureEvidence(true, "Output monitoring stopped; previously displayed live evidence is stale until monitoring resumes.", overlayLiveMonitoringState)
         } else if (window.captureMonitorBridge.status === "Monitoring" && window.overlayCaptureEvidenceStale) {
             window.transitionCaptureEvidence(false, "Overlay capture recovered; fresh accepted snapshot is available.", overlayLiveMonitoringState)
         }
