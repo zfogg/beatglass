@@ -24,6 +24,7 @@ if isinstance(payload, dict):
         raise SystemExit("transition evidence has an empty artifact identity")
     if payload.get("artifact_sha256") is not None and (not isinstance(payload["artifact_sha256"], str) or not re.fullmatch(r"[0-9a-fA-F]{64}", payload["artifact_sha256"])):
         raise SystemExit("transition evidence has an invalid artifact digest")
+    capture_started_at = None
     if payload.get("capture_started_at") is not None:
         if not isinstance(payload["capture_started_at"], str):
             raise SystemExit("transition evidence has an invalid capture timestamp")
@@ -33,6 +34,17 @@ if isinstance(payload, dict):
             raise SystemExit("transition evidence has an invalid capture timestamp")
         if capture_started_at.tzinfo is None:
             raise SystemExit("transition capture timestamp has no timezone")
+    if payload.get("capture_ended_at") is not None:
+        if not isinstance(payload["capture_ended_at"], str):
+            raise SystemExit("transition evidence has an invalid capture end timestamp")
+        try:
+            capture_ended_at = datetime.fromisoformat(payload["capture_ended_at"].replace("Z", "+00:00"))
+        except ValueError:
+            raise SystemExit("transition evidence has an invalid capture end timestamp")
+        if capture_ended_at.tzinfo is None:
+            raise SystemExit("transition capture end timestamp has no timezone")
+        if capture_started_at is not None and capture_ended_at < capture_started_at:
+            raise SystemExit("transition capture end precedes capture start")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
 if any(not isinstance(event, dict) for event in events):
