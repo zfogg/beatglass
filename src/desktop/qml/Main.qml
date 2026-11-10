@@ -3973,7 +3973,7 @@ ApplicationWindow {
                                 objectName: "retryAnalysis"
                                 activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
-                                enabled: visible && window.analysisJobBridge.canRetry
+                                enabled: window.analysisJobBridge !== null && window.analysisJobBridge.canRetry === true
                                 Accessible.name: "Retry analysis"
                                 Accessible.description: "Retry the last source-attributed analysis operation after cancellation or failure."
                                 onClicked: { window.retryVisualizationAnalysis(); retryAnalysis.forceActiveFocus() }
