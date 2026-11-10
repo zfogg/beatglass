@@ -351,6 +351,8 @@ Reports that list only one required field, or neither, are rejected for the
 same reason; checked metadata must prove both identity dimensions.
 The array must be lexicographically sorted to keep generated reports
 deterministic and comparable across runs.
+Every array entry must be non-empty; blank field names are rejected as
+unverifiable metadata.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
