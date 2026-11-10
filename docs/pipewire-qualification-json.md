@@ -153,3 +153,5 @@ restart lifecycle epoch.
 Every transition event must include a non-empty string `event` name.
 When both timestamps and durations are provided, adjacent process intervals
 must not overlap.
+Lifecycle events must occur in `start`, `process`, `error`, `restart` order;
+duplicate lifecycle boundaries are rejected.
