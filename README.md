@@ -80,7 +80,9 @@ For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` a
 
 On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
 
-The shipped CLI reports decoder/analysis failures on stderr with an `error: ` prefix and exits with status 1; argument/usage errors exit with status 2.
+The shipped `beatglass-cli` and `beatglass-music-cli` report decoder/analysis
+failures on stderr with an `error: ` prefix and exit with status 1;
+argument/usage errors exit with status 2.
 
 ## Qualification evidence index
 
