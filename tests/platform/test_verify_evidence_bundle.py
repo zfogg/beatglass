@@ -274,6 +274,15 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text("{" + " " * module.MAX_MANIFEST_BYTES + "}", encoding="utf-8")
             self.assertIn("manifest exceeds 16 MiB", module.verify(root, manifest))
 
+    def test_scenario_inventory_has_bounded_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            scenarios = [{"id": "capture", "status": "PENDING"} for _ in range(1001)]
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [], "scenarios": scenarios}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("scenarios exceed 1000 entries", module.verify(root, manifest))
+
     def test_artifact_path_segments_must_be_windows_safe(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
