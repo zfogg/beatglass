@@ -1368,6 +1368,7 @@ ApplicationWindow {
         window.requestActivate()
         overlaySettingsSummaryReviewAction.forceActiveFocus()
         window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : ".") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : " Live evidence is current."))
+        return true
     }
     function focusOverlayUnlockShortcut() {
         navigation.currentIndex = 1
