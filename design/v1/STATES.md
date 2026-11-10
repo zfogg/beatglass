@@ -341,3 +341,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Retry shortcut result contract | Retry shortcut requests overlay recovery while the control window is visible | Route keyboard retry through a named action and the button result contract, preserving paused-state focus and exposing the recovery outcome. |
 | Retry action result contract | Lower-level retry action restores the overlay or leaves recovery active | Return the native restore result to callers and preserve Retry focus when restoration fails. |
 | Show button failure contract | Show is requested without an available destination display | Return an explicit failure result after focusing display recovery, matching the successful native show path. |
+| Hide focus announcement contract | Hide/Restore shortcut focuses the appropriate control | Announce the selected control before returning success so keyboard and assistive technology users receive the recovery state. |

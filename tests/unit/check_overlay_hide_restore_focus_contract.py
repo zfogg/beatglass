@@ -853,3 +853,10 @@ def test_show_button_returns_failure_when_display_unavailable():
     assert "focusOverlayDisplayRecoveryFailure" in body
     assert "return false" in body
     assert "return window.handleOverlayShowAction()" in body
+
+
+def test_hide_focus_shortcut_announces_before_success_return():
+    start = QML.index("function focusOverlayHideShortcut")
+    body = QML[start : QML.index("    function focusOverlaySizeShortcut", start)]
+    assert body.index("announceCaptureRecoveryState") < body.index("return true")
+    assert "Restore is ready." in body
