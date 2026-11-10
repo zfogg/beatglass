@@ -173,3 +173,12 @@ def test_geometry_sync_failure_routes_to_display_recovery_focus():
     assert "focusOverlayAvailabilityRecovery" in body
     geometry = QML[QML.index("function onGeometryChanged") : start]
     assert "focusOverlayGeometrySyncFailure()" in geometry
+
+
+def test_display_loss_uses_centralized_recovery_focus():
+    start = QML.index("function focusOverlayDisplayLoss")
+    body = QML[start : QML.index("    function focusOverlayDisplaySelectionRequired", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    screens = QML[QML.index("function onScreensChanged") : start]
+    assert "focusOverlayDisplayLoss()" in screens
