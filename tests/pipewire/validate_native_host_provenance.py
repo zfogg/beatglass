@@ -39,6 +39,8 @@ if len(sys.argv) == 3:
         destination.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent, delete=False) as temporary:
             temporary.write(json.dumps(report, indent=2) + "\n")
+            temporary.flush()
+            os.fsync(temporary.fileno())
             temporary_path = Path(temporary.name)
         os.replace(temporary_path, destination)
     except OSError as error:

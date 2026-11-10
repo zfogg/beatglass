@@ -272,6 +272,8 @@ When emitting `REPORT.json`, an unwritable destination is also rejected with an
 explicit error rather than leaving a partially written qualification artifact.
 Reports are assembled in the destination directory and atomically replaced so
 readers never observe a partially written JSON report.
+The temporary file is flushed and synchronized before replacement so a
+successful validation report is durable across an abrupt process exit.
 Pass a second path to emit a deterministic validation report for the bundle:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 Validate that generated report before packaging with:

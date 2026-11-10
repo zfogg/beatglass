@@ -6,6 +6,7 @@ from pathlib import Path
 source = Path("tests/pipewire/validate_native_host_provenance.py").read_text()
 assert "usage: validate_native_host_provenance.py HOST.json [REPORT.json]" in source
 assert '"checked_fields"' in source
+assert "os.fsync" in Path("tests/pipewire/validate_native_host_provenance.py").read_text()
 print("Native host provenance report workflow verified")
 with tempfile.TemporaryDirectory() as directory:
     host = Path(directory) / "host.json"
