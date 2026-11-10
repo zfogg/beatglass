@@ -105,7 +105,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or "\ufffd" in relative
             or relative != relative.strip()
             or "\\" in relative
-            or any(ord(char) < 32 for char in relative)
+            or any(unicodedata.category(char) == "Cc" for char in relative)
             or any(part == "." for part in relative.split("/"))
             or any(part != ".." and part.endswith((".", " ")) for part in relative.split("/"))
             or any(len(part) > 255 for part in relative.split("/"))
