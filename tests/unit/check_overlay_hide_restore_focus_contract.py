@@ -1161,3 +1161,12 @@ def test_display_selection_required_propagates_focus_result():
     assert "overlayDisplaySelectionRequired = true" in body
     assert "overlayDisplayRecoveryPending = true" in body
     assert "return window.focusOverlayAvailabilityRecovery" in body
+
+
+def test_geometry_state_announcement_reports_validity():
+    start = QML.index("function announceOverlayGeometryState")
+    body = QML[start : QML.index("    function focusOverlayDisplayLoss", start)]
+    assert "geometry.width <= 0" in body
+    assert "return false" in body
+    assert "Live evidence remains stale until fresh capture arrives." in body
+    assert "return true" in body
