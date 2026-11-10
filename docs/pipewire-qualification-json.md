@@ -160,3 +160,5 @@ number of evidence events.
 
 When reacquisition evidence provides `event_count`, it must equal the number
 of process events recorded in the restarted epoch.
+When `host` provenance is present, it must include a non-empty `name` and a
+supported `platform` (`linux`, `windows`, or `macos`).
