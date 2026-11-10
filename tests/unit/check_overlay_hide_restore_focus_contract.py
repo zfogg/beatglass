@@ -1073,6 +1073,14 @@ def test_overlay_pulse_requires_finite_positive_bpm_to_run():
     assert "Number(window.liveBridge.tempo) > 0" in body
 
 
+def test_overlay_pulse_status_label_exposes_running_state():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert 'text: "Beat pulse "' in label
+    assert "beatPulse.running" in label
+    assert "Accessible.role: Accessible.Status" in label
+
+
 def test_recovery_pause_focus_helper_reports_target_result():
     start = QML.index("function focusOverlayRecoveryPauseState")
     body = QML[start : QML.index("    function resetOverlayRecoveryAttempts", start)]
