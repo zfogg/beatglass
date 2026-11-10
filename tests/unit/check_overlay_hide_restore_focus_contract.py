@@ -1107,6 +1107,13 @@ def test_motion_restore_restarts_pulse_only_with_valid_evidence():
     assert "isFinite(Number(window.liveBridge.tempo))" in body
 
 
+def test_overlay_pulse_requires_capture_bridge():
+    start = QML.index("id: beatPulse")
+    body = QML[start : QML.index("            onTriggered", start)]
+    assert "window.captureMonitorBridge &&" in body
+    assert "status === \"Monitoring\"" in body
+
+
 def test_overlay_pulse_status_label_exposes_running_state():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
