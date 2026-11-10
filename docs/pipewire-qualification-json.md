@@ -196,3 +196,5 @@ If present, host `serial_number` must be a non-empty string identifying the
 qualified host instance.
 If present, host `cloud_provider` must be a non-empty string identifying the
 cloud or hosting provider.
+If present, host `region` must be a non-empty string identifying the provider
+region or site.
