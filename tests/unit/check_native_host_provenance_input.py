@@ -32,6 +32,12 @@ with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(blank_name)], capture_output=True, text=True)
         assert result.returncode != 0
         assert "host provenance has no name" in result.stderr
+    for platform in ("android", "", "LINUX"):
+        invalid_platform = Path(directory) / "invalid-platform.json"
+        invalid_platform.write_text(json.dumps({"platform": platform, "name": "qualification-host"}), encoding="utf-8")
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(invalid_platform)], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "host provenance has an invalid platform" in result.stderr
     fractional_node = Path(directory) / "fractional-node.json"
     fractional_node.write_text('{"platform":"linux","name":"qualification-host","node_id":1.5}', encoding="utf-8")
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(fractional_node)], capture_output=True, text=True)
