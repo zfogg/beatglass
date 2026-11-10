@@ -1,5 +1,21 @@
 # Progress and handoff
 
+## 2026-11-10 — CLI parity and qualification follow-up
+
+The CLI Live path now consumes the shared presentation contract for confidence,
+beat count, stale/reacquiring state, and bounded tempo history; the GUI model
+exposes the same values to QML. The CLI Library summary reports real persisted
+SQLite cache hits, and queued analysis cancellation now preserves retryable
+recovery metadata through the worker-owned callback boundary.
+
+Windows focused CLI validation remains 4/4 passing. The isolated Linux
+PipeWire/FTXUI build validates both `beatglass-cli` and `beatglass-tool` with
+the focused contract, audio, codec, and snapshot tests. The macOS qualification
+script now also requires native Mach-O `beatglass-cli` and `beatglass-tool`
+artifacts in addition to the desktop and Core Audio bundles. Native macOS
+execution and Linux runtime sink capture still require their respective host
+environments; the current WSL session has no running PipeWire desktop daemon.
+
 ## 2026-11-10 — CLI qualification evidence for issue #4320
 
 The `beatglass-cli` prototype now builds on Windows with the FTXUI TUI and
