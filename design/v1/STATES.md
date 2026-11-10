@@ -288,3 +288,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Reapply action contract | Keyboard and button reapply actions are both available | Route both surfaces through one persisted-settings reapply/focus action. |
 | Unlock action contract | Unlock button restores pointer/keyboard interaction | Route the button through one unlock/focus action and preserve recovery focus on success. |
 | Hide action contract | Hide button restores the control window | Route the button through the same hide transition as keyboard actions. |
+| Show action contract | Show button launches the native overlay | Route the button through one launch/fallback action with evidence guidance. |
