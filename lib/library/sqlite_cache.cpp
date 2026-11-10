@@ -104,12 +104,14 @@ public:
     if (rc != SQLITE_DONE) throw std::runtime_error(sqlite3_errmsg(db_));
     return out;
   }
-  std::optional<RetryableRun> retryable_run(const std::string& id) {
+  std::optional<RetryableRun> retryable_run(const std::string& id, std::stop_token stop) {
     if (id.empty() || id.size() > kMaxCacheRunIdBytes || id.find('\0') != std::string::npos)
       throw std::invalid_argument("invalid run ID");
     Statement s(db_, "SELECT id,content,engine,config,mode,source_path,decoder_snapshot FROM runs WHERE id=? AND status='retryable'");
     bind(s.p, 1, id);
+    if (stop.stop_requested()) throw CollectionCancelled();
     const int rc = sqlite3_step(s.p);
+    if (stop.stop_requested()) throw CollectionCancelled();
     if (rc == SQLITE_DONE) return std::nullopt;
     if (rc != SQLITE_ROW) throw std::runtime_error(sqlite3_errmsg(db_));
     return RetryableRun{reinterpret_cast<const char*>(sqlite3_column_text(s.p, 0)),
@@ -255,7 +257,7 @@ SqliteCache::~SqliteCache() = default;
 void SqliteCache::begin(const std::string& id, const CacheKey& key, const std::string& source_path, const std::string& decoder_snapshot) { impl_->begin(id, key, source_path, decoder_snapshot); }
 bool SqliteCache::find(const CacheKey& key, std::string& result) { return impl_->find(key, result); }
 std::vector<RetryableRun> SqliteCache::retryable_runs(std::size_t limit, std::stop_token stop) { return impl_->retryable_runs(limit, stop); }
-std::optional<RetryableRun> SqliteCache::retryable_run(const std::string& id) { return impl_->retryable_run(id); }
+std::optional<RetryableRun> SqliteCache::retryable_run(const std::string& id, std::stop_token stop) { return impl_->retryable_run(id, stop); }
 bool SqliteCache::discard_retryable(const std::string& id) { return impl_->discard_retryable(id); }
 std::size_t SqliteCache::discard_retryable(const std::vector<std::string>& ids) { return impl_->discard_retryable(ids); }
 bool SqliteCache::mark_retryable(const std::string& id, const CacheKey& key) { return impl_->mark_retryable(id, key); }
