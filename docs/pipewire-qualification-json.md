@@ -238,3 +238,5 @@ If present, host `clock_quality` must be a non-empty string describing the
 clock quality classification.
 If present, host `clock_stratum` must be a positive integer identifying the
 clock synchronization stratum.
+If present, host `clock_poll_interval_ms` must be a non-negative integer
+describing clock status polling cadence.
