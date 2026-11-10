@@ -38,6 +38,13 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode != 0
     assert "host provenance has an invalid TPM flag" in result.stderr
 
+    for node_id in (0, -7):
+        invalid_node = Path(directory) / "invalid-node.json"
+        invalid_node.write_text(f'{{"platform":"linux","name":"qualification-host","node_id":{node_id}}}', encoding="utf-8")
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(invalid_node)], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "host provenance has an invalid node id" in result.stderr
+
     malformed = Path(directory) / "malformed.json"
     malformed.write_text("{not-json", encoding="utf-8")
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(malformed)], capture_output=True, text=True)
