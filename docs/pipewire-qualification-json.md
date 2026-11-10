@@ -226,3 +226,5 @@ If present, host `clock_jitter_ns` must be a non-negative numeric jitter
 measurement; boolean values are invalid.
 If present, host `clock_leap_state` must be a non-empty string describing leap
 second handling during qualification.
+If present, host `clock_sync_interval_ms` must be a non-negative integer
+describing the clock synchronization interval.
