@@ -50,7 +50,8 @@ if not isinstance(events, list) or not events:
 if any(not isinstance(event.get("event"), str) or not event["event"].strip() for event in events):
     raise SystemExit("transition events must have a non-empty event name")
 if isinstance(payload, dict) and payload.get("event_count") is not None:
-    if not isinstance(payload["event_count"], int) or isinstance(payload["event_count"], bool) or payload["event_count"] != len(events):
+    if (not isinstance(payload["event_count"], int) or isinstance(payload["event_count"], bool)
+            or payload["event_count"] <= 0 or payload["event_count"] != len(events)):
         raise SystemExit("transition event count does not match artifact")
 if any(not isinstance(event, dict) for event in events):
     raise SystemExit("transition evidence contains a non-object event")
