@@ -266,6 +266,8 @@ Before packaging a native run, validate the extracted host object directly:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json`.
 The host validator accepts one host path and an optional report path; missing
 or extra arguments fail before any evidence file is opened.
+The host evidence root must be a JSON object; scalar, null, and array roots are
+rejected before provenance fields are inspected.
 Malformed or ambiguous host JSON is rejected before any host fields are
 trusted; duplicate keys are not silently normalized.
 Missing host evidence files are rejected through the same unreadable-input path;
