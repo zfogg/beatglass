@@ -214,3 +214,5 @@ If present, host `network_state` must be a non-empty string describing network
 connectivity state during qualification.
 If present, host `dns_state` must be a non-empty string describing DNS
 resolution state during qualification.
+If present, host `ntp_state` must be a non-empty string describing clock
+synchronization state during qualification.
