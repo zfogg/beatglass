@@ -2668,7 +2668,6 @@ ApplicationWindow {
                 objectName: "reduceMotion"
                 text: "Reduce motion"
                 checked: window.themePreferencesBridge ? window.themePreferencesBridge.reduceMotion : false
-                        Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                 activeFocusOnTab: true
                 Accessible.name: "Reduce motion"
                 Accessible.role: Accessible.CheckBox
