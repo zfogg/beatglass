@@ -2053,8 +2053,7 @@ ApplicationWindow {
                     window.announceCaptureRecoveryState("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.")
                     overlayDisplay.forceActiveFocus()
                 } else if (window.overlayDisplaySelectionRequired) {
-                    window.announceCaptureRecoveryState("DJ overlay recovered; choose a display to re-enable overlay actions.")
-                    overlayDisplay.forceActiveFocus()
+                    window.focusOverlayAvailabilityRecovery("DJ overlay recovered; choose a display to re-enable overlay actions.", overlayDisplay)
                 } else {
                     window.overlayDisplayRecoveryPending = false
                     window.focusOverlayRestoredState("DJ overlay recovered; Show, Restore, and Reapply actions are available.", overlaySettingsRetentionReviewAction)
