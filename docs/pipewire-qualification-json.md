@@ -291,6 +291,9 @@ The executable acceptance check in
 `tests/unit/check_native_host_provenance_timing_acceptance.py` also confirms
 that the boundary values zero nanoseconds and one source are accepted when
 provided by a producer.
+Report generation preserves timing provenance in sorted `checked_fields`; the
+behavior check in `tests/unit/check_native_host_provenance_timing_report.py`
+verifies both timing keys survive into the emitted evidence report.
 Unknown-but-well-formed host fields are retained in checked_fields metadata so
 future producers do not silently lose provenance during report generation.
 Before packaging a native run, validate the extracted host object directly:
