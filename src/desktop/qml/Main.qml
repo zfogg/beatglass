@@ -685,9 +685,10 @@ ApplicationWindow {
             && storageRecovery.selectedRunId !== ""
             && storageRecovery.analysisRetryable
         onActivated: {
+            const runId = storageRecovery.selectedRunId
             storageRecovery.retrySelectedRun()
             window.overlayPersistedDiagnosticDismissed = true
-            window.announceVisualizationRecovery("Persisted recovery retry admitted from keyboard; reset status cleared.")
+            window.announceVisualizationRecovery("Persisted recovery retry admitted for " + runId + " from keyboard; reset status cleared.")
             retryPersistedRecovery.forceActiveFocus()
         }
     }
