@@ -2119,6 +2119,7 @@ ApplicationWindow {
             window.overlayPendingOpacity = -1
         } else if (!window.overlayOpacityEditInFlight) {
             window.overlaySettingsRevision += 1
+            overlayOpacityControl.forceActiveFocus()
         }
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent. Live evidence remains stale until fresh capture arrives.")
