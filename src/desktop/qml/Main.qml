@@ -2890,7 +2890,6 @@ ApplicationWindow {
                         text: window.browseFolder.toString() || "No folder selected"
                         elide: Text.ElideMiddle; Layout.fillWidth: true
                         Accessible.name: "Current folder: " + text
-                        Accessible.value: text + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.StaticText
                         ToolTip.text: "Current folder path"
                     }
