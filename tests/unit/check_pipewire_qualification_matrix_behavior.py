@@ -66,4 +66,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_reason), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid pending reason" not in result.stderr + result.stdout:
         raise SystemExit("malformed pending reason was accepted")
+    summary.write_text(json.dumps({"qualified": True, "native_artifacts": ["evidence.zip"]}), encoding="utf-8")
+    missing_commit = root / "missing-commit-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(missing_commit), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "missing commit provenance" not in result.stderr + result.stdout:
+        raise SystemExit("qualified summary without commit provenance was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
