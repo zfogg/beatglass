@@ -42,7 +42,8 @@ std::string format_bpm(const std::optional<float>& bpm) {
   std::ostringstream out; out << std::fixed << std::setprecision(1) << *bpm; return out.str();
 }
 Element metric(std::string label, std::string value, Color accent) {
-  return vbox({text(std::move(label)) | color(Color::GrayLight), text(std::move(value)) | bold | color(accent)}) | borderRounded | flex;
+  return vbox({text(std::move(label)) | color(Color::GrayLight) | italic,
+               text(std::move(value)) | bold | color(accent)}) | borderRounded | bgcolor(Color::RGB(18, 24, 31)) | flex;
 }
 struct AnalysisView {
   beatglass::TempoResult result;
@@ -71,17 +72,18 @@ std::vector<float> decode_waveform(const std::filesystem::path& path) {
   }
   return peaks;
 }
-Element waveform_chart(const std::vector<float>& waveform, std::uint64_t beats) {
-  return vbox({text("WAVEFORM") | bold | color(Color::GrayLight),
+Element waveform_chart(const std::vector<float>& waveform, std::uint64_t beats, float playback_fraction = -1.0f) {
+  return vbox({text("WAVEFORM") | bold | underlined | color(Color::GreenLight),
                graph([=](int width, int height) {
                  std::vector<int> values(width);
                  for (int x = 0; x < width; ++x) {
                    const auto sample = waveform.empty() ? 0.08f : waveform[std::min<std::size_t>(waveform.size() - 1, static_cast<std::size_t>(x * waveform.size() / std::max(1, width)))];
                    const auto beat_marker = !waveform.empty() && beats > 0 && x % std::max(1, width / static_cast<int>(std::min<std::uint64_t>(beats, 16))) == 0 ? 0.12f : 0.0f;
-                   values[x] = std::clamp(static_cast<int>((sample + beat_marker) * height), 0, height - 1);
+                   const auto cursor = playback_fraction >= 0.0f && x == std::clamp(static_cast<int>(playback_fraction * width), 0, width - 1) ? 0.85f : 0.0f;
+                   values[x] = std::clamp(static_cast<int>((sample + beat_marker + cursor) * height), 0, height - 1);
                  }
                  return values;
-               }) | color(Color::GreenLight) | borderRounded}) | flex;
+               }) | color(Color::RGB(99, 255, 183)) | bgcolor(Color::RGB(8, 28, 25)) | borderRounded}) | flex;
 }
 std::vector<Track> discover(const std::filesystem::path& root, bool recursive = false) {
   std::vector<Track> tracks;
@@ -366,7 +368,7 @@ int main(int argc, char** argv) {
     const auto progress_total = analysis_total.load(std::memory_order_acquire);
     const auto progress_frames = analysis_frames.load(std::memory_order_acquire);
     const auto progress = progress_total ? std::min<std::uint64_t>(100, progress_frames * 100 / progress_total) : 0;
-    auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + (progress_total ? "  " + std::to_string(progress) + "%" : ""))}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
+    auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + (progress_total ? "  " + std::to_string(progress) + "%" : ""))}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(status) | color(Color::GrayLight) | italic;
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
     const auto playback_status =
 #ifdef _WIN32
@@ -375,6 +377,7 @@ int main(int argc, char** argv) {
         std::string{};
 #endif
     std::string playback_position = "—";
+    float playback_fraction = -1.0f;
 #ifdef _WIN32
     const auto playback_total = playback.total_frames();
     const auto playback_frame = std::min(playback.current_frame(), playback_total);
@@ -383,10 +386,11 @@ int main(int argc, char** argv) {
       const auto total_seconds = playback_total / result->metadata.sample_rate;
       playback_position = std::to_string(seconds / 60) + ":" + (seconds % 60 < 10 ? "0" : "") + std::to_string(seconds % 60) +
           " / " + std::to_string(total_seconds / 60) + ":" + (total_seconds % 60 < 10 ? "0" : "") + std::to_string(total_seconds % 60);
+      playback_fraction = static_cast<float>(playback_frame) / static_cast<float>(playback_total);
     }
 #endif
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), hbox({text("Folder: "), folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: "), filter_input->Render() | flex, text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0, playback_fraction), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto toggle_live = [&] {
 #ifdef _WIN32
@@ -435,16 +439,16 @@ int main(int argc, char** argv) {
     }
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
     const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
-    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render()}), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render()}), text(live_status) | color(Color::GrayLight) | italic, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input}), [&] {
-    return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold,
+    return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
       text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
       text("Preferences are session-scoped for this prototype."), separator(),
-      text("PRESENTATION") | bold, reduce_motion_checkbox->Render(),
-      text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight),
-      text("PLAYBACK") | bold, hbox({text("Seek step (1–60 seconds): "), seek_step_input->Render() | size(WIDTH, LESS_THAN, 8)}),
+      text("PRESENTATION") | bold | underlined, reduce_motion_checkbox->Render(),
+      text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight) | italic,
+      text("PLAYBACK") | bold | underlined, hbox({text("Seek step (1–60 seconds): ") | italic, seek_step_input->Render() | size(WIDTH, LESS_THAN, 8)}),
       separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."),
       text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
@@ -456,9 +460,9 @@ int main(int argc, char** argv) {
     auto library_render = library_tab->Render();
     auto live_render = live_tab->Render();
     auto settings_render = settings_tab->Render();
-    if (tab == 0) library_render = library_render | color(Color::Cyan) | bold;
-    if (tab == 1) live_render = live_render | color(Color::Cyan) | bold;
-    if (tab == 2) settings_render = settings_render | color(Color::Cyan) | bold;
+    if (tab == 0) library_render = library_render | color(Color::Black) | bgcolor(Color::Cyan) | bold | underlined;
+    if (tab == 1) live_render = live_render | color(Color::Black) | bgcolor(Color::GreenLight) | bold | underlined;
+    if (tab == 2) settings_render = settings_render | color(Color::Black) | bgcolor(Color::YellowLight) | bold | underlined;
     return hbox({library_render, text(" "), live_render, text(" "), settings_render}) | center;
   });
   auto root_component = CatchEvent(Container::Vertical({tab_bar, tabs}), [&](Event event) {
