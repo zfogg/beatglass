@@ -168,3 +168,5 @@ build that produced the evidence.
 If present, host `kernel` must be a non-empty string describing the host kernel.
 If present, host `os_version` must be a non-empty string identifying the host OS
 release.
+If present, host `arch` must be a non-empty string identifying the CPU
+architecture.
