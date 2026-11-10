@@ -268,6 +268,9 @@ Pass a second path to emit a deterministic validation report for the bundle:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 Validate that generated report before packaging with:
 `python tests/pipewire/validate_native_host_provenance_report.py REPORT.json`.
+The report shape is documented in
+`tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
+both required provenance fields (`platform` and `name`) in `checked_fields`.
 If present, host `clock_source_latency_ns` must be a non-negative numeric
 measurement of source latency; boolean values are invalid.
 If present, host `clock_source_noise_ns` must be a non-negative numeric

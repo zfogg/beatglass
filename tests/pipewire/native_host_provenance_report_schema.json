@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Beatglass native host provenance report",
+  "type": "object",
+  "required": ["schema", "valid", "platform", "name", "checked_fields"],
+  "properties": {
+    "schema": {"const": "beatglass-native-host-provenance-v1"},
+    "valid": {"const": true},
+    "platform": {"enum": ["linux", "windows", "macos"]},
+    "name": {"type": "string", "minLength": 1},
+    "checked_fields": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 2, "uniqueItems": true}
+  },
+  "additionalProperties": false
+}
