@@ -356,6 +356,8 @@ The machine-readable schema encodes this minimum with `minItems: 2` in
 addition to the executable validator checks.
 Each schema item also carries `minLength: 1`, matching rejection of blank
 field names.
+The report schema pins JSON Schema draft 2020-12 for tooling that validates the
+machine-readable contract independently.
 Its platform enum is intentionally limited to `linux`, `windows`, and `macos`,
 matching the host provenance validator.
 The schema also encodes a minimum length of one for report names, alongside
