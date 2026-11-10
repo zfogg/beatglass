@@ -2056,7 +2056,7 @@ ApplicationWindow {
                     + "; combined output may be ambiguous"
                     + "; Ctrl+Alt+Shift+B focuses beat pulse status"
                 Accessible.role: Accessible.Grouping
-                Accessible.description: "Capture-only DJ overlay: current live status, tempo, harmony, beat-pulse period, capture state, and recovery action. Track and deck metadata are unavailable without an explicitly configured DJ-app integration. Combined output may contain overlapping decks, so tempo, key, and chord evidence can be ambiguous. Ctrl+Alt+Shift+B focuses the beat pulse status." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
+                Accessible.description: "Capture-only DJ overlay: current live status, tempo, harmony, beat-pulse period, capture state, and recovery action. Track and deck metadata are unavailable without an explicitly configured DJ-app integration. The selected output may also include system notifications and other routed audio. Combined output may contain overlapping decks, so tempo, key, and chord evidence can be ambiguous. Ctrl+Alt+Shift+B focuses the beat pulse status." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
                 ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true
