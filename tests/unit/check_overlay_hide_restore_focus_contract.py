@@ -1081,6 +1081,14 @@ def test_overlay_pulse_status_label_exposes_running_state():
     assert "Accessible.role: Accessible.Status" in label
 
 
+def test_overlay_pulse_fades_with_reduced_motion_aware_easing():
+    start = QML.index("property real pulseOpacity")
+    body = QML[start : QML.index("            Timer", start)]
+    assert "Behavior on pulseOpacity" in body
+    assert "Easing.OutQuad" in body
+    assert "reduceMotion" in body
+
+
 def test_recovery_pause_focus_helper_reports_target_result():
     start = QML.index("function focusOverlayRecoveryPauseState")
     body = QML[start : QML.index("    function resetOverlayRecoveryAttempts", start)]

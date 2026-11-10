@@ -1930,6 +1930,7 @@ ApplicationWindow {
             Accessible.value: pulseOpacity > 0 ? "active" : "idle"
             Accessible.description: "Beat-synchronized visual metronome; " + (window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0 ? "tracking at " + window.liveBridge.tempo + " BPM" : "waiting for valid live BPM") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "; reduced motion disables pulsing" : ".")
             border.width: 1 + pulseOpacity * 3
+            Behavior on pulseOpacity { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
             Behavior on border.width { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 100 } }
             Timer {
                 id: beatPulse
