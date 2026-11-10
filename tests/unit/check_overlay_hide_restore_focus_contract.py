@@ -1157,6 +1157,16 @@ def test_overlay_pulse_status_exposes_transition_announcement():
     assert "latest transition" in label
 
 
+def test_overlay_pulse_status_has_keyboard_focus_path():
+    assert 'objectName: "overlayPulseStatusFocusShortcut"' in QML
+    assert 'sequence: "Ctrl+Alt+Shift+B"' in QML
+    assert "function focusOverlayPulseStatus()" in QML
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert "activeFocusOnTab: true" in label
+    assert "Accessible.focusable: true" in label
+
+
 def test_overlay_pulse_transitions_update_accessible_announcement():
     start = QML.index("function onReduceMotionChanged()")
     body = QML[start : QML.index("            Connections", start)]
