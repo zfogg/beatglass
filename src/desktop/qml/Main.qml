@@ -726,6 +726,15 @@ ApplicationWindow {
         if (focusTarget)
             focusTarget.forceActiveFocus()
     }
+    function focusOverlayAvailabilityRecovery(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Retained settings remain available."))
+        if (target)
+            target.forceActiveFocus()
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -2024,11 +2033,7 @@ ApplicationWindow {
                 window.overlayDisplayRecoveryPending = true
                 window.overlayCaptureEvidenceStale = true
                 clickThroughToggle.checked = false
-                window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers. Live evidence is stale until fresh capture arrives.")
-                window.show()
-                window.raise()
-                window.requestActivate()
-                retryOverlay.forceActiveFocus()
+                window.focusOverlayAvailabilityRecovery("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.", retryOverlay)
             } else if (window.overlayBridge) {
                 window.overlayRecoveryAttemptCount = 0
                 window.overlayRecoveryPausedByUser = false
