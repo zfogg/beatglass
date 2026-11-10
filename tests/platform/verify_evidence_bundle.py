@@ -79,6 +79,10 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if not isinstance(entry, dict):
             errors.append(f"invalid artifact entry: {entry}")
             continue
+        unknown_fields = set(entry) - {"path", "sha256", "role"}
+        if unknown_fields:
+            errors.append(f"unsupported artifact fields: {sorted(unknown_fields)}")
+            continue
         relative = entry.get("path")
         raw_expected = entry.get("sha256", "")
         expected = raw_expected.lower() if isinstance(raw_expected, str) else None
