@@ -924,3 +924,14 @@ def test_theme_selector_and_reset_use_shared_selection_helper():
     reset_start = QML.index('objectName: "resetAppearance"')
     reset = QML[reset_start : QML.index('objectName: "', reset_start + 20)]
     assert "window.selectThemeIndex(0)" in reset
+
+
+def test_reduce_motion_switch_uses_named_preference_action():
+    start = QML.index("function setReduceMotionPreference")
+    helper = QML[start : QML.index("    // Keep the visual selection synchronized", start)]
+    assert "themePreferencesBridge.reduceMotion = enabled" in helper
+    assert "themePreferenceAnnouncement" in helper
+    assert "return false" in helper
+    switch_start = QML.index('objectName: "reduceMotion"')
+    switch = QML[switch_start : QML.index('objectName: "themePreferenceAnnouncement"', switch_start)]
+    assert "window.setReduceMotionPreference(checked)" in switch
