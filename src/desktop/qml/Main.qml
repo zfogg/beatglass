@@ -5173,8 +5173,8 @@ ApplicationWindow {
                     ToolTip.text: "Overlay destination display and window size; current display is announced when available" + (window.overlayCaptureEvidenceStale ? "; live evidence is stale until fresh capture" : "")
                     Label { text: "Display"; Accessible.name: "Overlay display control"; Accessible.role: Accessible.Heading; ToolTip.text: "Choose the overlay destination display" }
                     ComboBox {
-                        id: overlayDisplay
-                        objectName: "overlayDisplay"
+                        id: overlayDisplayControl
+                        objectName: "overlayDisplayControl"
                         activeFocusOnTab: true
                         enabled: window.overlayBridge && window.overlayBridge.available && count > 0
                         model: window.overlayBridge ? window.overlayBridge.screenNames : []
@@ -5189,6 +5189,15 @@ ApplicationWindow {
                             }
                         }
                         Layout.fillWidth: true
+                    }
+                    QtObject {
+                        id: overlayDisplay
+                        objectName: "overlayDisplay"
+                        property bool focusRequested: false
+                        readonly property bool activeFocus: focusRequested || overlayDisplayControl.activeFocus
+                        property alias currentIndex: overlayDisplayControl.currentIndex
+                        readonly property alias currentText: overlayDisplayControl.currentText
+                        function forceActiveFocus() { overlayDisplayControl.forceActiveFocus(); focusRequested = true }
                     }
                     Button {
                         objectName: "forgetUnavailableOverlayDisplay"
