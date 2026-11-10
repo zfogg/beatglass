@@ -2082,14 +2082,9 @@ ApplicationWindow {
                         window.recoverOverlayAfterDisplayChange()
                     else {
                         window.overlayDisplayRecoveryPending = false
-                        window.show()
-                        window.raise()
-                        window.requestActivate()
-                        window.announceCaptureRecoveryState("DJ overlay display restored; recovery remains paused until Resume recovery is chosen.")
+                        window.focusOverlayAvailabilityRecovery("DJ overlay display restored; recovery remains paused until Resume recovery is chosen.", resumeOverlayRecovery)
                     }
-                    if (window.overlayRecoveryPausedByUser)
-                        resumeOverlayRecovery.forceActiveFocus()
-                    else
+                    if (!window.overlayRecoveryPausedByUser)
                         retryOverlay.forceActiveFocus()
                 } else {
                     window.overlayDisplaySelectionRequired = true
