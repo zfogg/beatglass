@@ -197,6 +197,16 @@ TEST_CASE("catalog reports a file path as an invalid browse root") {
  CHECK_FALSE(result.diagnostic.empty());
  CHECK(result.status == beatglass::library::CatalogStatus::invalid_root);
 }
+TEST_CASE("catalog exposes root-relative identity paths") {
+ TempDir dir; std::filesystem::create_directory(dir.path / "nested");
+ dir.file("track.wav");
+ const auto direct = beatglass::library::browse(dir.path);
+ REQUIRE(direct.entries.size() == 2);
+ CHECK(direct.entries[0].relative_path == direct.entries[0].path.filename());
+ const auto recursive = beatglass::library::browse_recursive(dir.path);
+ REQUIRE(recursive.entries.size() == 2);
+ CHECK(recursive.entries.back().relative_path == std::filesystem::path("nested"));
+}
 TEST_CASE("catalog cancellation returns no partial snapshot") {
  TempDir dir; dir.file("track.wav");
  std::stop_source source; source.request_stop();

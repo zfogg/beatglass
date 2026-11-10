@@ -68,7 +68,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
     // Duration requires opening and decoding the source. Catalog browsing is
     // intentionally filesystem-only, so it reports an explicit unknown value
     // until the analysis/metadata worker supplies decoded duration.
-    result.entries.push_back({entry.path(), name, title, {}, directory, bytes, std::move(format), -1.0});
+    result.entries.push_back({entry.path(), std::filesystem::relative(entry.path(), folder), name, title, {}, directory, bytes, std::move(format), -1.0});
   }
   if (error) { result.entries.clear(); result.status = CatalogStatus::filesystem_error; result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
@@ -117,7 +117,7 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
     if (!directory) {
       format = audio_format_for_path(entry.path());
     }
-    result.entries.push_back({entry.path(), name, entry.path().stem().string(), {}, directory,
+    result.entries.push_back({entry.path(), std::filesystem::relative(entry.path(), folder), name, entry.path().stem().string(), {}, directory,
                               bytes, std::move(format), -1.0});
   }
   if (error) { result.entries.clear(); result.status = CatalogStatus::filesystem_error; result.diagnostic = error.message(); return result; }
