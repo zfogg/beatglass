@@ -49,3 +49,5 @@ The verifier applies the same aggregate budget, keeping generated manifests
 and independently checked bundles under one resource policy.
 Automation can pass `--json` to receive a stable object containing `valid` and
 `errors` fields on stdout while retaining the normal exit status contract.
+Readiness reports are also written atomically, preventing interrupted
+qualification summaries from replacing a previously complete report.
