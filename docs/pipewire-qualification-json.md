@@ -333,6 +333,9 @@ same fail-closed rule for boolean platform-security evidence.
 The duplicate-TPM regression in
 `tests/unit/check_native_host_provenance_tpm_duplicate.py` applies the same
 ambiguity protection to hardware-presence evidence.
+The duplicate-node regression in
+`tests/unit/check_native_host_provenance_node_duplicate.py` keeps repeated
+capture-node identifiers from becoming ambiguous provenance.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
