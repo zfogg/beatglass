@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import unicodedata
 from datetime import datetime, timedelta, timezone
 import sys
 REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
@@ -92,6 +93,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or not isinstance(expected, str)
             or raw_expected != expected
             or len(relative) > 512
+            or relative != unicodedata.normalize("NFC", relative)
             or relative != relative.strip()
             or "\\" in relative
             or any(ord(char) < 32 for char in relative)
