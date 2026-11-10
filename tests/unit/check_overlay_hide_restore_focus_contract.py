@@ -298,3 +298,10 @@ def test_display_focus_shortcut_announces_stale_boundary():
     assert "overlayDisplay.forceActiveFocus()" in body
     assert "overlayDisplaySelectionRequired" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_retry_focus_shortcut_announces_stale_boundary():
+    start = QML.index("function focusOverlayRetryShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "retryOverlay.forceActiveFocus()" in body
+    assert "overlayCaptureEvidenceStale" in body
