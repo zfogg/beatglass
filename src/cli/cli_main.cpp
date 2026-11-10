@@ -222,16 +222,23 @@ int main(int argc, char** argv) {
   std::string live_status = "Capture stopped.";
   std::optional<float> live_bpm;
   beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
+  std::uint32_t live_sample_rate = 0;
+  std::uint64_t live_observed_frames = 0;
+  std::uint64_t live_discontinuities = 0;
   std::vector<float> live_waveform(160, 0.0f);
   live_session = std::make_unique<beatglass::windows::LoopbackSession>(live_epochs, [&] {
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
     live_bpm.reset();
     live_tracking_state = beatglass::TrackingState::reacquiring;
+    live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
   });
 #else
   std::string live_status = "Native loopback capture is unavailable in this build.";
   std::optional<float> live_bpm;
   beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
+  std::uint32_t live_sample_rate = 0;
+  std::uint64_t live_observed_frames = 0;
+  std::uint64_t live_discontinuities = 0;
   std::vector<float> live_waveform(160, 0.0f);
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
@@ -317,6 +324,7 @@ int main(int argc, char** argv) {
       live_session->stop();
       live_tracking_state = beatglass::TrackingState::stopped;
       live_bpm.reset();
+      live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
       live_status = "Capture stopped.";
       return;
     }
@@ -353,7 +361,7 @@ int main(int argc, char** argv) {
     }
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
     const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
-    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render()}), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render()}), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto settings = Renderer(Container::Vertical({reduce_motion_checkbox}), [&] {
@@ -401,6 +409,9 @@ int main(int argc, char** argv) {
           const auto layout = packet.channels == 1 ? beatglass::ChannelLayout::mono : packet.channels == 2 ? beatglass::ChannelLayout::stereo : beatglass::ChannelLayout::multichannel;
           beatglass::AudioBlock block{{packet.sample_rate, static_cast<std::uint16_t>(packet.channels), layout}, packet.epoch, packet.first_frame, static_cast<std::int64_t>(packet.qpc_100ns) * 100, packet.discontinuity, std::span<const float>(packet.samples.data(), packet.sample_count)};
           try {
+            live_sample_rate = packet.sample_rate;
+            live_observed_frames = packet.first_frame + packet.sample_count;
+            if (packet.discontinuity) ++live_discontinuities;
             const auto state = live_replay->process(block);
             live_bpm = state.bpm;
             live_tracking_state = state.state;
