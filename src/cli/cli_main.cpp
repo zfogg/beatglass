@@ -1173,6 +1173,7 @@ int main(int argc, char** argv) {
   auto set_live_multiplier = [&](float multiplier) {
     live_bpm_multiplier = multiplier;
     live_status = std::string("Displayed tempo correction set to ") + (multiplier < 1.0f ? "half" : multiplier > 1.0f ? "double" : "normal") + " BPM.";
+    persist_preferences();
   };
   auto half_bpm_button = Button(" ½ BPM ", [&] { set_live_multiplier(0.5f); });
   auto normal_bpm_button = Button(" Normal BPM ", [&] { set_live_multiplier(1.0f); });

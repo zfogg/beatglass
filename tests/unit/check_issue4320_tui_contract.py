@@ -24,6 +24,8 @@ def main() -> int:
         raise SystemExit("CLI Live spectrum does not expose bounded FFT history")
     if '"source changed") != std::string::npos ? "  [stale]"' not in tui:
         raise SystemExit("CLI Library does not distinguish stale source analysis from failed analysis")
+    if 'live_status = std::string("Displayed tempo correction set' not in tui or 'persist_preferences();' not in tui[tui.find('auto set_live_multiplier'):tui.find('auto half_bpm_button')]:
+        raise SystemExit("CLI BPM interpretation setting is not persisted when changed")
     if 'Button(" Recover persisted "' not in tui:
         raise SystemExit("CLI Library does not expose persisted recovery action")
     for marker in ("live_endpoint_id", "live_endpoint_name", "live_endpoint_preference", "updated.live_endpoint_id", "updated.live_endpoint_name"):
