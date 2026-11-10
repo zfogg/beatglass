@@ -3963,7 +3963,7 @@ ApplicationWindow {
                             Button {
                                 id: retryAnalysis
                                 text: "Retry analysis"
-                                objectName: "retryAdmittedAnalysis"
+                                objectName: "retryAnalysis"
                                 activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
                                 enabled: visible && window.analysisJobBridge.canRetry
@@ -3995,7 +3995,8 @@ ApplicationWindow {
                                 onAccepted: { if (!window.analysisJobBridge || !window.analysisJobBridge.canRetry) { window.announceVisualizationRecovery("Analysis recovery changed before discard; no recovery was discarded. Retry remains available when the worker reaches a terminal state."); retryAnalysis.forceActiveFocus() } else { window.analysisJobBridge.discard(); window.clearVisualizationForCaptureState("Analysis recovery discarded; previous visualization evidence is stale until a new accepted result."); window.announceVisualizationRecovery("Analysis recovery discarded; focus remains on the recovery controls."); retryAnalysis.forceActiveFocus() } }
                             }
                             Button {
-                                objectName: "cancelAdmittedAnalysis"
+                                id: cancelAnalysis
+                                objectName: "cancelAnalysis"
                                 text: "Cancel analysis"
                                 activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null
