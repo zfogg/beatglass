@@ -266,3 +266,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Show shortcut recovery | User invokes the keyboard shortcut for showing the overlay | Activate controls, focus Show, and announce whether live evidence remains stale. |
 | Hide shortcut recovery | User invokes the hide/restore focus shortcut | Use the explicit hidden-by-user state to focus Hide or Restore, avoiding ambiguous shortcut state and preserving evidence guidance. |
 | Size shortcut recovery | User invokes the overlay size focus shortcut | Activate controls, focus Size, and announce the current size with the evidence freshness boundary. |
+| Click-through shortcut recovery | User invokes the click-through focus shortcut | Activate controls, focus the interaction toggle, and announce current mode plus evidence freshness. |
