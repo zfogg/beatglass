@@ -1,4 +1,6 @@
 #include "beatglass/library/detail/cache_identity.hpp"
+#include <cstdint>
+#include <limits>
 #include <system_error>
 namespace beatglass::library_detail {
 CacheIdentityResult cache_identity_from_file(const std::filesystem::path& path,
@@ -21,8 +23,18 @@ FingerprintStatus refresh_collection_file(SqliteCache& cache, const std::filesys
   if (diagnostic) *diagnostic = fingerprint_status_diagnostic(fingerprint.status, fingerprint.diagnostic);
   if (fingerprint.status != FingerprintStatus::ok) return fingerprint.status;
   const auto name = path.filename().string();
+  // Apple exposes file_time_type::rep as a wider integer than SQLite's
+  // signed 64-bit metadata column. Clamp at the storage boundary so the
+  // identity remains deterministic without relying on implementation-defined
+  // narrowing.
+  const auto modified = fingerprint.modified.time_since_epoch().count();
+  const auto modified_i64 = modified > std::numeric_limits<std::int64_t>::max()
+      ? std::numeric_limits<std::int64_t>::max()
+      : modified < std::numeric_limits<std::int64_t>::min()
+          ? std::numeric_limits<std::int64_t>::min()
+          : static_cast<std::int64_t>(modified);
   cache.put_entry({path.string(), name, "audio", fingerprint.digest, fingerprint.size,
-                   fingerprint.modified.time_since_epoch().count()});
+                   modified_i64});
   return FingerprintStatus::ok;
 }
 
