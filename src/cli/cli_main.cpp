@@ -464,6 +464,7 @@ int main(int argc, char** argv) {
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0, playback_fraction), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), cancel_analysis_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   ←/→ or Prev/Next   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
+  std::string live_button_label = " Start monitoring ";
   auto toggle_live = [&] {
 #ifdef _WIN32
     if (live_session && live_session->state() != beatglass::SourceState::stopped) {
@@ -472,6 +473,7 @@ int main(int argc, char** argv) {
       live_bpm.reset();
       live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
       live_status = "Capture stopped.";
+      live_button_label = " Start monitoring ";
       return;
     }
     if (live_endpoint_ids.empty()) { live_status = "No render endpoint is available."; return; }
@@ -480,13 +482,16 @@ int main(int argc, char** argv) {
       live_status = "Selected sink is stale; refresh sinks before monitoring.";
       return;
     }
-    if (live_session->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)])) live_status = "Starting capture…";
+    if (live_session->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)])) {
+      live_status = "Starting capture…";
+      live_button_label = " Stop monitoring ";
+    }
     else live_status = "Capture could not start; inspect endpoint permissions or device state.";
 #else
     live_status = "Native loopback capture is unavailable in this build.";
 #endif
   };
-  auto live_button = Button(" Start monitoring ", toggle_live);
+  auto live_button = Button(&live_button_label, toggle_live);
   auto refresh_live_button = Button(" Refresh sinks ", [&] {
 #ifdef _WIN32
     live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
