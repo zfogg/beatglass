@@ -172,3 +172,5 @@ If present, host `arch` must be a non-empty string identifying the CPU
 architecture.
 If present, host `container_id` must be a non-empty string identifying the
 container or sandbox that produced the evidence.
+If present, host `timezone` must be a non-empty string describing the host
+clock timezone used for human-readable timestamps.
