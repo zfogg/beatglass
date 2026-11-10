@@ -98,7 +98,7 @@ TEST_CASE("virtual decoder matches path decoder on generated v1 codec fixtures")
     std::vector<char> bytes(std::istreambuf_iterator<char>{in}, {}); REQUIRE_FALSE(bytes.empty());
     MemorySource source; source.limit = 37; source.bytes.reserve(bytes.size());
     for (char c : bytes) source.bytes.push_back(static_cast<std::byte>(static_cast<unsigned char>(c)));
-    FileReader path_reader(path); VirtualFileReader virtual_reader(source, 1);
+    FileReader path_reader(path, 1); VirtualFileReader virtual_reader(source, 1);
     CHECK(virtual_reader.metadata().sample_rate == path_reader.metadata().sample_rate);
     CHECK(virtual_reader.metadata().channels == path_reader.metadata().channels);
     CHECK(virtual_reader.metadata().frames == path_reader.metadata().frames);
