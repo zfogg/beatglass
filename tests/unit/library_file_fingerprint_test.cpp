@@ -18,7 +18,9 @@ TEST_CASE("file fingerprint detects content changes even with restored attribute
   REQUIRE(a.digest == "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
   auto time = std::filesystem::last_write_time(f.path); f.write("xyz"); std::filesystem::last_write_time(f.path, time);
   auto b = fingerprint_file(f.path); REQUIRE(b.status == FingerprintStatus::ok); REQUIRE(b.digest != a.digest);
-  REQUIRE(b.size == a.size); REQUIRE(b.modified == a.modified);
+  REQUIRE(b.size == a.size);
+  const bool modification_time_preserved = b.modified == a.modified;
+  REQUIRE(modification_time_preserved);
 }
 TEST_CASE("file fingerprint observes cancellation and changes during read") {
   TempFile f; f.write(std::string(140000, 'x'));
