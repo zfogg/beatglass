@@ -238,6 +238,8 @@ def main() -> int:
                 category = "size"
             elif error.startswith("manifest exceeds "):
                 category = "manifest_size"
+            elif error.startswith("artifacts exceed ") and "entries" in error:
+                category = "entry_count"
             elif error.startswith(("artifacts exceed ", "total artifact bytes exceed ", "too many artifacts")):
                 category = "resource_limit"
             elif error.startswith("missing provenance field"):
