@@ -479,3 +479,12 @@ def test_click_through_button_routes_to_named_action():
     assert "setClickThrough(requestedClickThrough)" in body
     assert "overlayInteractionMode.forceActiveFocus()" in body
     assert "onClicked: window.handleOverlayClickThroughButtonAction(checked)" in QML
+
+
+def test_opacity_edit_recovery_keeps_slider_focused():
+    start = QML.index("function focusOverlayOpacityEditRecovery")
+    body = QML[start : QML.index("    function handleOverlayClickThroughButtonAction", start)]
+    assert "overlayOpacityControl.forceActiveFocus()" in body
+    assert "announceCaptureRecoveryState(message" in body
+    assert 'window.focusOverlayOpacityEditRecovery("DJ overlay opacity could not be changed' in QML
+    assert 'window.focusOverlayOpacityEditRecovery("DJ overlay opacity edit complete' in QML
