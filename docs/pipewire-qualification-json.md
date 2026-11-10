@@ -271,6 +271,8 @@ Validate that generated report before packaging with:
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
+The list must also be sorted and contain each field only once; duplicate or
+out-of-order fields are rejected before packaging.
 If present, host `clock_source_latency_ns` must be a non-negative numeric
 measurement of source latency; boolean values are invalid.
 If present, host `clock_source_noise_ns` must be a non-negative numeric
