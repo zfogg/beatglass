@@ -8,9 +8,108 @@
 #include "beatglass/core/playback_session.hpp"
 #if defined(BEATGLASS_HAS_PIPEWIRE)
 #include "beatglass/capture/pipewire_source.hpp"
+#if !defined(_WIN32) && !defined(__APPLE__)
+#include "beatglass/desktop/pipewire_playback_session.hpp"
+#endif
 #endif
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
 #include "beatglass/core/music_replay.hpp"
+#endif
+
+#if defined(BEATGLASS_HAS_PIPEWIRE) && !defined(_WIN32) && !defined(__APPLE__)
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <cstdint>
+#include <filesystem>
+#include <memory>
+#include <mutex>
+#include <stdexcept>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+#endif
+
+#if defined(BEATGLASS_HAS_PIPEWIRE) && !defined(_WIN32) && !defined(__APPLE__)
+class CliPlayback final {
+public:
+  CliPlayback() : worker_([this] { run(); }) {}
+  ~CliPlayback() { { std::lock_guard lock(mutex_); command_ = Command::shutdown; } condition_.notify_one(); worker_.join(); }
+  void play(const std::filesystem::path& path) { { std::lock_guard lock(mutex_); path_ = path; command_ = Command::play; } condition_.notify_one(); }
+  void resume() { request(Command::resume); }
+  void pause() { request(Command::pause); }
+  void seek_seconds(std::int64_t seconds) { { std::lock_guard lock(mutex_); seek_delta_seconds_ = seconds; command_ = Command::seek; } condition_.notify_one(); }
+  void stop() { request(Command::stop); }
+  beatglass::PlaybackState state() const noexcept { return state_.load(std::memory_order_acquire); }
+  std::uint64_t epoch() const noexcept { return epoch_.load(std::memory_order_acquire); }
+  std::uint64_t current_frame() const noexcept { return current_frame_.load(std::memory_order_acquire); }
+  std::uint64_t total_frames() const noexcept { return total_frames_.load(std::memory_order_acquire); }
+  std::string status() const { std::lock_guard lock(mutex_); return status_; }
+private:
+  enum class Command { none, play, resume, pause, seek, stop, shutdown };
+  void request(Command command) { { std::lock_guard lock(mutex_); command_ = command; } condition_.notify_one(); }
+  Command take_command() { std::lock_guard lock(mutex_); const auto command = command_; command_ = Command::none; return command; }
+  std::int64_t take_seek_delta_seconds() { std::lock_guard lock(mutex_); const auto delta = seek_delta_seconds_; seek_delta_seconds_ = 0; return delta; }
+  void set_status(std::string status) { std::lock_guard lock(mutex_); status_ = std::move(status); }
+  void run() {
+    std::unique_ptr<beatglass::FileReader> reader;
+    beatglass::pipewire::PlaybackSession output;
+    std::vector<float> decoded(4096);
+    std::uint64_t next_epoch = 0;
+    bool shutdown = false;
+    while (!shutdown) {
+      const auto command = take_command();
+      if (command == Command::shutdown) break;
+      if (command == Command::play) {
+        output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
+        try {
+          reader = std::make_unique<beatglass::FileReader>(path_, ++next_epoch);
+          const auto& metadata = reader->metadata(); std::string error;
+          current_frame_.store(0, std::memory_order_release); total_frames_.store(metadata.frames, std::memory_order_release);
+          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
+          epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status(output.status());
+        } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
+      } else if (command == Command::resume) {
+        if (reader && output.resume()) { state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status(output.status()); }
+      } else if (command == Command::pause) {
+        if (reader && output.pause()) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status(output.status()); }
+      } else if (command == Command::seek && reader) {
+        try {
+          const auto& metadata = reader->metadata(); const auto delta = take_seek_delta_seconds() * static_cast<std::int64_t>(metadata.sample_rate); const auto current = current_frame_.load(std::memory_order_acquire);
+          const auto target = delta < 0 && current < static_cast<std::uint64_t>(-delta) ? 0 : delta < 0 ? current - static_cast<std::uint64_t>(-delta) : std::min<std::uint64_t>(metadata.frames, current + static_cast<std::uint64_t>(delta));
+          output.stop(); reader->seek(target, ++next_epoch); std::string error;
+          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
+          current_frame_.store(target, std::memory_order_release); epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback seeked to frame " + std::to_string(target) + ".");
+        } catch (const std::exception& error) { set_status(std::string("Playback seek failed: ") + error.what()); }
+      } else if (command == Command::stop) {
+        output.stop(); reader.reset(); current_frame_.store(0, std::memory_order_release); total_frames_.store(0, std::memory_order_release); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status(output.status());
+      }
+      if (!reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) { std::unique_lock lock(mutex_); condition_.wait_for(lock, std::chrono::milliseconds(20), [&] { return command_ != Command::none; }); continue; }
+      const auto read = reader->read(decoded);
+      if (read.status == beatglass::FileReadStatus::end) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
+      if (read.status != beatglass::FileReadStatus::data) continue;
+      current_frame_.store(read.block.first_frame + read.block.samples.size() / std::max<std::size_t>(1, read.block.format.channels), std::memory_order_release);
+      while (!output.submit(read.block)) {
+        const auto pending = take_command();
+        if (pending == Command::stop || pending == Command::shutdown) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); shutdown = pending == Command::shutdown; break; }
+        if (pending == Command::pause) { output.pause(); state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status(output.status()); break; }
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      }
+    }
+    output.stop();
+  }
+  mutable std::mutex mutex_;
+  std::condition_variable condition_;
+  std::filesystem::path path_;
+  Command command_{Command::none};
+  std::string status_{"Playback stopped."};
+  std::thread worker_;
+  std::atomic<beatglass::PlaybackState> state_{beatglass::PlaybackState::stopped};
+  std::atomic<std::uint64_t> epoch_{}, current_frame_{}, total_frames_{};
+  std::int64_t seek_delta_seconds_{};
+};
 #endif
 #include "state_label.hpp"
 #ifdef _WIN32

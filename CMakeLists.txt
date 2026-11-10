@@ -43,6 +43,9 @@ if(BUILD_TESTING)
   add_test(NAME pipewire_buffer_safety_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_buffer_safety_contract.py)
   set_tests_properties(pipewire_buffer_safety_contract PROPERTIES LABELS unit TIMEOUT 10)
+  add_test(NAME pipewire_playback_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_playback_contract.py)
+  set_tests_properties(pipewire_playback_contract PROPERTIES LABELS unit TIMEOUT 10)
   add_test(NAME pipewire_inventory_capture_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_pipewire_inventory_capture_contract.py)
   set_tests_properties(pipewire_inventory_capture_contract PROPERTIES LABELS unit TIMEOUT 10)
@@ -196,7 +199,7 @@ if(BEATGLASS_BUILD_PIPEWIRE)
     message(FATAL_ERROR "PipeWire headers are required for BEATGLASS_BUILD_PIPEWIRE")
   endif()
   pkg_check_modules(PIPEWIRE REQUIRED IMPORTED_TARGET libpipewire-0.3)
-  add_library(beatglass_pipewire STATIC lib/capture/pipewire/discovery.cpp lib/capture/pipewire/source_adapter.cpp lib/capture/pipewire/stream_owner.cpp lib/capture/pipewire/stream_owner_linux.cpp)
+  add_library(beatglass_pipewire STATIC lib/capture/pipewire/discovery.cpp lib/capture/pipewire/source_adapter.cpp lib/capture/pipewire/stream_owner.cpp lib/capture/pipewire/stream_owner_linux.cpp lib/capture/pipewire/playback_session_linux.cpp lib/capture/file/playback_pcm_queue.cpp)
   target_compile_features(beatglass_pipewire PUBLIC cxx_std_20)
   target_include_directories(beatglass_pipewire PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
   target_link_libraries(beatglass_pipewire PRIVATE PkgConfig::PIPEWIRE)
