@@ -150,5 +150,6 @@ When process events provide `sample_rate`, it must be a positive integer.
 When process events provide `channels`, it must be a positive integer.
 Every process event must carry a positive `epoch` matching either the start or
 restart lifecycle epoch.
+Every transition event must include a non-empty string `event` name.
 When both timestamps and durations are provided, adjacent process intervals
 must not overlap.
