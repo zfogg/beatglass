@@ -62,7 +62,7 @@ commands = [
     [sys.executable, str(args.source / "tests/pipewire/check_linux_native_prerequisites.py")],
     ["cmake", "-S", str(args.source), "-B", str(args.build), "-DBEATGLASS_BUILD_PIPEWIRE=ON", "-DBEATGLASS_BUILD_TUI=ON", "-DBUILD_TESTING=ON"],
     ["cmake", "--build", str(args.build)],
-    ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "issue4320_tui_contract|cli_tui_snapshots"],
+    ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "issue4320_tui_contract|cli_generated_audio|cli_v1_codecs|cli_tui_snapshots"],
     ["ctest", "--test-dir", str(args.build), "--output-on-failure", "-R", "pipewire"],
     ["ctest", "--test-dir", str(args.build), "--show-only=json-v1", "--no-tests=error", "-R", "^pipewire_tests$"],
 ]

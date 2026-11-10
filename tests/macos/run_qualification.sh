@@ -217,7 +217,7 @@ if ! grep -Eq '[0-9]+% tests passed' "$overlay_log"; then
   echo "Overlay qualification log has no passing CTest summary" >&2
   exit 1
 fi
-cli_test_filter='^(issue4320_tui_contract|cli_tui_snapshots)$'
+cli_test_filter='^(issue4320_tui_contract|cli_generated_audio|cli_v1_codecs|cli_tui_snapshots)$'
 record_command "ctest --test-dir $out_dir/build -R $cli_test_filter --output-on-failure"
 cli_log="$out_dir/cli-ctest.log"
 ctest --test-dir "$out_dir/build" -R "$cli_test_filter" --output-on-failure | tee "$cli_log"
