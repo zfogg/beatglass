@@ -106,6 +106,8 @@ if isinstance(payload, dict):
                 not isinstance(host["clock_sync_offset_ns"], (int, float))
                 or isinstance(host["clock_sync_offset_ns"], bool)):
             raise SystemExit("transition host provenance has invalid sync offset")
+        if host.get("clock_holdover_state") is not None and (not isinstance(host["clock_holdover_state"], str) or not host["clock_holdover_state"].strip()):
+            raise SystemExit("transition host provenance has no holdover state")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
