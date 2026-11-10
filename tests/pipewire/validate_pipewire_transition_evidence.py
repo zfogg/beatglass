@@ -237,6 +237,9 @@ if reacquisition is not None:
     if reacquisition.get("profile") is not None:
         if not isinstance(reacquisition["profile"], str) or not reacquisition["profile"].strip():
             raise SystemExit("reacquisition evidence has an empty profile")
+    if reacquisition.get("policy") is not None:
+        if not isinstance(reacquisition["policy"], str) or not reacquisition["policy"].strip():
+            raise SystemExit("reacquisition evidence has an empty policy")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
