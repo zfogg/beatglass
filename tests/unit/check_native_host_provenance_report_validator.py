@@ -93,3 +93,15 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode != 0
     assert "report is unreadable" in result.stderr
 print("Native host provenance malformed-input rejection verified")
+
+with tempfile.TemporaryDirectory() as directory:
+    report = Path(directory) / "invalid-utf8-report.json"
+    report.write_bytes(b"{\xff\xfe")
+    result = subprocess.run(
+        ["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "report is unreadable" in result.stderr
+print("Native host provenance encoding rejection verified")
