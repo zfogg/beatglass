@@ -167,6 +167,7 @@ public:
 #include <iostream>
 #include <memory>
 #include <map>
+#include <set>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -218,6 +219,7 @@ struct CliPreferences {
   std::string live_endpoint_id;
   std::string live_endpoint_name;
   std::string library_folder;
+  std::vector<std::string> library_folders;
 };
 
 std::filesystem::path preferences_path() {
@@ -247,6 +249,12 @@ CliPreferences load_preferences() {
       fields >> std::quoted(preferences.library_folder);
       continue;
     }
+    if (key == "library_folder_entry") {
+      std::string folder;
+      fields >> std::quoted(folder);
+      if (!folder.empty()) preferences.library_folders.push_back(std::move(folder));
+      continue;
+    }
     if (!(fields >> value)) continue;
     if (key == "reduce_motion") preferences.reduce_motion = value == "1";
     else if (key == "seek_step") {
@@ -268,7 +276,10 @@ void save_preferences(const CliPreferences& preferences) {
   std::filesystem::create_directories(path.parent_path(), error);
   if (error) return;
   std::ofstream output(path, std::ios::trunc);
-  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << preferences.live_endpoint_id << "\nlive_endpoint_name " << preferences.live_endpoint_name << "\nlibrary_folder " << std::quoted(preferences.library_folder) << "\n";
+  if (output) {
+    output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << preferences.live_endpoint_id << "\nlive_endpoint_name " << preferences.live_endpoint_name << "\nlibrary_folder " << std::quoted(preferences.library_folder) << "\n";
+    for (const auto& folder : preferences.library_folders) output << "library_folder_entry " << std::quoted(folder) << "\n";
+  }
 }
 using namespace ftxui;
 // Apple SDK MacTypes.h exports global enum constants named bold and italic.
@@ -500,6 +511,18 @@ std::vector<Track> discover(const std::filesystem::path& root, bool recursive = 
   if (recursive) for (const auto& entry : std::filesystem::recursive_directory_iterator(root)) visit(entry);
   else for (const auto& entry : std::filesystem::directory_iterator(root)) visit(entry);
   std::ranges::sort(tracks, {}, &Track::title); return tracks;
+}
+std::vector<Track> discover(const std::vector<std::filesystem::path>& roots, bool recursive = true) {
+  std::vector<Track> tracks;
+  std::set<std::filesystem::path> seen;
+  for (const auto& root : roots) {
+    for (auto& track : discover(root, recursive)) {
+      const auto normalized = std::filesystem::weakly_canonical(track.path);
+      if (seen.insert(normalized).second) tracks.push_back(std::move(track));
+    }
+  }
+  std::ranges::sort(tracks, [](const Track& left, const Track& right) { return left.title == right.title ? left.path.string() < right.path.string() : left.title < right.title; });
+  return tracks;
 }
 std::string lower(std::string value) {
   std::ranges::transform(value, value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
@@ -794,9 +817,15 @@ int main(int argc, char** argv) {
   const auto preferences = load_preferences();
   const bool explicit_root = snapshot ? argc > 2 : argc > 1;
   std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::path{}) : (argc > 1 ? argv[1] : std::filesystem::path{});
-  if (!explicit_root && !preferences.library_folder.empty()) root = preferences.library_folder;
+  std::vector<std::filesystem::path> library_roots;
+  if (!explicit_root) {
+    for (const auto& folder : preferences.library_folders) library_roots.emplace_back(folder);
+    if (library_roots.empty() && !preferences.library_folder.empty()) library_roots.emplace_back(preferences.library_folder);
+    if (!library_roots.empty()) root = library_roots.front();
+  }
   if (root.empty()) root = std::filesystem::current_path();
-  auto tracks = discover(root, true);
+  if (library_roots.empty()) library_roots.push_back(root);
+  auto tracks = discover(library_roots, true);
   bool sort_by_path = false;
   std::string folder_text = root.string();
   std::string filter;
@@ -1148,7 +1177,7 @@ int main(int argc, char** argv) {
       analysis_cancelled.store(true, std::memory_order_release);
       analysis_stop.request_stop();
     }
-    tracks = discover(root, recursive);
+    tracks = discover(library_roots, recursive);
     if (sort_by_path) std::ranges::sort(tracks, [](const Track& left, const Track& right) { return left.path.generic_string() < right.path.generic_string(); });
     selected = -1;
     if (!previous_path.empty()) {
@@ -1189,7 +1218,8 @@ int main(int argc, char** argv) {
     // unavailable.  Rebuilding preferences with empty endpoint fields here
     // used to silently forget the user's selected sink on exit.
     CliPreferences updated{reduce_motion, 5, visual_mode, selected_device_id, bpm_setting,
-                           live_endpoint_preference, live_endpoint_name_preference, root.string()};
+                           live_endpoint_preference, live_endpoint_name_preference, root.string(), {}};
+    for (const auto& folder : library_roots) updated.library_folders.push_back(folder.string());
     try { updated.seek_step = std::clamp(std::stoi(seek_step_text), 1, 60); } catch (...) {}
     if (live_selected >= 0 && live_selected < static_cast<int>(live_endpoint_ids.size())) {
       updated.live_endpoint_id = live_endpoint_ids[static_cast<std::size_t>(live_selected)];
@@ -1228,22 +1258,53 @@ int main(int argc, char** argv) {
     if (!open_folder_in_file_manager(requested, error)) { status = std::move(error); return; }
     root = requested; recursive = true; refresh(); persist_preferences(); status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
   });
+  std::vector<std::string> library_root_labels;
+  int library_root_selected = 0;
+  auto sync_library_root_labels = [&] {
+    library_root_labels.clear();
+    for (const auto& folder : library_roots) library_root_labels.push_back(folder.string());
+    if (library_root_labels.empty()) library_root_labels.push_back("No library directories configured");
+    library_root_selected = std::clamp(library_root_selected, 0, static_cast<int>(library_root_labels.size()) - 1);
+  };
+  sync_library_root_labels();
+  auto add_folder_button = Button(" Add directory ", [&] {
+    const std::filesystem::path requested(folder_text);
+    if (requested.empty() || !std::filesystem::is_directory(requested)) { status = "Directory unavailable: " + requested.string(); return; }
+    const auto normalized = std::filesystem::weakly_canonical(requested);
+    if (std::ranges::any_of(library_roots, [&](const auto& folder) { return std::filesystem::weakly_canonical(folder) == normalized; })) { status = "Directory is already in the Library list."; return; }
+    library_roots.push_back(normalized); root = normalized; recursive = true; sync_library_root_labels(); refresh(); persist_preferences();
+    status = "Added " + normalized.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
+  });
   auto choose_folder_button = Button(" Choose folder… ", [&] {
 #ifdef _WIN32
     if (const auto chosen = choose_audio_folder()) {
       folder_text = chosen->string();
-      root = *chosen;
-      recursive = true;
-      refresh();
-      persist_preferences();
-      status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
+      add_folder_button->OnEvent(Event::Return);
     } else {
       status = "Folder selection cancelled; current Library folder is unchanged.";
     }
 #else
-    status = "Native folder picker is unavailable; edit the path and press Open folder.";
+    status = "Native folder picker is unavailable; edit the path and press Add directory.";
 #endif
   });
+  auto remove_folder_button = Button(" Remove selected directory ", [&] {
+    if (library_roots.empty() || library_root_selected < 0 || library_root_selected >= static_cast<int>(library_roots.size())) { status = "No library directory is configured."; return; }
+    const auto removed = library_roots[static_cast<std::size_t>(library_root_selected)];
+    library_roots.erase(library_roots.begin() + library_root_selected);
+    if (library_roots.empty()) library_roots.push_back(std::filesystem::current_path());
+    library_root_selected = std::min(library_root_selected, static_cast<int>(library_roots.size()) - 1);
+    root = library_roots[static_cast<std::size_t>(library_root_selected)]; folder_text = root.string(); sync_library_root_labels(); refresh(); persist_preferences();
+    status = "Removed " + removed.string() + "; Library now indexes " + std::to_string(tracks.size()) + " tracks.";
+  });
+  RadioboxOption library_root_option;
+  library_root_option.on_change = [&] {
+    if (library_root_selected < 0 || library_root_selected >= static_cast<int>(library_roots.size())) return;
+    root = library_roots[static_cast<std::size_t>(library_root_selected)];
+    folder_text = root.string();
+    refresh();
+    status = "Selected Library directory: " + root.string();
+  };
+  auto library_root_picker = Radiobox(&library_root_labels, &library_root_selected, library_root_option);
   auto play_button = Button(" Play ", [&] {
     if (selected < 0 || selected >= static_cast<int>(tracks.size())) {
       status = "Select a supported audio file before starting playback.";
@@ -1418,7 +1479,7 @@ int main(int argc, char** argv) {
 #endif
       text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight)});
     const auto library_seek = hbox({action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex}), hbox({action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), library_navigation, library_recovery, library_seek, separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Directory: ") | italic, folder_input->Render() | flex}), hbox({action(choose_folder_button->Render(), Color::Cyan), text(" "), action(add_folder_button->Render(), Color::GreenLight), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), library_navigation, library_recovery, library_seek, separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Add directory (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
   auto set_live_presentation_state = [&](beatglass::TrackingState state) {
@@ -1685,7 +1746,8 @@ int main(int argc, char** argv) {
   auto playback_device_picker = Radiobox(&playback_device_labels, &playback_device_selected);
   auto settings = Renderer(Container::Vertical(Components{reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button, beat_grid_mode_button, tonal_history_mode_button, playback_device_picker}), [&] {
     return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
-      text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
+      text("Library directories (recursive)") | bold, library_root_picker->Render() | frame | vscroll_indicator,
+      action(remove_folder_button->Render(), Color::RedLight), text("Selected directory: " + root.string()) | color(Color::GrayLight), text("Analysis engine: aubio / file analyzer"),
       text("Tonal engine: provisional FFT fallback; optional Essentia music-replay build provides higher-fidelity causal labels.") | color(Color::GrayLight) | italic,
       text("Preferences persist in the platform Beatglass CLI config."), text("Config: " + preferences_path().string()) | color(Color::GrayLight) | italic, separator(),
       text("PRESENTATION") | bold | underlined, reduce_motion_checkbox->Render(),

@@ -39,10 +39,13 @@ def main() -> int:
             raise SystemExit("CLI macOS Live contract missing: " + marker)
     if "no fresh packets arrived; reacquiring" not in tui:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
-    if "library_folder" not in tui or "std::quoted(preferences.library_folder)" not in tui:
-        raise SystemExit("CLI Library folder preference is not persisted as a quoted path")
-    if "!explicit_root && !preferences.library_folder.empty()" not in tui:
-        raise SystemExit("CLI Library folder preference is not restored on startup")
+    if "library_folder_entry" not in tui or "std::quoted(folder)" not in tui or "library_folders" not in tui:
+        raise SystemExit("CLI Library directory list is not persisted as quoted paths")
+    if "preferences.library_folders" not in tui or "library_roots" not in tui:
+        raise SystemExit("CLI Library directory list is not restored on startup")
+    for marker in ('Button(" Add directory "', 'Button(" Remove selected directory "', 'discover(library_roots, recursive)', 'library_root_picker'):
+        if marker not in tui:
+            raise SystemExit(f"CLI multi-directory Library UI missing: {marker}")
     if "live_spectrum_history" not in tui or "FFT history" not in tui:
         raise SystemExit("CLI Live spectrum does not expose bounded FFT history")
     if '"source changed") != std::string::npos ? "  [stale]"' not in tui:
