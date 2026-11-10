@@ -1940,7 +1940,7 @@ ApplicationWindow {
                 running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && !window.overlayCaptureEvidenceStale && window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" && window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0
                 onTriggered: { overlaySurface.pulseOpacity = 1.0; pulseFade.restart() }
             }
-            Timer { id: pulseFade; interval: 120; onTriggered: overlaySurface.pulseOpacity = 0.0 }
+            Timer { id: pulseFade; interval: Math.min(180, Math.max(80, beatPulse.interval * 0.2)); onTriggered: overlaySurface.pulseOpacity = 0.0 }
             Connections {
                 target: window.themePreferencesBridge
                 function onReduceMotionChanged() {
