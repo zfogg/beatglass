@@ -240,3 +240,5 @@ If present, host `clock_stratum` must be a positive integer identifying the
 clock synchronization stratum.
 If present, host `clock_poll_interval_ms` must be a non-negative integer
 describing clock status polling cadence.
+If present, host `clock_source_count` must be a positive integer describing
+the number of available synchronization sources.
