@@ -272,6 +272,8 @@ When emitting `REPORT.json`, an unwritable destination is also rejected with an
 explicit error rather than leaving a partially written qualification artifact.
 Reports are assembled in the destination directory and atomically replaced so
 readers never observe a partially written JSON report.
+Missing parent directories for the requested report path are created before the
+temporary file is opened, which supports clean per-run evidence directories.
 The temporary file is flushed and synchronized before replacement so a
 successful validation report is durable across an abrupt process exit.
 If replacement fails, the temporary file is removed so failed qualification
