@@ -158,7 +158,7 @@ def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT
         path = (root / canonical).resolve()
         if root.resolve() not in path.parents:
             errors.append(f"artifact escapes bundle: {relative}"); continue
-        if not path.is_file():
+        if not path.exists():
             errors.append(f"missing artifact: {relative}"); continue
         if not stat.S_ISREG(path.stat().st_mode):
             errors.append(f"artifact must be a regular file: {relative}"); continue
@@ -292,6 +292,8 @@ def main() -> int:
                 category = "scenario_schema"
             elif error.startswith("missing artifact:"):
                 category = "artifact_missing"
+            elif error.startswith("artifact must be a regular file:"):
+                category = "artifact_type"
             elif error.startswith(("artifact must", "artifact path", "artifact hash", "artifact size")):
                 category = "artifact"
             else:

@@ -440,6 +440,14 @@ class EvidenceBundleTest(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertGreaterEqual(payload["error_categories"].get("artifact_missing", 0), 1)
 
+    def test_json_groups_artifact_type_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / "capture.txt").mkdir(); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"capture.txt", "sha256":"0"*64}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("artifact_type", 0), 1)
+
     def test_json_groups_platform_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
@@ -472,7 +480,8 @@ class EvidenceBundleTest(unittest.TestCase):
                     "environment": "test", "artifacts": [{"path": "capture-dir", "sha256": "0" * 64}],
                     "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
             manifest.write_text(json.dumps(data), encoding="utf-8")
-            self.assertIn("missing artifact: capture-dir", module.verify(root, manifest))
+            errors = module.verify(root, manifest)
+            self.assertTrue("missing artifact: capture-dir" in errors or "artifact must be a regular file: capture-dir" in errors)
 
     def test_oversized_artifacts_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -124,6 +124,8 @@ Artifact paths escaping the evidence root are grouped under `artifact_path`
 for direct retained-file boundary triage.
 Missing retained artifact files are grouped under `artifact_missing` for direct
 evidence-retention triage.
+Non-regular artifact entries are grouped under `artifact_type` for direct
+retained-file type triage.
 Unsupported platform identifiers are grouped under `platform` for direct
 qualification-environment triage.
 Environment descriptor length, whitespace, and control-character failures
