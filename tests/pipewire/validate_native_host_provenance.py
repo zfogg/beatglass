@@ -34,6 +34,7 @@ if host.get("tpm_present") is not None and not isinstance(host["tpm_present"], b
     raise SystemExit("host provenance has an invalid TPM flag")
 if len(sys.argv) == 3:
     report = {"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
+    temporary_path = None
     try:
         destination = Path(sys.argv[2])
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -50,7 +51,7 @@ if len(sys.argv) == 3:
             finally:
                 os.close(directory_fd)
     except OSError as error:
-        if "temporary_path" in locals():
+        if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)
         raise SystemExit(f"host provenance report is unwritable: {error}")
 print("native host provenance verified")
