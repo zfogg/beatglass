@@ -1252,6 +1252,7 @@ def test_live_evidence_group_discloses_pulse_status_shortcut():
     assert "evidence can be ambiguous" in body
     assert "system notifications and other routed audio" in body
     assert "does not capture every device or bypassed audio path" in body
+    assert "provisional evidence, not calibrated certainty" in body
 
 
 def test_overlay_exposes_visible_capture_scope_label():
