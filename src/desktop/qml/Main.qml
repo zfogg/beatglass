@@ -993,7 +993,7 @@ ApplicationWindow {
             window.announceCaptureRecoveryState("Persisted overlay " + geometryReason + " unavailable for " + geometryDisplay + "; control-window fallback remains active.")
             return false
         }
-        if (!window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height)) {
+        if (window.overlayBridge.resizeOverlay(savedGeometry.width, savedGeometry.height) === false) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
             window.announceCaptureRecoveryState("Persisted overlay geometry could not be restored; control-window fallback remains active.")
@@ -1001,14 +1001,14 @@ ApplicationWindow {
         }
         const savedOpacity = Number(window.overlayBridge.opacity)
         if (isFinite(savedOpacity) && savedOpacity >= 0.2 && savedOpacity <= 1.0) {
-            if (!window.overlayBridge.setOpacity(savedOpacity)) {
+            if (window.overlayBridge.setOpacity(savedOpacity) === false) {
                 window.overlayLaunchFallbackActive = true
                 window.overlayDisplayRecoveryPending = true
                 window.announceCaptureRecoveryState("Persisted overlay opacity could not be restored; control-window fallback remains active.")
                 return false
             }
         } else {
-            if (!window.overlayBridge.setOpacity(0.9)) {
+            if (window.overlayBridge.setOpacity(0.9) === false) {
                 window.overlayLaunchFallbackActive = true
                 window.overlayDisplayRecoveryPending = true
                 window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe opacity could not be applied.")
