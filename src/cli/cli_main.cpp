@@ -119,6 +119,16 @@ Element waveform_chart(const std::vector<float>& waveform, const std::vector<std
   return vbox({text("WAVEFORM") | bold | underlined | color(Color::GreenLight),
                hbox(std::move(bars)) | bgcolor(Color::RGB(8, 28, 25)) | borderRounded}) | flex;
 }
+
+Element spectrum_chart(const std::vector<float>& spectrum) {
+  if (spectrum.empty()) return text("Spectrum waiting for captured audio…") | color(Color::GrayLight) | italic;
+  Elements bars;
+  for (const auto value : spectrum) {
+    const auto height = std::clamp(static_cast<int>(std::round(value * 8.0f)), 0, 8);
+    bars.push_back(text(std::string(static_cast<std::size_t>(height), '▂')) | color(Color::MagentaLight));
+  }
+  return hbox(bars) | bgcolor(Color::RGB(20, 14, 28));
+}
 std::vector<Track> discover(const std::filesystem::path& root, bool recursive = false) {
   std::vector<Track> tracks;
   if (root.empty() || !std::filesystem::is_directory(root)) return tracks;
@@ -351,12 +361,16 @@ int main(int argc, char** argv) {
   std::uint32_t live_sample_rate = 0;
   std::uint64_t live_observed_frames = 0;
   std::uint64_t live_discontinuities = 0;
+  std::uint64_t live_beats = 0;
   std::vector<float> live_waveform(160, 0.0f);
+  std::vector<float> live_spectrum(32, 0.0f);
+  std::vector<float> live_tempo_history;
   live_session = std::make_unique<beatglass::windows::LoopbackSession>(live_epochs, [&] {
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
     live_bpm.reset();
     live_tracking_state = beatglass::TrackingState::reacquiring;
     live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+    live_beats = 0; live_tempo_history.clear(); live_spectrum.assign(live_spectrum.size(), 0.0f);
   });
 #else
   std::string live_status = "Native loopback capture is unavailable in this build.";
@@ -748,7 +762,9 @@ int main(int argc, char** argv) {
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(live_status) | color(Color::GrayLight) | italic;
     const auto corrected_bpm = live_bpm ? std::optional<float>(*live_bpm * live_bpm_multiplier) : std::nullopt;
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
-    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({action(live_button->Render(), Color::GreenLight), text(" "), action(refresh_live_button->Render(), Color::Cyan), text(" "), action(reset_live_button->Render(), Color::YellowLight)}), hbox({text("Tempo interpretation: ") | italic, action(half_bpm_button->Render(), Color::YellowLight), text(" "), action(normal_bpm_button->Render(), Color::GreenLight), text(" "), action(double_bpm_button->Render(), Color::YellowLight), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, {}, live_observed_frames), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    std::vector<std::string> tempo_labels;
+    for (const auto bpm : live_tempo_history) tempo_labels.push_back(format_bpm(bpm));
+    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({action(live_button->Render(), Color::GreenLight), text(" "), action(refresh_live_button->Render(), Color::Cyan), text(" "), action(reset_live_button->Render(), Color::YellowLight)}), hbox({text("Tempo interpretation: ") | italic, action(half_bpm_button->Render(), Color::YellowLight), text(" "), action(normal_bpm_button->Render(), Color::GreenLight), text(" "), action(double_bpm_button->Render(), Color::YellowLight), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   beats " + std::to_string(live_beats) + "   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), text("Tempo history: " + (tempo_labels.empty() ? std::string("waiting for tracking") : join_history(tempo_labels))) | color(Color::YellowLight), text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum), text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, live_observed_frames), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input}), [&] {
@@ -828,12 +844,29 @@ int main(int argc, char** argv) {
             const auto state = live_replay->process(block);
             live_bpm = state.bpm;
             live_tracking_state = state.state;
+            live_beats = state.beats;
+            if (live_bpm) {
+              live_tempo_history.push_back(*live_bpm);
+              if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin());
+            }
             for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) {
               const auto first = bin * packet.sample_count / live_waveform.size();
               const auto last = std::max(first + 1, (bin + 1) * packet.sample_count / live_waveform.size());
               float peak = 0.0f;
               for (auto sample = first; sample < std::min<std::size_t>(last, packet.sample_count); ++sample) peak = std::max(peak, std::abs(packet.samples[sample]));
               live_waveform[bin] = peak;
+            }
+            const auto spectrum_samples = std::min<std::size_t>(packet.sample_count, 256);
+            for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) {
+              const auto frequency = static_cast<float>(bin + 1) / static_cast<float>(live_spectrum.size());
+              float real = 0.0f, imaginary = 0.0f;
+              for (std::size_t sample = 0; sample < spectrum_samples; ++sample) {
+                constexpr float pi = 3.14159265358979323846f;
+                const auto phase = 2.0f * pi * frequency * static_cast<float>(sample) / static_cast<float>(spectrum_samples);
+                const auto value = packet.samples[sample * packet.channels];
+                real += value * std::cos(phase); imaginary -= value * std::sin(phase);
+              }
+              live_spectrum[bin] = std::clamp(std::sqrt(real * real + imaginary * imaginary) / std::max<std::size_t>(1, spectrum_samples) * 12.0f, 0.0f, 1.0f);
             }
             live_status = "Receiving OS sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) {
