@@ -2980,8 +2980,8 @@ ApplicationWindow {
                         Keys.onReturnPressed: { if (currentIndex >= 0) window.activateEntry(currentIndex); else window.announceVisualizationRecovery("Choose a Library entry before activating."); event.accepted = true }
                         Keys.onEnterPressed: { if (currentIndex >= 0) window.activateEntry(currentIndex); else window.announceVisualizationRecovery("Choose a Library entry before activating."); event.accepted = true }
                         Keys.onSpacePressed: { if (currentIndex >= 0) window.activateEntry(currentIndex); else window.announceVisualizationRecovery("Choose a Library entry before activating."); event.accepted = true }
-                        Keys.onBackspacePressed: {
-                            if (files.parentFolder.toString() !== "") {
+                        Keys.onPressed: {
+                            if (event.key === Qt.Key_Backspace && files.parentFolder.toString() !== "") {
                                 window.clearSelectedAudio()
                                 window.browseFolder = files.parentFolder
                                 search.text = ""
@@ -2990,7 +2990,8 @@ ApplicationWindow {
                                 window.announceVisualizationRecovery("Moved to the parent Library folder; choose an audio source to inspect.")
                                 browser.currentIndex = -1
                                 event.accepted = true
-                            } else {
+                                event.accepted = true
+                            } else if (event.key === Qt.Key_Backspace) {
                                 window.announceVisualizationRecovery("Already at the top Library folder; parent navigation is unavailable.")
                                 event.accepted = true
                             }
