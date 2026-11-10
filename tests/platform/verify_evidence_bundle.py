@@ -168,6 +168,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
                     or evidence_value != unicodedata.normalize("NFC", evidence_value)
                     or any(unicodedata.category(char) == "Cc" for char in evidence_value)
                     or any(len(part) > 255 for part in evidence_value.split("/"))
+                    or any(part == "." for part in evidence_value.split("/"))
+                    or "//" in evidence_value or evidence_value.endswith("/")
                     or any(char in '<>"|?*:\\' for char in evidence_value)):
                 errors.append(f"invalid scenario evidence: {scenario.get('id')}"); continue
         if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
