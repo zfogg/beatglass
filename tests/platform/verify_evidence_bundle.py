@@ -238,7 +238,7 @@ def main() -> int:
                 category = "provenance"
             elif error.startswith(("scenarios must", "missing required scenarios")):
                 category = "scenario"
-            elif error.startswith(("scenarios must", "missing required scenarios", "unsupported manifest", "unsupported artifact fields", "invalid or duplicate artifact entry")):
+            elif error.startswith(("artifacts must", "scenarios must", "missing required scenarios", "unsupported manifest", "unsupported artifact fields", "invalid or duplicate artifact entry")):
                 category = "schema"
             else:
                 category = error.split(":", 1)[0]
