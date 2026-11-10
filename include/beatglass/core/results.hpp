@@ -24,6 +24,8 @@ struct Snapshot {
   std::optional<float> bpm;
   /** Uncalibrated signal-health confidence in [0, 1], when available. */
   std::optional<float> confidence;
+  /** Recent causal tempo estimates, oldest first, bounded by the publisher. */
+  std::vector<float> tempo_history;
   std::vector<Candidate> tempo_candidates, key_candidates;
   std::vector<Beat> beats;
   std::vector<ChordSegment> chords;

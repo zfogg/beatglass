@@ -15,6 +15,7 @@ private slots:
     snapshot->observed_through = {1, 2};
     snapshot->analysis_delay_frames = 17;
     snapshot->confidence = 0.75f;
+    snapshot->tempo_history = {120.0f, 123.4f};
     snapshot->beats.push_back({{1, 1}, 0.8f});
     snapshot->chords.push_back({{1, 0}, {1, 1}, {"Am", 0.5f}});
     QVERIFY(model.apply({1, snapshot}));
@@ -26,6 +27,7 @@ private slots:
     QCOMPARE(model.observedFrames(), qulonglong(2));
     QCOMPARE(model.analysisDelayFrames(), qulonglong(17));
     QCOMPARE(model.confidence(), 0.75);
+    QCOMPARE(model.tempoHistory(), QStringList({"120.0", "123.4"}));
     auto silent = std::make_shared<beatglass::Snapshot>(*snapshot);
     silent->state = beatglass::TrackingState::silent;
     QVERIFY(model.apply({2, silent}));

@@ -1,4 +1,5 @@
 #include "live_presentation.hpp"
+#include <cmath>
 #include <utility>
 
 LivePresentation::LivePresentation(QObject* parent) : QObject(parent) {}
@@ -14,6 +15,10 @@ bool LivePresentation::apply(beatglass::PresentationUpdate update) {
   analysis_delay_frames_ = displayed.analysis_delay_frames;
   confidence_ = displayed.confidence ? *displayed.confidence : -1.0;
   stale_ = displayed.stale;
+  tempo_history_.clear();
+  for (const auto bpm : displayed.tempo_history) {
+    if (std::isfinite(bpm) && bpm > 0.0f) tempo_history_.push_back(QString::number(bpm, 'f', 1));
+  }
   emit changed();
   return true;
 }

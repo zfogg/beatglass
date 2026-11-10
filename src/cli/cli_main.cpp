@@ -1318,11 +1318,12 @@ int main(int argc, char** argv) {
               presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {*music_state.local_chord, music_state.local_chord_strength.value_or(0.0f)}});
             }
 #endif
-            live_presentation = beatglass::present_snapshot(presentation_snapshot);
             if (live_bpm) {
               live_tempo_history.push_back(*live_bpm);
               if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin());
             }
+            presentation_snapshot.tempo_history = live_tempo_history;
+            live_presentation = beatglass::present_snapshot(presentation_snapshot);
             std::vector<float> mono(packet_frames);
             for (std::size_t frame = 0; frame < mono.size(); ++frame) {
               float sum = 0.0f;
@@ -1404,8 +1405,9 @@ int main(int argc, char** argv) {
             if (music_state.rolling_key) presentation_snapshot.key_candidates.push_back({*music_state.rolling_key, music_state.rolling_key_strength.value_or(0.0f)});
             if (music_state.local_chord && music_state.tonal_from && music_state.tonal_through) presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {*music_state.local_chord, music_state.local_chord_strength.value_or(0.0f)}});
 #endif
-            live_presentation = beatglass::present_snapshot(presentation_snapshot);
             if (live_bpm) { live_tempo_history.push_back(*live_bpm); if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin()); }
+            presentation_snapshot.tempo_history = live_tempo_history;
+            live_presentation = beatglass::present_snapshot(presentation_snapshot);
             std::vector<float> mono(packet_frames);
             for (std::size_t frame = 0; frame < mono.size(); ++frame) { float sum = 0.0f; for (std::uint32_t channel = 0; channel < packet_channels; ++channel) sum += packet.samples[frame * packet.channels + channel]; mono[frame] = sum / static_cast<float>(packet_channels); }
             for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) { const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset); if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate, std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) { const auto revision = ++live_visualization_revision; if (live_visualization_presentation.accept(frame->epoch, revision, *frame)) live_visualization_frame = std::move(frame); } }

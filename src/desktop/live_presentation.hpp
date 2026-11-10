@@ -2,6 +2,7 @@
 #include "beatglass/core/presentation_gate.hpp"
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 /**
  * GUI-thread-owned presentation of revisioned immutable live snapshots.
@@ -24,6 +25,7 @@ class LivePresentation : public QObject {
   Q_PROPERTY(qulonglong analysisDelayFrames READ analysisDelayFrames NOTIFY changed)
   Q_PROPERTY(double confidence READ confidence NOTIFY changed)
   Q_PROPERTY(bool stale READ stale NOTIFY changed)
+  Q_PROPERTY(QStringList tempoHistory READ tempoHistory NOTIFY changed)
 public:
   /** Construct on the owning GUI thread; parent, if any, has the same thread. */
   explicit LivePresentation(QObject* parent = nullptr);
@@ -47,6 +49,8 @@ public:
   double confidence() const { return confidence_; }
   /** True when the current state is not providing fresh tracking evidence. */
   bool stale() const { return stale_; }
+  /** Recent causal tempo labels, oldest first. */
+  QStringList tempoHistory() const { return tempo_history_; }
 signals:
   /** Emitted on the owning thread when a newer update is applied. */
   void changed();
@@ -57,4 +61,5 @@ private:
   qulonglong beat_count_ = 0, observed_frames_ = 0, analysis_delay_frames_ = 0;
   double confidence_ = -1.0;
   bool stale_ = false;
+  QStringList tempo_history_;
 };
