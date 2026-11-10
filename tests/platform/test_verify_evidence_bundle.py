@@ -269,6 +269,14 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest = Path(tmp) / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
             self.assertEqual(["bundle root must be a directory"], module.verify(root, manifest))
 
+    def test_json_groups_input_topology_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "bundle"; root.write_text("not a directory", encoding="utf-8")
+            manifest = Path(tmp) / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertEqual(1, payload["error_categories"]["input_topology"])
+
     def test_non_regular_artifacts_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); artifact = root / "capture-dir"; artifact.mkdir()

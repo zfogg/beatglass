@@ -230,7 +230,10 @@ def main() -> int:
     if args.json:
         error_categories = {}
         for error in errors:
-            category = error.split(":", 1)[0]
+            if error.startswith(("bundle root must ", "manifest must ")):
+                category = "input_topology"
+            else:
+                category = error.split(":", 1)[0]
             error_categories[category] = error_categories.get(category, 0) + 1
         artifact_count = 0; artifact_bytes = 0
         try:
