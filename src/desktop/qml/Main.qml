@@ -1948,6 +1948,7 @@ ApplicationWindow {
             if (window.captureMonitorBridge.status === "Error") {
                 window.overlayCaptureEvidenceStale = true
                 window.announceCaptureRecoveryState("No output device or permission; retry monitoring to acquire a fresh snapshot.")
+                overlayCaptureRecoveryAction.forceActiveFocus()
             } else if (window.captureMonitorBridge.status === "Reacquiring") {
                 window.overlayCaptureEvidenceStale = true
                 window.announceCaptureRecoveryState("Output device reacquiring; visualization focus restored when fresh audio arrives.")
