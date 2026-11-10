@@ -73,6 +73,8 @@ Commit provenance is preserved exactly and must not contain leading or trailing
 whitespace, preventing ambiguous build identities in the handoff.
 Pending reasons follow the same rule so rendered host guidance does not acquire
 ambiguous whitespace around its actionable explanation.
+Summary inputs must be regular files rather than symbolic links, preventing a
+qualification handoff from silently reading evidence from an unexpected path.
 The generator rechecks uniqueness after making external paths portable, rejecting
 basename collisions that would otherwise collapse distinct artifacts together.
 The summary's `qualified` field must be a JSON boolean; string status values fail
