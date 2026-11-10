@@ -3269,7 +3269,6 @@ ApplicationWindow {
                             wrapMode: Text.WordWrap; Layout.fillWidth: true
                             Accessible.name: "Audio metadata status: " + text
                             ToolTip.text: "Current metadata status"
-                            Accessible.value: text
                             Accessible.role: Accessible.Status
                             Accessible.description: window.metadataStatus.indexOf("Error:") === 0 ? text + ". Retry metadata is available for this selected source." : text
                         }
