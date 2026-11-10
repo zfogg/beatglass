@@ -297,6 +297,10 @@ verifies both timing keys survive into the emitted evidence report.
 Forward-compatible timing labels are preserved as well: the behavior check in
 `tests/unit/check_native_host_provenance_timing_unknown_field.py` confirms an
 unknown clock-source label remains visible in sorted evidence metadata.
+The producer/consumer behavior check in
+`tests/unit/check_native_host_provenance_timing_report_schema.py` verifies that
+timing-bearing reports remain acceptable to the report validator, preserving
+the boundary between evidence production and qualification consumption.
 Unknown-but-well-formed host fields are retained in checked_fields metadata so
 future producers do not silently lose provenance during report generation.
 Before packaging a native run, validate the extracted host object directly:
