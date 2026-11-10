@@ -1103,6 +1103,14 @@ def test_overlay_pulse_status_exposes_tempo_period():
     assert "millisecond period" in label
 
 
+def test_overlay_pulse_status_exposes_theme_contrast_direction():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert '"darkening"' in label
+    assert '"lightening"' in label
+    assert "selectedTheme" in label
+
+
 def test_live_evidence_description_mentions_pulse_period():
     start = QML.index('objectName: "overlayLiveEvidenceGroup"')
     body = QML[start : QML.index('objectName: "overlayEscapeHint"', start)]
