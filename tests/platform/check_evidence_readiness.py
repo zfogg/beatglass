@@ -17,6 +17,15 @@ verifier = importlib.util.module_from_spec(spec); assert spec.loader
 spec.loader.exec_module(verifier)
 
 
+def has_symlinked_parent(path: Path) -> bool:
+    current = path.parent
+    while current != current.parent:
+        if current.is_symlink():
+            return True
+        current = current.parent
+    return False
+
+
 def platforms_from_status(path: Path) -> list[str]:
     return [line.split("|")[1].strip().lower() for line in path.read_text(encoding="utf-8").splitlines()
             if line.startswith(("| Windows |", "| macOS |", "| Linux |"))]
@@ -368,7 +377,7 @@ def main() -> int:
         if args.report.is_symlink():
             print("readiness report output must not be a symlink", file=sys.stderr)
             return 1
-        if args.report.parent.is_symlink():
+        if has_symlinked_parent(args.report):
             print("readiness report output parent must not be a symlink", file=sys.stderr)
             return 1
         args.report.parent.mkdir(parents=True, exist_ok=True)
