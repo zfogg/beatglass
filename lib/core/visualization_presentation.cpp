@@ -13,10 +13,16 @@ bool VisualizationPresentation::accept(std::uint64_t generation,
                                        const VisualizationFrame& frame) noexcept {
   if (!frame.epoch || !frame.sample_rate || frame.end_frame <= frame.first_frame)
     return false;
-  for (float value : frame.minimum)
-    if (!std::isfinite(value)) return false;
-  for (float value : frame.maximum)
-    if (!std::isfinite(value)) return false;
+  for (std::size_t i = 0; i < frame.minimum.size(); ++i) {
+    const float minimum = frame.minimum[i];
+    const float maximum = frame.maximum[i];
+    // Presentation must fail closed: malformed extrema otherwise produce an
+    // inverted or unbounded waveform even though the publication gate accepts
+    // the revision as fresh.
+    if (!std::isfinite(minimum) || !std::isfinite(maximum)
+        || minimum < -1.0f || maximum > 1.0f || minimum > maximum)
+      return false;
+  }
   for (float value : frame.magnitude)
     if (!std::isfinite(value) || value < 0.0f) return false;
   if (!gate_.accept(generation, revision)) return false;

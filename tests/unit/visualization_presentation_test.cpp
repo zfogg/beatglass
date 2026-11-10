@@ -63,3 +63,15 @@ TEST_CASE("visualization presentation preserves exclusive sample-frame boundarie
   CHECK(presentation.current()->end_frame == 88200);
   CHECK(presentation.current()->end_frame > presentation.current()->first_frame);
 }
+
+TEST_CASE("visualization presentation rejects inverted and out of range waveform extrema") {
+  VisualizationPresentation presentation;
+  VisualizationFrame frame;
+  frame.epoch = 2; frame.sample_rate = 48000; frame.end_frame = 1024;
+  frame.minimum[0] = 0.4f; frame.maximum[0] = 0.2f;
+  CHECK_FALSE(presentation.accept(presentation.generation(), 1, frame));
+  frame.minimum[0] = -1.1f; frame.maximum[0] = 0.5f;
+  CHECK_FALSE(presentation.accept(presentation.generation(), 1, frame));
+  frame.minimum[0] = -0.5f; frame.maximum[0] = 1.0f;
+  REQUIRE(presentation.accept(presentation.generation(), 1, frame));
+}
