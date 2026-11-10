@@ -3251,7 +3251,6 @@ ApplicationWindow {
                             activeFocusOnTab: true
                             enabled: window.selectedAudioUrl.toString() !== "" && window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFile !== undefined && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
                             Accessible.name: "Analyze selected audio file"
-                            Accessible.value: enabled ? "available; " + window.selectedName : (window.analysisJobBridge && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "unavailable; analysis active" : "unavailable; select an audio file")
                             Accessible.role: Accessible.Button
                             Accessible.description: enabled ? "Fingerprint the selected local file and queue real offline analysis." : (window.analysisJobBridge && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") ? "Analysis is already active for the selected source; wait for completion or cancel before submitting again." : "Select a local audio file before queueing analysis.")
                             ToolTip.text: "Fingerprint and queue analysis for the selected audio file"
