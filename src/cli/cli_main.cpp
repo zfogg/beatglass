@@ -1960,7 +1960,15 @@ int main(int argc, char** argv) {
     if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); library_cache_hits += analysis.cache_hits; for (auto& entry : analysis.results) { completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); analysis_errors.erase(entry.first); } for (auto& entry : analysis.errors) analysis_errors.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; beat_frames = cached->second.beat_frames; key = cached->second.key; chord = cached->second.chord; tonal_history = cached->second.tonal_history; } status = analysis.errors.empty() ? "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates." : "Analysis finished with " + std::to_string(analysis.errors.size()) + " failed track(s)."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
-    std::cout << rendered.ToString();
+    // FTXUI's snapshot string already carries carriage returns on Windows;
+    // text-mode stdout adds another one when translating newlines. Remove the
+    // embedded CR so redirected snapshots keep normal one-row-per-line spacing.
+    auto snapshot_output = rendered.ToString();
+    for (std::size_t position = 0; (position = snapshot_output.find("\r\n", position)) != std::string::npos;) {
+      snapshot_output.erase(position, 1);
+      ++position;
+    }
+    std::cout << snapshot_output;
     return 0;
   }
   std::atomic_bool running{true};

@@ -19,6 +19,8 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
         capture_output=True, text=True, encoding="utf-8", errors="replace", env=cache_env,
     )
     assert first.returncode == 0, first.stderr
+    if os.name == "nt":
+        assert "\r\r\n" not in first.stdout, "snapshot output contains doubled carriage returns"
     second = subprocess.run(
         [exe, "--snapshot", str(root), "library"],
         capture_output=True, text=True, encoding="utf-8", errors="replace", env=cache_env,
