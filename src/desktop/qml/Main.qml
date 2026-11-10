@@ -882,6 +882,10 @@ ApplicationWindow {
                 window.overlayDisplayRecoveryPending = true
             }
         }
+        if (window.overlayBridge && !window.captureMonitorBridge) {
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("Overlay capture is unavailable; displayed estimates are stale until monitoring connects.")
+        }
         refreshCatalog()
         if (typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== "") {
             browseFolder = libraryPreferences.folder
