@@ -837,3 +837,11 @@ def test_retry_shortcut_routes_named_action_result():
     shortcut_start = QML.index("function handleOverlayRetryShortcut()")
     shortcut = QML[shortcut_start : QML.index("    function handleOverlayRetryAction", shortcut_start)]
     assert "return window.handleOverlayRetryShortcutAction()" in shortcut
+
+
+def test_retry_action_returns_restore_result():
+    start = QML.index("function handleOverlayRetryAction")
+    body = QML[start : QML.index("    function handleOverlayRetryButtonAction", start)]
+    assert "const restored = window.showOverlayAndHideControls()" in body
+    assert "return restored" in body
+    assert "retryOverlay.forceActiveFocus()" in body

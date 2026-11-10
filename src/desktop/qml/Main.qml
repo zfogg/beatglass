@@ -1541,6 +1541,7 @@ ApplicationWindow {
         const restored = window.showOverlayAndHideControls()
         if (!restored)
             retryOverlay.forceActiveFocus()
+        return restored
     }
     function handleOverlayRetryButtonAction() {
         if (window.overlayRecoveryPausedByUser) {
