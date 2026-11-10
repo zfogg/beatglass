@@ -56,6 +56,12 @@ if not isinstance(restart.get("serial"), str) or not restart["serial"].strip():
     raise SystemExit("restart event has no sink serial")
 if device_ids and (not isinstance(start.get("device_id"), str) or not isinstance(restart.get("device_id"), str)):
     raise SystemExit("device identity is missing from lifecycle boundary")
+error_events = [event for event in events if event.get("event") == "error"]
+error_domains = [event.get("error_domain") for event in error_events]
+if any(event.get("error_domain") is not None for event in error_events) and (any(not isinstance(value, str) or not value.strip() for value in error_domains)):
+    raise SystemExit("transition error domains must be complete and non-empty")
+if any(event.get("error_domain") is not None for event in error_events) and (not isinstance(restart.get("recovery_reason"), str) or not restart.get("recovery_reason", "").strip()):
+    raise SystemExit("recovery reason is missing from native error evidence")
 reacquisition = restart.get("reacquisition")
 if reacquisition is not None:
     if not isinstance(reacquisition, dict) or reacquisition.get("epoch") != restart.get("epoch"):
