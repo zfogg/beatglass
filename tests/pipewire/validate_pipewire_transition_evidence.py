@@ -31,6 +31,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no OS version")
         if host.get("arch") is not None and (not isinstance(host["arch"], str) or not host["arch"].strip()):
             raise SystemExit("transition host provenance has no architecture")
+        if host.get("container_id") is not None and (not isinstance(host["container_id"], str) or not host["container_id"].strip()):
+            raise SystemExit("transition host provenance has no container id")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
