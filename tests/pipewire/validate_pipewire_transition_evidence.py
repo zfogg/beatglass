@@ -73,6 +73,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no battery state")
         if host.get("network_state") is not None and (not isinstance(host["network_state"], str) or not host["network_state"].strip()):
             raise SystemExit("transition host provenance has no network state")
+        if host.get("dns_state") is not None and (not isinstance(host["dns_state"], str) or not host["dns_state"].strip()):
+            raise SystemExit("transition host provenance has no DNS state")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
