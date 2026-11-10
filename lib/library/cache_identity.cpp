@@ -43,7 +43,7 @@ FingerprintStatus invalidate_if_stale(SqliteCache& cache, const CacheKey& key,
                                       const std::filesystem::path& path,
                                       std::stop_token stop, std::string* diagnostic) {
   const auto status = revalidate_file_identity(path, key.content, stop, diagnostic);
-  if (status == FingerprintStatus::changed) cache.invalidate(key);
+  if (fingerprint_status_requires_refresh(status)) cache.invalidate(key);
   return status;
 }
 
@@ -53,7 +53,7 @@ Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
   if (result.empty()) return Publish::error;
   const auto initial = revalidate_file_identity(path, key.content, stop);
   if (initial == FingerprintStatus::cancelled) return Publish::cancelled;
-  if (initial == FingerprintStatus::changed) { cache.invalidate(key); return Publish::stale_input; }
+  if (fingerprint_status_requires_refresh(initial)) { cache.invalidate(key); return Publish::stale_input; }
   if (initial != FingerprintStatus::ok) return Publish::stale_input;
   if (stop.stop_requested()) return Publish::cancelled;
   cache.begin(run_id, key);
@@ -62,7 +62,7 @@ Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
     // that the existing completed cache entry is stale, so preserve it.
     if (stop.stop_requested()) return false;
     const auto status = revalidate_file_identity(path, key.content, stop);
-    if (status == FingerprintStatus::changed) cache.invalidate(key);
+    if (fingerprint_status_requires_refresh(status)) cache.invalidate(key);
     return status == FingerprintStatus::ok;
   });
 }
@@ -74,7 +74,7 @@ FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::
   // An unreadable path is not proof that the catalog entry is stale. Keep it
   // available with its diagnostic so a transient permission/device failure can
   // be retried without losing the user's catalog row.
-  if (status == FingerprintStatus::changed) {
+  if (fingerprint_status_requires_refresh(status)) {
     cache.remove_entry(path);
     if (diagnostic) *diagnostic = "content identity changed; catalog entry removed";
   }

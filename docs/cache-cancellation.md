@@ -23,3 +23,6 @@ transient failure and must not be blindly retried against the old identity.
 Callers can use `fingerprint_status_requires_refresh` to make this distinction
 explicit: only a `changed` result requires refreshing the cached identity;
 `cancelled` and `error` remain retryable without discarding a known identity.
+
+The cache identity implementation uses the same predicate, so all publication
+and collection paths invalidate only after a verified `changed` outcome.
