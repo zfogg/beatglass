@@ -1389,8 +1389,13 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Show overlay is unavailable until an available display is selected.", overlayDisplay)
+            return false
+        }
         showOverlay.forceActiveFocus()
         window.announceCaptureRecoveryState("Show overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
     }
     function focusOverlayHideShortcut() {
         navigation.currentIndex = 1

@@ -654,3 +654,13 @@ def test_unlock_focus_shortcut_requires_available_click_through_overlay():
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
     assert "return true" in body
+
+
+def test_show_focus_shortcut_requires_available_display():
+    start = QML.index("function focusOverlayShowShortcut")
+    body = QML[start : QML.index("    function focusOverlayHideShortcut", start)]
+    assert "overlayDisplaySelectionRequired" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return false" in body
+    assert "return true" in body
