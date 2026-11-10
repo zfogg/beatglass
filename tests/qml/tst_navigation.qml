@@ -2157,7 +2157,7 @@ TestCase {
         app.destroy()
         fakeOverlay.screenIndex = -1
     }
-    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
+    function test_captureFreshnessAnnouncesNativeRecoveryGate() {`n        fakeOverlay.available = false`n        let app = shellWithOverlay.createObject(null)`n        app.overlayCaptureEvidenceStale = true`n        app.transitionCaptureEvidence(false, "Fresh accepted capture available.", null)`n        verify(app.overlayCaptureEvidenceStale)`n        verify(app.overlayRecoveryAnnouncement.indexOf("native recovery completes") >= 0)`n        app.destroy()`n        fakeOverlay.available = true`n    }`n    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = []
         fakeOverlay.displayName = ""
@@ -2575,3 +2575,4 @@ TestCase {
         fakeOverlay.displayName = "Display"
     }
 }
+
