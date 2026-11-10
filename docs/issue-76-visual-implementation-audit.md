@@ -771,6 +771,8 @@ The overlay Start/Stop handler now rechecks the native capture status at activat
 
 Live-analysis Starting, Reacquiring, Error, and Stopped transitions now also invalidate overlay evidence even when the native capture bridge remains connected; Tracking clears that marker only after the capture bridge is Monitoring and announces fresh accepted evidence.
 
+The visualization-specific Retry monitoring control now enters the same stale-evidence recovery boundary before dispatching capture start, announcing that prior overlay evidence is provisional until fresh monitoring data arrives.
+
 Estimate attribution repeats the stale-capture marker as well, keeping the combined-output source label honest while its last accepted values await reacquisition.
 
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.

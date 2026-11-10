@@ -4358,6 +4358,8 @@ ApplicationWindow {
                     background: Rectangle { color: window.themeAccentColors[window.selectedThemeIndex]; radius: 5 }
                     Layout.minimumWidth: window.compactHeader ? 112 : 136
                     onClicked: {
+                        window.overlayCaptureEvidenceStale = true
+                        window.announceCaptureRecoveryState("Visualization capture retry requested; previous overlay evidence is stale until fresh monitoring data arrives.")
                         window.captureMonitorBridge.start()
                         visualizationCanvas.forceActiveFocus()
                     }
