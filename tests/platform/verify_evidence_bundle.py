@@ -96,6 +96,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"invalid or duplicate artifact entry: {entry}"); continue
         if "role" in entry and (not isinstance(entry["role"], str) or not entry["role"].strip()):
             errors.append(f"artifact role must be a nonempty string: {relative}"); continue
+        if "role" in entry and entry["role"] != entry["role"].strip():
+            errors.append(f"artifact role must not have leading or trailing whitespace: {relative}"); continue
         seen.add(canonical)
         path = (root / canonical).resolve()
         if root.resolve() not in path.parents:
