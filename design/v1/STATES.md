@@ -311,3 +311,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Unlock availability guard | Unlock is requested while click-through is inactive or the native overlay is unavailable | Preserve the current interaction state, explain why unlock cannot proceed, and focus the unlock recovery control. |
 | Hide availability guard | Hide is requested while the native overlay is unavailable | Keep the control-window fallback active, explain the unavailable state, and focus the available Show recovery control. |
 | Show action display guard | A keyboard or internal Show action is requested without an available destination display | Keep the fallback visible, explain that display selection is required, return a failure result, and focus display recovery. |
+| Retry shortcut paused guard | Keyboard or internal retry is requested while recovery is paused | Preserve the pause boundary, return failure, explain that Resume is required, and focus Resume. |

@@ -608,4 +608,11 @@ def test_show_action_requires_available_display():
     assert "overlayDisplaySelectionRequired" in body
     assert "screenNames.length === 0" in body
     assert "focusOverlayDisplayRecoveryFailure" in body
+
+def test_retry_action_respects_paused_recovery_boundary():
+    start = QML.index("function handleOverlayRetryAction")
+    body = QML[start : QML.index("    function handleOverlayRetryButtonAction", start)]
+    assert "overlayRecoveryPausedByUser" in body
+    assert "focusOverlayRecoveryPauseState" in body
+    assert "Resume recovery before retrying" in body
     assert "return false" in body
