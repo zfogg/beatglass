@@ -867,3 +867,11 @@ def test_stop_recovery_action_has_single_success_return():
     body = QML[start : QML.index("    function handleOverlayPausedPageShortcut", start)]
     assert body.count("return true") == 1
     assert "resumeOverlayRecovery.forceActiveFocus()" in body
+
+
+def test_summary_review_focus_shortcut_reports_success():
+    start = QML.index("function focusOverlaySummaryReviewShortcut")
+    body = QML[start : QML.index("    function focusOverlayUnlockShortcut", start)]
+    assert "overlaySettingsSummaryReviewAction.forceActiveFocus()" in body
+    assert "announceCaptureRecoveryState" in body
+    assert "return true" in body
