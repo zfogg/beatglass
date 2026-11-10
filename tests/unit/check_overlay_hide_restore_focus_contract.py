@@ -639,3 +639,12 @@ def test_click_through_action_returns_application_result():
     assert "return false" in body
     assert "return applied && clickThroughToggle.checked === requestedClickThrough" in body
     assert "overlayInteractionMode.forceActiveFocus()" in body
+
+
+def test_click_through_shortcut_handles_missing_bridge():
+    start = QML.index("function handleOverlayClickThroughShortcut")
+    body = QML[start : QML.index("    function handleOverlayRetryShortcut", start)]
+    assert "if (!window.overlayBridge)" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
+    assert "return true" in body
