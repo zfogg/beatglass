@@ -300,6 +300,9 @@ identity fail-closed even when other evidence fields are present.
 The array-platform regression in
 `tests/unit/check_native_host_provenance_platform_array.py` rejects structured
 platform values instead of accepting a list containing a canonical alias.
+The object-platform regression in
+`tests/unit/check_native_host_provenance_platform_object.py` similarly rejects
+nested platform identity structures.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
