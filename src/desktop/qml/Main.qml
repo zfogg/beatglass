@@ -1928,7 +1928,7 @@ ApplicationWindow {
             Accessible.name: "Overlay beat pulse"
             Accessible.role: Accessible.Status
             Accessible.value: pulseOpacity > 0 ? "active" : "idle"
-            Accessible.description: "Beat-synchronized visual metronome; " + (window.liveBridge.status === "Tracking" && Number(window.liveBridge.tempo) > 0 ? "tracking at " + window.liveBridge.tempo + " BPM" : "waiting for valid live BPM") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "; reduced motion disables pulsing" : ".")
+            Accessible.description: "Beat-synchronized visual metronome; " + (window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0 ? "tracking at " + window.liveBridge.tempo + " BPM" : "waiting for valid live BPM") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "; reduced motion disables pulsing" : ".")
             border.width: 1 + pulseOpacity * 3
             Behavior on border.width { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 100 } }
             Timer {
@@ -1936,7 +1936,7 @@ ApplicationWindow {
                 objectName: "beatPulse"
                 repeat: true
                 interval: { var bpm = Number(window.liveBridge.tempo); return isFinite(bpm) && bpm > 0 ? Math.max(120, 60000 / bpm) : 1000 }
-                running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && window.liveBridge.status === "Tracking"
+                running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0
                 onTriggered: { overlaySurface.pulseOpacity = 1.0; pulseFade.restart() }
             }
             Timer { id: pulseFade; interval: 120; onTriggered: overlaySurface.pulseOpacity = 0.0 }

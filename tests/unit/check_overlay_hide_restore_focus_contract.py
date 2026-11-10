@@ -1065,6 +1065,14 @@ def test_overlay_pulse_exposes_non_color_accessible_status():
     assert "reduced motion disables pulsing" in body
 
 
+def test_overlay_pulse_requires_finite_positive_bpm_to_run():
+    start = QML.index("id: beatPulse")
+    body = QML[start : QML.index("            onTriggered", start)]
+    assert "status === \"Tracking\"" in body
+    assert "isFinite(Number(window.liveBridge.tempo))" in body
+    assert "Number(window.liveBridge.tempo) > 0" in body
+
+
 def test_recovery_pause_focus_helper_reports_target_result():
     start = QML.index("function focusOverlayRecoveryPauseState")
     body = QML[start : QML.index("    function resetOverlayRecoveryAttempts", start)]
