@@ -3005,7 +3005,6 @@ ApplicationWindow {
                             highlighted: ListView.isCurrentItem
                             activeFocusOnTab: true
                             Accessible.name: fileName + (fileIsDir ? ", folder" : ", audio file")
-                            Accessible.value: fileIsDir ? "folder" : "audio file"
                             Accessible.role: Accessible.ListItem
                             Accessible.description: fileIsDir ? "Open this folder" : "Select this audio file for metadata, analysis and playback"
                             ToolTip.text: fileIsDir ? "Open folder " + fileName : "Select audio file " + fileName
