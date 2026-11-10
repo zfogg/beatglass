@@ -3420,6 +3420,7 @@ ApplicationWindow {
                                     : "Discard saved analysis run?"
                                 modal: true
                                 standardButtons: Dialog.Ok | Dialog.Cancel
+                                Accessible.role: Accessible.Dialog
                                 Accessible.name: "Discard saved analysis run confirmation"
                                 Accessible.description: "Confirm to remove only the selected retry record. Cancel is focused first; press Tab to reach the destructive OK action. The source audio file is never changed. Cancel returns focus to the discard control."
                                 Accessible.value: typeof storageRecovery !== "undefined" ? storageRecovery.selectedRunId : ""
