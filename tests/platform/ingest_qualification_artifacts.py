@@ -2,6 +2,8 @@
 import argparse
 import hashlib
 import json
+import os
+import tempfile
 from pathlib import Path
 import re
 import unicodedata
@@ -148,7 +150,19 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
         if len(serialized.encode("utf-8")) > max_manifest_bytes:
             errors.append(f"generated evidence manifest exceeds {max_manifest_bytes} bytes")
         else:
-            output.write_text(serialized, encoding="utf-8")
+            temporary = None
+            try:
+                with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent,
+                                                 prefix=f".{output.name}.", suffix=".tmp", delete=False) as stream:
+                    temporary = Path(stream.name)
+                    stream.write(serialized)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                os.replace(temporary, output)
+                temporary = None
+            finally:
+                if temporary is not None:
+                    temporary.unlink(missing_ok=True)
     return errors
 
 

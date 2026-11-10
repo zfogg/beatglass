@@ -30,3 +30,6 @@ Capture timestamps must include a timezone and cannot be more than five minutes
 in the future, preventing stale clock metadata from entering the bundle.
 Valid timestamps are emitted canonically as UTC ISO-8601 values with a `Z`
 suffix so manifests from different hosts compare consistently.
+Generated manifests are written through a same-directory temporary file,
+flushed, and atomically replaced so interrupted ingestion cannot leave a
+partially written manifest.
