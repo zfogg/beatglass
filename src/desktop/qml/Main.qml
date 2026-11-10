@@ -80,6 +80,7 @@ ApplicationWindow {
     property bool overlayCaptureEvidenceStale: false
     readonly property string overlayRecoveryEvidenceLabel: overlayCaptureEvidenceStale ? "Live evidence stale until fresh capture" : "Live evidence current"
     property string overlayRecoveryAnnouncement: ""
+    property bool overlayInvalidOpacityRecoveryPending: false
     property string overlayPulseAnnouncement: "Beat pulse is idle until fresh Monitoring capture and valid BPM are available."
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
@@ -1009,6 +1010,7 @@ ApplicationWindow {
             }
         } else {
             usedSafeOpacity = true
+            window.overlayInvalidOpacityRecoveryPending = true
             if (window.overlayBridge.setOpacity(0.9) === false) {
                 window.overlayLaunchFallbackActive = true
                 window.overlayDisplayRecoveryPending = true
@@ -1098,7 +1100,9 @@ ApplicationWindow {
         window.overlayLaunchFallbackActive = false
         if (visualStateReady) {
             window.overlayDisplayRecoveryPending = false
-            window.announceCaptureRecoveryState("Overlay settings synchronized from native state.")
+            window.announceCaptureRecoveryState(window.overlayInvalidOpacityRecoveryPending
+                ? "Overlay settings synchronized; invalid opacity replaced with safe 90 percent opacity."
+                : "Overlay settings synchronized from native state.")
             return true
         }
         window.overlayLaunchFallbackActive = true
@@ -2258,6 +2262,8 @@ ApplicationWindow {
             visualizationCanvas.forceActiveFocus()
     }
     function announceCaptureRecoveryState(message) {
+        if (window.overlayInvalidOpacityRecoveryPending && message.indexOf("90 percent opacity") < 0)
+            message += " Invalid opacity was replaced with safe 90 percent opacity."
         window.overlayRecoveryAnnouncement = message
         window.clearVisualizationForCaptureState(message)
         window.announceVisualizationRecovery(message)
