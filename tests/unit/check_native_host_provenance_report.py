@@ -12,6 +12,8 @@ with tempfile.TemporaryDirectory() as directory:
     report = Path(directory) / "report.json"
     host.write_text(json.dumps({"platform": "linux", "name": "qualification-host"}))
     subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(report)], check=True)
+    assert report.exists()
+    assert not list(report.parent.glob("tmp*"))
     result = json.loads(report.read_text())
     assert result["schema"] == "beatglass-native-host-provenance-v1"
     assert result["valid"] is True
