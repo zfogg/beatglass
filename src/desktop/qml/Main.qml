@@ -1983,6 +1983,16 @@ ApplicationWindow {
                     }
                 }
             }
+            Connections {
+                target: djOverlay
+                function onVisibleChanged() {
+                    if (!djOverlay.visible) {
+                        beatPulse.stop()
+                        pulseFade.stop()
+                        overlaySurface.pulseOpacity = 0.0
+                    }
+                }
+            }
             MouseArea {
                 anchors.fill: parent
                 property bool fallbackMove: false

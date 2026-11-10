@@ -1098,6 +1098,15 @@ def test_capture_monitoring_restarts_pulse_when_evidence_is_valid():
     assert "beatPulse.restart()" in body
 
 
+def test_overlay_visibility_clears_pulse_state():
+    start = QML.index("target: djOverlay")
+    body = QML[start : QML.index("            MouseArea", start)]
+    assert "!djOverlay.visible" in body
+    assert "beatPulse.stop()" in body
+    assert "pulseFade.stop()" in body
+    assert "overlaySurface.pulseOpacity = 0.0" in body
+
+
 def test_motion_restore_restarts_pulse_only_with_valid_evidence():
     start = QML.index("function onReduceMotionChanged")
     body = QML[start : QML.index("            Connections", start)]
