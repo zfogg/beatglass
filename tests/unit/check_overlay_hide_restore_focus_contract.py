@@ -616,3 +616,11 @@ def test_retry_action_respects_paused_recovery_boundary():
     assert "focusOverlayRecoveryPauseState" in body
     assert "Resume recovery before retrying" in body
     assert "return false" in body
+
+
+def test_reapply_button_respects_native_result_focus():
+    start = QML.index("function handleOverlayReapplyButtonAction")
+    body = QML[start : QML.index("    function handleOverlayUnlockAction", start)]
+    assert "const reapplied" in body
+    assert "if (reapplied)" in body
+    assert "reapplyOverlaySettings.forceActiveFocus()" in body
