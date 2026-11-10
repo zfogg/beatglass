@@ -509,6 +509,15 @@ def test_resume_recovery_routes_button_and_shortcut_to_shared_action():
     assert "onClicked: window.handleOverlayResumeRecoveryAction()" in QML
 
 
+def test_stop_recovery_is_idempotent_when_already_paused():
+    start = QML.index("function handleOverlayStopRecoveryAction")
+    body = QML[start : QML.index("    function handleOverlayPausedPageShortcut", start)]
+    assert "overlayRecoveryPausedByUser" in body
+    assert "focusOverlayRecoveryPauseState" in body
+    assert "return" in body
+    assert "stopOverlayRecoveryAttempts()" in body
+
+
 def test_size_recovery_keeps_selector_focused():
     start = QML.index("function focusOverlaySizeRecovery")
     body = QML[start : QML.index("    function handleOverlayClickThroughButtonAction", start)]
