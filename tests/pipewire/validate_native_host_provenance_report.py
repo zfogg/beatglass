@@ -30,7 +30,7 @@ if report.get("platform") not in ("linux", "windows", "macos"):
 if not isinstance(report.get("name"), str) or not report["name"].strip():
     raise SystemExit("host provenance report has no name")
 fields = report.get("checked_fields")
-if not isinstance(fields, list) or any(not isinstance(value, str) or not value for value in fields):
+if not isinstance(fields, list) or any(not isinstance(value, str) or not value.strip() for value in fields):
     raise SystemExit("host provenance report has invalid checked fields")
 if fields != sorted(fields) or len(fields) != len(set(fields)):
     raise SystemExit("host provenance report has invalid checked fields")
