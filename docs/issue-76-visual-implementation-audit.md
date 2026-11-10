@@ -1043,3 +1043,5 @@ A successful native visual restore now clears pending display recovery alongside
 Successful native visual restore now clears the control-window fallback marker with pending recovery, so a valid overlay state cannot remain labeled as fallback.
 
 Successful native visual restore clears the hidden-by-user marker with fallback state, keeping the restored overlay lifecycle consistent for direct recovery actions.
+
+Successful native visual restore clears the availability-loss marker so a recovered overlay is not treated as awaiting an older outage.
