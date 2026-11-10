@@ -789,6 +789,15 @@ ApplicationWindow {
             : "Reduced motion disabled for " + window.selectedTheme + "; standard presentation transitions restored."
         return true
     }
+    function resetAppearancePreferences() {
+        if (!window.themePreferencesBridge)
+            return false
+        window.themePreferencesBridge.reset()
+        window.selectThemeIndex(0)
+        window.setReduceMotionPreference(false)
+        window.themePreferenceAnnouncement = "Appearance reset to Light theme with full motion."
+        return true
+    }
     // Keep the visual selection synchronized when preferences are restored or
     // changed by another settings surface. Assignments from the controls below
     // intentionally remain immediate; this connection handles external changes.
@@ -2535,10 +2544,8 @@ ApplicationWindow {
                 Accessible.description: "Restore the default Light theme and turn off reduced motion. Current settings: " + window.selectedTheme + ", " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced motion" : "full motion") + "."
                 ToolTip.text: "Reset " + window.selectedTheme + " and " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full") + " motion to defaults"
                 onClicked: {
-                    if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
-                    window.selectThemeIndex(0)
+                    window.resetAppearancePreferences()
                     themeSelector.currentIndex = 0
-                    window.themePreferenceAnnouncement = "Appearance reset to Light theme with full motion."
                     resetAppearance.forceActiveFocus()
                 }
             }
