@@ -275,6 +275,11 @@ int main(int argc, char** argv) {
     }
     if (rows.empty()) rows.push_back(text("No supported audio files in this folder.") | color(Color::GrayLight));
     const auto name = selected >= 0 ? tracks[selected].title : "No track selected";
+    const auto duration = result && result->metadata.sample_rate != 0
+        ? std::to_string(result->metadata.frames / result->metadata.sample_rate / 60) + ":" +
+            (result->metadata.frames / result->metadata.sample_rate % 60 < 10 ? "0" : "") +
+            std::to_string(result->metadata.frames / result->metadata.sample_rate % 60)
+        : "—";
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
     auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status)}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
@@ -284,7 +289,7 @@ int main(int argc, char** argv) {
 #else
         std::string{};
 #endif
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto toggle_live = [&] {

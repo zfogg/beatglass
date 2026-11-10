@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     const std::filesystem::path arg(argv[i]);
     if (!positional_only && arg == std::filesystem::path("--")) positional_only = true;
     else if (!positional_only && (arg == std::filesystem::path("--help") || arg == std::filesystem::path("-h"))) { usage(); return 0; }
-    else if (!positional_only && (arg == std::filesystem::path("--version") || arg == std::filesystem::path("-V"))) { std::cout << "beatglass-cli " << BEATGLASS_VERSION << "\n"; return 0; }
+    else if (!positional_only && (arg == std::filesystem::path("--version") || arg == std::filesystem::path("-V"))) { std::cout << "beatglass-tool " << BEATGLASS_VERSION << "\n"; return 0; }
     else if (!positional_only && arg == std::filesystem::path("--replay") && !replay) replay = true;
     else if (!positional_only && arg == std::filesystem::path("--json") && !json) json = true;
     else if (path.empty() && arg.native().size() && (positional_only || arg.native()[0] != '-')) path = arg;
