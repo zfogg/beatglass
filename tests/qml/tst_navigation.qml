@@ -1007,9 +1007,14 @@ TestCase {
         let progress = findChild(app, "analysisProgress")
         compare(progress.text, "Running · observed 42 frames.")
         let cancel = findChild(app, "cancelAnalysis")
-        verify(cancel.visible); verify(cancel.enabled); cancel.clicked(); compare(fakeAnalysis.cancels, 1)
+        verify(cancel.visible)
+        verify(cancel.enabled)
+        cancel.clicked()
+        compare(fakeAnalysis.cancels, 1)
         let retry = findChild(app, "retryAnalysis")
-        verify(retry.enabled); retry.clicked(); compare(fakeAnalysis.retries, 1)
+        verify(retry.enabled)
+        retry.clicked()
+        compare(fakeAnalysis.retries, 1)
         app.destroy()
     }
     function test_batchQueueStatusShowsCapacityAndRejectedInputs() {
