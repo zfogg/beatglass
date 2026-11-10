@@ -1418,8 +1418,13 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay size is unavailable until the native overlay and a destination display are ready.", overlaySize)
+            return false
+        }
         overlaySize.forceActiveFocus()
         window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + "." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
     }
     function focusOverlayClickThroughShortcut() {
         navigation.currentIndex = 1
