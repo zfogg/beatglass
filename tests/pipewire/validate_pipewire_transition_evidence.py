@@ -2,6 +2,7 @@
 import json
 import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 if len(sys.argv) != 2:
@@ -23,6 +24,15 @@ if isinstance(payload, dict):
         raise SystemExit("transition evidence has an empty artifact identity")
     if payload.get("artifact_sha256") is not None and (not isinstance(payload["artifact_sha256"], str) or not re.fullmatch(r"[0-9a-fA-F]{64}", payload["artifact_sha256"])):
         raise SystemExit("transition evidence has an invalid artifact digest")
+    if payload.get("capture_started_at") is not None:
+        if not isinstance(payload["capture_started_at"], str):
+            raise SystemExit("transition evidence has an invalid capture timestamp")
+        try:
+            capture_started_at = datetime.fromisoformat(payload["capture_started_at"].replace("Z", "+00:00"))
+        except ValueError:
+            raise SystemExit("transition evidence has an invalid capture timestamp")
+        if capture_started_at.tzinfo is None:
+            raise SystemExit("transition capture timestamp has no timezone")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
 if any(not isinstance(event, dict) for event in events):
