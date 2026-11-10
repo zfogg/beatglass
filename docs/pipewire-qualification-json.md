@@ -10,3 +10,9 @@ summary; the JSON is an index, not a replacement for native logs/traces.
 Exit code `0` means every required file is present and non-empty; `1` means
 evidence is incomplete or unsafe; `2` means the artifact directory or command
 line is invalid.
+# Process sample-count integrity
+
+When a transition artifact includes `sample_count` on any `process` event, every
+`process` event must include a non-negative integer `sample_count`. This prevents
+partial callback accounting from being accepted as native evidence. The artifact
+must still contain positive captured samples in the active epoch.
