@@ -213,6 +213,7 @@ int main(int argc, char** argv) {
   std::string live_status = "Capture stopped.";
   std::optional<float> live_bpm;
   beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
+  std::vector<float> live_waveform(160, 0.0f);
   live_session = std::make_unique<beatglass::windows::LoopbackSession>(live_epochs, [&] {
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
     live_bpm.reset();
@@ -222,6 +223,7 @@ int main(int argc, char** argv) {
   std::string live_status = "Native loopback capture is unavailable in this build.";
   std::optional<float> live_bpm;
   beatglass::TrackingState live_tracking_state = beatglass::TrackingState::stopped;
+  std::vector<float> live_waveform(160, 0.0f);
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze = [&] {
@@ -304,7 +306,7 @@ int main(int argc, char** argv) {
     for (const auto& endpoint : live_endpoints) endpoints.push_back(text("●  " + endpoint) | color(Color::YellowLight));
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
     const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
-    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Enumerated by the native output adapter."), separator(), vbox(endpoints), live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), live_button->Render(), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Enumerated by the native output adapter."), separator(), vbox(endpoints), live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), live_button->Render(), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto settings = Renderer([&] { return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold, text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"), text("Terminal motion: enabled"), separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."), text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto tabs = Container::Tab({library, live, settings}, &tab);
@@ -338,6 +340,13 @@ int main(int argc, char** argv) {
             const auto state = live_replay->process(block);
             live_bpm = state.bpm;
             live_tracking_state = state.state;
+            for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) {
+              const auto first = bin * packet.sample_count / live_waveform.size();
+              const auto last = std::max(first + 1, (bin + 1) * packet.sample_count / live_waveform.size());
+              float peak = 0.0f;
+              for (auto sample = first; sample < std::min<std::size_t>(last, packet.sample_count); ++sample) peak = std::max(peak, std::abs(packet.samples[sample]));
+              live_waveform[bin] = peak;
+            }
             live_status = "Receiving OS sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) {
             live_tracking_state = beatglass::TrackingState::error;
