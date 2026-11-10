@@ -287,7 +287,7 @@ def main() -> int:
             elif error.startswith("invalid scenario:"):
                 category = "status"
             elif error.startswith("invalid scenario evidence:"):
-                category = "scenario_reference"
+                category = "scenario_path"
             elif error.startswith("unsupported scenario fields:"):
                 category = "scenario_schema"
             elif error.startswith(("missing artifact", "artifact must", "artifact path", "artifact hash", "artifact size")):

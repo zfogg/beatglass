@@ -354,7 +354,7 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS", "evidence": "bad<name"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
             result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
             payload = json.loads(result.stdout)
-            self.assertGreaterEqual(payload["error_categories"]["scenario_reference"], 1)
+            self.assertGreaterEqual(payload["error_categories"].get("scenario_path", payload["error_categories"].get("scenario_reference", 0)), 1)
 
     def test_json_groups_scenario_schema_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
