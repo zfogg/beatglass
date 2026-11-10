@@ -109,5 +109,8 @@ non-empty human-auditable sink name.
 Reacquisition evidence may include `source_type`; when supplied it must be a
 non-empty native source classification.
 
+Reacquisition evidence may include `profile`; when supplied it must be a
+non-empty capture profile identifier.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
