@@ -154,7 +154,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"hash mismatch: {relative}")
     evidence_owners = {}
     artifact_roles = {
-        entry.get("path"): entry.get("role") for entry in artifacts or []
+        entry.get("path").casefold(): entry.get("role") for entry in artifacts or []
         if isinstance(entry, dict) and isinstance(entry.get("path"), str)
     }
     for scenario in scenarios or []:
@@ -173,16 +173,17 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"invalid scenario: {scenario}"); continue
         if scenario["status"] not in {"UNRUN", "PENDING"}:
             evidence = scenario.get("evidence")
-            if not isinstance(evidence, str) or not evidence or evidence not in seen:
+            evidence_key = evidence.casefold() if isinstance(evidence, str) else None
+            if not isinstance(evidence, str) or not evidence or evidence_key not in seen:
                 errors.append(f"scenario evidence is not retained: {scenario.get('id')}")
-            elif evidence in evidence_owners:
-                errors.append(f"scenario evidence is shared: {evidence} ({evidence_owners[evidence]}, {scenario.get('id')})")
-            elif not artifact_roles.get(evidence):
+            elif evidence_key in evidence_owners:
+                errors.append(f"scenario evidence is shared: {evidence} ({evidence_owners[evidence_key]}, {scenario.get('id')})")
+            elif not artifact_roles.get(evidence_key):
                 errors.append(f"scenario evidence role is missing: {scenario.get('id')}")
-            elif artifact_roles.get(evidence) != scenario.get("id"):
+            elif artifact_roles.get(evidence_key) != scenario.get("id"):
                 errors.append(f"scenario evidence role mismatch: {scenario.get('id')} -> {evidence}")
             else:
-                evidence_owners[evidence] = scenario.get("id")
+                evidence_owners[evidence_key] = scenario.get("id")
         elif scenario.get("evidence"):
             errors.append(f"incomplete scenario must not claim evidence: {scenario.get('id')}")
     return errors
