@@ -4908,6 +4908,12 @@ ApplicationWindow {
                             window.handleOverlayOpacityChanged()
                         }
                     }
+                    QtObject {
+                        objectName: "overlayOpacity"
+                        readonly property bool activeFocus: overlayOpacityControl.activeFocus
+                        readonly property real value: overlayOpacityControl.value
+                        function forceActiveFocus() { overlayOpacityControl.forceActiveFocus() }
+                    }
                     Label {
                         objectName: "overlayKeyboardRecoveryStatus"
                         visible: window.overlayBridge !== null
