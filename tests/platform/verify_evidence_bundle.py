@@ -170,6 +170,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
                     or any(len(part) > 255 for part in evidence_value.split("/"))
                     or any(part == "." for part in evidence_value.split("/"))
                     or "//" in evidence_value or evidence_value.endswith("/")
+                    or any(part.rsplit(".", 1)[0].upper() in {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(1, 10)), *(f"LPT{i}" for i in range(1, 10))} for part in evidence_value.split("/") if part not in {".", ".."})
                     or any(char in '<>"|?*:\\' for char in evidence_value)):
                 errors.append(f"invalid scenario evidence: {scenario.get('id')}"); continue
         if (not isinstance(scenario, dict) or not isinstance(scenario.get("id"), str)
