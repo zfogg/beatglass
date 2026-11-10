@@ -1023,3 +1023,5 @@ Capture freshness cannot clear stale overlay evidence while destination selectio
 When capture freshness is blocked by native overlay readiness, the recovery announcement now explains that monitoring continues while presentation awaits native recovery.
 
 Successful visual-state restore now clears the recovery-required marker, so the UI cannot remain in a stale recovery state after geometry and opacity are reapplied.
+
+Failed visual-state restore now sets the recovery-required marker, keeping the UI honest when geometry or native visual settings cannot be reapplied.
