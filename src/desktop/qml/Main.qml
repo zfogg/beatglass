@@ -1996,6 +1996,14 @@ ApplicationWindow {
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
                         window.overlayPulseAnnouncement = "Beat pulse cleared while the overlay is hidden."
+                    } else if (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion) {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse remains disabled because reduced motion is enabled."
+                    } else if (window.overlayCaptureEvidenceStale || !window.captureMonitorBridge || window.captureMonitorBridge.status !== "Monitoring") {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse is waiting for fresh Monitoring capture."
+                    } else if (window.liveBridge.status !== "Tracking" || !isFinite(Number(window.liveBridge.tempo)) || Number(window.liveBridge.tempo) <= 0) {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse is waiting for valid live BPM."
+                    } else {
+                        window.overlayPulseAnnouncement = "Overlay restored; beat pulse is ready for fresh live evidence."
                     }
                 }
             }
