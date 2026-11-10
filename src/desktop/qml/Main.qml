@@ -769,6 +769,17 @@ ApplicationWindow {
     readonly property var themeForegrounds: ["#142c2c", "#f1f6f7", "#ffffff", "#f9f5ff", "#effaff", "#fff9e8"]
     readonly property var themeAccentColors: ["#126f60", "#8ee5cc", "#8cffe2", "#d4a8ff", "#75d9ff", "#ffd45e"]
     property int selectedThemeIndex: themePreferencesBridge ? themePreferencesBridge.themeIndex : 0
+    function selectThemeIndex(index) {
+        const nextIndex = Math.max(0, Math.min(window.themeNames.length - 1, index))
+        window.selectedThemeIndex = nextIndex
+        window.selectedTheme = window.themeNames[nextIndex]
+        window.themePreferenceAnnouncement = "Theme selected: " + window.selectedTheme + ". " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "Reduced motion is enabled." : "Full motion is enabled.")
+        if (window.themePreferencesBridge)
+            window.themePreferencesBridge.themeIndex = nextIndex
+        if (typeof visualizationCanvas !== "undefined")
+            visualizationCanvas.requestPaint()
+        return true
+    }
     // Keep the visual selection synchronized when preferences are restored or
     // changed by another settings surface. Assignments from the controls below
     // intentionally remain immediate; this connection handles external changes.
@@ -2604,36 +2615,28 @@ ApplicationWindow {
                         }
                         Keys.onLeftPressed: {
                             const nextIndex = (index - 1 + window.themeNames.length) % window.themeNames.length
-                            window.selectedThemeIndex = nextIndex
-                            window.selectedTheme = window.themeNames[nextIndex]
+                            window.selectThemeIndex(nextIndex)
                             themeSelector.currentIndex = nextIndex
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
                             themePreviews.children[nextIndex].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onRightPressed: {
                             const nextIndex = (index + 1) % window.themeNames.length
-                            window.selectedThemeIndex = nextIndex
-                            window.selectedTheme = window.themeNames[nextIndex]
+                            window.selectThemeIndex(nextIndex)
                             themeSelector.currentIndex = nextIndex
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = nextIndex
                             themePreviews.children[nextIndex].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onHomePressed: {
-                            window.selectedThemeIndex = 0
-                            window.selectedTheme = window.themeNames[0]
+                            window.selectThemeIndex(0)
                             themeSelector.currentIndex = 0
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = 0
                             themePreviews.children[0].forceActiveFocus()
                             event.accepted = true
                         }
                         Keys.onEndPressed: {
                             const lastIndex = window.themeNames.length - 1
-                            window.selectedThemeIndex = lastIndex
-                            window.selectedTheme = window.themeNames[lastIndex]
+                            window.selectThemeIndex(lastIndex)
                             themeSelector.currentIndex = lastIndex
-                            if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = lastIndex
                             themePreviews.children[lastIndex].forceActiveFocus()
                             event.accepted = true
                         }
@@ -2642,10 +2645,8 @@ ApplicationWindow {
                             event.accepted = true
                         }
                         onClicked: {
-                            window.selectedThemeIndex = index
-                            window.selectedTheme = window.themeNames[index]
+                            window.selectThemeIndex(index)
                             themeSelector.currentIndex = index
-                                if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = index
                         }
                     }
                 }

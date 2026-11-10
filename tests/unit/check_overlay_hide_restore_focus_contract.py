@@ -905,3 +905,13 @@ def test_overlay_pulse_is_theme_aware_and_invalidates_stale_tracking():
     assert "isFinite(bpm)" in body
     assert "overlaySurface.pulseOpacity = 0.0" in body
     assert "reduceMotion" in body
+
+
+def test_theme_preview_selection_uses_shared_accessible_helper():
+    start = QML.index("function selectThemeIndex")
+    helper = QML[start : QML.index("    // Keep the visual selection synchronized", start)]
+    assert "themePreferenceAnnouncement" in helper
+    assert "themePreferencesBridge.themeIndex" in helper
+    assert "requestPaint" in helper
+    previews = QML[QML.index("id: themePreviews") : QML.index("id: themeSelector", QML.index("id: themePreviews"))]
+    assert previews.count("window.selectThemeIndex") >= 5
