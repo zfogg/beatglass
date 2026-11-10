@@ -59,6 +59,9 @@ required = ("start", "process", "error", "restart")
 missing = [name for name in required if name not in names]
 if missing:
     raise SystemExit(f"transition evidence missing: {', '.join(missing)}")
+duplicates = [name for name in ("start", "error", "restart") if names.count(name) != 1]
+if duplicates:
+    raise SystemExit(f"transition lifecycle events must be unique: {', '.join(duplicates)}")
 positions = [names.index(name) for name in required]
 if positions != sorted(positions):
     raise SystemExit("transition lifecycle events are out of order")
