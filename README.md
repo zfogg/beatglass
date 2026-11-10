@@ -80,6 +80,15 @@ For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` a
 
 On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
 
+## Qualification evidence index
+
+Use [progress](docs/progress.md) for the implementation ledger and open work,
+[platform qualification status](docs/platform-qualification-status.md) for the
+current evidence boundary and remaining gates, and the platform handoff plans
+for [Windows](docs/windows-qualification.md), [macOS](docs/macos-qualification.md),
+and [Linux](docs/linux-qualification-plan.md). Portable checks prepare these
+handoffs; they do not substitute for retained native evidence.
+
 ## Command-line and qualification-tool options
 
 The following reference is generated from the authoritative parsers in
