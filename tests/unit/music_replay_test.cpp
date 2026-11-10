@@ -110,6 +110,14 @@ TEST_CASE("combined callback failure clears state and fails closed") {
   CHECK_THROWS(replay.process(block(std::span(pcm).first(512),10,0)));
 }
 
+TEST_CASE("file replay rejects source mutation before publication") {
+  auto pcm = music(4);
+  struct Fixture { std::filesystem::path path; Fixture(const std::vector<float>& audio) { path=std::filesystem::temp_directory_path()/"beatglass-revalidate.wav"; std::ofstream out(path,std::ios::binary); auto u16=[&](unsigned v){char x[2]={char(v&255),char((v>>8)&255)};out.write(x,2);}; auto u32=[&](unsigned v){u16(v&65535);u16(v>>16);}; out.write("RIFF",4);u32(36+static_cast<unsigned>(audio.size()*2));out.write("WAVEfmt ",8);u32(16);u16(1);u16(1);u32(44100);u32(88200);u16(2);u16(16);out.write("data",4);u32(static_cast<unsigned>(audio.size()*2));for(auto sample:audio){auto n=static_cast<int>(std::clamp(sample,-1.f,.999f)*32767);u16(static_cast<unsigned>(n)&65535);} } ~Fixture(){std::error_code e;std::filesystem::remove(path,e);} } fixture(pcm);
+  bool mutated=false;
+  CHECK_THROWS_AS(replay_music_file(fixture.path,91,{}, {}, {}, [&](const CausalMusicState&) { if (!mutated) { std::ofstream out(fixture.path,std::ios::binary|std::ios::app); out << 'x'; mutated=true; } }), std::runtime_error);
+  CHECK(mutated);
+}
+
 TEST_CASE("combined replay rejects zero epoch before observers") {
   auto pcm=music(1); CausalMusicReplay replay; bool called=false;
   CHECK_THROWS_AS(replay.process(block(pcm,0,0),[&](const CausalMusicBeat&){called=true;},[&](const CausalTonalFrame&){called=true;}),std::invalid_argument);
