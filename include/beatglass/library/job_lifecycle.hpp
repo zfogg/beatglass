@@ -11,6 +11,16 @@ struct JobSnapshot {
   std::uint64_t frames_processed{};
   /** Expected input frames, or absent if the total is unknown. */
   std::optional<std::uint64_t> total_frames;
+  /** Convert the worker snapshot to the shared bounded progress contract. */
+  JobProgress progress() const noexcept {
+    return JobProgress{frames_processed, total_frames.value_or(0), status};
+  }
+  /** Return a UI-safe fraction in [0, 1], or no value when total is unknown. */
+  std::optional<double> fraction() const noexcept {
+    if (!total_frames.has_value()) return std::nullopt;
+    if (*total_frames == 0) return 1.0;
+    return static_cast<double>(frames_processed) / static_cast<double>(*total_frames);
+  }
 };
 /**
  * Serial job lifecycle for one worker; not thread-safe and not a scheduler.
@@ -30,7 +40,7 @@ public:
   JobSnapshot snapshot() const noexcept { return snapshot_; }
   /** Transition a queued job to running. */
   bool start() noexcept {
-    if (snapshot_.status != JobStatus::queued) return false;
+    if (!canTransition(snapshot_.status, JobStatus::running)) return false;
     snapshot_.status = JobStatus::running; return true;
   }
   /** Update running progress; reject regression or counts beyond a known total. */
@@ -52,14 +62,13 @@ public:
   }
   /** Mark a running job complete; a known total must have been fully processed. */
   bool complete() noexcept {
-    if (snapshot_.status != JobStatus::running ||
+    if (!canTransition(snapshot_.status, JobStatus::complete) ||
         (hasKnownTotal(snapshot_.total_frames) && snapshot_.frames_processed != *snapshot_.total_frames)) return false;
     snapshot_.status = JobStatus::complete; return true;
   }
 private:
   bool finish(JobStatus status) noexcept {
-    if (isTerminal(snapshot_.status)) return false;
-    if (snapshot_.status != JobStatus::queued && snapshot_.status != JobStatus::running) return false;
+    if (!canTransition(snapshot_.status, status)) return false;
     snapshot_.status = status; return true;
   }
   JobSnapshot snapshot_{};
