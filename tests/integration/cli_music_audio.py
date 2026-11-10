@@ -8,6 +8,8 @@ import tempfile
 import wave
 
 exe = sys.argv[1]
+help_result = subprocess.run([exe, "--help"], capture_output=True, text=True)
+assert help_result.returncode == 0 and "Usage: beatglass-music-cli" in help_result.stdout
 version = subprocess.run([exe, "--version"], capture_output=True, text=True)
 assert version.returncode == 0 and version.stdout.startswith("beatglass-music-cli ")
 rate = 44100

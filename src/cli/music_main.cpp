@@ -25,6 +25,7 @@ void optional_number(const std::optional<float>& value) { if(value) std::cout <<
 int wmain(int argc, wchar_t** argv) {
 #else
 int main(int argc, char** argv) {
+  if (argc == 2 && (std::string_view(argv[1]) == "--help" || std::string_view(argv[1]) == "-h")) { std::cout << "Usage: beatglass-music-cli [--help] [--version] <audio-file>\n"; return 0; }
   if (argc == 2 && (std::string_view(argv[1]) == "--version" || std::string_view(argv[1]) == "-V")) { std::cout << "beatglass-music-cli " << BEATGLASS_VERSION << "\n"; return 0; }
 #endif
   if (argc != 2) { std::cerr << "Usage: beatglass-music-cli <audio-file>\n"; return 2; }
