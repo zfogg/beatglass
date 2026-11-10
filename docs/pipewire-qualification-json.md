@@ -180,3 +180,5 @@ If present, host `virtualization` must be a non-empty string describing the
 virtualization or bare-metal context.
 If present, host `hypervisor` must be a non-empty string identifying the
 hypervisor when evidence was captured in a virtual machine.
+If present, host `secure_boot` must be a boolean indicating whether secure boot
+was enabled during qualification.
