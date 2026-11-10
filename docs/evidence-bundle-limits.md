@@ -45,3 +45,5 @@ is hashed into the generated manifest.
 Ingestion additionally enforces an aggregate artifact budget (8 GiB by
 default), configurable with `--max-total-artifact-bytes`, to bound total disk
 and hashing work across a bundle.
+The verifier applies the same aggregate budget, keeping generated manifests
+and independently checked bundles under one resource policy.

@@ -279,6 +279,16 @@ class EvidenceBundleTest(unittest.TestCase):
             self.assertIn("artifact exceeds 1 bytes: capture.txt", module.verify(root, manifest, max_artifact_bytes=1))
             self.assertIn("resource limits must be positive", module.verify(root, manifest, max_entries=0))
 
+    def test_total_artifact_size_limit_is_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("xx", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest(); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": digest, "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifacts exceed total 1 bytes", module.verify(root, manifest, max_total_artifact_bytes=1))
+
     def test_oversized_manifests_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
