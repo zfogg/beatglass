@@ -197,6 +197,9 @@ if reacquisition is not None:
             raise SystemExit("reacquisition end timestamp has no timezone")
         if reacquisition.get("capture_started_at") is not None and reacquisition_ended_at < reacquisition_started_at:
             raise SystemExit("reacquisition end precedes start")
+    if reacquisition.get("platform") is not None:
+        if reacquisition["platform"] not in ("linux", "windows", "macos"):
+            raise SystemExit("reacquisition evidence has an invalid platform")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:

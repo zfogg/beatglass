@@ -76,5 +76,8 @@ an ISO-8601 timestamp with an explicit timezone.
 Reacquisition evidence may include `capture_ended_at`; when supplied it must be a
 timezone-aware ISO-8601 timestamp no earlier than its recovery start timestamp.
 
+Reacquisition evidence may include `platform`; when supplied it must be one of
+`linux`, `windows`, or `macos`.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
