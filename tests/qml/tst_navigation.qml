@@ -61,10 +61,13 @@ TestCase {
         property string displayName: "Display"
         property int screenIndex: -1
         property int selectedScreen: -1
-        property int requestedWidth: 0`n        property int requestedHeight: 0`n        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
+        property int requestedWidth: 0
+        property int requestedHeight: 0
+        property var geometry: ({ x: 120, y: 80, width: 430, height: 240 })
         property bool refuseClickThrough: false
         property bool refuseHide: false
-        property bool refuseUnlock: false`n        property bool refuseShow: false
+        property bool refuseUnlock: false
+        property bool refuseShow: false
         function attach(overlay, control) { attaches++; return true }
         function showOverlay() { shows++; return !refuseShow }
         function hideOverlay() { hides++; if (refuseHide) return false; clickThrough = false; return true }
@@ -2157,7 +2160,17 @@ TestCase {
         app.destroy()
         fakeOverlay.screenIndex = -1
     }
-    function test_captureFreshnessAnnouncesNativeRecoveryGate() {`n        fakeOverlay.available = false`n        let app = shellWithOverlay.createObject(null)`n        app.overlayCaptureEvidenceStale = true`n        app.transitionCaptureEvidence(false, "Fresh accepted capture available.", null)`n        verify(app.overlayCaptureEvidenceStale)`n        verify(app.overlayRecoveryAnnouncement.indexOf("native recovery completes") >= 0)`n        app.destroy()`n        fakeOverlay.available = true`n    }`n    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
+    function test_captureFreshnessAnnouncesNativeRecoveryGate() {
+        fakeOverlay.available = false
+        let app = shellWithOverlay.createObject(null)
+        app.overlayCaptureEvidenceStale = true
+        app.transitionCaptureEvidence(false, "Fresh accepted capture available.", null)
+        verify(app.overlayCaptureEvidenceStale)
+        verify(app.overlayRecoveryAnnouncement.indexOf("native recovery completes") >= 0)
+        app.destroy()
+        fakeOverlay.available = true
+    }
+    function test_missingDisplaySelectionMarksOverlayEvidenceStale() {
         fakeOverlay.available = true
         fakeOverlay.screenNames = []
         fakeOverlay.displayName = ""
