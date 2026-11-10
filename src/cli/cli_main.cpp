@@ -1269,6 +1269,7 @@ int main(int argc, char** argv) {
   bool last_saved_reduce_motion = reduce_motion;
   std::string last_saved_seek_step = seek_step_text;
   std::string last_saved_visual_mode = visual_mode;
+  int last_saved_playback_device = playback_device_selected;
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
   auto refresh_button = Button(" Refresh ", refresh);
   std::string sort_button_label = " Sort: title ";
@@ -1780,7 +1781,20 @@ int main(int argc, char** argv) {
   auto combined_mode_button = Button(" Combined ", [&] { set_visual_mode("combined"); });
   auto beat_grid_mode_button = Button(" Beat grid ", [&] { set_visual_mode("beat_grid"); });
   auto tonal_history_mode_button = Button(" Tonal history ", [&] { set_visual_mode("tonal_history"); });
-  auto playback_device_picker = Radiobox(&playback_device_labels, &playback_device_selected);
+  RadioboxOption playback_device_option;
+  playback_device_option.on_change = [&] {
+    persist_preferences();
+#ifdef _WIN32
+    if (!playback_devices.empty() && playback_device_selected >= 0 && playback_device_selected < static_cast<int>(playback_devices.size())) {
+      const auto device_id = playback_devices[static_cast<std::size_t>(playback_device_selected)].id;
+      if (playback.state() == beatglass::PlaybackState::playing || playback.state() == beatglass::PlaybackState::paused) playback.set_device(device_id);
+      status = "Playback output set to " + playback_devices[static_cast<std::size_t>(playback_device_selected)].name + ".";
+    }
+#else
+    status = "Playback output preference saved; this platform uses its native default output.";
+#endif
+  };
+  auto playback_device_picker = Radiobox(&playback_device_labels, &playback_device_selected, playback_device_option);
   auto settings = Renderer(Container::Vertical(Components{reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button, beat_grid_mode_button, tonal_history_mode_button, playback_device_picker}), [&] {
     return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
       text("Library directories (recursive)") | bold, library_root_picker->Render() | frame | vscroll_indicator,
@@ -1848,11 +1862,12 @@ int main(int argc, char** argv) {
       return true;
     }
     if (event == Event::Custom) {
-      if (reduce_motion != last_saved_reduce_motion || seek_step_text != last_saved_seek_step || visual_mode != last_saved_visual_mode) {
+      if (reduce_motion != last_saved_reduce_motion || seek_step_text != last_saved_seek_step || visual_mode != last_saved_visual_mode || playback_device_selected != last_saved_playback_device) {
         persist_preferences();
         last_saved_reduce_motion = reduce_motion;
         last_saved_seek_step = seek_step_text;
         last_saved_visual_mode = visual_mode;
+        last_saved_playback_device = playback_device_selected;
       }
       if (!reduce_motion) ++spinner_frame;
 #ifdef _WIN32
