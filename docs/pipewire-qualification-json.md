@@ -274,6 +274,8 @@ Zero and negative node IDs are rejected as well; `1` is the minimum accepted
 host node identifier.
 String-encoded node IDs are rejected; host evidence must carry the numeric JSON
 type rather than a display-formatted substitute.
+Fractional numeric node IDs are rejected too; node identifiers are integral
+host identity values, not measurements.
 `secure_boot` must be a JSON boolean when present; numeric sentinel values are
 not accepted as native host evidence.
 `tpm_present` follows the same boolean-only contract; numeric sentinel values
