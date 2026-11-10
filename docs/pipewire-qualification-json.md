@@ -276,6 +276,9 @@ The producer/consumer identity check in
 `tests/unit/check_native_host_provenance_identity_report.py` additionally
 ensures the report validator accepts that minimal evidence without adding
 absent timing fields.
+The Unicode identity check in
+`tests/unit/check_native_host_provenance_unicode_identity.py` verifies valid
+non-ASCII host names survive UTF-8 evidence production and consumption.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
