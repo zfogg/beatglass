@@ -27,7 +27,7 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
     )
     assert second.returncode == 0, second.stderr
     second_plain = re.sub(r"\x1b\[[0-9;]*m", "", second.stdout)
-    assert "persisted cache hits" in second_plain
+    assert re.search(r"\d+ cache", second_plain)
     assert "[cached]" in second_plain
 
     for tab, heading in (("library", "LIBRARY"), ("live", "LIVE"), ("settings", "SETTINGS")):

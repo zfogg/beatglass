@@ -1481,9 +1481,9 @@ int main(int argc, char** argv) {
     else rows.push_back(library_menu->Render() | vscroll_indicator | frame);
     const auto analyzed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return completed_analyses.contains(tracks[index].path); });
     const auto failed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return analysis_errors.contains(tracks[index].path); });
-    Elements summary_parts = {text(std::to_string(library_indices.size())) | bold | color(Color::Cyan), text(" visible  •  "), text(std::to_string(analyzed_count)) | bold | color(Color::GreenLight), text(" analyzed  •  "), text(std::to_string(failed_count)) | bold | color(failed_count ? Color::RedLight : Color::GrayLight), text(" failed"), text("  •  "), text(std::to_string(library_cache_hits)) | bold | color(library_cache_hits ? Color::MagentaLight : Color::GrayLight), text(" persisted cache hits")};
+    Elements summary_parts = {text(std::to_string(library_indices.size())) | bold | color(Color::Cyan), text(" visible  •  "), text(std::to_string(analyzed_count)) | bold | color(Color::GreenLight), text(" analyzed  •  "), text(std::to_string(failed_count)) | bold | color(failed_count ? Color::RedLight : Color::GrayLight), text(" failed"), text("  •  "), text(std::to_string(library_cache_hits)) | bold | color(library_cache_hits ? Color::MagentaLight : Color::GrayLight), text(" cache")};
 #ifdef BEATGLASS_CLI_LIBRARY
-    if (library_retryable_count != 0) summary_parts.insert(summary_parts.end(), {text("  •  "), text(std::to_string(library_retryable_count)) | bold | color(Color::YellowLight), text(" recovery")});
+    if (library_retryable_count != 0) summary_parts.insert(summary_parts.end(), {text("  •  "), text(std::to_string(library_retryable_count)) | bold | color(Color::YellowLight), text(" retry")});
 #endif
     auto library_summary = hbox(std::move(summary_parts)) | italic;
     const auto name = selected >= 0 ? tracks[selected].title : "No track selected";
