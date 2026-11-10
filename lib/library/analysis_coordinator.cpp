@@ -2,7 +2,7 @@
 #include "beatglass/library/analysis_commit.hpp"
 namespace beatglass::library {
 std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_id, AnalysisOperation operation, int priority) {
-  if (!storage_.cache() || run_id.empty() || run_id.size() > 4096 || run_id.find('\0') != std::string::npos || run_id.find_first_not_of(" \t\r\n") == std::string::npos || !operation.valid()) return {};
+  if (!storage_.cache() || run_id.empty() || run_id.size() > 4096 || run_id.find('\0') != std::string::npos || run_id.find_first_not_of(" \t\r\n") == std::string::npos) return {};
   const auto admission = storage_.admit_analysis(run_id, operation.identity, operation.source.path.string(), operation.decoder_snapshot);
   if (!admission.decoder_compatible || (!admission.analysis_reserved && !admission.cached)) return {};
   if (admission.cached) {
@@ -13,6 +13,7 @@ std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_i
     // of the serialized result.
     operation.serialize = {};
   }
+  if (!operation.valid()) return {};
   const auto recovery_id = run_id;
   const library_detail::CacheKey recovery_key{operation.identity.content_hash, operation.identity.engine_version, operation.identity.configuration_id, operation.identity.mode};
   operation.recover_cancellation = [cache = storage_.cache(), recovery_id, recovery_key] {
