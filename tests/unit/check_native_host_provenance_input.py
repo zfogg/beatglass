@@ -32,6 +32,12 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode != 0
     assert "host provenance has an invalid secure boot flag" in result.stderr
 
+    invalid_tpm = Path(directory) / "invalid-tpm.json"
+    invalid_tpm.write_text('{"platform":"linux","name":"qualification-host","tpm_present":0}', encoding="utf-8")
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(invalid_tpm)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "host provenance has an invalid TPM flag" in result.stderr
+
     malformed = Path(directory) / "malformed.json"
     malformed.write_text("{not-json", encoding="utf-8")
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(malformed)], capture_output=True, text=True)

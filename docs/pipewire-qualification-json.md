@@ -272,6 +272,8 @@ rejected before provenance fields are inspected.
 even though some language runtimes represent them as integers.
 `secure_boot` must be a JSON boolean when present; numeric sentinel values are
 not accepted as native host evidence.
+`tpm_present` follows the same boolean-only contract; numeric sentinel values
+are rejected rather than interpreted as availability evidence.
 Malformed or ambiguous host JSON is rejected before any host fields are
 trusted; duplicate keys are not silently normalized.
 Missing host evidence files are rejected through the same unreadable-input path;
