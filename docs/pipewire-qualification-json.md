@@ -58,5 +58,8 @@ non-negative integer identifying the recovery callback order.
 Reacquisition evidence may include `event_count`; when supplied it must be a
 positive integer describing the retained recovery event total.
 
+Reacquisition evidence may include `artifact_id`; when supplied it must be a
+non-empty identity matching the top-level artifact identity.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
