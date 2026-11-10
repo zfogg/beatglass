@@ -3220,7 +3220,6 @@ ApplicationWindow {
                             elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio source: " + text
                             ToolTip.text: "Selected source path"
-                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: text + ". This path is read-only; Beatglass never writes tags or source audio here."
                         }
