@@ -66,6 +66,9 @@ as independent qualification evidence.
 Execution blockers in pending summaries must likewise be printable, non-empty,
 and unique; malformed blocker metadata is rejected before it can be rendered
 as host qualification guidance.
+When a summary declares a schema, it must identify the supported
+`beatglass-native-qualification-summary-v1` contract; unknown schema versions
+are rejected rather than interpreted as native evidence.
 The generator rechecks uniqueness after making external paths portable, rejecting
 basename collisions that would otherwise collapse distinct artifacts together.
 The summary's `qualified` field must be a JSON boolean; string status values fail

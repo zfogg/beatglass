@@ -36,6 +36,8 @@ for item in platforms.values():
 if summary is not None:
     if not isinstance(summary, dict):
         raise SystemExit("native qualification summary must be an object")
+    if "schema" in summary and summary["schema"] != "beatglass-native-qualification-summary-v1":
+        raise SystemExit("native qualification summary has unsupported schema")
     if not isinstance(summary.get("native_artifacts", []), list) or any(not isinstance(artifact, str) or not artifact.strip() or any(ord(char) < 32 for char in artifact) for artifact in summary.get("native_artifacts", [])):
         raise SystemExit("native qualification summary has invalid native_artifacts")
     if len(set(summary.get("native_artifacts", []))) != len(summary.get("native_artifacts", [])):
