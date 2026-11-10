@@ -329,8 +329,23 @@ int main(int argc, char** argv) {
 #endif
   };
   auto live_button = Button(" Start monitoring ", toggle_live);
+  auto refresh_live_button = Button(" Refresh sinks ", [&] {
+#ifdef _WIN32
+    const auto refreshed = beatglass::windows::enumerate_render_endpoints();
+    live_error = refreshed.error;
+    live_endpoints.clear(); live_endpoint_ids.clear(); live_selected = 0;
+    for (const auto& endpoint : refreshed.endpoints) {
+      live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
+      live_endpoint_ids.push_back(endpoint.id);
+      if (endpoint.is_default) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
+    }
+    live_status = std::to_string(live_endpoints.size()) + " render sinks discovered.";
+#else
+    live_status = "Native sink discovery is unavailable in this build.";
+#endif
+  });
   auto endpoint_picker = Radiobox(&live_endpoints, &live_selected);
-  auto live = Renderer(Container::Vertical({endpoint_picker, live_button}), [&] {
+  auto live = Renderer(Container::Vertical({endpoint_picker, Container::Horizontal({live_button, refresh_live_button})}), [&] {
     Elements endpoints;
     for (std::size_t index = 0; index < live_endpoints.size(); ++index) {
       auto label = live_endpoints[index];
@@ -338,7 +353,7 @@ int main(int argc, char** argv) {
     }
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
     const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
-    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), live_button->Render(), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({live_button->Render(), text(" "), refresh_live_button->Render()}), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto settings = Renderer(Container::Vertical({reduce_motion_checkbox}), [&] {
