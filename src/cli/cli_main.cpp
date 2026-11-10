@@ -1,10 +1,14 @@
 #include "beatglass/core/file_analysis.hpp"
 #include "state_label.hpp"
+#ifdef _WIN32
+#include "../desktop/platform/windows_endpoints.hpp"
+#endif
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/dom/elements.hpp>
 #include <algorithm>
 #include <cmath>
+#include <cctype>
 #include <cstdint>
 #include <filesystem>
 #include <iomanip>
@@ -38,15 +42,21 @@ Element waveform_chart(bool analyzed, std::uint64_t frames, std::uint64_t beats)
                  return values;
                }) | color(Color::GreenLight) | borderRounded}) | flex;
 }
-std::vector<Track> discover(const std::filesystem::path& root) {
+std::vector<Track> discover(const std::filesystem::path& root, bool recursive = false) {
   std::vector<Track> tracks;
   if (root.empty() || !std::filesystem::is_directory(root)) return tracks;
-  for (const auto& entry : std::filesystem::directory_iterator(root)) {
-    if (!entry.is_regular_file()) continue;
+  const auto visit = [&](const auto& entry) {
+    if (!entry.is_regular_file()) return;
     const auto ext = entry.path().extension().string();
     if (ext == ".wav" || ext == ".flac" || ext == ".mp3" || ext == ".aiff" || ext == ".aif") tracks.push_back({entry.path(), entry.path().stem().string()});
-  }
+  };
+  if (recursive) for (const auto& entry : std::filesystem::recursive_directory_iterator(root)) visit(entry);
+  else for (const auto& entry : std::filesystem::directory_iterator(root)) visit(entry);
   std::ranges::sort(tracks, {}, &Track::title); return tracks;
+}
+std::string lower(std::string value) {
+  std::ranges::transform(value, value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+  return value;
 }
 }  // namespace
 
@@ -54,7 +64,19 @@ int main(int argc, char** argv) {
   using namespace ftxui;
   const bool snapshot = argc > 1 && std::string(argv[1]) == "--snapshot";
   const std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::current_path()) : (argc > 1 ? argv[1] : std::filesystem::current_path());
-  auto tracks = discover(root);
+  auto tracks = discover(root, true);
+  std::string filter;
+  bool recursive = true;
+  std::vector<std::string> live_endpoints;
+  std::string live_error;
+#ifdef _WIN32
+  const auto endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
+  live_error = endpoint_snapshot.error;
+  for (const auto& endpoint : endpoint_snapshot.endpoints) live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
+#else
+  live_endpoints.push_back("PipeWire/Core Audio/WASAPI adapter");
+  live_error = "Native sink enumeration is platform-specific and not enabled in this build.";
+#endif
   int tab = 0, selected = tracks.empty() ? -1 : 0;
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result; bool busy = false;
@@ -66,9 +88,16 @@ int main(int argc, char** argv) {
     catch (const std::exception& error) { result.reset(); status = std::string("Analysis failed: ") + error.what(); }
     busy = false;
   };
-  auto library = Renderer([&] {
+  auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); status = std::to_string(tracks.size()) + " tracks indexed."; };
+  auto filter_input = Input(&filter, "Filter songs");
+  auto recursive_checkbox = Checkbox("Recursive", &recursive);
+  auto refresh_button = Button(" Refresh ", refresh);
+  auto library_controls = Container::Horizontal({filter_input, recursive_checkbox, refresh_button});
+  auto library = Renderer(library_controls, [&] {
     Elements rows;
+    const auto query = lower(filter);
     for (int i = 0; i < static_cast<int>(tracks.size()); ++i) {
+      if (!query.empty() && lower(tracks[i].title).find(query) == std::string::npos) continue;
       auto row = text((i == selected ? "▸ " : "  ") + tracks[i].title);
       if (i == selected) row = row | color(Color::Cyan) | bold; rows.push_back(row);
     }
@@ -77,9 +106,9 @@ int main(int argc, char** argv) {
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
     auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status)}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result.has_value(), result ? result->metadata.frames : 0, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
-  auto live = Renderer([&] { return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Backend discovery is connected to the platform capture layer."), separator(), text("●  Default output sink") | color(Color::YellowLight), text("   Waiting for a native source adapter on this platform."), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: ") | color(Color::GrayLight), text("— BPM"), text("Key: —    Chord: —"), text("Capture state: stopped"), separator(), text("No live source is claimed and no audio is modified."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
+  auto live = Renderer([&] { Elements endpoints; for (const auto& endpoint : live_endpoints) endpoints.push_back(text("●  " + endpoint) | color(Color::YellowLight)); if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight)); return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Enumerated by the native output adapter."), separator(), vbox(endpoints), live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: ") | color(Color::GrayLight), text("— BPM"), text("Key: —    Chord: —"), text("Capture state: stopped"), separator(), text("Start capture will be wired to the platform source lifecycle next."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto settings = Renderer([&] { return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold, text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"), text("Terminal motion: enabled"), separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."), text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto tabs = Container::Tab({library, live, settings}, &tab);
   auto library_tab = Button("  Library  ", [&] { tab = 0; });
