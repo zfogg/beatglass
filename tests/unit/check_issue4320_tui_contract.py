@@ -43,6 +43,8 @@ def main() -> int:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
     if "live_pipewire->reacquire(" not in tui or "live_next_reacquire" not in tui:
         raise SystemExit("CLI Live endpoint loss does not automatically reacquire with a bounded retry")
+    if "WASAPI loopback lost its stream; reacquiring" not in tui:
+        raise SystemExit("CLI Windows Live endpoint loss does not expose automatic reacquisition")
     if "library_folder_entry" not in tui or "std::quoted(folder)" not in tui or "library_folders" not in tui:
         raise SystemExit("CLI Library directory list is not persisted as quoted paths")
     if "preferences.library_folders" not in tui or "library_roots" not in tui:

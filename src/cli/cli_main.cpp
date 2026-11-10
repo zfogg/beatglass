@@ -1990,7 +1990,28 @@ int main(int argc, char** argv) {
         }
       }
       if (live_session && live_session->state() == beatglass::SourceState::stopped) {
-        live_button_label = " Start monitoring ";
+        const auto now = std::chrono::steady_clock::now();
+        const auto user_stopped = live_status.find("start monitoring") != std::string::npos || live_status == "Capture stopped.";
+        if (live_tracking_state == beatglass::TrackingState::reacquiring && !user_stopped &&
+            now >= live_next_reacquire && live_selected >= 0 &&
+            live_selected < static_cast<int>(live_endpoint_ids.size()) &&
+            beatglass::windows::select_render_endpoint(live_endpoint_snapshot, live_endpoint_ids[static_cast<std::size_t>(live_selected)]) == beatglass::windows::SelectionResult::accepted &&
+            live_session->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)])) {
+          clear_live_evidence();
+          live_tracking_state = beatglass::TrackingState::reacquiring;
+          set_live_presentation_state(beatglass::TrackingState::reacquiring);
+          live_last_packet = now;
+          live_has_packet = false;
+          live_next_reacquire = now + std::chrono::milliseconds(1500);
+          live_button_label = " Stop monitoring ";
+          live_status = "WASAPI loopback lost its stream; reacquiring a fresh epoch…";
+        } else if (live_tracking_state == beatglass::TrackingState::reacquiring && !user_stopped) {
+          live_next_reacquire = now + std::chrono::milliseconds(750);
+          live_button_label = " Stop monitoring ";
+          live_status = "WASAPI reacquisition failed; retrying…";
+        } else {
+          live_button_label = " Start monitoring ";
+        }
       }
 #elif defined(BEATGLASS_HAS_PIPEWIRE) || defined(__APPLE__)
       if (live_pipewire && live_pipewire->selected_active()) {
