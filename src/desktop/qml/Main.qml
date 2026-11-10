@@ -4806,6 +4806,28 @@ ApplicationWindow {
                     ToolTip.text: window.overlayBridge && window.overlayBridge.available
                         ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available")) + "; Ctrl+Alt+Shift+B focuses beat pulse status"
                         : "Overlay window actions are unavailable; control-window fallback is active; overlay settings are retained; Ctrl+Alt+Shift+B focuses beat pulse status"
+                    Button {
+                        id: showOverlay
+                        objectName: "showOverlay"
+                        text: "Show overlay"
+                        enabled: window.overlayBridge !== null && !window.overlayDisplaySelectionRequired
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
+                        Accessible.description: "Show the DJ overlay and hide the control window after applying retained display settings."
+                        ToolTip.text: Accessible.description
+                        onClicked: window.showOverlayAndHideControls()
+                    }
+                    Button {
+                        id: restoreOverlay
+                        objectName: "restoreOverlay"
+                        text: "Restore overlay"
+                        enabled: window.overlayBridge !== null && window.overlayHiddenByUser && !window.overlayDisplaySelectionRequired
+                        Accessible.name: text
+                        Accessible.role: Accessible.Button
+                        Accessible.description: "Restore the user-hidden DJ overlay while retaining persisted display settings."
+                        ToolTip.text: Accessible.description
+                        onClicked: window.handleOverlayRestoreAction()
+                    }
                 }
                 Label {
                     objectName: "overlayShortcutHelp"
