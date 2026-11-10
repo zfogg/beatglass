@@ -66,7 +66,7 @@ public slots:
     if (!found || found->source_path.empty()) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::missing_source_snapshot))); refresh(); return; }
     try { if (!beatglass::library::file_decoder_snapshot_compatible(found->decoder_snapshot)) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromLatin1(beatglass::library::retry_rejection_message(beatglass::library::RetryRejectionReason::incompatible_decoder_snapshot))); refresh(); return; } }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
-    beatglass::library::AnalysisIdentity identity{found->key.content, found->key.engine, found->key.config, found->key.mode};
+    beatglass::AnalysisIdentity identity{found->key.content, found->key.engine, found->key.config, found->key.mode};
     beatglass::library::AnalysisOperation operation;
     try { operation = beatglass::library::make_file_decode_operation(found->source_path, std::move(identity), found->decoder_snapshot); }
     catch (const std::exception& error) { emit result(false, QStringLiteral("Retry rejected: ") + QString::fromUtf8(error.what())); refresh(); return; }
@@ -88,7 +88,7 @@ public slots:
     catch (...) { emit cached(false, QString{}); emit result(false, QStringLiteral("Cache lookup rejected: unknown storage error")); }
   }
   void invalidateCached(QString content, QString engine, QString configuration, QString mode) {
-    beatglass::library::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+    beatglass::AnalysisIdentity identity{content.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
     try { const bool removed = coordinator_.storage().invalidate_cached(identity);
       if (removed) emit cached(false, QString{});
       emit result(removed, removed ? QStringLiteral("Cached analysis invalidated") : QStringLiteral("No cached analysis found"));
@@ -103,7 +103,7 @@ public slots:
       return;
     }
     try {
-      beatglass::library::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
+      beatglass::AnalysisIdentity identity{contentHash.toStdString(), engine.toStdString(), configuration.toStdString(), mode.toStdString()};
       auto operation = beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity));
       operation.publish = [this](const std::string& value) { emit analysisResult(QString::fromStdString(value)); };
       auto submission = coordinator_.submit_admitted(runId.toStdString(), std::move(operation));
@@ -187,7 +187,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
       if (analysisRetryable_) { analysisRetryable_ = false; emit analysisRetryableChanged(); }
       if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
       if (!analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
-      if (analysisAdmission_) { analysisAdmission_ = false; emit analysisAdmissionChanged(); }
+      if (analysisReserved_) { analysisReserved_ = false; emit analysisAdmissionChanged(); }
       if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
       analysisStatus_ = QStringLiteral("Analysis idle · reanalysis required"); emit analysisStatusChanged();
     }
@@ -209,7 +209,7 @@ StorageRecoveryBridge::StorageRecoveryBridge(QObject* parent) : QObject(parent),
     if (!analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); }
     if (!hit && !analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); }
     if (analysisFrames_ != 0) { analysisFrames_ = 0; emit analysisProgressChanged(); }
-    if (analysisAdmission_) { analysisAdmission_ = false; emit analysisAdmissionChanged(); }
+    if (analysisReserved_) { analysisReserved_ = false; emit analysisAdmissionChanged(); }
     if (!analysisAdmissionResult_.isEmpty()) { analysisAdmissionResult_.clear(); emit analysisAdmissionChanged(); }
   }, Qt::QueuedConnection);
   connect(worker_, &Worker::analysis, this, [this](const QString& text) { analysisStatus_ = text; const bool retryable = text == QStringLiteral("Analysis cancelled") || text == QStringLiteral("Analysis failed") || text == QStringLiteral("Analysis recovery available"); if (analysisRetryable_ != retryable) { analysisRetryable_ = retryable; emit analysisRetryableChanged(); } if (text != QStringLiteral("Analysis failed") && !analysisError_.isEmpty()) { analysisError_.clear(); emit analysisErrorChanged(); } if ((text == QStringLiteral("Analysis cancelled") || text == QStringLiteral("Analysis failed")) && !analysisResult_.isEmpty()) { analysisResult_.clear(); emit analysisResultChanged(); } emit analysisStatusChanged(); }, Qt::QueuedConnection);
