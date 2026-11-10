@@ -101,6 +101,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or "//" in relative
             or relative.endswith("/")
             or ":" in relative
+            or any(char in relative for char in '<>"|?*')
             or not re.fullmatch(r"[0-9a-f]{64}", expected)
             or (isinstance(relative, str) and "\x00" in relative)
             or not canonical
