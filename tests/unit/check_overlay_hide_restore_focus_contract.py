@@ -555,9 +555,27 @@ def test_show_button_requires_available_display():
     assert "return" in body
 
 
+def test_restore_button_requires_available_display():
+    start = QML.index("function handleOverlayRestoreButtonAction")
+    body = QML[start : QML.index("    function handleOverlayHideAction", start)]
+    assert "overlayDisplaySelectionRequired" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return" in body
+
+
 def test_show_button_requires_available_display():
     start = QML.index("function handleOverlayShowButtonAction")
     body = QML[start : QML.index("    function handleOverlayShowAction", start)]
+    assert "overlayDisplaySelectionRequired" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return" in body
+
+
+def test_restore_button_requires_available_display():
+    start = QML.index("function handleOverlayRestoreButtonAction")
+    body = QML[start : QML.index("    function handleOverlayHideAction", start)]
     assert "overlayDisplaySelectionRequired" in body
     assert "screenNames.length === 0" in body
     assert "focusOverlayDisplayRecoveryFailure" in body

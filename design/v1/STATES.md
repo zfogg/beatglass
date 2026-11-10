@@ -306,3 +306,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Clear safe-mode guard | Clear safe mode is requested before the bounded retry limit is reached | Keep retry bookkeeping stable, explain that safe mode is not active, and return focus to Retry. |
 | Show overlay display guard | Show is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
 | Show overlay display guard | Show is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
+| Restore overlay display guard | Restore is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
