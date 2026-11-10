@@ -4131,13 +4131,17 @@ ApplicationWindow {
                     }
                     Keys.onHomePressed: { if (viewMode === "spectrum") selectedSpectrumBin = 0; else selectedPosition = 0; requestPaint(); event.accepted = true }
                     Keys.onEndPressed: { if (viewMode === "spectrum") selectedSpectrumBin = Math.max(0, renderedSpectrum.length - 1); else selectedPosition = 1; requestPaint(); event.accepted = true }
-                    Keys.onPageUpPressed: { if (viewMode === "spectrum") selectedSpectrumBin = Math.max(0, (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) - 10); else selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1); requestPaint(); event.accepted = true }
                     Keys.onReturnPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onEnterPressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onSpacePressed: { if (selectedPosition >= 0) clearVisualizationSelection.forceActiveFocus(); event.accepted = true }
                     Keys.onEscapePressed: { window.clearVisualizationPositionAndFocus(); event.accepted = true }
                     Keys.onPressed: {
-                        if (event.key === Qt.Key_PageDown) {
+                        if (event.key === Qt.Key_PageUp) {
+                            if (viewMode === "spectrum") selectedSpectrumBin = Math.max(0, (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) - 10)
+                            else selectedPosition = Math.max(0, (selectedPosition < 0 ? 0 : selectedPosition) - 0.1)
+                            requestPaint()
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_PageDown) {
                             if (viewMode === "spectrum") selectedSpectrumBin = Math.min(Math.max(0, renderedSpectrum.length - 1), (selectedSpectrumBin < 0 ? 0 : selectedSpectrumBin) + 10)
                             else selectedPosition = Math.min(1, (selectedPosition < 0 ? 0 : selectedPosition) + 0.1)
                             requestPaint()
