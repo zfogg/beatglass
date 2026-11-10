@@ -208,4 +208,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Resume recovery shortcut stale state | User reviews the keyboard shortcut for resuming paused recovery | Keep resume actionable while announcing stale live evidence until fresh capture. |
 | Paused recovery page shortcut stale state | User opens the paused recovery page from the keyboard | Keep recovery navigation actionable while announcing stale live evidence. |
 | Paused display recovery stale state | Display recovery is pending while user-paused retries remain manual | Keep resume guidance clear while marking live evidence stale until fresh capture. |
+| Resume recovery action stale state | User activates manual resume after pausing native overlay recovery | Keep resume action clear while identifying that fresh capture is still required. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
