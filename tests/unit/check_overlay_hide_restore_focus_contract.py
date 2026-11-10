@@ -1070,3 +1070,10 @@ def test_recovery_pause_focus_helper_reports_target_result():
     body = QML[start : QML.index("    function resetOverlayRecoveryAttempts", start)]
     assert "target.forceActiveFocus()" in body
     assert "return target !== null && target !== undefined" in body
+
+
+def test_availability_recovery_helper_reports_target_result():
+    start = QML.index("function focusOverlayAvailabilityRecovery")
+    body = QML[start : QML.index("    function focusOverlayBridgeSettingsFailure", start)]
+    assert "target.forceActiveFocus()" in body
+    assert "return target !== null && target !== undefined" in body
