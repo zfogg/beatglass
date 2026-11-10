@@ -1,6 +1,7 @@
 #include "beatglass/core/file_analysis.hpp"
 #include "beatglass/core/causal_replay.hpp"
 #include "beatglass/core/audio.hpp"
+#include "beatglass/capture/file_reader.hpp"
 #include "beatglass/core/playback_session.hpp"
 #include "state_label.hpp"
 #ifdef _WIN32
@@ -37,15 +38,41 @@ std::string format_bpm(const std::optional<float>& bpm) {
 Element metric(std::string label, std::string value, Color accent) {
   return vbox({text(std::move(label)) | color(Color::GrayLight), text(std::move(value)) | bold | color(accent)}) | borderRounded | flex;
 }
-Element waveform_chart(bool analyzed, std::uint64_t frames, std::uint64_t beats) {
+struct AnalysisView {
+  beatglass::TempoResult result;
+  std::vector<float> waveform;
+};
+std::vector<float> decode_waveform(const std::filesystem::path& path) {
+  beatglass::FileReader reader(path, 1);
+  constexpr std::size_t bins = 160;
+  std::vector<float> peaks(bins, 0.0f);
+  std::vector<float> buffer(4096 * 2);
+  std::uint64_t frames_read = 0;
+  const auto total_frames = reader.metadata().frames;
+  for (;;) {
+    const auto read = reader.read(buffer);
+    if (read.status == beatglass::FileReadStatus::end) break;
+    if (read.status != beatglass::FileReadStatus::data || read.block.format.channels == 0) break;
+    const auto channels = read.block.format.channels;
+    const auto frames = read.block.samples.size() / channels;
+    for (std::size_t frame = 0; frame < frames; ++frame) {
+      float peak = 0.0f;
+      for (std::size_t channel = 0; channel < channels; ++channel) peak = std::max(peak, std::abs(read.block.samples[frame * channels + channel]));
+      const auto bin = total_frames ? std::min<std::size_t>(bins - 1, static_cast<std::size_t>((frames_read + frame) * bins / total_frames)) : 0;
+      peaks[bin] = std::max(peaks[bin], peak);
+    }
+    frames_read += frames;
+  }
+  return peaks;
+}
+Element waveform_chart(const std::vector<float>& waveform, std::uint64_t beats) {
   return vbox({text("WAVEFORM") | bold | color(Color::GrayLight),
                graph([=](int width, int height) {
                  std::vector<int> values(width);
                  for (int x = 0; x < width; ++x) {
-                   const double phase = analyzed ? (static_cast<double>(frames % 4096) / 4096.0) : 0.0;
-                   const double pulse = analyzed ? 0.55 + 0.35 * std::sin((x + phase * width) * 0.22) : 0.12;
-                   const double beat = analyzed && beats > 0 ? 0.15 * std::sin(x * beats * 0.02) : 0.0;
-                   values[x] = std::clamp(static_cast<int>((pulse + beat) * height), 0, height - 1);
+                   const auto sample = waveform.empty() ? 0.08f : waveform[std::min<std::size_t>(waveform.size() - 1, static_cast<std::size_t>(x * waveform.size() / std::max(1, width)))];
+                   const auto beat_marker = !waveform.empty() && beats > 0 && x % std::max(1, width / static_cast<int>(std::min<std::uint64_t>(beats, 16))) == 0 ? 0.12f : 0.0f;
+                   values[x] = std::clamp(static_cast<int>((sample + beat_marker) * height), 0, height - 1);
                  }
                  return values;
                }) | color(Color::GreenLight) | borderRounded}) | flex;
@@ -91,11 +118,13 @@ int main(int argc, char** argv) {
 #endif
   int tab = 0, selected = tracks.empty() ? -1 : 0;
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
-  std::optional<beatglass::TempoResult> result; bool busy = false;
+  std::optional<beatglass::TempoResult> result;
+  std::vector<float> waveform;
+  bool busy = false;
   beatglass::PlaybackSession playback;
   std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
-  std::future<beatglass::TempoResult> analysis_future;
+  std::future<AnalysisView> analysis_future;
 #ifdef _WIN32
   beatglass::SourceEpochAllocator live_epochs;
   std::unique_ptr<beatglass::windows::LoopbackSession> live_session;
@@ -118,7 +147,7 @@ int main(int argc, char** argv) {
     if (selected < 0 || selected >= static_cast<int>(tracks.size()) || busy) return;
     busy = true; status = "Analyzing " + tracks[selected].title + "…";
     const auto path = tracks[selected].path;
-    analysis_future = std::async(std::launch::async, [path] { return beatglass::analyze_file(path); });
+    analysis_future = std::async(std::launch::async, [path] { return AnalysisView{beatglass::analyze_file(path), decode_waveform(path)}; });
   };
   auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); status = std::to_string(tracks.size()) + " tracks indexed."; };
   auto filter_input = Input(&filter, "Filter songs");
@@ -152,7 +181,7 @@ int main(int argc, char** argv) {
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
     auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status)}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result.has_value(), result ? result->metadata.frames : 0, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), separator(), status_view});
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), separator(), status_view});
     return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto toggle_live = [&] {
@@ -223,8 +252,8 @@ int main(int argc, char** argv) {
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-        try { result = analysis_future.get(); status = "Analysis complete — estimates are backed by the file analyzer."; }
-        catch (const std::exception& error) { result.reset(); status = std::string("Analysis failed: ") + error.what(); }
+        try { auto analysis = analysis_future.get(); result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; }
+        catch (const std::exception& error) { result.reset(); waveform.clear(); status = std::string("Analysis failed: ") + error.what(); }
         busy = false;
       }
       return true;
@@ -233,7 +262,7 @@ int main(int argc, char** argv) {
   });
   if (snapshot) {
     if (argc > 3) tab = std::clamp(std::stoi(argv[3]), 0, 2);
-    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); result = analysis_future.get(); status = "Analysis complete — estimates are backed by the file analyzer."; busy = false; } }
+    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
     std::cout << rendered.ToString();
