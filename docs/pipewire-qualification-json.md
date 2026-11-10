@@ -82,5 +82,8 @@ Reacquisition evidence may include `platform`; when supplied it must be one of
 Reacquisition evidence may include `node_id`; when supplied it must be a positive
 integer identifying the native capture node.
 
+Reacquisition evidence may include `source_name`; when supplied it must be a
+non-empty native source name.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.

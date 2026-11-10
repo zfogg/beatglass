@@ -205,6 +205,9 @@ if reacquisition is not None:
                 or isinstance(reacquisition["node_id"], bool)
                 or reacquisition["node_id"] <= 0):
             raise SystemExit("reacquisition evidence has an invalid node id")
+    if reacquisition.get("source_name") is not None:
+        if not isinstance(reacquisition["source_name"], str) or not reacquisition["source_name"].strip():
+            raise SystemExit("reacquisition evidence has an empty source name")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
