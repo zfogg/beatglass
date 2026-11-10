@@ -46,4 +46,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(malformed), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid native_artifacts" not in result.stderr + result.stdout:
         raise SystemExit("malformed native_artifacts summary was accepted")
+    summary.write_text(json.dumps({"qualified": "true", "native_artifacts": []}), encoding="utf-8")
+    invalid_status = root / "invalid-status-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(invalid_status), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid qualified status" not in result.stderr + result.stdout:
+        raise SystemExit("malformed qualified summary status was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
