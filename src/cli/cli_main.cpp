@@ -247,6 +247,7 @@ int main(int argc, char** argv) {
   const bool snapshot = argc > 1 && std::string(argv[1]) == "--snapshot";
   std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::current_path()) : (argc > 1 ? argv[1] : std::filesystem::current_path());
   auto tracks = discover(root, true);
+  bool sort_by_path = false;
   std::string folder_text = root.string();
   std::string filter;
   bool recursive = true;
@@ -362,6 +363,7 @@ int main(int argc, char** argv) {
       analysis_stop.request_stop();
     }
     tracks = discover(root, recursive);
+    if (sort_by_path) std::ranges::sort(tracks, [](const Track& left, const Track& right) { return left.path.generic_string() < right.path.generic_string(); });
     selected = -1;
     if (!previous_path.empty()) {
       for (int index = 0; index < static_cast<int>(tracks.size()); ++index) {
@@ -384,6 +386,13 @@ int main(int argc, char** argv) {
   };
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
   auto refresh_button = Button(" Refresh ", refresh);
+  std::string sort_button_label = " Sort: title ";
+  auto sort_button = Button(&sort_button_label, [&] {
+    sort_by_path = !sort_by_path;
+    sort_button_label = sort_by_path ? " Sort: path " : " Sort: title ";
+    refresh();
+    status = std::string("Sorted visible Library by ") + (sort_by_path ? "path." : "title.");
+  });
   auto cancel_analysis_button = Button(" Cancel analysis ", [&] {
     if (!busy) return;
     analysis_cancelled.store(true, std::memory_order_release);
@@ -497,7 +506,7 @@ int main(int argc, char** argv) {
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, analyze_all_button, play_button, pause_button, stop_button, cancel_analysis_button})});
+  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, sort_button, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, analyze_all_button, play_button, pause_button, stop_button, cancel_analysis_button})});
   auto library_container = Container::Vertical({library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
@@ -545,7 +554,7 @@ int main(int argc, char** argv) {
     }
 #endif
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0, playback_fraction), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("beat markers") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), analyze_all_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), cancel_analysis_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Analyze all visible   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), sort_button->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), analyze_all_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), cancel_analysis_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Analyze all visible   Sort title/path   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
   auto toggle_live = [&] {

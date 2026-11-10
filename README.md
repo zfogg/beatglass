@@ -90,7 +90,8 @@ beatglass-cli --snapshot <audio-folder> [library|live|settings]
 The TUI opens with Library, Live, and Settings tabs. Library recursively browses
 supported files, runs real decoder/aubio analysis asynchronously, can analyze all
 currently visible filtered tracks sequentially with shared cancellation and
-progress, renders a colored PCM waveform with beat markers and playback position, and exposes native
+progress, sorts the visible collection by title or path while preserving selection
+identity, renders a colored PCM waveform with beat markers and playback position, and exposes native
 folder selection and Windows playback controls. Live discovers Windows render
 sinks, captures the selected OS output through native loopback, and displays
 real tempo, telemetry, and a colored live waveform. Live also exposes explicit

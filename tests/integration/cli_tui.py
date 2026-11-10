@@ -20,6 +20,8 @@ for tab, heading in (("library", "LIBRARY"), ("live", "LIVE"), ("settings", "SET
     if tab == "library":
         assert "Analyze all" in result.stdout
         assert "Analyze all visible" in result.stdout
+        assert "Sort: title" in result.stdout
+        assert "Sort title/path" in result.stdout
     if tab == "live":
         for control in ("Reset / reacquire", "½ BPM", "Normal BPM", "2× BPM"):
             assert control in result.stdout, (tab, control, result.stdout)
