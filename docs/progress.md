@@ -7,6 +7,13 @@ passes the focused `issue4320_tui_contract` and `cli_tui_snapshots` tests (2/2).
 In WSL Ubuntu, the same CLI was configured with GCC and FTXUI 7.0.0, compiled
 and linked successfully, and its Library, Live, and Settings snapshot paths
 completed; generated-audio integration and the TUI contract also passed.
+
+The CLI Live view now has a real Linux PipeWire integration path when configured
+with `BEATGLASS_BUILD_PIPEWIRE=ON`: it enumerates output sinks, owns a bounded
+monitor stream, feeds the shared tempo/presentation and visualization pipeline,
+and clears/reacquires evidence on stream boundaries or packet timeouts. Native
+Linux verification remains pending until a host with PipeWire development
+headers and a running sink monitor is available.
 This is preparation evidence only: WSL is not native Linux qualification,
 PipeWire prerequisites were unavailable in that environment, macOS was not
 run, and the optional Essentia tonal runtime was not validated end-to-end.

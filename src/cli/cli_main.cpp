@@ -5,6 +5,9 @@
 #include "beatglass/core/visualization.hpp"
 #include "beatglass/capture/file_reader.hpp"
 #include "beatglass/core/playback_session.hpp"
+#if defined(BEATGLASS_HAS_PIPEWIRE)
+#include "beatglass/capture/pipewire_source.hpp"
+#endif
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
 #include "beatglass/core/music_replay.hpp"
 #endif
@@ -459,8 +462,18 @@ int main(int argc, char** argv) {
     live_endpoint_ids.push_back(endpoint.id);
   }
 #else
-  live_endpoints.push_back("PipeWire/Core Audio/WASAPI adapter");
-  live_error = "Native sink enumeration is platform-specific and not enabled in this build.";
+#if defined(BEATGLASS_HAS_PIPEWIRE)
+  auto live_endpoint_snapshot = beatglass::pipewire::discover_sinks(std::chrono::milliseconds(500));
+  live_error = live_endpoint_snapshot.error;
+  for (const auto& endpoint : live_endpoint_snapshot.sinks) {
+    live_endpoints.push_back(endpoint.name.empty() ? endpoint.description : endpoint.name);
+    live_endpoint_ids.push_back(endpoint.serial);
+  }
+  if (live_endpoints.empty() && live_error.empty()) live_error = "PipeWire found no output sink monitors.";
+#else
+  live_endpoints.push_back("PipeWire monitor (build with BEATGLASS_BUILD_PIPEWIRE=ON)");
+  live_error = "Native sink enumeration is unavailable in this build.";
+#endif
 #endif
   int tab = 0, selected = tracks.empty() ? -1 : 0;
   int live_selected = 0;
@@ -539,6 +552,17 @@ int main(int argc, char** argv) {
     live_signal_confidence = 0.0f;
   });
 #else
+#if defined(BEATGLASS_HAS_PIPEWIRE)
+  std::unique_ptr<beatglass::pipewire::MonitorBackend> live_pipewire = beatglass::pipewire::make_monitor_backend();
+  std::uint64_t live_pipewire_epoch = 1;
+#endif
+  std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
+#ifdef BEATGLASS_CLI_MUSIC_REPLAY
+  std::unique_ptr<beatglass::CausalMusicReplay> live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
+  std::optional<std::string> live_key;
+  std::optional<std::string> live_chord;
+  std::vector<std::string> live_tonal_history;
+#endif
   std::string live_status = "Native loopback capture is unavailable in this build.";
   std::optional<float> live_bpm;
   beatglass::PresentationState live_presentation;
@@ -551,6 +575,10 @@ int main(int argc, char** argv) {
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
   std::vector<float> live_tempo_history;
+  std::chrono::steady_clock::time_point live_last_packet{};
+  bool live_has_packet = false;
+  std::optional<beatglass::VisualizationFrame> live_visualization_frame;
+  beatglass::VisualizationProcessor live_visualization([](void*) noexcept {}, nullptr);
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze_paths = [&](std::vector<std::filesystem::path> paths) {
@@ -990,6 +1018,23 @@ int main(int argc, char** argv) {
       live_button_label = " Stop monitoring ";
     }
     else live_status = "Capture could not start; inspect endpoint permissions or device state.";
+#elif defined(BEATGLASS_HAS_PIPEWIRE)
+    if (live_pipewire && live_pipewire->selected_active()) {
+      live_pipewire->stop();
+      clear_live_evidence();
+      live_status = "Capture stopped.";
+      live_button_label = " Start monitoring ";
+      return;
+    }
+    if (!live_pipewire || live_endpoint_ids.empty()) { live_status = "No PipeWire output sink is available."; return; }
+    if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoint_ids.size())) { live_status = "Select an available output sink first."; return; }
+    if (live_pipewire->start_stream(live_endpoint_ids[static_cast<std::size_t>(live_selected)], ++live_pipewire_epoch, 48000, 2)) {
+      set_live_presentation_state(beatglass::TrackingState::reacquiring);
+      live_last_packet = std::chrono::steady_clock::now();
+      live_has_packet = false;
+      live_status = "Starting PipeWire monitor…";
+      live_button_label = " Stop monitoring ";
+    } else live_status = "PipeWire monitor could not start; refresh sinks and retry.";
 #else
     live_status = "Native loopback capture is unavailable in this build.";
 #endif
@@ -1013,6 +1058,17 @@ int main(int argc, char** argv) {
       if (endpoint.is_default) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
     }
     if (!stopped_for_refresh) live_status = std::to_string(live_endpoints.size()) + " render sinks discovered.";
+#elif defined(BEATGLASS_HAS_PIPEWIRE)
+    const auto stopped_for_refresh = live_pipewire && live_pipewire->selected_active();
+    if (stopped_for_refresh) { live_pipewire->stop(); clear_live_evidence(); live_button_label = " Start monitoring "; }
+    const auto refreshed = beatglass::pipewire::discover_sinks(std::chrono::milliseconds(500));
+    live_error = refreshed.error;
+    live_endpoints.clear(); live_endpoint_ids.clear(); live_selected = 0;
+    for (const auto& endpoint : refreshed.sinks) {
+      live_endpoints.push_back(endpoint.name.empty() ? endpoint.description : endpoint.name);
+      live_endpoint_ids.push_back(endpoint.serial);
+    }
+    live_status = std::to_string(live_endpoints.size()) + " PipeWire output sinks discovered.";
 #else
     live_status = "Native sink discovery is unavailable in this build.";
 #endif
@@ -1020,6 +1076,18 @@ int main(int argc, char** argv) {
   auto reset_live_button = Button(" Reset / reacquire ", [&] {
 #ifdef _WIN32
     if (live_session && live_session->state() != beatglass::SourceState::stopped) live_session->stop();
+    live_replay = std::make_unique<beatglass::CausalTempoReplay>();
+#ifdef BEATGLASS_CLI_MUSIC_REPLAY
+    live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
+    live_key.reset(); live_chord.reset(); live_tonal_history.clear();
+#endif
+    clear_live_evidence();
+    live_tracking_state = beatglass::TrackingState::reacquiring;
+    set_live_presentation_state(beatglass::TrackingState::reacquiring);
+    live_button_label = " Start monitoring ";
+    live_status = "Analysis reset; start monitoring to reacquire.";
+#elif defined(BEATGLASS_HAS_PIPEWIRE)
+    if (live_pipewire && live_pipewire->selected_active()) live_pipewire->stop();
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
     live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
@@ -1050,6 +1118,16 @@ int main(int argc, char** argv) {
       live_tracking_state = beatglass::TrackingState::stopped;
       live_bpm.reset();
       live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+      live_button_label = " Start monitoring ";
+      live_status = "Capture stopped because the selected sink changed.";
+      return;
+    }
+#endif
+#if defined(BEATGLASS_HAS_PIPEWIRE)
+    if (live_pipewire && live_pipewire->selected_active()) {
+      live_pipewire->stop();
+      clear_live_evidence();
+      live_tracking_state = beatglass::TrackingState::stopped;
       live_button_label = " Start monitoring ";
       live_status = "Capture stopped because the selected sink changed.";
       return;
@@ -1272,6 +1350,39 @@ int main(int argc, char** argv) {
       }
       if (live_session && live_session->state() == beatglass::SourceState::stopped) {
         live_button_label = " Start monitoring ";
+      }
+#elif defined(BEATGLASS_HAS_PIPEWIRE)
+      if (live_pipewire && live_pipewire->selected_active()) {
+        beatglass::coreaudio::CaptureBlock packet;
+        while (live_pipewire->pop_current(packet)) {
+          const auto layout = packet.channels == 1 ? beatglass::ChannelLayout::mono : packet.channels == 2 ? beatglass::ChannelLayout::stereo : beatglass::ChannelLayout::multichannel;
+          beatglass::AudioBlock block{{packet.sample_rate, static_cast<std::uint16_t>(packet.channels), layout}, packet.epoch, packet.first_frame, static_cast<std::int64_t>(packet.host_time), packet.discontinuity, std::span<const float>(packet.samples.data(), packet.sample_count)};
+          try {
+            live_sample_rate = packet.sample_rate;
+            live_last_packet = std::chrono::steady_clock::now();
+            live_has_packet = true;
+            const auto packet_channels = std::max<std::uint32_t>(1, packet.channels);
+            const auto packet_frames = packet.sample_count / packet_channels;
+            live_observed_frames = packet.first_frame + packet_frames;
+            if (packet.discontinuity) ++live_discontinuities;
+            double energy = 0.0; float peak = 0.0f;
+            for (std::size_t sample = 0; sample < packet.sample_count; sample += packet_channels) { const auto value = std::abs(packet.samples[sample]); energy += static_cast<double>(value) * value; peak = std::max(peak, value); }
+            live_signal_confidence = std::clamp(std::max(static_cast<float>(std::sqrt(energy / static_cast<double>(std::max<std::size_t>(1, packet_frames)))), peak * 0.35f) * 2.0f, 0.0f, 1.0f);
+            const auto state = live_replay->process(block);
+            live_bpm = state.bpm; live_tracking_state = state.state; live_beats = state.beats;
+            beatglass::Snapshot presentation_snapshot; presentation_snapshot.state = state.state; presentation_snapshot.observed_through = {state.epoch, state.observed_through}; presentation_snapshot.bpm = state.bpm;
+            live_presentation = beatglass::present_snapshot(presentation_snapshot);
+            if (live_bpm) { live_tempo_history.push_back(*live_bpm); if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin()); }
+            std::vector<float> mono(packet_frames);
+            for (std::size_t frame = 0; frame < mono.size(); ++frame) { float sum = 0.0f; for (std::uint32_t channel = 0; channel < packet_channels; ++channel) sum += packet.samples[frame * packet.channels + channel]; mono[frame] = sum / static_cast<float>(packet_channels); }
+            for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) { const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset); if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate, std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) live_visualization_frame = std::move(frame); }
+            if (live_visualization_frame) { const auto& frame = *live_visualization_frame; for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) { const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size())); live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source])); } for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) { const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size())); live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f); } }
+            live_status = "Receiving PipeWire sink audio; analysis is worker-owned and discontinuity-safe.";
+          } catch (const std::exception& error) { live_tracking_state = beatglass::TrackingState::error; live_status = std::string("Live analysis failed: ") + error.what(); live_pipewire->stop(); }
+        }
+        const auto pipewire_status = live_pipewire->poll_status();
+        if (pipewire_status.requires_reacquisition()) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status = "PipeWire capture needs reacquisition; restart monitoring for a fresh epoch."; }
+        if (live_has_packet && std::chrono::steady_clock::now() - live_last_packet > std::chrono::milliseconds(1500)) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status = "Capture is running but no fresh PipeWire packets arrived; reacquiring…"; live_has_packet = false; }
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
