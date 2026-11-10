@@ -1,6 +1,7 @@
 """Validate a host provenance object against the qualification contract."""
 import json
 import os
+import stat
 import sys
 import tempfile
 from pathlib import Path
@@ -38,11 +39,14 @@ if len(sys.argv) == 3:
     try:
         destination = Path(sys.argv[2])
         destination.parent.mkdir(parents=True, exist_ok=True)
+        existing_mode = stat.S_IMODE(destination.stat().st_mode) if destination.exists() else None
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent, delete=False) as temporary:
             temporary.write(json.dumps(report, indent=2) + "\n")
             temporary.flush()
             os.fsync(temporary.fileno())
             temporary_path = Path(temporary.name)
+        if existing_mode is not None:
+            os.chmod(temporary_path, existing_mode)
         os.replace(temporary_path, destination)
         if os.name != "nt":
             directory_fd = os.open(destination.parent, os.O_RDONLY)
