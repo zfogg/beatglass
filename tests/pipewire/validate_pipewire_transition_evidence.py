@@ -231,6 +231,9 @@ if reacquisition is not None:
     if reacquisition.get("sink_name") is not None:
         if not isinstance(reacquisition["sink_name"], str) or not reacquisition["sink_name"].strip():
             raise SystemExit("reacquisition evidence has an empty sink name")
+    if reacquisition.get("source_type") is not None:
+        if not isinstance(reacquisition["source_type"], str) or not reacquisition["source_type"].strip():
+            raise SystemExit("reacquisition evidence has an empty source type")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
