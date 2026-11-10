@@ -3148,7 +3148,7 @@ ApplicationWindow {
                         Accessible.value: enabled ? "available; " + window.recursiveAudioResultCount + " audio results found" : "unavailable; no audio results or analysis is active"
                         Accessible.name: "Analyze recursive audio results"
                         Accessible.role: Accessible.Button
-                        Accessible.description: enabled ? "Fingerprint and queue the first available recursive audio results; the bounded queue reports accepted and rejected items." : "An analysis batch is already active; wait for completion or cancel before submitting another batch."
+                        Accessible.description: enabled ? "Fingerprint and queue up to two of the first available recursive audio results; the bounded queue reports accepted and rejected items." : "An analysis batch is already active; wait for completion or cancel before submitting another batch."
                         ToolTip.text: "Queue the first recursive audio results for offline analysis"
                         onClicked: {
                             navigation.currentIndex = 0
