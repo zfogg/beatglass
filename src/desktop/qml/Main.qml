@@ -3029,7 +3029,6 @@ ApplicationWindow {
                                 objectName: "browserEmptyMessage"
                                 text: window.browserEmptyMessage()
                                 Accessible.name: "Library browser empty state: " + text
-                                Accessible.value: text
                                 Accessible.role: Accessible.StaticText
                                 Accessible.description: text + " Use Choose folder to recover from an empty or unreadable location."
                                 ToolTip.text: "Library browser recovery state"
