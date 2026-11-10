@@ -135,6 +135,11 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no clock source status")
         if host.get("clock_source_failover") is not None and not isinstance(host["clock_source_failover"], bool):
             raise SystemExit("transition host provenance has an invalid failover flag")
+        if host.get("clock_source_switch_count") is not None and (
+                not isinstance(host["clock_source_switch_count"], int)
+                or isinstance(host["clock_source_switch_count"], bool)
+                or host["clock_source_switch_count"] < 0):
+            raise SystemExit("transition host provenance has invalid switch count")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
