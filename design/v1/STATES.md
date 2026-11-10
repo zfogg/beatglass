@@ -360,3 +360,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Click-through shortcut availability contract | Keyboard click-through toggle runs after native overlay/display loss | Reject both lock and unlock paths before bridge mutation, focus interaction recovery, and return explicit failure. |
 | Display focus availability contract | Display-focus shortcut runs after native overlay/display loss | Focus display recovery and return explicit failure until a destination display is available. |
 | Retry focus availability contract | Retry-focus shortcut runs after native overlay/display loss | Focus availability recovery and return explicit failure until retry can be meaningfully activated. |
+| Reapply focus availability contract | Reapply-settings shortcut runs after native overlay/display loss | Reject before announcing a misleading restore attempt, focus display recovery, and return explicit failure. |

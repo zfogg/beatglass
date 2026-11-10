@@ -1029,3 +1029,12 @@ def test_retry_focus_shortcut_requires_available_overlay():
     assert "screenNames.length === 0" in body
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
+
+
+def test_reapply_focus_shortcut_requires_available_overlay():
+    start = QML.index("function focusOverlayReapplyShortcut")
+    body = QML[start : QML.index("    function handleOverlayReapplyAction", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return window.handleOverlayReapplyAction()" in body
