@@ -773,6 +773,8 @@ Live-analysis Starting, Reacquiring, Error, and Stopped transitions now also inv
 
 The visualization-specific Retry monitoring control now enters the same stale-evidence recovery boundary before dispatching capture start, announcing that prior overlay evidence is provisional until fresh monitoring data arrives.
 
+Resume recovery now rechecks the user-paused marker at activation time; a stale Resume click is rejected without another native show request and returns focus to the overlay recovery control.
+
 Estimate attribution repeats the stale-capture marker as well, keeping the combined-output source label honest while its last accepted values await reacquisition.
 
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.

@@ -1680,6 +1680,10 @@ ApplicationWindow {
         return window.handleOverlayResumeRecoveryAction()
     }
     function handleOverlayResumeRecoveryAction() {
+        if (!window.overlayRecoveryPausedByUser) {
+            window.focusOverlayRecoveryPauseState("Overlay recovery is no longer paused; no resume request was sent.", retryOverlay)
+            return false
+        }
         if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayDisplayRecoveryFailure("Overlay recovery cannot resume until the native overlay and a destination display are ready.", overlayDisplay)
             return false

@@ -195,6 +195,13 @@ TestCase {
         fakeLive.status = "Tracking"
         app.destroy()
     }
+    function test_resumeRecoveryRejectsStaleActivation() {
+        let app = shellWithOverlay.createObject(null)
+        app.overlayRecoveryPausedByUser = false
+        verify(!app.handleOverlayResumeRecoveryAction())
+        verify(app.overlayRecoveryAnnouncement.indexOf("no longer paused") >= 0)
+        app.destroy()
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
