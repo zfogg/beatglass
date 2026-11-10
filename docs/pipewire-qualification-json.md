@@ -272,6 +272,10 @@ keeps unsupported platform values from entering the qualification path.
 Timing metadata remains optional for legacy host producers: the behavior check
 in `tests/unit/check_native_host_provenance_timing_optional.py` verifies a
 minimal platform/name object still produces a valid identity-only report.
+The producer/consumer identity check in
+`tests/unit/check_native_host_provenance_identity_report.py` additionally
+ensures the report validator accepts that minimal evidence without adding
+absent timing fields.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
