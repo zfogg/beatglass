@@ -93,7 +93,8 @@ currently visible filtered tracks sequentially with shared cancellation and
 progress, isolates per-track decoder errors so one corrupt file does not abort the
 batch, clears a stale failure badge when retrying a track succeeds, sorts the visible collection by title or path while preserving selection
 identity, provides a case-insensitive search across title, filename, and full path, performs a safe metadata preflight so duration/format are visible before analysis, shows filtered visible/analyzed/failed counts, renders a colored PCM waveform with analyzer-detected beat frames and playback position, and recursively indexes folders selected through either path entry or the native picker. It exposes native
-folder selection and Windows/macOS playback controls. Live discovers Windows
+folder selection and Windows/macOS/Linux playback controls when the corresponding
+native backend is built. Live discovers Windows
 render sinks, macOS CoreAudio output sources, or Linux PipeWire sinks when the
 corresponding backend is built; it captures the selected OS output through the
 native backend and displays real tempo, telemetry, and a colored live waveform.

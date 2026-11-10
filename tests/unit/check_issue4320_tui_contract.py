@@ -10,6 +10,8 @@ def main() -> int:
     if missing: raise SystemExit("Missing issue #4320 TUI markers: " + ", ".join(missing))
     if "Analysis delay: " not in tui: raise SystemExit("CLI Live view does not expose shared analysis delay")
     if "present_analysis_view" not in tui or "beatglass::present_snapshot(snapshot)" not in tui: raise SystemExit("CLI Library details do not use shared analysis presentation")
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    if "Windows/macOS/Linux playback controls" not in readme: raise SystemExit("CLI README omits Linux playback capability")
     if "stale evidence" not in tui: raise SystemExit("CLI Live confidence must suppress stale evidence")
     if "live_presentation.stale || !live_bpm" not in tui: raise SystemExit("CLI Live tempo must suppress stale evidence")
     if "[cached]" not in tui: raise SystemExit("CLI Library does not distinguish persisted cache hits")
