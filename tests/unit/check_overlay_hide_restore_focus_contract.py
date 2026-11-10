@@ -722,3 +722,12 @@ def test_reapply_focus_shortcut_propagates_result():
     button_body = QML[button_start : QML.index("    function handleOverlayUnlockAction", button_start)]
     assert "return false" in button_body
     assert "return reapplied" in button_body
+ 
+def test_restore_action_propagates_result():
+    start = QML.index("function handleOverlayRestoreAction")
+    body = QML[start : QML.index("    function handleOverlayRestoreButtonAction", start)]
+    assert "return window.handleOverlayRestoreButtonAction()" in body
+    button_start = QML.index("function handleOverlayRestoreButtonAction")
+    button_body = QML[button_start : QML.index("    function handleOverlayHideAction", button_start)]
+    assert "return false" in button_body
+    assert "return window.handleOverlayShowAction()" in button_body
