@@ -303,6 +303,8 @@ Symlink report destinations are rejected as unwritable; qualification output
 never follows a link or modifies its target.
 Symlinked `HOST.json` inputs are rejected as unreadable so qualification does
 not silently follow an unexpected evidence target.
+Host input paths must be regular files; directories and special files are
+rejected before any read operation begins.
 Existing report destinations must be regular files; directories and other
 special filesystem objects are rejected before temporary output is created.
 The optional report path must differ from `HOST.json`; self-overwrite is
