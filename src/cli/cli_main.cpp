@@ -313,7 +313,14 @@ int main(int argc, char** argv) {
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze = [&] {
-    if (selected < 0 || selected >= static_cast<int>(tracks.size()) || busy) return;
+    if (busy) {
+      status = "Analysis already in progress; cancel it before starting another track.";
+      return;
+    }
+    if (selected < 0 || selected >= static_cast<int>(tracks.size())) {
+      status = "Select a supported audio file first.";
+      return;
+    }
     busy = true; analysis_cancelled.store(false, std::memory_order_release); analysis_stop = std::stop_source{}; analysis_frames.store(0); analysis_total.store(0); status = "Analyzing " + tracks[selected].title + "…";
     const auto path = tracks[selected].path;
     const auto stop_token = analysis_stop.get_token();
