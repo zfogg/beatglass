@@ -1,5 +1,6 @@
 """Validate a daemon-captured PipeWire lifecycle transition JSON artifact."""
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -20,6 +21,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no capture command")
     if payload.get("artifact_id") is not None and (not isinstance(payload["artifact_id"], str) or not payload["artifact_id"].strip()):
         raise SystemExit("transition evidence has an empty artifact identity")
+    if payload.get("artifact_sha256") is not None and (not isinstance(payload["artifact_sha256"], str) or not re.fullmatch(r"[0-9a-fA-F]{64}", payload["artifact_sha256"])):
+        raise SystemExit("transition evidence has an invalid artifact digest")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
 if any(not isinstance(event, dict) for event in events):
