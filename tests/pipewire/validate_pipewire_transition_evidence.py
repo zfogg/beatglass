@@ -34,6 +34,10 @@ if timestamps and (len(timestamps) != len(events) or any(not isinstance(value, i
 device_ids = [event.get("device_id") for event in events if isinstance(event, dict) and event.get("device_id") is not None]
 if device_ids and (len(device_ids) != len(events) or any(not isinstance(value, str) or not value.strip() for value in device_ids)):
     raise SystemExit("transition device identities must be complete and non-empty")
+positions = [event.get("sample_position") for event in events if isinstance(event, dict) and event.get("sample_position") is not None]
+if positions and (len(positions) != len(events) or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in positions)
+                 or positions != sorted(positions)):
+    raise SystemExit("transition sample positions must be complete and monotonic")
 error_event = next(event for event in events if event.get("event") == "error")
 if error_event.get("discontinuity") is not True:
     raise SystemExit("transition evidence has no discontinuity marker")
@@ -69,4 +73,8 @@ for event in events:
         raise SystemExit("transition event has an invalid negotiated format")
     if event_format is not None and event_format != fmt and event.get("event") == "process":
         raise SystemExit("process format disagrees with restart format")
+process_positions = [(event.get("sample_position"), event.get("sample_count")) for event in events if event.get("event") == "process" and event.get("sample_position") is not None]
+for previous, current in zip(process_positions, process_positions[1:]):
+    if previous[1] is not None and current[0] < previous[0] + previous[1]:
+        raise SystemExit("process sample positions overlap captured samples")
 print(f"PipeWire transition evidence verified ({len(events)} events)")
