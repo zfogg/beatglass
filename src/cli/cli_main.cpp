@@ -966,7 +966,6 @@ int main(int argc, char** argv) {
       text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Recover persisted   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
-#ifdef _WIN32
   auto set_live_presentation_state = [&](beatglass::TrackingState state) {
     beatglass::Snapshot snapshot;
     snapshot.state = state;
@@ -994,7 +993,6 @@ int main(int argc, char** argv) {
     live_visualization_frame.reset();
     set_live_presentation_state(beatglass::TrackingState::stopped);
   };
-#endif
   auto toggle_live = [&] {
 #ifdef _WIN32
     if (live_session && live_session->state() != beatglass::SourceState::stopped) {
@@ -1371,6 +1369,21 @@ int main(int argc, char** argv) {
             const auto state = live_replay->process(block);
             live_bpm = state.bpm; live_tracking_state = state.state; live_beats = state.beats;
             beatglass::Snapshot presentation_snapshot; presentation_snapshot.state = state.state; presentation_snapshot.observed_through = {state.epoch, state.observed_through}; presentation_snapshot.bpm = state.bpm;
+#ifdef BEATGLASS_CLI_MUSIC_REPLAY
+            if (!live_music_replay) live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
+            const auto music_state = live_music_replay->process(block, {}, [&](const beatglass::CausalTonalFrame& tonal) {
+              live_key = tonal.rolling_key;
+              live_chord = tonal.local_chord;
+              if (tonal.local_chord) {
+                live_tonal_history.push_back(*tonal.local_chord);
+                if (live_tonal_history.size() > 8) live_tonal_history.erase(live_tonal_history.begin());
+              }
+            });
+            live_key = music_state.rolling_key;
+            live_chord = music_state.local_chord;
+            if (music_state.rolling_key) presentation_snapshot.key_candidates.push_back({*music_state.rolling_key, music_state.rolling_key_strength.value_or(0.0f)});
+            if (music_state.local_chord && music_state.tonal_from && music_state.tonal_through) presentation_snapshot.chords.push_back({{state.epoch, *music_state.tonal_from}, {state.epoch, *music_state.tonal_through}, {*music_state.local_chord, music_state.local_chord_strength.value_or(0.0f)}});
+#endif
             live_presentation = beatglass::present_snapshot(presentation_snapshot);
             if (live_bpm) { live_tempo_history.push_back(*live_bpm); if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin()); }
             std::vector<float> mono(packet_frames);
