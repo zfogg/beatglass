@@ -8,6 +8,7 @@ assert "usage: validate_native_host_provenance.py HOST.json [REPORT.json]" in so
 assert '"checked_fields"' in source
 assert "os.fsync" in Path("tests/pipewire/validate_native_host_provenance.py").read_text()
 assert "os.name != \"nt\"" in Path("tests/pipewire/validate_native_host_provenance.py").read_text()
+assert "temporary_path = None" in Path("tests/pipewire/validate_native_host_provenance.py").read_text()
 print("Native host provenance report workflow verified")
 with tempfile.TemporaryDirectory() as directory:
     host = Path(directory) / "host.json"
