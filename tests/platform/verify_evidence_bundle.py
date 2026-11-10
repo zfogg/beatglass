@@ -177,6 +177,8 @@ def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT
         if isinstance(entry, dict) and isinstance(entry.get("path"), str)
     }
     for scenario in scenarios or []:
+        if not isinstance(scenario, dict):
+            errors.append(f"invalid scenario entry: {scenario}"); continue
         if isinstance(scenario, dict):
             unknown_fields = set(scenario) - {"id", "status", "evidence"}
             if unknown_fields:
@@ -299,6 +301,8 @@ def main() -> int:
                 category = "status"
             elif error.startswith("invalid scenario evidence:"):
                 category = "scenario_path"
+            elif error.startswith("invalid scenario entry:"):
+                category = "scenario_entry"
             elif error.startswith("unsupported scenario fields:"):
                 category = "scenario_schema"
             elif error.startswith("missing artifact:"):

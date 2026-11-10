@@ -160,6 +160,8 @@ Malformed SHA-256 declarations are grouped under `hash_format` for direct
 manifest-integrity triage.
 Malformed artifact entry structures are grouped under `artifact_entry` for
 direct manifest-shape triage.
+Malformed scenario entry structures are grouped under `scenario_entry` for
+direct scenario-shape triage.
 Per-artifact byte-limit violations are grouped under `size` for direct
 retained-file capacity triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
