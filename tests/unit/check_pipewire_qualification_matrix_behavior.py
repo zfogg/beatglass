@@ -112,4 +112,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(mismatched_host), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "does not match runner host" not in result.stderr + result.stdout:
         raise SystemExit("mismatched summary host was accepted")
+    summary.write_text(json.dumps([{"qualified": False}]), encoding="utf-8")
+    non_object = root / "non-object-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(non_object), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "summary must be an object" not in result.stderr + result.stdout:
+        raise SystemExit("non-object summary was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
