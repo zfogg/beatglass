@@ -383,6 +383,15 @@ private:
         command = take_command();
         if (command == Command::stop || command == Command::shutdown) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); shutdown = command == Command::shutdown; break; }
         if (command == Command::pause) { output.pause(); state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); break; }
+        if (command == Command::play || command == Command::seek) {
+          output.stop();
+          reader.reset();
+          state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
+          // Preserve the command for the outer worker loop after the current
+          // queue-drain boundary; a new source/seek must never be discarded.
+          { std::lock_guard lock(mutex_); command_ = command; }
+          break;
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
       }
       if (shutdown || !reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) continue;
