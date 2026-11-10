@@ -2121,7 +2121,6 @@ ApplicationWindow {
                     text: "Retry capture"
                     ToolTip.text: "Retry monitoring the selected output source; " + (window.overlayCaptureEvidenceStale ? "previous evidence is stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                     Accessible.name: "Retry overlay capture"
-                    Accessible.value: window.overlayCaptureEvidenceStale ? "available; previous evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "available; overlay recovery pending" : "available; overlay ready"
                     Accessible.role: Accessible.Button
                     Accessible.description: "Retry monitoring the selected output source; " + (window.overlayCaptureEvidenceStale ? "previous evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "overlay recovery is pending." : "overlay is ready.")
                     onClicked: window.captureMonitorBridge.start()
