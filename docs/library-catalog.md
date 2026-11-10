@@ -17,6 +17,9 @@ unlike `path`, it contains no machine-specific drive or absolute-root prefix.
 For recursive scans it preserves descendant components (for example,
 `nested/track.wav`). It is an identity hint, not permission to access a file;
 callers must continue using the absolute `path` for filesystem operations.
+Recursive results are ordered by this relative identity (case-folded, then
+exact spelling), so ordering does not depend on the drive letter or absolute
+root used for the scan.
 
 ## Cancellation
 

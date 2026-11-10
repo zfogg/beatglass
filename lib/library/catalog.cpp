@@ -122,9 +122,9 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
   }
   if (error) { result.entries.clear(); result.status = CatalogStatus::filesystem_error; result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
-    const auto af = folded(a.path.string()), bf = folded(b.path.string());
+    const auto af = folded(a.relative_path.generic_string()), bf = folded(b.relative_path.generic_string());
     if (af != bf) return af < bf;
-    return a.path.string() < b.path.string();
+    return a.relative_path.generic_string() < b.relative_path.generic_string();
   });
   if (result.entries.size() > max_entries) {
     result.entries.clear();
