@@ -395,7 +395,7 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             const resetOpacity = 0.9
-            window.handleOverlayOpacityResetAction(resetOpacity)
+            window.handleOverlayOpacityResetShortcut(resetOpacity)
         }
     }
     Shortcut {
@@ -1474,6 +1474,9 @@ ApplicationWindow {
         const applied = window.overlayBridge.setOpacity(resetOpacity)
         window.handleOverlayOpacityResetResult(applied, resetOpacity)
         return applied
+    }
+    function handleOverlayOpacityResetShortcut(resetOpacity) {
+        return window.handleOverlayOpacityResetAction(resetOpacity)
     }
     function focusOverlayOpacityEditRecovery(message) {
         overlayOpacityControl.forceActiveFocus()
