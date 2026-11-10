@@ -154,4 +154,15 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(control_artifact), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid native_artifacts" not in result.stderr + result.stdout:
         raise SystemExit("control-character native artifact was accepted")
+    real_parent = root / "real-parent"
+    real_parent.mkdir()
+    linked_parent = root / "linked-parent"
+    try:
+        linked_parent.symlink_to(real_parent, target_is_directory=True)
+    except OSError:
+        pass
+    else:
+        result = subprocess.run([sys.executable, str(script), str(linked_parent / "matrix.json")], capture_output=True, text=True)
+        if result.returncode == 0 or "output directory is a symbolic link" not in result.stderr + result.stdout:
+            raise SystemExit("symbolic-link matrix output directory was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")

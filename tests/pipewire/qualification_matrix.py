@@ -14,6 +14,8 @@ if output.is_symlink():
     raise SystemExit("qualification matrix output is a symbolic link")
 if output.exists() and not output.is_file():
     raise SystemExit("qualification matrix output is not a regular file")
+if output.parent.is_symlink():
+    raise SystemExit("qualification matrix output directory is a symbolic link")
 if len(sys.argv) == 4:
     try:
         summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
