@@ -214,10 +214,14 @@ def main() -> int:
     parser.add_argument("--max-manifest-bytes", type=int, default=MAX_MANIFEST_BYTES)
     parser.add_argument("--max-entries", type=int, default=MAX_ENTRIES)
     parser.add_argument("--max-total-artifact-bytes", type=int, default=MAX_TOTAL_ARTIFACT_BYTES)
+    parser.add_argument("--json", action="store_true", help="emit machine-readable validation output")
     args = parser.parse_args()
     errors = verify(args.root, args.manifest, max_artifact_bytes=args.max_artifact_bytes,
                     max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries,
                     max_total_artifact_bytes=args.max_total_artifact_bytes)
+    if args.json:
+        print(json.dumps({"valid": not errors, "errors": errors}, sort_keys=True))
+        return 1 if errors else 0
     if errors:
         print("\n".join(errors), file=sys.stderr); return 1
     print("evidence bundle verified")
