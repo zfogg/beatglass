@@ -358,6 +358,9 @@ def main() -> int:
     parser.add_argument("--max-report-bytes", type=int, default=MAX_REPORT_BYTES)
     parser.add_argument("--json", action="store_true", help="emit the readiness report on stdout")
     args = parser.parse_args()
+    if args.max_age_hours <= 0:
+        print("max age hours must be positive", file=sys.stderr)
+        return 1
     errors = check(args.status, args.bundles, args.max_age_hours)
     if args.json:
         print(json.dumps(report(args.status, args.bundles, args.max_age_hours), sort_keys=True))
