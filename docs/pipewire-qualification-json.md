@@ -303,6 +303,8 @@ Symlink report destinations are rejected as unwritable; qualification output
 never follows a link or modifies its target.
 Existing report destinations must be regular files; directories and other
 special filesystem objects are rejected before temporary output is created.
+The optional report path must differ from `HOST.json`; self-overwrite is
+rejected before any output write begins.
 The temporary file is flushed and synchronized before replacement so a
 successful validation report is durable across an abrupt process exit.
 If replacement fails, the temporary file is removed so failed qualification

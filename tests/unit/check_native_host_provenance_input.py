@@ -85,6 +85,10 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), directory], capture_output=True, text=True)
     assert result.returncode != 0
     assert "host provenance report is unwritable" in result.stderr
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(host)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "host provenance report is unwritable" in result.stderr
+    assert json.loads(host.read_text(encoding="utf-8"))["name"] == "qualification-host"
     assert not list(Path(directory).glob("tmp*"))
 
     collision = Path(directory) / "not-a-directory"
