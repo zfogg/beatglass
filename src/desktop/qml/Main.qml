@@ -4746,8 +4746,8 @@ ApplicationWindow {
                         activeFocusOnTab: true
                         Accessible.name: "Forget saved overlay display"
                         Accessible.role: Accessible.Button
-                        Accessible.description: "Clear the unavailable saved display so another display can be selected"
-                        ToolTip.text: "Clear the unavailable saved display and choose a replacement"
+                        Accessible.description: "Clear the unavailable saved display so another display can be selected" + (window.overlayCaptureEvidenceStale ? ". Live overlay evidence is stale until fresh capture arrives." : "")
+                        ToolTip.text: "Clear the unavailable saved display and choose a replacement" + (window.overlayCaptureEvidenceStale ? "; live evidence is stale until fresh capture" : "")
                         onClicked: {
                             window.forgetUnavailableOverlayDisplay()
                             window.announceCaptureRecoveryState("Saved overlay display cleared; choose a replacement display.")
