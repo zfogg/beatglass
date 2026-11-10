@@ -38,3 +38,5 @@ respectively, preventing untrusted qualification directories from forcing
 unbounded text reads before artifact validation begins.
 Artifact inventories also use case-insensitive collision keys so manifests
 cannot contain two names that alias on Windows or other case-folding filesystems.
+Referenced evidence fields use the same portable path checks as hashed
+artifacts, so scenario-linked files cannot bypass the canonical path policy.

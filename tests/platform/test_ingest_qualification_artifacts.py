@@ -290,6 +290,14 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertTrue(any("symlinked qualification artifact" in error for error in errors))
 
+    def test_nonportable_referenced_evidence_path_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\nplayback_evidence=capture?.json\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("non-portable referenced evidence path: capture?.json", errors)
+
     def test_custom_artifact_limit_is_enforced(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

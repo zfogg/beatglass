@@ -119,6 +119,10 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
     known_paths = {item["path"].casefold() for item in artifacts}
     referenced_paths = set()
     for key, relative in referenced.items():
+        if (relative != unicodedata.normalize("NFC", relative)
+                or "\\" in relative or any(ord(char) < 32 for char in relative)
+                or any(char in '<>"|?*:' for char in relative)):
+            errors.append(f"non-portable referenced evidence path: {relative}"); continue
         candidate = root / relative
         if candidate.is_symlink():
             errors.append(f"symlinked referenced evidence: {relative}"); continue
