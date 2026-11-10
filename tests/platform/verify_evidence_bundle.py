@@ -12,6 +12,7 @@ REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "o
 
 REQUIRED_PROVENANCE = ("platform", "commit", "captured_at", "environment")
 SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
+MAX_ARTIFACT_BYTES = 1 << 30
 
 
 def verify(root: Path, manifest: Path) -> list[str]:
@@ -138,6 +139,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"missing artifact: {relative}"); continue
         if not stat.S_ISREG(path.stat().st_mode):
             errors.append(f"artifact must be a regular file: {relative}"); continue
+        if path.stat().st_size > MAX_ARTIFACT_BYTES:
+            errors.append(f"artifact exceeds 1 GiB: {relative}"); continue
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")

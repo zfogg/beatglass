@@ -256,6 +256,18 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("missing artifact: capture-dir", module.verify(root, manifest))
 
+    def test_oversized_artifacts_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.bin"
+            with artifact.open("wb") as stream:
+                stream.truncate(module.MAX_ARTIFACT_BYTES + 1)
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.bin", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact exceeds 1 GiB: capture.bin", module.verify(root, manifest))
+
     def test_artifact_path_segments_must_be_windows_safe(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
