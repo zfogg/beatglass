@@ -339,6 +339,9 @@ Reports with `valid: false` are rejected even when their other fields are
 well-formed; failed qualification cannot be packaged as evidence.
 The `valid` field must be the JSON boolean `true`, not a truthy number or
 string.
+The report schema identifier must exactly equal
+`beatglass-native-host-provenance-v1`; missing, numeric, and older identifiers
+are rejected.
 Report names follow the host contract and must contain visible non-whitespace
 text.
 Report platforms must use the same exact lowercase enum as host evidence;
