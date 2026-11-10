@@ -268,6 +268,12 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("artifact exceeds 1 GiB: capture.bin", module.verify(root, manifest))
 
+    def test_oversized_manifests_are_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text("{" + " " * module.MAX_MANIFEST_BYTES + "}", encoding="utf-8")
+            self.assertIn("manifest exceeds 16 MiB", module.verify(root, manifest))
+
     def test_artifact_path_segments_must_be_windows_safe(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
