@@ -525,6 +525,8 @@ int main(int argc, char** argv) {
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
   std::vector<float> live_tempo_history;
+  std::chrono::steady_clock::time_point live_last_packet{};
+  bool live_has_packet = false;
   std::optional<beatglass::VisualizationFrame> live_visualization_frame;
   beatglass::VisualizationProcessor live_visualization([](void*) noexcept {}, nullptr);
   live_session = std::make_unique<beatglass::windows::LoopbackSession>(live_epochs, [&] {
@@ -936,6 +938,8 @@ int main(int argc, char** argv) {
     live_waveform.assign(live_waveform.size(), 0.0f);
     live_spectrum.assign(live_spectrum.size(), 0.0f);
     live_tempo_history.clear();
+    live_last_packet = {};
+    live_has_packet = false;
     live_visualization.reset();
     live_visualization_frame.reset();
     set_live_presentation_state(beatglass::TrackingState::stopped);
@@ -958,6 +962,8 @@ int main(int argc, char** argv) {
     }
     if (live_session->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)])) {
       set_live_presentation_state(beatglass::TrackingState::reacquiring);
+      live_last_packet = std::chrono::steady_clock::now();
+      live_has_packet = false;
       live_status = "Starting capture…";
       live_button_label = " Stop monitoring ";
     }
@@ -1156,6 +1162,8 @@ int main(int argc, char** argv) {
           beatglass::AudioBlock block{{packet.sample_rate, static_cast<std::uint16_t>(packet.channels), layout}, packet.epoch, packet.first_frame, static_cast<std::int64_t>(packet.qpc_100ns) * 100, packet.discontinuity, std::span<const float>(packet.samples.data(), packet.sample_count)};
           try {
             live_sample_rate = packet.sample_rate;
+            live_last_packet = std::chrono::steady_clock::now();
+            live_has_packet = true;
             const auto packet_channels = std::max<std::uint32_t>(1, packet.channels);
             const auto packet_frames = packet.sample_count / packet_channels;
             live_observed_frames = packet.first_frame + packet_frames;
@@ -1231,6 +1239,13 @@ int main(int argc, char** argv) {
             live_status = std::string("Live analysis failed: ") + error.what();
             live_session->stop();
           }
+        }
+        if (live_has_packet && std::chrono::steady_clock::now() - live_last_packet > std::chrono::milliseconds(1500)) {
+          live_signal_confidence = 0.0f;
+          live_tracking_state = beatglass::TrackingState::reacquiring;
+          set_live_presentation_state(beatglass::TrackingState::reacquiring);
+          live_status = "Capture is running but no fresh packets arrived; reacquiring…";
+          live_has_packet = false;
         }
       }
       if (live_session && live_session->state() == beatglass::SourceState::stopped) {
