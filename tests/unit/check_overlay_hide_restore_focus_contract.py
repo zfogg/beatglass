@@ -1190,3 +1190,15 @@ def test_display_recovery_failure_helper_is_defined_and_propagates_result():
     assert "overlayDisplaySelectionRequired = true" in body
     assert "overlayCaptureEvidenceStale = true" in body
     assert "return window.focusOverlayAvailabilityRecovery" in body
+
+
+def test_overlay_field_recovery_helpers_report_focus_success():
+    opacity_start = QML.index("function focusOverlayOpacityEditRecovery")
+    opacity = QML[opacity_start : QML.index("    function focusOverlayDisplaySelectionRecovery", opacity_start)]
+    display_start = QML.index("function focusOverlayDisplaySelectionRecovery")
+    display = QML[display_start : QML.index("    function focusOverlayDisplayRecoveryFailure", display_start)]
+    size_start = QML.index("function focusOverlaySizeRecovery")
+    size = QML[size_start : QML.index("    function handleOverlayClickThroughButtonAction", size_start)]
+    assert "overlayOpacityControl.forceActiveFocus()" in opacity and "return true" in opacity
+    assert "overlayDisplay.forceActiveFocus()" in display and "return true" in display
+    assert "overlaySize.forceActiveFocus()" in size and "return true" in size

@@ -379,3 +379,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Geometry announcement contract | Overlay geometry is valid or unavailable during recovery | Return explicit validity while marking geometry evidence stale and announcing restored dimensions. |
 | Capture startup failure contract | Capture attach/startup fails before fresh live evidence exists | Mark stale/pending recovery state and report that the failure was handled for upstream recovery flows. |
 | Display recovery failure helper contract | Show, retry, restore, or display-focus actions encounter unavailable display state | Centralize pending/selection/stale state updates and propagate availability-recovery focus result. |
+| Field recovery focus contract | Opacity, display-selection, or size recovery focuses a concrete control | Announce recovery context and return successful focus status for callers. |

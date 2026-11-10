@@ -1529,10 +1529,12 @@ ApplicationWindow {
     function focusOverlayOpacityEditRecovery(message) {
         overlayOpacityControl.forceActiveFocus()
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+        return true
     }
     function focusOverlayDisplaySelectionRecovery(message) {
         overlayDisplay.forceActiveFocus()
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+        return true
     }
     function focusOverlayDisplayRecoveryFailure(message, target) {
         window.overlayDisplayRecoveryPending = true
@@ -1543,6 +1545,7 @@ ApplicationWindow {
     function focusOverlaySizeRecovery(message) {
         overlaySize.forceActiveFocus()
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+        return true
     }
     function handleOverlayClickThroughButtonAction(requestedClickThrough) {
         if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
