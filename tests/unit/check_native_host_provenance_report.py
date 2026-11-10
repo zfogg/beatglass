@@ -16,3 +16,4 @@ with tempfile.TemporaryDirectory() as directory:
     assert result["schema"] == "beatglass-native-host-provenance-v1"
     assert result["valid"] is True
     assert result["platform"] == "linux"
+    subprocess.run(["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)], check=True)
