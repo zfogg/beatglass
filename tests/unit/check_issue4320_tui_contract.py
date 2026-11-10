@@ -14,7 +14,7 @@ def main() -> int:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
     if 'Button(" Recover persisted "' not in tui:
         raise SystemExit("CLI Library does not expose persisted recovery action")
-    for marker in ("live_endpoint_id", "live_endpoint_preference", "updated.live_endpoint_id"):
+    for marker in ("live_endpoint_id", "live_endpoint_name", "live_endpoint_preference", "updated.live_endpoint_id", "updated.live_endpoint_name"):
         if marker not in tui:
             raise SystemExit("CLI Live endpoint preference contract missing: " + marker)
     print(f"Issue #4320 TUI contract markers verified ({len(required)} checks)")
