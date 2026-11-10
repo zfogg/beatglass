@@ -1263,6 +1263,13 @@ def test_overlay_exposes_visible_capture_scope_label():
     assert "selected output mix" in body
     assert "captureMonitorBridge.status" in body
     assert "evidence stale until fresh capture" in body
+
+
+def test_overlay_shows_stale_evidence_banner():
+    start = QML.index('objectName: "overlayStaleEvidenceBanner"')
+    body = QML[start : QML.index('objectName: "overlayCaptureScope"', start)]
+    assert "visible: window.overlayCaptureEvidenceStale" in body
+    assert "Previously displayed tempo, key, and chord values are stale" in body
     assert "; combined output may be ambiguous" in body
 
 
