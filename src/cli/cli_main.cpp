@@ -215,7 +215,7 @@ Element spectrum_chart(const std::vector<float>& spectrum) {
   Elements bars;
   for (const auto value : spectrum) {
     const auto height = std::clamp(static_cast<int>(std::round(value * 8.0f)), 0, 8);
-    bars.push_back(text(std::string(static_cast<std::size_t>(height), '▂')) | color(Color::MagentaLight));
+    bars.push_back(text(std::string(static_cast<std::size_t>(height), '#')) | color(Color::MagentaLight));
   }
   return hbox(bars) | bgcolor(Color::RGB(20, 14, 28));
 }
@@ -448,6 +448,8 @@ int main(int argc, char** argv) {
   int playback_device_selected = 0;
 #else
   beatglass::PlaybackSession playback;
+  std::vector<std::string> playback_device_labels;
+  int playback_device_selected = 0;
 #endif
   std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
@@ -505,6 +507,7 @@ int main(int argc, char** argv) {
   float live_signal_confidence = 0.0f;
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
+  std::vector<float> live_tempo_history;
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze_paths = [&](std::vector<std::filesystem::path> paths) {
@@ -644,7 +647,7 @@ int main(int argc, char** argv) {
   auto filter_input = Input(&filter, "Search library");
   auto folder_input = Input(&folder_text, "Audio folder");
   auto clear_search_button = Button(" Clear search ", [&] { filter.clear(); status = "Library search cleared."; });
-  auto search_bar = Renderer(Container::Horizontal({filter_input, clear_search_button}), [&] {
+  auto search_bar = Renderer(Container::Horizontal(Components{filter_input, clear_search_button}), [&] {
     return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 32) | borderRounded, text(" "), action(clear_search_button->Render(), Color::Cyan)});
   });
   std::string seek_step_text = std::to_string(preferences.seek_step);
@@ -795,8 +798,8 @@ int main(int argc, char** argv) {
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, sort_button, refresh_button}), Container::Horizontal({search_bar, previous_button, next_button, analyze_selected_button, analyze_all_button, retry_analysis_button, play_button, pause_button, stop_button, cancel_analysis_button})});
-  auto library_container = Container::Vertical({library_controls, library_menu});
+  auto library_controls = Container::Vertical(Components{Container::Horizontal(Components{folder_input, choose_folder_button, open_folder_button, recursive_checkbox, sort_button, refresh_button}), Container::Horizontal(Components{search_bar, previous_button, next_button, analyze_selected_button, analyze_all_button, retry_analysis_button, play_button, pause_button, stop_button, cancel_analysis_button})});
+  auto library_container = Container::Vertical(Components{library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
     const auto query = lower(filter);
@@ -956,7 +959,7 @@ int main(int argc, char** argv) {
     live_status = "Selected sink: " + live_endpoints[static_cast<std::size_t>(live_selected)];
   };
   auto endpoint_picker = Radiobox(&live_endpoints, &live_selected, endpoint_picker_option);
-  auto live = Renderer(Container::Vertical({endpoint_picker, Container::Horizontal({live_button, refresh_live_button, reset_live_button, half_bpm_button, normal_bpm_button, double_bpm_button})}), [&] {
+  auto live = Renderer(Container::Vertical(Components{endpoint_picker, Container::Horizontal(Components{live_button, refresh_live_button, reset_live_button, half_bpm_button, normal_bpm_button, double_bpm_button})}), [&] {
     Elements endpoints;
     for (std::size_t index = 0; index < live_endpoints.size(); ++index) {
       auto label = live_endpoints[index];
@@ -984,8 +987,8 @@ int main(int argc, char** argv) {
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
     const auto spectrum_view = vbox({text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum)});
     const auto waveform_view = vbox({text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, live_observed_frames)});
-    std::string beat_grid(32, '·');
-    for (std::size_t index = 0; index < std::min<std::uint64_t>(live_beats, beat_grid.size()); ++index) beat_grid[beat_grid.size() - 1 - index] = '●';
+    std::string beat_grid(32, '.');
+    for (std::size_t index = 0; index < std::min<std::uint64_t>(live_beats, beat_grid.size()); ++index) beat_grid[beat_grid.size() - 1 - index] = '*';
     const auto beat_grid_view = vbox({text("Beat grid") | bold | color(Color::YellowLight), text("|" + beat_grid + "|") | color(Color::YellowLight) | bgcolor(Color::RGB(35, 28, 8)), text("Recent beats: " + std::to_string(live_beats)) | color(Color::GrayLight)});
     const auto tonal_history_view = vbox({text("Tonal history") | bold | color(Color::BlueLight), text(live_tonal_label) | color(Color::BlueLight), text("Key: " + live_key_label + "   Chord: " + live_chord_label) | color(Color::White)});
     const auto visualization = visual_mode == "waveform" ? waveform_view : visual_mode == "spectrum" ? spectrum_view : visual_mode == "beat_grid" ? beat_grid_view : visual_mode == "tonal_history" ? tonal_history_view : vbox({spectrum_view, waveform_view});
@@ -1000,7 +1003,7 @@ int main(int argc, char** argv) {
   auto beat_grid_mode_button = Button(" Beat grid ", [&] { visual_mode = "beat_grid"; });
   auto tonal_history_mode_button = Button(" Tonal history ", [&] { visual_mode = "tonal_history"; });
   auto playback_device_picker = Radiobox(&playback_device_labels, &playback_device_selected);
-  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button, beat_grid_mode_button, tonal_history_mode_button, playback_device_picker}), [&] {
+  auto settings = Renderer(Container::Vertical(Components{reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button, beat_grid_mode_button, tonal_history_mode_button, playback_device_picker}), [&] {
     return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
       text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
       text("Tonal engine: optional Essentia music-replay build (disabled in this standard CLI build).") | color(Color::GrayLight) | italic,
@@ -1015,11 +1018,11 @@ int main(int argc, char** argv) {
       separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."),
       text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
-  auto tabs = Container::Tab({library, live, settings}, &tab);
+  auto tabs = Container::Tab(Components{library, live, settings}, &tab);
   auto library_tab = Button("  [1] Library  ", [&] { tab = 0; });
   auto live_tab = Button("  [2] Live  ", [&] { tab = 1; });
   auto settings_tab = Button("  [3] Settings  ", [&] { tab = 2; });
-  auto tab_bar = Renderer(Container::Horizontal({library_tab, live_tab, settings_tab}), [&] {
+  auto tab_bar = Renderer(Container::Horizontal(Components{library_tab, live_tab, settings_tab}), [&] {
     auto library_render = library_tab->Render();
     auto live_render = live_tab->Render();
     auto settings_render = settings_tab->Render();
@@ -1034,7 +1037,7 @@ int main(int argc, char** argv) {
     else settings_render = settings_render | color(Color::GrayLight);
     return hbox({library_render, text(" "), live_render, text(" "), settings_render}) | center;
   });
-  auto body = Renderer(Container::Vertical({tab_bar, tabs}), [&]() -> Element {
+  auto body = Renderer(Container::Vertical(Components{tab_bar, tabs}), [&]() -> Element {
     const auto compact = !snapshot && (screen.dimx() < 100 || screen.dimy() < 28);
     if (compact) {
       return vbox({tab_bar->Render(), separator(), filler(),
