@@ -47,6 +47,9 @@ if isinstance(payload, dict):
             raise SystemExit("transition capture end precedes capture start")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
+if isinstance(payload, dict) and payload.get("event_count") is not None:
+    if not isinstance(payload["event_count"], int) or isinstance(payload["event_count"], bool) or payload["event_count"] != len(events):
+        raise SystemExit("transition event count does not match artifact")
 if any(not isinstance(event, dict) for event in events):
     raise SystemExit("transition evidence contains a non-object event")
 names = [event.get("event") for event in events if isinstance(event, dict)]
