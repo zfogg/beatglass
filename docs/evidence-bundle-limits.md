@@ -120,6 +120,8 @@ Unsupported scenario fields are grouped under `scenario_schema` for direct
 manifest-contract triage.
 Shared scenario evidence ownership is grouped under `scenario_identity` for
 direct coverage and deduplication triage.
+Missing or mismatched evidence roles are grouped under `role` for direct
+artifact-to-scenario contract triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.
