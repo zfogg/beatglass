@@ -5,6 +5,7 @@ import QtQuick.Dialogs
 import Qt.labs.folderlistmodel
 
 ApplicationWindow {
+    property alias unlockOverlay: clickThroughToggle
     id: window
     objectName: "mainWindow"
     visible: true
@@ -2088,6 +2089,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Label { text: "Beatglass · " + window.liveBridge.status; color: window.themeForegrounds[window.selectedThemeIndex]; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                     Button {
+                        id: hideOverlay
                         text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the overlay window and restore the control window"; ToolTip.text: "Hide the overlay and restore the control window"
                         visible: window.overlayBridge && !window.overlayBridge.clickThrough
                         onClicked: window.hideOverlayAndRestoreControls()
