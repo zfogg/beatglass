@@ -266,6 +266,8 @@ Before packaging a native run, validate the extracted host object directly:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json`.
 Malformed or ambiguous host JSON is rejected before any host fields are
 trusted; duplicate keys are not silently normalized.
+Missing host evidence files are rejected through the same unreadable-input path;
+the validator never treats an absent file as an empty host object.
 Pass a second path to emit a deterministic validation report for the bundle:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 Validate that generated report before packaging with:
