@@ -30,6 +30,8 @@ else:
     summary = None
 summary_path = Path(sys.argv[3]).resolve() if len(sys.argv) == 4 else None
 host = platform.system()
+if host not in {"Linux", "Windows", "Darwin"}:
+    raise SystemExit(f"native qualification host is unsupported: {host}")
 platforms = {
     "Linux": {"target": "Linux/PipeWire", "status": "pending", "evidence": [], "execution_blockers": ["Linux host", "PipeWire daemon", "libpipewire-0.3", "audio sink"]},
     "Windows": {"target": "Windows/native audio/overlay", "status": "pending", "evidence": [], "execution_blockers": ["Windows host", "desktop audio permission", "overlay session"]},
