@@ -2092,7 +2092,7 @@ ApplicationWindow {
                 ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true
-                    Label { text: "Beatglass · " + window.liveBridge.status; color: window.themeForegrounds[window.selectedThemeIndex]; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text }
+                    Label { text: "Beatglass · " + window.liveBridge.status; color: window.themeForegrounds[window.selectedThemeIndex]; Layout.fillWidth: true; elide: Text.ElideRight; Accessible.name: "Beatglass status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text }
                     Button {
                         text: "×"; objectName: "overlayWindowHide"; Accessible.name: "Hide overlay"; Accessible.role: Accessible.Button; Accessible.description: "Hide the overlay window and restore the control window"; ToolTip.text: "Hide the overlay and restore the control window"
                         visible: window.overlayBridge && !window.overlayBridge.clickThrough
