@@ -93,6 +93,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or raw_expected != expected
             or relative != relative.strip()
             or "\\" in relative
+            or any(part == "." for part in relative.split("/"))
             or not re.fullmatch(r"[0-9a-f]{64}", expected)
             or (isinstance(relative, str) and "\x00" in relative)
             or not canonical
