@@ -19,6 +19,8 @@ struct CausalTempoState {
   std::optional<float> bpm;
   /** Detected beats in the current acquisition, not timestamped events. */
   std::uint64_t beats{};
+  /** Recent detected beat boundaries in the current epoch, oldest first. */
+  std::vector<std::uint64_t> beat_frames;
   /** Current signal and acquisition state. */
   TrackingState state{TrackingState::stopped};
 };

@@ -17,7 +17,7 @@ Decoder snapshot validation is fail-closed: a retry is eligible only when the pe
 
 Retryable analysis storage schema v2 persists `source_path` and `decoder_snapshot` beside content/engine/configuration/mode identity. The recovery bridge uses these fields for metadata-gated coordinator resubmission; missing or mismatched metadata remains a rejection.
 
-Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, and platform recovery contracts. End-to-end persistence, playback, native capture, and full native qualification remain in progress.
+Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, persistent SQLite Library cache/recovery, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, native Windows/macOS playback/capture paths, bounded Linux PipeWire playback/capture, and platform recovery contracts. End-to-end production parity and full native qualification remain in progress.
 
 The implementation is C++20. C callers can interoperate today through the
 documented CLI/process boundary; a stable C ABI adapter is not yet shipped.
@@ -31,7 +31,7 @@ Minimal C integration (using the installed C adapter) looks like:
 #include <stdlib.h>
 
 int main(void) {
-    return system("beatglass-cli --json song.wav");
+    return system("beatglass-tool --json song.wav");
 }
 ```
 
@@ -45,7 +45,7 @@ Production implementation belongs in `src/` for applications and `lib/` for reus
 
 The desktop shell currently exposes six persisted appearance themes (Light, Dark, High contrast, Purple, Blue, and Yellow) plus a reduced-motion preference; native QML palette values are aligned with the `design/v1` tokens, while native desktop qualification remains pending.
 
-The current `main` branch includes the bounded analysis queue and retry lifecycle, cache lookup and persisted recovery controls, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, and Windows endpoint-loss recovery. These are implemented slices, not a v1 completion claim: native capture, playback integration, complete cross-platform persistence qualification, and interactive qualification remain open.
+The current `main` branch includes the bounded analysis queue and retry lifecycle, persistent CLI Library cache/recovery, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, Windows endpoint-loss recovery, native macOS AudioUnit playback/CoreAudio Live integration, and bounded Linux PipeWire playback/capture integration. These are implemented slices, not a v1 completion claim: optional tonal dependencies and interactive/native qualification remain open.
 
 ## Build and test the groundwork
 
@@ -65,20 +65,58 @@ cmake --build build --target beatglass_all_tests --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; run `beatglass-tui [audio-folder]` to browse local files and launch real analysis. For example on Ubuntu 22.04:
+The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; persistent SQLite Library storage is enabled by default (set `-DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=OFF` only for a dependency-light build without cache/recovery), and `beatglass-cli [audio-folder]` browses local files and launches real analysis. The single-file utility is named `beatglass-tool`. For example on Ubuntu 22.04:
 
 ```sh
 sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript
 cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_TEST_V1_CODECS=OFF
 cmake --build build
 ctest --test-dir build --output-on-failure
-./build/beatglass-cli /path/to/file.wav
+./build/beatglass-tool /path/to/file.wav
 ./build/beatglass-desktop
 ```
 
-For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. An experimental LLVM/Clang toolchain can also be installed with Scoop (`scoop install llvm`) and selected through CMake's `-T ClangCL` generator toolset or an explicit `CMAKE_CXX_COMPILER`; this is a development option, not a pinned qualification environment. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below. The CLI accepts one file, prints an aubio estimate or unknown, and never modifies the input. The Library page displays basic decoded metadata; it does not launch analysis. The DJ page reports that capture is unavailable. On macOS it also exposes an experimental overlay; its native behavior is unqualified and described in [macOS overlay status](docs/macos-overlay.md). The native evidence procedure is [the macOS qualification checklist](docs/macos-qualification.md). Actual support depends on decoder build options. No GUI, capture or overlay has been qualified on any platform.
+For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. An experimental LLVM/Clang toolchain can also be installed with Scoop (`scoop install llvm`) and selected through CMake's `-T ClangCL` generator toolset or an explicit `CMAKE_CXX_COMPILER`; this is a development option, not a pinned qualification environment. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below.
 
-On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
+The terminal prototype has two distinct executables. `beatglass-tool` is the
+single-file analyzer, while `beatglass-cli` is the FTXUI application:
+
+```text
+beatglass-tool [--help] [--version] [--replay] [--json] [--] <audio-file>
+beatglass-cli [audio-folder]
+beatglass-cli --snapshot <audio-folder> [library|live|settings]
+```
+
+The TUI opens with Library, Live, and Settings tabs. Library recursively browses
+supported files, runs real decoder/aubio analysis asynchronously, can analyze all
+currently visible filtered tracks sequentially with shared cancellation and
+progress, isolates per-track decoder errors so one corrupt file does not abort the
+batch, clears a stale failure badge when retrying a track succeeds, sorts the visible collection by title or path while preserving selection
+identity, provides a case-insensitive search across title, filename, and full path, performs a safe metadata preflight so duration/format are visible before analysis, shows filtered visible/analyzed/failed counts, renders a colored PCM waveform with analyzer-detected beat frames and playback position, and recursively indexes folders selected through either path entry or the native picker. It exposes native
+folder selection and Windows/macOS/Linux playback controls when the corresponding
+native backend is built. Live discovers Windows
+render sinks, macOS CoreAudio output sources, or Linux PipeWire sinks when the
+corresponding backend is built; it captures the selected OS output through the
+native backend and displays real tempo, telemetry, and a colored live waveform.
+Live also exposes explicit
+half/normal/double tempo interpretation and reset/reacquire controls. Settings
+controls reduced motion and the seek step. Mouse tab selection and `Tab`/`1`/`2`/`3` keyboard
+navigation are supported; terminals below 100 columns or 28 rows show a clear
+resize prompt. Standard builds display explicitly provisional FFT-derived
+key/chord estimates with bounded recent tonal history; when
+`BEATGLASS_BUILD_MUSIC_REPLAY=ON` is enabled with Essentia, Library and Live
+analysis use the optional causal tonal replay path and display its higher-fidelity
+key/chord estimates. Neither path claims calibrated confidence or full-mix
+musical accuracy yet.
+
+Library keyboard shortcuts include `a` for Analyze all visible, `r` for refresh,
+`s` for sort, and `o` for the folder action; text inputs retain normal character
+editing when focused. The TUI never writes tags or modifies source audio. Native
+desktop, capture, playback, and overlay qualification
+remain platform-specific work; see [macOS overlay status](docs/macos-overlay.md)
+and [the macOS qualification checklist](docs/macos-qualification.md).
+
+On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds PipeWire sink discovery/capture and bounded native playback plus their CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). A real daemon qualification run remains open. See [Linux platform status](docs/linux-platform-increment.md).
 
 The shipped `beatglass-cli` and `beatglass-music-cli` report decoder/analysis
 failures on stderr with an `error: ` prefix and exit with status 1;
@@ -110,23 +148,23 @@ with a nonzero exit status and report errors on stderr.
 
 ### Binary command-line flags
 
-These are the only options accepted by the shipped `beatglass-cli` and
+These are the only options accepted by the shipped `beatglass-tool` and
 `beatglass-desktop` binaries. They are separate from the developer and
 qualification-script flags below.
 
-Usage: `beatglass-cli [--help] [--version] [--replay] [--json] [--] <audio-file>`.
+Usage: `beatglass-tool [--help] [--version] [--replay] [--json] [--] <audio-file>`.
 The music analysis binary uses `beatglass-music-cli [--help] [--version] <audio-file>`.
 
 | Binary | Argument | Meaning |
 | --- | --- | --- |
-| `beatglass-cli` | `<audio-file>` (required) | Analyze one audio file without modifying it. |
-| `beatglass-cli` | `--help`, `-h` | Print usage and exit successfully. |
-| `beatglass-cli` | `--version`, `-V` | Print the project version and exit successfully. |
+| `beatglass-tool` | `<audio-file>` (required) | Analyze one audio file without modifying it. |
+| `beatglass-tool` | `--help`, `-h` | Print usage and exit successfully. |
+| `beatglass-tool` | `--version`, `-V` | Print the project version and exit successfully. |
 | `beatglass-music-cli` | `--version`, `-V` | Print the project version and exit successfully. |
 | `beatglass-music-cli` | `--help`, `-h` | Print usage and exit successfully. |
-| `beatglass-cli` | `--replay <file>` | Run causal replay without real-time pacing. |
-| `beatglass-cli` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
-| `beatglass-cli` | `--` | End option parsing so a filename beginning with `-` is accepted. |
+| `beatglass-tool` | `--replay <file>` | Run causal replay without real-time pacing. |
+| `beatglass-tool` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
+| `beatglass-tool` | `--` | End option parsing so a filename beginning with `-` is accepted. |
 | `beatglass-desktop` | `--database <path>` | Select the SQLite storage path; the first occurrence wins. |
 
 Unknown options, missing values, duplicate `--replay`/`--json`, and a missing
@@ -141,10 +179,10 @@ shipped binaries.
 
 | Command | Option | Default / values | Behavior and interactions |
 | --- | --- | --- | --- |
-| `beatglass-cli` | `<audio-file>` | required positional path | Analyzes one input; the input is never modified. |
-| `beatglass-cli` | `--replay <file>` | off | Emits incremental causal estimates without real-time pacing; may end with a partial JSON-Lines stream on error. |
-| `beatglass-cli` | `--json` | off | Emits one JSON result, or JSON Lines with `--replay`; `bpm` may be `null`. |
-| `beatglass-cli` | `--` | none | Ends option parsing so an input beginning with `-` is treated as a path. |
+| `beatglass-tool` | `<audio-file>` | required positional path | Analyzes one input; the input is never modified. |
+| `beatglass-tool` | `--replay <file>` | off | Emits incremental causal estimates without real-time pacing; may end with a partial JSON-Lines stream on error. |
+| `beatglass-tool` | `--json` | off | Emits one JSON result, or JSON Lines with `--replay`; `bpm` may be `null`. |
+| `beatglass-tool` | `--` | none | Ends option parsing so an input beginning with `-` is treated as a path. |
 | `beatglass-desktop` | `--database <path>` | application default | Selects the SQLite storage path; the first occurrence wins and later arguments are passed to Qt. |
 
 Unknown CLI options, missing values, duplicate `--replay`/`--json`, and a
@@ -295,7 +333,7 @@ On Windows with Visual Studio, add `-G "Visual Studio 17 2022" -A x64` to the co
 
 The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
 
-File replay uses the proposed worker-owned `CausalTempoReplay` block interface. It accepts arbitrary interleaved chunk sizes, buffers partial 512-frame hops, and reports accepted and analyzed exclusive boundaries separately. An incomplete final hop is not analyzed. Live capture and the library snapshot job are not connected yet.
+File replay uses the proposed worker-owned `CausalTempoReplay` block interface. It accepts arbitrary interleaved chunk sizes, buffers partial 512-frame hops, and reports accepted and analyzed exclusive boundaries separately. An incomplete final hop is not analyzed. The FTXUI CLI now connects file analysis, source-backed Library waveforms/playback, and Windows loopback Live capture to these worker-owned paths; broader desktop persistence and cross-platform native qualification remain open.
 
 The optional [tonal worker experiment](docs/tonal-experiment.md) requires Essentia and is not connected to product analysis.
 
@@ -315,7 +353,7 @@ The experimental worker-only aubio beat tracker is not connected to the CLI or s
 
 ## Provisional library storage increment
 
-`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables private, not yet product-wired SQLite and job-executor primitives. SQLite is declared in the pinned vcpkg manifest for reproducible development toolchains. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
+`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables the SQLite and job-executor primitives used by the CLI Library cache/recovery path. It is now the default; set it explicitly when configuring a qualification build. SQLite is declared in the pinned vcpkg manifest for reproducible development toolchains. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
 
 ```sh
 cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src

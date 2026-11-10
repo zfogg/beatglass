@@ -8,10 +8,11 @@ import tempfile
 import wave
 
 exe = sys.argv[1]
+usage = "Usage: " + pathlib.Path(exe).stem
 missing_argument = subprocess.run([exe], capture_output=True, text=True)
-assert missing_argument.returncode == 2 and "Usage: beatglass-cli" in missing_argument.stdout
+assert missing_argument.returncode == 2 and usage in missing_argument.stdout
 extra_argument = subprocess.run([exe, "one.wav", "two.wav"], capture_output=True, text=True)
-assert extra_argument.returncode == 2 and "Usage: beatglass-cli" in extra_argument.stdout
+assert extra_argument.returncode == 2 and usage in extra_argument.stdout
 with tempfile.TemporaryDirectory() as directory:
     root = pathlib.Path(directory)
     def make(path, clicks, stereo=False):

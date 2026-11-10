@@ -66,16 +66,15 @@ public:
     read_.store((read + 1) % Slots, std::memory_order_release);
     return true;
   }
-/// Return the current number of queued blocks for consumer-side telemetry.
-/// The value is a snapshot and may change immediately after return; it never
-/// participates in producer admission decisions.
+/// Return the cumulative number of complete frames counted in rejected blocks.
+  std::uint64_t dropped_frames() const noexcept { return dropped_.load(std::memory_order_relaxed); }
+  /// Return the number of queued blocks currently available to the consumer.
+  /// The result is a snapshot and may change immediately after this call.
   std::size_t size() const noexcept {
     const auto read = read_.load(std::memory_order_acquire);
     const auto write = write_.load(std::memory_order_acquire);
-    return (write + Slots - read) % Slots;
+    return write >= read ? write - read : Slots - read + write;
   }
-/// Return the cumulative number of complete frames counted in rejected blocks.
-  std::uint64_t dropped_frames() const noexcept { return dropped_.load(std::memory_order_relaxed); }
 private:
   std::array<Block, Slots> slots_{};
   std::atomic<std::size_t> read_{0}, write_{0};

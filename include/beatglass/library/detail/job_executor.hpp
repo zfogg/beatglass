@@ -54,7 +54,7 @@ public:
    */
   bool submit(int priority, Work work);
   /** Queue tracked work or return empty if full, stopping, or empty. A cancelled queued job occupies capacity until removed by the worker or shutdown. */
-  std::shared_ptr<JobHandle> submit_tracked(int priority, TrackedWork work);
+  std::shared_ptr<JobHandle> submit_tracked(int priority, TrackedWork work, std::function<void()> on_queued_cancel = {});
   /** Reject new jobs, request active cancellation, then cancel and destroy queued jobs outside the queue lock and join. May block until active work or queued closure destruction returns. Stop callbacks execute without the queue lock. */
   void shutdown();
 private:

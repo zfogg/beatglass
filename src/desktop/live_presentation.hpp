@@ -2,6 +2,7 @@
 #include "beatglass/core/presentation_gate.hpp"
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 /**
  * GUI-thread-owned presentation of revisioned immutable live snapshots.
@@ -19,6 +20,13 @@ class LivePresentation : public QObject {
   Q_PROPERTY(QString tempo READ tempo NOTIFY changed)
   Q_PROPERTY(QString key READ key NOTIFY changed)
   Q_PROPERTY(QString chord READ chord NOTIFY changed)
+  Q_PROPERTY(qulonglong beatCount READ beatCount NOTIFY changed)
+  Q_PROPERTY(qulonglong observedFrames READ observedFrames NOTIFY changed)
+  Q_PROPERTY(qulonglong analysisDelayFrames READ analysisDelayFrames NOTIFY changed)
+  Q_PROPERTY(double confidence READ confidence NOTIFY changed)
+  Q_PROPERTY(bool stale READ stale NOTIFY changed)
+  Q_PROPERTY(QStringList tempoHistory READ tempoHistory NOTIFY changed)
+  Q_PROPERTY(QStringList tonalHistory READ tonalHistory NOTIFY changed)
 public:
   /** Construct on the owning GUI thread; parent, if any, has the same thread. */
   explicit LivePresentation(QObject* parent = nullptr);
@@ -32,6 +40,20 @@ public:
   QString key() const { return key_; }
   /** Most recent chord label, or an em dash if unavailable. */
   QString chord() const { return chord_; }
+  /** Number of beats in the accepted snapshot. */
+  qulonglong beatCount() const { return beat_count_; }
+  /** Exclusive captured frame boundary in the accepted snapshot. */
+  qulonglong observedFrames() const { return observed_frames_; }
+  /** Published analysis delay measured in frames. */
+  qulonglong analysisDelayFrames() const { return analysis_delay_frames_; }
+  /** Signal-health confidence in [0, 1], or -1 when unavailable. */
+  double confidence() const { return confidence_; }
+  /** True when the current state is not providing fresh tracking evidence. */
+  bool stale() const { return stale_; }
+  /** Recent causal tempo labels, oldest first. */
+  QStringList tempoHistory() const { return tempo_history_; }
+  /** Recent causal chord labels, oldest first. */
+  QStringList tonalHistory() const { return tonal_history_; }
 signals:
   /** Emitted on the owning thread when a newer update is applied. */
   void changed();
@@ -39,4 +61,9 @@ private:
   beatglass::PresentationGate gate_;
   QString status_ = QStringLiteral("Stopped");
   QString tempo_ = QStringLiteral("\u2014"), key_ = QStringLiteral("\u2014"), chord_ = QStringLiteral("\u2014");
+  qulonglong beat_count_ = 0, observed_frames_ = 0, analysis_delay_frames_ = 0;
+  double confidence_ = -1.0;
+  bool stale_ = false;
+  QStringList tempo_history_;
+  QStringList tonal_history_;
 };

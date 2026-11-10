@@ -72,9 +72,7 @@ FileReader::FileReader(ByteSource& source, std::uint64_t epoch, std::stop_token 
 }
 FileReader::~FileReader() = default;
 const FileMetadata& FileReader::metadata() const noexcept { return impl_->metadata; }
-bool FileReader::source_changed() const noexcept {
-  return impl_->source_changed();
-}
+bool FileReader::source_changed() const noexcept { return impl_->source_changed(); }
 FileReadResult FileReader::read(std::span<float> buffer, std::stop_token cancel) {
   auto& f = *impl_; if (f.failed) throw std::runtime_error("File reader failed");
   if (f.virtual_reader) return f.virtual_reader->read(buffer, cancel);

@@ -13,6 +13,7 @@ bool MacAudioUnitPlayback::start(std::uint32_t rate, std::uint16_t channels,
                                  std::uint64_t epoch) noexcept {
   stop();
   if (!rate || !channels || !max_samples || !epoch || channels > 2) return false;
+  if (!session_.start(epoch)) return false;
   owned_queue_ = std::make_unique<PlaybackPcmQueue>(2, max_samples);
   scratch_ = std::make_unique<float[]>(max_samples);
   max_samples_ = max_samples;
@@ -64,10 +65,29 @@ void MacAudioUnitPlayback::stop() noexcept {
   owned_queue_.reset();
   scratch_.reset();
   max_samples_ = channels_ = 0;
+  session_.stop();
 }
 
 bool MacAudioUnitPlayback::submit(const AudioBlock& block) noexcept {
-  return queue_ && block.epoch && queue_->push(block);
+  return queue_ && session_.state() == PlaybackState::playing && block.epoch == session_.epoch() && queue_->push(block);
+}
+
+bool MacAudioUnitPlayback::pause() noexcept {
+  if (!unit_ || !session_.pause()) return false;
+  if (AudioOutputUnitStop(unit_) != noErr) {
+    session_.resume();
+    return false;
+  }
+  return true;
+}
+
+bool MacAudioUnitPlayback::resume() noexcept {
+  if (!unit_ || !session_.resume()) return false;
+  if (AudioOutputUnitStart(unit_) != noErr) {
+    session_.pause();
+    return false;
+  }
+  return true;
 }
 
 OSStatus MacAudioUnitPlayback::render(void* ref, AudioUnitRenderActionFlags*,

@@ -3,7 +3,8 @@ param(
   [Parameter(Position = 0)]
   [string]$OutputDirectory = "",
   [switch]$Build,
-  [switch]$RunTests
+  [switch]$RunTests,
+  [switch]$TuiOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -48,8 +49,18 @@ try {
       "-S", $repoRoot, "-B", $buildDirectory,
       "-G", "Visual Studio 17 2022", "-A", "x64",
       "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_TESTING=ON",
-      "-DBEATGLASS_BUILD_DESKTOP=ON", "-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=ON"
+      "-DBEATGLASS_BUILD_SLICE=ON", "-DBEATGLASS_BUILD_TUI=ON", "-DBEATGLASS_BUILD_DESKTOP=$(-not $TuiOnly)", "-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=$(-not $TuiOnly)",
+      "-DBEATGLASS_FETCH_SQLITE3=ON"
     )
+    if ($env:VCPKG_ROOT) {
+      $toolchain = Join-Path $env:VCPKG_ROOT "scripts/buildsystems/vcpkg.cmake"
+      if (Test-Path -LiteralPath $toolchain) {
+        $configureArgs += "-DCMAKE_TOOLCHAIN_FILE=$toolchain"
+        $configureArgs += "-DVCPKG_MANIFEST_FEATURES=$(if ($TuiOnly) { 'tui' } else { 'desktop;tui' })"
+      } else {
+        "VCPKG toolchain not found at $toolchain; continuing with host dependencies."
+      }
+    }
     "cmake $($configureArgs -join ' ')"
     & cmake @configureArgs
     if ($LASTEXITCODE -ne 0) { throw "CMake configure failed with exit code $LASTEXITCODE" }
@@ -65,6 +76,9 @@ try {
   if ($RunTests) {
     $ctestRun = Join-Path $OutputDirectory "ctest-run.log"
     $testArgs = @("--test-dir", $buildDirectory, "-C", "Release", "--output-on-failure")
+    if ($TuiOnly) {
+      $testArgs += @("-R", "issue4320_tui_contract|cli_generated_audio|cli_v1_codecs|cli_tui_snapshots")
+    }
     "ctest $($testArgs -join ' ')"
     & ctest @testArgs 2>&1 | Tee-Object -FilePath $ctestRun
     if ($LASTEXITCODE -ne 0) { throw "CTest execution failed with exit code $LASTEXITCODE" }
@@ -75,16 +89,24 @@ try {
   & ctest --test-dir $buildDirectory -C Release -N | Tee-Object -FilePath $ctestList
   if ($LASTEXITCODE -ne 0) { throw "CTest discovery failed with exit code $LASTEXITCODE" }
   $discovered = Get-Content $ctestList -Raw
-  if ($discovered -notmatch "windows_endpoint_tests|windows_dj_bridge|windows_overlay") {
+  if ($TuiOnly) {
+    if ($discovered -notmatch "issue4320_tui_contract|cli_tui_snapshots") {
+      throw "No TUI qualification tests were discovered in $buildDirectory"
+    }
+  } elseif ($discovered -notmatch "windows_endpoint_tests|windows_dj_bridge|windows_overlay") {
     throw "No Windows platform tests were discovered in $buildDirectory"
   }
 
-  $required = @(
-    (Join-Path $buildDirectory "Release/beatglass-desktop.exe"),
-    (Join-Path $buildDirectory "Release/windows_endpoint_tests.exe"),
-    (Join-Path $buildDirectory "Release/windows_dj_bridge_tests.exe"),
-    (Join-Path $buildDirectory "Release/windows_overlay_tests.exe")
-  )
+  $required = if ($TuiOnly) {
+    @((Join-Path $buildDirectory "Release/beatglass-cli.exe"))
+  } else {
+    @(
+      (Join-Path $buildDirectory "Release/beatglass-desktop.exe"),
+      (Join-Path $buildDirectory "Release/windows_endpoint_tests.exe"),
+      (Join-Path $buildDirectory "Release/windows_dj_bridge_tests.exe"),
+      (Join-Path $buildDirectory "Release/windows_overlay_tests.exe")
+    )
+  }
   foreach ($path in $required) {
     if (-not (Test-Path $path)) { throw "Required qualification artifact is missing: $path" }
   }
@@ -98,7 +120,7 @@ try {
   $hashLines | Set-Content -LiteralPath $manifestPath -Encoding utf8
   "Artifact SHA-256 manifest: $manifestPath"
   $identityManifest = Join-Path $OutputDirectory "qualification-manifest.txt"
-  $qtVersion = if (Get-Command qmake -ErrorAction SilentlyContinue) { (& qmake --version | Select-Object -Last 1).Trim() } else { "UNAVAILABLE" }
+  $qtVersion = if ($TuiOnly) { "NOT_REQUESTED_TUI_ONLY" } elseif (Get-Command qmake -ErrorAction SilentlyContinue) { (& qmake --version | Select-Object -Last 1).Trim() } else { "UNAVAILABLE" }
   $hardwareModel = (Get-CimInstance Win32_ComputerSystem | Select-Object -First 1 | ForEach-Object { "$($_.Manufacturer) $($_.Model)" }).Trim()
   @(
     "commit=$(git -C $repoRoot rev-parse HEAD)"
@@ -110,8 +132,9 @@ try {
     "hardware_model=$hardwareModel"
     "vcpkg_root=$($env:VCPKG_ROOT)"
     "artifact_sha256=qualification-artifacts.sha256"
-    "playback_evidence=native-playback-evidence.json"
-    "overlay_evidence=native-overlay-evidence.json"
+    "qualification_scope=$(if ($TuiOnly) { 'tui-only' } else { 'desktop-and-tui' })"
+    "playback_evidence=$(if ($TuiOnly) { 'UNRUN_TUI_ONLY' } else { 'native-playback-evidence.json' })"
+    "overlay_evidence=$(if ($TuiOnly) { 'UNRUN_TUI_ONLY' } else { 'native-overlay-evidence.json' })"
     "display_topology=display-topology.json"
     "audio_inventory=audio-endpoints.json"
   ) | Set-Content -LiteralPath $identityManifest -Encoding utf8
@@ -135,7 +158,11 @@ try {
     @{ case = "dpi-fullscreen"; status = "UNRUN"; log = ""; screenshot = "" }
   ) | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $overlayEvidencePath -Encoding utf8
   "Native overlay evidence template: $overlayEvidencePath"
-  "UNRUN: native WASAPI routing, endpoint removal/recovery, overlay, DPI, and interactive UI cases require a logged-in Windows session."
+  if ($TuiOnly) {
+    "UNRUN: native WASAPI routing, endpoint removal/recovery, and interactive TUI cases require a logged-in Windows session."
+  } else {
+    "UNRUN: native WASAPI routing, endpoint removal/recovery, overlay, DPI, and interactive UI cases require a logged-in Windows session."
+  }
 }
 finally {
   Stop-Transcript | Out-Null

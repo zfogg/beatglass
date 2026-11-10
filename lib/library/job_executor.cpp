@@ -11,17 +11,20 @@ struct JobHandle::State {
   std::stop_source stop;
   TrackedState status{TrackedState::queued};
   std::uint64_t frames{};
+  std::function<void()> on_queued_cancel;
 };
 JobHandle::JobHandle(std::shared_ptr<State> state) : state_(std::move(state)) {}
 void JobHandle::cancel() {
+  std::function<void()> queued_callback;
   {
     std::lock_guard lock(state_->mutex);
     if (state_->status != TrackedState::queued && state_->status != TrackedState::running) return;
-    if (state_->status == TrackedState::queued) state_->status = TrackedState::cancelled;
+    if (state_->status == TrackedState::queued) { state_->status = TrackedState::cancelled; queued_callback = std::move(state_->on_queued_cancel); }
   }
   // A cancellation begun while running can race terminal publication. Never
   // invoke stop callbacks while holding the state mutex.
   state_->stop.request_stop();
+  if (queued_callback) { try { queued_callback(); } catch (...) {} }
 }
 TrackedState JobHandle::state() const { std::lock_guard lock(state_->mutex); return state_->status; }
 std::uint64_t JobHandle::frames() const { std::lock_guard lock(state_->mutex); return state_->frames; }
@@ -64,9 +67,10 @@ bool JobExecutor::submit(int priority, Work work) {
   impl_->ready.notify_one();
   return true;
 }
-std::shared_ptr<JobHandle> JobExecutor::submit_tracked(int priority, TrackedWork work) {
+std::shared_ptr<JobHandle> JobExecutor::submit_tracked(int priority, TrackedWork work, std::function<void()> on_queued_cancel) {
   if (!work) return {};
   auto state = std::make_shared<JobHandle::State>();
+  state->on_queued_cancel = std::move(on_queued_cancel);
   auto handle = std::shared_ptr<JobHandle>(new JobHandle(state));
   Work wrapped = [state, work = std::move(work)](std::stop_token shutdown) {
     {

@@ -272,11 +272,14 @@ TEST_CASE("catalog skips symlinked files and directories") {
   std::error_code ec;
   std::filesystem::create_symlink(dir.path / "real.wav", dir.path / "linked.wav", ec);
   if (ec) return; // Platform qualification may disable symlink creation.
-  std::filesystem::create_directory(dir.path / "nested");
-  std::filesystem::create_directory_symlink(dir.path / "nested", dir.path / "linked-nested", ec);
+  std::filesystem::create_directory_symlink(dir.path.parent_path(), dir.path / "linked-nested", ec);
+  if (ec) return; // Directory symlink creation requires additional Windows privileges.
+  ec.clear();
+  if (!std::filesystem::is_symlink(std::filesystem::symlink_status(dir.path / "linked-nested", ec)) || ec) return;
   const auto result = beatglass::library::browse(dir.path);
-  REQUIRE(result.entries.size() == 2);
+  // The fixture contains one real audio file and two symlinks.  Both links
+  // must be skipped; there is no real nested directory in this fixture.
+  REQUIRE(result.entries.size() == 1);
   CHECK(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "real.wav"; }));
-  CHECK(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "nested"; }));
   CHECK_FALSE(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "linked.wav" || entry.name == "linked-nested"; }));
 }

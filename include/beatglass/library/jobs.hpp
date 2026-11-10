@@ -31,3 +31,5 @@ constexpr bool isValidProgress(const JobProgress& progress) noexcept {
   return !hasKnownTotal(progress) || progress.frames_processed <= progress.total_frames;
 }
 }
+/** Compatibility alias for library-facing callers; the identity is owned by the core namespace. */
+namespace beatglass::library { using AnalysisIdentity = ::beatglass::AnalysisIdentity; }

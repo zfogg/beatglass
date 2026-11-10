@@ -1,29 +1,65 @@
 # Progress and handoff
 
-## Current native qualification snapshot (2026-11-10)
+## 2026-11-10 — CLI parity and qualification follow-up
 
-The current main line has passing Windows qualification contracts for cache
-lookup, the Windows qualification manifest and script syntax, and the Issue
-76 QML aggregate contract. Focused macOS Qt 6.12 runs pass the persisted
-overlay visual-restore, display reconnect, and paused display-reorder
-scenarios. These checks are not a full v1 qualification claim: native Linux
-capture/desktop qualification and the complete cross-platform UI/audio matrix
-remain open.
+The CLI Live path now consumes the shared presentation contract for confidence,
+beat count, stale/reacquiring state, and bounded tempo history; the GUI model
+exposes the same values to QML. The CLI Library summary reports real persisted
+SQLite cache hits, and queued analysis cancellation now preserves retryable
+recovery metadata through the worker-owned callback boundary.
 
-## Full macOS build and CTest snapshot (2026-11-10)
+Windows focused CLI validation remains 4/4 passing. The isolated Linux
+PipeWire/FTXUI build validates both `beatglass-cli` and `beatglass-tool` with
+the focused contract, audio, codec, and snapshot tests. The macOS qualification
+script now also requires native Mach-O `beatglass-cli` and `beatglass-tool`
+artifacts in addition to the desktop and Core Audio bundles. Native macOS
+execution and Linux runtime sink capture still require their respective host
+environments; the current WSL session has no running PipeWire desktop daemon.
 
-On the native macOS host, a clean Qt 6.12 Release configuration with
-`BEATGLASS_BUILD_DESKTOP=ON`, `BEATGLASS_BUILD_SLICE=ON`,
-`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, `BEATGLASS_BUILD_DESKTOP_ANALYSIS=ON`,
-and `BEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON` built the desktop, Core Audio,
-overlay, library, and test targets successfully. The resulting CTest run
-executed 440 tests: 419 passed and 21 failed. The failures are not being
-promoted to a qualification claim; they remain open as native follow-up work
-covering cache/cancellation and symlink cases, codec/CLI integration, overlay
-teardown, QML navigation timeouts, and qualification-environment behavior.
-The exact run was `ctest --test-dir build-verify --output-on-failure -C
-Release` on the `zachbook-pro` host. Linux native qualification remains
-unrun.
+## 2026-11-10 — CLI qualification evidence for issue #4320
+
+The `beatglass-cli` prototype now builds on Windows with the FTXUI TUI and
+passes the focused `issue4320_tui_contract` and `cli_tui_snapshots` tests (2/2).
+In WSL Ubuntu, the same CLI was configured with GCC and FTXUI 7.0.0, compiled
+and linked successfully, and its Library, Live, and Settings snapshot paths
+completed; generated-audio integration and the TUI contract also passed.
+
+The CLI Live view now has a real Linux PipeWire integration path when configured
+with `BEATGLASS_BUILD_PIPEWIRE=ON`: it enumerates output sinks, owns a bounded
+monitor stream, feeds the shared tempo/presentation and visualization pipeline,
+and clears/reacquires evidence on stream boundaries or packet timeouts. Native
+Linux verification remains pending until a host with PipeWire development
+headers and a running sink monitor is available.
+In the current WSL host, an isolated PipeWire 1.6.10 package tree plus locally
+built FTXUI 7.0.0 produced a successful `BEATGLASS_BUILD_PIPEWIRE=ON` CLI build;
+all three snapshots and the contract/snapshot tests passed. Runtime discovery
+then reached PipeWire and reported `Could not create PipeWire loop`, confirming
+that the remaining limitation is the absent daemon/session rather than a build
+or linkage failure.
+This is preparation evidence only: WSL is not native Linux qualification,
+PipeWire prerequisites were unavailable in that environment, macOS was not
+run, and the optional Essentia tonal runtime was not validated end-to-end.
+
+The CLI playback worker now stays within the shared Windows playback queue's
+4096-sample bound, fixing a pre-open rejection of native playback. The TUI's
+SQLite Library prototype is enabled by default when configured with TUI support
+and is documented as an explicit dependency-light opt-out. The shared Live
+visualization processor is used for CLI waveform/FFT data, with corrected
+interleaved-sample versus audio-frame accounting and explicit reset/reacquire
+clearing. Windows build and focused TUI contract/snapshot tests pass; native
+audio-device playback remains a hardware/runtime qualification item.
+
+After the shared visualization and playback lifecycle changes, WSL Ubuntu was
+reconfigured and rebuilt with GCC and FTXUI 7.0.0. Library, Live, and Settings
+snapshots rendered successfully, and `issue4320_tui_contract` plus
+`cli_generated_audio` passed (2/2). This is cross-compiler preparation evidence;
+WSL does not qualify native PipeWire routing or desktop audio behavior.
+
+The persisted-recovery action and shared Live presentation projection also
+rebuild cleanly under the same GCC/FTXUI 7.0.0 WSL configuration. Library,
+Live, and Settings snapshots plus `issue4320_tui_contract` and
+`cli_generated_audio` passed again (2/2); native PipeWire qualification is
+still separate from this cross-compiler check.
 
 Overlay settings now provide a focused endpoint refresh action that keeps
 selection and retry recovery in one workflow. Portable coverage is in
@@ -1031,15 +1067,6 @@ names, and file-fingerprint/OpenSSL linkage. The resulting
 Catch2 rebuild was not completed in this run; Core Audio smoke discovery also
 did not produce a bounded report in the non-interactive invocation. Real
 permission, endpoint capture, overlay and long-session checks remain pending.
-
-The follow-up native pass on the same machine completed the full configured
-build at 100% and ran all 441 CTest cases. PR #4572 corrected stale test API
-namespaces, prototype-library linkage, Catch2 matcher includes, and several
-generated QML syntax/binding defects. The targeted QML suite is now reduced to
-remaining duplicate-binding/test-fixture issues being worked through; the
-aggregate run still has platform-sensitive catalog/symlink, timing, CLI codec,
-and native overlay failures. The desktop bundle continues to link and validate
-as Mach-O x86_64. No native qualification gate is claimed complete yet.
 
 ## Design-system rendering evidence — 2026-11-10
 

@@ -18,6 +18,8 @@ public:
   StorageOwner& operator=(const StorageOwner&) = delete;
   /** Validate configuration and open storage; clears a supplied diagnostic on entry and success, and failure leaves the owner closed. */
   bool open(const StorageConfig& config, std::string* diagnostic = nullptr);
+  /** Compatibility spelling for callers that treat storage opening as a library lifecycle action. */
+  bool open_storage(const StorageConfig& config, std::string* diagnostic = nullptr) { return open(config, diagnostic); }
   /**
    * Close storage on the owning worker after submitted jobs are quiescent.
    * Callers must stop/cancel and join work that can access the cache before
@@ -48,3 +50,7 @@ private:
   std::unique_ptr<library_detail::SqliteCache> cache_;
 };
 }
+
+// Keep the aggregate storage header source-compatible with callers that use
+// the coordinator and tracked-state types together with StorageOwner.
+#include "beatglass/library/analysis_coordinator.hpp"

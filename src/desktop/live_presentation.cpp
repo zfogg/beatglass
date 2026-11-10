@@ -5,25 +5,22 @@
 LivePresentation::LivePresentation(QObject* parent) : QObject(parent) {}
 bool LivePresentation::apply(beatglass::PresentationUpdate update) {
   if (!gate_.apply(std::move(update))) return false;
-  status_ = QStringLiteral("Stopped");
-  tempo_ = key_ = chord_ = QStringLiteral("\u2014");
-  if (const auto snapshot = gate_.current()) {
-    switch (snapshot->state) {
-      case beatglass::TrackingState::stopped: status_ = QStringLiteral("Stopped"); break;
-      case beatglass::TrackingState::silent: status_ = QStringLiteral("Silent"); break;
-      case beatglass::TrackingState::acquiring: status_ = QStringLiteral("Acquiring"); break;
-      case beatglass::TrackingState::tracking: status_ = QStringLiteral("Tracking"); break;
-      case beatglass::TrackingState::reacquiring: status_ = QStringLiteral("Reacquiring"); break;
-      case beatglass::TrackingState::error: status_ = QStringLiteral("Error"); break;
-    }
-    if (snapshot->state != beatglass::TrackingState::tracking) { emit changed(); return true; }
-    if (snapshot->bpm && std::isfinite(*snapshot->bpm) && *snapshot->bpm > 0)
-      tempo_ = QString::number(*snapshot->bpm, 'f', 1);
-    if (!snapshot->key_candidates.empty() && !snapshot->key_candidates.front().label.empty())
-      key_ = QString::fromStdString(snapshot->key_candidates.front().label);
-    if (!snapshot->chords.empty() && !snapshot->chords.back().chord.label.empty())
-      chord_ = QString::fromStdString(snapshot->chords.back().chord.label);
+  const auto displayed = gate_.current() ? beatglass::present_snapshot(*gate_.current()) : beatglass::PresentationState{"Stopped", "—", "—", "—", 0, 0, 0, std::nullopt, {}, {}, {}, false};
+  status_ = QString::fromStdString(displayed.status);
+  tempo_ = QString::fromStdString(displayed.tempo);
+  key_ = QString::fromStdString(displayed.key);
+  chord_ = QString::fromStdString(displayed.chord);
+  beat_count_ = displayed.beat_count;
+  observed_frames_ = displayed.observed_frames;
+  analysis_delay_frames_ = displayed.analysis_delay_frames;
+  confidence_ = displayed.confidence ? *displayed.confidence : -1.0;
+  stale_ = displayed.stale;
+  tempo_history_.clear();
+  for (const auto bpm : displayed.tempo_history) {
+    if (std::isfinite(bpm) && bpm > 0.0f) tempo_history_.push_back(QString::number(bpm, 'f', 1));
   }
+  tonal_history_.clear();
+  for (const auto& label : displayed.tonal_history) tonal_history_.push_back(QString::fromStdString(label));
   emit changed();
   return true;
 }
