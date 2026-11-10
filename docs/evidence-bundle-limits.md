@@ -81,3 +81,5 @@ Errors include an `error_categories` count map for dashboards without requiring
 clients to parse human-readable diagnostic strings.
 Report generators reject symlinked output parents so a qualification command
 cannot redirect a report outside its intended workspace.
+The readiness checker enforces the same symlink-free parent-path rule for its
+`--report` output.

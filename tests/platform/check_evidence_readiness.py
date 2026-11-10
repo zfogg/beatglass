@@ -362,6 +362,9 @@ def main() -> int:
     if args.json:
         print(json.dumps(report(args.status, args.bundles, args.max_age_hours), sort_keys=True))
     if args.report:
+        if args.report.parent.is_symlink():
+            print("readiness report output parent must not be a symlink", file=sys.stderr)
+            return 1
         args.report.parent.mkdir(parents=True, exist_ok=True)
         serialized = json.dumps(report(args.status, args.bundles, args.max_age_hours), indent=2) + "\n"
         if args.max_report_bytes <= 0:
