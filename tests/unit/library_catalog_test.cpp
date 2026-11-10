@@ -179,7 +179,9 @@ TEST_CASE("catalog preserves empty directories as navigable entries") {
 }
 
 TEST_CASE("recursive catalog discovers supported descendants without following links") {
-    const auto root = make_root("recursive");
+    TempDir temp;
+    const auto root = temp.path / "recursive";
+    std::filesystem::create_directory(root);
     std::filesystem::create_directories(root / "nested");
     std::ofstream(root / "nested" / "deep.WAV") << "x";
     std::ofstream(root / "nested" / "ignore.txt") << "x";
