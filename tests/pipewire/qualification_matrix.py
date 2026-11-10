@@ -21,6 +21,8 @@ for item in platforms.values():
 if summary is not None:
     if not isinstance(summary.get("native_artifacts", []), list) or any(not isinstance(artifact, str) or not artifact.strip() for artifact in summary.get("native_artifacts", [])):
         raise SystemExit("native qualification summary has invalid native_artifacts")
+    if len(set(summary.get("native_artifacts", []))) != len(summary.get("native_artifacts", [])):
+        raise SystemExit("native qualification summary has duplicate native_artifacts")
     if not isinstance(summary.get("qualified"), bool):
         raise SystemExit("native qualification summary has invalid qualified status")
     if "native_execution_attempted" in summary and not isinstance(summary["native_execution_attempted"], bool):

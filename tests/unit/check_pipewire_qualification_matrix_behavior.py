@@ -51,6 +51,11 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_artifact), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid native_artifacts" not in result.stderr + result.stdout:
         raise SystemExit("non-string native artifact entry was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": ["evidence.zip", "evidence.zip"], "pending_reason": "host unavailable"}), encoding="utf-8")
+    duplicate_artifact = root / "duplicate-artifact-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(duplicate_artifact), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "duplicate native_artifacts" not in result.stderr + result.stdout:
+        raise SystemExit("duplicate native artifact entries were accepted")
     summary.write_text(json.dumps({"qualified": "true", "native_artifacts": []}), encoding="utf-8")
     invalid_status = root / "invalid-status-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(invalid_status), "--summary", str(summary)], capture_output=True, text=True)
