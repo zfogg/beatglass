@@ -20,6 +20,12 @@ interleaved-sample versus audio-frame accounting and explicit reset/reacquire
 clearing. Windows build and focused TUI contract/snapshot tests pass; native
 audio-device playback remains a hardware/runtime qualification item.
 
+After the shared visualization and playback lifecycle changes, WSL Ubuntu was
+reconfigured and rebuilt with GCC and FTXUI 7.0.0. Library, Live, and Settings
+snapshots rendered successfully, and `issue4320_tui_contract` plus
+`cli_generated_audio` passed (2/2). This is cross-compiler preparation evidence;
+WSL does not qualify native PipeWire routing or desktop audio behavior.
+
 Overlay settings now provide a focused endpoint refresh action that keeps
 selection and retry recovery in one workflow. Portable coverage is in
 `python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
