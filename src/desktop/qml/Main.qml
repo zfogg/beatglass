@@ -1516,6 +1516,10 @@ ApplicationWindow {
         overlayOpacityControl.forceActiveFocus()
     }
     function handleOverlayOpacityResetAction(resetOpacity) {
+        if (window.overlayOpacityEditInFlight) {
+            window.focusOverlayOpacityEditRecovery("Overlay opacity update is already pending; no duplicate reset was sent.")
+            return false
+        }
         if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayAvailabilityRecovery("Overlay opacity reset is unavailable until the native overlay and a destination display are ready.", overlayOpacityControl)
             return false

@@ -755,6 +755,8 @@ The capture status itself now exposes the stale-evidence marker as an accessible
 
 The live monitoring focus target repeats that stale-evidence context during Reacquiring, so keyboard users receive the same source-freshness explanation at the point where recovery focus is restored.
 
+Opacity reset now rechecks its in-flight marker at activation time, rejecting duplicate native setter requests while a previous reset is still awaiting its bridge echo.
+
 Explicit Stop overlay monitoring now marks the last tempo/harmony snapshot stale immediately; restarting monitoring must return to Monitoring before those values are presented as current again.
 
 When the native overlay is available but no capture bridge is connected at startup, the overlay marks displayed estimates stale and announces that monitoring must connect before fresh evidence can be presented.
