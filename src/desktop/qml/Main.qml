@@ -1589,8 +1589,13 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (!window.overlayBridge) {
+            window.focusOverlayAvailabilityRecovery("Retry overlay control is unavailable because the native overlay bridge is not connected.", retryOverlay)
+            return false
+        }
         retryOverlay.forceActiveFocus()
         window.announceCaptureRecoveryState("Retry overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
     }
     function handleOverlayResumeShortcut() {
         navigation.currentIndex = 1

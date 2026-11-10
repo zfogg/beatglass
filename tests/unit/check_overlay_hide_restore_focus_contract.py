@@ -703,3 +703,11 @@ def test_opacity_reset_requires_available_overlay():
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
     assert "return applied" in body
+
+def test_retry_focus_shortcut_handles_missing_bridge():
+    start = QML.index("function focusOverlayRetryShortcut")
+    body = QML[start : QML.index("    function handleOverlayResumeShortcut", start)]
+    assert "if (!window.overlayBridge)" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
+    assert "return true" in body
