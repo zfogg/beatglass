@@ -101,7 +101,9 @@ Element waveform_chart(const std::vector<float>& waveform, const std::vector<std
   bars.reserve(width);
   for (int x = 0; x < width; ++x) {
     const auto sample = waveform.empty() ? 0.08f : waveform[std::min<std::size_t>(waveform.size() - 1, static_cast<std::size_t>(x * waveform.size() / width))];
-    const auto level = std::clamp(static_cast<int>(sample * static_cast<float>(levels.size() - 1)), 1, static_cast<int>(levels.size() - 1));
+    // Square-root companding keeps quiet real-world PCM detail visible without changing analysis input.
+    const auto display_sample = std::sqrt(std::clamp(sample, 0.0f, 1.0f));
+    const auto level = std::clamp(static_cast<int>(display_sample * static_cast<float>(levels.size() - 1)), 1, static_cast<int>(levels.size() - 1));
     const auto beat_marker = !waveform.empty() && total_frames > 0 && std::ranges::any_of(beat_frames, [&](const auto frame) { return static_cast<int>(frame * width / total_frames) == x; });
     const auto cursor = playback_fraction >= 0.0f && x == std::clamp(static_cast<int>(playback_fraction * width), 0, width - 1);
     const auto accent = cursor ? Color::Cyan : beat_marker ? Color::YellowLight : Color::GreenLight;
