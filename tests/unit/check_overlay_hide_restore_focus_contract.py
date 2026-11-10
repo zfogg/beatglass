@@ -1182,6 +1182,13 @@ def test_overlay_pulse_status_has_visible_keyboard_focus_indicator():
     assert "padding: 3" in label
 
 
+def test_overlay_pulse_status_focus_updates_announcement():
+    start = QML.index("target: overlayPulseStatus")
+    body = QML[start : QML.index("            MouseArea", start)]
+    assert "onActiveFocusChanged" in body
+    assert "Beat pulse status focused" in body
+
+
 def test_overlay_pulse_transitions_update_accessible_announcement():
     start = QML.index("function onReduceMotionChanged()")
     body = QML[start : QML.index("            Connections", start)]
