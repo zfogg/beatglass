@@ -42,6 +42,8 @@ Both JSON interfaces include `schema_version: 1`; consumers should reject
 unknown versions rather than guessing at field semantics.
 Ingestion JSON also reports generated `artifact_count` and `artifact_bytes`
 metrics for orchestration and audit logging.
+Its `error_categories` map provides stable counts for ingestion dashboards,
+matching verifier JSON diagnostics.
 Artifact inventories also use case-insensitive collision keys so manifests
 cannot contain two names that alias on Windows or other case-folding filesystems.
 Referenced evidence fields use the same portable path checks as hashed
