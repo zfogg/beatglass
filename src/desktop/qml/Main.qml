@@ -982,7 +982,7 @@ ApplicationWindow {
             }
             window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe 90 percent opacity applied.")
         }
-        window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
+        window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")\n        window.overlayRecoveryPausedByUser = false
         window.syncOverlaySizePreferenceFromGeometry(savedGeometry)
         return true
     }
@@ -5648,6 +5648,7 @@ ApplicationWindow {
         onRejected: window.handleLibraryFolderChooserRejected()
     }
 }
+
 
 
 
