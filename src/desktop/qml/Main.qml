@@ -3046,7 +3046,6 @@ ApplicationWindow {
                             objectName: "playbackControls"
                             Layout.fillWidth: true
                             Accessible.name: "Playback controls"
-                            Accessible.value: window.playbackBridge ? window.playbackBridge.state : "unavailable"
                             Accessible.role: Accessible.Grouping
                             Accessible.description: "Open, configure, and control playback for the selected audio source."
                             ToolTip.text: window.playbackBridge ? "Playback controls; current state: " + window.playbackBridge.state : "Playback controls are unavailable"
