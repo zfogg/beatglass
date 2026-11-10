@@ -104,6 +104,7 @@
 | Estimate attribution stale naming | User reviews the source attribution while prior estimates remain visible | Identify the attribution as stale until fresh capture, keeping source context separate from data freshness. |
 | Settings retention stale naming | User reviews retained overlay settings while prior estimates remain visible | Keep persisted settings recovery context distinct from live-data freshness in the status name. |
 | Settings review stale affordance | User focuses review settings while recovery and stale evidence overlap | Preserve the recovery action while explicitly announcing that prior displayed evidence awaits fresh capture. |
+| Estimate readiness stale state | User reviews whether the overlay has usable estimates during recovery | Keep accepted-snapshot readiness distinct from freshness and announce when the visible snapshot is stale. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |

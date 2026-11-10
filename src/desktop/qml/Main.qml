@@ -4694,11 +4694,11 @@ ApplicationWindow {
                         text: visible
                             ? (visualizationCanvas.modeHasData ? "Overlay estimates: accepted snapshot ready" : "Overlay estimates: waiting for accepted snapshot")
                             : "Overlay estimates unavailable"
-                        Accessible.name: "Overlay estimate readiness, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.name: "Overlay estimate readiness, " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: text + (window.overlayDisplayRecoveryPending ? "; recovery pending; snapshot retained" : "; recovery ready")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && visualizationCanvas.modeHasData
-                            ? text + ". The overlay is showing data from the current accepted visualization snapshot." + (window.overlayDisplayRecoveryPending ? " The accepted snapshot remains retained while recovery is pending." : "")
+                            ? text + ". The overlay is showing data from the current accepted visualization snapshot." + (window.overlayCaptureEvidenceStale ? " The accepted snapshot is stale until fresh capture arrives." : "") + (window.overlayDisplayRecoveryPending ? " The accepted snapshot remains retained while recovery is pending." : "")
                             : visible ? text + ". The overlay will update after monitoring accepts a replacement snapshot." + (window.overlayDisplayRecoveryPending ? " The last accepted snapshot remains retained while recovery is pending." : "") : text
                         ToolTip.text: visible ? Accessible.description : "Overlay estimate readiness"
                         Layout.fillWidth: true
