@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import stat
 import unicodedata
 from datetime import datetime, timedelta, timezone
 import sys
@@ -135,6 +136,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"artifact escapes bundle: {relative}"); continue
         if not path.is_file():
             errors.append(f"missing artifact: {relative}"); continue
+        if not stat.S_ISREG(path.stat().st_mode):
+            errors.append(f"artifact must be a regular file: {relative}"); continue
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
