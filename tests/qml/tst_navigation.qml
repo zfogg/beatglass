@@ -146,6 +146,15 @@ TestCase {
         verify(app.overlayRecoveryAnnouncement.indexOf("capture is unavailable") >= 0)
         app.destroy()
     }
+    function test_captureStartingMarksOverlayEvidenceStale() {
+        let app = shellWithOverlay.createObject(null)
+        fakeCapture.status = "Starting"
+        verify(app.overlayCaptureEvidenceStale)
+        verify(findChild(app, "overlayLiveMonitoringState").activeFocus)
+        verify(app.overlayRecoveryAnnouncement.indexOf("capture starting") >= 0)
+        fakeCapture.status = "Monitoring"
+        app.destroy()
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)

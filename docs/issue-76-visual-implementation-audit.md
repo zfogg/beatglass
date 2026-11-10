@@ -765,6 +765,8 @@ Retry overlay capture repeats the same stale-evidence context in its accessible 
 
 The grouped live-evidence surface also reports stale capture context before its child controls, so screen-reader navigation announces freshness requirements at the recovery section boundary.
 
+Capture Starting is now an explicit overlay recovery transition: it marks prior live evidence stale, announces that fresh audio is pending, and returns keyboard focus to the live monitoring status until Monitoring accepts new data.
+
 Estimate attribution repeats the stale-capture marker as well, keeping the combined-output source label honest while its last accepted values await reacquisition.
 
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
