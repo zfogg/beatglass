@@ -943,15 +943,11 @@ ApplicationWindow {
     }
     Component.onCompleted: {
         if (overlayBridge && !overlayBridge.attach(djOverlay, window)) {
-            window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.announceCaptureRecoveryState("Native overlay attachment failed; control-window fallback remains active.")
+            window.focusOverlayAttachFailure("Native overlay attachment failed; control-window fallback remains active.")
         } else {
             const synced = window.syncOverlaySettingsFromBridge()
             if (!synced) {
-                window.overlayLaunchFallbackActive = true
-                window.overlayDisplayRecoveryPending = true
+                window.focusOverlayAttachFailure("Native overlay attached, but retained settings are unavailable; control-window fallback remains active.")
             }
         }
         if (window.overlayBridge && !window.captureMonitorBridge) {
@@ -963,6 +959,13 @@ ApplicationWindow {
             browseFolder = libraryPreferences.folder
             refreshCatalog()
         }
+    }
+    function focusOverlayAttachFailure(message) {
+        window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        window.announceCaptureRecoveryState(message + " Live evidence is stale until fresh capture arrives.")
     }
     function focusOverlayRecoveryAction(message) {
         navigation.currentIndex = 1

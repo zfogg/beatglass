@@ -80,3 +80,11 @@ def test_bridge_settings_failure_uses_availability_focus_transition():
     assert "overlayDisplayRecoveryPending = true" in body
     assert "focusOverlayAvailabilityRecovery" in body
     assert "focusOverlayBridgeSettingsFailure(" in QML[QML.index("const synced = window.syncOverlaySettingsFromBridge()") :]
+
+
+def test_startup_attach_and_sync_failures_share_fallback_state():
+    start = QML.index("function focusOverlayAttachFailure")
+    body = QML[start : QML.index("    function focusOverlayRecoveryAction", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    completed = QML[QML.index("Component.onCompleted") : QML.index("    function focusOverlayAttachFailure")]
+    assert completed.count("window.focusOverlayAttachFailure(") == 2
