@@ -89,6 +89,14 @@ for [Windows](docs/windows-qualification.md), [macOS](docs/macos-qualification.m
 and [Linux](docs/linux-qualification-plan.md). Portable checks prepare these
 handoffs; they do not substitute for retained native evidence.
 
+Portable evidence boundary checks:
+
+```text
+python tests/platform/check_cli_evidence_status.py
+python tests/platform/check_progress_cli_evidence.py
+python tests/platform/check_qualification_index.py
+```
+
 ## Command-line and qualification-tool options
 
 The following reference is generated from the authoritative parsers in
