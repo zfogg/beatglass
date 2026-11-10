@@ -30,6 +30,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
         elif platform not in SUPPORTED_PLATFORMS:
             errors.append(f"unsupported platform: {platform}")
     environment = data.get("environment")
+    if isinstance(environment, str) and len(environment) > 512:
+        errors.append("environment exceeds 512 characters")
     if isinstance(environment, str) and environment.strip() and environment != environment.strip():
         errors.append("environment must not have leading or trailing whitespace")
     if isinstance(environment, str) and any(ord(char) < 32 and char not in "\t" for char in environment):
