@@ -81,3 +81,18 @@ TEST_CASE("source interruption invalidates in-flight publication") {
  REQUIRE(tracking.start(*source.epoch())); publication.begin_acquisition(tracking.token());
  CHECK_FALSE(publication.publish(old, first));
 }
+
+TEST_CASE("late notifications from a retired attempt cannot invalidate a newer run") {
+ SourceLifecycle source; auto first = source.start(); REQUIRE(first);
+ REQUIRE(source.notify(*first, 1, SourceState::running, 101) == SourceEventResult::accepted);
+ REQUIRE(source.notify(*first, 2, SourceState::interrupted) == SourceEventResult::accepted);
+ auto second = source.start(); REQUIRE(second);
+ REQUIRE(source.notify(*second, 1, SourceState::running, 102) == SourceEventResult::accepted);
+
+ // A delayed callback from the retired generation must be ignored, not fail
+ // closed, so the currently monitored endpoint remains publishable.
+ CHECK(source.notify(*first, 3, SourceState::interrupted) == SourceEventResult::stale);
+ CHECK(source.state() == SourceState::running);
+ REQUIRE(source.epoch());
+ CHECK(*source.epoch() == 102);
+}

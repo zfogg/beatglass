@@ -492,8 +492,10 @@ TEST_CASE("analysis publication observes cancellation before serialization") {
   op.serialize = [&] { serialized = true; return std::string("result"); };
   op.verify = [&](std::stop_token) { verified = true; return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   std::stop_source stop; stop.request_stop();
+  cache.begin("run", {"sha256:test", "engine", "config", "offline"});
   REQUIRE(beatglass::library::publish_operation(cache, "run", op, stop.get_token()) == beatglass::library_detail::Publish::cancelled);
   CHECK_FALSE(serialized); CHECK_FALSE(verified);
+  REQUIRE(cache.retryable_runs().size() == 1);
 }
 TEST_CASE("analysis publication converts serialization failures into errors") {
   beatglass::library_detail::SqliteCache cache(":memory:");

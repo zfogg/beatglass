@@ -64,6 +64,23 @@ For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` a
 
 On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
 
+## Binary command-line flags
+
+The shipped binaries intentionally expose a small interface. `beatglass-cli`
+accepts one required positional `<audio-file>` and these three switches:
+
+| Binary | Flag | Meaning |
+| --- | --- | --- |
+| `beatglass-cli` | `--replay` | Emit causal estimates for each observed block without real-time pacing. |
+| `beatglass-cli` | `--json` | Emit machine-readable JSON; with `--replay`, emit JSON Lines. |
+| `beatglass-cli` | `--` | Stop option parsing so an input path beginning with `-` is accepted. |
+
+`beatglass-desktop` additionally accepts `--database <path>` to select its
+SQLite storage path. Unknown options, duplicate `--replay`/`--json`, missing
+values, and a missing audio path fail with status 2. The many `--...` options
+used by qualification and evidence scripts below are developer-tool flags,
+not flags accepted by these binaries.
+
 ## API documentation
 
 The [published documentation site](https://zfogg.github.io/beatglass/) combines three documentation tools:
