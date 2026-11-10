@@ -14,12 +14,16 @@ REQUIRED_PROVENANCE = ("platform", "commit", "captured_at", "environment")
 SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
 MAX_ARTIFACT_BYTES = 1 << 30
 MAX_MANIFEST_BYTES = 16 << 20
+MAX_ENTRIES = 1000
 
 
-def verify(root: Path, manifest: Path) -> list[str]:
+def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_BYTES,
+           max_manifest_bytes: int = MAX_MANIFEST_BYTES, max_entries: int = MAX_ENTRIES) -> list[str]:
+    if max_artifact_bytes <= 0 or max_manifest_bytes <= 0 or max_entries <= 0:
+        return ["resource limits must be positive"]
     try:
-        if manifest.stat().st_size > MAX_MANIFEST_BYTES:
-            return ["manifest exceeds 16 MiB"]
+        if manifest.stat().st_size > max_manifest_bytes:
+            return [f"manifest exceeds {max_manifest_bytes} bytes"]
     except OSError as error:
         return [f"invalid manifest JSON: {error}"]
     try:
@@ -62,12 +66,12 @@ def verify(root: Path, manifest: Path) -> list[str]:
     scenarios = data.get("scenarios")
     if not isinstance(artifacts, list) or not artifacts:
         errors.append("artifacts must be a nonempty list")
-    elif len(artifacts) > 1000:
-        errors.append("artifacts exceed 1000 entries")
+    elif len(artifacts) > max_entries:
+        errors.append(f"artifacts exceed {max_entries} entries")
     if not isinstance(scenarios, list) or not scenarios:
         errors.append("scenarios must be a nonempty list")
-    elif len(scenarios) > 1000:
-        errors.append("scenarios exceed 1000 entries")
+    elif len(scenarios) > max_entries:
+        errors.append(f"scenarios exceed {max_entries} entries")
     scenario_ids = {
         scenario.get("id") for scenario in scenarios or []
         if isinstance(scenario, dict) and isinstance(scenario.get("id"), str)
@@ -147,8 +151,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"missing artifact: {relative}"); continue
         if not stat.S_ISREG(path.stat().st_mode):
             errors.append(f"artifact must be a regular file: {relative}"); continue
-        if path.stat().st_size > MAX_ARTIFACT_BYTES:
-            errors.append(f"artifact exceeds 1 GiB: {relative}"); continue
+        if path.stat().st_size > max_artifact_bytes:
+            errors.append(f"artifact exceeds {max_artifact_bytes} bytes: {relative}"); continue
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
@@ -200,8 +204,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--max-artifact-bytes", type=int, default=MAX_ARTIFACT_BYTES)
+    parser.add_argument("--max-manifest-bytes", type=int, default=MAX_MANIFEST_BYTES)
+    parser.add_argument("--max-entries", type=int, default=MAX_ENTRIES)
     args = parser.parse_args()
-    errors = verify(args.root, args.manifest)
+    errors = verify(args.root, args.manifest, max_artifact_bytes=args.max_artifact_bytes,
+                    max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries)
     if errors:
         print("\n".join(errors), file=sys.stderr); return 1
     print("evidence bundle verified")

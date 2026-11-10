@@ -266,13 +266,24 @@ class EvidenceBundleTest(unittest.TestCase):
                     "environment": "test", "artifacts": [{"path": "capture.bin", "sha256": "0" * 64}],
                     "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
             manifest.write_text(json.dumps(data), encoding="utf-8")
-            self.assertIn("artifact exceeds 1 GiB: capture.bin", module.verify(root, manifest))
+            self.assertIn("artifact exceeds 1073741824 bytes: capture.bin", module.verify(root, manifest))
+
+    def test_custom_resource_limits_are_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("xx", encoding="utf-8")
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact exceeds 1 bytes: capture.txt", module.verify(root, manifest, max_artifact_bytes=1))
+            self.assertIn("resource limits must be positive", module.verify(root, manifest, max_entries=0))
 
     def test_oversized_manifests_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
             manifest.write_text("{" + " " * module.MAX_MANIFEST_BYTES + "}", encoding="utf-8")
-            self.assertIn("manifest exceeds 16 MiB", module.verify(root, manifest))
+            self.assertIn("manifest exceeds 16777216 bytes", module.verify(root, manifest))
 
     def test_scenario_inventory_has_bounded_size(self):
         with tempfile.TemporaryDirectory() as tmp:
