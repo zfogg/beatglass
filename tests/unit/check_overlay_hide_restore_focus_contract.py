@@ -711,3 +711,14 @@ def test_retry_focus_shortcut_handles_missing_bridge():
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
     assert "return true" in body
+def test_reapply_focus_shortcut_propagates_result():
+    start = QML.index("function focusOverlayReapplyShortcut")
+    body = QML[start : QML.index("    function handleOverlayReapplyButtonAction", start)]
+    assert "return window.handleOverlayReapplyAction()" in body
+    action_start = QML.index("function handleOverlayReapplyAction")
+    action_body = QML[action_start : QML.index("    function handleOverlayReapplyButtonAction", action_start)]
+    assert "return window.handleOverlayReapplyButtonAction()" in action_body
+    button_start = QML.index("function handleOverlayReapplyButtonAction")
+    button_body = QML[button_start : QML.index("    function handleOverlayUnlockAction", button_start)]
+    assert "return false" in button_body
+    assert "return reapplied" in button_body
