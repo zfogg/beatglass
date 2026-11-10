@@ -761,6 +761,21 @@ ApplicationWindow {
         if (target)
             target.forceActiveFocus()
     }
+    function focusOverlayUnlockState(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Interaction state is current."))
+        if (target)
+            target.forceActiveFocus()
+    }
+    function focusOverlaySettingsRecoveryFailure(message, target) {
+        window.overlayCaptureEvidenceStale = true
+        window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
+        window.focusOverlayRestoreFailure(message, target)
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -1393,51 +1408,26 @@ ApplicationWindow {
         if (!window.overlayBridge.setClickThrough(false)) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("DJ overlay could not be unlocked; control-window fallback remains available.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            if (typeof unlockOverlay !== "undefined")
-                unlockOverlay.forceActiveFocus()
+            window.focusOverlayUnlockState("DJ overlay could not be unlocked; control-window fallback remains available.", unlockOverlay)
             return false
         }
         window.overlayLaunchFallbackActive = false
         window.overlayDisplayRecoveryPending = false
-        window.announceCaptureRecoveryState("DJ overlay unlocked; keyboard and pointer interaction restored.")
-        if (typeof unlockOverlay !== "undefined")
-            unlockOverlay.forceActiveFocus()
+        window.focusOverlayUnlockState("DJ overlay unlocked; keyboard and pointer interaction restored.", unlockOverlay)
         return true
     }
     function reapplyOverlaySettingsAndRestore() {
         if (!window.overlayBridge || !window.overlayBridge.available) {
-            window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlaySettingsRecoveryFailure("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.", overlayDisplay)
             return false
         }
         if (window.overlayBridge.screenIndex >= 0)
             if (!window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)) {
-                window.overlayLaunchFallbackActive = true
-                window.overlayDisplayRecoveryPending = true
-                window.announceCaptureRecoveryState("Persisted overlay display is unavailable; choose another display before restoring the overlay.")
-                window.show()
-                window.raise()
-                window.requestActivate()
-                overlayDisplay.forceActiveFocus()
+                window.focusOverlaySettingsRecoveryFailure("Persisted overlay display is unavailable; choose another display before restoring the overlay.", overlayDisplay)
                 return false
             }
         if (!window.restoreOverlayVisualStateFromBridge()) {
-            window.overlayLaunchFallbackActive = true
-            window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("Persisted overlay visual state is unavailable; choose a display and try restoring again.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlaySettingsRecoveryFailure("Persisted overlay visual state is unavailable; choose a display and try restoring again.", overlayDisplay)
             return false
         }
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
