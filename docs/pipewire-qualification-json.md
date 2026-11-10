@@ -321,6 +321,9 @@ identity values rather than converting them into host labels.
 The non-finite-name regression in
 `tests/unit/check_native_host_provenance_name_nan.py` rejects JSON NaN identity
 values as well, preserving finite string-only host names.
+The infinity-name regression in
+`tests/unit/check_native_host_provenance_name_infinity.py` closes the remaining
+non-finite numeric identity case.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
