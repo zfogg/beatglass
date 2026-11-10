@@ -664,6 +664,20 @@ int main(int argc, char** argv) {
     status = "Retrying failed analysis…";
     analyze();
   });
+#ifdef BEATGLASS_CLI_LIBRARY
+  auto recover_persisted_button = Button(" Recover persisted ", [&] {
+    if (!library_storage) { status = "Persistent recovery is unavailable; SQLite storage is not open."; return; }
+    const auto runs = library_storage->retryable_runs(1);
+    if (runs.empty()) { status = "No persisted retryable analysis is waiting for recovery."; return; }
+    const auto path = std::filesystem::path(runs.front().source_path);
+    const auto found = std::ranges::find(tracks, path, &Track::path);
+    if (found == tracks.end()) { status = "Persisted recovery source is no longer in the current Library."; return; }
+    selected = static_cast<int>(std::distance(tracks.begin(), found));
+    analysis_errors.erase(path);
+    status = "Recovering persisted analysis for " + found->title + "…";
+    analyze_paths({path});
+  });
+#endif
   auto refresh = [&] {
     const auto cancelling = busy;
     const auto previous_path = selected >= 0 && selected < static_cast<int>(tracks.size())
@@ -848,7 +862,11 @@ int main(int argc, char** argv) {
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Vertical(Components{Container::Horizontal(Components{folder_input, choose_folder_button, open_folder_button, recursive_checkbox, sort_button, refresh_button}), Container::Horizontal(Components{search_bar, previous_button, next_button, analyze_selected_button, analyze_all_button, retry_analysis_button, play_button, pause_button, stop_button, cancel_analysis_button})});
+  auto library_controls = Container::Vertical(Components{Container::Horizontal(Components{folder_input, choose_folder_button, open_folder_button, recursive_checkbox, sort_button, refresh_button}), Container::Horizontal(Components{search_bar, previous_button, next_button, analyze_selected_button, analyze_all_button, retry_analysis_button,
+#ifdef BEATGLASS_CLI_LIBRARY
+    recover_persisted_button,
+#endif
+    play_button, pause_button, stop_button, cancel_analysis_button})});
   auto library_container = Container::Vertical(Components{library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
@@ -913,7 +931,11 @@ int main(int argc, char** argv) {
     const auto sample_rate = result ? result->metadata.sample_rate : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->sample_rate : 0;
     const auto channels = result ? result->metadata.channels : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->channels : 0;
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 6), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction) | size(HEIGHT, EQUAL, 5), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(format == "—" ? "Select a supported track to inspect it" : "Format: " + format) | bold, text(sample_rate ? "Sample rate: " + std::to_string(sample_rate) + " Hz   Channels: " + std::to_string(channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (key ? *key : "—") + "   Chord: " + (chord ? *chord : "—")) | color(key || chord ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + join_history(tonal_history)) | color(tonal_history.empty() ? Color::GrayLight : Color::GreenLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(retry_analysis_button->Render(), Color::YellowLight), text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(retry_analysis_button->Render(), Color::YellowLight),
+#ifdef BEATGLASS_CLI_LIBRARY
+      text(" "), action(recover_persisted_button->Render(), Color::MagentaLight),
+#endif
+      text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Recover persisted   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
 #ifdef _WIN32

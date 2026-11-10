@@ -12,6 +12,8 @@ def main() -> int:
         raise SystemExit("CLI playback buffers exceed the shared bounded session capacity")
     if "no fresh packets arrived; reacquiring" not in tui:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
+    if 'Button(" Recover persisted "' not in tui:
+        raise SystemExit("CLI Library does not expose persisted recovery action")
     print(f"Issue #4320 TUI contract markers verified ({len(required)} checks)")
     return 0
 
