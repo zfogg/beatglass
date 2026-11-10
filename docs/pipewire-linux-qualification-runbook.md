@@ -43,6 +43,8 @@ Every artifact entry must be a non-empty string path; numeric or blank entries
 fail before matrix generation.
 Artifact paths must also be unique so one retained file cannot be counted twice
 as independent qualification evidence.
+The generator rechecks uniqueness after making external paths portable, rejecting
+basename collisions that would otherwise collapse distinct artifacts together.
 The summary's `qualified` field must be a JSON boolean; string status values fail
 before generation rather than being silently downgraded to pending.
 When present, `native_execution_attempted` must also be a JSON boolean so a

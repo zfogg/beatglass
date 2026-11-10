@@ -56,6 +56,17 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(duplicate_artifact), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "duplicate native_artifacts" not in result.stderr + result.stdout:
         raise SystemExit("duplicate native artifact entries were accepted")
+    first_external = root / "one" / "evidence.zip"
+    second_external = root / "two" / "evidence.zip"
+    first_external.parent.mkdir()
+    second_external.parent.mkdir()
+    first_external.write_bytes(b"one")
+    second_external.write_bytes(b"two")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [str(first_external), str(second_external)], "pending_reason": "host unavailable"}), encoding="utf-8")
+    collision = root / "collision-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(collision), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "collide after normalization" not in result.stderr + result.stdout:
+        raise SystemExit("normalized evidence collision was accepted")
     summary.write_text(json.dumps({"qualified": "true", "native_artifacts": []}), encoding="utf-8")
     invalid_status = root / "invalid-status-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(invalid_status), "--summary", str(summary)], capture_output=True, text=True)
