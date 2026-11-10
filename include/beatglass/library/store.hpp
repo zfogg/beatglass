@@ -123,3 +123,5 @@ private:
   State state_{State::pending};
 };
 }
+/** Compatibility alias for library-facing callers; source versions remain core-owned values. */
+namespace beatglass::library { using FileVersion = ::beatglass::FileVersion; }
