@@ -4825,8 +4825,8 @@ ApplicationWindow {
                         ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available")) + "; Ctrl+Alt+Shift+B focuses beat pulse status"
                         : "Overlay window actions are unavailable; control-window fallback is active; overlay settings are retained; Ctrl+Alt+Shift+B focuses beat pulse status"
                     Button {
-                        id: showOverlay
-                        objectName: "showOverlay"
+                        id: showOverlayButton
+                        objectName: "showOverlayAction"
                         text: "Show overlay"
                         activeFocusOnTab: true
                         enabled: window.overlayBridge !== null && !window.overlayDisplaySelectionRequired
@@ -4847,6 +4847,12 @@ ApplicationWindow {
                         Accessible.description: "Restore the user-hidden DJ overlay while retaining persisted display settings."
                         ToolTip.text: Accessible.description
                         onClicked: window.handleOverlayRestoreAction()
+                    }
+                    QtObject {
+                        id: showOverlay
+                        objectName: "showOverlay"
+                        property bool activeFocus: showOverlayButton.activeFocus
+                        function forceActiveFocus() { showOverlayButton.forceActiveFocus(); activeFocus = true }
                     }
                 }
                 Label {
