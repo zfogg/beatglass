@@ -17,6 +17,10 @@ When a transition artifact includes `sample_count` on any `process` event, every
 partial callback accounting from being accepted as native evidence. The artifact
 must still contain positive captured samples in the active epoch.
 
+If any event supplies `epoch`, every event must supply a positive integer epoch.
+Partial epoch annotations are rejected so lifecycle evidence cannot silently mix
+attributed and unattributed records.
+
 Process events may also include `serial`. If present, it must be a non-empty string
 on every process event and must match the sink serial for that event's capture epoch:
 the start serial before restart and the restart serial afterward. This preserves
