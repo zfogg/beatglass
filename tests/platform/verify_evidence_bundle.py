@@ -91,6 +91,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             not isinstance(relative, str)
             or not isinstance(expected, str)
             or raw_expected != expected
+            or len(relative) > 512
             or relative != relative.strip()
             or "\\" in relative
             or any(part == "." for part in relative.split("/"))
