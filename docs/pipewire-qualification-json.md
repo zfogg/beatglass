@@ -174,3 +174,5 @@ If present, host `container_id` must be a non-empty string identifying the
 container or sandbox that produced the evidence.
 If present, host `timezone` must be a non-empty string describing the host
 clock timezone used for human-readable timestamps.
+If present, host `distro` must be a non-empty string identifying the OS
+distribution or platform family.
