@@ -234,3 +234,5 @@ If present, host `clock_sync_offset_ns` must be numeric; boolean values are
 invalid.
 If present, host `clock_holdover_state` must be a non-empty string describing
 clock holdover behavior during qualification.
+If present, host `clock_quality` must be a non-empty string describing the
+clock quality classification.
