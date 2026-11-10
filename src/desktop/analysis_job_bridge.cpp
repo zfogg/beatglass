@@ -1,9 +1,18 @@
 #include "analysis_job_bridge.hpp"
 #include "beatglass/library/file_analysis_operation.hpp"
 #include "beatglass/library/detail/file_fingerprint.hpp"
+#include <limits>
 
 namespace {
 constexpr std::size_t kMaxDisplayedResultBytes = 4096;
+bool addBatchTotal(qulonglong& total, qulonglong value) noexcept {
+  if (value > std::numeric_limits<qulonglong>::max() - total) {
+    total = 0;
+    return false;
+  }
+  total += value;
+  return true;
+}
 std::string displayedResult(std::string value) {
   if (value.size() <= kMaxDisplayedResultBytes) return value;
   value.resize(kMaxDisplayedResultBytes);
@@ -192,7 +201,14 @@ int AnalysisJobBridge::submitBatch(std::vector<beatglass::library::AnalysisOpera
     const auto source_total = operation.source.size_bytes;
     auto retained = runner_.submit_retryable(std::move(operation), priority);
     if (!retained) { ++batchRejected_; continue; }
-    batch_.push_back(std::move(retained)); ++batchAccepted_; batch_total_frames_ += source_total; batch_progress_known_ = batch_total_frames_ > 0;
+    batch_.push_back(std::move(retained));
+    ++batchAccepted_;
+    if (batchAccepted_ == 1) {
+      batch_total_frames_ = source_total;
+      batch_progress_known_ = source_total > 0;
+    } else if (batch_progress_known_ && !addBatchTotal(batch_total_frames_, source_total)) {
+      batch_progress_known_ = false;
+    }
   }
   emit batchChanged();
   if (!batch_.empty()) {

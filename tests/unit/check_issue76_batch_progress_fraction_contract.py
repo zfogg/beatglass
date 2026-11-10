@@ -8,7 +8,9 @@ for marker in (
     'Q_PROPERTY(qulonglong batchTotalFrames READ batchTotalFrames NOTIFY batchChanged)',
     'Q_PROPERTY(bool batchProgressKnown READ batchProgressKnown NOTIFY batchChanged)',
     'Q_PROPERTY(double batchProgressFraction READ batchProgressFraction NOTIFY batchChanged)',
-    'batch_total_frames_ += source_total',
+    'batch_total_frames_ = source_total',
+    'addBatchTotal(qulonglong& total, qulonglong value)',
+    'std::numeric_limits<qulonglong>::max() - total',
 ):
     if marker not in header + source:
         raise SystemExit(f"Missing batch progress marker: {marker}")
