@@ -335,6 +335,8 @@ Validate that generated report before packaging with:
 `python tests/pipewire/validate_native_host_provenance_report.py REPORT.json`.
 The report validator accepts exactly one report path; missing or extra
 arguments fail with the usage contract before any file is opened.
+Reports with `valid: false` are rejected even when their other fields are
+well-formed; failed qualification cannot be packaged as evidence.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
