@@ -41,6 +41,8 @@ if len(sys.argv) == 3:
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.is_symlink():
             raise OSError("report destination is a symbolic link")
+        if destination.exists() and not destination.is_file():
+            raise OSError("report destination is not a regular file")
         existing_mode = stat.S_IMODE(destination.stat().st_mode) if destination.exists() else None
         with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=destination.parent, delete=False) as temporary:
             temporary.write(json.dumps(report, indent=2) + "\n")
