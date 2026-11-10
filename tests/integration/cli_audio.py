@@ -102,6 +102,7 @@ with tempfile.TemporaryDirectory() as directory:
             assert earlier[field] == full[field], (field, earlier, full)
     assert len(prefix_json) < len(observations)
     assert subprocess.run([exe, "--json", "--json", str(clicks)], capture_output=True).returncode == 2
+    assert subprocess.run([exe, "--replay", "--replay", str(clicks)], capture_output=True).returncode == 2
     dash_path = root / "-clicks.wav"
     dash_path.write_bytes(clicks.read_bytes())
     dash_result = subprocess.run([exe, "--json", "--", "-clicks.wav"], cwd=root, capture_output=True, text=True, check=True)
