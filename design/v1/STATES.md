@@ -262,3 +262,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Overlay size recovery | Native resize succeeds or fails from the keyboard shortcut | Keep persisted size state authoritative, announce failure/stale evidence when needed, and focus the size control. |
 | Reapply shortcut recovery | User invokes the keyboard shortcut for reapplying saved overlay settings | Activate controls, announce the retained-settings/evidence boundary, perform reapply, and return focus to Reapply. |
 | Summary review shortcut recovery | User invokes the consolidated overlay summary shortcut | Activate controls, focus summary review, and announce revision, pending recovery, and evidence freshness together. |
+| Unlock shortcut recovery | User invokes the keyboard shortcut for unlocking click-through overlay controls | Activate controls, focus Unlock, and announce the interaction and evidence recovery boundary. |

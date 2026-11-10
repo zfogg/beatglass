@@ -255,12 +255,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            unlockOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction.")
+            window.focusOverlayUnlockShortcut()
         }
     }
     Shortcut {
@@ -1442,6 +1437,14 @@ ApplicationWindow {
         window.requestActivate()
         overlaySettingsSummaryReviewAction.forceActiveFocus()
         window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : ".") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : " Live evidence is current."))
+    }
+    function focusOverlayUnlockShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        unlockOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
