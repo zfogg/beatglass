@@ -2562,7 +2562,7 @@ ApplicationWindow {
             window.handleOverlayOpacityChanged()
         }
         function onGeometryChanged() {
-            if (!window.syncOverlaySettingsStateFromBridge())
+            if (!window.overlayBridge || !window.syncOverlaySettingsStateFromBridge())
                 window.focusOverlayGeometrySyncFailure()
             if (window.overlayDisplayRecoveryPending && window.overlayBridge
                     && window.overlayBridge.screenNames.length > 0
