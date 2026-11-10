@@ -279,4 +279,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Paused page shortcut recovery | User opens the paused recovery page from the keyboard | Activate the recovery page, focus Resume, and preserve the stale evidence boundary. |
 | Paused focus shortcut recovery | User presses Escape from paused overlay recovery | Route focus to Resume through a dedicated stale-evidence transition. |
 | Recovery action focus contract | Multiple paused-recovery entry points request the Resume action | Keep one canonical recovery focus helper so announcements and evidence labels cannot diverge. |
+| Safe-mode clear action contract | Keyboard and button safe-mode clear actions are both available | Route both surfaces through one reset/announcement/focus action so Retry remains deterministic. |
 | Hide/restore toggle recovery | User invokes the hide/restore overlay shortcut | Branch on explicit user-hidden state, announce restore intent and stale evidence, and route to the matching visibility transition. |
