@@ -82,6 +82,7 @@
 | Overlay unavailable | Native overlay cannot be shown on the selected display | State that live overlay evidence is stale, keep monitoring in the control window, and offer display selection or retry without hiding the recovery path. |
 | Overlay no display | No output displays are enumerated | Mark overlay evidence stale, keep monitoring and controls available, and direct the user to connect a display before retrying. |
 | Overlay saved display missing | The persisted overlay destination is not currently enumerated | Announce that overlay evidence is stale while monitoring continues, and offer reconnect or replacement-display recovery without hiding controls. |
+| Overlay hidden by user | User hides the floating overlay while monitoring continues | Keep live monitoring and evidence valid, expose Restore overlay accessibly, and clarify that hiding the window does not stop capture. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
 | DJ | Monitoring selected output, activity and combined-mix caveat | Start/stop, select default or explicit output, half/double BPM, reset/reacquire. |

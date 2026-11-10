@@ -4689,7 +4689,7 @@ ApplicationWindow {
                         Accessible.value: text
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayHiddenByUser
-                            ? text + ". Use Restore overlay to return the persisted overlay without losing monitoring."
+                            ? text + ". Use Restore overlay to return the persisted overlay without losing monitoring or invalidating live evidence."
                             : visible ? text + ". Hide overlay preserves monitoring and restores the control window." : text
                         ToolTip.text: visible ? Accessible.description : "Overlay visibility status"
                         Layout.fillWidth: true
