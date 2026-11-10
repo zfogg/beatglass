@@ -182,3 +182,10 @@ def test_display_loss_uses_centralized_recovery_focus():
     assert "focusOverlayAvailabilityRecovery" in body
     screens = QML[QML.index("function onScreensChanged") : start]
     assert "focusOverlayDisplayLoss()" in screens
+
+
+def test_click_through_changes_focus_the_next_interaction_action():
+    start = QML.index("function handleOverlayInteractionStateChanged")
+    body = QML[start : QML.index("    function handleOverlayOpacityChanged", start)]
+    assert "unlockOverlay.forceActiveFocus()" in body
+    assert "overlayInteractionMode.forceActiveFocus()" in body

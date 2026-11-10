@@ -2105,6 +2105,10 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(window.overlayBridge.clickThrough
             ? "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction. Live evidence is stale until fresh capture arrives."
             : "DJ overlay interaction restored; keyboard and pointer input are available. Live evidence remains stale until fresh capture arrives.")
+        if (window.overlayBridge.clickThrough)
+            unlockOverlay.forceActiveFocus()
+        else
+            overlayInteractionMode.forceActiveFocus()
     }
     function handleOverlayOpacityChanged() {
         if (!window.overlayBridge)
