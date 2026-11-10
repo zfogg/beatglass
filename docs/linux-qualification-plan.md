@@ -55,6 +55,7 @@ For each session, record the exact distribution, kernel, compositor/session vers
 - The lifecycle evidence must contain exactly one `start`, `error`, and `restart` event; duplicate boundary events are rejected so reviewers cannot mistake a partial or concatenated capture for one transition run.
 - When `reacquisition` evidence is supplied, the artifact must also contain a positive-sample `process` event after restart in the new epoch, proving that recovery resumed capture rather than merely reporting a restart callback.
 - The discontinuity `error` event must remain in the active pre-restart epoch; an error attributed to the post-restart epoch is rejected as contradictory evidence.
+- Process events may include `drop_count`; when present, every process event must report a non-negative count, preserving queue-overflow evidence without inferring drops from missing fields.
 - Exercise an X11 session with a real window manager, including stacking, input-shape behavior, monitor/DPI changes, fullscreen applications, and recovery from an off-screen overlay.
 - Exercise GNOME and KDE Wayland sessions separately. Probe layer-shell availability and compositor refusal; fall back to an ordinary compact window when the required capability is absent.
 - Verify that no fallback silently captures a microphone or a different output sink, and that the user can always recover the main controls.
