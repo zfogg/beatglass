@@ -1019,3 +1019,5 @@ Fresh capture preserves stale overlay evidence while availability-loss recovery 
 Capture freshness cannot clear stale overlay evidence while the native bridge is unavailable; accepted audio remains independent from overlay readiness.
 
 Capture freshness cannot clear stale overlay evidence while destination selection is required; live audio may continue, but overlay presentation stays blocked until a destination is chosen.
+
+When capture freshness is blocked by native overlay readiness, the recovery announcement now explains that monitoring continues while presentation awaits native recovery.
