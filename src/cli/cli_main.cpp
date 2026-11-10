@@ -211,6 +211,9 @@ int main(int argc, char** argv) {
   std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
   std::future<AnalysisView> analysis_future;
+  std::vector<std::string> library_labels;
+  std::vector<int> library_indices;
+  int library_visible_selected = 0;
 #ifdef _WIN32
   beatglass::SourceEpochAllocator live_epochs;
   std::unique_ptr<beatglass::windows::LoopbackSession> live_session;
@@ -264,16 +267,24 @@ int main(int argc, char** argv) {
     playback.stop();
     status = "Playback stopped.";
   });
+  MenuOption library_menu_option;
+  library_menu_option.on_change = [&] {
+    if (library_visible_selected >= 0 && library_visible_selected < static_cast<int>(library_indices.size())) selected = library_indices[static_cast<std::size_t>(library_visible_selected)];
+  };
+  auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
   auto library_controls = Container::Horizontal({filter_input, recursive_checkbox, refresh_button, play_button, pause_button, stop_button});
-  auto library = Renderer(library_controls, [&] {
+  auto library_container = Container::Vertical({library_controls, library_menu});
+  auto library = Renderer(library_container, [&] {
     Elements rows;
     const auto query = lower(filter);
+    library_labels.clear(); library_indices.clear();
     for (int i = 0; i < static_cast<int>(tracks.size()); ++i) {
       if (!query.empty() && lower(tracks[i].title).find(query) == std::string::npos) continue;
-      auto row = text((i == selected ? "▸ " : "  ") + tracks[i].title);
-      if (i == selected) row = row | color(Color::Cyan) | bold; rows.push_back(row);
+      library_labels.push_back(tracks[i].title); library_indices.push_back(i);
+      if (i == selected) library_visible_selected = static_cast<int>(library_labels.size()) - 1;
     }
-    if (rows.empty()) rows.push_back(text("No supported audio files in this folder.") | color(Color::GrayLight));
+    if (library_labels.empty()) rows.push_back(text("No supported audio files in this folder.") | color(Color::GrayLight));
+    else rows.push_back(library_menu->Render() | vscroll_indicator | frame);
     const auto name = selected >= 0 ? tracks[selected].title : "No track selected";
     const auto duration = result && result->metadata.sample_rate != 0
         ? std::to_string(result->metadata.frames / result->metadata.sample_rate / 60) + ":" +
@@ -290,7 +301,7 @@ int main(int argc, char** argv) {
         std::string{};
 #endif
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto toggle_live = [&] {
 #ifdef _WIN32
@@ -315,8 +326,6 @@ int main(int argc, char** argv) {
     Elements endpoints;
     for (std::size_t index = 0; index < live_endpoints.size(); ++index) {
       auto label = live_endpoints[index];
-#ifdef _WIN32
-#endif
       endpoints.push_back(text("●  " + label) | color(Color::YellowLight));
     }
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
@@ -349,8 +358,6 @@ int main(int argc, char** argv) {
   auto root_component = CatchEvent(Container::Vertical({tab_bar, tabs}), [&](Event event) {
     if (event == Event::Character("q") || event == Event::Escape) { screen.Exit(); return true; }
     if (event == Event::Return && tab == 0) { analyze(); return true; }
-    if (event == Event::ArrowDown && tab == 0 && !tracks.empty()) { selected = std::min(selected + 1, static_cast<int>(tracks.size()) - 1); return true; }
-    if (event == Event::ArrowUp && tab == 0 && !tracks.empty()) { selected = std::max(selected - 1, 0); return true; }
     if (event == Event::Custom) {
       if (!reduce_motion) ++spinner_frame;
 #ifdef _WIN32
