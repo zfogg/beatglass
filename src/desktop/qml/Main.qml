@@ -2851,7 +2851,6 @@ ApplicationWindow {
                         id: addFolderRecursively
                         text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
                         enabled: window.libraryCatalogBridge !== null && window.browseFolder.toString() !== ""
-                        Accessible.value: enabled ? "available" : "choose a folder first"
                         Accessible.name: "Add folder recursively"; Accessible.role: Accessible.Button
                         Accessible.description: "Enumerate supported audio files in this folder and all descendant folders without following links."
                         ToolTip.text: "Enumerate supported audio files in this folder and all descendant folders"
@@ -2869,7 +2868,6 @@ ApplicationWindow {
                         id: parentFolder; text: "Up"; objectName: "parentFolder"
                         activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== "" && files.parentFolder.toString() !== ""
-                        Accessible.value: enabled ? "available" : "at folder root"
                         onClicked: window.navigateLibraryParentFolder()
                         Accessible.name: "Go to parent folder"
                         Accessible.role: Accessible.Button
@@ -2879,12 +2877,12 @@ ApplicationWindow {
                     Button {
                         id: refreshFolder; text: "Refresh"; objectName: "refreshFolder"; activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== ""
-                        Accessible.name: "Refresh folder contents"; Accessible.value: enabled ? "available; clears the current selection" : "unavailable; choose a folder first"; Accessible.role: Accessible.Button
+                        Accessible.name: "Refresh folder contents"; Accessible.role: Accessible.Button
                         Accessible.description: "Re-read the current folder so newly added, removed, or changed audio files are reflected."
                         ToolTip.text: "Refresh the current folder contents"
                         onClicked: { files.refresh(); window.refreshCatalog(); window.resetLibraryBrowserSelection("Folder contents refreshed; entry selection cleared.") }
                     }
-                    Button { id: clearSavedFolder; objectName: "clearSavedFolder"; text: "Forget folder"; enabled: typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== ""; Accessible.name: "Forget saved Library folder"; Accessible.value: enabled ? "available" : "no saved folder"; Accessible.description: "Clear the persisted Library folder without modifying audio files."; onClicked: { libraryPreferences.clearFolder(); window.clearSelectedAudio(); window.browseFolder = ""; window.announceVisualizationRecovery("Saved Library folder cleared; choose a folder to browse."); clearSavedFolder.forceActiveFocus() } }
+                    Button { id: clearSavedFolder; objectName: "clearSavedFolder"; text: "Forget folder"; enabled: typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== ""; Accessible.name: "Forget saved Library folder"; Accessible.description: "Clear the persisted Library folder without modifying audio files."; onClicked: { libraryPreferences.clearFolder(); window.clearSelectedAudio(); window.browseFolder = ""; window.announceVisualizationRecovery("Saved Library folder cleared; choose a folder to browse."); clearSavedFolder.forceActiveFocus() } }
                     Label {
                         id: folderPath
                         objectName: "folderPath"
