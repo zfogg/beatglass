@@ -271,6 +271,12 @@ void save_preferences(const CliPreferences& preferences) {
   if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << preferences.live_endpoint_id << "\nlive_endpoint_name " << preferences.live_endpoint_name << "\nlibrary_folder " << std::quoted(preferences.library_folder) << "\n";
 }
 using namespace ftxui;
+// Apple SDK MacTypes.h exports global enum constants named bold and italic.
+// Keep the existing compact FTXUI styling expressions portable by binding the
+// intended decorators in this local namespace rather than relying on global
+// unqualified lookup.
+constexpr auto bold = ftxui::bold;
+constexpr auto italic = ftxui::italic;
 
 std::string shell_quote(const std::string& value) {
   std::string quoted = "'";
@@ -321,18 +327,18 @@ std::string format_duration(const beatglass::FileMetadata& metadata) {
   return std::to_string(seconds / 60) + ":" + (seconds % 60 < 10 ? "0" : "") + std::to_string(seconds % 60);
 }
 Element metric(std::string label, std::string value, Color accent) {
-  return vbox({text(std::move(label)) | color(Color::GrayLight) | italic,
-               text(std::move(value)) | bold | color(accent)}) | borderRounded | bgcolor(Color::RGB(18, 24, 31)) | flex;
+  return vbox({text(std::move(label)) | color(Color::GrayLight) | ftxui::italic,
+               text(std::move(value)) | ftxui::bold | color(accent)}) | borderRounded | bgcolor(Color::RGB(18, 24, 31)) | flex;
 }
 Element action(Element element, Color accent) {
-  return element | color(accent) | bold;
+  return element | color(accent) | ftxui::bold;
 }
 Element progress_meter(std::uint64_t percent) {
   constexpr std::size_t width = 36;
   const auto filled = std::min<std::size_t>(width, static_cast<std::size_t>(percent * width / 100));
-  return hbox({text("["), text(std::string(filled, '#')) | color(Color::GreenLight) | bold,
+  return hbox({text("["), text(std::string(filled, '#')) | color(Color::GreenLight) | ftxui::bold,
                text(std::string(width - filled, '-')) | color(Color::GrayDark), text("] ") ,
-               text(std::to_string(percent) + "%") | color(Color::YellowLight) | bold});
+               text(std::to_string(percent) + "%") | color(Color::YellowLight) | ftxui::bold});
 }
 struct AnalysisView {
   beatglass::TempoResult result;
@@ -372,7 +378,7 @@ CacheSource cache_source(const std::filesystem::path& path) {
   if (error) throw std::runtime_error("cache identity size failed: " + error.message());
   const auto modified = std::filesystem::last_write_time(path, error).time_since_epoch().count();
   if (error) throw std::runtime_error("cache identity timestamp failed: " + error.message());
-  const auto content = path.generic_string() + "|" + std::to_string(size) + "|" + std::to_string(modified);
+  const auto content = path.generic_string() + "|" + std::to_string(size) + "|" + std::to_string(static_cast<long long>(modified));
   const auto run_id = content;
   return {{path, size, modified, content}, {content, "cli-aubio-v1", "default", "offline"}, run_id};
 }
