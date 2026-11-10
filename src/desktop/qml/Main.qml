@@ -1638,16 +1638,17 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
-        window.handleOverlayStopRecoveryAction()
+        return window.handleOverlayStopRecoveryAction()
     }
     function handleOverlayStopRecoveryAction() {
         if (window.overlayRecoveryPausedByUser) {
             window.focusOverlayRecoveryPauseState("Overlay recovery is already paused; Resume recovery remains available.", resumeOverlayRecovery)
-            return
+            return false
         }
         window.stopOverlayRecoveryAttempts()
         window.announceCaptureRecoveryState("Overlay recovery paused; Resume recovery is available. Live evidence remains stale until fresh capture arrives.")
         resumeOverlayRecovery.forceActiveFocus()
+        return true
         return true
     }
     function handleOverlayPausedPageShortcut() {

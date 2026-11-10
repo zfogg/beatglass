@@ -792,3 +792,13 @@ def test_show_button_propagates_native_result():
     assert "const restored" in action_body
     assert "retryOverlay.forceActiveFocus()" in action_body
     assert "return restored" in action_body
+
+
+def test_stop_recovery_shortcut_propagates_result():
+    start = QML.index("function handleOverlayStopShortcut")
+    body = QML[start : QML.index("    function handleOverlayStopRecoveryAction", start)]
+    assert "return window.handleOverlayStopRecoveryAction()" in body
+    action_start = QML.index("function handleOverlayStopRecoveryAction")
+    action_body = QML[action_start : QML.index("    function handleOverlayPausedPageShortcut", action_start)]
+    assert "return false" in action_body
+    assert "return true" in action_body
