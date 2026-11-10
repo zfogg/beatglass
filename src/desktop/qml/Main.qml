@@ -295,12 +295,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlaySize.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + ".")
+            window.focusOverlaySizeShortcut()
         }
     }
     Shortcut {
@@ -1451,6 +1446,14 @@ ApplicationWindow {
         else
             hideOverlay.forceActiveFocus()
         window.announceCaptureRecoveryState("Hide overlay control focused; " + (window.overlayHiddenByUser ? "Restore is ready." : "Hide is ready.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+    }
+    function focusOverlaySizeShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        overlaySize.forceActiveFocus()
+        window.announceCaptureRecoveryState("Overlay size control focused; current size is " + overlaySize.currentText + "." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
