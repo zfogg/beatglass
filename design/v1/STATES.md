@@ -100,6 +100,7 @@
 | Overlay live monitoring recovery | Monitoring remains visible while capture recovers | Keep endpoint context and monitoring status visible, and append the stale-evidence boundary until fresh capture arrives. |
 | Overlay monitoring action recovery | User starts/stops monitoring while evidence is stale | Include the stale-evidence boundary in the action description so the next start cannot be mistaken for an already accepted result. |
 | Overlay retry stale affordance | User retries output monitoring while prior evidence remains visible | Keep tooltip, value, and description explicit that prior evidence is stale until fresh capture arrives. |
+| Live monitoring stale naming | Screen reader reaches the live monitoring status while capture recovers | Name the status with the stale-evidence boundary so status and value announcements cannot be interpreted as fresh data. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |

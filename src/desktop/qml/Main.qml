@@ -4531,7 +4531,7 @@ ApplicationWindow {
                         visible: window.overlayBridge !== null
                         text: visible ? ("Overlay monitoring: " + window.liveBridge.status
                             + (window.liveBridge.status === "Tracking" ? " · live estimates updating" : " · waiting for accepted output")) : "Overlay monitoring unavailable"
-                        Accessible.name: "Overlay live monitoring state, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                        Accessible.name: "Overlay live monitoring state, " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                         Accessible.value: visible ? text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "") : ""
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.liveBridge.status === "Tracking"
