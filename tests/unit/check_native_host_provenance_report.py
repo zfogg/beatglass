@@ -16,6 +16,9 @@ with tempfile.TemporaryDirectory() as directory:
     subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(report)], check=True)
     assert report.exists()
     assert not list(report.parent.glob("tmp*"))
+    nested = Path(directory) / "nested" / "evidence" / "report.json"
+    subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(nested)], check=True)
+    assert nested.exists()
     result = json.loads(report.read_text())
     assert result["schema"] == "beatglass-native-host-provenance-v1"
     assert result["valid"] is True
