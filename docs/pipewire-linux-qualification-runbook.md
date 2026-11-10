@@ -63,6 +63,9 @@ Artifact paths must also be printable text without control characters so
 retained evidence remains safe to transport and review.
 Artifact paths must also be unique so one retained file cannot be counted twice
 as independent qualification evidence.
+Execution blockers in pending summaries must likewise be printable, non-empty,
+and unique; malformed blocker metadata is rejected before it can be rendered
+as host qualification guidance.
 The generator rechecks uniqueness after making external paths portable, rejecting
 basename collisions that would otherwise collapse distinct artifacts together.
 The summary's `qualified` field must be a JSON boolean; string status values fail
