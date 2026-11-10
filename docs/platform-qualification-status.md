@@ -2,6 +2,14 @@
 
 ## Current portable CLI/library evidence (2026-11-10)
 
+Issue #4320 CLI evidence: the Windows x64 FTXUI build passes the focused TUI
+contract and snapshot tests (2/2). A GCC/FTXUI 7.0.0 build in WSL Ubuntu
+successfully compiles and links the CLI, and Library/Live/Settings snapshots
+plus generated-audio and TUI-contract checks pass. These are development and
+cross-compiler preparation results, not native Linux qualification: WSL did
+not have the PipeWire prerequisites, macOS was not available for a native run,
+and the optional Essentia tonal path was not validated end-to-end.
+
 The shipped CLI and music CLI expose documented `--help`/`-h` and
 `--version`/`-V` entry points. JSON and human-readable analysis output expose
 decoded duration, and generated WAV/AIFF/FLAC/MP3 integration checks validate

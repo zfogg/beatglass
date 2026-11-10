@@ -1,5 +1,16 @@
 # Progress and handoff
 
+## 2026-11-10 — CLI qualification evidence for issue #4320
+
+The `beatglass-cli` prototype now builds on Windows with the FTXUI TUI and
+passes the focused `issue4320_tui_contract` and `cli_tui_snapshots` tests (2/2).
+In WSL Ubuntu, the same CLI was configured with GCC and FTXUI 7.0.0, compiled
+and linked successfully, and its Library, Live, and Settings snapshot paths
+completed; generated-audio integration and the TUI contract also passed.
+This is preparation evidence only: WSL is not native Linux qualification,
+PipeWire prerequisites were unavailable in that environment, macOS was not
+run, and the optional Essentia tonal runtime was not validated end-to-end.
+
 Overlay settings now provide a focused endpoint refresh action that keeps
 selection and retry recovery in one workflow. Portable coverage is in
 `python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
