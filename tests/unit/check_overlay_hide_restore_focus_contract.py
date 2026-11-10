@@ -860,3 +860,10 @@ def test_hide_focus_shortcut_announces_before_success_return():
     body = QML[start : QML.index("    function focusOverlaySizeShortcut", start)]
     assert body.index("announceCaptureRecoveryState") < body.index("return true")
     assert "Restore is ready." in body
+
+
+def test_stop_recovery_action_has_single_success_return():
+    start = QML.index("function handleOverlayStopRecoveryAction")
+    body = QML[start : QML.index("    function handleOverlayPausedPageShortcut", start)]
+    assert body.count("return true") == 1
+    assert "resumeOverlayRecovery.forceActiveFocus()" in body
