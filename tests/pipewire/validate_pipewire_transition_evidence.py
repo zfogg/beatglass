@@ -157,6 +157,11 @@ if isinstance(payload, dict):
                 or isinstance(host["clock_source_noise_ns"], bool)
                 or host["clock_source_noise_ns"] < 0):
             raise SystemExit("transition host provenance has invalid source noise")
+        if host.get("clock_source_phase_noise") is not None and (
+                not isinstance(host["clock_source_phase_noise"], (int, float))
+                or isinstance(host["clock_source_phase_noise"], bool)
+                or host["clock_source_phase_noise"] < 0):
+            raise SystemExit("transition host provenance has invalid phase noise")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
