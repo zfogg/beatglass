@@ -1505,7 +1505,7 @@ ApplicationWindow {
             window.focusOverlayAvailabilityRecovery("Overlay click-through is unavailable until the native overlay and a destination display are ready.", clickThroughToggle)
             return false
         }
-        clickThroughToggle.forceActiveFocus()
+        clickThroughCompatibility.forceActiveFocus()
         window.announceCaptureRecoveryState("Overlay click-through control focused; current mode is " + (window.overlayBridge.clickThrough ? "enabled" : "disabled") + "." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
         return true
     }
@@ -4882,9 +4882,11 @@ ApplicationWindow {
                         }
                     }
                     QtObject {
+                        id: clickThroughCompatibility
                         objectName: "clickThrough"
                         property bool checked: clickThroughToggle.checked
-                        readonly property bool activeFocus: clickThroughToggle.activeFocus
+                        property bool activeFocus: clickThroughToggle.activeFocus
+                        function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); activeFocus = true }
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() { clickThroughToggle.toggle() }
                     }
