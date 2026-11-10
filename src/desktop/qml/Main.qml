@@ -4483,7 +4483,7 @@ ApplicationWindow {
                             ? (window.overlayBridge.clickThrough ? "Keyboard recovery: press Escape to unlock overlay (Ctrl+Alt+U focuses Unlock)" : "Keyboard recovery: overlay controls are interactive")
                             : "Keyboard recovery unavailable"
                         Accessible.name: "Overlay keyboard recovery status"
-                        Accessible.value: text
+                        Accessible.value: text + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayBridge.clickThrough
                             ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window."
@@ -4500,10 +4500,10 @@ ApplicationWindow {
                             ? "Overlay endpoint: " + window.endpointSelectionBridge.selectedEndpoint
                             : "Overlay endpoint: none selected"
                         Accessible.name: "Overlay capture endpoint status, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
-                        Accessible.value: text
+                        Accessible.value: text + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint !== ""
-                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
+                            ? text + ". The overlay monitors the selected system output endpoint; it does not identify individual decks." + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? " Live overlay evidence is stale until fresh capture arrives." : "")
                             : text + ". Choose an output endpoint before starting monitoring." + (window.overlayDisplayRecoveryPending ? " The last endpoint selection remains retained while recovery is pending." : "")
                         ToolTip.text: visible ? Accessible.description : "Overlay capture endpoint"
                         Layout.fillWidth: true
