@@ -303,6 +303,12 @@ for previous, current in zip(process_positions, process_positions[1:]):
     if previous[1] is not None and current[0] < previous[0] + previous[1]:
         raise SystemExit("process sample positions overlap captured samples")
 process_events = [event for event in events if event.get("event") == "process"]
+for event in process_events:
+    if event.get("sample_position") is not None and (
+            not isinstance(event["sample_position"], int)
+            or isinstance(event["sample_position"], bool)
+            or event["sample_position"] < 0):
+        raise SystemExit("process sample positions must be non-negative integers")
 sample_counts = [event.get("sample_count") for event in process_events if event.get("sample_count") is not None]
 if sample_counts and (len(sample_counts) != len(process_events)
                       or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in sample_counts)):

@@ -138,3 +138,6 @@ match the start identity so a recovery cannot silently switch devices.
 
 The `epoch` values on the start and restart lifecycle events must be positive
 integers, with restart strictly advancing beyond start.
+
+When process events provide `sample_position`, it must be a non-negative
+integer so timeline overlap checks cannot accept loosely typed coordinates.
