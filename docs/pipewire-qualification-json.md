@@ -117,3 +117,5 @@ non-empty capture-policy identifier.
 
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
+Reacquisition evidence may include `reason_code`; when supplied it must be a
+non-zero integer identifying the machine-readable recovery reason.
