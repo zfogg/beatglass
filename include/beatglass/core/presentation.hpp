@@ -11,15 +11,16 @@ namespace beatglass {
 /** Shared immutable snapshot; the publisher is responsible for bounding timeline lengths before publication. */
 using PublishedSnapshot = std::shared_ptr<const Snapshot>;
 /** Application-facing labels and stale flag. */
-struct PresentationState { std::string status, tempo, key, chord; std::uint64_t beat_count{}, observed_frames{}, analysis_delay_frames{}; bool stale{}; };
+struct PresentationState { std::string status, tempo, key, chord; std::uint64_t beat_count{}, observed_frames{}, analysis_delay_frames{}; std::optional<float> confidence; bool stale{}; };
 /**
  * Convert one immutable analysis snapshot to the product's shared display state.
  * This is pure and thread-safe: it borrows no data and performs no UI work.
  * Non-tracking states intentionally clear tempo/key/chord labels.
  */
 inline PresentationState present_snapshot(const Snapshot& snapshot) {
-  PresentationState result{"Stopped", "—", "—", "—", 0, snapshot.observed_through.frame, snapshot.analysis_delay_frames, false};
+  PresentationState result{"Stopped", "—", "—", "—", 0, snapshot.observed_through.frame, snapshot.analysis_delay_frames, std::nullopt, false};
   result.beat_count = snapshot.beats.size();
+  if (snapshot.confidence && std::isfinite(*snapshot.confidence) && *snapshot.confidence >= 0.0f && *snapshot.confidence <= 1.0f) result.confidence = *snapshot.confidence;
   switch (snapshot.state) {
     case TrackingState::stopped: result.status = "Stopped"; break;
     case TrackingState::silent: result.status = "Silent"; break;
