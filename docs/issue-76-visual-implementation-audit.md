@@ -1001,3 +1001,5 @@ Analysis freshness, selected-source workflow, and frame progress now expose live
 Native playback state, source, position, and output-running state now expose live status values, making playback and analysis source identity consistent for assistive technology.
 
 Native playback errors, seek limitations, source-selection mismatch, and unavailable-control guidance now use live status semantics, keeping playback recovery actionable.
+
+Fresh capture status no longer clears the overlay stale-evidence marker while display recovery is pending; accepted capture remains gated until a valid destination is restored.
