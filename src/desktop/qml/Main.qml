@@ -2350,6 +2350,9 @@ ApplicationWindow {
                     || window.liveBridge.status === "Starting"
                     || window.liveBridge.status === "Reacquiring")
                 window.clearVisualizationForCaptureState()
+            if (window.liveBridge.status === "Stopped" || window.liveBridge.status === "Error"
+                    || window.liveBridge.status === "Starting" || window.liveBridge.status === "Reacquiring")
+                window.overlayCaptureEvidenceStale = true
             if (window.liveBridge.status === "Stopped")
                 window.announceVisualizationRecovery("Output monitoring stopped; start monitoring from the DJ controls when an output endpoint is available.")
             else if (window.liveBridge.status === "Starting")
@@ -2358,8 +2361,12 @@ ApplicationWindow {
                 window.announceVisualizationRecovery("Output monitoring is reacquiring; previous visualization selection was cleared.")
             else if (window.liveBridge.status === "Error")
                 window.announceVisualizationRecovery("Output monitoring reported an error; retry monitoring after checking the selected output and permission state.")
-            else if (window.liveBridge.status === "Tracking")
+            else if (window.liveBridge.status === "Tracking") {
+                if (window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring"
+                        && window.overlayCaptureEvidenceStale)
+                    window.transitionCaptureEvidence(false, "Overlay live analysis recovered; fresh accepted evidence is available.", overlayLiveMonitoringState)
                 window.announceVisualizationRecovery("Output monitoring is tracking; visualization updates will appear as accepted data arrives.")
+            }
         }
     }
     Connections {

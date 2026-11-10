@@ -168,6 +168,19 @@ TestCase {
         fakeCapture.status = "Monitoring"
         app.destroy()
     }
+    function test_liveAnalysisTransitionInvalidatesOverlayEvidence() {
+        let app = shellWithOverlay.createObject(null)
+        fakeCapture.status = "Monitoring"
+        fakeLive.status = "Starting"
+        verify(app.overlayCaptureEvidenceStale)
+        verify(app.overlayRecoveryAnnouncement.indexOf("starting") >= 0)
+        fakeLive.status = "Tracking"
+        verify(!app.overlayCaptureEvidenceStale)
+        verify(app.overlayRecoveryAnnouncement.indexOf("fresh accepted evidence") >= 0)
+        fakeCapture.status = "Monitoring"
+        fakeLive.status = "Stopped"
+        app.destroy()
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
