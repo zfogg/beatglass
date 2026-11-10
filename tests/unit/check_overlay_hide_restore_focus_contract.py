@@ -220,3 +220,10 @@ def test_summary_review_shortcut_announces_full_recovery_state():
     assert "overlaySettingsSummaryReviewAction.forceActiveFocus()" in body
     assert "overlayDisplayRecoveryPending" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_unlock_shortcut_announces_stale_boundary():
+    start = QML.index("function focusOverlayUnlockShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "unlockOverlay.forceActiveFocus()" in body
+    assert "overlayCaptureEvidenceStale" in body
