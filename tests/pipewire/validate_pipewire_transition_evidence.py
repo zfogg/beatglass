@@ -216,6 +216,9 @@ if reacquisition is not None:
     if reacquisition.get("toolchain") is not None:
         if not isinstance(reacquisition["toolchain"], str) or not reacquisition["toolchain"].strip():
             raise SystemExit("reacquisition evidence has an empty toolchain")
+    if reacquisition.get("environment") is not None:
+        if not isinstance(reacquisition["environment"], str) or not reacquisition["environment"].strip():
+            raise SystemExit("reacquisition evidence has an empty environment")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
