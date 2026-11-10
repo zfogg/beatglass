@@ -213,6 +213,15 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
 
+    def test_artifact_path_must_not_use_del_control_character(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture\u007f.txt", "sha256": "0" * 64}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in module.verify(root, manifest)))
+
     def test_artifact_path_segments_must_be_windows_safe(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
