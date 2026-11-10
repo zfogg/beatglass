@@ -275,6 +275,8 @@ The list must also be sorted and contain each field only once; duplicate or
 out-of-order fields are rejected before packaging.
 Every checked-field entry must be a non-empty JSON string; malformed values are
 rejected as invalid evidence rather than raising an internal validator error.
+The generated report has a closed top-level shape; unknown report properties are
+rejected so producers cannot silently bypass the qualification contract.
 If present, host `clock_source_latency_ns` must be a non-negative numeric
 measurement of source latency; boolean values are invalid.
 If present, host `clock_source_noise_ns` must be a non-negative numeric
