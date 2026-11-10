@@ -2488,9 +2488,7 @@ ApplicationWindow {
                 Accessible.description: "Choose one of six color themes for the Beatglass desktop; current theme " + currentText
                 ToolTip.text: "Choose a color theme; current theme: " + currentText
                 onActivated: {
-                    window.selectedThemeIndex = currentIndex
-                    window.selectedTheme = currentText
-                    if (window.themePreferencesBridge) window.themePreferencesBridge.themeIndex = currentIndex
+                    window.selectThemeIndex(currentIndex)
                 }
             }
             Switch {
@@ -2529,8 +2527,7 @@ ApplicationWindow {
                 ToolTip.text: "Reset " + window.selectedTheme + " and " + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "reduced" : "full") + " motion to defaults"
                 onClicked: {
                     if (window.themePreferencesBridge) window.themePreferencesBridge.reset()
-                    window.selectedThemeIndex = 0
-                    window.selectedTheme = window.themeNames[0]
+                    window.selectThemeIndex(0)
                     themeSelector.currentIndex = 0
                     window.themePreferenceAnnouncement = "Appearance reset to Light theme with full motion."
                     resetAppearance.forceActiveFocus()

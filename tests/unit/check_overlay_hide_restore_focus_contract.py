@@ -915,3 +915,12 @@ def test_theme_preview_selection_uses_shared_accessible_helper():
     assert "requestPaint" in helper
     previews = QML[QML.index("id: themePreviews") : QML.index("id: themeSelector", QML.index("id: themePreviews"))]
     assert previews.count("window.selectThemeIndex") >= 5
+
+
+def test_theme_selector_and_reset_use_shared_selection_helper():
+    selector_start = QML.index('id: themeSelector')
+    selector = QML[selector_start : QML.index('id: reduceMotion', selector_start)]
+    assert "window.selectThemeIndex(currentIndex)" in selector
+    reset_start = QML.index('objectName: "resetAppearance"')
+    reset = QML[reset_start : QML.index('objectName: "', reset_start + 20)]
+    assert "window.selectThemeIndex(0)" in reset
