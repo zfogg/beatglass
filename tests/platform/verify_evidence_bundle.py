@@ -9,6 +9,7 @@ import sys
 REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
 
 REQUIRED_PROVENANCE = ("platform", "commit", "captured_at", "environment")
+SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
 
 
 def verify(root: Path, manifest: Path) -> list[str]:
@@ -22,6 +23,9 @@ def verify(root: Path, manifest: Path) -> list[str]:
     for field in REQUIRED_PROVENANCE:
         if not isinstance(data.get(field), str) or not data[field].strip():
             errors.append(f"missing provenance field: {field}")
+    platform = data.get("platform")
+    if isinstance(platform, str) and platform.strip() and platform.lower() not in SUPPORTED_PLATFORMS:
+        errors.append(f"unsupported platform: {platform}")
     commit = data.get("commit")
     if isinstance(commit, str) and commit.strip() and not re.fullmatch(r"[0-9a-fA-F]{40}", commit):
         errors.append("commit must be a 40-character hexadecimal SHA-1")
