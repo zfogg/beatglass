@@ -4927,7 +4927,9 @@ ApplicationWindow {
                             : (window.overlayLaunchFallbackActive
                                 ? "The overlay is using its launch fallback while persisted settings remain available."
                                 : "The overlay is ready with persisted settings applied."))
-                    ToolTip.text: window.overlayDisplayRecoveryPending
+                    ToolTip.text: window.overlayCaptureEvidenceStale
+                        ? "Overlay live evidence is stale until fresh capture; persisted display settings are retained"
+                        : window.overlayDisplayRecoveryPending
                         ? "Overlay recovery pending; persisted display settings are retained"
                         : (window.overlayLaunchFallbackActive
                             ? "Overlay launch fallback active; persisted display settings are available"
