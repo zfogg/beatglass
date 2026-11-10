@@ -53,6 +53,7 @@ struct CliPreferences {
   bool reduce_motion{};
   int seek_step{5};
   std::string visual_mode{"combined"};
+  int playback_device_id{-1};
 };
 
 std::filesystem::path preferences_path() {
@@ -80,6 +81,7 @@ CliPreferences load_preferences() {
       try { preferences.seek_step = std::clamp(std::stoi(value), 1, 60); } catch (...) {}
     }
     else if (key == "visual_mode" && (value == "waveform" || value == "spectrum" || value == "combined" || value == "beat_grid" || value == "tonal_history")) preferences.visual_mode = value;
+    else if (key == "playback_device_id") { try { preferences.playback_device_id = std::stoi(value); } catch (...) {} }
   }
   return preferences;
 }
@@ -91,7 +93,7 @@ void save_preferences(const CliPreferences& preferences) {
   std::filesystem::create_directories(path.parent_path(), error);
   if (error) return;
   std::ofstream output(path, std::ios::trunc);
-  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\n";
+  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\n";
 }
 using namespace ftxui;
 
@@ -468,6 +470,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> playback_device_labels;
   for (const auto& device : playback_devices) playback_device_labels.push_back(std::to_string(device.id) + ": " + device.name);
   int playback_device_selected = 0;
+  for (int index = 0; index < static_cast<int>(playback_devices.size()); ++index) if (playback_devices[static_cast<std::size_t>(index)].id == preferences.playback_device_id) playback_device_selected = index;
 #else
   beatglass::PlaybackSession playback;
   std::vector<std::string> playback_device_labels;
@@ -680,7 +683,14 @@ int main(int argc, char** argv) {
     catch (...) { return 5; }
   };
   auto persist_preferences = [&] {
-    try { save_preferences(CliPreferences{reduce_motion, std::clamp(std::stoi(seek_step_text), 1, 60), visual_mode}); } catch (...) { save_preferences(CliPreferences{reduce_motion, 5, visual_mode}); }
+    const auto selected_device_id = [&] {
+#ifdef _WIN32
+      return !playback_devices.empty() && playback_device_selected >= 0 && playback_device_selected < static_cast<int>(playback_devices.size()) ? static_cast<int>(playback_devices[static_cast<std::size_t>(playback_device_selected)].id) : -1;
+#else
+      return -1;
+#endif
+    }();
+    try { save_preferences(CliPreferences{reduce_motion, std::clamp(std::stoi(seek_step_text), 1, 60), visual_mode, selected_device_id}); } catch (...) { save_preferences(CliPreferences{reduce_motion, 5, visual_mode, selected_device_id}); }
   };
   bool last_saved_reduce_motion = reduce_motion;
   std::string last_saved_seek_step = seek_step_text;
