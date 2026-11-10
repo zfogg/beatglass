@@ -1546,7 +1546,10 @@ ApplicationWindow {
         window.overlayRecoveryAttemptCount = 0
         window.overlayRecoveryPausedByUser = false
         navigation.currentIndex = 1
-        window.announceCaptureRecoveryState("DJ overlay safe mode cleared; retry is available when a display is ready.")
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState("DJ overlay safe mode cleared; retry is available when a display is ready. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Live evidence is current."))
         retryOverlay.forceActiveFocus()
     }
     function stopOverlayRecoveryAttempts() {
