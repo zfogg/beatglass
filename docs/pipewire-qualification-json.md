@@ -129,3 +129,6 @@ format validation.
 
 Any transition event that includes `format` follows the same positive-integer
 requirements for `sample_rate` and `channels`.
+
+The required restart-event `format` uses these same strict positive-integer
+requirements for `sample_rate` and `channels`.
