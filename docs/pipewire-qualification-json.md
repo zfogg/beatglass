@@ -344,6 +344,8 @@ The report schema identifier must exactly equal
 are rejected.
 Report names follow the host contract and must contain visible non-whitespace
 text.
+Report names must also be JSON strings; null, numeric, and array values are
+rejected before packaging.
 Report platforms must use the same exact lowercase enum as host evidence;
 numeric, null, or padded values are rejected.
 `checked_fields` must be a JSON array of non-empty strings; objects, scalars,
