@@ -5005,9 +5005,9 @@ ApplicationWindow {
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
                                     Accessible.name: "Output capture endpoint"
-                                    Accessible.value: currentText + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready")
+                                    Accessible.value: currentText + (window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                                     Accessible.role: Accessible.ComboBox
-                                    Accessible.description: (currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.")
+                                    Accessible.description: (currentText !== "" ? "Current capture endpoint: " + currentText + ". Choose the output endpoint used for live capture." : "No capture endpoint selected. Choose the output endpoint used for live capture.") + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready.") + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? " Live overlay evidence is stale until fresh capture arrives." : "")
                                     ToolTip.text: "Choose the output endpoint used for live capture; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready")
                                     onActivated: { if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id); window.announceVisualizationRecovery("Output endpoint selected; capture will refresh the accepted visualization snapshot."); endpointSelector.forceActiveFocus() }
                                 }
