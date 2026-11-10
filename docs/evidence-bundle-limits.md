@@ -36,6 +36,8 @@ partially written manifest.
 The identity and hash-list inputs are bounded to 64 KiB and 16 MiB
 respectively, preventing untrusted qualification directories from forcing
 unbounded text reads before artifact validation begins.
+Ingestion also supports `--json`, returning validity, errors, output, and
+effective limits for orchestration without parsing human-readable logs.
 Artifact inventories also use case-insensitive collision keys so manifests
 cannot contain two names that alias on Windows or other case-folding filesystems.
 Referenced evidence fields use the same portable path checks as hashed

@@ -4,6 +4,8 @@ import tempfile
 import unittest
 import hashlib
 import json
+import subprocess
+import sys
 
 spec = importlib.util.spec_from_file_location("ingest", Path(__file__).with_name("ingest_qualification_artifacts.py"))
 ingest = importlib.util.module_from_spec(spec); assert spec.loader
@@ -316,6 +318,16 @@ class QualificationIngestTest(unittest.TestCase):
             (root / "qualification-artifacts.sha256").write_text(f"{digest}  capture.log\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json", max_total_artifact_bytes=1)
             self.assertIn("qualification artifacts exceed total 1 bytes", errors)
+
+    def test_cli_json_report_is_machine_readable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); output = root / "manifest.json"
+            result = subprocess.run([sys.executable, str(Path(__file__).with_name("ingest_qualification_artifacts.py")),
+                                     str(root), str(output), "--json"], capture_output=True, text=True, check=False)
+            report = json.loads(result.stdout)
+            self.assertFalse(report["valid"])
+            self.assertEqual(report["error_count"], len(report["errors"]))
+            self.assertIn("max_total_artifact_bytes", report["limits"])
 
     def test_custom_artifact_limit_is_enforced(self):
         with tempfile.TemporaryDirectory() as tmp:
