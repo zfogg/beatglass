@@ -7,10 +7,10 @@
 #include <stdexcept>
 #include <vector>
 namespace beatglass {
-FileMetadata read_metadata(const std::filesystem::path& path) { FileReader file(path); return file.metadata(); }
+FileMetadata read_metadata(const std::filesystem::path& path) { FileReader file(path, 1); return file.metadata(); }
 TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver& observer,
                         const ReplayBeatObserver& beat_observer, std::stop_token cancel) {
-  FileReader file(path); constexpr std::size_t hop = 512;
+  FileReader file(path, 1); constexpr std::size_t hop = 512;
   const auto metadata = file.metadata();
   CausalTempoReplay replay;
   std::unique_ptr<detail::BeatTracker> beats;
