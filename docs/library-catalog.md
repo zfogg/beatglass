@@ -10,3 +10,8 @@ The helper is pure: it does not inspect, open, follow, or modify the path.
 Callers that need filesystem metadata must perform that work on a non-audio
 worker. Symlink traversal and recursive enumeration remain governed by the
 catalog functions, not this extension policy.
+
+Both browse functions accept `max_entries` (default 10,000). If enumeration
+would exceed the bound, they discard partial results and return the stable
+diagnostic `catalog entry limit exceeded`; callers must present this as a
+bounded-resource failure rather than silently showing an incomplete catalog.

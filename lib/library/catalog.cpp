@@ -26,7 +26,7 @@ namespace {
 bool supported_audio(const std::filesystem::path& path) { return !audio_format_for_path(path).empty(); }
 }
 
-CatalogResult browse(const std::filesystem::path& folder, std::string search) {
+CatalogResult browse(const std::filesystem::path& folder, std::string search, std::size_t max_entries) {
   CatalogResult result;
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
@@ -65,6 +65,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
     // intentionally filesystem-only, so it reports an explicit unknown value
     // until the analysis/metadata worker supplies decoded duration.
     result.entries.push_back({entry.path(), name, title, {}, directory, bytes, std::move(format), -1.0});
+    if (result.entries.size() > max_entries) { result.entries.clear(); result.diagnostic = "catalog entry limit exceeded"; return result; }
   }
   if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
@@ -76,7 +77,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
   return result;
 }
 
-CatalogResult browse_recursive(const std::filesystem::path& folder, std::string search) {
+CatalogResult browse_recursive(const std::filesystem::path& folder, std::string search, std::size_t max_entries) {
   CatalogResult result;
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
@@ -106,6 +107,7 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
     }
     result.entries.push_back({entry.path(), name, entry.path().stem().string(), {}, directory,
                               bytes, std::move(format), -1.0});
+    if (result.entries.size() > max_entries) { result.entries.clear(); result.diagnostic = "catalog entry limit exceeded"; return result; }
   }
   if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {

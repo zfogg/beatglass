@@ -36,6 +36,13 @@ TEST_CASE("catalog lists folders and supported audio in deterministic order") {
   CHECK(result.entries[1].bytes == 0);
 }
 
+TEST_CASE("catalog fails closed when entry bound is exceeded") {
+  TempDir dir; dir.file("one.wav"); dir.file("two.wav");
+  const auto result = beatglass::library::browse(dir.path, {}, 1);
+  CHECK(result.entries.empty());
+  CHECK(result.diagnostic == "catalog entry limit exceeded");
+}
+
 TEST_CASE("catalog applies case-insensitive name filtering and rejects missing folders") {
   TempDir dir; dir.file("Summer.flac"); dir.file("winter.ogg");
   const auto filtered = beatglass::library::browse(dir.path, "SUM");
