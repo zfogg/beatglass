@@ -5,6 +5,7 @@
 #include <functional>
 #include <optional>
 #include <string>
+#include <stop_token>
 namespace beatglass {
 /** Decoded file properties; no reference to the open file is retained. */
 struct FileMetadata {
@@ -56,9 +57,13 @@ using ReplayBeatObserver = std::function<void(const ReplayBeat&)>;
 /** Replay a file causally, faster than real time, on the caller's worker thread.
  * @param path Local audio file; no source tags or content are modified.
  * @param observer Optional synchronous progress observer; it is not retained.
+ * @param cancel Optional cooperative cancellation token. Cancellation returns
+ * the latest state after complete decoded blocks and never publishes a
+ * partial block.
  * @return The final state after all complete decoded blocks.
  * @throws std::exception on decoder, invalid PCM, estimator or observer errors.
  */
 TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver& observer,
-                        const ReplayBeatObserver& beat_observer = {});
+                        const ReplayBeatObserver& beat_observer = {},
+                        std::stop_token cancel = {});
 }

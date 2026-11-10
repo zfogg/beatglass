@@ -9,7 +9,7 @@
 namespace beatglass {
 FileMetadata read_metadata(const std::filesystem::path& path) { FileReader file(path); return file.metadata(); }
 TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver& observer,
-                        const ReplayBeatObserver& beat_observer) {
+                        const ReplayBeatObserver& beat_observer, std::stop_token cancel) {
   FileReader file(path); constexpr std::size_t hop = 512;
   const auto metadata = file.metadata();
   CausalTempoReplay replay;
@@ -17,8 +17,9 @@ TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver&
   std::vector<float> pcm(hop * metadata.channels);
   TempoResult result{metadata, std::nullopt, 0};
   while (true) {
-    const auto read = file.read(pcm);
+    const auto read = file.read(pcm, cancel);
     if (read.status == FileReadStatus::end) break;
+    if (read.status == FileReadStatus::cancelled) return result;
     if (read.status != FileReadStatus::data) throw std::runtime_error("Unexpected cancelled file read");
     if (beat_observer && !beats) beats = std::make_unique<detail::BeatTracker>(read.block.format.sample_rate);
     const auto state = replay.process(read.block, [&](const CausalMonoHop& hop, TrackingState) {
