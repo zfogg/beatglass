@@ -99,6 +99,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or any(unicodedata.category(char) == "Cf" for char in relative)
             or any(unicodedata.category(char) in {"Zl", "Zp"} for char in relative)
             or any(unicodedata.category(char) == "Zs" for char in relative)
+            or any(unicodedata.category(char) == "Co" for char in relative)
             or any(0xD800 <= ord(char) <= 0xDFFF for char in relative)
             or "\ufffd" in relative
             or relative != relative.strip()
