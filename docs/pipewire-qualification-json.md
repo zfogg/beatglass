@@ -264,6 +264,8 @@ The machine-readable host contract is captured in
 the qualification authority and native execution evidence is still required.
 Before packaging a native run, validate the extracted host object directly:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json`.
+Pass a second path to emit a deterministic validation report for the bundle:
+`python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 If present, host `clock_source_latency_ns` must be a non-negative numeric
 measurement of source latency; boolean values are invalid.
 If present, host `clock_source_noise_ns` must be a non-negative numeric
