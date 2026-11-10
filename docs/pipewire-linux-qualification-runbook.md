@@ -47,6 +47,8 @@ Matrix output paths must be regular files; symbolic-link and non-file outputs
 are rejected before generation to avoid overwriting unrelated targets.
 Matrix emission is atomic and fsynced before replacement, so an interrupted
 generation cannot leave a partially written qualification matrix.
+On POSIX hosts the containing directory is fsynced after replacement as well,
+making the rename durable before the handoff reports success.
 Every artifact entry must be a non-empty string path; numeric or blank entries
 fail before matrix generation.
 Artifact paths must also be unique so one retained file cannot be counted twice
