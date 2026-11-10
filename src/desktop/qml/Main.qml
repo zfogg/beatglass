@@ -2562,6 +2562,8 @@ ApplicationWindow {
             window.handleOverlayOpacityChanged()
         }
         function onGeometryChanged() {
+            if (!window || !window.overlayBridge)
+                return
             if (!window.syncOverlaySettingsStateFromBridge())
                 window.focusOverlayGeometrySyncFailure()
             if (window.overlayDisplayRecoveryPending && window.overlayBridge
@@ -4082,7 +4084,7 @@ ApplicationWindow {
                     Accessible.role: Accessible.Grouping
                     Accessible.description: "Start, stop, or retry live output monitoring."
                     ToolTip.text: "Live monitoring controls; current state is announced when available"
-                    Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: !!window.captureMonitorBridge && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring after a capture error." : "Start or stop live output monitoring."; ToolTip.text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring" : window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry live output monitoring" : "Start live output monitoring"; onClicked: if (window.captureMonitorBridge) { if (window.captureMonitorBridge.status === "Monitoring") window.captureMonitorBridge.stop(); else window.captureMonitorBridge.start() } }
+                    Button { text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry monitoring" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Starting" ? "Starting…" : (window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring" ? "Reacquiring…" : "Start monitoring"))); objectName: "toggleMonitoring"; activeFocusOnTab: true; enabled: !!window.captureMonitorBridge && window.captureMonitorBridge.status !== "Starting" && window.captureMonitorBridge.status !== "Reacquiring"; Accessible.name: text; Accessible.role: Accessible.Button; Accessible.description: "Start monitoring, or retry after a capture error."; ToolTip.text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" ? "Stop live output monitoring" : window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "Retry live output monitoring" : "Start live output monitoring"; onClicked: if (window.captureMonitorBridge) { if (window.captureMonitorBridge.status === "Monitoring") window.captureMonitorBridge.stop(); else window.captureMonitorBridge.start() } }
                 ColumnLayout {
                     objectName: "monitoringStatusGroup"
                     Layout.fillWidth: true
