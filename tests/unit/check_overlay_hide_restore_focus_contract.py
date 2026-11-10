@@ -72,3 +72,11 @@ def test_recovery_pause_and_reset_share_focus_transition():
     body = QML[start : QML.index("    function quitApplication", start)]
     assert "Live evidence is current." in body
     assert body.count("window.focusOverlayRecoveryPauseState(") == 2
+
+
+def test_bridge_settings_failure_uses_availability_focus_transition():
+    start = QML.index("function focusOverlayBridgeSettingsFailure")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "overlayDisplayRecoveryPending = true" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "focusOverlayBridgeSettingsFailure(" in QML[QML.index("const synced = window.syncOverlaySettingsFromBridge()") :]
