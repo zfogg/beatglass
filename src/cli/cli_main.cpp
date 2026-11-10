@@ -327,7 +327,10 @@ private:
   void run() {
     std::unique_ptr<beatglass::FileReader> reader;
     beatglass::windows::WindowsPlaybackSession output;
-    std::vector<float> decoded(4096 * 2), render(4096 * 2);
+    // Keep the reader and renderer inside WindowsPlaybackSession's shared
+    // bounded queue contract; passing 8192 here makes start_device reject the
+    // session before the native output can open.
+    std::vector<float> decoded(4096), render(4096);
     std::uint64_t next_epoch = 0;
     bool shutdown = false;
     std::uint64_t current_frame = 0;
