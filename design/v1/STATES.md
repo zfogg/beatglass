@@ -356,3 +356,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Restore availability contract | Restore is requested while the native overlay is present but unavailable | Focus display recovery and return explicit failure until the native overlay and destination display are ready. |
 | Resume availability contract | Paused recovery is resumed after native overlay/display loss | Keep recovery paused, focus display recovery, and return explicit failure until the overlay can be reacquired. |
 | Retry availability contract | Retry is requested while the native overlay/display is unavailable | Avoid incrementing recovery attempts, focus display recovery, and return explicit failure until retry can reacquire the overlay. |
+| Show availability contract | Show is requested while the native overlay bridge exists but is unavailable | Reject both button and lower-level show paths consistently, focus display recovery, and return explicit failure. |
