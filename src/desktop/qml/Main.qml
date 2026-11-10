@@ -1298,13 +1298,14 @@ ApplicationWindow {
     function restoreOverlayFallbackControls(reason) {
         window.overlayLaunchFallbackActive = true
         window.overlayDisplayRecoveryPending = true
+        window.overlayCaptureEvidenceStale = true
         window.overlayHiddenByUser = false
         window.show()
         window.raise()
         window.requestActivate()
         overlayDisplay.forceActiveFocus()
         if (reason !== "")
-            window.announceCaptureRecoveryState(reason)
+            window.announceCaptureRecoveryState(reason + " Live evidence is stale until fresh capture arrives.")
     }
     function showOverlayAndHideControls() {
         window.overlayHiddenByUser = false
