@@ -318,6 +318,9 @@ objects out of the scalar host-name field.
 The float-name regression in
 `tests/unit/check_native_host_provenance_name_float.py` rejects fractional
 identity values rather than converting them into host labels.
+The non-finite-name regression in
+`tests/unit/check_native_host_provenance_name_nan.py` rejects JSON NaN identity
+values as well, preserving finite string-only host names.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
