@@ -21,6 +21,8 @@ for item in platforms.values():
 if summary is not None:
     if not isinstance(summary.get("native_artifacts", []), list):
         raise SystemExit("native qualification summary has invalid native_artifacts")
+    if not isinstance(summary.get("qualified"), bool):
+        raise SystemExit("native qualification summary has invalid qualified status")
     current = platforms.get(host)
     if current is not None:
         current["status"] = "qualified" if summary.get("qualified") is True else "pending"
