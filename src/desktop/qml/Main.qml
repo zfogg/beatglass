@@ -1431,8 +1431,13 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayAvailabilityRecovery("Overlay click-through is unavailable until the native overlay and a destination display are ready.", clickThroughToggle)
+            return false
+        }
         clickThroughToggle.forceActiveFocus()
         window.announceCaptureRecoveryState("Overlay click-through control focused; current mode is " + (window.overlayBridge.clickThrough ? "enabled" : "disabled") + "." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
     }
     function focusOverlayOpacityShortcut() {
         navigation.currentIndex = 1
