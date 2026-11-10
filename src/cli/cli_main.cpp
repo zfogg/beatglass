@@ -114,6 +114,8 @@ public:
   void stop() { request(Command::stop); }
   beatglass::PlaybackState state() const noexcept { return state_.load(std::memory_order_acquire); }
   std::uint64_t epoch() const noexcept { return epoch_.load(std::memory_order_acquire); }
+  std::uint64_t current_frame() const noexcept { return current_frame_.load(std::memory_order_acquire); }
+  std::uint64_t total_frames() const noexcept { return total_frames_.load(std::memory_order_acquire); }
   std::string status() const { std::lock_guard lock(mutex_); return status_; }
 private:
   enum class Command { none, play, pause, seek, stop, shutdown };
@@ -138,6 +140,8 @@ private:
           current_frame = 0;
           std::string error;
           const auto& metadata = reader->metadata();
+          current_frame_.store(0, std::memory_order_release);
+          total_frames_.store(metadata.frames, std::memory_order_release);
           if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
           epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through native output.");
         } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
@@ -155,9 +159,10 @@ private:
           std::string error;
           if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
           current_frame = target; epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback seeked to frame " + std::to_string(target) + ".");
+          current_frame_.store(target, std::memory_order_release);
         } catch (const std::exception& error) { set_status(std::string("Playback seek failed: ") + error.what()); }
       } else if (command == Command::stop) {
-        output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback stopped.");
+        output.stop(); reader.reset(); current_frame_.store(0, std::memory_order_release); total_frames_.store(0, std::memory_order_release); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback stopped.");
       }
       if (!reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) {
         std::unique_lock lock(mutex_); condition_.wait_for(lock, std::chrono::milliseconds(20), [&] { return command_ != Command::none; }); continue;
@@ -166,6 +171,7 @@ private:
       if (read.status == beatglass::FileReadStatus::end) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
       if (read.status != beatglass::FileReadStatus::data) continue;
       current_frame = read.block.first_frame + read.block.samples.size() / std::max<std::size_t>(1, read.block.format.channels);
+      current_frame_.store(current_frame, std::memory_order_release);
       while (!output.submit(read.block)) {
         output.render(render);
         command = take_command();
@@ -186,6 +192,8 @@ private:
   std::thread worker_;
   std::atomic<beatglass::PlaybackState> state_{beatglass::PlaybackState::stopped};
   std::atomic<std::uint64_t> epoch_{};
+  std::atomic<std::uint64_t> current_frame_{};
+  std::atomic<std::uint64_t> total_frames_{};
   std::int64_t seek_delta_seconds_{};
 };
 #endif
@@ -366,7 +374,18 @@ int main(int argc, char** argv) {
 #else
         std::string{};
 #endif
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
+    std::string playback_position = "—";
+#ifdef _WIN32
+    const auto playback_total = playback.total_frames();
+    const auto playback_frame = std::min(playback.current_frame(), playback_total);
+    if (result && result->metadata.sample_rate != 0 && playback_total != 0) {
+      const auto seconds = playback_frame / result->metadata.sample_rate;
+      const auto total_seconds = playback_total / result->metadata.sample_rate;
+      playback_position = std::to_string(seconds / 60) + ":" + (seconds % 60 < 10 ? "0" : "") + std::to_string(seconds % 60) +
+          " / " + std::to_string(total_seconds / 60) + ":" + (total_seconds % 60 < 10 ? "0" : "") + std::to_string(total_seconds % 60);
+    }
+#endif
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), hbox({text("Folder: "), folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: "), filter_input->Render() | flex, text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto toggle_live = [&] {
