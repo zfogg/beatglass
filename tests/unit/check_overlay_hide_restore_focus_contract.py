@@ -664,3 +664,12 @@ def test_show_focus_shortcut_requires_available_display():
     assert "focusOverlayDisplayRecoveryFailure" in body
     assert "return false" in body
     assert "return true" in body
+
+
+def test_hide_focus_shortcut_requires_available_overlay():
+    start = QML.index("function focusOverlayHideShortcut")
+    body = QML[start : QML.index("    function handleOverlayHideToggleShortcut", start)]
+    assert "overlayBridge.available" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
+    assert "return true" in body
