@@ -81,6 +81,8 @@ Errors include an `error_categories` count map for dashboards without requiring
 clients to parse human-readable diagnostic strings.
 Report generators reject symlinked output parents so a qualification command
 cannot redirect a report outside its intended workspace.
+The standalone generator checks every ancestor component, including missing
+nested directories, before creating report output.
 They also reject an existing symlink at the output path itself, preserving the
 target and requiring explicit replacement of regular files only.
 The readiness checker enforces the same symlink-free parent-path rule for its
