@@ -44,6 +44,11 @@ with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(invalid_node)], capture_output=True, text=True)
         assert result.returncode != 0
         assert "host provenance has an invalid node id" in result.stderr
+    string_node = Path(directory) / "string-node.json"
+    string_node.write_text('{"platform":"linux","name":"qualification-host","node_id":"7"}', encoding="utf-8")
+    result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(string_node)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert "host provenance has an invalid node id" in result.stderr
 
     malformed = Path(directory) / "malformed.json"
     malformed.write_text("{not-json", encoding="utf-8")
