@@ -1021,3 +1021,5 @@ Capture freshness cannot clear stale overlay evidence while the native bridge is
 Capture freshness cannot clear stale overlay evidence while destination selection is required; live audio may continue, but overlay presentation stays blocked until a destination is chosen.
 
 When capture freshness is blocked by native overlay readiness, the recovery announcement now explains that monitoring continues while presentation awaits native recovery.
+
+Successful visual-state restore now clears the recovery-required marker, so the UI cannot remain in a stale recovery state after geometry and opacity are reapplied.
