@@ -5,8 +5,12 @@
 #include "beatglass/core/playback_session.hpp"
 #include "state_label.hpp"
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include "../desktop/platform/windows_endpoints.hpp"
 #include "../desktop/platform/windows_loopback_session.hpp"
+#include "../desktop/platform/windows_playback_session.hpp"
 #endif
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -26,7 +30,9 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <condition_variable>
 #include <vector>
+#include <mutex>
 
 namespace {
 using namespace ftxui;
@@ -93,6 +99,77 @@ std::string lower(std::string value) {
   std::ranges::transform(value, value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return value;
 }
+#ifdef _WIN32
+class CliPlayback final {
+public:
+  CliPlayback() : worker_([this] { run(); }) {}
+  ~CliPlayback() {
+    { std::lock_guard lock(mutex_); command_ = Command::shutdown; }
+    condition_.notify_one();
+    worker_.join();
+  }
+  void play(const std::filesystem::path& path) { { std::lock_guard lock(mutex_); path_ = path; command_ = Command::play; } condition_.notify_one(); }
+  void pause() { request(Command::pause); }
+  void stop() { request(Command::stop); }
+  beatglass::PlaybackState state() const noexcept { return state_.load(std::memory_order_acquire); }
+  std::uint64_t epoch() const noexcept { return epoch_.load(std::memory_order_acquire); }
+  std::string status() const { std::lock_guard lock(mutex_); return status_; }
+private:
+  enum class Command { none, play, pause, stop, shutdown };
+  void request(Command command) { { std::lock_guard lock(mutex_); command_ = command; } condition_.notify_one(); }
+  Command take_command() { std::lock_guard lock(mutex_); const auto command = command_; command_ = Command::none; return command; }
+  void set_status(std::string status) { std::lock_guard lock(mutex_); status_ = std::move(status); }
+  void run() {
+    std::unique_ptr<beatglass::FileReader> reader;
+    beatglass::windows::WindowsPlaybackSession output;
+    std::vector<float> decoded(4096 * 2), render(4096 * 2);
+    std::uint64_t next_epoch = 0;
+    bool shutdown = false;
+    while (!shutdown) {
+      auto command = take_command();
+      if (command == Command::shutdown) break;
+      if (command == Command::play) {
+        output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
+        try {
+          reader = std::make_unique<beatglass::FileReader>(path_, ++next_epoch);
+          std::string error;
+          const auto& metadata = reader->metadata();
+          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
+          epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through native output.");
+        } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
+      } else if (command == Command::pause) {
+        if (output.pause()) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
+      } else if (command == Command::stop) {
+        output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback stopped.");
+      }
+      if (!reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) {
+        std::unique_lock lock(mutex_); condition_.wait_for(lock, std::chrono::milliseconds(20), [&] { return command_ != Command::none; }); continue;
+      }
+      const auto read = reader->read(decoded);
+      if (read.status == beatglass::FileReadStatus::end) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
+      if (read.status != beatglass::FileReadStatus::data) continue;
+      while (!output.submit(read.block)) {
+        output.render(render);
+        command = take_command();
+        if (command == Command::stop || command == Command::shutdown) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); shutdown = command == Command::shutdown; break; }
+        if (command == Command::pause) { output.pause(); state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); break; }
+        std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      }
+      if (shutdown || !reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) continue;
+      output.render(render);
+    }
+    output.stop();
+  }
+  mutable std::mutex mutex_;
+  std::condition_variable condition_;
+  std::filesystem::path path_;
+  Command command_{Command::none};
+  std::string status_{"Playback stopped."};
+  std::thread worker_;
+  std::atomic<beatglass::PlaybackState> state_{beatglass::PlaybackState::stopped};
+  std::atomic<std::uint64_t> epoch_{};
+};
+#endif
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -121,7 +198,11 @@ int main(int argc, char** argv) {
   std::optional<beatglass::TempoResult> result;
   std::vector<float> waveform;
   bool busy = false;
+#ifdef _WIN32
+  CliPlayback playback;
+#else
   beatglass::PlaybackSession playback;
+#endif
   std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
   std::future<AnalysisView> analysis_future;
@@ -155,13 +236,22 @@ int main(int argc, char** argv) {
   auto refresh_button = Button(" Refresh ", refresh);
   auto play_button = Button(" Play ", [&] {
     if (selected >= 0 && selected < static_cast<int>(tracks.size())) {
+#ifdef _WIN32
+      playback.play(tracks[selected].path);
+#else
       ++playback_epoch;
       playback.start(playback_epoch);
+#endif
       status = "Playing " + tracks[selected].title + " through the selected output.";
     }
   });
   auto pause_button = Button(" Pause ", [&] {
+#ifdef _WIN32
+    playback.pause();
+    status = "Playback pause requested.";
+#else
     if (playback.pause()) status = "Playback paused.";
+#endif
   });
   auto stop_button = Button(" Stop ", [&] {
     playback.stop();
@@ -181,7 +271,13 @@ int main(int argc, char** argv) {
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
     auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status)}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), separator(), status_view});
+    const auto playback_status =
+#ifdef _WIN32
+        playback.status();
+#else
+        std::string{};
+#endif
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
     return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto toggle_live = [&] {
