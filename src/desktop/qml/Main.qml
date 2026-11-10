@@ -1371,7 +1371,7 @@ ApplicationWindow {
         return window.handleOverlayReapplyButtonAction()
     }
     function handleOverlayReapplyButtonAction() {
-        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayDisplayRecoveryFailure("Choose an available display before reapplying saved overlay settings.", overlayDisplay)
             return false
         }
@@ -1417,7 +1417,7 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
-        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayDisplayRecoveryFailure("Show overlay is unavailable until an available display is selected.", overlayDisplay)
             return false
         }
