@@ -75,6 +75,7 @@ ApplicationWindow {
     property bool overlayCaptureEvidenceStale: false
     readonly property string overlayRecoveryEvidenceLabel: overlayCaptureEvidenceStale ? "Live evidence stale until fresh capture" : "Live evidence current"
     property string overlayRecoveryAnnouncement: ""
+    property string overlayPulseAnnouncement: "Beat pulse is idle until fresh Monitoring capture and valid BPM are available."
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
     readonly property bool analysisCacheIdentityReady: cacheContent.text.trim() !== "" && cacheEngine.text.trim() !== "" && cacheConfig.text.trim() !== "" && cacheMode.acceptableInput
@@ -1948,9 +1949,11 @@ ApplicationWindow {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse disabled because reduced motion is enabled."
                         window.themePreferenceAnnouncement = "Reduced motion enabled for " + window.selectedTheme + "; overlay beat pulse disabled."
                     } else if (djOverlay.visible && window.liveBridge.status === "Tracking" && !window.overlayCaptureEvidenceStale && window.captureMonitorBridge && window.captureMonitorBridge.status === "Monitoring" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0) {
                         beatPulse.restart()
+                        window.overlayPulseAnnouncement = "Beat pulse restored for fresh Monitoring capture."
                         window.themePreferenceAnnouncement = "Reduced motion disabled for " + window.selectedTheme + "; overlay beat pulse restored."
                     }
                 }
@@ -1966,6 +1969,7 @@ ApplicationWindow {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse paused until fresh Monitoring capture and valid BPM are available."
                     }
                 }
             }
@@ -1980,6 +1984,7 @@ ApplicationWindow {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse paused while capture monitoring is unavailable or reacquiring."
                     }
                 }
             }
@@ -1990,6 +1995,7 @@ ApplicationWindow {
                         beatPulse.stop()
                         pulseFade.stop()
                         overlaySurface.pulseOpacity = 0.0
+                        window.overlayPulseAnnouncement = "Beat pulse cleared while the overlay is hidden."
                     }
                 }
             }
@@ -2041,7 +2047,7 @@ ApplicationWindow {
                     Accessible.description: text
                 }
                 Label { text: "BPM " + window.liveBridge.tempo; objectName: "overlayTempo"; color: window.themeForegrounds[window.selectedThemeIndex]; font.pixelSize: 24; font.bold: true; Accessible.name: "Overlay tempo: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live tempo estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
-                Label { text: "Beat pulse " + (beatPulse.running ? "active · " + beatPulse.interval + " ms · " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") : (window.overlayCaptureEvidenceStale ? "idle · stale" : "idle") + " · " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "capture unavailable") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? " · reduced" : "")); objectName: "overlayPulseStatus"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay beat pulse status"; Accessible.value: text + "; capture " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "; reduced motion" : "") + (window.overlayCaptureEvidenceStale ? "; evidence stale" : ""); Accessible.role: Accessible.Status; Accessible.description: "Beat-synchronized visual metronome status; " + (beatPulse.running ? "active for valid live BPM with a " + beatPulse.interval + " millisecond period and " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") + " contrast" : "idle until a Monitoring capture bridge, valid live BPM, and full motion are available") + "."; ToolTip.text: "Beat-synchronized visual pulse status, period, contrast direction, and capture state" }
+                    Label { text: "Beat pulse " + (beatPulse.running ? "active · " + beatPulse.interval + " ms · " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") : (window.overlayCaptureEvidenceStale ? "idle · stale" : "idle") + " · " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "capture unavailable") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? " · reduced" : "")); objectName: "overlayPulseStatus"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay beat pulse status"; Accessible.value: text + "; capture " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable") + (window.themePreferencesBridge && window.themePreferencesBridge.reduceMotion ? "; reduced motion" : "") + (window.overlayCaptureEvidenceStale ? "; evidence stale" : "") + "; announcement: " + window.overlayPulseAnnouncement; Accessible.role: Accessible.Status; Accessible.description: "Beat-synchronized visual metronome status; " + window.overlayPulseAnnouncement + " " + (beatPulse.running ? "Active for valid live BPM with a " + beatPulse.interval + " millisecond period and " + ((window.selectedTheme === "Light" || window.selectedTheme === "Yellow") ? "darkening" : "lightening") + " contrast" : "Idle until a Monitoring capture bridge, valid live BPM, and full motion are available") + "."; ToolTip.text: "Beat-synchronized visual pulse status, period, contrast direction, capture state, and latest transition" }
                 Label { text: "Key " + window.liveBridge.key + "    Chord " + window.liveBridge.chord; objectName: "overlayHarmony"; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Overlay harmony: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "This estimate is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current live key and chord estimate; " + (window.overlayCaptureEvidenceStale ? "stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                 Label { text: window.captureMonitorBridge ? (window.captureMonitorBridge.status === "Error" ? "Capture error — retry monitoring" : "Capture " + window.captureMonitorBridge.status) : "Capture unavailable"; color: window.captureMonitorBridge && window.captureMonitorBridge.status === "Error" ? "#fca5a5" : window.themeForegrounds[window.selectedThemeIndex]; objectName: "overlayCaptureStatus"; Accessible.name: "Overlay capture status: " + text; Accessible.value: text + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; overlay recovery pending" : "; overlay ready"); Accessible.role: Accessible.Status; Accessible.description: text + ". " + (window.overlayCaptureEvidenceStale ? "Previously displayed evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? "Overlay recovery is pending." : "Overlay is ready."); ToolTip.text: "Current output capture status; " + (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                 Button {

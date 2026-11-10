@@ -369,6 +369,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Beat pulse fade contract | Beat pulse starts or clears during full/reduced motion | Use a restrained eased opacity transition during full motion and avoid animation when reduced motion is enabled. |
 | Beat pulse tempo fade contract | BPM changes alter beat period | Scale the fade window with the computed period while clamping it to a readable 80–180 ms range. |
 | Beat pulse visibility contract | Overlay hides or reopens while a pulse is active | Stop timer/fade and clear pulse opacity when hidden so stale visual state cannot reappear on restore. |
+| Beat pulse transition announcement contract | Pulse is suppressed, restored, paused, or cleared by a visibility/motion/capture transition | Expose the latest transition reason in the pulse Status description so assistive technology receives recovery context without relying on color or animation. |
 | Live evidence pulse summary contract | Overlay live-evidence grouping is announced to assistive technology | Include beat-pulse active/idle state alongside capture status and stale-evidence state. |
 | Beat pulse period status contract | Valid BPM drives a running pulse | Expose the computed millisecond beat period in the visible/accessibility status for timing transparency. |
 | Live evidence timing description contract | Assistive technology enters the overlay live-evidence group | Name beat-pulse timing alongside tempo, harmony, capture, and recovery context. |

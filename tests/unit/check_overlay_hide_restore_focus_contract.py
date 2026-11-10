@@ -1150,6 +1150,24 @@ def test_overlay_pulse_status_reports_capture_state():
     assert "captureMonitorBridge.status" in label
 
 
+def test_overlay_pulse_status_exposes_transition_announcement():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert "overlayPulseAnnouncement" in label
+    assert "latest transition" in label
+
+
+def test_overlay_pulse_transitions_update_accessible_announcement():
+    start = QML.index("function onReduceMotionChanged()")
+    body = QML[start : QML.index("            Connections", start)]
+    assert "overlayPulseAnnouncement" in body
+    assert "reduced motion" in body
+    visibility = QML.index("function onVisibleChanged()")
+    visible_body = QML[visibility : QML.index("            MouseArea", visibility)]
+    assert "overlayPulseAnnouncement" in visible_body
+    assert "overlay hidden" in visible_body
+
+
 def test_overlay_pulse_visible_status_includes_capture_lifecycle():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
