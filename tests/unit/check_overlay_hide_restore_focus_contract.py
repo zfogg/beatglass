@@ -1248,6 +1248,8 @@ def test_live_evidence_group_discloses_pulse_status_shortcut():
     assert "Ctrl+Alt+Shift+B focuses the beat pulse status" in body
     assert "; Ctrl+Alt+Shift+B focuses beat pulse status" in body
     assert "Track and deck metadata are unavailable" in body
+    assert "overlapping decks" in body
+    assert "evidence can be ambiguous" in body
 
 
 def test_live_evidence_group_name_discloses_pulse_status_shortcut():
