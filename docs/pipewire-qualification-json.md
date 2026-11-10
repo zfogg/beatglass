@@ -300,6 +300,9 @@ identity fail-closed even when other evidence fields are present.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
+The null-name regression in
+`tests/unit/check_native_host_provenance_name_null.py` keeps absent host identity
+fail-closed even when platform and timing evidence are present.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
