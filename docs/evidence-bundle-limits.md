@@ -104,6 +104,8 @@ Malformed manifest JSON is grouped under `parse`, keeping input decoding
 failures distinct from valid-but-invalid evidence contracts.
 Duplicate or conflicting artifact identities are grouped under `identity` in
 JSON output for direct manifest deduplication triage.
+Traversal, separator, and canonicalization failures are grouped under `path`
+for direct workspace-boundary triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.
