@@ -51,6 +51,7 @@ For each session, record the exact distribution, kernel, compositor/session vers
 - Transition artifacts may include an `artifact_sha256`; when present, it must be a complete hexadecimal SHA-256 digest so retained evidence can be integrity-checked before review.
 - Transition artifacts may include `capture_started_at`; when present, it must be an ISO-8601 timestamp with timezone, preserving when native capture began without accepting ambiguous local times.
 - Transition artifacts may include `capture_ended_at`; when both capture bounds are present, the end must be timezone-aware and not precede the start, preserving an auditable capture interval.
+- Transition artifacts may include `event_count`; when present, it must equal the serialized event list length, preventing truncated or appended records from silently passing review.
 - Exercise an X11 session with a real window manager, including stacking, input-shape behavior, monitor/DPI changes, fullscreen applications, and recovery from an off-screen overlay.
 - Exercise GNOME and KDE Wayland sessions separately. Probe layer-shell availability and compositor refusal; fall back to an ordinary compact window when the required capability is absent.
 - Verify that no fallback silently captures a microphone or a different output sink, and that the user can always recover the main controls.
