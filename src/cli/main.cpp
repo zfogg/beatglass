@@ -50,7 +50,9 @@ int main(int argc, char** argv) {
   try {
     const auto r = replay ? beatglass::replay_file(path, [json](std::uint64_t frame, const beatglass::TempoResult& state) {
       if (json) { json_result("replay", state, frame); return; }
-      std::cout << "observed frame: " << frame << " tempo: ";
+      const auto duration = state.metadata.sample_rate
+          ? static_cast<double>(state.metadata.frames) / state.metadata.sample_rate : 0.0;
+      std::cout << "observed frame: " << frame << " duration seconds: " << duration << " tempo: ";
       if (state.bpm) std::cout << *state.bpm; else std::cout << "unknown";
       std::cout << " state: " << beatglass::cli::state_label(state.state) << "\n";
     }, [json](const beatglass::ReplayBeat& beat) {
