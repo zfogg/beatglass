@@ -1556,7 +1556,7 @@ ApplicationWindow {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
         window.overlayDisplaySelectionRequired = false
         window.overlayDisplayRecoveryPending = false
-        window.announceCaptureRecoveryState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.")
+        window.focusOverlayRestoredState("DJ overlay display selection persisted for " + name + "; Show, Restore, and Reapply actions are enabled.", overlaySettingsRetentionReviewAction)
         return true
     }
     function hideOverlayAndRestoreControls() {
