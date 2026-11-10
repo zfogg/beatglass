@@ -1126,3 +1126,11 @@ def test_bridge_settings_failure_propagates_focus_result():
     assert "overlayLaunchFallbackActive = true" in body
     assert "overlayDisplayRecoveryPending = true" in body
     assert "return window.focusOverlayAvailabilityRecovery" in body
+
+
+def test_settings_recovery_failure_propagates_focus_result():
+    start = QML.index("function focusOverlaySettingsRecoveryFailure")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "overlayDisplayRecoveryPending = true" in body
+    assert "return window.focusOverlayRestoreFailure" in body
