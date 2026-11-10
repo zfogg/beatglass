@@ -2047,7 +2047,7 @@ ApplicationWindow {
                     + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "")
                     + "; beat pulse " + (beatPulse.running ? "active" : "idle")
                 Accessible.role: Accessible.Grouping
-                Accessible.description: "Current live status, tempo, harmony, beat-pulse period, capture state, and recovery action for the DJ overlay." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
+                Accessible.description: "Current live status, tempo, harmony, beat-pulse period, capture state, and recovery action for the DJ overlay. Ctrl+Alt+Shift+B focuses the beat pulse status." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
                 ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true

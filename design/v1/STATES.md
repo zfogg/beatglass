@@ -374,6 +374,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Beat pulse status focus contract | Keyboard user needs to inspect pulse state without pointer access | Ctrl+Alt+Shift+B focuses the pulse Status and announces its current gate and latest transition. |
 | Beat pulse shortcut discoverability contract | Keyboard users review the overlay shortcut help | The visible and accessible shortcut help names Ctrl+Alt+Shift+B and explains that it focuses beat pulse status. |
 | Beat pulse focus indicator contract | Pulse Status receives keyboard focus through Tab or Ctrl+Alt+Shift+B | Draw a theme-accent focus ring with sufficient inset so keyboard focus is visible without changing pulse semantics. |
+| Live evidence pulse shortcut contract | Assistive technology enters the live-evidence group | Include the pulse-status focus shortcut in the group description alongside timing, capture, and recovery context. |
 | Live evidence pulse summary contract | Overlay live-evidence grouping is announced to assistive technology | Include beat-pulse active/idle state alongside capture status and stale-evidence state. |
 | Beat pulse period status contract | Valid BPM drives a running pulse | Expose the computed millisecond beat period in the visible/accessibility status for timing transparency. |
 | Live evidence timing description contract | Assistive technology enters the overlay live-evidence group | Name beat-pulse timing alongside tempo, harmony, capture, and recovery context. |
