@@ -1548,7 +1548,7 @@ ApplicationWindow {
     function handleOverlayRetryButtonAction() {
         if (window.overlayRecoveryPausedByUser) {
             window.focusOverlayRecoveryPauseState("Overlay recovery is paused; Resume recovery before retrying.", resumeOverlayRecovery)
-            return
+            return false
         }
         window.overlayRecoveryPausedByUser = false
         window.overlayRecoveryAttemptCount += 1
@@ -1645,6 +1645,7 @@ ApplicationWindow {
         window.stopOverlayRecoveryAttempts()
         window.announceCaptureRecoveryState("Overlay recovery paused; Resume recovery is available. Live evidence remains stale until fresh capture arrives.")
         resumeOverlayRecovery.forceActiveFocus()
+        return true
     }
     function handleOverlayPausedPageShortcut() {
         window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready. Live evidence remains stale until fresh capture arrives.")

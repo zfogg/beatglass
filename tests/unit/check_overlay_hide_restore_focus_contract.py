@@ -754,3 +754,10 @@ def test_clear_safe_mode_action_returns_result():
     assert "return true" in body
     assert "resetOverlayRecoveryAttempts()" in body
     assert "retryOverlay.forceActiveFocus()" in body
+def test_stop_recovery_action_returns_result():
+    start = QML.index("function handleOverlayStopRecoveryAction")
+    body = QML[start : QML.index("    function handleOverlayPausedPageShortcut", start)]
+    assert "return false" in body
+    assert "stopOverlayRecoveryAttempts()" in body
+    assert "resumeOverlayRecovery.forceActiveFocus()" in body
+    assert "return true" in body
