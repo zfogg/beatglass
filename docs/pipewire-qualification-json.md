@@ -317,3 +317,6 @@ If present, host `clock_source_phase_offset_ns` must be numeric; boolean values
 are invalid.
 If present, host `clock_source_stability` must be a non-empty string describing
 the selected source's stability classification.
+On POSIX hosts this mode-preservation behavior is covered by an executable
+permission regression test; Windows qualification uses the platform's native
+permission semantics.

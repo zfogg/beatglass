@@ -1,4 +1,6 @@
 import json
+import os
+import stat
 import subprocess
 import tempfile
 from pathlib import Path
@@ -21,6 +23,10 @@ with tempfile.TemporaryDirectory() as directory:
     nested = Path(directory) / "nested" / "evidence" / "report.json"
     subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(nested)], check=True)
     assert nested.exists()
+    if os.name != "nt":
+        os.chmod(report, 0o640)
+        subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(host), str(report)], check=True)
+        assert stat.S_IMODE(report.stat().st_mode) == 0o640
     result = json.loads(report.read_text())
     assert result["schema"] == "beatglass-native-host-provenance-v1"
     assert result["valid"] is True
