@@ -1195,11 +1195,11 @@ int main(int argc, char** argv) {
 #endif
     const auto displayed_live_status = live_presentation.stale ? live_status + "  [stale evidence — reacquiring]" : live_status;
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(displayed_live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(displayed_live_status) | color(Color::GrayLight) | italic;
-    const auto corrected_bpm = live_bpm ? std::optional<float>(*live_bpm * live_bpm_multiplier) : std::nullopt;
+    const auto corrected_bpm = live_presentation.stale || !live_bpm ? std::optional<float>{} : std::optional<float>{*live_bpm * live_bpm_multiplier};
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
     const auto live_key_label = live_presentation.key;
     const auto live_chord_label = live_presentation.chord;
-    const auto live_tonal_label = live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history);
+    const auto live_tonal_label = live_presentation.stale ? std::string("stale evidence — waiting for fresh tonal windows") : live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history);
 #else
     const std::string live_key_label = "—";
     const std::string live_chord_label = "—";
