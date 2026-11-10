@@ -544,3 +544,21 @@ def test_clear_safe_mode_is_idempotent_before_limit():
     assert "safe mode is not active" in body
     assert "return" in body
     assert "resetOverlayRecoveryAttempts()" in body
+
+
+def test_show_button_requires_available_display():
+    start = QML.index("function handleOverlayShowButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowAction", start)]
+    assert "overlayDisplaySelectionRequired" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return" in body
+
+
+def test_show_button_requires_available_display():
+    start = QML.index("function handleOverlayShowButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowAction", start)]
+    assert "overlayDisplaySelectionRequired" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return" in body

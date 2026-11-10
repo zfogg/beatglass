@@ -304,3 +304,5 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Size edit focus recovery | User chooses or fails to apply an overlay size | Keep the size selector focused for immediate keyboard correction, announce the applied or persisted size, and retain stale or pending evidence guidance. |
 | Retry while paused guard | A retry action is requested while recovery is paused | Keep the pause boundary intact, explain that Resume is required, and focus Resume instead of silently starting a retry. |
 | Clear safe-mode guard | Clear safe mode is requested before the bounded retry limit is reached | Keep retry bookkeeping stable, explain that safe mode is not active, and return focus to Retry. |
+| Show overlay display guard | Show is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
+| Show overlay display guard | Show is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
