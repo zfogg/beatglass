@@ -53,7 +53,7 @@ if summary is not None:
         raise SystemExit("native qualification summary lacks native execution attempt")
     if summary.get("qualified") is True and summary.get("native_execution_blockers"):
         raise SystemExit("native qualification summary retains execution blockers")
-    if "commit" in summary and (not isinstance(summary["commit"], str) or not summary["commit"].strip()):
+    if "commit" in summary and (not isinstance(summary["commit"], str) or not summary["commit"].strip() or any(ord(char) < 32 for char in summary["commit"])):
         raise SystemExit("native qualification summary has invalid commit provenance")
     if "host_os" in summary and summary["host_os"] != host:
         raise SystemExit("native qualification summary host does not match runner host")
