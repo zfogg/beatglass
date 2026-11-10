@@ -1027,3 +1027,5 @@ Successful visual-state restore now clears the recovery-required marker, so the 
 Failed visual-state restore now sets the recovery-required marker, keeping the UI honest when geometry or native visual settings cannot be reapplied.
 
 Native resize or opacity application failures now retain the recovery-required marker, so partial visual restoration cannot be reported as ready.
+
+An invalid persisted opacity now keeps the visual recovery marker set even when safe 90 percent opacity is applied, making the fallback explicit until settings are reviewed.
