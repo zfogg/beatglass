@@ -136,6 +136,7 @@ TestCase {
         fakeCapture.status = "Monitoring"
         action.clicked()
         verify(app.overlayCaptureEvidenceStale)
+        verify(action.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("monitoring stopped") >= 0)
         app.destroy()
     }
