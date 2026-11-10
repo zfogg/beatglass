@@ -155,3 +155,5 @@ When both timestamps and durations are provided, adjacent process intervals
 must not overlap.
 Lifecycle events must occur in `start`, `process`, `error`, `restart` order;
 duplicate lifecycle boundaries are rejected.
+When present, top-level `event_count` must be a positive integer equal to the
+number of evidence events.
