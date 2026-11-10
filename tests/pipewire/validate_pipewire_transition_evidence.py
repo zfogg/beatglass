@@ -125,6 +125,11 @@ if reacquisition is not None:
         raise SystemExit("reacquisition evidence has no captured samples")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
+    if reacquisition.get("device_id") is not None:
+        if not isinstance(reacquisition["device_id"], str) or not reacquisition["device_id"].strip():
+            raise SystemExit("reacquisition evidence has an empty device identity")
+        if reacquisition["device_id"] != restart.get("device_id"):
+            raise SystemExit("reacquisition device identity does not match restart")
     restart_index = events.index(restart)
     if not any(event.get("event") == "process" and event.get("epoch") == restart.get("epoch")
                and isinstance(event.get("sample_count"), int) and not isinstance(event.get("sample_count"), bool)
