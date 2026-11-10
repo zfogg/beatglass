@@ -356,6 +356,8 @@ The machine-readable schema encodes this minimum with `minItems: 2` in
 addition to the executable validator checks.
 Its platform enum is intentionally limited to `linux`, `windows`, and `macos`,
 matching the host provenance validator.
+The schema also encodes a minimum length of one for report names, alongside
+the validator's visible-text check.
 Reports that list only one required field, or neither, are rejected for the
 same reason; checked metadata must prove both identity dimensions.
 Required field names are case-sensitive; display-cased variants such as
