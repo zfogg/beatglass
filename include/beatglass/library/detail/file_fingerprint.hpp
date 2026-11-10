@@ -12,6 +12,16 @@ enum class FingerprintStatus {
   /** File size or modification time changed during the read. */ changed,
   /** The file could not be read or the digest failed. */ error
 };
+/** Stable user-facing label for a fingerprint outcome. */
+inline const char* fingerprint_status_label(FingerprintStatus status) noexcept {
+  switch (status) {
+    case FingerprintStatus::ok: return "ok";
+    case FingerprintStatus::cancelled: return "cancelled";
+    case FingerprintStatus::changed: return "changed";
+    case FingerprintStatus::error: return "error";
+  }
+  return "error";
+}
 /** SHA-256 evidence for the bytes observed by one read, with file attributes around that read. It is not an opened-decoder identity or immunity to concurrent mutation. */
 struct FileFingerprint {
   /** Outcome; only ok permits use of remaining fields. */ FingerprintStatus status{FingerprintStatus::error};

@@ -53,3 +53,9 @@ TEST_CASE("file fingerprint reports observer exceptions") {
   auto failed = fingerprint_file(f.path, {}, [](auto) { throw std::runtime_error("observer failed"); });
   REQUIRE(failed.status == FingerprintStatus::error); REQUIRE(failed.diagnostic == "observer failed");
 }
+TEST_CASE("file fingerprint statuses have stable labels") {
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::ok)) == "ok");
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::cancelled)) == "cancelled");
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::changed)) == "changed");
+ CHECK(std::string(fingerprint_status_label(FingerprintStatus::error)) == "error");
+}

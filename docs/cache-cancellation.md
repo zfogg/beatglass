@@ -11,3 +11,7 @@ recovery request arrives during the SQLite iteration, it throws
 `CollectionCancelled` and leaves every retryable row unchanged.
 The targeted `retryable_run(id)` lookup follows the same rule before and after
 its SQLite step.
+
+Recovery/UI code can use `fingerprint_status_label` for the stable labels
+`ok`, `cancelled`, `changed`, and `error`; diagnostics remain supplemental
+detail rather than machine-readable keys.
