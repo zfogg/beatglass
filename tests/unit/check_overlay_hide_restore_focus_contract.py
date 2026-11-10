@@ -1170,3 +1170,14 @@ def test_geometry_state_announcement_reports_validity():
     assert "return false" in body
     assert "Live evidence remains stale until fresh capture arrives." in body
     assert "return true" in body
+
+
+def test_capture_startup_and_attach_failures_report_handled_result():
+    attach_start = QML.index("function focusOverlayAttachFailure")
+    attach = QML[attach_start : QML.index("    function focusOverlayCaptureStartupFailure", attach_start)]
+    startup_start = QML.index("function focusOverlayCaptureStartupFailure")
+    startup = QML[startup_start : QML.index("    function focusOverlayRecoveryAction", startup_start)]
+    assert "overlayDisplaySelectionRequired = true" in attach
+    assert "return true" in attach
+    assert "overlayDisplayRecoveryPending = true" in startup
+    assert "return true" in startup
