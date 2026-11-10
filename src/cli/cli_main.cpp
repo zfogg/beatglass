@@ -395,11 +395,13 @@ int main(int argc, char** argv) {
 #ifdef BEATGLASS_CLI_LIBRARY
   std::unique_ptr<beatglass::library::StorageOwner> library_storage = std::make_unique<beatglass::library::StorageOwner>();
   std::string library_storage_status;
+  std::size_t library_retryable_count = 0;
   if (!snapshot) if (const auto config = preferences_path(); !config.empty()) {
     std::error_code storage_error;
     std::filesystem::create_directories(config.parent_path(), storage_error);
     const auto database = config.parent_path() / "library.sqlite3";
     if (!library_storage->open({database}, &library_storage_status)) library_storage.reset();
+    else library_retryable_count = library_storage->retryable_runs().size();
   }
 #endif
 #ifdef _WIN32
@@ -504,10 +506,12 @@ int main(int argc, char** argv) {
       AnalysisBatch batch;
       for (const auto& path : paths) {
         if (stop_token.stop_requested()) break;
+#ifdef BEATGLASS_CLI_LIBRARY
+        std::optional<CacheSource> cache_identity;
+#endif
         try {
         const auto metadata = beatglass::read_metadata(path);
         analysis_total.store(metadata.frames, std::memory_order_release);
-        std::optional<CacheSource> cache_identity;
 #ifdef BEATGLASS_CLI_LIBRARY
         if (library_storage_ptr) {
           cache_identity = cache_source(path);
@@ -564,6 +568,10 @@ int main(int argc, char** argv) {
         batch_completed.fetch_add(1, std::memory_order_acq_rel);
         } catch (const std::exception& error) {
           if (stop_token.stop_requested()) break;
+#ifdef BEATGLASS_CLI_LIBRARY
+          if (library_storage_ptr && cache_identity && library_storage_ptr->cache())
+            library_storage_ptr->cache()->mark_retryable(cache_identity->run_id, {cache_identity->identity.content_hash, cache_identity->identity.engine_version, cache_identity->identity.configuration_id, cache_identity->identity.mode});
+#endif
           batch.errors.emplace_back(path, error.what());
           batch_completed.fetch_add(1, std::memory_order_acq_rel);
         }
@@ -774,7 +782,11 @@ int main(int argc, char** argv) {
     else rows.push_back(library_menu->Render() | vscroll_indicator | frame);
     const auto analyzed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return completed_analyses.contains(tracks[index].path); });
     const auto failed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return analysis_errors.contains(tracks[index].path); });
-    const auto library_summary = hbox({text(std::to_string(library_indices.size())) | bold | color(Color::Cyan), text(" visible  •  "), text(std::to_string(analyzed_count)) | bold | color(Color::GreenLight), text(" analyzed  •  "), text(std::to_string(failed_count)) | bold | color(failed_count ? Color::RedLight : Color::GrayLight), text(" failed")}) | italic;
+    auto library_summary = hbox({text(std::to_string(library_indices.size())) | bold | color(Color::Cyan), text(" visible  •  "), text(std::to_string(analyzed_count)) | bold | color(Color::GreenLight), text(" analyzed  •  "), text(std::to_string(failed_count)) | bold | color(failed_count ? Color::RedLight : Color::GrayLight), text(" failed")
+#ifdef BEATGLASS_CLI_LIBRARY
+      , text("  •  "), text(std::to_string(library_retryable_count)) | bold | color(library_retryable_count ? Color::YellowLight : Color::GrayLight), text(" recovery")
+#endif
+      }) | italic;
     const auto name = selected >= 0 ? tracks[selected].title : "No track selected";
     const auto duration = result ? format_duration(result->metadata)
         : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata
