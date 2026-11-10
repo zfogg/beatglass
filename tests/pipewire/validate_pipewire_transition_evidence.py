@@ -46,6 +46,10 @@ positions = [event.get("sample_position") for event in events if isinstance(even
 if positions and (len(positions) != len(events) or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in positions)
                  or positions != sorted(positions)):
     raise SystemExit("transition sample positions must be complete and monotonic")
+sequences = [event.get("sequence") for event in events if isinstance(event, dict) and event.get("sequence") is not None]
+if sequences and (len(sequences) != len(events) or sequences != list(range(len(events)))
+                 or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in sequences)):
+    raise SystemExit("transition event sequences must be complete and contiguous")
 error_event = next(event for event in events if event.get("event") == "error")
 if error_event.get("discontinuity") is not True:
     raise SystemExit("transition evidence has no discontinuity marker")

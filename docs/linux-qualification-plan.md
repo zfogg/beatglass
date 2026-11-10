@@ -46,6 +46,7 @@ For each session, record the exact distribution, kernel, compositor/session vers
 - Transition events may include `sample_position`; when present, positions must be complete and monotonic, and successive process blocks may not overlap their captured sample ranges. This preserves discontinuity/reacquisition timing evidence without inventing positions.
 - Error events may include `error_domain`; when present, every error event must carry a non-empty domain and the restart must state a non-empty `recovery_reason`, keeping native failure provenance tied to the claimed recovery.
 - Transition artifacts may include `host` provenance with `platform`, `daemon_version`, and `capture_command`. When present, these fields must identify a supported host and the exact daemon/capture invocation, without turning pending artifacts into qualification claims.
+- Transition events may include a zero-based `sequence`; when present, it must be complete and contiguous, so dropped or reordered evidence records are rejected before review.
 - Exercise an X11 session with a real window manager, including stacking, input-shape behavior, monitor/DPI changes, fullscreen applications, and recovery from an off-screen overlay.
 - Exercise GNOME and KDE Wayland sessions separately. Probe layer-shell availability and compositor refusal; fall back to an ordinary compact window when the required capability is absent.
 - Verify that no fallback silently captures a microphone or a different output sink, and that the user can always recover the main controls.
