@@ -110,6 +110,11 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no holdover state")
         if host.get("clock_quality") is not None and (not isinstance(host["clock_quality"], str) or not host["clock_quality"].strip()):
             raise SystemExit("transition host provenance has no clock quality")
+        if host.get("clock_stratum") is not None and (
+                not isinstance(host["clock_stratum"], int)
+                or isinstance(host["clock_stratum"], bool)
+                or host["clock_stratum"] <= 0):
+            raise SystemExit("transition host provenance has invalid clock stratum")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
