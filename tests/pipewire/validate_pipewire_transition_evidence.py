@@ -148,6 +148,9 @@ if reacquisition is not None:
     if reacquisition.get("error_domain") is not None:
         if not isinstance(reacquisition["error_domain"], str) or not reacquisition["error_domain"].strip():
             raise SystemExit("reacquisition evidence has an empty error domain")
+    if reacquisition.get("recovery_reason") is not None:
+        if not isinstance(reacquisition["recovery_reason"], str) or not reacquisition["recovery_reason"].strip():
+            raise SystemExit("reacquisition evidence has an empty recovery reason")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
