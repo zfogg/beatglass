@@ -101,6 +101,10 @@ if not any(isinstance(event.get("sample_count"), int) and not isinstance(event.g
            and event.get("epoch") == start.get("epoch") for event in events if event.get("event") == "process"):
     raise SystemExit("process evidence has no captured samples")
 restart = next(event for event in events if event.get("event") == "restart")
+if (not isinstance(start.get("epoch"), int) or isinstance(start.get("epoch"), bool)
+        or start["epoch"] <= 0 or not isinstance(restart.get("epoch"), int)
+        or isinstance(restart.get("epoch"), bool) or restart["epoch"] <= 0):
+    raise SystemExit("lifecycle epochs must be positive integers")
 if restart.get("epoch") <= start.get("epoch"):
     raise SystemExit("restart does not advance the capture epoch")
 if not isinstance(restart.get("serial"), str) or not restart["serial"].strip():

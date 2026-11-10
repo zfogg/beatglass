@@ -135,3 +135,6 @@ requirements for `sample_rate` and `channels`.
 
 When both lifecycle boundaries provide `device_id`, the restart identity must
 match the start identity so a recovery cannot silently switch devices.
+
+The `epoch` values on the start and restart lifecycle events must be positive
+integers, with restart strictly advancing beyond start.
