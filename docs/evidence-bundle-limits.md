@@ -67,6 +67,8 @@ The generator accepts `--json` to mirror the report to stdout for automation
 while still retaining the durable output file.
 Generated readiness reports expose generation error counts and categories for
 dashboard consumers, matching the ingestion and verifier JSON contracts.
+They also expose aggregate retained artifact count and byte totals for quick
+qualification-volume checks without traversing each platform row.
 Readiness output is capped at 16 MiB by default; constrained environments can
 override this with `--max-report-bytes`.
 Automation can pass `--json` to receive the complete readiness object on
