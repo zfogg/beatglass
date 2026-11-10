@@ -95,18 +95,20 @@ if [[ -z "$usage_description" || "$usage_description_lower" != *system* || "$usa
 fi
 echo "Production bundle usage description: $usage_description"
 desktop_binary="$out_dir/build/beatglass-desktop.app/Contents/MacOS/beatglass-desktop"
+cli_binary="$out_dir/build/beatglass-cli"
+tool_binary="$out_dir/build/beatglass-tool"
 tap_bundle="$out_dir/build/beatglass-coreaudio-smoke.app"
 tap_binary="$tap_bundle/Contents/MacOS/beatglass-coreaudio-smoke"
 recovery_bundle="$out_dir/build/beatglass-coreaudio-recovery.app"
 recovery_binary="$recovery_bundle/Contents/MacOS/beatglass-coreaudio-recovery"
-for required_path in "$desktop_binary" "$tap_bundle" "$tap_binary" "$recovery_bundle" "$recovery_binary"; do
+for required_path in "$desktop_binary" "$cli_binary" "$tool_binary" "$tap_bundle" "$tap_binary" "$recovery_bundle" "$recovery_binary"; do
   if [[ "$required_path" == *.app && ! -d "$required_path" ]] ||
      [[ "$required_path" != *.app && ! -x "$required_path" ]]; then
     echo "Required native qualification artifact not found: $required_path" >&2
     exit 1
   fi
 done
-for native_binary in "$desktop_binary" "$tap_binary" "$recovery_binary"; do
+for native_binary in "$desktop_binary" "$cli_binary" "$tool_binary" "$tap_binary" "$recovery_binary"; do
   if ! file -b "$native_binary" | grep -q 'Mach-O'; then
     echo "Qualification artifact is not a native Mach-O executable: $native_binary" >&2
     exit 1
@@ -136,7 +138,7 @@ validate_bundle_executable() {
 validate_bundle_executable "$out_dir/build/beatglass-desktop.app" "beatglass-desktop"
 validate_bundle_executable "$tap_bundle" "beatglass-coreaudio-smoke"
 validate_bundle_executable "$recovery_bundle" "beatglass-coreaudio-recovery"
-echo "Native qualification artifacts: desktop=$desktop_binary tap=$tap_binary recovery=$recovery_binary"
+echo "Native qualification artifacts: desktop=$desktop_binary cli=$cli_binary tool=$tool_binary tap=$tap_binary recovery=$recovery_binary"
 validate_bundle_identity() {
   local bundle="$1" expected_executable="$2" expected_identifier="$3" expected_name="$4"
   local plist="$bundle/Contents/Info.plist" actual_executable actual_identifier actual_name package_type bundle_version
