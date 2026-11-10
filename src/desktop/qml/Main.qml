@@ -3523,14 +3523,16 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchAcceptedCount > 0
                                 Layout.fillWidth: true
                                 from: 0; to: 1
-                                value: visible && window.analysisJobBridge.batchAcceptedCount > 0
-                                       ? Math.min(1, (window.analysisJobBridge.batchCompletedCount + window.analysisJobBridge.batchFailedCount + window.analysisJobBridge.batchCancelledCount) / window.analysisJobBridge.batchAcceptedCount)
+                                value: visible && window.analysisJobBridge.batchProgressKnown
+                                       ? Math.min(1, Math.max(0, window.analysisJobBridge.batchProgressFraction))
+                                       : visible && window.analysisJobBridge.batchAcceptedCount > 0
+                                         ? Math.min(1, (window.analysisJobBridge.batchCompletedCount + window.analysisJobBridge.batchFailedCount + window.analysisJobBridge.batchCancelledCount) / window.analysisJobBridge.batchAcceptedCount)
                                        : 0
-                                indeterminate: visible && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") && value === 0
+                                indeterminate: visible && !window.analysisJobBridge.batchProgressKnown && (window.analysisJobBridge.status === "Queued" || window.analysisJobBridge.status === "Running") && value === 0
                                 Accessible.name: "Analysis batch completion"
                                 Accessible.value: visible ? (indeterminate ? "in progress; " : "") + Math.round(value * 100) + "% complete; " + window.analysisJobBridge.batchCompletedCount + " completed, " + window.analysisJobBridge.batchFailedCount + " failed, " + window.analysisJobBridge.batchCancelledCount + " cancelled" : "unavailable; no accepted batch items"
                                 Accessible.role: Accessible.ProgressBar
-                                Accessible.description: visible ? "Completed, failed, or cancelled items out of the accepted analysis batch. Cancel is available while running; retry or discard recovery is available after terminal failure." : "Batch progress is unavailable."
+                                Accessible.description: visible ? (window.analysisJobBridge.batchProgressKnown ? "Determinate source-frame progress for the accepted analysis batch." : "Completed, failed, or cancelled items out of the accepted analysis batch; source-frame total is not available yet.") + " Cancel is available while running; retry or discard recovery is available after terminal failure." : "Batch progress is unavailable."
                                 ToolTip.text: visible ? "Batch completion: " + Math.round(value * 100) + "%" : "Batch progress unavailable"
                             }
                             Label {
