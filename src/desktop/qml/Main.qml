@@ -5590,6 +5590,7 @@ ApplicationWindow {
         title: "Choose a folder to browse"
         onAccepted: {
             window.browseFolder = selectedFolder
+            window.catalogDiagnostic = ""
             search.text = ""
             window.recursiveCatalogActive = false
             window.recursiveCatalogRows = []
