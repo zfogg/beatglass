@@ -1523,13 +1523,15 @@ ApplicationWindow {
     function handleOverlayClickThroughShortcut() {
         return window.handleOverlayClickThroughShortcutAction()
     }
-    function handleOverlayRetryShortcut() {
+    function handleOverlayRetryShortcutAction() {
         navigation.currentIndex = 1
         window.show()
         window.raise()
         window.requestActivate()
-        window.announceCaptureRecoveryState("DJ overlay retry requested; control window remains visible until recovery succeeds. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : ""))
-        window.handleOverlayRetryAction()
+        return window.handleOverlayRetryButtonAction()
+    }
+    function handleOverlayRetryShortcut() {
+        return window.handleOverlayRetryShortcutAction()
     }
     function handleOverlayRetryAction() {
         if (window.overlayRecoveryPausedByUser) {
