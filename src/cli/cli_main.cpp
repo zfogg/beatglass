@@ -26,6 +26,7 @@
 #include <cctype>
 #include <cstdint>
 #include <filesystem>
+#include <fstream>
 #include <future>
 #include <iomanip>
 #include <iostream>
@@ -34,6 +35,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <cstdlib>
 #include <thread>
 #include <chrono>
 #include <condition_variable>
@@ -41,6 +43,49 @@
 #include <mutex>
 
 namespace {
+
+struct CliPreferences {
+  bool reduce_motion{};
+  int seek_step{5};
+};
+
+std::filesystem::path preferences_path() {
+#ifdef _WIN32
+  if (const auto* app_data = std::getenv("APPDATA"); app_data && *app_data)
+    return std::filesystem::path(app_data) / "Beatglass" / "beatglass-cli.settings";
+#else
+  if (const auto* config_home = std::getenv("XDG_CONFIG_HOME"); config_home && *config_home)
+    return std::filesystem::path(config_home) / "beatglass" / "settings";
+  if (const auto* home = std::getenv("HOME"); home && *home)
+    return std::filesystem::path(home) / ".config" / "beatglass" / "settings";
+#endif
+  return {};
+}
+
+CliPreferences load_preferences() {
+  CliPreferences preferences;
+  const auto path = preferences_path();
+  if (path.empty()) return preferences;
+  std::ifstream input(path);
+  std::string key, value;
+  while (input >> key >> value) {
+    if (key == "reduce_motion") preferences.reduce_motion = value == "1";
+    else if (key == "seek_step") {
+      try { preferences.seek_step = std::clamp(std::stoi(value), 1, 60); } catch (...) {}
+    }
+  }
+  return preferences;
+}
+
+void save_preferences(const CliPreferences& preferences) {
+  const auto path = preferences_path();
+  if (path.empty()) return;
+  std::error_code error;
+  std::filesystem::create_directories(path.parent_path(), error);
+  if (error) return;
+  std::ofstream output(path, std::ios::trunc);
+  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\n";
+}
 using namespace ftxui;
 struct Track { std::filesystem::path path; std::string title; std::optional<beatglass::FileMetadata> metadata; };
 std::string format_bpm(const std::optional<float>& bpm) {
@@ -299,6 +344,7 @@ int main(int argc, char** argv) {
   const bool snapshot = argc > 1 && std::string(argv[1]) == "--snapshot";
   std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::current_path()) : (argc > 1 ? argv[1] : std::filesystem::current_path());
   auto tracks = discover(root, true);
+  const auto preferences = load_preferences();
   bool sort_by_path = false;
   std::string folder_text = root.string();
   std::string filter;
@@ -332,7 +378,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> tonal_history;
   std::filesystem::path analysis_path;
   bool busy = false;
-  bool reduce_motion = false;
+  bool reduce_motion = preferences.reduce_motion;
 #ifdef _WIN32
   CliPlayback playback;
 #else
@@ -464,12 +510,17 @@ int main(int argc, char** argv) {
   auto search_bar = Renderer(Container::Horizontal({filter_input, clear_search_button}), [&] {
     return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 32) | borderRounded, text(" "), action(clear_search_button->Render(), Color::Cyan)});
   });
-  std::string seek_step_text = "5";
+  std::string seek_step_text = std::to_string(preferences.seek_step);
   auto seek_step_input = Input(&seek_step_text, "seconds");
   auto seek_step = [&] {
     try { return std::clamp(std::stoi(seek_step_text), 1, 60); }
     catch (...) { return 5; }
   };
+  auto persist_preferences = [&] {
+    try { save_preferences(CliPreferences{reduce_motion, std::clamp(std::stoi(seek_step_text), 1, 60)}); } catch (...) { save_preferences(CliPreferences{reduce_motion, 5}); }
+  };
+  bool last_saved_reduce_motion = reduce_motion;
+  std::string last_saved_seek_step = seek_step_text;
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
   auto refresh_button = Button(" Refresh ", refresh);
   std::string sort_button_label = " Sort: title ";
@@ -812,7 +863,7 @@ int main(int argc, char** argv) {
     return vbox({tab_bar->Render(), tabs->Render() | flex}) | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto root_component = CatchEvent(body, [&](Event event) {
-    if (event == Event::Character("q") || event == Event::Escape) { screen.Exit(); return true; }
+    if (event == Event::Character("q") || event == Event::Escape) { persist_preferences(); screen.Exit(); return true; }
     if (event == Event::Character("1")) { tab = 0; return true; }
     if (event == Event::Character("2")) { tab = 1; return true; }
     if (event == Event::Character("3")) { tab = 2; return true; }
@@ -832,6 +883,11 @@ int main(int argc, char** argv) {
       return true;
     }
     if (event == Event::Custom) {
+      if (reduce_motion != last_saved_reduce_motion || seek_step_text != last_saved_seek_step) {
+        persist_preferences();
+        last_saved_reduce_motion = reduce_motion;
+        last_saved_seek_step = seek_step_text;
+      }
       if (!reduce_motion) ++spinner_frame;
 #ifdef _WIN32
       if (live_session && live_session->state() != beatglass::SourceState::stopped) {
