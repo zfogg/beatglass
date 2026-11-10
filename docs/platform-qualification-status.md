@@ -38,6 +38,31 @@ Playback epoch/recovery status: portable tests cover stale-state clearing and re
 
 This matrix records development evidence and the remaining gates. A build or headless test does not establish native desktop, audio, or overlay support.
 
+## Latest local qualification snapshot (2026-11-10)
+
+The Windows checkout passed the focused local qualification contracts from
+`build-otel-main` (Release):
+
+```text
+ctest --test-dir build-otel-main --output-on-failure -C Release \
+  -R 'windows_qualification_manifest_verifier|windows_qualification_script_syntax|issue76_qml_contract'
+100% tests passed (3/3)
+```
+
+The macOS checkout `/tmp/beatglass-native` built the full Release desktop
+configuration with Qt 6.12 and passed 437 of 440 registered tests. The three
+remaining failures are native/headless qualification gaps, not portable
+contract evidence: `macos_overlay_controller` failed to observe native mode
+revocation after overlay destruction, while `macos_overlay_navigation` and
+`desktop_navigation` timed out in the offscreen QML harness. The macOS run was
+performed with `QT_QPA_PLATFORM=offscreen`, `QT_QUICK_BACKEND=software`, and
+`QT_QUICK_CONTROLS_STYLE=Basic`; it therefore does not qualify a logged-in
+desktop, Core Audio routing, menu-bar recovery, or real overlay behavior.
+
+These results are retained as development evidence only. They do not change
+the platform rows below to `PASS`, and Linux native qualification remains
+unrun.
+
 | Platform | Current integrated/preparation evidence | Native gates still required |
 | --- | --- | --- |
 | Windows | `tests/windows/run_qualification.ps1` records build identity, configures/builds the x64 desktop targets, discovers tests, verifies artifacts, and can run CTest with `-RunTests`; endpoint-loss state and display selection/recovery have unit/QML coverage. | Real WASAPI loopback permission and routing, device removal/recovery on hardware, fullscreen and multi-monitor overlay behavior, tray recovery, DPI changes, and packaged runtime dependencies on supported Windows versions. |
