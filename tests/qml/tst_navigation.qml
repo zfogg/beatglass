@@ -13,7 +13,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    QtObject { id: fakeCapture; property string status: "Monitoring" }
+    QtObject { id: fakeCapture; property string status: "Monitoring"; function stop() { status = "Stopped" }; function start() { status = "Monitoring" } }
     QtObject {
         id: fakePlayback
         property string state: "Stopped"
@@ -127,6 +127,15 @@ TestCase {
         verify(monitoring.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("reacquiring") >= 0)
         fakeCapture.status = "Monitoring"
+        app.destroy()
+    }
+    function test_stoppingOverlayMonitoringMarksEvidenceStale() {
+        let app = shellWithOverlay.createObject(null)
+        let action = findChild(app, "overlayMonitoringAction")
+        fakeCapture.status = "Monitoring"
+        action.clicked()
+        verify(app.overlayCaptureEvidenceStale)
+        verify(app.overlayRecoveryAnnouncement.indexOf("monitoring stopped") >= 0)
         app.destroy()
     }
     function test_overlayAvailabilityFailureRestoresControls() {
