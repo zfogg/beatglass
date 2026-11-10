@@ -32,6 +32,14 @@
 #include <vector>
 #endif
 
+#include <cstdlib>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 #if defined(BEATGLASS_HAS_PIPEWIRE) && !defined(_WIN32) && !defined(__APPLE__)
 class CliPlayback final {
 public:
@@ -263,6 +271,37 @@ void save_preferences(const CliPreferences& preferences) {
   if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << preferences.live_endpoint_id << "\nlive_endpoint_name " << preferences.live_endpoint_name << "\nlibrary_folder " << std::quoted(preferences.library_folder) << "\n";
 }
 using namespace ftxui;
+
+bool open_folder_in_file_manager(const std::filesystem::path& folder, std::string& error) {
+  if (folder.empty() || !std::filesystem::is_directory(folder)) {
+    error = "Folder unavailable: " + folder.string();
+    return false;
+  }
+#ifdef _WIN32
+  const auto result = reinterpret_cast<std::intptr_t>(ShellExecuteW(nullptr, L"open", folder.wstring().c_str(), nullptr, nullptr, SW_SHOWNORMAL));
+  if (result <= 32) {
+    error = "Windows could not open the folder (ShellExecute error " + std::to_string(result) + ").";
+    return false;
+  }
+#elif defined(__APPLE__)
+  std::ostringstream quoted_path;
+  quoted_path << std::quoted(folder.string());
+  const auto command = "open -- " + quoted_path.str();
+  if (std::system(command.c_str()) != 0) {
+    error = "macOS could not open the folder.";
+    return false;
+  }
+#else
+  std::ostringstream quoted_path;
+  quoted_path << std::quoted(folder.string());
+  const auto command = "xdg-open -- " + quoted_path.str();
+  if (std::system(command.c_str()) != 0) {
+    error = "The desktop could not open the folder (xdg-open failed).";
+    return false;
+  }
+#endif
+  return true;
+}
 
 
 struct Track { std::filesystem::path path; std::string title; std::optional<beatglass::FileMetadata> metadata; };
@@ -1102,8 +1141,8 @@ int main(int argc, char** argv) {
   });
   auto open_folder_button = Button(" Open folder ", [&] {
     const std::filesystem::path requested(folder_text);
-    std::error_code error;
-    if (!std::filesystem::is_directory(requested, error)) { status = "Folder unavailable: " + folder_text; return; }
+    std::string error;
+    if (!open_folder_in_file_manager(requested, error)) { status = std::move(error); return; }
     root = requested; recursive = true; refresh(); status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
   });
   auto choose_folder_button = Button(" Choose folder… ", [&] {
@@ -1257,10 +1296,6 @@ int main(int argc, char** argv) {
             ? format_duration(*tracks[selected].metadata) : "—";
     const auto analysis_display = result ? present_analysis_view(AnalysisView{*result, waveform, beat_frames, key, chord, tonal_history, false}) : beatglass::PresentationState{};
     Elements cards = {metric("TEMPO", result ? analysis_display.tempo + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(analysis_display.beat_count) : "—", Color::YellowLight), metric("STATE", result ? analysis_display.status : "waiting", Color::Cyan)};
-    cards.push_back(text("Analyze selected") | color(Color::GreenLight));
-    cards.push_back(text("Analyze all") | color(Color::GreenLight));
-    cards.push_back(text("Sort: title") | color(Color::YellowLight));
-    cards.push_back(text("Sort title/path") | color(Color::YellowLight));
     const auto progress_total = analysis_total.load(std::memory_order_acquire);
     const auto progress_frames = analysis_frames.load(std::memory_order_acquire);
     const auto progress = progress_total ? std::min<std::uint64_t>(100, progress_frames * 100 / progress_total) : 0;
@@ -1292,11 +1327,14 @@ int main(int argc, char** argv) {
     const auto sample_rate = result ? result->metadata.sample_rate : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->sample_rate : 0;
     const auto channels = result ? result->metadata.channels : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->channels : 0;
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 6), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction) | size(HEIGHT, EQUAL, 5), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(format == "—" ? "Select a supported track to inspect it" : "Format: " + format) | bold, text(sample_rate ? "Sample rate: " + std::to_string(sample_rate) + " Hz   Channels: " + std::to_string(channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (result ? analysis_display.key : std::string("—")) + "   Chord: " + (result ? analysis_display.chord : std::string("—"))) | color(result && (analysis_display.key != "—" || analysis_display.chord != "—") ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + (result ? join_history(analysis_display.tonal_history) : std::string("—"))) | color(result && !analysis_display.tonal_history.empty() ? Color::GreenLight : Color::GrayLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(retry_analysis_button->Render(), Color::YellowLight),
+    const auto library_navigation = hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight)});
+    const auto library_recovery = hbox({action(retry_analysis_button->Render(), Color::YellowLight),
 #ifdef BEATGLASS_CLI_LIBRARY
       text(" "), action(recover_persisted_button->Render(), Color::MagentaLight),
 #endif
-      text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Recover persisted   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+      text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight)});
+    const auto library_seek = hbox({action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)});
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex}), hbox({action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), library_navigation, library_recovery, library_seek, separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
   auto set_live_presentation_state = [&](beatglass::TrackingState state) {
