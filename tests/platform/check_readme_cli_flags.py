@@ -17,3 +17,12 @@ missing = sorted(flag for flag in flags if flag not in README)
 if missing:
     raise SystemExit("README is missing parser flags: " + ", ".join(missing))
 print(f"README CLI flag coverage verified ({len(flags)} flags)")
+
+# Keep the shipped music CLI's short aliases and usage contract visible too.
+music_source = (ROOT / "src/cli/music_main.cpp").read_text(encoding="utf-8")
+for token in ("--help", "-h", "--version", "-V"):
+    if token in music_source and token not in README:
+        raise SystemExit(f"README is missing music CLI token: {token}")
+if "beatglass-music-cli" in music_source and "beatglass-music-cli" not in README:
+    raise SystemExit("README is missing beatglass-music-cli documentation")
+print("README music CLI alias coverage verified")
