@@ -58,7 +58,9 @@ Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
   if (stop.stop_requested()) return Publish::cancelled;
   cache.begin(run_id, key);
   return cache.publish(run_id, key, result, stop, [&] {
-    if (stop.stop_requested()) { cache.invalidate(key); return false; }
+    // Cancellation only abandons this in-flight publication. It is not proof
+    // that the existing completed cache entry is stale, so preserve it.
+    if (stop.stop_requested()) return false;
     const auto status = revalidate_file_identity(path, key.content, stop);
     if (status == FingerprintStatus::changed) cache.invalidate(key);
     return status == FingerprintStatus::ok;
