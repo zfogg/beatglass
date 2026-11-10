@@ -893,3 +893,15 @@ def test_size_shortcut_handles_unavailable_overlay():
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
     assert "resizeOverlay" in body
+
+
+def test_overlay_pulse_is_theme_aware_and_invalidates_stale_tracking():
+    start = QML.index("property real pulseOpacity")
+    body = QML[start : QML.index("            MouseArea", start)]
+    assert "pulseColor" in body
+    assert "Qt.darker" in body
+    assert "Qt.lighter" in body
+    assert 'status === "Tracking"' in body
+    assert "isFinite(bpm)" in body
+    assert "overlaySurface.pulseOpacity = 0.0" in body
+    assert "reduceMotion" in body
