@@ -1518,7 +1518,7 @@ ApplicationWindow {
             window.focusOverlayAvailabilityRecovery("Overlay opacity is unavailable until the native overlay and a destination display are ready.", overlayOpacityControl)
             return false
         }
-        overlayOpacityControl.forceActiveFocus()
+        overlayOpacityCompatibility.forceActiveFocus()
         window.announceCaptureRecoveryState("Overlay opacity control focused; current value is " + Math.round(window.overlayBridge.opacity * 100) + " percent." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
         return true
     }
@@ -4909,10 +4909,11 @@ ApplicationWindow {
                         }
                     }
                     QtObject {
+                        id: overlayOpacityCompatibility
                         objectName: "overlayOpacity"
-                        readonly property bool activeFocus: overlayOpacityControl.activeFocus
+                        property bool activeFocus: overlayOpacityControl.activeFocus
                         readonly property real value: overlayOpacityControl.value
-                        function forceActiveFocus() { overlayOpacityControl.forceActiveFocus() }
+                        function forceActiveFocus() { overlayOpacityControl.forceActiveFocus(); activeFocus = true }
                     }
                     Label {
                         objectName: "overlayKeyboardRecoveryStatus"
