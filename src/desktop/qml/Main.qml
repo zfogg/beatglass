@@ -2570,10 +2570,15 @@ ApplicationWindow {
         return window.focusOverlayAvailabilityRecovery("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.", overlayDisplay)
     }
     function announceOverlayGeometryState() {
-        if (!window.overlayBridge || !window.overlayBridge.geometry || window.overlayBridge.geometry.width <= 0)
+        const geometry = window.overlayBridge ? window.overlayBridge.geometry : null
+        if (!geometry || !isFinite(geometry.x) || !isFinite(geometry.y)
+                || !isFinite(geometry.width) || !isFinite(geometry.height)
+                || geometry.width <= 0 || geometry.height <= 0) {
+            window.focusOverlayGeometrySyncFailure()
             return false
+        }
         window.overlayCaptureEvidenceStale = true
-        window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels. Live evidence remains stale until fresh capture arrives.")
+        window.announceCaptureRecoveryState("DJ overlay geometry restored at " + geometry.width + " by " + geometry.height + " pixels. Live evidence remains stale until fresh capture arrives.")
         return true
     }
     function focusOverlayGeometrySyncFailure() {

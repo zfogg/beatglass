@@ -757,6 +757,8 @@ The live monitoring focus target repeats that stale-evidence context during Reac
 
 Opacity reset now rechecks its in-flight marker at activation time, rejecting duplicate native setter requests while a previous reset is still awaiting its bridge echo.
 
+Native geometry announcements now validate finite coordinates and both dimensions before claiming restoration; malformed snapshots keep geometry recovery pending and direct users to display recovery.
+
 Explicit Stop overlay monitoring now marks the last tempo/harmony snapshot stale immediately; restarting monitoring must return to Monitoring before those values are presented as current again.
 
 When the native overlay is available but no capture bridge is connected at startup, the overlay marks displayed estimates stale and announces that monitoring must connect before fresh evidence can be presented.
