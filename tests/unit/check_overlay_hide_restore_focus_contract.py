@@ -1262,6 +1262,7 @@ def test_overlay_actions_disclose_pulse_status_shortcut():
     assert "native overlay launch fallback is active" in body
     assert "recovery is pending" in body
     assert "Overlay window actions are unavailable" in body
+    assert "Overlay window actions are available" in body
 
 
 def test_overlay_keyboard_recovery_status_discloses_pulse_shortcut():
