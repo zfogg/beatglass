@@ -43,7 +43,7 @@ class EvidenceBundleTest(unittest.TestCase):
                     "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
             manifest.write_text(json.dumps(data), encoding="utf-8")
             errors = module.verify(root, manifest)
-            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
+            self.assertTrue(any("invalid artifact hash" in error or "invalid or duplicate artifact entry" in error for error in errors))
 
     def test_artifact_unknown_fields_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -63,7 +63,7 @@ class EvidenceBundleTest(unittest.TestCase):
                     "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
             manifest.write_text(json.dumps(data), encoding="utf-8")
             errors = module.verify(root, manifest)
-            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
+            self.assertTrue(any("invalid artifact hash" in error or "invalid or duplicate artifact entry" in error for error in errors))
 
     def test_artifact_hash_must_be_lowercase(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -1428,6 +1428,14 @@ class EvidenceBundleNegativeTest(unittest.TestCase):
             result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
             payload = json.loads(result.stdout)
             self.assertGreaterEqual(payload["error_categories"].get("freshness", 0), 1)
+
+    def test_json_groups_hash_format_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"linux","commit":"a"*40,"captured_at":"2020-01-01T00:00:00Z","environment":"x", "artifacts": [{"path":"a", "sha256":"bad"}], "scenarios": []}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("hash_format", 0), 1)
 
 if __name__ == "__main__":
     unittest.main()

@@ -113,6 +113,8 @@ def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT
         raw_expected = entry.get("sha256", "")
         expected = raw_expected.lower() if isinstance(raw_expected, str) else None
         canonical = Path(relative).as_posix() if isinstance(relative, str) else None
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            errors.append(f"invalid artifact hash: {relative}"); continue
         if (
             not isinstance(relative, str)
             or not isinstance(expected, str)
@@ -139,7 +141,6 @@ def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT
             or relative.endswith("/")
             or ":" in relative
             or any(char in relative for char in '<>"|?*')
-            or not re.fullmatch(r"[0-9a-f]{64}", expected)
             or (isinstance(relative, str) and "\x00" in relative)
             or not canonical
             or canonical != relative
@@ -282,6 +283,8 @@ def main() -> int:
                 category = "artifact_role"
             elif error.startswith("hash mismatch:"):
                 category = "hash"
+            elif error.startswith("invalid artifact hash:"):
+                category = "hash_format"
             elif error.startswith("commit "):
                 category = "commit"
             elif error.startswith(("scenario evidence shared:", "scenario evidence role mismatch:")):
