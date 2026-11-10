@@ -264,6 +264,8 @@ The machine-readable host contract is captured in
 the qualification authority and native execution evidence is still required.
 Before packaging a native run, validate the extracted host object directly:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json`.
+Malformed or ambiguous host JSON is rejected before any host fields are
+trusted; duplicate keys are not silently normalized.
 Pass a second path to emit a deterministic validation report for the bundle:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json REPORT.json`.
 Validate that generated report before packaging with:
