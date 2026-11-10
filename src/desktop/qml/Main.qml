@@ -1127,6 +1127,27 @@ ApplicationWindow {
         window.catalogDiagnostic = window.libraryCatalogBridge && window.libraryCatalogBridge.lastDiagnostic !== undefined
                 ? window.libraryCatalogBridge.lastDiagnostic : ""
     }
+    function configuredLibraryFolders() {
+        return typeof libraryPreferences !== "undefined" && libraryPreferences.folders
+            ? libraryPreferences.folders : []
+    }
+    function localFolderUrl(path) {
+        if (path.indexOf("://") >= 0) return path
+        const normalized = path.replace(/\\/g, "/")
+        return "file://" + (normalized.charAt(0) === "/" ? "" : "/") + normalized
+    }
+    function scanConfiguredLibraryFolders() {
+        const roots = window.configuredLibraryFolders()
+        let rows = []
+        let diagnostics = []
+        for (let i = 0; i < roots.length; ++i) {
+            const result = window.libraryCatalogBridge.browseRecursive(window.localFolderUrl(roots[i]), search.text)
+            rows = rows.concat(result)
+            if (window.libraryCatalogBridge.lastDiagnostic !== "") diagnostics.push(roots[i] + ": " + window.libraryCatalogBridge.lastDiagnostic)
+        }
+        window.catalogDiagnostic = diagnostics.join("; ")
+        return rows
+    }
     function resetLibraryBrowserSelection(message) {
         window.clearSelectedAudio()
         browser.currentIndex = -1
@@ -1152,7 +1173,7 @@ ApplicationWindow {
         window.resetLibraryBrowserSelection("Moved to the parent Library folder; choose an audio source to inspect.")
     }
     function openLibraryFolderChooser() {
-        window.announceVisualizationRecovery("Choose a Library folder dialog opened.")
+        window.announceVisualizationRecovery("Add a Library folder dialog opened.")
         folderPicker.open()
         chooseFolder.forceActiveFocus()
     }
@@ -2902,7 +2923,7 @@ ApplicationWindow {
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                Button { id: chooseFolder; text: "Choose folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Choose audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Choose a local folder to browse"; ToolTip.text: "Choose a local folder to browse"; onClicked: window.openLibraryFolderChooser() }
+                Button { id: chooseFolder; text: "Add folder…"; objectName: "chooseFolder"; activeFocusOnTab: true; Accessible.name: "Add audio folder"; Accessible.role: Accessible.Button; Accessible.description: "Add a local folder to the Library directory list"; ToolTip.text: "Add a local folder to the Library directory list"; onClicked: window.openLibraryFolderChooser() }
                     Button {
                         id: addFolderRecursively
                         text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
@@ -2913,7 +2934,9 @@ ApplicationWindow {
                         onClicked: {
                             window.clearSelectedAudio()
                             browser.currentIndex = -1
-                            window.recursiveCatalogRows = window.libraryCatalogBridge.browseRecursive(window.browseFolder, search.text)
+                            window.recursiveCatalogRows = window.configuredLibraryFolders().length > 0
+                                ? window.scanConfiguredLibraryFolders()
+                                : window.libraryCatalogBridge.browseRecursive(window.browseFolder, search.text)
                             window.recursiveCatalogActive = true
                             window.catalogDiagnostic = window.libraryCatalogBridge.lastDiagnostic
                             window.announceVisualizationRecovery(window.recursiveCatalogRows.length + " recursive catalog entries found; use the folder browser to inspect or select a source.")
@@ -5494,6 +5517,51 @@ ApplicationWindow {
                 anchors.fill: parent; anchors.margins: 24; spacing: 14
                 Label { text: "Settings"; font.pixelSize: 28; font.bold: true; color: window.themeForegrounds[window.selectedThemeIndex]; Accessible.name: "Settings"; Accessible.role: Accessible.Heading; ToolTip.text: "Audio capture, appearance, and overlay settings" }
                 GroupBox {
+                    title: "Library directories"
+                    objectName: "libraryDirectoriesSettings"
+                    Layout.fillWidth: true
+                    Accessible.name: "Library directories settings"
+                    Accessible.role: Accessible.Grouping
+                    Accessible.description: "Add folders to the local Library scan list or remove them without changing source audio."
+                    ColumnLayout {
+                        anchors.fill: parent; spacing: 6
+                        Label {
+                            objectName: "libraryDirectoriesSummary"
+                            text: typeof libraryPreferences !== "undefined" && libraryPreferences.folders.length > 0
+                                ? libraryPreferences.folders.length + " configured Library director" + (libraryPreferences.folders.length === 1 ? "y" : "ies")
+                                : "No Library directories configured"
+                            Accessible.name: "Library directories summary"
+                            Accessible.role: Accessible.Status
+                            Accessible.description: text
+                            Layout.fillWidth: true
+                        }
+                        Repeater {
+                            model: typeof libraryPreferences !== "undefined" ? libraryPreferences.folders : []
+                            delegate: RowLayout {
+                                objectName: "libraryDirectoryRow"
+                                Layout.fillWidth: true
+                                Label { text: modelData; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.name: "Library directory " + modelData; Accessible.role: Accessible.StaticText }
+                                Button {
+                                    objectName: "removeLibraryDirectory"
+                                    text: "Remove"
+                                    activeFocusOnTab: true
+                                    Accessible.name: "Remove Library directory " + modelData
+                                    Accessible.description: "Remove this directory from the Library scan list; source audio is not changed."
+                                    onClicked: { libraryPreferences.removeFolder(index); window.announceVisualizationRecovery("Library directory removed; remaining directories stay configured."); forceActiveFocus() }
+                                }
+                            }
+                        }
+                        Button {
+                            objectName: "addLibraryDirectory"
+                            text: "Add directory…"
+                            activeFocusOnTab: true
+                            Accessible.name: "Add Library directory"
+                            Accessible.description: "Choose another local directory to add to the Library scan list."
+                            onClicked: { window.openLibraryFolderChooser(); forceActiveFocus() }
+                        }
+                    }
+                }
+                GroupBox {
                     title: "Audio capture"
                     Accessible.name: "Audio capture settings"
                     Accessible.role: Accessible.Grouping
@@ -5640,6 +5708,7 @@ ApplicationWindow {
         currentFolder: window.browseFolder
         onAccepted: {
             window.browseFolder = selectedFolder
+            if (typeof libraryPreferences !== "undefined") libraryPreferences.addFolder(selectedFolder.toLocalFile())
             window.catalogDiagnostic = ""
             search.text = ""
             window.recursiveCatalogActive = false
