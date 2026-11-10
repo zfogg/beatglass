@@ -61,14 +61,6 @@ struct FileReader::Impl {
     metadata = virtual_reader->metadata();
   }
   ~Impl() { if (handle) sf_close(handle); }
-  bool source_changed() const noexcept {
-    if (path.empty()) return false;
-    std::error_code ec;
-    const auto size = std::filesystem::file_size(path, ec);
-    if (ec || size != initial_size) return true;
-    const auto modified = std::filesystem::last_write_time(path, ec);
-    return ec || modified != initial_modified;
-  }
 };
 FileReader::FileReader(const std::filesystem::path& path, std::uint64_t epoch) {
   if (!epoch) throw std::invalid_argument("File source epoch must be nonzero");
