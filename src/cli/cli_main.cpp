@@ -60,6 +60,7 @@ struct AnalysisView {
 };
 struct AnalysisBatch {
   std::vector<std::pair<std::filesystem::path, AnalysisView>> results;
+  std::vector<std::pair<std::filesystem::path, std::string>> errors;
 };
 std::vector<float> decode_waveform(const std::filesystem::path& path, std::stop_token cancel = {}) {
   beatglass::FileReader reader(path, 1);
@@ -312,6 +313,7 @@ int main(int argc, char** argv) {
   std::atomic<std::size_t> batch_completed{0};
   std::atomic<std::size_t> batch_total{0};
   std::map<std::filesystem::path, AnalysisView> completed_analyses;
+  std::map<std::filesystem::path, std::string> analysis_errors;
   std::vector<std::string> library_labels;
   std::vector<int> library_indices;
   int library_visible_selected = 0;
@@ -359,6 +361,7 @@ int main(int argc, char** argv) {
       AnalysisBatch batch;
       for (const auto& path : paths) {
         if (stop_token.stop_requested()) break;
+        try {
         const auto metadata = beatglass::read_metadata(path);
         analysis_total.store(metadata.frames, std::memory_order_release);
         std::vector<std::uint64_t> beat_frames;
@@ -377,6 +380,11 @@ int main(int argc, char** argv) {
         if (stop_token.stop_requested()) break;
         batch.results.emplace_back(path, AnalysisView{result, std::move(waveform), std::move(beat_frames), std::move(key), std::move(chord), std::move(tonal_history)});
         batch_completed.fetch_add(1, std::memory_order_acq_rel);
+        } catch (const std::exception& error) {
+          if (stop_token.stop_requested()) break;
+          batch.errors.emplace_back(path, error.what());
+          batch_completed.fetch_add(1, std::memory_order_acq_rel);
+        }
       }
       return batch;
     });
@@ -404,6 +412,7 @@ int main(int argc, char** argv) {
     if (selected < 0 && !tracks.empty()) selected = 0;
     result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear();
     completed_analyses.clear();
+    analysis_errors.clear();
     status = std::to_string(tracks.size()) + " tracks indexed; selection preserved by path." +
         (cancelling ? " Cancelling the previous analysis." : "");
   };
@@ -797,7 +806,7 @@ int main(int argc, char** argv) {
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; const auto cached = !selection_changed && completed_analyses.find(analysis_path) != completed_analyses.end(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; completed track results remain available."; } else if (!cached) { result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear(); status = "Analysis finished for a previous track; select a completed track to view its result."; } else { result = completed_analyses.at(analysis_path).result; waveform = completed_analyses.at(analysis_path).waveform; beat_frames = completed_analyses.at(analysis_path).beat_frames; key = completed_analyses.at(analysis_path).key; chord = completed_analyses.at(analysis_path).chord; tonal_history = completed_analyses.at(analysis_path).tonal_history; status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
+        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); for (auto& entry : analysis.errors) analysis_errors.insert_or_assign(entry.first, std::move(entry.second)); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; const auto cached = !selection_changed && completed_analyses.find(analysis_path) != completed_analyses.end(); const auto failed = !selection_changed && analysis_errors.find(analysis_path) != analysis_errors.end(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; completed track results remain available."; } else if (failed) { result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear(); status = "Analysis failed for " + tracks[selected].title + ": " + analysis_errors.at(analysis_path) + "."; } else if (!cached) { result.reset(); waveform.clear(); beat_frames.clear(); key.reset(); chord.reset(); tonal_history.clear(); status = "Analysis finished for a previous track; select a completed track to view its result."; } else { result = completed_analyses.at(analysis_path).result; waveform = completed_analyses.at(analysis_path).waveform; beat_frames = completed_analyses.at(analysis_path).beat_frames; key = completed_analyses.at(analysis_path).key; chord = completed_analyses.at(analysis_path).chord; tonal_history = completed_analyses.at(analysis_path).tonal_history; status = analysis.errors.empty() ? "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates." : "Batch complete with " + std::to_string(analysis.errors.size()) + " failed track(s); successful results remain available."; } }
         catch (const std::exception& error) { result.reset(); waveform.clear(); status = std::string("Analysis failed: ") + error.what(); }
         busy = false;
       }
@@ -816,7 +825,7 @@ int main(int argc, char** argv) {
         return 2;
       }
     }
-    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; beat_frames = cached->second.beat_frames; key = cached->second.key; chord = cached->second.chord; tonal_history = cached->second.tonal_history; } status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
+    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); for (auto& entry : analysis.errors) analysis_errors.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; beat_frames = cached->second.beat_frames; key = cached->second.key; chord = cached->second.chord; tonal_history = cached->second.tonal_history; } status = analysis.errors.empty() ? "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates." : "Analysis finished with " + std::to_string(analysis.errors.size()) + " failed track(s)."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
     std::cout << rendered.ToString();
