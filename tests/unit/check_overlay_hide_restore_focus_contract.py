@@ -496,3 +496,12 @@ def test_display_selection_recovery_keeps_selector_focused():
     assert "announceCaptureRecoveryState(message" in body
     assert 'window.focusOverlayDisplaySelectionRecovery("Overlay display selected: "' in QML
     assert 'window.focusOverlayDisplaySelectionRecovery("Overlay display selection could not be applied' in QML
+
+
+def test_size_recovery_keeps_selector_focused():
+    start = QML.index("function focusOverlaySizeRecovery")
+    body = QML[start : QML.index("    function handleOverlayClickThroughButtonAction", start)]
+    assert "overlaySize.forceActiveFocus()" in body
+    assert "announceCaptureRecoveryState(message" in body
+    assert 'window.focusOverlaySizeRecovery("DJ overlay size set to "' in QML
+    assert 'window.focusOverlaySizeRecovery("DJ overlay size could not be changed' in QML
