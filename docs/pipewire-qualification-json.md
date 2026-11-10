@@ -315,6 +315,9 @@ values before they can enter qualification.
 The infinity-platform regression in
 `tests/unit/check_native_host_provenance_platform_infinity.py` rejects the other
 non-finite numeric platform form as well.
+The duplicate-platform regression in
+`tests/unit/check_native_host_provenance_platform_duplicate.py` keeps ambiguous
+identity evidence from being accepted when producers repeat the platform key.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
