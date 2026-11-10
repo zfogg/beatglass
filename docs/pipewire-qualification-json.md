@@ -339,6 +339,8 @@ Reports with `valid: false` are rejected even when their other fields are
 well-formed; failed qualification cannot be packaged as evidence.
 The `valid` field must be the JSON boolean `true`, not a truthy number or
 string.
+Report names follow the host contract and must contain visible non-whitespace
+text.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
