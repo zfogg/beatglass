@@ -258,3 +258,5 @@ If present, host `clock_source_last_switch_ns` must be a non-negative integer
 timestamp for the latest synchronization-source switch.
 If present, host `clock_source_health` must be a non-empty string describing
 the selected source's health.
+If present, host `clock_source_latency_ns` must be a non-negative numeric
+measurement of source latency; boolean values are invalid.
