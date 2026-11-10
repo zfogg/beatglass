@@ -128,6 +128,52 @@ handoff, review/consume the decision, record signoff, promote, then verify the
 manifest and final release bundle. `--require-ready` and `--consume-review`
 are conservative gates; they do not replace native platform evidence.
 
+### PipeWire and qualification helper flags
+
+The Linux/native helper scripts are also user-facing and are covered by the
+same reference:
+
+| Tool | Flags |
+| --- | --- |
+| `tests/pipewire/check_linux_native_prerequisites.py` | `--report <path>` |
+| `tests/pipewire/run_linux_native_qualification.py` | `--source <path>` (repository root), `--build <path>` (`build-pipewire`), `--summary <path>`, `--transitions <path>`, `--archive <path>`, `--capture-plan <path>`; `--archive` requires `--summary` |
+| `tests/pipewire/qualification_matrix.py` | `--summary <path>` |
+| `tests/pipewire/validate_qualification_artifacts.py` | `--json` |
+| `tests/platform/verify_evidence_bundle.py` | `--root`, `--manifest`, `--max-artifact-bytes`, `--max-manifest-bytes`, `--max-entries`, `--max-total-artifact-bytes`, `--json` |
+| `tests/platform/validate_readiness_report.py` | `--bundles` |
+| `tests/platform/verify_release_manifest.py` | `--signoff` |
+
+`--report`, `--summary`, `--transitions`, `--archive`, and `--capture-plan`
+write evidence only when their parent workflow reaches that stage. PipeWire
+qualification remains pending until a real native host run supplies the
+artifacts; `--json` changes output format and does not claim qualification.
+
+### CMake configuration flags
+
+The documented CMake feature switches are `-DBUILD_TESTING=ON`,
+`-DBEATGLASS_BUILD_SLICE=ON`, `-DBEATGLASS_BUILD_DESKTOP=ON`,
+`-DBEATGLASS_BUILD_PIPEWIRE=ON`, `-DBEATGLASS_BUILD_TONAL_SPIKE=ON`,
+`-DBEATGLASS_BUILD_MUSIC_REPLAY=ON`,
+`-DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`,
+`-DBEATGLASS_BUILD_LIBRARY_FINGERPRINT=ON`,
+`-DBEATGLASS_FETCH_SQLITE3=ON`, and `-DBEATGLASS_TEST_V1_CODECS=OFF`.
+These are experimental build switches, not runtime CLI flags; combine only
+the options described by each section above.
+
+On Windows, Scoop's main bucket can be made explicit before installing the
+experimental LLVM toolchain:
+
+```powershell
+scoop bucket add main
+scoop install llvm
+clang --version
+clang-cl --version
+cmake -S . -B build-clang -G "Visual Studio 17 2022" -A x64 -T ClangCL
+```
+
+The compiler selection and Scoop package are development conveniences, not a
+cross-platform qualification result or a pinned release toolchain.
+
 ## API documentation
 
 The [published documentation site](https://zfogg.github.io/beatglass/) combines three documentation tools:
