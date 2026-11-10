@@ -144,4 +144,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(control_reason), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid pending reason" not in result.stderr + result.stdout:
         raise SystemExit("control-character pending reason was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": "host unavailable", "commit": "native\u0001commit"}), encoding="utf-8")
+    control_commit = root / "control-commit-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(control_commit), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid commit provenance" not in result.stderr + result.stdout:
+        raise SystemExit("control-character commit provenance was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
