@@ -1166,6 +1166,10 @@ def test_overlay_pulse_transitions_update_accessible_announcement():
     visible_body = QML[visibility : QML.index("            MouseArea", visibility)]
     assert "overlayPulseAnnouncement" in visible_body
     assert "overlay hidden" in visible_body
+    assert "Overlay restored" in visible_body
+    assert "reduced motion" in visible_body
+    assert "fresh Monitoring capture" in visible_body
+    assert "valid live BPM" in visible_body
 
 
 def test_overlay_pulse_visible_status_includes_capture_lifecycle():
