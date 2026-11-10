@@ -1618,11 +1618,15 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Display selection is unavailable until the native overlay and a destination display are ready.", overlayDisplay)
+            return false
+        }
         overlayDisplay.forceActiveFocus()
         window.announceCaptureRecoveryState((window.overlayDisplaySelectionRequired
             ? "Overlay display selection required; choose an available display."
             : "Overlay display selector focused.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
-        return window.overlayBridge !== null
+        return true
     }
     function focusOverlayRetryShortcut() {
         navigation.currentIndex = 1
