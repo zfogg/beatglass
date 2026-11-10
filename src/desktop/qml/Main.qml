@@ -841,6 +841,21 @@ ApplicationWindow {
     }
     Connections {
         target: window.overlayBridge
+        function onScreenNamesChanged() {
+            if (!window.overlayBridge)
+                return
+            const savedName = window.overlayPreferredDisplayName
+            const savedIndex = savedName !== "" ? window.overlayBridge.screenNames.indexOf(savedName) : -1
+            if (savedIndex >= 0) {
+                window.overlayPreferredScreenIndex = savedIndex
+                window.overlayDisplaySelectionRequired = false
+                window.overlayDisplayRecoveryPending = false
+                if (typeof overlayDisplayControl !== "undefined")
+                    overlayDisplayControl.currentIndex = savedIndex
+            } else {
+                window.restoreOverlayDisplaySelectionFromBridge()
+            }
+        }
         function onAvailableChanged() {
             if (!window.overlayBridge)
                 return
