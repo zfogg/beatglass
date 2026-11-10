@@ -8,6 +8,7 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#include <shobjidl.h>
 #include "../desktop/platform/windows_endpoints.hpp"
 #include "../desktop/platform/windows_loopback_session.hpp"
 #include "../desktop/platform/windows_playback_session.hpp"
@@ -101,6 +102,31 @@ std::string lower(std::string value) {
   std::ranges::transform(value, value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
   return value;
 }
+#ifdef _WIN32
+std::optional<std::filesystem::path> choose_audio_folder() {
+  const auto init = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+  const auto should_uninitialize = SUCCEEDED(init);
+  IFileDialog* dialog = nullptr;
+  std::optional<std::filesystem::path> selected;
+  if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog)))) {
+    DWORD options = 0;
+    if (SUCCEEDED(dialog->GetOptions(&options)) && SUCCEEDED(dialog->SetOptions(options | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM)) && SUCCEEDED(dialog->Show(nullptr))) {
+      IShellItem* item = nullptr;
+      if (SUCCEEDED(dialog->GetResult(&item))) {
+        PWSTR path = nullptr;
+        if (SUCCEEDED(item->GetDisplayName(SIGDN_FILESYSPATH, &path)) && path) {
+          selected = std::filesystem::path(path);
+          CoTaskMemFree(path);
+        }
+        item->Release();
+      }
+    }
+    dialog->Release();
+  }
+  if (should_uninitialize) CoUninitialize();
+  return selected;
+}
+#endif
 #ifdef _WIN32
 class CliPlayback final {
 public:
@@ -301,6 +327,20 @@ int main(int argc, char** argv) {
     if (!std::filesystem::is_directory(requested, error)) { status = "Folder unavailable: " + folder_text; return; }
     root = requested; refresh(); status = "Opened " + root.string() + " — " + std::to_string(tracks.size()) + " tracks indexed.";
   });
+  auto choose_folder_button = Button(" Choose folder… ", [&] {
+#ifdef _WIN32
+    if (const auto chosen = choose_audio_folder()) {
+      folder_text = chosen->string();
+      root = *chosen;
+      refresh();
+      status = "Opened " + root.string() + " — " + std::to_string(tracks.size()) + " tracks indexed.";
+    } else {
+      status = "Folder selection cancelled; current Library folder is unchanged.";
+    }
+#else
+    status = "Native folder picker is unavailable; edit the path and press Open folder.";
+#endif
+  });
   auto play_button = Button(" Play ", [&] {
     if (selected >= 0 && selected < static_cast<int>(tracks.size())) {
 #ifdef _WIN32
@@ -357,7 +397,7 @@ int main(int argc, char** argv) {
     if (library_visible_selected >= 0 && library_visible_selected < static_cast<int>(library_indices.size())) selected = library_indices[static_cast<std::size_t>(library_visible_selected)];
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, play_button, pause_button, stop_button})});
+  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, play_button, pause_button, stop_button})});
   auto library_container = Container::Vertical({library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
@@ -402,7 +442,7 @@ int main(int argc, char** argv) {
     }
 #endif
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0, playback_fraction), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   ←/→ or Prev/Next   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), choose_folder_button->Render(), text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: ") | italic, filter_input->Render() | flex, text(" "), previous_button->Render(), text(" "), next_button->Render(), text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render(), text(" "), seek_back_button->Render(), text(" "), seek_forward_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   ←/→ or Prev/Next   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto toggle_live = [&] {
 #ifdef _WIN32
