@@ -1,6 +1,8 @@
 import importlib.util
 import hashlib
 import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -288,6 +290,18 @@ class EvidenceBundleTest(unittest.TestCase):
                     "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("artifacts exceed total 1 bytes", module.verify(root, manifest, max_total_artifact_bytes=1))
+
+    def test_cli_json_report_is_machine_readable(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(__file__).with_name("verify_evidence_bundle.py")),
+                                     "--root", str(root), "--manifest", str(manifest), "--json"],
+                                    capture_output=True, text=True, check=False)
+            report = json.loads(result.stdout)
+            self.assertFalse(report["valid"])
+            self.assertTrue(report["errors"])
+            self.assertNotEqual(result.returncode, 0)
 
     def test_oversized_manifests_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
