@@ -865,6 +865,7 @@ ApplicationWindow {
                 window.overlayDisplayRecoveryPending = true
                 window.overlayLaunchFallbackActive = true
                 window.overlayCaptureEvidenceStale = true
+                window.focusOverlayDisplayLoss()
             }
         }
         function onAvailableChanged() {
