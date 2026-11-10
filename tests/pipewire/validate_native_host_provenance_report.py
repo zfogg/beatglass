@@ -6,9 +6,19 @@ from pathlib import Path
 if len(sys.argv) != 2:
     raise SystemExit("usage: validate_native_host_provenance_report.py REPORT.json")
 try:
-    report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    def reject_duplicate_keys(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate key: {key}")
+            result[key] = value
+        return result
+
+    report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_keys)
 except (OSError, UnicodeError, json.JSONDecodeError) as error:
     raise SystemExit(f"host provenance report is unreadable: {error}")
+except ValueError as error:
+    raise SystemExit(f"host provenance report is ambiguous: {error}")
 if not isinstance(report, dict) or report.get("schema") != "beatglass-native-host-provenance-v1":
     raise SystemExit("host provenance report has an unsupported schema")
 if set(report) != {"schema", "valid", "platform", "name", "checked_fields"}:

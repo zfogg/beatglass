@@ -105,3 +105,20 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode != 0
     assert "report is unreadable" in result.stderr
 print("Native host provenance encoding rejection verified")
+
+with tempfile.TemporaryDirectory() as directory:
+    report = Path(directory) / "duplicate-key-report.json"
+    report.write_text(
+        '{"schema":"beatglass-native-host-provenance-v1","valid":true,'
+        '"platform":"linux","name":"first","name":"second",'
+        '"checked_fields":["name","platform"]}',
+        encoding="utf-8",
+    )
+    result = subprocess.run(
+        ["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "report is ambiguous" in result.stderr
+print("Native host provenance duplicate-key rejection verified")
