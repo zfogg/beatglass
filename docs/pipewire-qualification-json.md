@@ -282,6 +282,8 @@ If replacement fails, the temporary file is removed so failed qualification
 does not leave orphaned evidence artifacts beside the requested report.
 Cleanup also covers failures while writing or synchronizing the temporary file
 itself, before the destination can be replaced.
+When replacing an existing report, its permission mode is preserved across the
+atomic replacement where the host filesystem supports it.
 On POSIX hosts the containing directory is synchronized after replacement as
 well; Windows uses the compatible atomic-replace path without directory fsync.
 Pass a second path to emit a deterministic validation report for the bundle:
