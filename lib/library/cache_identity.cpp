@@ -65,7 +65,10 @@ Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
   if (result.empty()) return Publish::error;
   const auto initial = revalidate_file_identity(path, key.content, stop);
   if (initial == FingerprintStatus::cancelled) return Publish::cancelled;
-  if (fingerprint_status_requires_refresh(initial)) { cache.invalidate(key); return Publish::stale_input; }
+  // A changed source invalidates this publication attempt, not the last
+  // known-good result. Keep the completed cache row available for recovery;
+  // explicit catalog invalidation is handled by invalidate_if_stale().
+  if (fingerprint_status_requires_refresh(initial)) return Publish::stale_input;
   if (initial != FingerprintStatus::ok) return Publish::stale_input;
   if (stop.stop_requested()) return Publish::cancelled;
   cache.begin(run_id, key);
@@ -74,7 +77,8 @@ Publish publish_file_result(SqliteCache& cache, const std::string& run_id,
     // that the existing completed cache entry is stale, so preserve it.
     if (stop.stop_requested()) return false;
     const auto status = revalidate_file_identity(path, key.content, stop);
-    if (fingerprint_status_requires_refresh(status)) cache.invalidate(key);
+    // Preserve the prior completed result when the source changes during this
+    // attempt; the caller can retry after the source stabilizes.
     return status == FingerprintStatus::ok;
   });
 }
