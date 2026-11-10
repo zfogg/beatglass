@@ -49,6 +49,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no attestation")
         if host.get("firmware") is not None and (not isinstance(host["firmware"], str) or not host["firmware"].strip()):
             raise SystemExit("transition host provenance has no firmware")
+        if host.get("bios") is not None and (not isinstance(host["bios"], str) or not host["bios"].strip()):
+            raise SystemExit("transition host provenance has no BIOS")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
