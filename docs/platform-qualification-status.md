@@ -13,6 +13,17 @@ headless QML harness with repeated null-bridge warnings, so this run remains
 unqualified for the navigation scenario. The tap/recovery smoke scenario was
 not run because `BEATGLASS_MACOS_TAP_UID` was intentionally unset.
 
+## macOS navigation rerun (2026-11-10, a639e7a9)
+
+A focused rerun on the Intel MacBookPro16,1 passed
+`macos_overlay_controller` in 3.99 seconds. `macos_overlay_navigation`
+still timed out at 120.15 seconds under the offscreen Qt 6.12 harness. The
+failure reached assertions for capture reacquiring/starting focus, stale
+capture evidence, and eight click-through recovery paths before timing out.
+This is retained as a reproducible headless-harness defect; it is not native
+desktop qualification. The tap/recovery smoke remains unverified because no
+audible-content run was available.
+
 ## Current portable CLI/library evidence (2026-11-10)
 
 The shipped CLI and music CLI expose documented `--help`/`-h` and
