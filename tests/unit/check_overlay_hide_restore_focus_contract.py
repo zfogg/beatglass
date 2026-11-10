@@ -766,3 +766,9 @@ def test_hide_restore_toggle_shortcut_propagates_selected_action_result():
     body = QML[start : QML.index("    function handleOverlayRestoreAction", start)]
     assert "return window.handleOverlayRestoreAction()" in body
     assert "return window.handleOverlayHideAction()" in body
+def test_display_focus_shortcut_returns_bridge_availability():
+    start = QML.index("function focusOverlayDisplayShortcut")
+    body = QML[start : QML.index("    function focusOverlayRetryShortcut", start)]
+    assert "overlayDisplay.forceActiveFocus()" in body
+    assert "announceCaptureRecoveryState" in body
+    assert "return window.overlayBridge !== null" in body
