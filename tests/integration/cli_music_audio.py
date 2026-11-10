@@ -30,6 +30,8 @@ with tempfile.TemporaryDirectory() as directory:
     result = rows[-1]
     assert result["epoch"] > 0 and all(row["epoch"] == result["epoch"] for row in rows), rows
     assert result["schema_version"] == 1 and result["sample_rate"] == rate and result["bpm"] is not None and result["state"] == "tracking", result
+    assert result["duration_seconds"] == 12.0, result
+    assert all(row["duration_seconds"] == 12.0 for row in rows if "duration_seconds" in row), rows
     assert result["rolling_key"] is not None and result["local_chord"] == "A minor", result
     assert result["tonal_through"] <= result["analyzed_through"] <= result["observed_through"] == rate * 12
     beats = [row for row in rows[:-1] if row["type"] == "beat"]
