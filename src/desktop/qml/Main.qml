@@ -861,7 +861,10 @@ ApplicationWindow {
                         retryOverlay.forceActiveFocus()
                 }
             } else {
-                window.restoreOverlayDisplaySelectionFromBridge()
+                window.overlayDisplaySelectionRequired = true
+                window.overlayDisplayRecoveryPending = true
+                window.overlayLaunchFallbackActive = true
+                window.overlayCaptureEvidenceStale = true
             }
         }
         function onAvailableChanged() {
