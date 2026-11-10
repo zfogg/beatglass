@@ -11,6 +11,15 @@ This is preparation evidence only: WSL is not native Linux qualification,
 PipeWire prerequisites were unavailable in that environment, macOS was not
 run, and the optional Essentia tonal runtime was not validated end-to-end.
 
+The CLI playback worker now stays within the shared Windows playback queue's
+4096-sample bound, fixing a pre-open rejection of native playback. The TUI's
+SQLite Library prototype is enabled by default when configured with TUI support
+and is documented as an explicit dependency-light opt-out. The shared Live
+visualization processor is used for CLI waveform/FFT data, with corrected
+interleaved-sample versus audio-frame accounting and explicit reset/reacquire
+clearing. Windows build and focused TUI contract/snapshot tests pass; native
+audio-device playback remains a hardware/runtime qualification item.
+
 Overlay settings now provide a focused endpoint refresh action that keeps
 selection and retry recovery in one workflow. Portable coverage is in
 `python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
