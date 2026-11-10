@@ -39,6 +39,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no distro")
         if host.get("virtualization") is not None and (not isinstance(host["virtualization"], str) or not host["virtualization"].strip()):
             raise SystemExit("transition host provenance has no virtualization context")
+        if host.get("hypervisor") is not None and (not isinstance(host["hypervisor"], str) or not host["hypervisor"].strip()):
+            raise SystemExit("transition host provenance has no hypervisor")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
