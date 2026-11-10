@@ -216,6 +216,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Recovery focus workflow | Keyboard entry opens recovery from multiple paths | Route focus through one helper that activates the page, focuses Resume, and announces the evidence boundary. |
 | Recovery keyboard transition | Escape or the paused-page shortcut enters manual recovery | Use one focus transition that activates the page, focuses Resume, and announces freshness consistently. |
 | Manual recovery pause transition | User stops bounded overlay recovery while monitoring continues | Mark visible evidence stale, keep the recovery page active, and focus Resume so the next action is deterministic. |
+| Safe-mode reset transition | User clears safe mode after bounded overlay retries | Activate the recovery page, focus Retry, and announce whether visible evidence still awaits fresh capture. |
 | Resume recovery tooltip stale state | User hovers manual resume after pausing native overlay recovery | Keep the action hint aligned with the stale-evidence boundary. |
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
