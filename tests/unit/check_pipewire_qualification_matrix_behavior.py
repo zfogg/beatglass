@@ -61,4 +61,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_blockers), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid execution blockers" not in result.stderr + result.stdout:
         raise SystemExit("malformed native execution blockers were accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": ""}), encoding="utf-8")
+    invalid_reason = root / "invalid-reason-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(invalid_reason), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid pending reason" not in result.stderr + result.stdout:
+        raise SystemExit("malformed pending reason was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")

@@ -45,6 +45,8 @@ When present, `native_execution_attempted` must also be a JSON boolean so a
 string cannot masquerade as native execution evidence.
 When present, `native_execution_blockers` must be a non-empty-string array;
 malformed blocker values fail before matrix generation.
+Pending summaries must include a non-empty `pending_reason`; this keeps an
+unqualified platform handoff actionable instead of producing a blank status.
 The matrix behavior fixture validates this merge, including pending reasons and
 evidence paths, with `python tests/unit/check_pipewire_qualification_matrix_behavior.py`.
 It covers both pending and qualified host summaries so the report can advance
