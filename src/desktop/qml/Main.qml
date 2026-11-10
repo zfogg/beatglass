@@ -4856,7 +4856,7 @@ ApplicationWindow {
                         readonly property bool enabled: showOverlayButton.enabled
                         readonly property string text: showOverlayButton.text
                         function forceActiveFocus() { showOverlayButton.forceActiveFocus(); focusRequested = true }
-                        function clicked() { showOverlayButton.clicked() }
+                        function clicked() { return window.showOverlayAndHideControls() }
                     }
                     QtObject {
                         id: restoreOverlay
@@ -4866,7 +4866,7 @@ ApplicationWindow {
                         readonly property bool enabled: restoreOverlayButton.enabled
                         readonly property string text: restoreOverlayButton.text
                         function forceActiveFocus() { restoreOverlayButton.forceActiveFocus(); focusRequested = true }
-                        function clicked() { restoreOverlayButton.clicked() }
+                        function clicked() { return window.handleOverlayRestoreAction() }
                     }
                 }
                 Label {
