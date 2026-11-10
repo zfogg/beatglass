@@ -2447,7 +2447,7 @@ ApplicationWindow {
             window.transitionCaptureEvidence(true, "Output device reacquiring; visualization focus restored when fresh audio arrives.", overlayLiveMonitoringState)
         } else if (window.captureMonitorBridge.status === "Stopped") {
             window.transitionCaptureEvidence(true, "Output monitoring stopped; previously displayed live evidence is stale until monitoring resumes.", overlayLiveMonitoringState)
-        } else if (window.captureMonitorBridge.status === "Monitoring" && window.overlayCaptureEvidenceStale) {
+        } else if (window.captureMonitorBridge.status === "Monitoring" && window.overlayCaptureEvidenceStale && !window.overlayDisplayRecoveryPending) {
             window.transitionCaptureEvidence(false, "Overlay capture recovered; fresh accepted snapshot is available.", overlayLiveMonitoringState)
         }
     }
@@ -5647,3 +5647,4 @@ ApplicationWindow {
         onRejected: window.handleLibraryFolderChooserRejected()
     }
 }
+
