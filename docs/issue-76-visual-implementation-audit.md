@@ -974,6 +974,8 @@ Retry overlay is now explicitly included in the keyboard tab order while display
 
 The overlay display selector is now explicitly keyboard reachable as well, ensuring recovery can proceed from destination selection through retry without pointer input.
 
+Display recovery now commits the native bridge's canonical display identity after geometry and visual-state synchronization succeeds, preventing a stale picker label from being retained across relaunch while keeping the control-window fallback transactional on failure.
+
 The output endpoint empty state now uses live status semantics alongside endpoint discovery and recovery guidance, so missing-device remediation is announced consistently.
 
 The output-device selector is explicitly keyboard reachable, keeping monitoring setup usable from the same keyboard recovery path as endpoint refresh and status guidance.
