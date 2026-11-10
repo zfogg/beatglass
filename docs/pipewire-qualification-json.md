@@ -330,6 +330,9 @@ same ambiguity protection to source-count metadata.
 The duplicate-secure-boot regression in
 `tests/unit/check_native_host_provenance_secure_boot_duplicate.py` preserves the
 same fail-closed rule for boolean platform-security evidence.
+The duplicate-TPM regression in
+`tests/unit/check_native_host_provenance_tpm_duplicate.py` applies the same
+ambiguity protection to hardware-presence evidence.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
