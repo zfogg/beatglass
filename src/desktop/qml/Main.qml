@@ -395,8 +395,7 @@ ApplicationWindow {
             && !window.overlayDisplaySelectionRequired
         onActivated: {
             const resetOpacity = 0.9
-            const applied = window.overlayBridge.setOpacity(resetOpacity)
-            window.handleOverlayOpacityResetResult(applied, resetOpacity)
+            window.handleOverlayOpacityResetAction(resetOpacity)
         }
     }
     Shortcut {
@@ -1425,6 +1424,10 @@ ApplicationWindow {
             window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active. Live evidence remains stale until fresh capture arrives.")
         }
         overlayOpacityControl.forceActiveFocus()
+    }
+    function handleOverlayOpacityResetAction(resetOpacity) {
+        const applied = window.overlayBridge.setOpacity(resetOpacity)
+        window.handleOverlayOpacityResetResult(applied, resetOpacity)
     }
     function handleOverlayClickThroughShortcut() {
         const requested = !window.overlayBridge.clickThrough

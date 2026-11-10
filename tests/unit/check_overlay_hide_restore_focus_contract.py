@@ -464,3 +464,10 @@ def test_retry_button_named_attempt_action():
 
 def test_retry_button_routes_to_named_action():
     assert "onClicked: window.handleOverlayRetryButtonAction()" in QML
+
+
+def test_opacity_reset_uses_named_action():
+    start = QML.index("function handleOverlayOpacityResetAction")
+    body = QML[start : QML.index("    function handleOverlayClickThroughShortcut", start)]
+    assert "setOpacity(resetOpacity)" in body
+    assert "handleOverlayOpacityResetResult" in body
