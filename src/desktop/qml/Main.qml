@@ -327,23 +327,7 @@ ApplicationWindow {
         enabled: window.overlayBridge && window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: {
-            const requested = !window.overlayBridge.clickThrough
-            if (!requested) {
-                window.unlockOverlayAndRestoreFocus()
-                return
-            }
-            const applied = window.overlayBridge.setClickThrough(requested)
-            if (!applied) {
-                window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active.")
-                clickThroughToggle.forceActiveFocus()
-                return
-            }
-            window.announceCaptureRecoveryState(requested
-                ? "DJ overlay click-through enabled; press Escape to unlock interaction."
-                : "DJ overlay interaction restored; keyboard and pointer input are available.")
-            clickThroughToggle.forceActiveFocus()
-        }
+        onActivated: window.handleOverlayClickThroughShortcut()
     }
     Shortcut {
         objectName: "overlayRetryShortcut"
@@ -1463,6 +1447,23 @@ ApplicationWindow {
             window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active. Live evidence remains stale until fresh capture arrives.")
         }
         overlayOpacityControl.forceActiveFocus()
+    }
+    function handleOverlayClickThroughShortcut() {
+        const requested = !window.overlayBridge.clickThrough
+        if (!requested) {
+            window.unlockOverlayAndRestoreFocus()
+            return
+        }
+        const applied = window.overlayBridge.setClickThrough(requested)
+        if (!applied) {
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active. Live evidence remains stale until fresh capture arrives.")
+            clickThroughToggle.forceActiveFocus()
+            return
+        }
+        window.overlayCaptureEvidenceStale = true
+        window.announceCaptureRecoveryState("DJ overlay click-through enabled; press Escape to unlock interaction. Live evidence remains stale until fresh capture arrives.")
+        clickThroughToggle.forceActiveFocus()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available

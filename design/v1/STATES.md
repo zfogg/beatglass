@@ -269,3 +269,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Click-through shortcut recovery | User invokes the click-through focus shortcut | Activate controls, focus the interaction toggle, and announce current mode plus evidence freshness. |
 | Opacity shortcut recovery | User invokes the overlay opacity focus shortcut | Activate controls, focus Opacity, and announce the current value with the evidence freshness boundary. |
 | Opacity reset recovery | User invokes the reset-opacity shortcut | Preserve in-flight reset state, keep persisted opacity authoritative on failure, and focus Opacity with stale evidence guidance. |
+| Click-through toggle recovery | User toggles click-through from the keyboard | Preserve stale evidence on success or failure, announce the interaction boundary, and keep the toggle focused for the next action. |
