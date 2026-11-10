@@ -3228,7 +3228,6 @@ ApplicationWindow {
                             text: window.selectedAudioUrl.toString() === "" ? "Duration unavailable" : (window.metadataStatus.indexOf(" | ") >= 0 ? "Metadata: " + window.metadataStatus : "Duration: unknown until decoded metadata is available")
                             Accessible.name: "Selected audio duration: " + text
                             ToolTip.text: "Selected source duration"
-                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: window.metadataStatus.indexOf("Error:") === 0 ? text + ". Retry metadata to attempt decoding again." : text
                             wrapMode: Text.WordWrap
