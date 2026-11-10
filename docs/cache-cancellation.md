@@ -29,3 +29,5 @@ detail with the stable status label (for example, `error: cannot open`).
 
 The cache identity implementation uses the same predicate, so all publication
 and collection paths invalidate only after a verified `changed` outcome.
+Collection pruning reports that outcome as `changed: content identity changed;
+catalog entry removed`, making the destructive action explicit to callers.

@@ -76,7 +76,7 @@ FingerprintStatus invalidate_collection_if_stale(SqliteCache& cache, const std::
   // be retried without losing the user's catalog row.
   if (fingerprint_status_requires_refresh(status)) {
     cache.remove_entry(path);
-    if (diagnostic) *diagnostic = "content identity changed; catalog entry removed";
+    if (diagnostic) *diagnostic = fingerprint_status_diagnostic(status, "content identity changed; catalog entry removed");
   }
   return status;
 }
