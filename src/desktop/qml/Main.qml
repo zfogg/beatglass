@@ -2902,7 +2902,6 @@ ApplicationWindow {
                     Button {
                         id: refreshFolder; text: "Refresh"; objectName: "refreshFolder"; activeFocusOnTab: true
                         enabled: window.browseFolder.toString() !== ""
-                        Accessible.value: enabled ? "available" : "choose a folder first"
                         Accessible.name: "Refresh folder contents"; Accessible.value: enabled ? "available; clears the current selection" : "unavailable; choose a folder first"; Accessible.role: Accessible.Button
                         Accessible.description: "Re-read the current folder so newly added, removed, or changed audio files are reflected."
                         ToolTip.text: "Refresh the current folder contents"

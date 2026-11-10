@@ -2534,7 +2534,7 @@ TestCase {
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
 
-'    function test_validVisualRestoreIsDirectlyTestable() {
+    function test_validVisualRestoreIsDirectlyTestable() {
         fakeOverlay.available = true
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
         fakeOverlay.opacity = 0.42
