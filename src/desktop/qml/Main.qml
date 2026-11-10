@@ -210,14 +210,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && !window.overlayBridge.available
             && window.overlayBridge.screenNames.length > 0
-        onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            retryOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Retry overlay control focused.")
-        }
+        onActivated: window.focusOverlayRetryShortcut()
     }
     Shortcut {
         objectName: "overlayReapplyFocusShortcut"
@@ -1472,6 +1465,14 @@ ApplicationWindow {
         window.announceCaptureRecoveryState((window.overlayDisplaySelectionRequired
             ? "Overlay display selection required; choose an available display."
             : "Overlay display selector focused.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+    }
+    function focusOverlayRetryShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        retryOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Retry overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
