@@ -14,6 +14,8 @@ def main() -> int:
         raise SystemExit("CLI playback device selection is not synchronized with the playback worker")
     if "sample_rate) /" not in tui or "spectrum.size() - 1" not in tui or "Nyquist" not in tui:
         raise SystemExit("CLI FFT tonal estimator does not map reduced bins to the Nyquist range")
+    if "presentation_snapshot.key_candidates.push_back" not in tui or "presentation_snapshot.chords.push_back" not in tui:
+        raise SystemExit("CLI provisional tonal evidence is not published through the shared presentation snapshot")
     if "Analysis delay: " not in tui: raise SystemExit("CLI Live view does not expose shared analysis delay")
     if "present_analysis_view" not in tui or "beatglass::present_snapshot(snapshot)" not in tui: raise SystemExit("CLI Library details do not use shared analysis presentation")
     readme = (root / "README.md").read_text(encoding="utf-8")
