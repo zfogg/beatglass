@@ -178,3 +178,5 @@ If present, host `distro` must be a non-empty string identifying the OS
 distribution or platform family.
 If present, host `virtualization` must be a non-empty string describing the
 virtualization or bare-metal context.
+If present, host `hypervisor` must be a non-empty string identifying the
+hypervisor when evidence was captured in a virtual machine.
