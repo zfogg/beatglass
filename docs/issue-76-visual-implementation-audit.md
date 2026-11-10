@@ -549,6 +549,10 @@ The issue-76 contract suite now checks each runtime status branch explicitly—E
 
 The visualization status group now includes a state-aware Clear selection action. It is enabled only when a waveform or FFT position is selected, reports available/unavailable through its accessible value, and keeps keyboard and pointer recovery paths available from the same responsive status layout.
 
+The clear action now adapts its label and width in compact headers, while its accessible description and tooltip include the current capture transition. This keeps the action understandable while Starting, Reacquiring, Error, or steady-state monitoring changes around it.
+
+The parent visualization status group now carries the selection-clear availability alongside capture and data state, so assistive navigation announces both the live runtime condition and whether an actionable selection exists.
+
 The compact-header theme preview group now reports the selected theme directly and includes it in its entry tooltip, preserving palette context when users navigate swatches without the full appearance controls visible.
 
 Each theme preview swatch now updates its tooltip when selected, explicitly identifying the active palette instead of repeating a generic selection action. This keeps pointer and keyboard feedback aligned with the radio-button value.
