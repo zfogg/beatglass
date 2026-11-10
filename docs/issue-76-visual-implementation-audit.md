@@ -1005,3 +1005,5 @@ Native playback errors, seek limitations, source-selection mismatch, and unavail
 Fresh capture status no longer clears the overlay stale-evidence marker while display recovery is pending; accepted capture remains gated until a valid destination is restored.
 
 Fresh capture also preserves stale overlay evidence while the user has intentionally hidden the overlay; restoring the overlay remains the explicit transition that makes retained live state visible again.
+
+Fresh capture preserves stale overlay evidence while recovery is paused by the user; resuming recovery remains the explicit transition for presenting live overlay state again.
