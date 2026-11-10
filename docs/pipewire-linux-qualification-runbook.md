@@ -54,6 +54,8 @@ temporary file before replacement so atomic updates do not broaden or remove
 the handoff file's access policy.
 Every artifact entry must be a non-empty string path; numeric or blank entries
 fail before matrix generation.
+Artifact paths must also be printable text without control characters so
+retained evidence remains safe to transport and review.
 Artifact paths must also be unique so one retained file cannot be counted twice
 as independent qualification evidence.
 The generator rechecks uniqueness after making external paths portable, rejecting
