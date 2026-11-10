@@ -482,6 +482,7 @@ int main(int argc, char** argv) {
   for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.endpoints.size()); ++index) if (live_endpoint_snapshot.endpoints[index].is_default) live_selected = index;
 #endif
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
+  std::size_t library_cache_hits = 0;
   std::optional<beatglass::TempoResult> result;
   std::vector<float> waveform;
   std::vector<std::uint64_t> beat_frames;
@@ -922,6 +923,7 @@ int main(int argc, char** argv) {
     const auto analyzed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return completed_analyses.contains(tracks[index].path); });
     const auto failed_count = std::count_if(library_indices.begin(), library_indices.end(), [&](const auto index) { return analysis_errors.contains(tracks[index].path); });
     auto library_summary = hbox({text(std::to_string(library_indices.size())) | bold | color(Color::Cyan), text(" visible  •  "), text(std::to_string(analyzed_count)) | bold | color(Color::GreenLight), text(" analyzed  •  "), text(std::to_string(failed_count)) | bold | color(failed_count ? Color::RedLight : Color::GrayLight), text(" failed")
+      , text("  •  "), text(std::to_string(library_cache_hits)) | bold | color(library_cache_hits ? Color::MagentaLight : Color::GrayLight), text(" persisted cache hits")
 #ifdef BEATGLASS_CLI_LIBRARY
       , text("  •  "), text(std::to_string(library_retryable_count)) | bold | color(library_retryable_count ? Color::YellowLight : Color::GrayLight), text(" recovery")
 #endif
@@ -1422,7 +1424,7 @@ int main(int argc, char** argv) {
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) { completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); analysis_errors.erase(entry.first); } for (auto& entry : analysis.errors) analysis_errors.insert_or_assign(entry.first, std::move(entry.second));
+        try { auto analysis = analysis_future.get(); library_cache_hits += analysis.cache_hits; for (auto& entry : analysis.results) { completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); analysis_errors.erase(entry.first); } for (auto& entry : analysis.errors) analysis_errors.insert_or_assign(entry.first, std::move(entry.second));
 #ifdef BEATGLASS_CLI_LIBRARY
           if (library_storage) library_retryable_count = library_storage->retryable_runs().size();
 #endif
