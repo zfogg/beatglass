@@ -32,5 +32,8 @@ if host.get("tpm_present") is not None and not isinstance(host["tpm_present"], b
     raise SystemExit("host provenance has an invalid TPM flag")
 if len(sys.argv) == 3:
     report = {"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
-    Path(sys.argv[2]).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    try:
+        Path(sys.argv[2]).write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    except OSError as error:
+        raise SystemExit(f"host provenance report is unwritable: {error}")
 print("native host provenance verified")
