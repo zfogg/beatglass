@@ -161,6 +161,11 @@ if reacquisition is not None:
                 or isinstance(reacquisition["event_count"], bool)
                 or reacquisition["event_count"] <= 0):
             raise SystemExit("reacquisition evidence has an invalid event count")
+    if reacquisition.get("artifact_id") is not None:
+        if not isinstance(reacquisition["artifact_id"], str) or not reacquisition["artifact_id"].strip():
+            raise SystemExit("reacquisition evidence has an empty artifact identity")
+        if isinstance(payload, dict) and payload.get("artifact_id") is not None and reacquisition["artifact_id"] != payload["artifact_id"]:
+            raise SystemExit("reacquisition artifact identity does not match artifact")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
