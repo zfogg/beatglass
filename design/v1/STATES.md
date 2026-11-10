@@ -355,3 +355,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Hide availability contract | Hide is requested after the native overlay loses its destination display | Reject the hide transition, preserve the control-window fallback, and return explicit failure for recovery callers. |
 | Restore availability contract | Restore is requested while the native overlay is present but unavailable | Focus display recovery and return explicit failure until the native overlay and destination display are ready. |
 | Resume availability contract | Paused recovery is resumed after native overlay/display loss | Keep recovery paused, focus display recovery, and return explicit failure until the overlay can be reacquired. |
+| Retry availability contract | Retry is requested while the native overlay/display is unavailable | Avoid incrementing recovery attempts, focus display recovery, and return explicit failure until retry can reacquire the overlay. |
