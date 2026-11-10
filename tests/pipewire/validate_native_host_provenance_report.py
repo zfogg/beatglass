@@ -5,7 +5,10 @@ from pathlib import Path
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: validate_native_host_provenance_report.py REPORT.json")
-report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+try:
+    report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as error:
+    raise SystemExit(f"host provenance report is unreadable: {error}")
 if not isinstance(report, dict) or report.get("schema") != "beatglass-native-host-provenance-v1":
     raise SystemExit("host provenance report has an unsupported schema")
 if set(report) != {"schema", "valid", "platform", "name", "checked_fields"}:
