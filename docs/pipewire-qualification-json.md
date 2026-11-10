@@ -250,3 +250,5 @@ If present, host `clock_source_type` must be a non-empty string classifying the
 selected synchronization source.
 If present, host `clock_source_status` must be a non-empty string describing
 the selected source's qualification status.
+If present, host `clock_source_failover` must be a boolean indicating whether
+the source was selected through failover.
