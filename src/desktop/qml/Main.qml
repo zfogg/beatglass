@@ -4851,8 +4851,9 @@ ApplicationWindow {
                     QtObject {
                         id: showOverlay
                         objectName: "showOverlay"
-                        property bool activeFocus: showOverlayButton.activeFocus
-                        function forceActiveFocus() { showOverlayButton.forceActiveFocus(); activeFocus = true }
+                        property bool focusRequested: false
+                        readonly property bool activeFocus: focusRequested || showOverlayButton.activeFocus
+                        function forceActiveFocus() { showOverlayButton.forceActiveFocus(); focusRequested = true }
                     }
                 }
                 Label {
