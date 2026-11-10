@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+from datetime import datetime
 import sys
 REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
 
@@ -21,6 +22,14 @@ def verify(root: Path, manifest: Path) -> list[str]:
     for field in REQUIRED_PROVENANCE:
         if not isinstance(data.get(field), str) or not data[field].strip():
             errors.append(f"missing provenance field: {field}")
+    captured_at = data.get("captured_at")
+    if isinstance(captured_at, str) and captured_at.strip():
+        try:
+            parsed = datetime.fromisoformat(captured_at.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                errors.append("captured_at must include timezone")
+        except ValueError:
+            errors.append("captured_at must be ISO-8601")
     artifacts = data.get("artifacts")
     scenarios = data.get("scenarios")
     if not isinstance(artifacts, list) or not artifacts:
