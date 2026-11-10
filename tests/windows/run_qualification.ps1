@@ -76,6 +76,9 @@ try {
   if ($RunTests) {
     $ctestRun = Join-Path $OutputDirectory "ctest-run.log"
     $testArgs = @("--test-dir", $buildDirectory, "-C", "Release", "--output-on-failure")
+    if ($TuiOnly) {
+      $testArgs += @("-R", "issue4320_tui_contract|cli_generated_audio|cli_v1_codecs|cli_tui_snapshots")
+    }
     "ctest $($testArgs -join ' ')"
     & ctest @testArgs 2>&1 | Tee-Object -FilePath $ctestRun
     if ($LASTEXITCODE -ne 0) { throw "CTest execution failed with exit code $LASTEXITCODE" }
