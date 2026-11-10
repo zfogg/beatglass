@@ -14,6 +14,8 @@ def main() -> int:
     if "[cached]" not in tui: raise SystemExit("CLI Library does not distinguish persisted cache hits")
     if "std::vector<float> decoded(4096), render(4096)" not in tui:
         raise SystemExit("CLI playback buffers exceed the shared bounded session capacity")
+    if "beatglass/desktop/macos_playback_session.hpp" not in tui or "macOS AudioUnit output" not in tui:
+        raise SystemExit("CLI macOS playback is not wired to the native bounded AudioUnit session")
     if "no fresh packets arrived; reacquiring" not in tui:
         raise SystemExit("CLI Live watchdog does not expose no-packet reacquisition")
     if "library_folder" not in tui or "std::quoted(preferences.library_folder)" not in tui:
