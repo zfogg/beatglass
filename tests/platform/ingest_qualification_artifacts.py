@@ -19,6 +19,15 @@ MAX_HASHES_BYTES = 16 << 20
 MAX_TOTAL_ARTIFACT_BYTES = 8 << 30
 
 
+def has_symlinked_parent(path: Path) -> bool:
+    current = path.parent
+    while current != current.parent:
+        if current.is_symlink():
+            return True
+        current = current.parent
+    return False
+
+
 def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_BYTES,
            max_manifest_bytes: int = MAX_MANIFEST_BYTES, max_entries: int = MAX_ENTRIES,
            max_total_artifact_bytes: int = MAX_TOTAL_ARTIFACT_BYTES) -> list[str]:
@@ -162,7 +171,7 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
               "artifacts": artifacts, "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in SCENARIOS]}
     if output.is_symlink():
         errors.append("symlinked evidence manifest output")
-    elif output.parent.is_symlink():
+    elif has_symlinked_parent(output):
         errors.append("symlinked evidence manifest output parent")
     elif not output.parent.is_dir():
         errors.append("evidence manifest output parent is missing")
