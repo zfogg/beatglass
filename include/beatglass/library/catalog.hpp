@@ -16,6 +16,8 @@ namespace beatglass::library {
  */
 struct CatalogEntry {
   std::filesystem::path path;
+  /** Stable path relative to the query root; never contains machine roots. */
+  std::filesystem::path relative_path;
   std::string name;
   /** Display title fallback derived from the filename stem; not embedded metadata. */
   std::string title;

@@ -11,6 +11,13 @@ Callers that need filesystem metadata must perform that work on a non-audio
 worker. Symlink traversal and recursive enumeration remain governed by the
 catalog functions, not this extension policy.
 
+Each `CatalogEntry` also carries `relative_path`, computed from the query
+root. It is suitable for persisted selection keys and display-state caching:
+unlike `path`, it contains no machine-specific drive or absolute-root prefix.
+For recursive scans it preserves descendant components (for example,
+`nested/track.wav`). It is an identity hint, not permission to access a file;
+callers must continue using the absolute `path` for filesystem operations.
+
 ## Cancellation
 
 `browse` and `browse_recursive` accept an optional C++20 `std::stop_token`.
