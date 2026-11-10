@@ -234,6 +234,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Final display restore retry | Final visual-state reapply fails after selection and synchronization | Return to selection-required fallback, focus display selection, and preserve the stale-evidence boundary. |
 | Display selection success focus | Display selection, visual restore, and settings persistence all succeed | Activate the page, announce stale/current evidence, and focus retained-settings review as the next deterministic action. |
 | Hidden overlay restoration focus | A compatible display returns while the user-hidden overlay remains hidden | Announce the restored geometry and focus Restore so visibility recovery is deterministic. |
+| Overlay hide/restore focus workflow | User hides the native overlay or the hide operation falls back to the control window | Activate the control page, announce retained settings and evidence freshness, then focus Restore on success or Hide for retry on failure. |
 | Resume recovery tooltip stale state | User hovers manual resume after pausing native overlay recovery | Keep the action hint aligned with the stale-evidence boundary. |
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |
