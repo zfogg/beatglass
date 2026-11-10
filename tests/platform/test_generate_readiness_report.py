@@ -30,6 +30,7 @@ class GenerateReadinessReportTest(unittest.TestCase):
                 self.assertEqual(module.main(), 0)
             self.assertTrue(output.is_file())
             self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["exit_gate_status"], "PENDING")
+            self.assertEqual(list(output.parent.glob(".readiness.json.*.tmp")), [])
 
     def test_missing_artifact_remains_fail_closed(self):
         with tempfile.TemporaryDirectory() as temp:
