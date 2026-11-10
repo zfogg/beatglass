@@ -1,4 +1,5 @@
 #include "beatglass/core/file_analysis.hpp"
+#include "beatglass/core/playback_session.hpp"
 #include "state_label.hpp"
 #ifdef _WIN32
 #include "../desktop/platform/windows_endpoints.hpp"
@@ -84,6 +85,8 @@ int main(int argc, char** argv) {
   int tab = 0, selected = tracks.empty() ? -1 : 0;
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result; bool busy = false;
+  beatglass::PlaybackSession playback;
+  std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
   std::future<beatglass::TempoResult> analysis_future;
   auto screen = ScreenInteractive::TerminalOutput();
@@ -97,7 +100,21 @@ int main(int argc, char** argv) {
   auto filter_input = Input(&filter, "Filter songs");
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
   auto refresh_button = Button(" Refresh ", refresh);
-  auto library_controls = Container::Horizontal({filter_input, recursive_checkbox, refresh_button});
+  auto play_button = Button(" Play ", [&] {
+    if (selected >= 0 && selected < static_cast<int>(tracks.size())) {
+      ++playback_epoch;
+      playback.start(playback_epoch);
+      status = "Playing " + tracks[selected].title + " through the selected output.";
+    }
+  });
+  auto pause_button = Button(" Pause ", [&] {
+    if (playback.pause()) status = "Playback paused.";
+  });
+  auto stop_button = Button(" Stop ", [&] {
+    playback.stop();
+    status = "Playback stopped.";
+  });
+  auto library_controls = Container::Horizontal({filter_input, recursive_checkbox, refresh_button, play_button, pause_button, stop_button});
   auto library = Renderer(library_controls, [&] {
     Elements rows;
     const auto query = lower(filter);
@@ -110,8 +127,9 @@ int main(int argc, char** argv) {
     const auto name = selected >= 0 ? tracks[selected].title : "No track selected";
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
     auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status)}) | color(Color::YellowLight) : text(status) | color(Color::GrayLight);
-    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result.has_value(), result ? result->metadata.frames : 0, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
+    auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result.has_value(), result ? result->metadata.frames : 0, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz" : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), separator(), status_view});
+    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | vscroll_indicator | frame | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto live = Renderer([&] { Elements endpoints; for (const auto& endpoint : live_endpoints) endpoints.push_back(text("●  " + endpoint) | color(Color::YellowLight)); if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight)); return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Enumerated by the native output adapter."), separator(), vbox(endpoints), live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: ") | color(Color::GrayLight), text("— BPM"), text("Key: —    Chord: —"), text("Capture state: stopped"), separator(), text("Start capture will be wired to the platform source lifecycle next."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto settings = Renderer([&] { return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold, text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"), text("Terminal motion: enabled"), separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."), text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
