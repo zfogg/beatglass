@@ -5058,7 +5058,7 @@ ApplicationWindow {
                                 window.captureMonitorBridge.start()
                                 window.announceCaptureRecoveryState("Overlay monitoring requested; waiting for accepted output data.")
                             }
-                            overlayLiveMonitoringState.forceActiveFocus()
+                            retryOverlay.forceActiveFocus()
                         }
                     }
                     Button {
@@ -5077,7 +5077,7 @@ ApplicationWindow {
                             window.overlayCaptureEvidenceStale = true
                             window.captureMonitorBridge.start()
                             window.announceCaptureRecoveryState("Overlay capture retry requested; waiting for a fresh accepted snapshot.")
-                            overlayLiveMonitoringState.forceActiveFocus()
+                            retryOverlay.forceActiveFocus()
                         }
                     }
                     QtObject {
