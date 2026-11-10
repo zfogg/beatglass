@@ -1,6 +1,7 @@
 """Exercise matrix generation with runner summary evidence."""
 import json
 import os
+import platform
 import subprocess
 import sys
 import tempfile
@@ -138,6 +139,11 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(mismatched_host), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "does not match runner host" not in result.stderr + result.stdout:
         raise SystemExit("mismatched summary host was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": "host unavailable", "host_os": f" {platform.system()}"}), encoding="utf-8")
+    padded_host = root / "padded-host-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(padded_host), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "does not match runner host" not in result.stderr + result.stdout:
+        raise SystemExit("whitespace-padded summary host was accepted")
     summary.write_text(json.dumps([{"qualified": False}]), encoding="utf-8")
     non_object = root / "non-object-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(non_object), "--summary", str(summary)], capture_output=True, text=True)
