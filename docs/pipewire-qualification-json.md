@@ -64,5 +64,8 @@ non-empty identity matching the top-level artifact identity.
 Reacquisition evidence may include `artifact_sha256`; when supplied it must be a
 64-character hexadecimal digest matching the top-level artifact digest.
 
+Reacquisition evidence may include `daemon_version`; when supplied it must be a
+non-empty string identifying the native daemon that performed recovery.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
