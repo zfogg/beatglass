@@ -4890,6 +4890,24 @@ ApplicationWindow {
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() { clickThroughToggle.toggle() }
                     }
+                    Slider {
+                        id: overlayOpacityControl
+                        objectName: "overlayOpacityControl"
+                        from: 0.2
+                        to: 1.0
+                        stepSize: 0.05
+                        value: window.overlayBridge ? window.overlayBridge.opacity : 0.9
+                        enabled: window.overlayBridge !== null && window.overlayBridge.available
+                        activeFocusOnTab: true
+                        Accessible.name: "Overlay opacity"
+                        Accessible.role: Accessible.Slider
+                        Accessible.description: "Adjust overlay opacity from 20 to 100 percent."
+                        ToolTip.text: "Overlay opacity: " + Math.round(value * 100) + "%"
+                        onMoved: {
+                            if (window.overlayBridge) window.overlayBridge.setOpacity(value)
+                            window.handleOverlayOpacityChanged()
+                        }
+                    }
                     Label {
                         objectName: "overlayKeyboardRecoveryStatus"
                         visible: window.overlayBridge !== null
