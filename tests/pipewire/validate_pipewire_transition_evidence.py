@@ -131,6 +131,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no clock source id")
         if host.get("clock_source_type") is not None and (not isinstance(host["clock_source_type"], str) or not host["clock_source_type"].strip()):
             raise SystemExit("transition host provenance has no clock source type")
+        if host.get("clock_source_status") is not None and (not isinstance(host["clock_source_status"], str) or not host["clock_source_status"].strip()):
+            raise SystemExit("transition host provenance has no clock source status")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
