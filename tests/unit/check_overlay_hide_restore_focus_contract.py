@@ -65,3 +65,10 @@ def test_forgetting_display_uses_shared_recovery_focus():
     body = QML[start : QML.index("    function persistOverlayDisplaySelection", start)]
     assert "window.focusOverlayDisplayRecoveryFailure(" in body
     assert "overlayPreferredDisplayName = \"\"" in body
+
+
+def test_recovery_pause_and_reset_share_focus_transition():
+    start = QML.index("function focusOverlayRecoveryPauseState")
+    body = QML[start : QML.index("    function quitApplication", start)]
+    assert "Live evidence is current." in body
+    assert body.count("window.focusOverlayRecoveryPauseState(") == 2

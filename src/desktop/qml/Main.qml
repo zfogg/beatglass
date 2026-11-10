@@ -1556,26 +1556,25 @@ ApplicationWindow {
             : "DJ overlay could not be hidden; control-window fallback remains active."
         window.focusOverlayHiddenState(message, hidden ? restoreOverlay : hideOverlay)
     }
-    function resetOverlayRecoveryAttempts() {
-        window.overlayRecoveryAttemptCount = 0
-        window.overlayRecoveryPausedByUser = false
+    function focusOverlayRecoveryPauseState(message, target) {
         navigation.currentIndex = 1
         window.show()
         window.raise()
         window.requestActivate()
-        window.announceCaptureRecoveryState("DJ overlay safe mode cleared; retry is available when a display is ready. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Live evidence is current."))
-        retryOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Live evidence is current."))
+        if (target)
+            target.forceActiveFocus()
+    }
+    function resetOverlayRecoveryAttempts() {
+        window.overlayRecoveryAttemptCount = 0
+        window.overlayRecoveryPausedByUser = false
+        window.focusOverlayRecoveryPauseState("DJ overlay safe mode cleared; retry is available when a display is ready.", retryOverlay)
     }
     function stopOverlayRecoveryAttempts() {
         window.overlayRecoveryAttemptCount = 0
         window.overlayRecoveryPausedByUser = true
         window.overlayCaptureEvidenceStale = true
-        navigation.currentIndex = 1
-        window.show()
-        window.raise()
-        window.requestActivate()
-        window.announceCaptureRecoveryState("DJ overlay recovery paused; monitoring continues and retry can be started again from this page. Live evidence is stale until fresh capture arrives.")
-        resumeOverlayRecovery.forceActiveFocus()
+        window.focusOverlayRecoveryPauseState("DJ overlay recovery paused; monitoring continues and retry can be started again from this page.", resumeOverlayRecovery)
     }
     function quitApplication() {
         window.overlayWasVisibleBeforeAvailabilityLoss = false
