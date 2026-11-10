@@ -907,6 +907,15 @@ ApplicationWindow {
             refreshCatalog()
         }
     }
+    function focusOverlayRecoveryAction(message) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + window.overlayRecoveryEvidenceLabel + ".")
+        resumeOverlayRecovery.forceActiveFocus()
+    }
+
     function restoreOverlayDisplaySelectionFromBridge() {
         if (!window.overlayBridge) {
             window.overlayDisplayRecoveryPending = true
