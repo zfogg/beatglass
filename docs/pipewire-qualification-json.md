@@ -319,6 +319,8 @@ The host validator's optional report output uses the same atomic temporary-file,
 flush, and synchronization contract as the standalone report validator.
 Its replacement path also preserves an existing report's permission mode on
 POSIX hosts.
+After host validation emits `REPORT.json`, run the standalone report validator
+as a round-trip check before packaging the evidence bundle.
 Validate that generated report before packaging with:
 `python tests/pipewire/validate_native_host_provenance_report.py REPORT.json`.
 The report validator accepts exactly one report path; missing or extra
