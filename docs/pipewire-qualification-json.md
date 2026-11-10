@@ -354,6 +354,8 @@ An empty array is also rejected because every valid report must identify at
 least its `platform` and `name` provenance fields.
 The machine-readable schema encodes this minimum with `minItems: 2` in
 addition to the executable validator checks.
+Its platform enum is intentionally limited to `linux`, `windows`, and `macos`,
+matching the host provenance validator.
 Reports that list only one required field, or neither, are rejected for the
 same reason; checked metadata must prove both identity dimensions.
 Required field names are case-sensitive; display-cased variants such as
