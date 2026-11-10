@@ -227,3 +227,10 @@ def test_unlock_shortcut_announces_stale_boundary():
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
     assert "unlockOverlay.forceActiveFocus()" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_show_shortcut_announces_stale_boundary():
+    start = QML.index("function focusOverlayShowShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "showOverlay.forceActiveFocus()" in body
+    assert "overlayCaptureEvidenceStale" in body
