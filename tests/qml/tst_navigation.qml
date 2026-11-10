@@ -1001,7 +1001,7 @@ TestCase {
         app.destroy()
     }
     function test_analysisLifecycleControlsUseBridge() {
-        fakeAnalysis.status = "Running"; fakeAnalysis.frames = 42; fakeAnalysis.canCancel = true; fakeAnalysis.canRetry = false; fakeAnalysis.cancels = 0; fakeAnalysis.retries = 0
+        fakeAnalysis.status = "Running"; fakeAnalysis.frames = 42; fakeAnalysis.canCancel = true; fakeAnalysis.canRetry = true; fakeAnalysis.cancels = 0; fakeAnalysis.retries = 0
         let app = shellWithAnalysis.createObject(null)
         app.selectedName = "source.wav"
         let progress = findChild(app, "analysisProgress")
