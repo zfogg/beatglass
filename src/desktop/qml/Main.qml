@@ -4541,6 +4541,21 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                     }
+                    Label {
+                        objectName: "overlayCaptureRecoveryStatus"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null
+                            && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
+                        text: window.captureMonitorBridge && window.captureMonitorBridge.status === "Reacquiring"
+                            ? "Monitoring paused · reacquiring selected output"
+                            : "Monitoring paused · selected output unavailable"
+                        Accessible.name: "Overlay capture recovery status"
+                        Accessible.value: text + "; no estimates"
+                        Accessible.role: Accessible.Status
+                        Accessible.description: text + ". No new estimates are published while the output is unavailable; retry capture after reconnecting or choosing another output."
+                        ToolTip.text: Accessible.description
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
                     Button {
                         objectName: "overlayMonitoringAction"
                         visible: window.overlayBridge !== null
