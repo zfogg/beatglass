@@ -3201,6 +3201,7 @@ ApplicationWindow {
                             activeFocusOnTab: true
                             Accessible.name: name + (folder ? ", folder" : ", audio file")
                             Accessible.value: folder ? "folder" : "audio file"
+                            ToolTip.text: path
                             Accessible.role: Accessible.ListItem
                             Accessible.description: folder ? "Folder discovered recursively" : "Select this audio file for metadata and analysis"
                             text: name + (folder ? "  (folder)" : "")
