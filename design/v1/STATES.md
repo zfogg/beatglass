@@ -257,3 +257,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Overlay geometry status recovery | Native geometry is restored or reported after a display transition | Announce the restored dimensions while keeping live evidence stale until fresh capture arrives. |
 | Overlay geometry sync failure | Native geometry changes but retained settings cannot be synchronized | Mark display recovery/evidence stale, keep fallback controls available, and focus display selection for retry. |
 | Display loss recovery focus | The native display list becomes empty during monitoring | Centralize pending/selection/stale state, restore control focus, and announce that overlay actions await a display. |
+| Click-through focus recovery | Native interaction changes into or out of click-through mode | Preserve stale evidence, announce the keyboard/pointer boundary, and focus Unlock when locked or interaction mode when restored. |
