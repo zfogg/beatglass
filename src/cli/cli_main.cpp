@@ -328,18 +328,18 @@ std::string format_duration(const beatglass::FileMetadata& metadata) {
   return std::to_string(seconds / 60) + ":" + (seconds % 60 < 10 ? "0" : "") + std::to_string(seconds % 60);
 }
 Element metric(std::string label, std::string value, Color accent) {
-  return vbox({text(std::move(label)) | color(Color::GrayLight) | ftxui::italic,
-               text(std::move(value)) | ftxui::bold | color(accent)}) | borderRounded | bgcolor(Color::RGB(18, 24, 31)) | flex;
+  return vbox({text(std::move(label)) | color(Color::GrayLight) | italic,
+               text(std::move(value)) | bold | color(accent)}) | borderRounded | bgcolor(Color::RGB(18, 24, 31)) | flex;
 }
 Element action(Element element, Color accent) {
-  return element | color(accent) | ftxui::bold;
+  return element | color(accent) | bold;
 }
 Element progress_meter(std::uint64_t percent) {
   constexpr std::size_t width = 36;
   const auto filled = std::min<std::size_t>(width, static_cast<std::size_t>(percent * width / 100));
-  return hbox({text("["), text(std::string(filled, '#')) | color(Color::GreenLight) | ftxui::bold,
+  return hbox({text("["), text(std::string(filled, '#')) | color(Color::GreenLight) | bold,
                text(std::string(width - filled, '-')) | color(Color::GrayDark), text("] ") ,
-               text(std::to_string(percent) + "%") | color(Color::YellowLight) | ftxui::bold});
+               text(std::to_string(percent) + "%") | color(Color::YellowLight) | bold});
 }
 struct AnalysisView {
   beatglass::TempoResult result;
@@ -377,7 +377,7 @@ CacheSource cache_source(const std::filesystem::path& path) {
   std::error_code error;
   const auto size = std::filesystem::file_size(path, error);
   if (error) throw std::runtime_error("cache identity size failed: " + error.message());
-  const auto modified = std::filesystem::last_write_time(path, error).time_since_epoch().count();
+  const auto modified = static_cast<std::int64_t>(std::filesystem::last_write_time(path, error).time_since_epoch().count());
   if (error) throw std::runtime_error("cache identity timestamp failed: " + error.message());
   const auto content = path.generic_string() + "|" + std::to_string(size) + "|" + std::to_string(static_cast<long long>(modified));
   const auto run_id = content;
