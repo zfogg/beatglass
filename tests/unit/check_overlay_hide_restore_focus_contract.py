@@ -329,3 +329,10 @@ def test_stop_shortcut_pauses_and_focuses_resume():
     assert "stopOverlayRecoveryAttempts()" in body
     assert "resumeOverlayRecovery.forceActiveFocus()" in body
     assert "Live evidence remains stale" in body
+
+
+def test_paused_page_shortcut_preserves_stale_boundary():
+    start = QML.index("function handleOverlayPausedPageShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "focusOverlayRecoveryAction" in body
+    assert "Live evidence remains stale" in body
