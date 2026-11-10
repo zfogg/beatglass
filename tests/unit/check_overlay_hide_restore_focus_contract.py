@@ -735,3 +735,14 @@ def test_hide_action_propagates_result():
     body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
     assert "return false" in body
     assert "return window.hideOverlayAndRestoreControls()" in body
+
+
+def test_resume_action_propagates_native_result():
+    start = QML.index("function handleOverlayResumeShortcut")
+    body = QML[start : QML.index("    function handleOverlayResumeRecoveryAction", start)]
+    assert "return window.handleOverlayResumeRecoveryAction()" in body
+    action_start = QML.index("function handleOverlayResumeRecoveryAction")
+    action_body = QML[action_start : QML.index("    function handleOverlayClearSafeModeShortcut", action_start)]
+    assert "const resumed" in action_body
+    assert "overlayDisplayStatus.forceActiveFocus()" in action_body
+    assert "return resumed" in action_body
