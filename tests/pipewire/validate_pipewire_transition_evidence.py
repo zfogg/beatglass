@@ -470,7 +470,7 @@ for event in process_events:
     if (not isinstance(event.get("epoch"), int)
             or isinstance(event.get("epoch"), bool)
             or event["epoch"] <= 0
-            or event["epoch"] not in (start["epoch"], restart["epoch"]):
+            or event["epoch"] not in (start["epoch"], restart["epoch"])):
         raise SystemExit("process epoch must match a lifecycle epoch")
 process_timestamps = [event["timestamp_ns"] for event in process_events if event.get("timestamp_ns") is not None]
 if process_timestamps and any(previous > current for previous, current in zip(process_timestamps, process_timestamps[1:])):

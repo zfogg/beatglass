@@ -24,7 +24,7 @@ required = {
     "cache skips decoder": 'Cached analysis ready',
     "admission properties": 'Q_PROPERTY(bool analysisReserved READ analysisReserved NOTIFY analysisAdmissionChanged)',
     "admission invokable": 'Q_INVOKABLE void admitAnalysis',
-    "worker admission": 'coordinator_.storage().admit_analysis',
+    "worker admission": 'coordinator_.admit_analysis',
     "admission signal": 'void admitted(bool reserved, QString cachedResult);',
 }
 haystack = header + source + qml
