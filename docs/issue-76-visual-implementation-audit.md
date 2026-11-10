@@ -745,6 +745,8 @@ When Monitoring returns after that stale state, the overlay announces that a fre
 
 Entering the capture Error state now moves keyboard focus directly to Retry overlay capture after announcing the missing device or permission, so the failure state is actionable without pointer navigation.
 
+The intermediate Reacquiring state also moves focus to the live monitoring status while retaining the stale-evidence marker, so keyboard users can follow recovery before Monitoring publishes a fresh accepted snapshot.
+
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
 
 Overlay geometry now exposes the persisted/native position and size in Settings and announces restored or clamped geometry through the shared recovery status. When native geometry is unavailable, the status explicitly keeps the control-window fallback visible.

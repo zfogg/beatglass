@@ -1952,6 +1952,7 @@ ApplicationWindow {
             } else if (window.captureMonitorBridge.status === "Reacquiring") {
                 window.overlayCaptureEvidenceStale = true
                 window.announceCaptureRecoveryState("Output device reacquiring; visualization focus restored when fresh audio arrives.")
+                overlayLiveMonitoringState.forceActiveFocus()
             } else if (window.captureMonitorBridge.status === "Monitoring") {
                 const recovered = window.overlayCaptureEvidenceStale
                 window.overlayCaptureEvidenceStale = false
