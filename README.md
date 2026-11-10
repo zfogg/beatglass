@@ -19,6 +19,22 @@ Retryable analysis storage schema v2 persists `source_path` and `decoder_snapsho
 
 Beatglass is a local desktop music analysis application with a Library for analyzing files and a DJ mode that monitors a selected system output and displays live musical estimates. The integrated prototype now includes the desktop shell, source-attributed analysis lifecycle, bounded batch submission, source-PCM waveform/FFT views, DJ evidence/reacquisition states, and platform recovery contracts. End-to-end persistence, playback, native capture, and full native qualification remain in progress.
 
+The implementation is C++20. C callers can interoperate today through the
+documented CLI/process boundary; a stable C ABI adapter is not yet shipped.
+Objective-C callers can invoke that boundary from `.m`, while
+Objective-C++ callers can bridge to C++ headers from `.mm`. ABI stability is
+not yet promised.
+
+Minimal C integration (using the installed C adapter) looks like:
+
+```c
+#include <stdlib.h>
+
+int main(void) {
+    return system("beatglass-cli --json song.wav");
+}
+```
+
 The intended stack is C++20, CMake, Qt 6 Quick, SQLite, aubio and Essentia, with PipeWire, Core Audio taps and WASAPI loopback for Linux, macOS and Windows respectively. Dependency availability, versions and licenses must be verified before selection. No account or network service should be required at runtime.
 
 ## Current status and prerequisites
@@ -60,9 +76,57 @@ ctest --test-dir build --output-on-failure
 ./build/beatglass-desktop
 ```
 
-For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below. The CLI accepts one file, prints an aubio estimate or unknown, and never modifies the input. The Library page displays basic decoded metadata; it does not launch analysis. The DJ page reports that capture is unavailable. On macOS it also exposes an experimental overlay; its native behavior is unqualified and described in [macOS overlay status](docs/macos-overlay.md). The native evidence procedure is [the macOS qualification checklist](docs/macos-qualification.md). Actual support depends on decoder build options. No GUI, capture or overlay has been qualified on any platform.
+For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. An experimental LLVM/Clang toolchain can also be installed with Scoop (`scoop install llvm`) and selected through CMake's `-T ClangCL` generator toolset or an explicit `CMAKE_CXX_COMPILER`; this is a development option, not a pinned qualification environment. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below. The CLI accepts one file, prints an aubio estimate or unknown, and never modifies the input. The Library page displays basic decoded metadata; it does not launch analysis. The DJ page reports that capture is unavailable. On macOS it also exposes an experimental overlay; its native behavior is unqualified and described in [macOS overlay status](docs/macos-overlay.md). The native evidence procedure is [the macOS qualification checklist](docs/macos-qualification.md). Actual support depends on decoder build options. No GUI, capture or overlay has been qualified on any platform.
 
 On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
+
+## Command-line and qualification-tool options
+
+The following reference is generated from the authoritative parsers in
+`src/cli/main.cpp`, `src/desktop/main.cpp`, and `tests/platform/*.py`. Paths
+are read-only unless an option explicitly names an output; tools fail closed
+with a nonzero exit status and report errors on stderr.
+
+### Analysis and desktop executables
+
+| Command | Option | Default / values | Behavior and interactions |
+| --- | --- | --- | --- |
+| `beatglass-cli` | `<audio-file>` | required positional path | Analyzes one input; the input is never modified. |
+| `beatglass-cli` | `--replay <file>` | off | Emits incremental causal estimates without real-time pacing; may end with a partial JSON-Lines stream on error. |
+| `beatglass-cli` | `--json` | off | Emits one JSON result, or JSON Lines with `--replay`; `bpm` may be `null`. |
+| `beatglass-cli` | `--` | none | Ends option parsing so an input beginning with `-` is treated as a path. |
+| `beatglass-desktop` | `--database <path>` | application default | Selects the SQLite storage path; the first occurrence wins and later arguments are passed to Qt. |
+
+Unknown CLI options, missing values, duplicate `--replay`/`--json`, and a
+missing audio path exit with status 2. `--json` and `--replay` may be combined.
+
+### Readiness, evidence, and release tools
+
+| Tool | Positional arguments | Options (default) |
+| --- | --- | --- |
+| `check_evidence_readiness.py` | `--status`, `--bundles` (both required) | `--report` (none), `--max-age-hours` (168; must be positive), `--max-report-bytes` (16 MiB), `--json` (off) |
+| `generate_readiness_report.py` | `bundles output` | `--max-report-bytes` (16 MiB), `--json` (off) |
+| `run_readiness_handoff.py` | `bundles output` | `--status`, `--max-age-hours` (168), `--check-docs`, `--consume`, `--native-output`, `--native-platform {windows,macos,linux}`, `--review-output`, `--require-ready`, `--review-json`, `--consume-review`, `--decision-output`, `--native-review-output`, `--native-reviewer` |
+| `ingest_qualification_artifacts.py` | `root output` | `--max-artifact-bytes` (1 GiB), `--max-manifest-bytes` (16 MiB), `--max-entries` (1000), `--max-total-artifact-bytes` (8 GiB), `--json` |
+| `verify_evidence_bundle.py` | `--root`, `--manifest` (both required) | `--max-artifact-bytes` (1 GiB), `--max-manifest-bytes` (16 MiB), `--max-entries` (1000), `--max-total-artifact-bytes` (8 GiB), `--json` |
+| `validate_readiness_report.py` | `report` | `--bundles` (none; enables retained-bundle verification) |
+| `consume_readiness_handoff.py` | `report` | none |
+| `consume_review_packet.py` | `packet` | `--report` (none) |
+| `consume_review_bundle.py` | `bundle` | `--report-name` (`readiness-report.json`), `--packet-name` (`review.json`) |
+| `review_readiness_handoff.py` | `report output` | `--require-ready`, `--json-output` (none) |
+| `review_release_decision.py` | `bundle output` | none |
+| `review_native_evidence.py` | `report reviewer output` | none |
+| `retain_review_bundle.py` | `report packet destination` | none |
+| `promote_review_bundle.py` | `source destination` | none |
+| `record_release_signoff.py` | `decision reviewer output` | none |
+| `prepare_release_bundle.py` | `report packet retained release` | `--signoff` (none; when present, required and verified) |
+| `verify_release_manifest.py` | `release_root` | `--signoff` (none; requires and verifies manual signoff when present) |
+| `verify_release_bundle.py` | `release_root` | none |
+
+The readiness chain is intentionally ordered: ingest/retain evidence, run the
+handoff, review/consume the decision, record signoff, promote, then verify the
+manifest and final release bundle. `--require-ready` and `--consume-review`
+are conservative gates; they do not replace native platform evidence.
 
 ## API documentation
 
