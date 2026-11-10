@@ -2549,7 +2549,7 @@ TestCase {
         compare(fakeOverlay.requestedWidth, 620)
         compare(fakeOverlay.requestedHeight, 280)
         compare(fakeOverlay.opacity, 0.42)
-        verify(app.overlayRecoveryAnnouncement.indexOf("42 percent opacity") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("geometry and opacity restored") >= 0)
         app.destroy()
         fakeOverlay.opacity = 0.9
     }
