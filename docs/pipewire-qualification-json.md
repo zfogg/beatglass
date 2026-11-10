@@ -274,6 +274,8 @@ Optional `secure_boot` and `tpm_present` schema properties are boolean-typed,
 matching runtime rejection of numeric sentinels.
 The host schema permits additional properties for forward-compatible native
 provenance fields; validator checks remain authoritative for known fields.
+Unknown-but-well-formed host fields are retained in checked_fields metadata so
+future producers do not silently lose provenance during report generation.
 Before packaging a native run, validate the extracted host object directly:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json`.
 The host validator accepts one host path and an optional report path; missing

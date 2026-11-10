@@ -34,6 +34,11 @@ with tempfile.TemporaryDirectory() as directory:
     optional_result = json.loads(optional_report.read_text(encoding="utf-8"))
     assert optional_result["checked_fields"] == ["name", "node_id", "platform", "secure_boot", "tpm_present"]
     subprocess.run(["python", "tests/pipewire/validate_native_host_provenance_report.py", str(optional_report)], check=True)
+    forward_host = Path(directory) / "forward-host.json"
+    forward_report = Path(directory) / "forward-report.json"
+    forward_host.write_text(json.dumps({"platform": "linux", "name": "qualified", "future_measurement": "retained"}), encoding="utf-8")
+    subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(forward_host), str(forward_report)], check=True)
+    assert "future_measurement" in json.loads(forward_report.read_text(encoding="utf-8"))["checked_fields"]
     if os.name != "nt":
         os.chmod(optional_report, 0o640)
         subprocess.run(["python", "tests/pipewire/validate_native_host_provenance.py", str(optional_host), str(optional_report)], check=True)
