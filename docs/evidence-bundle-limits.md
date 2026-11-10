@@ -38,6 +38,8 @@ respectively, preventing untrusted qualification directories from forcing
 unbounded text reads before artifact validation begins.
 Ingestion checks every output ancestor for symlink traversal before creating
 missing nested report directories.
+The verifier also rejects symlinked bundle roots and manifest inputs, keeping
+validation anchored to the intended evidence workspace.
 Ingestion also supports `--json`, returning validity, errors, output, and
 effective limits for orchestration without parsing human-readable logs.
 Both JSON interfaces include `schema_version: 1`; consumers should reject
