@@ -96,3 +96,12 @@ def test_capture_startup_failure_marks_stale_pending_recovery():
     assert "overlayCaptureEvidenceStale = true" in body
     assert "overlayDisplayRecoveryPending = true" in body
     assert "focusOverlayCaptureStartupFailure()" in QML[QML.index("Component.onCompleted") : start]
+
+
+def test_capture_monitor_status_changes_share_one_transition_handler():
+    start = QML.index("function handleCaptureMonitorStatusChanged")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "transitionCaptureEvidence(true" in body
+    assert "transitionCaptureEvidence(false" in body
+    connections = QML[QML.index("target: window.captureMonitorBridge") : start]
+    assert "window.handleCaptureMonitorStatusChanged()" in connections
