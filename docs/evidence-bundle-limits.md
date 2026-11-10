@@ -107,3 +107,6 @@ under `resource_limit`, making capacity failures distinct from malformed data.
 Manifest contract failures such as missing provenance and required scenarios
 are grouped under `schema`, keeping evidence-shape failures distinct from
 workspace topology and capacity problems.
+Missing provenance metadata is grouped under `provenance` in JSON output, so
+qualification dashboards can identify incomplete build/environment identity
+separately from other manifest-shape errors.
