@@ -118,7 +118,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or (isinstance(relative, str) and "\x00" in relative)
             or not canonical
             or canonical != relative
-            or canonical in seen
+            or canonical.casefold() in seen
         ):
             errors.append(f"invalid or duplicate artifact entry: {entry}"); continue
         if "role" in entry and (not isinstance(entry["role"], str) or not entry["role"].strip()):
@@ -127,7 +127,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             errors.append(f"artifact role must not have leading or trailing whitespace: {relative}"); continue
         if "role" in entry and len(entry["role"]) > 128:
             errors.append(f"artifact role exceeds 128 characters: {relative}"); continue
-        seen.add(canonical)
+        seen.add(canonical.casefold())
         path = (root / canonical).resolve()
         if root.resolve() not in path.parents:
             errors.append(f"artifact escapes bundle: {relative}"); continue
