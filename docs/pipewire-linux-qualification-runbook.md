@@ -66,6 +66,8 @@ When present, `native_execution_blockers` must be a non-empty-string array;
 malformed blocker values fail before matrix generation.
 Pending summaries must include a non-empty `pending_reason`; this keeps an
 unqualified platform handoff actionable instead of producing a blank status.
+Pending reasons must also be printable text without control characters so
+review reports remain readable and safe to transport.
 Qualified summaries must include a non-empty `commit` value so native evidence
 cannot be detached from the code identity that produced it.
 If a pending summary includes `commit`, it must still be a non-empty string;

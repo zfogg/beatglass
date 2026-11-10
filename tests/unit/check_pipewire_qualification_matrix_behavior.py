@@ -139,4 +139,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(mode_output)], capture_output=True, text=True)
     if result.returncode != 0 or mode_output.stat().st_mode & 0o777 != original_mode:
         raise SystemExit("matrix output mode was not preserved")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": "host\u0001unavailable"}), encoding="utf-8")
+    control_reason = root / "control-reason-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(control_reason), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid pending reason" not in result.stderr + result.stdout:
+        raise SystemExit("control-character pending reason was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
