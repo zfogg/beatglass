@@ -13,6 +13,12 @@ struct TempDir {
 };
 }
 
+TEST_CASE("catalog exposes canonical audio format policy") {
+  CHECK(beatglass::library::audio_format_for_path("track.WAV") == "WAV");
+  CHECK(beatglass::library::audio_format_for_path("track.aif") == "AIFF");
+  CHECK(beatglass::library::audio_format_for_path("notes.txt").empty());
+}
+
 TEST_CASE("catalog lists folders and supported audio in deterministic order") {
   TempDir dir; dir.file("zeta.WAV"); dir.file("Alpha.mp3"); dir.file("notes.txt");
   std::filesystem::create_directory(dir.path / "Mixes");
