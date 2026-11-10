@@ -254,3 +254,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Overlay interaction state recovery | Click-through interaction changes between locked and unlocked | Increment settings revision, preserve stale evidence until capture refreshes, and announce the keyboard/pointer recovery boundary. |
 | Overlay opacity recovery | Persisted opacity changes arrive from the native bridge | Preserve in-flight acknowledgement state, increment settings revision when external, and announce stale evidence until capture refreshes. |
 | Overlay geometry recovery | Native geometry changes while display recovery is pending | Preserve stale evidence, resume automatic recovery when allowed, and focus Retry or Resume based on the paused state. |
+| Overlay geometry status recovery | Native geometry is restored or reported after a display transition | Announce the restored dimensions while keeping live evidence stale until fresh capture arrives. |
