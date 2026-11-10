@@ -292,12 +292,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            showOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Show overlay control focused.")
+            window.focusOverlayShowShortcut()
         }
     }
     Shortcut {
@@ -1445,6 +1440,14 @@ ApplicationWindow {
         window.requestActivate()
         unlockOverlay.forceActiveFocus()
         window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+    }
+    function focusOverlayShowShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        showOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Show overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
