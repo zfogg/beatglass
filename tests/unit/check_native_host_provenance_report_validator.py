@@ -29,6 +29,14 @@ with tempfile.TemporaryDirectory() as directory:
     assert "host provenance report has no name" in result.stderr
 
 with tempfile.TemporaryDirectory() as directory:
+    for platform in (None, 7, "linux "):
+        report = Path(directory) / "invalid-platform-report.json"
+        report.write_text(json.dumps({"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": platform, "name": "host", "checked_fields": ["name", "platform"]}), encoding="utf-8")
+        result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)], capture_output=True, text=True)
+        assert result.returncode != 0
+        assert "host provenance report has an invalid platform" in result.stderr
+
+with tempfile.TemporaryDirectory() as directory:
     report = Path(directory) / "truthy-valid.json"
     report.write_text(json.dumps({"schema": "beatglass-native-host-provenance-v1", "valid": 1, "platform": "linux", "name": "host", "checked_fields": ["name", "platform"]}), encoding="utf-8")
     result = subprocess.run(["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)], capture_output=True, text=True)
