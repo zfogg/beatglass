@@ -248,3 +248,5 @@ If present, host `clock_source_id` must be a non-empty string identifying the
 selected synchronization source.
 If present, host `clock_source_type` must be a non-empty string classifying the
 selected synchronization source.
+If present, host `clock_source_status` must be a non-empty string describing
+the selected source's qualification status.
