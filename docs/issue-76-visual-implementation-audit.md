@@ -1003,3 +1003,5 @@ Native playback state, source, position, and output-running state now expose liv
 Native playback errors, seek limitations, source-selection mismatch, and unavailable-control guidance now use live status semantics, keeping playback recovery actionable.
 
 Fresh capture status no longer clears the overlay stale-evidence marker while display recovery is pending; accepted capture remains gated until a valid destination is restored.
+
+Fresh capture also preserves stale overlay evidence while the user has intentionally hidden the overlay; restoring the overlay remains the explicit transition that makes retained live state visible again.
