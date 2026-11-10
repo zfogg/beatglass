@@ -279,6 +279,8 @@ The generated report has a closed top-level shape; unknown report properties are
 rejected so producers cannot silently bypass the qualification contract.
 Unreadable files and malformed JSON are also rejected with a concise validation
 error; they do not produce a traceback or a partially trusted report.
+Files that are not valid UTF-8 are treated as unreadable and rejected by the
+same check.
 If present, host `clock_source_latency_ns` must be a non-negative numeric
 measurement of source latency; boolean values are invalid.
 If present, host `clock_source_noise_ns` must be a non-negative numeric
