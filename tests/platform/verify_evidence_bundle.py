@@ -97,6 +97,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
             or any(ord(char) < 32 for char in relative)
             or any(part == "." for part in relative.split("/"))
             or any(part != ".." and part.endswith((".", " ")) for part in relative.split("/"))
+            or any(part.rsplit(".", 1)[0].upper() in {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(1, 10)), *(f"LPT{i}" for i in range(1, 10))} for part in relative.split("/") if part not in {".", ".."})
             or "//" in relative
             or relative.endswith("/")
             or ":" in relative
