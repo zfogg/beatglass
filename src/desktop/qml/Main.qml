@@ -4718,7 +4718,7 @@ ApplicationWindow {
                         Accessible.name: "Overlay display empty state"
                         Accessible.value: text
                         Accessible.role: Accessible.Status
-                        Accessible.description: text + " Connect a display before choosing an overlay destination."
+                        Accessible.description: text + " Live overlay evidence is stale while no display is available; monitoring continues in the control window. Connect a display before choosing an overlay destination."
                         ToolTip.text: "Connect a display before choosing an overlay destination"
                     }
                     Label {

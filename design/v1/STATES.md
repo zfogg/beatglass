@@ -80,6 +80,7 @@
 | Overlay display recovery | Saved display is unavailable or being restored | Expose the recovery state and stale-evidence boundary accessibly; keep the control window available until a display is confirmed. |
 | Overlay recovery action pending | Recovery is waiting for a compatible display | Include the stale-evidence boundary in the recovery status itself, keep controls available, and direct the user to choose or reconnect a display. |
 | Overlay unavailable | Native overlay cannot be shown on the selected display | State that live overlay evidence is stale, keep monitoring in the control window, and offer display selection or retry without hiding the recovery path. |
+| Overlay no display | No output displays are enumerated | Mark overlay evidence stale, keep monitoring and controls available, and direct the user to connect a display before retrying. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
 | DJ | Monitoring selected output, activity and combined-mix caveat | Start/stop, select default or explicit output, half/double BPM, reset/reacquire. |
