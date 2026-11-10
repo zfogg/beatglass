@@ -220,6 +220,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Restore failure transition | Overlay launch, visual-state restore, or native show fails | Centralize stale/pending state and announce the fresh-capture boundary before returning to fallback controls. |
 | Fallback control transition | Native overlay is unavailable and the control window becomes the active fallback | Mark visible evidence stale and announce the same boundary on every fallback entry. |
 | Capture evidence transition | Capture enters error, reacquiring, or monitoring states | Centralize stale/current state, announcement wording, and focus target so recovery transitions cannot drift. |
+| Native availability transition | Overlay bridge becomes unavailable or returns | Mark evidence stale and route unavailable focus to Retry while preserving retained settings. |
 | Resume recovery tooltip stale state | User hovers manual resume after pausing native overlay recovery | Keep the action hint aligned with the stale-evidence boundary. |
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |

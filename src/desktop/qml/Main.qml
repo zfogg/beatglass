@@ -2022,8 +2022,9 @@ ApplicationWindow {
         function onAvailableChanged() {
             if (window.overlayBridge && !window.overlayBridge.available) {
                 window.overlayDisplayRecoveryPending = true
+                window.overlayCaptureEvidenceStale = true
                 clickThroughToggle.checked = false
-                window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers.")
+                window.announceCaptureRecoveryState("DJ overlay unavailable; output monitoring remains unavailable until the display recovers. Live evidence is stale until fresh capture arrives.")
                 window.show()
                 window.raise()
                 window.requestActivate()
