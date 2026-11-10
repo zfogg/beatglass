@@ -148,5 +148,7 @@ Provided process timestamps must also be monotonic in event order.
 When process events provide `duration_ns`, it must be a non-negative integer.
 When process events provide `sample_rate`, it must be a positive integer.
 When process events provide `channels`, it must be a positive integer.
+Every process event must carry a positive `epoch` matching either the start or
+restart lifecycle epoch.
 When both timestamps and durations are provided, adjacent process intervals
 must not overlap.
