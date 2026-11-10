@@ -45,7 +45,7 @@ bool AnalysisJobBridge::submitFile(const QString& path, const QString& contentHa
   if (engineVersion_ != engineVersion || configurationId_ != configurationId || analysisMode_ != mode) {
     engineVersion_ = engineVersion; configurationId_ = configurationId; analysisMode_ = mode; emit provenanceChanged();
   }
-  beatglass::library::AnalysisIdentity identity;
+  beatglass::AnalysisIdentity identity;
   identity.content_hash = contentHash.toStdString(); identity.engine_version = engineVersion.toStdString();
   identity.configuration_id = configurationId.toStdString(); identity.mode = mode.toStdString();
   return static_cast<bool>(submit(beatglass::library::make_file_decode_operation(path.toStdString(), std::move(identity))));
@@ -67,7 +67,7 @@ int AnalysisJobBridge::submitSelectedFiles(const QStringList& paths) {
     if (path.isEmpty()) continue;
     const auto fingerprint = beatglass::library_detail::fingerprint_file(path.toStdString());
     if (fingerprint.status != beatglass::library_detail::FingerprintStatus::ok) continue;
-    beatglass::library::AnalysisIdentity identity;
+    beatglass::AnalysisIdentity identity;
     identity.content_hash = fingerprint.digest;
     identity.engine_version = "beatglass-desktop-v1";
     identity.configuration_id = "default-offline";
