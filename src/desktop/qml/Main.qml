@@ -5442,10 +5442,10 @@ ApplicationWindow {
                             activeFocusOnTab: true
                             model: ["Default system output"]
                             currentIndex: 0
-                            enabled: true
+                            enabled: window.endpointSelectionBridge !== null && count > 0
                             Accessible.name: "Output device"
                             Accessible.role: Accessible.ComboBox
-                            Accessible.description: "Current output device: " + currentText + ". Monitoring follows the operating system default output device."
+                            Accessible.description: enabled ? "Current output device: " + currentText + ". Monitoring follows the operating system default output device." : "No output device is currently available for monitoring."
                             ToolTip.text: "Current system output device used for monitoring"
                             Layout.fillWidth: true
                         }
