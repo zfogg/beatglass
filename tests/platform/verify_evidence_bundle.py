@@ -9,7 +9,7 @@ import sys
 REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "overlay"}
 
 REQUIRED_PROVENANCE = ("platform", "commit", "captured_at", "environment")
-SUPPORTED_PLATFORMS = {"linux", "windows", "macos"}
+SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
 
 
 def verify(root: Path, manifest: Path) -> list[str]:
