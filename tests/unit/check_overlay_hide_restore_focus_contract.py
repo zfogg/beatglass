@@ -34,3 +34,13 @@ def test_restore_failures_share_an_activated_stale_focus_path():
 
 def test_design_state_documents_hide_restore_focus_contract():
     assert "Overlay hide/restore focus workflow" in STATES
+
+
+def test_unlock_workflow_centralizes_success_and_failure_focus():
+    start = QML.index("function focusOverlayUnlockState")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "navigation.currentIndex = 1" in body
+    assert "Interaction state is current." in body
+    unlock = QML[QML.index("function unlockOverlayAndRestoreFocus") : QML.index("    function reapplyOverlaySettingsAndRestore")]
+    assert unlock.count("window.focusOverlayUnlockState(") == 2
+    assert "setClickThrough(false)" in unlock

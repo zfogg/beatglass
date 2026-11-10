@@ -761,6 +761,15 @@ ApplicationWindow {
         if (target)
             target.forceActiveFocus()
     }
+    function focusOverlayUnlockState(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Interaction state is current."))
+        if (target)
+            target.forceActiveFocus()
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -1393,19 +1402,12 @@ ApplicationWindow {
         if (!window.overlayBridge.setClickThrough(false)) {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("DJ overlay could not be unlocked; control-window fallback remains available.")
-            window.show()
-            window.raise()
-            window.requestActivate()
-            if (typeof unlockOverlay !== "undefined")
-                unlockOverlay.forceActiveFocus()
+            window.focusOverlayUnlockState("DJ overlay could not be unlocked; control-window fallback remains available.", unlockOverlay)
             return false
         }
         window.overlayLaunchFallbackActive = false
         window.overlayDisplayRecoveryPending = false
-        window.announceCaptureRecoveryState("DJ overlay unlocked; keyboard and pointer interaction restored.")
-        if (typeof unlockOverlay !== "undefined")
-            unlockOverlay.forceActiveFocus()
+        window.focusOverlayUnlockState("DJ overlay unlocked; keyboard and pointer interaction restored.", unlockOverlay)
         return true
     }
     function reapplyOverlaySettingsAndRestore() {
