@@ -343,6 +343,8 @@ Report names follow the host contract and must contain visible non-whitespace
 text.
 Report platforms must use the same exact lowercase enum as host evidence;
 numeric, null, or padded values are rejected.
+`checked_fields` must be a JSON array of non-empty strings; objects, scalars,
+and null values are rejected as malformed report metadata.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
