@@ -83,6 +83,16 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(invalid_blockers), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid execution blockers" not in result.stderr + result.stdout:
         raise SystemExit("malformed native execution blockers were accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "native_execution_blockers": ["audio\u0001permission"], "pending_reason": "host unavailable"}), encoding="utf-8")
+    control_blockers = root / "control-blockers-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(control_blockers), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid execution blockers" not in result.stderr + result.stdout:
+        raise SystemExit("control-character execution blocker was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "native_execution_blockers": ["permission", "permission"], "pending_reason": "host unavailable"}), encoding="utf-8")
+    duplicate_blockers = root / "duplicate-blockers-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(duplicate_blockers), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "duplicate execution blockers" not in result.stderr + result.stdout:
+        raise SystemExit("duplicate execution blockers were accepted")
     summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": ""}), encoding="utf-8")
     invalid_reason = root / "invalid-reason-matrix.json"
     result = subprocess.run([sys.executable, str(script), str(invalid_reason), "--summary", str(summary)], capture_output=True, text=True)
