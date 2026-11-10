@@ -17,7 +17,8 @@ events = [
 
 def run(reacquisition):
     payload = {"schema": "beatglass-pipewire-transitions-v1", "commit": "test", "events": json.loads(json.dumps(events))}
-    payload["events"][-1]["reacquisition"] = reacquisition
+    payload["events"].append({"event": "process", "epoch": 2, "sample_count": 128})
+    payload["events"][-2]["reacquisition"] = reacquisition
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "transitions.json"
         path.write_text(json.dumps(payload), encoding="utf-8")
