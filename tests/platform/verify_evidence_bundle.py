@@ -66,6 +66,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
         errors.append("artifacts exceed 1000 entries")
     if not isinstance(scenarios, list) or not scenarios:
         errors.append("scenarios must be a nonempty list")
+    elif len(scenarios) > 1000:
+        errors.append("scenarios exceed 1000 entries")
     scenario_ids = {
         scenario.get("id") for scenario in scenarios or []
         if isinstance(scenario, dict) and isinstance(scenario.get("id"), str)
