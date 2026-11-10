@@ -1699,7 +1699,7 @@ ApplicationWindow {
         return window.handleOverlayRestoreButtonAction()
     }
     function handleOverlayRestoreButtonAction() {
-        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
             window.focusOverlayDisplayRecoveryFailure("Choose an available display before restoring the overlay.", overlayDisplay)
             return false
         }
