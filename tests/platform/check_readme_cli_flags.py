@@ -32,3 +32,8 @@ for token in ("--help", "-h", "--version", "-V"):
     if token in cli_source and token not in README:
         raise SystemExit(f"README is missing main CLI token: {token}")
 print("README main CLI alias coverage verified")
+
+desktop_source = (ROOT / "src/desktop/main.cpp").read_text(encoding="utf-8")
+if "--database" in desktop_source and "--database" not in README:
+    raise SystemExit("README is missing desktop --database documentation")
+print("README desktop flag coverage verified")
