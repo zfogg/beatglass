@@ -27,8 +27,9 @@ bool supported_audio(const std::filesystem::path& path) { return !audio_format_f
 }
 
 CatalogResult browse(const std::filesystem::path& folder, std::string search,
-                     std::size_t max_entries) {
+                     std::size_t max_entries, std::stop_token stop) {
   CatalogResult result;
+  if (stop.stop_requested()) { result.cancelled = true; result.diagnostic = "catalog query cancelled"; return result; }
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
     result.status = error ? CatalogStatus::filesystem_error : CatalogStatus::invalid_root;
@@ -37,6 +38,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
   }
   const auto query = folded(std::move(search));
   for (std::filesystem::directory_iterator it(folder, error), end; it != end && !error; it.increment(error)) {
+    if (stop.stop_requested()) { result.entries.clear(); result.cancelled = true; result.diagnostic = "catalog query cancelled"; return result; }
     const auto& entry = *it;
     // Library browsing is intentionally one level deep; do not follow links
     // into unrelated trees or expose a linked source under a misleading path.
@@ -84,8 +86,9 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
 }
 
 CatalogResult browse_recursive(const std::filesystem::path& folder, std::string search,
-                               std::size_t max_entries) {
+                               std::size_t max_entries, std::stop_token stop) {
   CatalogResult result;
+  if (stop.stop_requested()) { result.cancelled = true; result.diagnostic = "catalog query cancelled"; return result; }
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
     result.status = error ? CatalogStatus::filesystem_error : CatalogStatus::invalid_root;
@@ -97,6 +100,7 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
       folder, std::filesystem::directory_options::skip_permission_denied, error);
   const std::filesystem::recursive_directory_iterator end;
   for (; it != end && !error; it.increment(error)) {
+    if (stop.stop_requested()) { result.entries.clear(); result.cancelled = true; result.diagnostic = "catalog query cancelled"; return result; }
     const auto& entry = *it;
     if (entry.is_symlink(error)) { if (error) break; it.disable_recursion_pending(); continue; }
     const bool directory = entry.is_directory(error);

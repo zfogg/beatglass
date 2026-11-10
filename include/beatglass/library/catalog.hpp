@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <cstdint>
 #include <string>
+#include <stop_token>
 #include <vector>
 
 namespace beatglass::library {
@@ -45,6 +46,8 @@ struct CatalogResult {
   std::vector<CatalogEntry> entries;
   std::string diagnostic;
   CatalogStatus status{CatalogStatus::ok};
+  /** True when the caller cancelled before a complete snapshot was built. */
+  bool cancelled{};
 };
 
 /** Return the canonical display format for a supported audio path.
@@ -62,7 +65,8 @@ std::string audio_format_for_path(const std::filesystem::path& path);
  */
 CatalogResult browse(const std::filesystem::path& folder,
                      std::string search = {},
-                     std::size_t max_entries = 10000);
+                     std::size_t max_entries = 10000,
+                     std::stop_token stop = {});
 
 /** Enumerate a local folder and all descendant folders without following links.
  * The result uses the same supported-format and deterministic ordering rules
@@ -70,6 +74,7 @@ CatalogResult browse(const std::filesystem::path& folder,
  */
 CatalogResult browse_recursive(const std::filesystem::path& folder,
                                std::string search = {},
-                               std::size_t max_entries = 10000);
+                               std::size_t max_entries = 10000,
+                               std::stop_token stop = {});
 
 } // namespace beatglass::library

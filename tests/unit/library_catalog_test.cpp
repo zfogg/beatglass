@@ -197,6 +197,14 @@ TEST_CASE("catalog reports a file path as an invalid browse root") {
  CHECK_FALSE(result.diagnostic.empty());
  CHECK(result.status == beatglass::library::CatalogStatus::invalid_root);
 }
+TEST_CASE("catalog cancellation returns no partial snapshot") {
+ TempDir dir; dir.file("track.wav");
+ std::stop_source source; source.request_stop();
+ const auto result = beatglass::library::browse(dir.path, {}, 10000, source.get_token());
+ CHECK(result.entries.empty());
+ CHECK(result.cancelled);
+ CHECK(result.diagnostic == "catalog query cancelled");
+}
 TEST_CASE("catalog exposes a stable status for entry limits") {
  TempDir dir; dir.file("one.wav"); dir.file("two.flac");
  const auto result = beatglass::library::browse(dir.path, {}, 1);
