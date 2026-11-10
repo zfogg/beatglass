@@ -50,7 +50,7 @@ struct AnalysisView {
   beatglass::TempoResult result;
   std::vector<float> waveform;
 };
-std::vector<float> decode_waveform(const std::filesystem::path& path) {
+std::vector<float> decode_waveform(const std::filesystem::path& path, std::stop_token cancel = {}) {
   beatglass::FileReader reader(path, 1);
   constexpr std::size_t bins = 160;
   std::vector<float> peaks(bins, 0.0f);
@@ -58,6 +58,7 @@ std::vector<float> decode_waveform(const std::filesystem::path& path) {
   std::uint64_t frames_read = 0;
   const auto total_frames = reader.metadata().frames;
   for (;;) {
+    if (cancel.stop_requested()) return {};
     const auto read = reader.read(buffer);
     if (read.status == beatglass::FileReadStatus::end) break;
     if (read.status != beatglass::FileReadStatus::data || read.block.format.channels == 0) break;
@@ -320,7 +321,7 @@ int main(int argc, char** argv) {
       const auto metadata = beatglass::read_metadata(path);
       analysis_total.store(metadata.frames, std::memory_order_release);
       const auto result = beatglass::replay_file(path, [&](std::uint64_t observed, const beatglass::TempoResult&) { analysis_frames.store(observed, std::memory_order_release); }, {}, stop_token);
-      return AnalysisView{result, decode_waveform(path)};
+      return AnalysisView{result, decode_waveform(path, stop_token)};
     });
   };
   auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); result.reset(); waveform.clear(); status = std::to_string(tracks.size()) + " tracks indexed."; };
