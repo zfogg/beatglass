@@ -71,4 +71,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(missing_commit), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "missing commit provenance" not in result.stderr + result.stdout:
         raise SystemExit("qualified summary without commit provenance was accepted")
+    summary.write_text(json.dumps({"qualified": True, "commit": "native-commit", "native_artifacts": ["evidence.zip"], "native_execution_attempted": False}), encoding="utf-8")
+    missing_attempt = root / "missing-attempt-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(missing_attempt), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "lacks native execution attempt" not in result.stderr + result.stdout:
+        raise SystemExit("qualified summary without native execution attempt was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
