@@ -2973,7 +2973,6 @@ ApplicationWindow {
                         keyNavigationEnabled: true
                         activeFocusOnTab: true
                         Accessible.name: "Folder contents"
-                        Accessible.value: currentIndex >= 0 ? (currentIndex + 1) + " of " + count : "No entry selected"
                         Accessible.role: Accessible.List
                         Accessible.description: "Use Up and Down to select an entry, then Enter or Space to open a folder or select an audio file."
                         ToolTip.text: "Folder contents; use arrow keys to navigate"
