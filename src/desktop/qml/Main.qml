@@ -1365,6 +1365,10 @@ ApplicationWindow {
             window.focusOverlaySettingsRecoveryFailure("Persisted overlay settings unavailable; control window remains available as the tray/taskbar fallback.", overlayDisplay)
             return false
         }
+        if (window.overlayBridge.screenIndex >= window.overlayBridge.screenNames.length) {
+            window.focusOverlaySettingsRecoveryFailure("Persisted overlay display is no longer available; choose another display before restoring the overlay.", overlayDisplay)
+            return false
+        }
         if (window.overlayBridge.screenIndex >= 0)
             if (!window.overlayBridge.moveToScreen(window.overlayBridge.screenIndex)) {
                 window.focusOverlaySettingsRecoveryFailure("Persisted overlay display is unavailable; choose another display before restoring the overlay.", overlayDisplay)
