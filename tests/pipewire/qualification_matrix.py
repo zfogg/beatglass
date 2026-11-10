@@ -50,6 +50,8 @@ if summary is not None:
                 except ValueError:
                     artifact = artifact_path.name
             evidence.append(artifact)
+        if len(set(evidence)) != len(evidence):
+            raise SystemExit("native qualification summary artifacts collide after normalization")
         current["evidence"] = evidence
         current["native_execution_attempted"] = summary.get("native_execution_attempted", False)
         if current["status"] == "pending":
