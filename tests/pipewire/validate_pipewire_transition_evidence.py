@@ -130,6 +130,13 @@ if reacquisition is not None:
             raise SystemExit("reacquisition evidence has an empty device identity")
         if reacquisition["device_id"] != restart.get("device_id"):
             raise SystemExit("reacquisition device identity does not match restart")
+    reacquisition_format = reacquisition.get("format")
+    if reacquisition_format is not None:
+        if (not isinstance(reacquisition_format, dict) or reacquisition_format.get("sample_rate", 0) <= 0
+                or reacquisition_format.get("channels", 0) <= 0):
+            raise SystemExit("reacquisition evidence has an invalid negotiated format")
+        if reacquisition_format != restart.get("format"):
+            raise SystemExit("reacquisition format disagrees with restart format")
     restart_index = events.index(restart)
     if not any(event.get("event") == "process" and event.get("epoch") == restart.get("epoch")
                and isinstance(event.get("sample_count"), int) and not isinstance(event.get("sample_count"), bool)
