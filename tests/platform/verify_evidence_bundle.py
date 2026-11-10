@@ -248,6 +248,8 @@ def main() -> int:
                 category = "identity"
             elif error.startswith(("artifact path", "artifact escapes bundle", "scenario evidence path")):
                 category = "path"
+            elif error.startswith("unsupported platform"):
+                category = "platform"
             elif error.startswith("scenario evidence"):
                 category = "scenario_evidence"
             elif error.startswith(("missing artifact", "artifact must", "artifact path", "artifact hash", "artifact size")):
