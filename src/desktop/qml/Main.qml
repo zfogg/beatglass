@@ -3398,6 +3398,7 @@ ApplicationWindow {
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.failureReason !== ""
                                 text: visible ? ("Analysis issue: " + window.analysisJobBridge.failureReason) : ""
                                 Accessible.name: "Analysis failure reason"
+                                Accessible.value: visible ? text : ""
                                 Accessible.description: visible ? text + ". Use Retry analysis or discard recovery when the status permits." : "No analysis failure has been reported."
                                 Accessible.role: Accessible.Status
                                 Layout.fillWidth: true; wrapMode: Text.WordWrap
@@ -4624,7 +4625,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationDataStatus"
                     text: visualizationCanvas.renderedWaveform.length + " waveform samples · " + visualizationCanvas.renderedSpectrum.length + " spectrum bins"
-                    Accessible.name: "Visualization data status: " + text; Accessible.role: Accessible.StaticText; Accessible.description: text
+                    Accessible.name: "Visualization data status"; Accessible.value: text; Accessible.role: Accessible.StaticText; Accessible.description: text
                     color: window.themeForegrounds[window.selectedThemeIndex]
                     font.pixelSize: window.compactHeader ? 12 : 14
                     Layout.fillWidth: true
@@ -4768,7 +4769,7 @@ ApplicationWindow {
                 Label {
                     objectName: "visualizationCaptureStatus"
                     text: window.liveBridge.status === "Stopped" ? "Capture is stopped; start monitoring to populate the visualization." : "Capture is active; visualization updates from the current output stream."
-                    Accessible.name: "Visualization capture status: " + text
+                    Accessible.name: "Visualization capture status"; Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: text
                     ToolTip.text: "Current capture state feeding waveform and FFT data"
