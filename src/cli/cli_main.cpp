@@ -281,6 +281,7 @@ public:
     worker_.join();
   }
   void play(const std::filesystem::path& path) { { std::lock_guard lock(mutex_); path_ = path; command_ = Command::play; } condition_.notify_one(); }
+  void resume() { request(Command::resume); }
   void pause() { request(Command::pause); }
   void seek_seconds(std::int64_t seconds) { { std::lock_guard lock(mutex_); seek_delta_seconds_ = seconds; command_ = Command::seek; } condition_.notify_one(); }
   void stop() { request(Command::stop); }
@@ -291,7 +292,7 @@ public:
   std::uint64_t total_frames() const noexcept { return total_frames_.load(std::memory_order_acquire); }
   std::string status() const { std::lock_guard lock(mutex_); return status_; }
 private:
-  enum class Command { none, play, pause, seek, stop, shutdown };
+  enum class Command { none, play, resume, pause, seek, stop, shutdown };
   void request(Command command) { { std::lock_guard lock(mutex_); command_ = command; } condition_.notify_one(); }
   Command take_command() { std::lock_guard lock(mutex_); const auto command = command_; command_ = Command::none; return command; }
   std::int64_t take_seek_delta_seconds() { std::lock_guard lock(mutex_); const auto delta = seek_delta_seconds_; seek_delta_seconds_ = 0; return delta; }
@@ -318,6 +319,8 @@ private:
           if (!output.start_device(device_id_, metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
           epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through native output.");
         } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
+      } else if (command == Command::resume) {
+        if (output.resume()) { state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback resumed."); }
       } else if (command == Command::pause) {
         if (output.pause()) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
       } else if (command == Command::seek && reader) {
@@ -701,8 +704,13 @@ int main(int argc, char** argv) {
     }
 #ifdef _WIN32
     if (!playback_devices.empty() && playback_device_selected >= 0 && playback_device_selected < static_cast<int>(playback_devices.size())) playback.set_device(playback_devices[static_cast<std::size_t>(playback_device_selected)].id);
-    playback.play(tracks[selected].path);
-    status = "Playing " + tracks[selected].title + " through the selected output.";
+    if (playback.state() == beatglass::PlaybackState::paused) {
+      playback.resume();
+      status = "Resuming " + tracks[selected].title + " through the selected output.";
+    } else {
+      playback.play(tracks[selected].path);
+      status = "Playing " + tracks[selected].title + " through the selected output.";
+    }
 #else
     status = "Native playback is unavailable in this build; analysis remains available.";
 #endif
