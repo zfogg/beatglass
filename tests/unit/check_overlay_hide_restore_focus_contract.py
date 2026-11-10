@@ -189,3 +189,9 @@ def test_click_through_changes_focus_the_next_interaction_action():
     body = QML[start : QML.index("    function handleOverlayOpacityChanged", start)]
     assert "unlockOverlay.forceActiveFocus()" in body
     assert "overlayInteractionMode.forceActiveFocus()" in body
+
+
+def test_external_opacity_changes_focus_review_control():
+    start = QML.index("function handleOverlayOpacityChanged")
+    body = QML[start : QML.index("    function handleOverlayGeometryRecovery", start)]
+    assert "overlayOpacityControl.forceActiveFocus()" in body
