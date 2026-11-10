@@ -4451,7 +4451,7 @@ ApplicationWindow {
                         Accessible.name: checked ? "Disable click-through" : "Enable click-through"
                         Accessible.value: (checked ? "enabled" : "disabled") + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : "")
                         Accessible.role: Accessible.CheckBox
-                        Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled")
+                        Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled") + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : "")
                         ToolTip.text: "Toggle pointer click-through for the overlay"
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onClicked: if (window.overlayBridge) {
