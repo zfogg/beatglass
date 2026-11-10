@@ -306,6 +306,11 @@ process_events = [event for event in events if event.get("event") == "process"]
 process_timestamps = [event["timestamp_ns"] for event in process_events if event.get("timestamp_ns") is not None]
 if process_timestamps and any(previous > current for previous, current in zip(process_timestamps, process_timestamps[1:])):
     raise SystemExit("process timestamps must be monotonic")
+for previous, current in zip(process_events, process_events[1:]):
+    if (previous.get("timestamp_ns") is not None and previous.get("duration_ns") is not None
+            and current.get("timestamp_ns") is not None
+            and previous["timestamp_ns"] + previous["duration_ns"] > current["timestamp_ns"]):
+        raise SystemExit("process intervals overlap")
 for event in process_events:
     if event.get("sample_position") is not None and (
             not isinstance(event["sample_position"], int)
