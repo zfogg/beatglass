@@ -5,7 +5,8 @@ import "../../src/desktop/qml"
 TestCase {
     name: "Navigation"
     when: windowShown
-    width: 900; height: 620
+    width: 900
+    height: 620
     QtObject {
         id: fakeMetadata
         property url lastFile
@@ -2251,7 +2252,7 @@ TestCase {
         app.destroy()
     }
 
-'    function test_displayReconnectReusesRetainedGeometrySettings() {
+    function test_displayReconnectReusesRetainedGeometrySettings() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
         app.overlayPreferredDisplayName = "Projector"
