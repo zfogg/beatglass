@@ -307,6 +307,16 @@ class QualificationIngestTest(unittest.TestCase):
             errors = ingest.ingest(root, root / "manifest.json", max_artifact_bytes=1)
             self.assertIn("referenced evidence exceeds 1 bytes: playback.json", errors)
 
+    def test_total_artifact_size_limit_is_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            artifact = root / "capture.log"; artifact.write_text("large", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json", max_total_artifact_bytes=1)
+            self.assertIn("qualification artifacts exceed total 1 bytes", errors)
+
     def test_custom_artifact_limit_is_enforced(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

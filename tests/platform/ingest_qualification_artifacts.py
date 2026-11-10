@@ -16,12 +16,14 @@ MAX_MANIFEST_BYTES = 16 << 20
 MAX_ENTRIES = 1000
 MAX_IDENTITY_BYTES = 64 << 10
 MAX_HASHES_BYTES = 16 << 20
+MAX_TOTAL_ARTIFACT_BYTES = 8 << 30
 
 
 def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_BYTES,
-           max_manifest_bytes: int = MAX_MANIFEST_BYTES, max_entries: int = MAX_ENTRIES) -> list[str]:
+           max_manifest_bytes: int = MAX_MANIFEST_BYTES, max_entries: int = MAX_ENTRIES,
+           max_total_artifact_bytes: int = MAX_TOTAL_ARTIFACT_BYTES) -> list[str]:
     errors = []
-    if max_artifact_bytes <= 0 or max_manifest_bytes <= 0 or max_entries <= 0:
+    if max_artifact_bytes <= 0 or max_manifest_bytes <= 0 or max_entries <= 0 or max_total_artifact_bytes <= 0:
         return ["resource limits must be positive"]
     if root.is_symlink():
         errors.append("symlinked qualification root")
@@ -70,6 +72,7 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
         except ValueError:
             errors.append("invalid capture timestamp")
     artifacts = []
+    total_artifact_bytes = 0
     hashes_path = root / "qualification-artifacts.sha256"
     if hashes_path.is_symlink():
         errors.append("symlinked qualification-artifacts.sha256")
@@ -108,6 +111,9 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
                 errors.append(f"empty qualification artifact: {normalized}"); continue
             if path.stat().st_size > max_artifact_bytes:
                 errors.append(f"qualification artifact exceeds {max_artifact_bytes} bytes: {normalized}"); continue
+            total_artifact_bytes += path.stat().st_size
+            if total_artifact_bytes > max_total_artifact_bytes:
+                errors.append(f"qualification artifacts exceed total {max_total_artifact_bytes} bytes"); continue
             actual = hashlib.sha256(path.read_bytes()).hexdigest()
             if actual != digest.lower():
                 errors.append(f"artifact hash mismatch: {relative}")
@@ -136,6 +142,9 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
             errors.append(f"empty referenced evidence: {normalized}"); continue
         if path.stat().st_size > max_artifact_bytes:
             errors.append(f"referenced evidence exceeds {max_artifact_bytes} bytes: {normalized}"); continue
+        total_artifact_bytes += path.stat().st_size
+        if total_artifact_bytes > max_total_artifact_bytes:
+            errors.append(f"qualification artifacts exceed total {max_total_artifact_bytes} bytes"); continue
         collision_key = normalized.casefold()
         if collision_key in known_paths:
             errors.append(f"duplicate referenced evidence path: {normalized}")
@@ -186,8 +195,10 @@ def main() -> int:
     parser.add_argument("--max-artifact-bytes", type=int, default=MAX_ARTIFACT_BYTES)
     parser.add_argument("--max-manifest-bytes", type=int, default=MAX_MANIFEST_BYTES)
     parser.add_argument("--max-entries", type=int, default=MAX_ENTRIES)
+    parser.add_argument("--max-total-artifact-bytes", type=int, default=MAX_TOTAL_ARTIFACT_BYTES)
     args = parser.parse_args(); errors = ingest(args.root, args.output, max_artifact_bytes=args.max_artifact_bytes,
-                                                 max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries)
+                                                 max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries,
+                                                 max_total_artifact_bytes=args.max_total_artifact_bytes)
     if errors: print("\n".join(errors)); return 1
     print(f"wrote conservative evidence manifest: {args.output}"); return 0
 
