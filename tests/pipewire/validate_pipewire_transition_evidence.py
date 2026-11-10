@@ -312,6 +312,11 @@ for previous, current in zip(process_events, process_events[1:]):
             and previous["timestamp_ns"] + previous["duration_ns"] > current["timestamp_ns"]):
         raise SystemExit("process intervals overlap")
 for event in process_events:
+    if event.get("sample_rate") is not None and (
+            not isinstance(event["sample_rate"], int)
+            or isinstance(event["sample_rate"], bool)
+            or event["sample_rate"] <= 0):
+        raise SystemExit("process sample rates must be positive integers")
     if event.get("sample_position") is not None and (
             not isinstance(event["sample_position"], int)
             or isinstance(event["sample_position"], bool)
