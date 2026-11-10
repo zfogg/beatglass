@@ -123,7 +123,7 @@ TEST_CASE("storage owner exposes cache admission boundary") {
 }
 TEST_CASE("storage owner invalidates one cached identity without affecting another") {
   beatglass::library::StorageOwner owner;
-  REQUIRE(owner.open_storage({":memory:"}));
+  REQUIRE(owner.open({":memory:"}));
   const beatglass::AnalysisIdentity first{"first", "engine", "config", "offline"};
   const beatglass::AnalysisIdentity second{"second", "engine", "config", "offline"};
   owner.cache()->begin("first-run", {"first", "engine", "config", "offline"});
@@ -138,7 +138,7 @@ TEST_CASE("storage owner invalidates one cached identity without affecting anoth
 }
 TEST_CASE("invalidated identity is admitted for fresh reanalysis") {
   beatglass::library::StorageOwner owner;
-  REQUIRE(owner.open_storage({":memory:"}));
+  REQUIRE(owner.open({":memory:"}));
   const beatglass::AnalysisIdentity identity{"reanalyze", "engine", "config", "offline"};
   const beatglass::library_detail::CacheKey key{"reanalyze", "engine", "config", "offline"};
   owner.cache()->begin("reanalyze-seed", key, "track.wav", beatglass::library::kFileDecoderSnapshot);
