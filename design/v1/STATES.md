@@ -78,6 +78,7 @@
 | Overlay safe mode | Native overlay retries reached the bounded attempt limit | Keep monitoring available without the overlay, mark overlay evidence stale, explain the limit accessibly, and require Clear safe mode before another retry. |
 | Overlay safe mode cleared | User cleared the bounded retry limit | Announce that retry is available, move keyboard focus to Retry overlay, and keep the control window visible until restoration succeeds. |
 | Overlay display recovery | Saved display is unavailable or being restored | Expose the recovery state and stale-evidence boundary accessibly; keep the control window available until a display is confirmed. |
+| Overlay recovery action pending | Recovery is waiting for a compatible display | Include the stale-evidence boundary in the recovery status itself, keep controls available, and direct the user to choose or reconnect a display. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
 | DJ | Monitoring selected output, activity and combined-mix caveat | Start/stop, select default or explicit output, half/double BPM, reset/reacquire. |
