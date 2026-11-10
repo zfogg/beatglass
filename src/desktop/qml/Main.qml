@@ -1453,6 +1453,13 @@ ApplicationWindow {
         if (!restored)
             retryOverlay.forceActiveFocus()
     }
+    function handleOverlayRetryButtonAction() {
+        window.overlayRecoveryPausedByUser = false
+        window.overlayRecoveryAttemptCount += 1
+        window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
+        window.showOverlayAndHideControls()
+        overlayDisplayStatus.forceActiveFocus()
+    }
     function handleOverlayShowButtonAction() {
         window.announceCaptureRecoveryState("DJ overlay launch requested on the selected display; restoring persisted settings." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
         window.handleOverlayShowAction()

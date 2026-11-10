@@ -292,3 +292,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Restore action contract | Restore button or keyboard toggle restores a user-hidden overlay | Route both surfaces through one restore/fallback action with evidence guidance. |
 | Restore button routing | Restore button invokes the shared restore action | Keep button and keyboard restore behavior identical and regression-tested. |
 | Show button routing | Show button invokes the shared show action | Keep launch/fallback behavior identical across button and keyboard recovery paths. |
+| Retry button routing | Retry button starts bounded native recovery | Route button behavior through a named action preserving attempt count, stale evidence, and display-status focus. |

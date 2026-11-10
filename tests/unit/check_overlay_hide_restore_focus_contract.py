@@ -445,3 +445,10 @@ def test_restore_button_routes_to_shared_action():
 
 def test_show_button_routes_to_shared_action():
     assert "onClicked: window.handleOverlayShowButtonAction()" in QML
+
+
+def test_retry_button_named_attempt_action():
+    start = QML.index("function handleOverlayRetryButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowAction", start)]
+    assert "overlayRecoveryAttemptCount += 1" in body
+    assert "overlayDisplayStatus.forceActiveFocus()" in body
