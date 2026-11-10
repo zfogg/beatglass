@@ -36,3 +36,6 @@ Process events may also include `serial`. If present, it must be a non-empty str
 on every process event and must match the sink serial for that event's capture epoch:
 the start serial before restart and the restart serial afterward. This preserves
 device-switch ordering in retained native evidence.
+
+Reacquisition evidence may include `sample_position`; when supplied it must be a
+non-negative integer, preserving a valid timeline coordinate for recovery samples.

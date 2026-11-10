@@ -123,6 +123,11 @@ if reacquisition is not None:
         raise SystemExit("reacquisition evidence has the wrong epoch")
     if not isinstance(reacquisition.get("sample_count"), int) or isinstance(reacquisition.get("sample_count"), bool) or reacquisition["sample_count"] <= 0:
         raise SystemExit("reacquisition evidence has no captured samples")
+    if reacquisition.get("sample_position") is not None:
+        if (not isinstance(reacquisition["sample_position"], int)
+                or isinstance(reacquisition["sample_position"], bool)
+                or reacquisition["sample_position"] < 0):
+            raise SystemExit("reacquisition evidence has an invalid sample position")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
