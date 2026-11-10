@@ -780,6 +780,15 @@ ApplicationWindow {
             visualizationCanvas.requestPaint()
         return true
     }
+    function setReduceMotionPreference(enabled) {
+        if (!window.themePreferencesBridge)
+            return false
+        window.themePreferencesBridge.reduceMotion = enabled
+        window.themePreferenceAnnouncement = enabled
+            ? "Reduced motion enabled for " + window.selectedTheme + "; beat pulse and presentation transitions are minimized."
+            : "Reduced motion disabled for " + window.selectedTheme + "; standard presentation transitions restored."
+        return true
+    }
     // Keep the visual selection synchronized when preferences are restored or
     // changed by another settings surface. Assignments from the controls below
     // intentionally remain immediate; this connection handles external changes.
@@ -2502,7 +2511,7 @@ ApplicationWindow {
                 Accessible.role: Accessible.CheckBox
                 Accessible.description: "Reduce animation and transition effects in the desktop presentation; currently " + (checked ? "enabled" : "disabled")
                 ToolTip.text: checked ? "Reduced motion is enabled; disable to restore transitions" : "Enable reduced motion to minimize animation and transitions"
-                onClicked: if (window.themePreferencesBridge) window.themePreferencesBridge.reduceMotion = checked
+                onClicked: window.setReduceMotionPreference(checked)
             }
             Label {
                 objectName: "themePreferenceAnnouncement"
