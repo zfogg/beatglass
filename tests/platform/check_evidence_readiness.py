@@ -10,6 +10,7 @@ import sys
 from datetime import datetime, timezone
 import re
 from collections import Counter
+MAX_REPORT_BYTES = 16 << 20
 
 spec = importlib.util.spec_from_file_location("verify_bundle", Path(__file__).with_name("verify_evidence_bundle.py"))
 verifier = importlib.util.module_from_spec(spec); assert spec.loader
@@ -354,11 +355,16 @@ def main() -> int:
     parser.add_argument("--bundles", type=Path, required=True)
     parser.add_argument("--report", type=Path, help="write a JSON retention/readiness report")
     parser.add_argument("--max-age-hours", type=float, default=168, help="reject evidence older than this (default: 168)")
+    parser.add_argument("--max-report-bytes", type=int, default=MAX_REPORT_BYTES)
     args = parser.parse_args()
     errors = check(args.status, args.bundles, args.max_age_hours)
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
         serialized = json.dumps(report(args.status, args.bundles, args.max_age_hours), indent=2) + "\n"
+        if args.max_report_bytes <= 0:
+            print("report size limit must be positive", file=sys.stderr); return 1
+        if len(serialized.encode("utf-8")) > args.max_report_bytes:
+            print(f"readiness report exceeds {args.max_report_bytes} bytes", file=sys.stderr); return 1
         temporary = None
         try:
             with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=args.report.parent,
