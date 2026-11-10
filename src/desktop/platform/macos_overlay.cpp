@@ -48,7 +48,11 @@ bool OverlayController::attach(QQuickWindow* overlay, QWindow* control) {
   flags.setFlag(Qt::WindowTransparentForInput, false);
   overlay_->setFlags(flags);
   overlay_->installEventFilter(this); control_->installEventFilter(this);
-  connect(overlay_, &QObject::destroyed, this, [this] { overlay_ = nullptr; detach(); });
+  connect(overlay_, &QObject::destroyed, this, [this] {
+    if (native_) native_->reset();
+    overlay_ = nullptr;
+    detach();
+  });
   connect(control_, &QObject::destroyed, this, [this] { control_ = nullptr; detach(); });
   connect(overlay_, &QWindow::xChanged, this, [this] { scheduleSave(); if (!updating_screens_) emit screensChanged(); });
   connect(overlay_, &QWindow::yChanged, this, [this] { scheduleSave(); if (!updating_screens_) emit screensChanged(); });

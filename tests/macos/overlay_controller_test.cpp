@@ -17,6 +17,7 @@ public:
   bool fail{}, mode{};
   int calls{};
   bool apply(QQuickWindow*, bool clickThrough) override { ++calls; if (fail) return false; mode = clickThrough; return true; }
+  void reset() noexcept override { mode = false; }
 };
 class FakeMetadata final : public QObject {
   Q_OBJECT

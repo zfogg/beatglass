@@ -22,6 +22,7 @@ public:
     native.ignoresMouseEvents = clickThrough ? YES : NO;
     return native.ignoresMouseEvents == (clickThrough ? YES : NO);
   }
+  void reset() noexcept override {}
 };
 }
 std::unique_ptr<OverlayNative> makeOverlayNative() { return std::make_unique<AppKitOverlay>(); }
