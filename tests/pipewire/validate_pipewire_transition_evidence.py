@@ -145,6 +145,9 @@ if reacquisition is not None:
                 or isinstance(reacquisition["error_code"], bool)
                 or reacquisition["error_code"] == 0):
             raise SystemExit("reacquisition evidence has an invalid error code")
+    if reacquisition.get("error_domain") is not None:
+        if not isinstance(reacquisition["error_domain"], str) or not reacquisition["error_domain"].strip():
+            raise SystemExit("reacquisition evidence has an empty error domain")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
