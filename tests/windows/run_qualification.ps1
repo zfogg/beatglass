@@ -49,7 +49,7 @@ try {
       "-S", $repoRoot, "-B", $buildDirectory,
       "-G", "Visual Studio 17 2022", "-A", "x64",
       "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_TESTING=ON",
-      "-DBEATGLASS_BUILD_SLICE=ON", "-DBEATGLASS_BUILD_DESKTOP=$(-not $TuiOnly)", "-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=$(-not $TuiOnly)",
+      "-DBEATGLASS_BUILD_SLICE=ON", "-DBEATGLASS_BUILD_TUI=ON", "-DBEATGLASS_BUILD_DESKTOP=$(-not $TuiOnly)", "-DBEATGLASS_BUILD_WINDOWS_OVERLAY_TESTS=$(-not $TuiOnly)",
       "-DBEATGLASS_FETCH_SQLITE3=ON"
     )
     if ($env:VCPKG_ROOT) {
