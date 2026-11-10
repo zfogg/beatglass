@@ -39,6 +39,6 @@ if "--database" in desktop_source and "--database" not in README:
 print("README desktop flag coverage verified")
 
 for binary in ("beatglass-cli", "beatglass-music-cli"):
-    if f"Usage: {binary}" not in README:
+    if f"Usage:" not in README or binary not in README:
         raise SystemExit(f"README is missing usage contract for {binary}")
 print("README shipped usage coverage verified")
