@@ -5008,10 +5008,13 @@ ApplicationWindow {
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
                             if (!window.captureMonitorBridge) return
-                            if (window.captureMonitorBridge.status === "Monitoring") {
+                            const status = window.captureMonitorBridge.status
+                            if (status === "Monitoring") {
                                 window.captureMonitorBridge.stop()
                                 window.overlayCaptureEvidenceStale = true
                                 window.announceCaptureRecoveryState("Overlay monitoring stopped; overlay settings remain available.")
+                            } else if (status === "Starting" || status === "Reacquiring") {
+                                window.announceCaptureRecoveryState("Overlay monitoring is already transitioning; no duplicate capture request was sent.")
                             } else {
                                 window.overlayCaptureEvidenceStale = true
                                 window.captureMonitorBridge.start()

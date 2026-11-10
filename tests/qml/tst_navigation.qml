@@ -13,7 +13,7 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    QtObject { id: fakeCapture; property string status: "Monitoring"; function stop() { status = "Stopped" }; function start() { status = "Monitoring" } }
+    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" }; function start() { starts++; status = "Monitoring" } }
     QtObject {
         id: fakePlayback
         property string state: "Stopped"
@@ -152,6 +152,19 @@ TestCase {
         verify(app.overlayCaptureEvidenceStale)
         verify(findChild(app, "overlayLiveMonitoringState").activeFocus)
         verify(app.overlayRecoveryAnnouncement.indexOf("capture starting") >= 0)
+        fakeCapture.status = "Monitoring"
+        app.destroy()
+    }
+    function test_monitoringActionRejectsStaleTransitionActivation() {
+        let app = shellWithOverlay.createObject(null)
+        let action = findChild(app, "overlayMonitoringAction")
+        fakeCapture.starts = 0
+        fakeCapture.stops = 0
+        fakeCapture.status = "Reacquiring"
+        action.clicked()
+        compare(fakeCapture.starts, 0)
+        compare(fakeCapture.stops, 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("no duplicate capture request") >= 0)
         fakeCapture.status = "Monitoring"
         app.destroy()
     }

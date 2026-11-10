@@ -767,6 +767,8 @@ The grouped live-evidence surface also reports stale capture context before its 
 
 Capture Starting is now an explicit overlay recovery transition: it marks prior live evidence stale, announces that fresh audio is pending, and returns keyboard focus to the live monitoring status until Monitoring accepts new data.
 
+The overlay Start/Stop handler now rechecks the native capture status at activation time, refusing duplicate requests during Starting or Reacquiring and announcing that the existing transition remains in progress.
+
 Estimate attribution repeats the stale-capture marker as well, keeping the combined-output source label honest while its last accepted values await reacquisition.
 
 The valid persisted visual-state restore path is directly exercised in QML regression tests, including width, height, opacity, and the resulting accessible recovery announcement.
