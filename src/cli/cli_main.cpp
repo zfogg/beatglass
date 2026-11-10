@@ -333,7 +333,18 @@ int main(int argc, char** argv) {
       return AnalysisView{result, decode_waveform(path, stop_token)};
     });
   };
-  auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); result.reset(); waveform.clear(); status = std::to_string(tracks.size()) + " tracks indexed."; };
+  auto refresh = [&] {
+    const auto cancelling = busy;
+    if (cancelling) {
+      analysis_cancelled.store(true, std::memory_order_release);
+      analysis_stop.request_stop();
+    }
+    tracks = discover(root, recursive);
+    selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1);
+    result.reset(); waveform.clear();
+    status = std::to_string(tracks.size()) + " tracks indexed." +
+        (cancelling ? " Cancelling the previous analysis." : "");
+  };
   auto filter_input = Input(&filter, "Filter songs");
   auto folder_input = Input(&folder_text, "Audio folder");
   std::string seek_step_text = "5";
