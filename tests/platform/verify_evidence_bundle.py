@@ -244,6 +244,8 @@ def main() -> int:
                 category = "resource_limit"
             elif error.startswith("missing provenance field"):
                 category = "provenance"
+            elif error == "captured_at must include timezone":
+                category = "clock"
             elif error.startswith("captured_at "):
                 category = "temporal"
             elif error.startswith(("scenarios must", "missing required scenarios")):
