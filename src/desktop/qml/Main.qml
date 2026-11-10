@@ -631,7 +631,7 @@ ApplicationWindow {
     function focusOverlayBridgeSettingsFailure(message, target) {
         window.overlayLaunchFallbackActive = true
         window.overlayDisplayRecoveryPending = true
-        window.focusOverlayAvailabilityRecovery(message + " Persisted settings remain retained for retry.", target)
+        return window.focusOverlayAvailabilityRecovery(message + " Persisted settings remain retained for retry.", target)
     }
     function focusOverlayRestoredState(message, target) {
         window.show()

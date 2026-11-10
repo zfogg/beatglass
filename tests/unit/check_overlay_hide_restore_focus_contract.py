@@ -1118,3 +1118,11 @@ def test_capture_evidence_transition_reports_focus_target_result():
     assert "focusTarget.forceActiveFocus()" in body
     assert "Fresh accepted capture is available." in body
     assert "return focusTarget !== null && focusTarget !== undefined" in body
+
+
+def test_bridge_settings_failure_propagates_focus_result():
+    start = QML.index("function focusOverlayBridgeSettingsFailure")
+    body = QML[start : QML.index("    function focusOverlayRestoredState", start)]
+    assert "overlayLaunchFallbackActive = true" in body
+    assert "overlayDisplayRecoveryPending = true" in body
+    assert "return window.focusOverlayAvailabilityRecovery" in body
