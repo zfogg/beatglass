@@ -272,11 +272,12 @@ void save_preferences(const CliPreferences& preferences) {
 }
 using namespace ftxui;
 // Apple SDK MacTypes.h exports global enum constants named bold and italic.
-// Keep the existing compact FTXUI styling expressions portable by binding the
-// intended decorators in this local namespace rather than relying on global
-// unqualified lookup.
-constexpr auto bold = ftxui::bold;
-constexpr auto italic = ftxui::italic;
+// Rewrite the compact styling tokens only after all Apple headers are included;
+// the macros are confined to this executable translation unit.
+#ifdef __APPLE__
+#define bold ftxui::bold
+#define italic ftxui::italic
+#endif
 
 std::string shell_quote(const std::string& value) {
   std::string quoted = "'";
