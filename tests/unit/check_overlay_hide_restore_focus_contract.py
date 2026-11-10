@@ -1271,6 +1271,8 @@ def test_overlay_shows_stale_evidence_banner():
     assert "visible: window.overlayCaptureEvidenceStale" in body
     assert "Previously displayed tempo, key, and chord values are stale" in body
     assert "prior evidence is stale until the new endpoint" in QML
+    assert "monitoring restarted" in QML
+    assert "captureMonitorBridge.start()" in QML
     assert "themeForegrounds[window.selectedThemeIndex]" in body
     assert "font.bold: true" in body
     assert "; combined output may be ambiguous" in body
