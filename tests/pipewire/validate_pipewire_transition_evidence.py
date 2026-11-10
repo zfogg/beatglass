@@ -115,6 +115,11 @@ if reacquisition is not None:
         raise SystemExit("reacquisition evidence has no captured samples")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
+    restart_index = events.index(restart)
+    if not any(event.get("event") == "process" and event.get("epoch") == restart.get("epoch")
+               and isinstance(event.get("sample_count"), int) and not isinstance(event.get("sample_count"), bool)
+               and event["sample_count"] > 0 for event in events[restart_index + 1:]):
+        raise SystemExit("reacquisition evidence has no post-restart samples")
 fmt = restart.get("format")
 if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("channels", 0) <= 0:
     raise SystemExit("restart event has no negotiated format")
