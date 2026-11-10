@@ -254,6 +254,8 @@ def main() -> int:
                 category = "environment"
             elif error.startswith("artifact role "):
                 category = "artifact_role"
+            elif error.startswith("hash mismatch:"):
+                category = "hash"
             elif error.startswith("commit "):
                 category = "commit"
             elif error.startswith(("scenario evidence shared:", "scenario evidence role mismatch:")):

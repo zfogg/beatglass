@@ -124,6 +124,8 @@ Missing or mismatched evidence roles are grouped under `role` for direct
 artifact-to-scenario contract triage.
 Artifact role format and size failures are grouped under `artifact_role` for
 direct retained-artifact metadata triage.
+SHA-256 mismatches are grouped under `hash` for direct retained-file
+integrity triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.
