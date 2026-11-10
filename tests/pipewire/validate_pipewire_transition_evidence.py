@@ -61,6 +61,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no region")
         if host.get("availability_zone") is not None and (not isinstance(host["availability_zone"], str) or not host["availability_zone"].strip()):
             raise SystemExit("transition host provenance has no availability zone")
+        if host.get("rack_id") is not None and (not isinstance(host["rack_id"], str) or not host["rack_id"].strip()):
+            raise SystemExit("transition host provenance has no rack id")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
