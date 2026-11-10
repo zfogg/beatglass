@@ -3210,7 +3210,6 @@ ApplicationWindow {
                             text: window.selectedName || "No file selected"
                             font.bold: true; elide: Text.ElideMiddle; Layout.fillWidth: true
                             Accessible.name: "Selected audio file: " + text
-                            Accessible.value: text
                             Accessible.role: Accessible.StaticText
                             Accessible.description: window.metadataStatus.indexOf("Error:") === 0 ? text + ". Retry metadata to attempt decoding again." : text
                             ToolTip.text: "Currently selected audio file"
