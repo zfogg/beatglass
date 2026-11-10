@@ -1025,3 +1025,5 @@ When capture freshness is blocked by native overlay readiness, the recovery anno
 Successful visual-state restore now clears the recovery-required marker, so the UI cannot remain in a stale recovery state after geometry and opacity are reapplied.
 
 Failed visual-state restore now sets the recovery-required marker, keeping the UI honest when geometry or native visual settings cannot be reapplied.
+
+Native resize or opacity application failures now retain the recovery-required marker, so partial visual restoration cannot be reported as ready.
