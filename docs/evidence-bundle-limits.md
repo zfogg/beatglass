@@ -96,6 +96,8 @@ All ancestor components are checked, including missing nested directories that
 would otherwise be created beneath a symlinked workspace component.
 Its `--max-age-hours` value must be positive, preventing accidental
 configuration that marks every retained bundle stale.
+Timestamp format, timezone, and future-capture failures are grouped under
+`temporal` in JSON output for clear freshness and clock-discipline reporting.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.

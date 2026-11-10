@@ -317,6 +317,14 @@ class EvidenceBundleTest(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertGreaterEqual(payload["error_categories"]["artifact"], 1)
 
+    def test_json_groups_temporal_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            manifest.write_text(json.dumps({"platform":"x","commit":"a"*40,"captured_at":"2099-01-01T00:00:00Z","environment":"x", "artifacts": [], "scenarios": [{"id": x, "status": "PASS"} for x in module.REQUIRED_SCENARIOS]}), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"]["temporal"], 1)
+
     def test_non_regular_artifacts_are_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); artifact = root / "capture-dir"; artifact.mkdir()
