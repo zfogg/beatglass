@@ -3572,10 +3572,12 @@ ApplicationWindow {
                             }
                             Button {
                                 objectName: "selectLatestPublishedSource"
+                                activeFocusOnTab: true
                                 visible: window.analysisJobBridge !== null && window.analysisJobBridge.batchLastSource !== ""
                                 text: "Select latest published source"
                                 enabled: visible
                                 Accessible.name: "Select latest published analysis source"
+                                Accessible.value: enabled ? "available; " + window.analysisJobBridge.batchLastSource : "unavailable; no verified published source"
                                 Accessible.role: Accessible.Button
                                 Accessible.description: "Select the source associated with the latest verified batch result and refresh its metadata details."
                                 ToolTip.text: "Select the source associated with the latest verified batch result"
