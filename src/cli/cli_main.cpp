@@ -512,9 +512,13 @@ TonalEstimate estimate_tonal_labels(const std::vector<float>& spectrum, std::uin
   static constexpr std::array<const char*, 12> names{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
   if (spectrum.size() < 4 || sample_rate == 0) return {};
   std::array<float, 12> pitch{};
-  constexpr float window = static_cast<float>(beatglass::VisualizationFrame::window_size);
   for (std::size_t bin = 1; bin < spectrum.size(); ++bin) {
-    const auto frequency = static_cast<float>(bin) * static_cast<float>(sample_rate) / window;
+    // Live keeps a bounded display spectrum by resampling the full FFT.  These
+    // bins therefore span 0..Nyquist, rather than retaining the source FFT bin
+    // numbers; map them back through the display spectrum's actual frequency
+    // range before assigning pitch classes.
+    const auto frequency = static_cast<float>(bin) * static_cast<float>(sample_rate) /
+        (2.0f * static_cast<float>(spectrum.size() - 1));
     if (frequency < 55.0f || frequency > 1760.0f) continue;
     const auto midi = 69.0f + 12.0f * std::log2(frequency / 440.0f);
     const auto pitch_class = static_cast<int>(std::lround(midi)) % 12;
