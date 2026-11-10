@@ -71,6 +71,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert quiet_json["bpm"] is None and quiet_json["state"] == "silent"
     result_json = json.loads(subprocess.run([exe, "--json", str(clicks)], capture_output=True, text=True, check=True).stdout)
     assert result_json["sample_rate"] == 44100 and result_json["frames"] == 44100 * 20
+    assert result_json["duration_seconds"] == 20.0
     assert abs(result_json["bpm"] - bpm) < .01
     replay_json = [json.loads(line) for line in subprocess.run([exe, "--json", "--replay", str(clicks)], capture_output=True, text=True, check=True).stdout.splitlines()]
     assert replay_json[-1] == result_json

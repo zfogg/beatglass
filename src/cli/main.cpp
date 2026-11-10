@@ -22,7 +22,9 @@ void json_result(const char* type, const beatglass::TempoResult& r, std::uint64_
   if (std::string_view(type) == "replay") std::cout << ",\"observed_through\":" << frame;
   std::cout << ",\"format\":"; json_string(r.metadata.format);
   std::cout << ",\"sample_rate\":" << r.metadata.sample_rate << ",\"channels\":" << r.metadata.channels
-            << ",\"frames\":" << r.metadata.frames << ",\"beats\":" << r.beats << ",\"bpm\":";
+            << ",\"frames\":" << r.metadata.frames << ",\"duration_seconds\":"
+            << (r.metadata.sample_rate ? static_cast<double>(r.metadata.frames) / r.metadata.sample_rate : 0.0)
+            << ",\"beats\":" << r.beats << ",\"bpm\":";
   if (r.bpm) std::cout << *r.bpm; else std::cout << "null";
   std::cout << ",\"state\":\"" << beatglass::cli::state_label(r.state) << "\"}\n";
 }
@@ -57,7 +59,7 @@ int main(int argc, char** argv) {
                 << ",\"frame\":" << beat.frame << ",\"observed_through\":" << beat.observed_through << "}\n";
     }) : beatglass::analyze_file(path);
     if (json) { json_result("result", r); return 0; }
-    std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nbeats: " << r.beats << "\ntempo: ";
+    std::cout << "format: " << r.metadata.format << "\nsample rate: " << r.metadata.sample_rate << "\nchannels: " << r.metadata.channels << "\nframes: " << r.metadata.frames << "\nduration seconds: " << (r.metadata.sample_rate ? static_cast<double>(r.metadata.frames) / r.metadata.sample_rate : 0.0) << "\nbeats: " << r.beats << "\ntempo: ";
     if (r.bpm) std::cout << *r.bpm << " BPM\n"; else std::cout << "unknown\n";
   } catch (const std::exception& e) { std::cerr << e.what() << "\n"; return 1; }
   return 0;
