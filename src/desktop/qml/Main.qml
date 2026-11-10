@@ -3048,7 +3048,7 @@ ApplicationWindow {
                                 Accessible.role: Accessible.Button
                                 Accessible.description: "Choose a local folder to populate the Library. Current state: " + window.browserEmptyMessage()
                                 ToolTip.text: "Choose a local folder to recover the library"
-                                onClicked: { window.announceVisualizationRecovery("Choose a Library folder dialog opened from the empty state."); folderPicker.open(); chooseFolderEmpty.forceActiveFocus() }
+                                onClicked: { navigation.currentIndex = 0; window.announceVisualizationRecovery("Choose a Library folder dialog opened from the empty state."); folderPicker.open(); chooseFolderEmpty.forceActiveFocus() }
                             }
                         }
                         RowLayout {
