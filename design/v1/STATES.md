@@ -276,3 +276,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Resume shortcut recovery | User resumes paused overlay recovery from the keyboard | Activate controls, announce stale evidence, and invoke Resume deterministically. |
 | Safe-mode clear shortcut recovery | User clears the bounded overlay retry safe mode from the keyboard | Activate controls, clear the retry bound, announce evidence freshness, and focus Retry. |
 | Stop shortcut recovery | User pauses bounded overlay recovery from the keyboard | Activate controls, pause recovery, announce stale evidence, and focus Resume. |
+| Paused page shortcut recovery | User opens the paused recovery page from the keyboard | Activate the recovery page, focus Resume, and preserve the stale evidence boundary. |

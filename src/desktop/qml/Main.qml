@@ -366,7 +366,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+Shift+Pause"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryPausedByUser
-        onActivated: window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready.")
+        onActivated: window.handleOverlayPausedPageShortcut()
     }
     Shortcut {
         objectName: "overlayDisplayFocusShortcut"
@@ -1499,6 +1499,9 @@ ApplicationWindow {
         window.stopOverlayRecoveryAttempts()
         window.announceCaptureRecoveryState("Overlay recovery paused; Resume recovery is available. Live evidence remains stale until fresh capture arrives.")
         resumeOverlayRecovery.forceActiveFocus()
+    }
+    function handleOverlayPausedPageShortcut() {
+        window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready. Live evidence remains stale until fresh capture arrives.")
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
