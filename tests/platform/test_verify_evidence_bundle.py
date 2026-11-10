@@ -85,6 +85,15 @@ class EvidenceBundleTest(unittest.TestCase):
             manifest.write_text(json.dumps(data), encoding="utf-8")
             self.assertIn("unsupported platform: android", module.verify(root, manifest))
 
+    def test_artifact_role_must_be_nonempty_string_when_present(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "0" * 64, "role": []}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("artifact role must be a nonempty string: capture.txt", module.verify(root, manifest))
+
     def test_scenario_id_must_be_hashable_string(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
