@@ -39,6 +39,8 @@ Pass `--summary evidence/native-summary.json` to merge a runner summary's
 qualified status and artifact paths into the host's matrix entry.
 The summary's `native_artifacts` field must be a JSON array; malformed summary
 shapes fail before a matrix is emitted instead of being iterated as text.
+Every artifact entry must be a non-empty string path; numeric or blank entries
+fail before matrix generation.
 The summary's `qualified` field must be a JSON boolean; string status values fail
 before generation rather than being silently downgraded to pending.
 When present, `native_execution_attempted` must also be a JSON boolean so a
