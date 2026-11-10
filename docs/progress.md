@@ -971,3 +971,13 @@ Visualization load-state description now includes overlay recovery readiness. Po
 
 Consolidated overlay settings summary descriptions now distinguish ready, launch-fallback, and recovery-pending states for assistive technology. Portable coverage is in `python tests/unit/check_overlay_summary_description_contract.py`.
 
+## CLI/library evidence update — 2026-11-10
+
+The shipped analysis and music CLIs now document and test help/version entry
+points, decoded duration in human and JSON output, and generated WAV/AIFF/
+FLAC/MP3 duration consistency without modifying source files. The README and
+platform status index these as portable preparation evidence. Native decoder
+runtime, packaged dependencies, real playback/output routing, and retained
+Windows/macOS/Linux qualification bundles remain open; no headless result in
+this update advances those gates.
+
