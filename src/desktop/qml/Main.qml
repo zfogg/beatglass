@@ -1452,8 +1452,10 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
     }
     function handleOverlayClickThroughButtonAction(requestedClickThrough) {
-        if (!window.overlayBridge)
-            return
+        if (!window.overlayBridge) {
+            window.focusOverlayAvailabilityRecovery("Overlay interaction mode is unavailable because the native overlay bridge is not connected.", clickThroughToggle)
+            return false
+        }
         const applied = window.overlayBridge.setClickThrough(requestedClickThrough)
         clickThroughToggle.checked = window.overlayBridge.clickThrough
         if (!applied || clickThroughToggle.checked !== requestedClickThrough) {
@@ -1466,6 +1468,7 @@ ApplicationWindow {
             window.announceCaptureRecoveryState(requestedClickThrough ? "DJ overlay click-through enabled; press Escape or use Unlock overlay to restore interaction." : "DJ overlay interaction restored; keyboard and pointer input are available.")
         }
         overlayInteractionMode.forceActiveFocus()
+        return applied && clickThroughToggle.checked === requestedClickThrough
     }
     function handleOverlayClickThroughShortcut() {
         const requested = !window.overlayBridge.clickThrough
