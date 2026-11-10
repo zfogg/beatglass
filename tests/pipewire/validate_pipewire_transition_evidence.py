@@ -68,6 +68,8 @@ if positions != sorted(positions):
 epochs = [event.get("epoch") for event in events if isinstance(event, dict) and event.get("epoch") is not None]
 if any(not isinstance(epoch, int) or isinstance(epoch, bool) or epoch <= 0 for epoch in epochs) or epochs != sorted(epochs):
     raise SystemExit("transition epochs must be positive and monotonic")
+if epochs and len(epochs) != len(events):
+    raise SystemExit("transition epochs must be complete when supplied")
 timestamps = [event.get("timestamp_ns") for event in events if isinstance(event, dict) and event.get("timestamp_ns") is not None]
 if timestamps and (len(timestamps) != len(events) or any(not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in timestamps)
                   or timestamps != sorted(timestamps)):
