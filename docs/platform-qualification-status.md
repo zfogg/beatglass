@@ -1,5 +1,18 @@
 # Platform qualification status
 
+## macOS qualification rerun (2026-11-10)
+
+The merged qualification fixes were exercised on the Intel MacBookPro16,1
+(`macOS 26.7.2`, Xcode 26.2, Clang 23.1.5, Qt 6.12.0) at commit
+`dcf72df3899230f555089316a1df5b0cf9028410`. The production desktop bundle,
+Core Audio smoke/recovery bundles, CLI, and full build completed successfully;
+bundle metadata and executable-name verification passed. Output discovery found
+the real `BuiltInSpeakerDevice` endpoint, and `macos_overlay_controller` plus
+`macos_native_overlay` passed. `macos_overlay_navigation` timed out in the
+headless QML harness with repeated null-bridge warnings, so this run remains
+unqualified for the navigation scenario. The tap/recovery smoke scenario was
+not run because `BEATGLASS_MACOS_TAP_UID` was intentionally unset.
+
 ## Current portable CLI/library evidence (2026-11-10)
 
 The shipped CLI and music CLI expose documented `--help`/`-h` and
@@ -66,7 +79,7 @@ unrun.
 | Platform | Current integrated/preparation evidence | Native gates still required |
 | --- | --- | --- |
 | Windows | `tests/windows/run_qualification.ps1` records build identity, configures/builds the x64 desktop targets, discovers tests, verifies artifacts, and can run CTest with `-RunTests`; endpoint-loss state and display selection/recovery have unit/QML coverage. | Real WASAPI loopback permission and routing, device removal/recovery on hardware, fullscreen and multi-monitor overlay behavior, tray recovery, DPI changes, and packaged runtime dependencies on supported Windows versions. |
-| macOS | `tests/macos/run_qualification.sh` enables the production desktop-analysis bridge and records build/evidence metadata; `tests/macos/verify_qualification_artifacts.sh` verifies the retained bundle; shell syntax and local diff checks pass. | Re-run the production qualification on `zachbook-pro`; verify real Core Audio capture permission prompts, output-device switching/recovery, Spaces/fullscreen behavior, menu-bar recovery, Retina/DPI changes, Intel and Apple Silicon runtime behavior, and packaged signing/runtime dependencies. |
+| macOS | Merged `tests/macos/run_qualification.sh` run at `dcf72df3` built the production desktop, CLI, Core Audio smoke/recovery bundles, and all test binaries; bundle verification, output discovery, `macos_overlay_controller`, and `macos_native_overlay` passed. | `macos_overlay_navigation` timed out in the headless QML harness; set `BEATGLASS_MACOS_TAP_UID` and rerun tap/recovery smoke; verify real Core Audio permission prompts, output-device switching/recovery, Spaces/fullscreen behavior, menu-bar recovery, Retina/DPI changes, Apple Silicon runtime, and packaged signing/runtime dependencies. |
 | Linux | Configure with `-DBEATGLASS_BUILD_PIPEWIRE=ON`; build serially when memory is constrained; run CTest, including optional virtual-graph tests; run strict documentation checks. | Real PipeWire device routing and permissions, device loss/replacement, X11 window-manager behavior, GNOME and KDE Wayland probing, layer-shell refusal/fallback, monitor/DPI changes, and recovery from an unavailable overlay capability. |
 
 For every native run, record the OS version, kernel or build number, compiler, Qt version, audio backend/session version, display server or compositor, output device, build identity, exact commands, and observed limitations. Until those records exist for the relevant platform scenarios, support language must remain experimental.
