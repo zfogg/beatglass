@@ -73,5 +73,8 @@ non-empty command string identifying how recovery capture was performed.
 Reacquisition evidence may include `capture_started_at`; when supplied it must be
 an ISO-8601 timestamp with an explicit timezone.
 
+Reacquisition evidence may include `capture_ended_at`; when supplied it must be a
+timezone-aware ISO-8601 timestamp no earlier than its recovery start timestamp.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
