@@ -232,6 +232,8 @@ def main() -> int:
         for error in errors:
             if error.startswith(("bundle root must ", "manifest must ")):
                 category = "input_topology"
+            elif error.startswith(("manifest exceeds ", "artifact exceeds ", "artifacts exceed ", "total artifact bytes exceed ", "too many artifacts")):
+                category = "resource_limit"
             else:
                 category = error.split(":", 1)[0]
             error_categories[category] = error_categories.get(category, 0) + 1

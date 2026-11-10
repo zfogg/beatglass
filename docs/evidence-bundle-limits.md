@@ -102,3 +102,5 @@ parsing.
 JSON output groups these pre-parse failures under `input_topology`, allowing
 qualification dashboards to distinguish workspace setup errors from content
 validation failures.
+JSON output also groups manifest, artifact-count, and byte-budget violations
+under `resource_limit`, making capacity failures distinct from malformed data.
