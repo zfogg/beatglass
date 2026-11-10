@@ -113,3 +113,5 @@ separately from other manifest-shape errors.
 Required-scenario omissions are grouped under `scenario` in JSON output, so
 qualification dashboards can distinguish incomplete test coverage from other
 schema failures.
+Artifact reference, hash, and size failures are grouped under `artifact` in
+JSON output, keeping retained-file integrity problems easy to triage.
