@@ -212,3 +212,5 @@ If present, host `battery_state` must be a non-empty string describing battery
 or mains-power state during qualification.
 If present, host `network_state` must be a non-empty string describing network
 connectivity state during qualification.
+If present, host `dns_state` must be a non-empty string describing DNS
+resolution state during qualification.
