@@ -10,6 +10,21 @@ scenarios. These checks are not a full v1 qualification claim: native Linux
 capture/desktop qualification and the complete cross-platform UI/audio matrix
 remain open.
 
+## Full macOS build and CTest snapshot (2026-11-10)
+
+On the native macOS host, a clean Qt 6.12 Release configuration with
+`BEATGLASS_BUILD_DESKTOP=ON`, `BEATGLASS_BUILD_SLICE=ON`,
+`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON`, `BEATGLASS_BUILD_DESKTOP_ANALYSIS=ON`,
+and `BEATGLASS_BUILD_MACOS_OVERLAY_TESTS=ON` built the desktop, Core Audio,
+overlay, library, and test targets successfully. The resulting CTest run
+executed 440 tests: 419 passed and 21 failed. The failures are not being
+promoted to a qualification claim; they remain open as native follow-up work
+covering cache/cancellation and symlink cases, codec/CLI integration, overlay
+teardown, QML navigation timeouts, and qualification-environment behavior.
+The exact run was `ctest --test-dir build-verify --output-on-failure -C
+Release` on the `zachbook-pro` host. Linux native qualification remains
+unrun.
+
 Overlay settings now provide a focused endpoint refresh action that keeps
 selection and retry recovery in one workflow. Portable coverage is in
 `python tests/unit/check_overlay_endpoint_refresh_action_contract.py`.
