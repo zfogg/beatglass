@@ -973,3 +973,12 @@ def test_restore_button_requires_available_overlay():
     assert "screenNames.length === 0" in body
     assert "focusOverlayDisplayRecoveryFailure" in body
     assert "return false" in body
+
+
+def test_resume_recovery_requires_available_overlay():
+    start = QML.index("function handleOverlayResumeRecoveryAction")
+    body = QML[start : QML.index("    function handleOverlayClearSafeModeShortcut", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return false" in body

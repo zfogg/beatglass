@@ -1641,6 +1641,10 @@ ApplicationWindow {
         return window.handleOverlayResumeRecoveryAction()
     }
     function handleOverlayResumeRecoveryAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Overlay recovery cannot resume until the native overlay and a destination display are ready.", overlayDisplay)
+            return false
+        }
         window.overlayRecoveryPausedByUser = false
         window.overlayRecoveryAttemptCount = 1
         window.announceCaptureRecoveryState("DJ overlay recovery resumed (attempt 1); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
