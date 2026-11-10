@@ -2089,14 +2089,7 @@ ApplicationWindow {
             window.handleOverlayInteractionStateChanged()
         }
         function onOpacityChanged() {
-            if (window.overlayBridge && window.overlayOpacityEditInFlight
-                    && Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) {
-                window.overlayOpacityEditInFlight = false
-                window.overlayPendingOpacity = -1
-            } else if (window.overlayBridge && !window.overlayOpacityEditInFlight)
-                window.overlaySettingsRevision += 1
-            if (window.overlayBridge)
-                window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent.")
+            window.handleOverlayOpacityChanged()
         }
         function onGeometryChanged() {
             window.syncOverlaySettingsStateFromBridge()
@@ -2124,6 +2117,19 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(window.overlayBridge.clickThrough
             ? "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction. Live evidence is stale until fresh capture arrives."
             : "DJ overlay interaction restored; keyboard and pointer input are available. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlayOpacityChanged() {
+        if (!window.overlayBridge)
+            return
+        if (window.overlayOpacityEditInFlight
+                && Math.abs(Number(window.overlayBridge.opacity) - window.overlayPendingOpacity) < 0.001) {
+            window.overlayOpacityEditInFlight = false
+            window.overlayPendingOpacity = -1
+        } else if (!window.overlayOpacityEditInFlight) {
+            window.overlaySettingsRevision += 1
+        }
+        window.overlayCaptureEvidenceStale = true
+        window.announceCaptureRecoveryState("DJ overlay opacity set to " + Math.round(window.overlayBridge.opacity * 100) + " percent. Live evidence remains stale until fresh capture arrives.")
     }
     function focusOverlayDisplaySelectionRequired() {
         window.overlayDisplaySelectionRequired = true

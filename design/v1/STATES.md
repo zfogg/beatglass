@@ -252,3 +252,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Overlay availability without display | Native overlay returns while no display is available | Keep actions disabled, mark display selection/evidence stale, and route focus through the availability recovery transition. |
 | Restored display selection required | A display returns but no saved destination matches it | Mark selection/recovery/evidence stale together and focus display selection with actionable restore guidance. |
 | Overlay interaction state recovery | Click-through interaction changes between locked and unlocked | Increment settings revision, preserve stale evidence until capture refreshes, and announce the keyboard/pointer recovery boundary. |
+| Overlay opacity recovery | Persisted opacity changes arrive from the native bridge | Preserve in-flight acknowledgement state, increment settings revision when external, and announce stale evidence until capture refreshes. |
