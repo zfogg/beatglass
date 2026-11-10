@@ -1445,6 +1445,13 @@ ApplicationWindow {
         if (!restored)
             retryOverlay.forceActiveFocus()
     }
+    function handleOverlayShowAction() {
+        const restored = window.showOverlayAndHideControls()
+        if (!restored) {
+            window.overlayCaptureEvidenceStale = true
+            retryOverlay.forceActiveFocus()
+        }
+    }
     function focusOverlayDisplayShortcut() {
         navigation.currentIndex = 1
         window.show()
@@ -1504,7 +1511,7 @@ ApplicationWindow {
     function handleOverlayHideToggleShortcut() {
         if (window.overlayHiddenByUser) {
             window.announceCaptureRecoveryState("Restoring the user-hidden DJ overlay; persisted settings will be reapplied." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
-            window.showOverlayAndHideControls()
+            window.handleOverlayShowAction()
         } else {
             window.hideOverlayAndRestoreControls()
         }

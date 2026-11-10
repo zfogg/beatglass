@@ -384,3 +384,11 @@ def test_hide_toggle_uses_explicit_visibility_state():
     assert "overlayHiddenByUser" in body
     assert "showOverlayAndHideControls()" in body
     assert "hideOverlayAndRestoreControls()" in body
+
+
+def test_show_action_keeps_retry_focusable_on_failure():
+    start = QML.index("function handleOverlayShowAction")
+    body = QML[start : QML.index("    function handleOverlayHideToggleShortcut", start)]
+    assert "showOverlayAndHideControls()" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "retryOverlay.forceActiveFocus()" in body
