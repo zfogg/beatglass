@@ -336,7 +336,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+Shift+C"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit
-        onActivated: window.resetOverlayRecoveryAttempts()
+        onActivated: window.handleOverlayClearSafeModeShortcut()
     }
     Shortcut {
         objectName: "overlayStopRecoveryShortcut"
@@ -1481,6 +1481,15 @@ ApplicationWindow {
         window.requestActivate()
         window.announceCaptureRecoveryState("Resume overlay recovery requested. Live evidence remains stale until fresh capture arrives.")
         resumeOverlayRecovery.clicked()
+    }
+    function handleOverlayClearSafeModeShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.resetOverlayRecoveryAttempts()
+        window.announceCaptureRecoveryState("Overlay safe mode cleared; Retry overlay is available and focused. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : ""))
+        retryOverlay.forceActiveFocus()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available

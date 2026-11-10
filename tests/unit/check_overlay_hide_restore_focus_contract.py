@@ -313,3 +313,11 @@ def test_resume_shortcut_activates_recovery_page():
     assert "navigation.currentIndex = 1" in body
     assert "resumeOverlayRecovery.clicked()" in body
     assert "Live evidence remains stale" in body
+
+
+def test_safe_mode_clear_shortcut_focuses_retry():
+    start = QML.index("function handleOverlayClearSafeModeShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "resetOverlayRecoveryAttempts()" in body
+    assert "retryOverlay.forceActiveFocus()" in body
+    assert "overlayCaptureEvidenceStale" in body
