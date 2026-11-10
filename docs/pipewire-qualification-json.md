@@ -55,5 +55,8 @@ non-empty string describing why native capture was restarted.
 Reacquisition evidence may include `process_index`; when supplied it must be a
 non-negative integer identifying the recovery callback order.
 
+Reacquisition evidence may include `event_count`; when supplied it must be a
+positive integer describing the retained recovery event total.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.

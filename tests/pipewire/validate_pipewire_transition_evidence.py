@@ -156,6 +156,11 @@ if reacquisition is not None:
                 or isinstance(reacquisition["process_index"], bool)
                 or reacquisition["process_index"] < 0):
             raise SystemExit("reacquisition evidence has an invalid process index")
+    if reacquisition.get("event_count") is not None:
+        if (not isinstance(reacquisition["event_count"], int)
+                or isinstance(reacquisition["event_count"], bool)
+                or reacquisition["event_count"] <= 0):
+            raise SystemExit("reacquisition evidence has an invalid event count")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
