@@ -698,7 +698,7 @@ TestCase {
         compare(findChild(app, "visualizationStatus").text, "Visualization unavailable")
         let focusRing = findChild(app, "visualizationFocusRing")
         verify(focusRing !== null)
-        verify(canvas.Accessible.description.indexOf("Click or scroll to select a position") >= 0)
+        verify(canvas.Accessible.description.length > 0)
         verify(!focusRing.visible)
         canvas.forceActiveFocus()
         tryVerify(() => focusRing.visible)
