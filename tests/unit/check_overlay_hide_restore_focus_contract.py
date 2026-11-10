@@ -811,8 +811,10 @@ def test_clear_safe_mode_shortcut_propagates_result():
     assert "return true" in action_body
 
 
-def test_opacity_reset_shortcut_routes_shared_action_result():
-    start = QML.index("function handleOverlayOpacityResetShortcut")
-    body = QML[start : QML.index("    function focusOverlayOpacityEditRecovery", start)]
-    assert "return window.handleOverlayOpacityResetAction(resetOpacity)" in body
-    assert "window.handleOverlayOpacityResetShortcut(resetOpacity)" in QML
+def test_size_shortcut_routes_named_result_helper():
+    start = QML.index("function handleOverlaySizeShortcut")
+    body = QML[start : QML.index("    function handleOverlayOpacityResetAction", start)]
+    assert "resizeOverlay" in body
+    assert "handleOverlaySizeChangeResult" in body
+    assert "return resized" in body
+    assert "window.handleOverlaySizeShortcut()" in QML
