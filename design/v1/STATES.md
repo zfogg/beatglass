@@ -260,3 +260,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Click-through focus recovery | Native interaction changes into or out of click-through mode | Preserve stale evidence, announce the keyboard/pointer boundary, and focus Unlock when locked or interaction mode when restored. |
 | External opacity focus recovery | Native opacity changes outside an in-flight user edit | Preserve stale evidence and route focus to the opacity control so the retained value is reviewable. |
 | Overlay size recovery | Native resize succeeds or fails from the keyboard shortcut | Keep persisted size state authoritative, announce failure/stale evidence when needed, and focus the size control. |
+| Reapply shortcut recovery | User invokes the keyboard shortcut for reapplying saved overlay settings | Activate controls, announce the retained-settings/evidence boundary, perform reapply, and return focus to Reapply. |

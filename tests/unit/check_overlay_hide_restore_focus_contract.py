@@ -204,3 +204,11 @@ def test_size_change_result_preserves_persisted_state_and_focus():
     assert "overlayCaptureEvidenceStale = true" in body
     assert "overlaySize.forceActiveFocus()" in body
     assert "handleOverlaySizeChangeResult(resized, nextIndex)" in QML[QML.index("sequence: \"Ctrl+Alt+O\"") : start]
+
+
+def test_reapply_shortcut_activates_and_restores_focus():
+    start = QML.index("function focusOverlayReapplyShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "navigation.currentIndex = 1" in body
+    assert "reapplyOverlaySettingsAndRestore()" in body
+    assert "reapplyOverlaySettings.forceActiveFocus()" in body

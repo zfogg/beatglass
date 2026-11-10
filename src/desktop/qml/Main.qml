@@ -453,9 +453,7 @@ ApplicationWindow {
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
         onActivated: {
-            window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity.")
-            window.reapplyOverlaySettingsAndRestore()
-            reapplyOverlaySettings.forceActiveFocus()
+            window.focusOverlayReapplyShortcut()
         }
     }
     Shortcut {
@@ -1429,6 +1427,15 @@ ApplicationWindow {
         }
         window.announceCaptureRecoveryState("Persisted overlay display, geometry, and opacity reapplied.")
         return window.showOverlayAndHideControls()
+    }
+    function focusOverlayReapplyShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Retained settings are current."))
+        window.reapplyOverlaySettingsAndRestore()
+        reapplyOverlaySettings.forceActiveFocus()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
