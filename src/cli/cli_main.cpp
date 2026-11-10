@@ -184,9 +184,9 @@ int main(int argc, char** argv) {
   std::vector<std::string> live_endpoint_ids;
   std::string live_error;
 #ifdef _WIN32
-  const auto endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
-  live_error = endpoint_snapshot.error;
-  for (const auto& endpoint : endpoint_snapshot.endpoints) {
+  auto live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
+  live_error = live_endpoint_snapshot.error;
+  for (const auto& endpoint : live_endpoint_snapshot.endpoints) {
     live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
     live_endpoint_ids.push_back(endpoint.id);
   }
@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
   int tab = 0, selected = tracks.empty() ? -1 : 0;
   int live_selected = 0;
 #ifdef _WIN32
-  for (int index = 0; index < static_cast<int>(endpoint_snapshot.endpoints.size()); ++index) if (endpoint_snapshot.endpoints[index].is_default) live_selected = index;
+  for (int index = 0; index < static_cast<int>(live_endpoint_snapshot.endpoints.size()); ++index) if (live_endpoint_snapshot.endpoints[index].is_default) live_selected = index;
 #endif
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result;
@@ -330,6 +330,10 @@ int main(int argc, char** argv) {
     }
     if (live_endpoint_ids.empty()) { live_status = "No render endpoint is available."; return; }
     if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoint_ids.size())) { live_status = "Select an available render endpoint first."; return; }
+    if (beatglass::windows::select_render_endpoint(live_endpoint_snapshot, live_endpoint_ids[static_cast<std::size_t>(live_selected)]) != beatglass::windows::SelectionResult::accepted) {
+      live_status = "Selected sink is stale; refresh sinks before monitoring.";
+      return;
+    }
     if (live_session->start(live_endpoint_ids[static_cast<std::size_t>(live_selected)])) live_status = "Starting capture…";
     else live_status = "Capture could not start; inspect endpoint permissions or device state.";
 #else
@@ -339,10 +343,10 @@ int main(int argc, char** argv) {
   auto live_button = Button(" Start monitoring ", toggle_live);
   auto refresh_live_button = Button(" Refresh sinks ", [&] {
 #ifdef _WIN32
-    const auto refreshed = beatglass::windows::enumerate_render_endpoints();
-    live_error = refreshed.error;
+    live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
+    live_error = live_endpoint_snapshot.error;
     live_endpoints.clear(); live_endpoint_ids.clear(); live_selected = 0;
-    for (const auto& endpoint : refreshed.endpoints) {
+    for (const auto& endpoint : live_endpoint_snapshot.endpoints) {
       live_endpoints.push_back(endpoint.name + (endpoint.is_default ? " (default)" : ""));
       live_endpoint_ids.push_back(endpoint.id);
       if (endpoint.is_default) live_selected = static_cast<int>(live_endpoint_ids.size()) - 1;
