@@ -5510,7 +5510,6 @@ ApplicationWindow {
                                 ComboBox {
                                     objectName: "endpointSelector"
                                     activeFocusOnTab: true
-                                    Accessible.role: Accessible.ComboBox
                                     model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []
                                     textRole: "name"
                                     enabled: count > 0; Layout.fillWidth: true
