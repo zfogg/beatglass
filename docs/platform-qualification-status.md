@@ -1,5 +1,17 @@
 # Platform qualification status
 
+## Current portable CLI/library evidence (2026-11-10)
+
+The shipped CLI and music CLI expose documented `--help`/`-h` and
+`--version`/`-V` entry points. JSON and human-readable analysis output expose
+decoded duration, and generated WAV/AIFF/FLAC/MP3 integration checks validate
+duration consistency and source immutability. These are portable development
+checks only; they do not advance any native Windows, macOS, or Linux gate.
+
+Remaining CLI/library gates are native decoder/runtime availability, packaged
+dependency verification, real playback/output-device qualification, and the
+platform evidence bundles listed below.
+
 Readiness evidence for shortcut recovery must show that stop/resume shortcuts update an accessible announcement (`queued`, `running`, `cancelled`, `retry`, or `complete`), preserve focus, and do not leave stale results presented. Run the portable contract with `python tests/unit/check_desktop_analysis_transition.py`; native screen-reader and assistive-technology timing still require platform runs.
 
 Native readiness evidence must verify keyboard parity for playback recovery: focus reaches pause/resume, retry, endpoint refresh, and reacquisition controls; accessible names expose current state; and stale-result clearing is announced without pointer input. Reproduce the portable audit with `python tests/unit/check_desktop_analysis_transition.py`; this does not replace native UI/accessibility qualification.
