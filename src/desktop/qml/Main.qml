@@ -669,6 +669,7 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Interaction state is current."))
         if (target)
             target.forceActiveFocus()
+        return target !== null && target !== undefined
     }
     function focusOverlaySettingsRecoveryFailure(message, target) {
         window.overlayCaptureEvidenceStale = true
