@@ -376,3 +376,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | No-display recovery contract | Overlay recovers while no destination display is present | Mark display selection pending/stale and propagate availability-recovery focus result. |
 | Display-loss recovery contract | Active display disappears or retained geometry cannot synchronize | Mark display recovery pending/stale and propagate availability-recovery focus result. |
 | Display-selection recovery contract | Display returns but selection is required before actions resume | Mark selection/pending/stale state and propagate display-control focus result. |
+| Geometry announcement contract | Overlay geometry is valid or unavailable during recovery | Return explicit validity while marking geometry evidence stale and announcing restored dimensions. |

@@ -2467,9 +2467,10 @@ ApplicationWindow {
     }
     function announceOverlayGeometryState() {
         if (!window.overlayBridge || !window.overlayBridge.geometry || window.overlayBridge.geometry.width <= 0)
-            return
+            return false
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels. Live evidence remains stale until fresh capture arrives.")
+        return true
     }
     function focusOverlayGeometrySyncFailure() {
         window.overlayDisplayRecoveryPending = true
