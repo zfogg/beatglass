@@ -409,10 +409,16 @@ int main(int argc, char** argv) {
     auto current = std::find(library_indices.begin(), library_indices.end(), selected);
     auto visible = current == library_indices.end() ? 0 : static_cast<int>(std::distance(library_indices.begin(), current));
     visible = (visible + direction + static_cast<int>(library_indices.size())) % static_cast<int>(library_indices.size());
+    const auto cancelling = busy;
+    if (cancelling) {
+      analysis_cancelled.store(true, std::memory_order_release);
+      analysis_stop.request_stop();
+    }
     selected = library_indices[static_cast<std::size_t>(visible)];
     library_visible_selected = visible;
     result.reset(); waveform.clear();
-    status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play.";
+    status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
+        (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
   auto previous_button = Button(" Prev ", [&] { select_relative(-1); });
   auto next_button = Button(" Next ", [&] { select_relative(1); });
