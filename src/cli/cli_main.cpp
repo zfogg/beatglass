@@ -537,9 +537,9 @@ int main(int argc, char** argv) {
       text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto tabs = Container::Tab({library, live, settings}, &tab);
-  auto library_tab = Button("  Library  ", [&] { tab = 0; });
-  auto live_tab = Button("  Live  ", [&] { tab = 1; });
-  auto settings_tab = Button("  Settings  ", [&] { tab = 2; });
+  auto library_tab = Button("  [1] Library  ", [&] { tab = 0; });
+  auto live_tab = Button("  [2] Live  ", [&] { tab = 1; });
+  auto settings_tab = Button("  [3] Settings  ", [&] { tab = 2; });
   auto tab_bar = Renderer(Container::Horizontal({library_tab, live_tab, settings_tab}), [&] {
     auto library_render = library_tab->Render();
     auto live_render = live_tab->Render();
