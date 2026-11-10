@@ -262,6 +262,8 @@ the selected source's health.
 The machine-readable host contract is captured in
 `tests/pipewire/native_host_provenance_schema.json`; validator behavior remains
 the qualification authority and native execution evidence is still required.
+The schema title is `Beatglass native host provenance` and its required
+identity fields are exactly `platform` and `name`.
 Before packaging a native run, validate the extracted host object directly:
 `python tests/pipewire/validate_native_host_provenance.py HOST.json`.
 The host validator accepts one host path and an optional report path; missing
