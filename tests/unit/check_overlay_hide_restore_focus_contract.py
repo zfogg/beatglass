@@ -1178,7 +1178,7 @@ def test_capture_startup_and_attach_failures_report_handled_result():
     startup_start = QML.index("function focusOverlayCaptureStartupFailure")
     startup = QML[startup_start : QML.index("    function focusOverlayRecoveryAction", startup_start)]
     assert "overlayDisplaySelectionRequired = true" in attach
-    assert "return true" in attach
+    assert "return window.focusOverlayAvailabilityRecovery" in attach
     assert "overlayDisplayRecoveryPending = true" in startup
     assert "return true" in startup
 

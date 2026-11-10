@@ -890,8 +890,7 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = true
         window.overlayDisplaySelectionRequired = true
         window.overlayCaptureEvidenceStale = true
-        window.announceCaptureRecoveryState(message + " Live evidence is stale until fresh capture arrives.")
-        return true
+        return window.focusOverlayAvailabilityRecovery(message + " Live evidence is stale until fresh capture arrives.", overlayDisplay)
     }
     function focusOverlayCaptureStartupFailure() {
         window.overlayCaptureEvidenceStale = true
