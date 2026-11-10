@@ -2086,11 +2086,7 @@ ApplicationWindow {
             }
         }
         function onClickThroughChanged() {
-            window.overlaySettingsRevision += 1
-            if (window.overlayBridge && window.overlayBridge.clickThrough)
-                window.announceCaptureRecoveryState("DJ overlay is click-through; unlock it to restore keyboard and pointer interaction.")
-            else
-                window.announceCaptureRecoveryState("DJ overlay interaction restored; keyboard and pointer input are available.")
+            window.handleOverlayInteractionStateChanged()
         }
         function onOpacityChanged() {
             if (window.overlayBridge && window.overlayOpacityEditInFlight
@@ -2119,6 +2115,15 @@ ApplicationWindow {
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
         }
+    }
+    function handleOverlayInteractionStateChanged() {
+        window.overlaySettingsRevision += 1
+        if (!window.overlayBridge)
+            return
+        window.overlayCaptureEvidenceStale = true
+        window.announceCaptureRecoveryState(window.overlayBridge.clickThrough
+            ? "DJ overlay is click-through; unlock it to restore keyboard and pointer interaction. Live evidence is stale until fresh capture arrives."
+            : "DJ overlay interaction restored; keyboard and pointer input are available. Live evidence remains stale until fresh capture arrives.")
     }
     function focusOverlayDisplaySelectionRequired() {
         window.overlayDisplaySelectionRequired = true

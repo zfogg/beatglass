@@ -131,3 +131,11 @@ def test_restored_display_without_saved_match_uses_selection_focus():
     assert "overlayDisplaySelectionRequired = true" in body
     assert "focusOverlayAvailabilityRecovery" in body
     assert "focusOverlayDisplaySelectionRequired()" in QML[QML.index("function onScreensChanged") : start]
+
+
+def test_interaction_state_changes_share_stale_evidence_announcement():
+    start = QML.index("function handleOverlayInteractionStateChanged")
+    body = QML[start : QML.index("    function focusOverlayDisplaySelectionRequired", start)]
+    assert "overlaySettingsRevision += 1" in body
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "handleOverlayInteractionStateChanged()" in QML[QML.index("function onClickThroughChanged") : start]
