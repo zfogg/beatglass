@@ -965,6 +965,8 @@ int main(int argc, char** argv) {
     live_tracking_state = beatglass::TrackingState::reacquiring;
     live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
     live_waveform.assign(live_waveform.size(), 0.0f);
+    live_visualization.reset();
+    live_visualization_frame.reset();
     live_button_label = " Start monitoring ";
     live_status = "Analysis reset; start monitoring to reacquire.";
 #else
@@ -1121,16 +1123,18 @@ int main(int argc, char** argv) {
           beatglass::AudioBlock block{{packet.sample_rate, static_cast<std::uint16_t>(packet.channels), layout}, packet.epoch, packet.first_frame, static_cast<std::int64_t>(packet.qpc_100ns) * 100, packet.discontinuity, std::span<const float>(packet.samples.data(), packet.sample_count)};
           try {
             live_sample_rate = packet.sample_rate;
-            live_observed_frames = packet.first_frame + packet.sample_count;
+            const auto packet_channels = std::max<std::uint32_t>(1, packet.channels);
+            const auto packet_frames = packet.sample_count / packet_channels;
+            live_observed_frames = packet.first_frame + packet_frames;
             if (packet.discontinuity) ++live_discontinuities;
             double energy = 0.0;
             float peak = 0.0f;
-            for (std::size_t sample = 0; sample < packet.sample_count; sample += std::max<std::uint32_t>(1, packet.channels)) {
+            for (std::size_t sample = 0; sample < packet.sample_count; sample += packet_channels) {
               const auto value = std::abs(packet.samples[sample]);
               energy += static_cast<double>(value) * value;
               peak = std::max(peak, value);
             }
-            const auto sample_count = std::max<std::size_t>(1, (packet.sample_count + std::max<std::uint32_t>(1, packet.channels) - 1) / std::max<std::uint32_t>(1, packet.channels));
+            const auto sample_count = std::max<std::size_t>(1, packet_frames);
             const auto rms = static_cast<float>(std::sqrt(energy / static_cast<double>(sample_count)));
             live_signal_confidence = std::clamp(std::max(rms, peak * 0.35f) * 2.0f, 0.0f, 1.0f);
             const auto state = live_replay->process(block);
@@ -1159,11 +1163,11 @@ int main(int argc, char** argv) {
               live_tempo_history.push_back(*live_bpm);
               if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin());
             }
-            std::vector<float> mono(packet.sample_count / std::max<std::uint32_t>(1, packet.channels));
+            std::vector<float> mono(packet_frames);
             for (std::size_t frame = 0; frame < mono.size(); ++frame) {
               float sum = 0.0f;
-              for (std::uint32_t channel = 0; channel < std::max<std::uint32_t>(1, packet.channels); ++channel) sum += packet.samples[frame * packet.channels + channel];
-              mono[frame] = sum / static_cast<float>(std::max<std::uint32_t>(1, packet.channels));
+              for (std::uint32_t channel = 0; channel < packet_channels; ++channel) sum += packet.samples[frame * packet.channels + channel];
+              mono[frame] = sum / static_cast<float>(packet_channels);
             }
             for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) {
               const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset);
