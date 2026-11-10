@@ -18,6 +18,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
             raise SystemExit("transition host provenance has no capture command")
+    if payload.get("artifact_id") is not None and (not isinstance(payload["artifact_id"], str) or not payload["artifact_id"].strip()):
+        raise SystemExit("transition evidence has an empty artifact identity")
 if not isinstance(events, list) or not events:
     raise SystemExit("transition evidence must be a non-empty event list")
 if any(not isinstance(event, dict) for event in events):
