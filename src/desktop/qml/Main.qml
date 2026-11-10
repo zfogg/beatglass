@@ -273,15 +273,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && window.overlayBridge.available
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            if (hidden)
-            hideOverlay.forceActiveFocus()
-        else
-            restoreOverlay.forceActiveFocus()
-            window.announceCaptureRecoveryState("Hide overlay control focused.")
+            window.focusOverlayHideShortcut()
         }
     }
     Shortcut {
@@ -1448,6 +1440,17 @@ ApplicationWindow {
         window.requestActivate()
         showOverlay.forceActiveFocus()
         window.announceCaptureRecoveryState("Show overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+    }
+    function focusOverlayHideShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        if (window.overlayHiddenByUser)
+            restoreOverlay.forceActiveFocus()
+        else
+            hideOverlay.forceActiveFocus()
+        window.announceCaptureRecoveryState("Hide overlay control focused; " + (window.overlayHiddenByUser ? "Restore is ready." : "Hide is ready.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
