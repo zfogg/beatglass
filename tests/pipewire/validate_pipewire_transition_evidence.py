@@ -25,6 +25,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has an invalid node id")
         if host.get("build_id") is not None and (not isinstance(host["build_id"], str) or not host["build_id"].strip()):
             raise SystemExit("transition host provenance has no build id")
+        if host.get("kernel") is not None and (not isinstance(host["kernel"], str) or not host["kernel"].strip()):
+            raise SystemExit("transition host provenance has no kernel")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
