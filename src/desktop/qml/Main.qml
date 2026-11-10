@@ -380,16 +380,7 @@ ApplicationWindow {
         sequence: "Ctrl+Alt+D"
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0
-        onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlayDisplay.forceActiveFocus()
-            window.announceCaptureRecoveryState(window.overlayDisplaySelectionRequired
-                ? "Overlay display selection required; choose an available display."
-                : "Overlay display selector focused.")
-        }
+        onActivated: window.focusOverlayDisplayShortcut()
     }
     Shortcut {
         objectName: "overlayReapplyShortcut"
@@ -1471,6 +1462,16 @@ ApplicationWindow {
         const restored = window.showOverlayAndHideControls()
         if (!restored)
             retryOverlay.forceActiveFocus()
+    }
+    function focusOverlayDisplayShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        overlayDisplay.forceActiveFocus()
+        window.announceCaptureRecoveryState((window.overlayDisplaySelectionRequired
+            ? "Overlay display selection required; choose an available display."
+            : "Overlay display selector focused.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
