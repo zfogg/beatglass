@@ -1433,6 +1433,10 @@ ApplicationWindow {
         overlayOpacityControl.forceActiveFocus()
         window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
     }
+    function focusOverlayDisplaySelectionRecovery(message) {
+        overlayDisplay.forceActiveFocus()
+        window.announceCaptureRecoveryState(message + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? " Recovery remains pending." : ""))
+    }
     function handleOverlayClickThroughButtonAction(requestedClickThrough) {
         if (!window.overlayBridge)
             return
@@ -4915,10 +4919,10 @@ ApplicationWindow {
                         onActivated: {
                             const requestedIndex = currentIndex
                             if (window.persistOverlayDisplaySelection(requestedIndex, currentText))
-                                overlayDisplayStatus.forceActiveFocus()
+                                window.focusOverlayDisplaySelectionRecovery("Overlay display selected: " + currentText + ". Display selection is ready for recovery.")
                             else {
                                 currentIndex = window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
-                                forceActiveFocus()
+                                window.focusOverlayDisplaySelectionRecovery("Overlay display selection could not be applied; persisted display remains active.")
                             }
                         }
                         Layout.fillWidth: true
