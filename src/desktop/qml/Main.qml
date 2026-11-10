@@ -1429,6 +1429,22 @@ ApplicationWindow {
         const applied = window.overlayBridge.setOpacity(resetOpacity)
         window.handleOverlayOpacityResetResult(applied, resetOpacity)
     }
+    function handleOverlayClickThroughButtonAction(requestedClickThrough) {
+        if (!window.overlayBridge)
+            return
+        const applied = window.overlayBridge.setClickThrough(requestedClickThrough)
+        clickThroughToggle.checked = window.overlayBridge.clickThrough
+        if (!applied || clickThroughToggle.checked !== requestedClickThrough) {
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again. Live evidence remains stale until fresh capture arrives.")
+        } else {
+            window.overlaySettingsRevision += 1
+            window.overlayLaunchFallbackActive = false
+            window.overlayDisplayRecoveryPending = false
+            window.announceCaptureRecoveryState(requestedClickThrough ? "DJ overlay click-through enabled; press Escape or use Unlock overlay to restore interaction." : "DJ overlay interaction restored; keyboard and pointer input are available.")
+        }
+        overlayInteractionMode.forceActiveFocus()
+    }
     function handleOverlayClickThroughShortcut() {
         const requested = !window.overlayBridge.clickThrough
         if (!requested) {
@@ -4633,22 +4649,7 @@ ApplicationWindow {
                         Accessible.description: "Allow pointer input to pass through the overlay window; currently " + (checked ? "enabled" : "disabled") + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : "")
                         ToolTip.text: "Toggle pointer click-through for the overlay" + (window.overlayCaptureEvidenceStale ? "; live evidence is stale until fresh capture" : "")
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
-                        onClicked: if (window.overlayBridge) {
-                            const requestedClickThrough = checked
-                            const applied = window.overlayBridge.setClickThrough(requestedClickThrough)
-                            checked = window.overlayBridge.clickThrough
-                            if (!applied || checked !== requestedClickThrough)
-                                window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again.")
-                            else {
-                                window.overlaySettingsRevision += 1
-                                window.overlayLaunchFallbackActive = false
-                                window.overlayDisplayRecoveryPending = false
-                                window.announceCaptureRecoveryState(requestedClickThrough
-                                    ? "DJ overlay click-through enabled; press Escape or use Unlock overlay to restore interaction."
-                                    : "DJ overlay interaction restored; keyboard and pointer input are available.")
-                            }
-                            overlayInteractionMode.forceActiveFocus()
-                        }
+                        onClicked: window.handleOverlayClickThroughButtonAction(checked)
                         Connections {
                             target: window.overlayBridge
                             function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
