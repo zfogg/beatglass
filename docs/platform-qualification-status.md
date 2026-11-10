@@ -198,6 +198,8 @@ and allows the matrix validator's traversal checks to remain fail-closed.
 For local handoff review, `validate_qualification_matrix.py MATRIX.json ROOT`
 additionally verifies every listed evidence artifact exists beneath `ROOT`;
 the original one-argument shape remains a portable schema-only check.
+The evidence-root check resolves each artifact before containment testing, so a
+symlink inside the retained root cannot point to evidence outside that root.
 
 | Evidence class | Windows session result | Required native owner/action |
 | --- | --- | --- |

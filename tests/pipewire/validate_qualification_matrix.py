@@ -31,7 +31,12 @@ for name, entry in platforms.items():
         raise SystemExit(f"invalid evidence path: {name}")
     if evidence_root is not None:
         for path in entry["evidence"]:
-            if not (evidence_root / path).is_file():
+            artifact = evidence_root / path
+            try:
+                contained = artifact.resolve().is_relative_to(evidence_root)
+            except (OSError, ValueError):
+                contained = False
+            if not contained or not artifact.is_file():
                 raise SystemExit(f"missing evidence artifact: {name}: {path}")
     if len(set(entry["evidence"])) != len(entry["evidence"]):
         raise SystemExit(f"duplicate evidence path: {name}")

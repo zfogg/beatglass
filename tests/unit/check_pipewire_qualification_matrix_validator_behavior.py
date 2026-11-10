@@ -71,4 +71,17 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(validator), str(path), str(evidence_root)], capture_output=True, text=True)
     if result.returncode == 0 or "missing evidence artifact" not in result.stderr + result.stdout:
         raise SystemExit("missing evidence artifact was accepted")
+    outside = Path(directory) / "outside.zip"
+    outside.write_bytes(b"outside")
+    link = evidence_root / "linked.zip"
+    try:
+        link.symlink_to(outside)
+    except OSError:
+        pass
+    else:
+        valid["platforms"]["Windows"]["evidence"] = ["linked.zip"]
+        path.write_text(json.dumps(valid), encoding="utf-8")
+        result = subprocess.run([sys.executable, str(validator), str(path), str(evidence_root)], capture_output=True, text=True)
+        if result.returncode == 0 or "missing evidence artifact" not in result.stderr + result.stdout:
+            raise SystemExit("outside-root symlink evidence was accepted")
 print("PipeWire qualification matrix validator behavior passed (9 scenarios)")
