@@ -2924,7 +2924,6 @@ ApplicationWindow {
                           + " · cancelled " + window.analysisJobBridge.batchCancelledCount
                           + ((window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? " · recovery actions available below" : "")) : ""
                     Accessible.name: "Library analysis batch recovery: " + text
-                    Accessible.value: visible ? text : ""
                     Accessible.role: Accessible.Status
                     Accessible.description: visible && (window.analysisJobBridge.status === "Failed" || window.analysisJobBridge.status === "Cancelled") ? text + ". Retry or discard the retained batch in the selected source panel; the prior result is cleared before retry." : visible ? text + ". Progress updates as worker outcomes are published." : "No analysis batch is active."
                     ToolTip.text: visible ? Accessible.description : "Library analysis batch status"
