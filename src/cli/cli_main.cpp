@@ -72,6 +72,7 @@ private:
       if (command == Command::shutdown) break;
       if (command == Command::play) {
         output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
+        session_.stop();
         try {
           reader = std::make_unique<beatglass::FileReader>(path_, ++next_epoch);
           const auto& metadata = reader->metadata(); std::string error;
@@ -96,7 +97,7 @@ private:
       }
       if (!reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) { std::unique_lock lock(mutex_); condition_.wait_for(lock, std::chrono::milliseconds(20), [&] { return command_ != Command::none; }); continue; }
       const auto read = reader->read(decoded);
-      if (read.status == beatglass::FileReadStatus::end) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
+      if (read.status == beatglass::FileReadStatus::end) { output.stop(); session_.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
       if (read.status != beatglass::FileReadStatus::data) continue;
       current_frame_.store(read.block.first_frame + read.block.samples.size() / std::max<std::size_t>(1, read.block.format.channels), std::memory_order_release);
       while (!output.submit(read.block)) {
@@ -645,12 +646,13 @@ private:
           current_frame_.store(0, std::memory_order_release);
           total_frames_.store(metadata.frames, std::memory_order_release);
           if (!output.start_device(take_device_id(), metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
+          if (!session_.start(next_epoch)) { output.stop(); reader.reset(); set_status("Playback session could not acquire a fresh epoch."); continue; }
           epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through native output.");
         } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
       } else if (command == Command::resume) {
-        if (output.resume()) { state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback resumed."); }
+        if (output.resume() && session_.resume()) { state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback resumed."); }
       } else if (command == Command::pause) {
-        if (output.pause()) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
+        if (output.pause() && session_.pause()) { state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); }
       } else if (command == Command::seek && reader) {
         try {
           const auto metadata = reader->metadata();
@@ -662,11 +664,12 @@ private:
           output.stop(); reader->seek(target, ++next_epoch);
           std::string error;
           if (!output.start_device(take_device_id(), metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
+          if (!session_.seek(target, next_epoch)) throw std::runtime_error("Playback session rejected the seek epoch");
           current_frame = target; epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback seeked to frame " + std::to_string(target) + ".");
           current_frame_.store(target, std::memory_order_release);
         } catch (const std::exception& error) { set_status(std::string("Playback seek failed: ") + error.what()); }
       } else if (command == Command::stop) {
-        output.stop(); reader.reset(); current_frame_.store(0, std::memory_order_release); total_frames_.store(0, std::memory_order_release); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback stopped.");
+        output.stop(); session_.stop(); reader.reset(); current_frame_.store(0, std::memory_order_release); total_frames_.store(0, std::memory_order_release); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback stopped.");
       }
       if (!reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) {
         std::unique_lock lock(mutex_); condition_.wait_for(lock, std::chrono::milliseconds(20), [&] { return command_ != Command::none; }); continue;
@@ -674,16 +677,15 @@ private:
       const auto read = reader->read(decoded);
       if (read.status == beatglass::FileReadStatus::end) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); set_status("Playback reached end of file."); continue; }
       if (read.status != beatglass::FileReadStatus::data) continue;
-      current_frame = read.block.first_frame + read.block.samples.size() / std::max<std::size_t>(1, read.block.format.channels);
-      current_frame_.store(current_frame, std::memory_order_release);
       while (!output.submit(read.block)) {
         output.render(render);
         command = take_command();
-        if (command == Command::stop || command == Command::shutdown) { output.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); shutdown = command == Command::shutdown; break; }
-        if (command == Command::pause) { output.pause(); state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); break; }
+        if (command == Command::stop || command == Command::shutdown) { output.stop(); session_.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release); shutdown = command == Command::shutdown; break; }
+        if (command == Command::pause) { output.pause(); session_.pause(); state_.store(beatglass::PlaybackState::paused, std::memory_order_release); set_status("Playback paused."); break; }
         if (command == Command::play || command == Command::seek) {
           output.stop();
           reader.reset();
+          session_.stop();
           state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
           // Preserve the command for the outer worker loop after the current
           // queue-drain boundary; a new source/seek must never be discarded.
@@ -692,10 +694,21 @@ private:
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
       }
+      if (reader && state_.load(std::memory_order_acquire) == beatglass::PlaybackState::playing) {
+        const auto frame_count = read.block.samples.size() / std::max<std::size_t>(1, read.block.format.channels);
+        if (!session_.accept(read.block.epoch, read.block.first_frame, frame_count)) {
+          output.stop(); session_.stop(); reader.reset(); state_.store(beatglass::PlaybackState::stopped, std::memory_order_release);
+          set_status("Playback stopped after an out-of-order decoded block.");
+          continue;
+        }
+        current_frame = session_.next_frame();
+        current_frame_.store(current_frame, std::memory_order_release);
+      }
       if (shutdown || !reader || state_.load(std::memory_order_acquire) != beatglass::PlaybackState::playing) continue;
       output.render(render);
     }
     output.stop();
+    session_.stop();
   }
   mutable std::mutex mutex_;
   std::condition_variable condition_;
@@ -709,6 +722,7 @@ private:
   std::atomic<std::uint64_t> total_frames_{};
   std::int64_t seek_delta_seconds_{};
   UINT device_id_{WAVE_MAPPER};
+  beatglass::PlaybackSession session_;
 };
 #endif
 #ifdef __APPLE__
