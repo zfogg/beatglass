@@ -1349,8 +1349,9 @@ ApplicationWindow {
             window.focusOverlayDisplayRecoveryFailure("Choose an available display before reapplying saved overlay settings.", overlayDisplay)
             return
         }
-        window.reapplyOverlaySettingsAndRestore()
-        reapplyOverlaySettings.forceActiveFocus()
+        const reapplied = window.reapplyOverlaySettingsAndRestore()
+        if (reapplied)
+            reapplyOverlaySettings.forceActiveFocus()
     }
     function handleOverlayUnlockAction() {
         if (!window.overlayBridge || !window.overlayBridge.available || !window.overlayBridge.clickThrough) {
