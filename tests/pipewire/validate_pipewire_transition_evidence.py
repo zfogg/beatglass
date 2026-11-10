@@ -309,6 +309,11 @@ for event in process_events:
             or isinstance(event["sample_position"], bool)
             or event["sample_position"] < 0):
         raise SystemExit("process sample positions must be non-negative integers")
+    if event.get("timestamp_ns") is not None and (
+            not isinstance(event["timestamp_ns"], int)
+            or isinstance(event["timestamp_ns"], bool)
+            or event["timestamp_ns"] < 0):
+        raise SystemExit("process timestamps must be non-negative integers")
 sample_counts = [event.get("sample_count") for event in process_events if event.get("sample_count") is not None]
 if sample_counts and (len(sample_counts) != len(process_events)
                       or any(not isinstance(value, int) or isinstance(value, bool) or value < 0 for value in sample_counts)):
