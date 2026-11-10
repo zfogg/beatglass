@@ -261,4 +261,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | External opacity focus recovery | Native opacity changes outside an in-flight user edit | Preserve stale evidence and route focus to the opacity control so the retained value is reviewable. |
 | Overlay size recovery | Native resize succeeds or fails from the keyboard shortcut | Keep persisted size state authoritative, announce failure/stale evidence when needed, and focus the size control. |
 | Reapply shortcut recovery | User invokes the keyboard shortcut for reapplying saved overlay settings | Activate controls, announce the retained-settings/evidence boundary, perform reapply, and return focus to Reapply. |
-| Retention review shortcut recovery | User invokes the retained-settings review shortcut | Activate controls, focus the review action, and announce whether live evidence is current or stale. |
+| Summary review shortcut recovery | User invokes the consolidated overlay summary shortcut | Activate controls, focus summary review, and announce revision, pending recovery, and evidence freshness together. |

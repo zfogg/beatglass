@@ -241,7 +241,12 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge !== null
         onActivated: {
-            window.focusOverlayRetentionReviewShortcut()
+            navigation.currentIndex = 1
+            window.show()
+            window.raise()
+            window.requestActivate()
+            overlaySettingsRetentionReviewAction.forceActiveFocus()
+            window.announceCaptureRecoveryState("Retained overlay settings review control focused.")
         }
     }
     Shortcut {
@@ -264,9 +269,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge !== null
         onActivated: {
-            navigation.currentIndex = 1
-            overlaySettingsSummaryReviewAction.forceActiveFocus()
-            window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+            window.focusOverlaySummaryReviewShortcut()
         }
     }
     Shortcut {
@@ -1432,13 +1435,13 @@ ApplicationWindow {
         window.reapplyOverlaySettingsAndRestore()
         reapplyOverlaySettings.forceActiveFocus()
     }
-    function focusOverlayRetentionReviewShortcut() {
+    function focusOverlaySummaryReviewShortcut() {
         navigation.currentIndex = 1
         window.show()
         window.raise()
         window.requestActivate()
-        overlaySettingsRetentionReviewAction.forceActiveFocus()
-        window.announceCaptureRecoveryState("Retained overlay settings review control focused. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Retained settings are current."))
+        overlaySettingsSummaryReviewAction.forceActiveFocus()
+        window.announceCaptureRecoveryState("Overlay summary review control focused; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : ".") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : " Live evidence is current."))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
