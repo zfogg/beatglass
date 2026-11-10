@@ -52,7 +52,7 @@ public:
   std::uint64_t position() const noexcept { return position_; }
   /** Seek to an absolute byte offset through EOF; reject offsets beyond EOF. */
   bool seek(std::uint64_t offset) {
-    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return false; }
+    if (failed_) return false;
     if (offset > snapshot_size_) return false;
     position_ = offset; return true;
   }
@@ -60,7 +60,7 @@ public:
    * Reject underflow, overflow and positions past EOF without changing position.
    */
   bool seek_relative(std::int64_t displacement, ByteSeekOrigin origin) {
-    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return false; }
+    if (failed_) return false;
     const auto size = snapshot_size_;
     std::uint64_t base;
     switch (origin) {
