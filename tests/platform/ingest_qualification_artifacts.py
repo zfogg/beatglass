@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import unicodedata
 from datetime import datetime
 
 SCENARIOS = ("capture", "recovery", "output", "display", "playback", "overlay")
@@ -60,8 +61,12 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
             if len(parts) != 2:
                 errors.append(f"malformed artifact hash line: {line}"); continue
             digest, relative = parts
-            if not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+            if not re.fullmatch(r"[0-9a-f]{64}", digest):
                 errors.append(f"invalid artifact hash: {relative}"); continue
+            if relative != unicodedata.normalize("NFC", relative) or any(ord(char) < 32 or unicodedata.category(char) in {"Cf", "Cs", "Cn"} for char in relative):
+                errors.append(f"non-canonical artifact path: {relative}"); continue
+            if "\\" in relative or any(char in '<>"|?*:' for char in relative):
+                errors.append(f"non-portable artifact path: {relative}"); continue
             candidate = root / relative
             if candidate.is_symlink():
                 errors.append(f"symlinked qualification artifact: {relative}"); continue
