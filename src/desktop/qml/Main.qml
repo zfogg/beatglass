@@ -1864,10 +1864,12 @@ ApplicationWindow {
             overlayDisplay.forceActiveFocus()
             return false
         }
-        window.syncOverlaySettingsStateFromBridge()
-        window.syncOverlaySettingsStateFromBridge()
+        // Commit the destination only after native geometry, opacity, and
+        // display state have synchronized successfully. Prefer the bridge's
+        // canonical identity so a stale picker label cannot survive relaunch.
         window.overlayPreferredScreenIndex = index
-        window.overlayPreferredDisplayName = name
+        window.overlayPreferredDisplayName = window.overlayBridge.displayName !== ""
+            ? window.overlayBridge.displayName : name
         window.overlaySettingsRevision += 1
         window.overlayLaunchFallbackActive = false
         window.overlayWasVisibleBeforeAvailabilityLoss = false

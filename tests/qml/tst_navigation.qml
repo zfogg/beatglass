@@ -2528,4 +2528,22 @@ TestCase {
         fakeOverlay.screenNames = ["Display"]
         fakeOverlay.displayName = "Display"
     }
+    function test_selectReplacementDisplayPersistsNativeDisplayIdentity() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Projector", "Laptop"]
+        fakeOverlay.displayName = "Projector"
+        fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: 280 })
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Missing display"
+        app.overlayPreferredScreenIndex = -1
+        app.overlayDisplayRecoveryPending = true
+        app.overlayDisplaySelectionRequired = true
+        verify(app.persistOverlayDisplaySelection(0, "stale-picker-label"))
+        compare(app.overlayPreferredDisplayName, "Projector")
+        compare(app.overlayPreferredScreenIndex, 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("Projector") >= 0)
+        app.destroy()
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.displayName = "Display"
+    }
 }
