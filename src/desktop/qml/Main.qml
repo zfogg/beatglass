@@ -4916,11 +4916,13 @@ ApplicationWindow {
                         + (window.overlayLaunchFallbackActive ? " · launch fallback active" : "")
                         + " · settings revision " + window.overlaySettingsRevision
                         + (window.overlayDisplayRecoveryPending ? " · recovery pending · settings retained" : (window.overlayLaunchFallbackActive ? " · settings retained" : ""))
-                    Accessible.name: "Overlay settings summary, " + (window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
+                    Accessible.name: "Overlay settings summary, " + (window.overlayCaptureEvidenceStale ? "live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "ready")
                     Accessible.value: text
                     Accessible.role: Accessible.Status
                     Accessible.description: "Current overlay display, size, opacity, and settings revision. "
-                        + (window.overlayDisplayRecoveryPending
+                        + (window.overlayCaptureEvidenceStale
+                            ? "Live overlay evidence is stale until fresh capture arrives; persisted settings remain available."
+                            : window.overlayDisplayRecoveryPending
                             ? "Recovery is pending; persisted settings are retained while the display is restored."
                             : (window.overlayLaunchFallbackActive
                                 ? "The overlay is using its launch fallback while persisted settings remain available."
