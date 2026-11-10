@@ -85,5 +85,6 @@ They also reject an existing symlink at the output path itself, preserving the
 target and requiring explicit replacement of regular files only.
 The readiness checker enforces the same symlink-free parent-path rule for its
 `--report` output.
+It also refuses to replace an existing symlink at that output path.
 Its `--max-age-hours` value must be positive, preventing accidental
 configuration that marks every retained bundle stale.
