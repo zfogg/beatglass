@@ -212,3 +212,10 @@ def test_reapply_shortcut_activates_and_restores_focus():
     assert "navigation.currentIndex = 1" in body
     assert "reapplyOverlaySettingsAndRestore()" in body
     assert "reapplyOverlaySettings.forceActiveFocus()" in body
+
+
+def test_retention_review_shortcut_announces_evidence_boundary():
+    start = QML.index("function focusOverlayRetentionReviewShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "overlaySettingsRetentionReviewAction.forceActiveFocus()" in body
+    assert "overlayCaptureEvidenceStale" in body

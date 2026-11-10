@@ -241,12 +241,7 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: window.overlayBridge !== null
         onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            overlaySettingsRetentionReviewAction.forceActiveFocus()
-            window.announceCaptureRecoveryState("Retained overlay settings review control focused.")
+            window.focusOverlayRetentionReviewShortcut()
         }
     }
     Shortcut {
@@ -1436,6 +1431,14 @@ ApplicationWindow {
         window.announceCaptureRecoveryState("Reapplying saved overlay display, size, position, and opacity. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Retained settings are current."))
         window.reapplyOverlaySettingsAndRestore()
         reapplyOverlaySettings.forceActiveFocus()
+    }
+    function focusOverlayRetentionReviewShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        overlaySettingsRetentionReviewAction.forceActiveFocus()
+        window.announceCaptureRecoveryState("Retained overlay settings review control focused. " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture arrives." : "Retained settings are current."))
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
