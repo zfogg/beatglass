@@ -3037,7 +3037,6 @@ ApplicationWindow {
                                 objectName: "chooseFolderEmpty"
                                 text: "Choose folder…"
                                 Accessible.name: "Choose a folder"
-                                Accessible.value: "Recovery action available"
                                 Accessible.role: Accessible.Button
                                 Accessible.description: "Choose a local folder to populate the Library. Current state: " + window.browserEmptyMessage()
                                 ToolTip.text: "Choose a local folder to recover the library"
