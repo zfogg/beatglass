@@ -264,6 +264,16 @@ Element spectrum_chart(const std::vector<float>& spectrum) {
   }
   return hbox(bars) | bgcolor(Color::RGB(20, 14, 28));
 }
+Element spectrum_history_chart(const std::vector<std::vector<float>>& history) {
+  if (history.empty()) return text("FFT history waiting for captured audio…") | color(Color::GrayLight) | italic;
+  Elements rows;
+  for (const auto& frame : history) {
+    std::string row;
+    for (const auto value : frame) row += value > 0.75f ? "█" : value > 0.45f ? "▓" : value > 0.2f ? "▒" : value > 0.05f ? "░" : " ";
+    rows.push_back(text(std::move(row)) | color(Color::MagentaLight));
+  }
+  return vbox(std::move(rows)) | bgcolor(Color::RGB(20, 14, 28));
+}
 std::vector<Track> discover(const std::filesystem::path& root, bool recursive = false) {
   std::vector<Track> tracks;
   if (root.empty() || !std::filesystem::is_directory(root)) return tracks;
@@ -569,6 +579,7 @@ int main(int argc, char** argv) {
   float live_signal_confidence = 0.0f;
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
+  std::vector<std::vector<float>> live_spectrum_history;
   std::vector<float> live_tempo_history;
   std::chrono::steady_clock::time_point live_last_packet{};
   bool live_has_packet = false;
@@ -582,6 +593,7 @@ int main(int argc, char** argv) {
     live_tracking_state = beatglass::TrackingState::reacquiring;
     live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
     live_beats = 0; live_tempo_history.clear(); live_spectrum.assign(live_spectrum.size(), 0.0f);
+    live_spectrum_history.clear();
     live_visualization.reset(); live_visualization_frame.reset();
     live_visualization_presentation.clear();
     live_visualization_revision = 0;
@@ -610,6 +622,7 @@ int main(int argc, char** argv) {
   float live_signal_confidence = 0.0f;
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
+  std::vector<std::vector<float>> live_spectrum_history;
   std::vector<float> live_tempo_history;
   std::chrono::steady_clock::time_point live_last_packet{};
   bool live_has_packet = false;
@@ -1035,6 +1048,7 @@ int main(int argc, char** argv) {
     live_signal_confidence = 0.0f;
     live_waveform.assign(live_waveform.size(), 0.0f);
     live_spectrum.assign(live_spectrum.size(), 0.0f);
+    live_spectrum_history.clear();
     live_tempo_history.clear();
     live_last_packet = {};
     live_has_packet = false;
@@ -1225,7 +1239,7 @@ int main(int argc, char** argv) {
     const auto shared_observed_frames = live_presentation.observed_frames ? live_presentation.observed_frames : live_observed_frames;
     const auto shared_beat_count = live_presentation.beat_count ? live_presentation.beat_count : live_beats;
     const auto shared_analysis_delay = live_presentation.analysis_delay_frames;
-    const auto spectrum_view = vbox({text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum)});
+    const auto spectrum_view = vbox({text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum), text("FFT history") | bold | color(Color::MagentaLight), spectrum_history_chart(live_spectrum_history)});
     const auto waveform_view = vbox({text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, shared_observed_frames)});
     std::string beat_grid(32, '.');
     for (const auto frame : live_presentation.beat_frames) {
@@ -1406,6 +1420,8 @@ int main(int argc, char** argv) {
                 const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size()));
                 live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f);
               }
+              live_spectrum_history.push_back(live_spectrum);
+              if (live_spectrum_history.size() > 12) live_spectrum_history.erase(live_spectrum_history.begin());
             }
             live_status = "Receiving OS sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) {
@@ -1469,7 +1485,7 @@ int main(int argc, char** argv) {
             std::vector<float> mono(packet_frames);
             for (std::size_t frame = 0; frame < mono.size(); ++frame) { float sum = 0.0f; for (std::uint32_t channel = 0; channel < packet_channels; ++channel) sum += packet.samples[frame * packet.channels + channel]; mono[frame] = sum / static_cast<float>(packet_channels); }
             for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) { const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset); if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate, std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) { const auto revision = ++live_visualization_revision; if (live_visualization_presentation.accept(frame->epoch, revision, *frame)) live_visualization_frame = std::move(frame); } }
-            if (live_visualization_frame) { const auto& frame = *live_visualization_frame; for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) { const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size())); live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source])); } for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) { const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size())); live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f); } }
+            if (live_visualization_frame) { const auto& frame = *live_visualization_frame; for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) { const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size())); live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source])); } for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) { const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size())); live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f); } live_spectrum_history.push_back(live_spectrum); if (live_spectrum_history.size() > 12) live_spectrum_history.erase(live_spectrum_history.begin()); }
             live_status = "Receiving PipeWire sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) { live_tracking_state = beatglass::TrackingState::error; live_status = std::string("Live analysis failed: ") + error.what(); live_pipewire->stop(); }
         }
