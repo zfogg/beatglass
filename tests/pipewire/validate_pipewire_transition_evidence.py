@@ -200,6 +200,11 @@ if reacquisition is not None:
     if reacquisition.get("platform") is not None:
         if reacquisition["platform"] not in ("linux", "windows", "macos"):
             raise SystemExit("reacquisition evidence has an invalid platform")
+    if reacquisition.get("node_id") is not None:
+        if (not isinstance(reacquisition["node_id"], int)
+                or isinstance(reacquisition["node_id"], bool)
+                or reacquisition["node_id"] <= 0):
+            raise SystemExit("reacquisition evidence has an invalid node id")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:

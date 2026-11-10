@@ -79,5 +79,8 @@ timezone-aware ISO-8601 timestamp no earlier than its recovery start timestamp.
 Reacquisition evidence may include `platform`; when supplied it must be one of
 `linux`, `windows`, or `macos`.
 
+Reacquisition evidence may include `node_id`; when supplied it must be a positive
+integer identifying the native capture node.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
