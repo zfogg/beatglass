@@ -5226,7 +5226,7 @@ ApplicationWindow {
                 Label {
                     objectName: "overlayFallbackState"
                     visible: window.overlayBridge !== null && (window.overlayLaunchFallbackActive || !window.overlayBridge.available)
-                    text: window.overlayBridge.available
+                    text: window.overlayBridge && window.overlayBridge.available
                         ? "Control window remains available as the fallback while the overlay restores. Review persisted settings, then use Restore overlay."
                         : "Control window remains available as the tray/taskbar fallback until the overlay display recovers. Use Retry overlay after reconnecting a display."
                     Accessible.name: "Overlay fallback state"
@@ -5253,7 +5253,7 @@ ApplicationWindow {
                 Label {
                     objectName: "overlayRecoveryStep"
                     visible: window.overlayBridge !== null && window.overlayDisplayRecoveryPending
-                    text: window.overlayBridge.available
+                    text: window.overlayBridge && window.overlayBridge.available
                         ? "Recovery steps: 1. Review settings  →  2. Restore overlay"
                         : "Recovery steps: 1. Reconnect a display  →  2. Retry overlay"
                     Accessible.name: "Overlay recovery steps"
