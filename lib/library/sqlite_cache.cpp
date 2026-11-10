@@ -199,7 +199,7 @@ public:
         bind(update.p, 1, id); bind_key(update.p, 2, key); done(update.p);
         return sqlite3_changes(db_) == 1;
       };
-      if (result.empty() || result.size() > kMaxCachedResultBytes || !sqlite_length_representable(result.size())) {
+      if (result.size() > kMaxCachedResultBytes || !sqlite_length_representable(result.size())) {
         if (!retryable()) { rollback(); return Publish::error; }
         exec("COMMIT"); return Publish::error;
       }

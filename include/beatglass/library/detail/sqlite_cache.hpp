@@ -92,7 +92,7 @@ public:
   bool mark_retryable(const std::string& id, const CacheKey& key);
   /** Remove the active result for an exact identity; returns false when none exists, throws for an invalid key, and leaves source files and historical runs untouched. */
   bool invalidate(const CacheKey& key);
-  /** Revalidate and atomically publish. Empty or oversized results fail closed and leave a running row retryable; stale verification and cancellation likewise preserve retryable recovery. Cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. */
+  /** Revalidate and atomically publish. Oversized results fail closed and leave a running row retryable; an empty blob is a valid persisted result and remains distinct from a cache miss. Stale verification and cancellation likewise preserve retryable recovery. Cancellation after commit begins does not override its outcome. A callback must validate the opened source version; stat/hash checks have filesystem races. */
   Publish publish(const std::string& id, const CacheKey& key, const std::string& result,
                   std::stop_token stop, const std::function<bool()>& revalidate);
 private:
