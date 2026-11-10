@@ -130,6 +130,9 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="emit the generated report on stdout")
     args = parser.parse_args()
     report = build_report(args.bundles)
+    if args.output.is_symlink():
+        print("readiness report output must not be a symlink")
+        return 1
     if args.output.parent.is_symlink():
         print("readiness report output parent must not be a symlink")
         return 1

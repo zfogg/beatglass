@@ -63,6 +63,19 @@ class GenerateReadinessReportTest(unittest.TestCase):
             with mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(parent / "readiness.json")]):
                 self.assertEqual(module.main(), 1)
 
+    def test_cli_rejects_symlinked_output(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp:
+            target = Path(temp) / "target.json"; target.write_text("old", encoding="utf-8")
+            output = Path(temp) / "readiness.json"
+            try:
+                output.symlink_to(target)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            with mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(output)]):
+                self.assertEqual(module.main(), 1)
+            self.assertEqual(target.read_text(encoding="utf-8"), "old")
+
     def test_missing_artifact_remains_fail_closed(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
