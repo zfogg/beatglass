@@ -353,6 +353,7 @@ The array must be lexicographically sorted to keep generated reports
 deterministic and comparable across runs.
 Every array entry must be non-empty; blank field names are rejected as
 unverifiable metadata.
+Whitespace-only entries are rejected as blank names as well.
 The report shape is documented in
 `tests/pipewire/native_host_provenance_report_schema.json`; reports must retain
 both required provenance fields (`platform` and `name`) in `checked_fields`.
