@@ -40,6 +40,10 @@
 #include <chrono>
 #include <condition_variable>
 #include <vector>
+#ifdef BEATGLASS_CLI_LIBRARY
+#include "beatglass/library/storage_owner.hpp"
+#include "beatglass/library/analysis_operation.hpp"
+#endif
 #include <mutex>
 
 namespace {
@@ -122,7 +126,42 @@ struct AnalysisView {
 struct AnalysisBatch {
   std::vector<std::pair<std::filesystem::path, AnalysisView>> results;
   std::vector<std::pair<std::filesystem::path, std::string>> errors;
+  std::size_t cache_hits{};
 };
+#ifdef BEATGLASS_CLI_LIBRARY
+struct CacheSource {
+  beatglass::FileVersion source;
+  beatglass::AnalysisIdentity identity;
+  std::string run_id;
+};
+CacheSource cache_source(const std::filesystem::path& path) {
+  std::error_code error;
+  const auto size = std::filesystem::file_size(path, error);
+  if (error) throw std::runtime_error("cache identity size failed: " + error.message());
+  const auto modified = std::filesystem::last_write_time(path, error).time_since_epoch().count();
+  if (error) throw std::runtime_error("cache identity timestamp failed: " + error.message());
+  const auto content = path.generic_string() + "|" + std::to_string(size) + "|" + std::to_string(modified);
+  const auto run_id = content;
+  return {{path, size, modified, content}, {content, "cli-aubio-v1", "default", "offline"}, run_id};
+}
+std::string encode_cached_analysis(const AnalysisView& view) {
+  std::ostringstream out;
+  out << view.result.metadata.sample_rate << ' ' << view.result.metadata.channels << ' ' << view.result.metadata.frames << ' '
+      << std::quoted(view.result.metadata.format) << ' ' << (view.result.bpm ? *view.result.bpm : -1.0f) << ' '
+      << view.result.beats << ' ' << static_cast<int>(view.result.state);
+  return out.str();
+}
+std::optional<AnalysisView> decode_cached_analysis(const std::string& encoded, const std::filesystem::path& path) {
+  std::istringstream in(encoded);
+  AnalysisView view;
+  float bpm = -1.0f;
+  int state = 0;
+  if (!(in >> view.result.metadata.sample_rate >> view.result.metadata.channels >> view.result.metadata.frames >> std::quoted(view.result.metadata.format) >> bpm >> view.result.beats >> state)) return std::nullopt;
+  view.result.bpm = bpm >= 0.0f ? std::optional<float>(bpm) : std::nullopt;
+  view.result.state = static_cast<beatglass::TrackingState>(state);
+  return view;
+}
+#endif
 std::vector<float> decode_waveform(const std::filesystem::path& path, std::stop_token cancel = {}) {
   beatglass::FileReader reader(path, 1);
   constexpr std::size_t bins = 160;
@@ -353,6 +392,16 @@ int main(int argc, char** argv) {
   std::vector<std::string> live_endpoint_ids;
   std::string live_error;
   float live_bpm_multiplier = 1.0f;
+#ifdef BEATGLASS_CLI_LIBRARY
+  std::unique_ptr<beatglass::library::StorageOwner> library_storage = std::make_unique<beatglass::library::StorageOwner>();
+  std::string library_storage_status;
+  if (!snapshot) if (const auto config = preferences_path(); !config.empty()) {
+    std::error_code storage_error;
+    std::filesystem::create_directories(config.parent_path(), storage_error);
+    const auto database = config.parent_path() / "library.sqlite3";
+    if (!library_storage->open({database}, &library_storage_status)) library_storage.reset();
+  }
+#endif
 #ifdef _WIN32
   auto live_endpoint_snapshot = beatglass::windows::enumerate_render_endpoints();
   live_error = live_endpoint_snapshot.error;
@@ -444,13 +493,36 @@ int main(int argc, char** argv) {
     const auto focus_path = selected >= 0 && selected < static_cast<int>(tracks.size()) ? tracks[selected].path : paths.front();
     analysis_path = focus_path;
     const auto stop_token = analysis_stop.get_token();
-    analysis_future = std::async(std::launch::async, [paths = std::move(paths), stop_token, &analysis_frames, &analysis_total, &batch_completed] {
+#ifdef BEATGLASS_CLI_LIBRARY
+    auto* library_storage_ptr = library_storage.get();
+#endif
+    analysis_future = std::async(std::launch::async, [paths = std::move(paths), stop_token, &analysis_frames, &analysis_total, &batch_completed
+#ifdef BEATGLASS_CLI_LIBRARY
+      , library_storage_ptr
+#endif
+      ] {
       AnalysisBatch batch;
       for (const auto& path : paths) {
         if (stop_token.stop_requested()) break;
         try {
         const auto metadata = beatglass::read_metadata(path);
         analysis_total.store(metadata.frames, std::memory_order_release);
+        std::optional<CacheSource> cache_identity;
+#ifdef BEATGLASS_CLI_LIBRARY
+        if (library_storage_ptr) {
+          cache_identity = cache_source(path);
+          const auto admission = library_storage_ptr->admit_analysis(cache_identity->run_id, cache_identity->identity, path.string(), "cli-aubio-v1");
+          if (admission.cached) {
+            if (auto cached = decode_cached_analysis(*admission.cached, path)) {
+              cached->waveform = decode_waveform(path, stop_token);
+              batch.results.emplace_back(path, std::move(*cached));
+              ++batch.cache_hits;
+              batch_completed.fetch_add(1, std::memory_order_acq_rel);
+              continue;
+            }
+          }
+        }
+#endif
         std::vector<std::uint64_t> beat_frames;
         std::optional<std::string> key;
         std::optional<std::string> chord;
@@ -465,7 +537,30 @@ int main(int argc, char** argv) {
 #endif
         auto waveform = decode_waveform(path, stop_token);
         if (stop_token.stop_requested()) break;
-        batch.results.emplace_back(path, AnalysisView{result, std::move(waveform), std::move(beat_frames), std::move(key), std::move(chord), std::move(tonal_history)});
+        AnalysisView completed{result, std::move(waveform), std::move(beat_frames), std::move(key), std::move(chord), std::move(tonal_history)};
+#ifdef BEATGLASS_CLI_LIBRARY
+        if (library_storage_ptr && cache_identity) {
+          const auto identity = cache_identity->identity;
+          beatglass::library::AnalysisOperation operation;
+          operation.source = cache_identity->source;
+          operation.identity = identity;
+          operation.decoder_snapshot = "cli-aubio-v1";
+          const auto encoded = encode_cached_analysis(completed);
+          operation.serialize = [encoded] { return encoded; };
+          operation.verify = [source = cache_identity->source](std::stop_token cancel) {
+            if (cancel.stop_requested()) return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::cancelled, "cancelled"};
+            std::error_code error;
+            const auto size = std::filesystem::file_size(source.path, error);
+            const auto modified = std::filesystem::last_write_time(source.path, error).time_since_epoch().count();
+            if (error) return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::error, error.message()};
+            if (size != source.size_bytes || modified != source.modified_ns) return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::changed, "source changed during analysis"};
+            return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match, {}};
+          };
+          const auto published = library_storage_ptr->publish_analysis(cache_identity->run_id, operation, stop_token);
+          if (published == beatglass::library_detail::Publish::stale_input) throw std::runtime_error("source changed during analysis; result was not cached");
+        }
+#endif
+        batch.results.emplace_back(path, std::move(completed));
         batch_completed.fetch_add(1, std::memory_order_acq_rel);
         } catch (const std::exception& error) {
           if (stop_token.stop_requested()) break;
@@ -481,6 +576,15 @@ int main(int argc, char** argv) {
     analyze_paths({tracks[selected].path});
   };
   auto analyze_selected_button = Button(" Analyze selected ", analyze);
+  auto retry_analysis_button = Button(" Retry failed ", [&] {
+    if (selected < 0 || selected >= static_cast<int>(tracks.size()) || !analysis_errors.contains(tracks[selected].path)) {
+      status = "Select a failed track before retrying.";
+      return;
+    }
+    analysis_errors.erase(tracks[selected].path);
+    status = "Retrying failed analysis…";
+    analyze();
+  });
   auto refresh = [&] {
     const auto cancelling = busy;
     const auto previous_path = selected >= 0 && selected < static_cast<int>(tracks.size())
@@ -650,7 +754,7 @@ int main(int argc, char** argv) {
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, sort_button, refresh_button}), Container::Horizontal({search_bar, previous_button, next_button, analyze_selected_button, analyze_all_button, play_button, pause_button, stop_button, cancel_analysis_button})});
+  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, sort_button, refresh_button}), Container::Horizontal({search_bar, previous_button, next_button, analyze_selected_button, analyze_all_button, retry_analysis_button, play_button, pause_button, stop_button, cancel_analysis_button})});
   auto library_container = Container::Vertical({library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
@@ -707,7 +811,7 @@ int main(int argc, char** argv) {
     const auto sample_rate = result ? result->metadata.sample_rate : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->sample_rate : 0;
     const auto channels = result ? result->metadata.channels : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata ? tracks[selected].metadata->channels : 0;
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), selected >= 0 && selected < static_cast<int>(tracks.size()) ? text("Source: " + tracks[selected].path.string()) | color(Color::GrayLight) | italic : text("Source: —") | color(Color::GrayLight) | italic, separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 6), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? beat_frames : std::vector<std::uint64_t>{}, result ? result->metadata.frames : 0, playback_fraction) | size(HEIGHT, EQUAL, 5), hbox({text("Waveform: ") | color(Color::GrayLight) | bold, text("PCM amplitude") | color(Color::GreenLight), text("  •  "), text("detected beat frames") | color(Color::YellowLight), text("  •  "), text("playback cursor") | color(Color::Cyan)}), separator(), text(format == "—" ? "Select a supported track to inspect it" : "Format: " + format) | bold, text(sample_rate ? "Sample rate: " + std::to_string(sample_rate) + " Hz   Channels: " + std::to_string(channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Key: " + (key ? *key : "—") + "   Chord: " + (chord ? *chord : "—")) | color(key || chord ? Color::GreenLight : Color::GrayLight), text("Tonal history: " + join_history(tonal_history)) | color(tonal_history.empty() ? Color::GrayLight : Color::GreenLight), text("Playback: " + std::string(playback_label) + "  position " + playback_position + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), hbox({text("Folder: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)}), library_summary, search_bar->Render(), hbox({action(previous_button->Render(), Color::GrayLight), text(" "), action(next_button->Render(), Color::GrayLight), text(" "), action(analyze_selected_button->Render(), Color::GreenLight), text(" "), action(analyze_all_button->Render(), Color::GreenLight), text(" "), action(retry_analysis_button->Render(), Color::YellowLight), text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight), text(" "), action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Folder (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
   auto toggle_live = [&] {
