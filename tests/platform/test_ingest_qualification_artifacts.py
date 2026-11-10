@@ -328,6 +328,7 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertEqual(report["schema_version"], 1)
             self.assertFalse(report["valid"])
             self.assertEqual(report["error_count"], len(report["errors"]))
+            self.assertEqual(sum(report["error_categories"].values()), report["error_count"])
             self.assertIn("max_total_artifact_bytes", report["limits"])
             self.assertEqual(report["artifact_count"], 0)
             self.assertEqual(report["artifact_bytes"], 0)
