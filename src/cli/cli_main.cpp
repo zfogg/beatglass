@@ -94,6 +94,7 @@ void save_preferences(const CliPreferences& preferences) {
   if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\n";
 }
 using namespace ftxui;
+
 struct Track { std::filesystem::path path; std::string title; std::optional<beatglass::FileMetadata> metadata; };
 std::string format_bpm(const std::optional<float>& bpm) {
   if (!bpm) return "—";
@@ -501,6 +502,7 @@ int main(int argc, char** argv) {
   std::uint64_t live_discontinuities = 0;
   float live_signal_confidence = 0.0f;
   std::vector<float> live_waveform(160, 0.0f);
+  std::vector<float> live_spectrum(32, 0.0f);
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze_paths = [&](std::vector<std::filesystem::path> paths) {
