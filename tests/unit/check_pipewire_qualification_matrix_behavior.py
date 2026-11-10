@@ -41,4 +41,9 @@ with tempfile.TemporaryDirectory() as directory:
     absolute_entry = json.loads(absolute_matrix.read_text(encoding="utf-8"))["platforms"][matrix["host_os"]]
     if absolute_entry["evidence"] != ["evidence/native-absolute.zip"]:
         raise SystemExit("absolute evidence path was not made portable")
+    summary.write_text(json.dumps({"qualified": True, "native_artifacts": "evidence.zip"}), encoding="utf-8")
+    malformed = root / "malformed-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(malformed), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid native_artifacts" not in result.stderr + result.stdout:
+        raise SystemExit("malformed native_artifacts summary was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")

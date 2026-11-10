@@ -19,6 +19,8 @@ for item in platforms.values():
     if item["status"] == "pending":
         item["pending_reason"] = "native host execution pending"
 if summary is not None:
+    if not isinstance(summary.get("native_artifacts", []), list):
+        raise SystemExit("native qualification summary has invalid native_artifacts")
     current = platforms.get(host)
     if current is not None:
         current["status"] = "qualified" if summary.get("qualified") is True else "pending"
