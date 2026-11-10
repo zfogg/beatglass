@@ -88,5 +88,8 @@ non-empty native source name.
 Reacquisition evidence may include `commit`; when supplied it must be non-empty
 and match the top-level artifact commit.
 
+Reacquisition evidence may include `toolchain`; when supplied it must be a
+non-empty string identifying the runtime/toolchain context.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
