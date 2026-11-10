@@ -2081,10 +2081,7 @@ ApplicationWindow {
                     if (!window.overlayRecoveryPausedByUser)
                         retryOverlay.forceActiveFocus()
                 } else {
-                    window.overlayDisplaySelectionRequired = true
-                    window.overlayDisplayRecoveryPending = true
-                    window.announceCaptureRecoveryState("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.")
-                    overlayDisplay.forceActiveFocus()
+                    window.focusOverlayDisplaySelectionRequired()
                 }
             }
         }
@@ -2122,6 +2119,12 @@ ApplicationWindow {
             if (window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0)
                 window.announceCaptureRecoveryState("DJ overlay geometry restored at " + window.overlayBridge.geometry.width + " by " + window.overlayBridge.geometry.height + " pixels.")
         }
+    }
+    function focusOverlayDisplaySelectionRequired() {
+        window.overlayDisplaySelectionRequired = true
+        window.overlayDisplayRecoveryPending = true
+        window.overlayCaptureEvidenceStale = true
+        window.focusOverlayAvailabilityRecovery("DJ overlay display restored; choose a display to re-enable overlay actions and resume monitoring.", overlayDisplay)
     }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null

@@ -123,3 +123,11 @@ def test_overlay_recovery_without_display_uses_availability_focus():
     assert "overlayDisplaySelectionRequired = true" in body
     assert "focusOverlayAvailabilityRecovery" in body
     assert "focusOverlayNoDisplayRecovery()" in QML[QML.index("onAvailableChanged") : start]
+
+
+def test_restored_display_without_saved_match_uses_selection_focus():
+    start = QML.index("function focusOverlayDisplaySelectionRequired")
+    body = QML[start : QML.index("    function focusOverlayRecoveryAction", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "focusOverlayDisplaySelectionRequired()" in QML[QML.index("function onScreensChanged") : start]

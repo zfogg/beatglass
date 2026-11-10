@@ -250,3 +250,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Capture monitor status workflow | Capture changes to Error, Reacquiring, or Monitoring | Route all evidence freshness and focus transitions through one status handler, preserving deterministic retry/live focus. |
 | Endpoint change recovery workflow | Output capture endpoint changes, disappears, or reports an error | Mark overlay evidence stale and recovery pending, clear dependent visualization state, and focus endpoint selection with actionable guidance. |
 | Overlay availability without display | Native overlay returns while no display is available | Keep actions disabled, mark display selection/evidence stale, and route focus through the availability recovery transition. |
+| Restored display selection required | A display returns but no saved destination matches it | Mark selection/recovery/evidence stale together and focus display selection with actionable restore guidance. |
