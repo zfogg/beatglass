@@ -352,7 +352,7 @@ ApplicationWindow {
         enabled: window.overlayRecoveryPausedByUser && window.overlayBridge
             && window.overlayBridge.screenNames.length > 0
             && !window.overlayDisplaySelectionRequired
-        onActivated: resumeOverlayRecovery.clicked()
+        onActivated: window.handleOverlayResumeShortcut()
     }
     Shortcut {
         objectName: "overlayPausedRecoveryFocusShortcut"
@@ -1473,6 +1473,14 @@ ApplicationWindow {
         window.requestActivate()
         retryOverlay.forceActiveFocus()
         window.announceCaptureRecoveryState("Retry overlay control focused." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+    }
+    function handleOverlayResumeShortcut() {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState("Resume overlay recovery requested. Live evidence remains stale until fresh capture arrives.")
+        resumeOverlayRecovery.clicked()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
