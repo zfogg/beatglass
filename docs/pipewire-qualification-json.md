@@ -276,6 +276,9 @@ host node identifier.
 not accepted as native host evidence.
 `tpm_present` follows the same boolean-only contract; numeric sentinel values
 are rejected rather than interpreted as availability evidence.
+Validated optional fields are retained in sorted `checked_fields` report
+metadata, allowing reviewers to see which host attributes were actually
+qualified without claiming native execution.
 Malformed or ambiguous host JSON is rejected before any host fields are
 trusted; duplicate keys are not silently normalized.
 Missing host evidence files are rejected through the same unreadable-input path;
