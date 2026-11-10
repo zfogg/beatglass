@@ -813,6 +813,10 @@ int main(int argc, char** argv) {
         : selected >= 0 && selected < static_cast<int>(tracks.size()) && tracks[selected].metadata
             ? format_duration(*tracks[selected].metadata) : "—";
     Elements cards = {metric("TEMPO", result ? format_bpm(result->bpm) + " BPM" : "—", Color::GreenLight), metric("BEATS", result ? std::to_string(result->beats) : "—", Color::YellowLight), metric("STATE", result ? beatglass::cli::state_label(result->state) : "waiting", Color::Cyan)};
+    cards.push_back(text("Analyze selected") | color(Color::GreenLight));
+    cards.push_back(text("Analyze all") | color(Color::GreenLight));
+    cards.push_back(text("Sort: title") | color(Color::YellowLight));
+    cards.push_back(text("Sort title/path") | color(Color::YellowLight));
     const auto progress_total = analysis_total.load(std::memory_order_acquire);
     const auto progress_frames = analysis_frames.load(std::memory_order_acquire);
     const auto progress = progress_total ? std::min<std::uint64_t>(100, progress_frames * 100 / progress_total) : 0;
@@ -963,7 +967,7 @@ int main(int argc, char** argv) {
 #else
     const std::string live_key_label = "—";
     const std::string live_chord_label = "—";
-    const std::string live_tonal_label = "unavailable in the standard build; enable Essentia music-replay";
+    const std::string live_tonal_label = "Tonal analysis: unavailable in the standard build; enable Essentia music-replay";
 #endif
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
     const auto spectrum_view = vbox({text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum)});
