@@ -1518,10 +1518,9 @@ ApplicationWindow {
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("Overlay display selected, but persisted visual state could not be reapplied.")
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selected, but persisted visual state could not be reapplied.")
             window.show()
             window.raise()
             window.requestActivate()
@@ -1529,10 +1528,9 @@ ApplicationWindow {
             return false
         }
         if (!window.syncOverlaySettingsStateFromBridge()) {
-            window.overlayDisplayRecoveryPending = true
+            window.markOverlayRecoveryStale("Overlay display selected, but settings synchronization failed; choose or reconnect a display.")
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selected, but settings synchronization failed; choose or reconnect a display.")
             window.show()
             window.raise()
             window.requestActivate()
