@@ -170,3 +170,5 @@ If present, host `os_version` must be a non-empty string identifying the host OS
 release.
 If present, host `arch` must be a non-empty string identifying the CPU
 architecture.
+If present, host `container_id` must be a non-empty string identifying the
+container or sandbox that produced the evidence.
