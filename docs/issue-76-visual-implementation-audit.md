@@ -1013,3 +1013,5 @@ Fresh capture preserves stale overlay evidence while native recovery safe mode i
 Fresh capture preserves stale overlay evidence while the control-window fallback is active; native overlay recovery must complete before live overlay state is presented.
 
 Fresh capture preserves stale overlay evidence while visual-state recovery is required; opacity, size, and position must be reapplied before live overlay state is presented.
+
+Fresh capture preserves stale overlay evidence while availability-loss recovery still expects the prior overlay to be restored; capture remains visible as monitoring continuity, not overlay readiness.
