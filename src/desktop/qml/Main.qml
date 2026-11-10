@@ -1001,6 +1001,7 @@ ApplicationWindow {
             return false
         }
         const savedOpacity = Number(window.overlayBridge.opacity)
+        let usedSafeOpacity = false
         if (isFinite(savedOpacity) && savedOpacity >= 0.2 && savedOpacity <= 1.0) {
             if (window.overlayBridge.setOpacity(savedOpacity) === false) {
                 window.overlayLaunchFallbackActive = true
@@ -1009,6 +1010,7 @@ ApplicationWindow {
                 return false
             }
         } else {
+            usedSafeOpacity = true
             if (window.overlayBridge.setOpacity(0.9) === false) {
                 window.overlayLaunchFallbackActive = true
                 window.overlayDisplayRecoveryPending = true
@@ -1017,7 +1019,9 @@ ApplicationWindow {
             }
             window.announceCaptureRecoveryState("Persisted overlay opacity unavailable; safe 90 percent opacity applied.")
         }
-        window.announceCaptureRecoveryState("Persisted overlay geometry and opacity restored.")
+        window.announceCaptureRecoveryState(usedSafeOpacity
+            ? "Persisted overlay geometry restored; invalid opacity replaced with safe 90 percent opacity."
+            : "Persisted overlay geometry and opacity restored.")
         window.overlayRecoveryPausedByUser = false
         window.syncOverlaySizePreferenceFromGeometry(savedGeometry)
         return true
