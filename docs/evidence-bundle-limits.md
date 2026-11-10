@@ -65,6 +65,8 @@ Its report size is capped at 16 MiB by default and can be tightened with
 `--max-report-bytes` before any output file is created.
 The generator accepts `--json` to mirror the report to stdout for automation
 while still retaining the durable output file.
+Generated readiness reports expose generation error counts and categories for
+dashboard consumers, matching the ingestion and verifier JSON contracts.
 Readiness output is capped at 16 MiB by default; constrained environments can
 override this with `--max-report-bytes`.
 Automation can pass `--json` to receive the complete readiness object on
