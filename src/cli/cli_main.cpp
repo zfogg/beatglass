@@ -434,7 +434,18 @@ int main(int argc, char** argv) {
   });
   MenuOption library_menu_option;
   library_menu_option.on_change = [&] {
-    if (library_visible_selected >= 0 && library_visible_selected < static_cast<int>(library_indices.size())) selected = library_indices[static_cast<std::size_t>(library_visible_selected)];
+    if (library_visible_selected < 0 || library_visible_selected >= static_cast<int>(library_indices.size())) return;
+    const auto next = library_indices[static_cast<std::size_t>(library_visible_selected)];
+    if (next == selected) return;
+    const auto cancelling = busy;
+    if (cancelling) {
+      analysis_cancelled.store(true, std::memory_order_release);
+      analysis_stop.request_stop();
+    }
+    selected = next;
+    result.reset(); waveform.clear();
+    status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
+        (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
   auto library_controls = Container::Vertical({Container::Horizontal({folder_input, choose_folder_button, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, previous_button, next_button, play_button, pause_button, stop_button, cancel_analysis_button})});
