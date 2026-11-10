@@ -104,6 +104,8 @@ Unsupported artifact fields are grouped under `artifact_schema` for direct
 manifest-contract triage.
 Unsupported top-level manifest fields are grouped under `manifest_schema` for
 direct bundle-contract triage.
+Missing timestamp timezone information is grouped under `clock` for direct
+capture-clock discipline triage.
 Timestamp format, timezone, and future-capture failures are grouped under
 `temporal` in JSON output for clear freshness and clock-discipline reporting.
 Missing retained evidence for a required scenario is grouped under
