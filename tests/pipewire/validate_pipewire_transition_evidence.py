@@ -151,6 +151,11 @@ if reacquisition is not None:
     if reacquisition.get("recovery_reason") is not None:
         if not isinstance(reacquisition["recovery_reason"], str) or not reacquisition["recovery_reason"].strip():
             raise SystemExit("reacquisition evidence has an empty recovery reason")
+    if reacquisition.get("process_index") is not None:
+        if (not isinstance(reacquisition["process_index"], int)
+                or isinstance(reacquisition["process_index"], bool)
+                or reacquisition["process_index"] < 0):
+            raise SystemExit("reacquisition evidence has an invalid process index")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
