@@ -5,9 +5,9 @@ import sys
 
 exe, root = sys.argv[1], pathlib.Path(sys.argv[2])
 help_result = subprocess.run([exe, "--help"], capture_output=True, text=True)
-assert help_result.returncode == 0 and "Usage: beatglass-cli" in help_result.stdout
+assert help_result.returncode == 0 and "Usage: beatglass-tool" in help_result.stdout
 version_result = subprocess.run([exe, "--version"], capture_output=True, text=True)
-assert version_result.returncode == 0 and version_result.stdout.startswith("beatglass-cli ")
+assert version_result.returncode == 0 and version_result.stdout.startswith("beatglass-tool ")
 for extension in ("wav", "aiff", "flac", "mp3"):
     path = root / f"tone.{extension}"
     before = hashlib.sha256(path.read_bytes()).digest()
