@@ -1124,7 +1124,7 @@ ApplicationWindow {
     function clearLibraryFilter(target) {
         search.text = ""
         target.forceActiveFocus()
-        window.announceVisualizationRecovery("Library filter cleared; all folder entries are visible.")
+        window.announceVisualizationRecovery("Library filter cleared; " + files.count + " folder entries are visible.")
     }
     function clearLibrarySelectionAndFilter(target) {
         window.clearSelectedAudio()
