@@ -289,3 +289,18 @@ class QualificationIngestTest(unittest.TestCase):
                 f"{digest}  linked.log\n", encoding="utf-8")
             errors = ingest.ingest(root, root / "manifest.json")
             self.assertTrue(any("symlinked qualification artifact" in error for error in errors))
+
+    def test_custom_artifact_limit_is_enforced(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            artifact = root / "capture.log"; artifact.write_text("native evidence", encoding="utf-8")
+            digest = hashlib.sha256(artifact.read_bytes()).hexdigest()
+            (root / "qualification-artifacts.sha256").write_text(f"{digest}  capture.log\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json", max_artifact_bytes=1)
+            self.assertTrue(any("qualification artifact exceeds 1 bytes" in error for error in errors))
+
+    def test_invalid_resource_limits_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.assertEqual(["resource limits must be positive"], ingest.ingest(root, root / "manifest.json", max_entries=0))

@@ -13,3 +13,8 @@ python tests/platform/verify_evidence_bundle.py --root BUNDLE --manifest BUNDLE/
 
 All limits must be positive. This is a resource-safety policy only; it does
 not replace native qualification or evidence integrity checks.
+
+The ingest step uses the same policy before hashing native artifacts and before
+writing its generated manifest. Pass the same three options to
+`tests/platform/ingest_qualification_artifacts.py` to keep generation and
+verification budgets aligned.

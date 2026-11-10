@@ -7,10 +7,16 @@ import re
 from datetime import datetime
 
 SCENARIOS = ("capture", "recovery", "output", "display", "playback", "overlay")
+MAX_ARTIFACT_BYTES = 1 << 30
+MAX_MANIFEST_BYTES = 16 << 20
+MAX_ENTRIES = 1000
 
 
-def ingest(root: Path, output: Path) -> list[str]:
+def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_BYTES,
+           max_manifest_bytes: int = MAX_MANIFEST_BYTES, max_entries: int = MAX_ENTRIES) -> list[str]:
     errors = []
+    if max_artifact_bytes <= 0 or max_manifest_bytes <= 0 or max_entries <= 0:
+        return ["resource limits must be positive"]
     if root.is_symlink():
         errors.append("symlinked qualification root")
     identity = {}
@@ -71,6 +77,8 @@ def ingest(root: Path, output: Path) -> list[str]:
             seen_paths.add(normalized)
             if path.stat().st_size == 0:
                 errors.append(f"empty qualification artifact: {normalized}"); continue
+            if path.stat().st_size > max_artifact_bytes:
+                errors.append(f"qualification artifact exceeds {max_artifact_bytes} bytes: {normalized}"); continue
             actual = hashlib.sha256(path.read_bytes()).hexdigest()
             if actual != digest.lower():
                 errors.append(f"artifact hash mismatch: {relative}")
@@ -101,6 +109,8 @@ def ingest(root: Path, output: Path) -> list[str]:
             continue
         referenced_paths.add(normalized)
         artifacts.append({"path": normalized, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "role": key})
+    if len(artifacts) > max_entries:
+        errors.append(f"qualification artifacts exceed {max_entries} entries")
     artifacts.sort(key=lambda item: (item["path"], item["role"]))
     report = {"platform": identity.get("platform", "unknown"), "commit": identity.get("commit", ""),
               "captured_at": identity.get("captured_at", ""), "environment": identity.get("environment", "native script output"),
@@ -114,14 +124,22 @@ def ingest(root: Path, output: Path) -> list[str]:
     elif output.exists() and not output.is_file():
         errors.append("evidence manifest output is not a file")
     else:
-        output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
+        if len(serialized.encode("utf-8")) > max_manifest_bytes:
+            errors.append(f"generated evidence manifest exceeds {max_manifest_bytes} bytes")
+        else:
+            output.write_text(serialized, encoding="utf-8")
     return errors
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path); parser.add_argument("output", type=Path)
-    args = parser.parse_args(); errors = ingest(args.root, args.output)
+    parser.add_argument("--max-artifact-bytes", type=int, default=MAX_ARTIFACT_BYTES)
+    parser.add_argument("--max-manifest-bytes", type=int, default=MAX_MANIFEST_BYTES)
+    parser.add_argument("--max-entries", type=int, default=MAX_ENTRIES)
+    args = parser.parse_args(); errors = ingest(args.root, args.output, max_artifact_bytes=args.max_artifact_bytes,
+                                                 max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries)
     if errors: print("\n".join(errors)); return 1
     print(f"wrote conservative evidence manifest: {args.output}"); return 0
 
