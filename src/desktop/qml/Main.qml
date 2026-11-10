@@ -2058,12 +2058,7 @@ ApplicationWindow {
             if (window.overlayBridge && window.overlayBridge.displayName !== "")
                 window.overlayPreferredDisplayName = window.overlayBridge.displayName
             if (!window.overlayBridge || window.overlayBridge.screenNames.length === 0)
-                {
-                    window.overlayDisplayRecoveryPending = true
-                    window.overlayDisplaySelectionRequired = true
-                    window.overlayCaptureEvidenceStale = true
-                    window.focusOverlayAvailabilityRecovery("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.", overlayDisplay)
-                }
+                window.focusOverlayDisplayLoss()
             else {
                 const savedNameIndex = window.overlayPreferredDisplayName !== ""
                     ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName) : -1
@@ -2134,6 +2129,12 @@ ApplicationWindow {
             resumeOverlayRecovery.forceActiveFocus()
         else
             retryOverlay.forceActiveFocus()
+    }
+    function focusOverlayDisplayLoss() {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        window.focusOverlayAvailabilityRecovery("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.", overlayDisplay)
     }
     function announceOverlayGeometryState() {
         if (!window.overlayBridge || !window.overlayBridge.geometry || window.overlayBridge.geometry.width <= 0)
