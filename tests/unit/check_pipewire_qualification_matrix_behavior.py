@@ -133,4 +133,10 @@ with tempfile.TemporaryDirectory() as directory:
         result = subprocess.run([sys.executable, str(script), str(linked_output)], capture_output=True, text=True)
         if result.returncode == 0 or "symbolic link" not in result.stderr + result.stdout:
             raise SystemExit("symbolic-link matrix output was accepted")
+    mode_output = root / "mode-matrix.json"
+    mode_output.write_text("old", encoding="utf-8")
+    original_mode = mode_output.stat().st_mode & 0o777
+    result = subprocess.run([sys.executable, str(script), str(mode_output)], capture_output=True, text=True)
+    if result.returncode != 0 or mode_output.stat().st_mode & 0o777 != original_mode:
+        raise SystemExit("matrix output mode was not preserved")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")

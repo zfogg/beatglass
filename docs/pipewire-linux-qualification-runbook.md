@@ -49,6 +49,9 @@ Matrix emission is atomic and fsynced before replacement, so an interrupted
 generation cannot leave a partially written qualification matrix.
 On POSIX hosts the containing directory is fsynced after replacement as well,
 making the rename durable before the handoff reports success.
+When replacing an existing matrix, its permission mode is copied to the
+temporary file before replacement so atomic updates do not broaden or remove
+the handoff file's access policy.
 Every artifact entry must be a non-empty string path; numeric or blank entries
 fail before matrix generation.
 Artifact paths must also be unique so one retained file cannot be counted twice

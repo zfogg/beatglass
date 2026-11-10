@@ -2,6 +2,7 @@
 import json
 import os
 import platform
+import stat
 import sys
 import tempfile
 from pathlib import Path
@@ -81,12 +82,15 @@ if summary is not None and isinstance(summary.get("commit"), str) and summary["c
     matrix["commit"] = summary["commit"]
 output.parent.mkdir(parents=True, exist_ok=True)
 temporary = None
+existing_mode = stat.S_IMODE(output.stat().st_mode) if output.exists() else None
 try:
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=output.parent, delete=False) as handle:
         temporary = Path(handle.name)
         handle.write(json.dumps(matrix, indent=2) + "\n")
         handle.flush()
         os.fsync(handle.fileno())
+    if existing_mode is not None:
+        os.chmod(temporary, existing_mode)
     os.replace(temporary, output)
     if os.name != "nt":
         directory_fd = os.open(output.parent, os.O_RDONLY)
