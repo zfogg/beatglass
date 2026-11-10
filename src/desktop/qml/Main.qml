@@ -1647,7 +1647,6 @@ ApplicationWindow {
         window.announceCaptureRecoveryState("Overlay recovery paused; Resume recovery is available. Live evidence remains stale until fresh capture arrives.")
         resumeOverlayRecovery.forceActiveFocus()
         return true
-        return true
     }
     function handleOverlayPausedPageShortcut() {
         window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready. Live evidence remains stale until fresh capture arrives.")
