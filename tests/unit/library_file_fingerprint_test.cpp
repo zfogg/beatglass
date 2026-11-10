@@ -66,3 +66,10 @@ TEST_CASE("file fingerprint retry policy distinguishes transient outcomes") {
  CHECK_FALSE(fingerprint_status_is_retryable(FingerprintStatus::ok));
  CHECK_FALSE(fingerprint_status_is_retryable(FingerprintStatus::changed));
 }
+
+TEST_CASE("file fingerprint refresh policy isolates changed sources") {
+ CHECK(fingerprint_status_requires_refresh(FingerprintStatus::changed));
+ CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::ok));
+ CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::cancelled));
+ CHECK_FALSE(fingerprint_status_requires_refresh(FingerprintStatus::error));
+}
