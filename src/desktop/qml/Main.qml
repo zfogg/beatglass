@@ -1610,6 +1610,10 @@ ApplicationWindow {
         window.handleOverlayShowAction()
     }
     function handleOverlayHideAction() {
+        if (!window.overlayBridge || !window.overlayBridge.available) {
+            window.focusOverlayAvailabilityRecovery("Overlay hide is unavailable because the native overlay is not available; control-window fallback remains active.", showOverlay)
+            return
+        }
         window.hideOverlayAndRestoreControls()
     }
     function recoverOverlayAfterDisplayChange() {

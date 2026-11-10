@@ -309,3 +309,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Restore overlay display guard | Restore is requested without an available destination display | Keep the control window available, explain that display selection is required, and focus the display selector for recovery. |
 | Reapply settings display guard | Reapply is requested without an available destination display | Keep persisted settings unchanged, explain that display selection is required, and focus the display selector for recovery. |
 | Unlock availability guard | Unlock is requested while click-through is inactive or the native overlay is unavailable | Preserve the current interaction state, explain why unlock cannot proceed, and focus the unlock recovery control. |
+| Hide availability guard | Hide is requested while the native overlay is unavailable | Keep the control-window fallback active, explain the unavailable state, and focus the available Show recovery control. |
