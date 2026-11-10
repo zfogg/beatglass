@@ -1087,6 +1087,7 @@ ApplicationWindow {
         window.recursiveCatalogActive = false
         recursiveResultsView.currentIndex = -1
         search.text = ""
+        window.catalogDiagnostic = ""
         window.resetLibraryBrowserSelection("Returned to the current folder browser; the filter, entry selection, and selected source were cleared.")
     }
     function returnLibraryFromRecursiveShortcut() {
