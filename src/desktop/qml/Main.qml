@@ -1969,6 +1969,16 @@ ApplicationWindow {
                     }
                 }
             }
+            Connections {
+                target: window.captureMonitorBridge
+                function onChanged() {
+                    if (!window.captureMonitorBridge || window.captureMonitorBridge.status !== "Monitoring") {
+                        beatPulse.stop()
+                        pulseFade.stop()
+                        overlaySurface.pulseOpacity = 0.0
+                    }
+                }
+            }
             MouseArea {
                 anchors.fill: parent
                 property bool fallbackMove: false

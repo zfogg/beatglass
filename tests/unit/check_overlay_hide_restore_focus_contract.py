@@ -1081,6 +1081,15 @@ def test_overlay_pulse_requires_fresh_monitoring_evidence():
     assert "tracking = window.liveBridge.status" in body
 
 
+def test_capture_status_change_clears_pulse_immediately():
+    start = QML.index("target: window.captureMonitorBridge")
+    body = QML[start : QML.index("            MouseArea", start)]
+    assert 'status !== "Monitoring"' in body
+    assert "beatPulse.stop()" in body
+    assert "pulseFade.stop()" in body
+    assert "overlaySurface.pulseOpacity = 0.0" in body
+
+
 def test_overlay_pulse_status_label_exposes_running_state():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
