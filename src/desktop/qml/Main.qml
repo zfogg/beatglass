@@ -4602,6 +4602,25 @@ ApplicationWindow {
                             overlayLiveMonitoringState.forceActiveFocus()
                         }
                     }
+                    Button {
+                        objectName: "chooseOverlayOutput"
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null
+                            && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
+                        text: "Choose output"
+                        enabled: visible && window.endpointSelectionBridge !== null
+                        Accessible.name: "Choose overlay output"
+                        Accessible.value: enabled ? "available; capture recovery" : "unavailable"
+                        Accessible.role: Accessible.Button
+                        Accessible.description: enabled
+                            ? "Choose another system output for overlay monitoring before retrying capture; current estimates remain unavailable until fresh output is accepted."
+                            : "Output selection is unavailable while overlay capture recovers."
+                        ToolTip.text: Accessible.description
+                        onClicked: {
+                            window.endpointSelectionBridge.refresh()
+                            window.announceCaptureRecoveryState("Choose an output endpoint before retrying overlay capture.")
+                            endpointSelector.forceActiveFocus()
+                        }
+                    }
                     Label {
                         objectName: "overlayEstimateAttribution"
                         visible: window.overlayBridge !== null
