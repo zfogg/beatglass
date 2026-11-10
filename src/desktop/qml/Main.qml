@@ -3101,7 +3101,6 @@ ApplicationWindow {
                             text: "Playback controls are unavailable in this build; metadata and analysis details remain read-only."
                             visible: !window.playbackBridge
                             Accessible.name: "Playback availability: " + text
-                            Accessible.value: text
                             Accessible.role: Accessible.Status
                             Accessible.description: text + " Treat this as provisional evidence until source-linked analysis is accepted."
                             ToolTip.text: "Playback controls unavailable; metadata remains read-only"
