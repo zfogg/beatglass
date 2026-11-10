@@ -45,7 +45,7 @@ Production implementation belongs in `src/` for applications and `lib/` for reus
 
 The desktop shell currently exposes six persisted appearance themes (Light, Dark, High contrast, Purple, Blue, and Yellow) plus a reduced-motion preference; native QML palette values are aligned with the `design/v1` tokens, while native desktop qualification remains pending.
 
-The current `main` branch includes the bounded analysis queue and retry lifecycle, persistent CLI Library cache/recovery, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, Windows endpoint-loss recovery, and native macOS AudioUnit playback/CoreAudio Live integration. These are implemented slices, not a v1 completion claim: Linux native playback, optional tonal dependencies, and interactive qualification remain open.
+The current `main` branch includes the bounded analysis queue and retry lifecycle, persistent CLI Library cache/recovery, source-PCM waveform/FFT controls, selectable themes and accessible preference/overlay recovery controls, DJ evidence/reacquisition messaging, Windows endpoint-loss recovery, native macOS AudioUnit playback/CoreAudio Live integration, and bounded Linux PipeWire playback/capture integration. These are implemented slices, not a v1 completion claim: optional tonal dependencies and interactive/native qualification remain open.
 
 ## Build and test the groundwork
 
