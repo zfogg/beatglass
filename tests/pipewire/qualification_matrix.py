@@ -20,6 +20,8 @@ if len(sys.argv) == 4:
     summary_input = Path(sys.argv[3])
     if summary_input.is_symlink():
         raise SystemExit("native qualification summary is a symbolic link")
+    if summary_input.parent.is_symlink():
+        raise SystemExit("native qualification summary directory is a symbolic link")
     try:
         summary = json.loads(summary_input.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
