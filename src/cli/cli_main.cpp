@@ -202,6 +202,7 @@ int main(int argc, char** argv) {
   std::optional<beatglass::TempoResult> result;
   std::vector<float> waveform;
   bool busy = false;
+  bool reduce_motion = false;
 #ifdef _WIN32
   CliPlayback playback;
 #else
@@ -307,12 +308,26 @@ int main(int argc, char** argv) {
   auto endpoint_picker = Radiobox(&live_endpoints, &live_selected);
   auto live = Renderer(Container::Vertical({endpoint_picker, live_button}), [&] {
     Elements endpoints;
-    for (const auto& endpoint : live_endpoints) endpoints.push_back(text("●  " + endpoint) | color(Color::YellowLight));
+    for (std::size_t index = 0; index < live_endpoints.size(); ++index) {
+      auto label = live_endpoints[index];
+#ifdef _WIN32
+#endif
+      endpoints.push_back(text("●  " + label) | color(Color::YellowLight));
+    }
     if (endpoints.empty()) endpoints.push_back(text("No active output sinks discovered.") | color(Color::GrayLight));
     const auto live_state = live_tracking_state == beatglass::TrackingState::tracking ? "tracking" : live_tracking_state == beatglass::TrackingState::acquiring ? "acquiring" : live_tracking_state == beatglass::TrackingState::reacquiring ? "reacquiring" : live_tracking_state == beatglass::TrackingState::error ? "error" : "stopped";
     return vbox({text("LIVE") | bold | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold, text("Choose a render endpoint before monitoring."), separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), live_button->Render(), text(live_status) | color(Color::GrayLight), separator(), text("LIVE ANALYSIS") | bold, text("Tempo: " + (live_bpm ? format_bpm(live_bpm) + " BPM" : "— BPM")), text("Key: —    Chord: —"), text("Capture state: " + std::string(live_state)), separator(), waveform_chart(live_waveform, 0), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
-  auto settings = Renderer([&] { return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold, text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"), text("Terminal motion: enabled"), separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."), text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
+  auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
+  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox}), [&] {
+    return vbox({text("SETTINGS") | bold | color(Color::Cyan), separator(), text("SESSION") | bold,
+      text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
+      text("Preferences are session-scoped for this prototype."), separator(),
+      text("PRESENTATION") | bold, reduce_motion_checkbox->Render(),
+      text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight),
+      separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."),
+      text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+  });
   auto tabs = Container::Tab({library, live, settings}, &tab);
   auto library_tab = Button("  Library  ", [&] { tab = 0; });
   auto live_tab = Button("  Live  ", [&] { tab = 1; });
@@ -332,7 +347,7 @@ int main(int argc, char** argv) {
     if (event == Event::ArrowDown && tab == 0 && !tracks.empty()) { selected = std::min(selected + 1, static_cast<int>(tracks.size()) - 1); return true; }
     if (event == Event::ArrowUp && tab == 0 && !tracks.empty()) { selected = std::max(selected - 1, 0); return true; }
     if (event == Event::Custom) {
-      ++spinner_frame;
+      if (!reduce_motion) ++spinner_frame;
 #ifdef _WIN32
       if (live_session && live_session->state() != beatglass::SourceState::stopped) {
         live_session->poll();
