@@ -119,3 +119,6 @@ Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
 Reacquisition evidence may include `reason_code`; when supplied it must be a
 non-zero integer identifying the machine-readable recovery reason.
+
+Reacquisition evidence must include the same non-empty `serial` as the restart
+event, preventing recovery evidence from being attributed to a different sink.
