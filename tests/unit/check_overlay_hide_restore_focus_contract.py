@@ -679,3 +679,13 @@ def test_size_focus_shortcut_requires_available_overlay():
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
     assert "return true" in body
+
+
+def test_click_through_focus_shortcut_requires_available_overlay():
+    start = QML.index("function focusOverlayClickThroughShortcut")
+    body = QML[start : QML.index("    function focusOverlayOpacityShortcut", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "return false" in body
+    assert "return true" in body
