@@ -256,8 +256,13 @@ if reacquisition is not None:
             raise SystemExit("reacquisition device identity does not match restart")
     reacquisition_format = reacquisition.get("format")
     if reacquisition_format is not None:
-        if (not isinstance(reacquisition_format, dict) or reacquisition_format.get("sample_rate", 0) <= 0
-                or reacquisition_format.get("channels", 0) <= 0):
+        if (not isinstance(reacquisition_format, dict)
+                or not isinstance(reacquisition_format.get("sample_rate"), int)
+                or isinstance(reacquisition_format.get("sample_rate"), bool)
+                or reacquisition_format["sample_rate"] <= 0
+                or not isinstance(reacquisition_format.get("channels"), int)
+                or isinstance(reacquisition_format.get("channels"), bool)
+                or reacquisition_format["channels"] <= 0):
             raise SystemExit("reacquisition evidence has an invalid negotiated format")
         if reacquisition_format != restart.get("format"):
             raise SystemExit("reacquisition format disagrees with restart format")
