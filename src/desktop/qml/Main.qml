@@ -4951,7 +4951,7 @@ ApplicationWindow {
                         ToolTip.text: Accessible.description
                         onClicked: {
                             overlaySettingsSummary.forceActiveFocus()
-                            window.announceCaptureRecoveryState((window.overlayLaunchFallbackActive ? "Overlay recovery reviewed" : "Overlay summary reviewed") + "; settings revision " + window.overlaySettingsRevision + (window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
+                            window.announceCaptureRecoveryState((window.overlayLaunchFallbackActive ? "Overlay recovery reviewed" : "Overlay summary reviewed") + "; settings revision " + window.overlaySettingsRevision + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : window.overlayDisplayRecoveryPending ? ", recovery pending." : "."))
                         }
                     }
                 Label {
