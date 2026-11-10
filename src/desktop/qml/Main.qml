@@ -4911,7 +4911,7 @@ ApplicationWindow {
                         Accessible.value: text + "; Ctrl+Alt+Shift+B focuses beat pulse status" + (window.captureMonitorBridge && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring") ? "; live evidence stale" : "")
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.overlayBridge.clickThrough
-                            ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window."
+                            ? text + ". Ctrl+Alt+U also focuses Unlock overlay from the control window. Ctrl+Alt+Shift+B focuses beat pulse status."
                             : visible ? text + ". Click-through can be enabled or disabled from the overlay controls." : text
                         ToolTip.text: visible ? Accessible.description : "Overlay keyboard recovery"
                         Layout.fillWidth: true

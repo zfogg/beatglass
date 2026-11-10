@@ -378,6 +378,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Beat pulse focus announcement contract | Pulse Status receives focus through Tab or its shortcut | Update the latest transition announcement with the current active/idle state when focus enters the Status. |
 | Live evidence pulse shortcut value contract | Accessibility client reads the live-evidence group value | Include the pulse-status shortcut in the group value, not only its description, so compact status queries retain the keyboard path. |
 | Keyboard recovery pulse shortcut contract | Accessibility client reads keyboard recovery status | Include the pulse-status shortcut in recovery status values so keyboard recovery context retains live-evidence navigation. |
+| Keyboard recovery pulse description contract | Assistive technology reads the full keyboard recovery description | Name the pulse-status shortcut in the spoken recovery guidance alongside the unlock shortcut. |
 | Live evidence pulse summary contract | Overlay live-evidence grouping is announced to assistive technology | Include beat-pulse active/idle state alongside capture status and stale-evidence state. |
 | Beat pulse period status contract | Valid BPM drives a running pulse | Expose the computed millisecond beat period in the visible/accessibility status for timing transparency. |
 | Live evidence timing description contract | Assistive technology enters the overlay live-evidence group | Name beat-pulse timing alongside tempo, harmony, capture, and recovery context. |
