@@ -301,6 +301,8 @@ class EvidenceBundleTest(unittest.TestCase):
             report = json.loads(result.stdout)
             self.assertFalse(report["valid"])
             self.assertTrue(report["errors"])
+            self.assertEqual(report["error_count"], len(report["errors"]))
+            self.assertIn("max_total_artifact_bytes", report["limits"])
             self.assertNotEqual(result.returncode, 0)
 
     def test_oversized_manifests_are_rejected(self):

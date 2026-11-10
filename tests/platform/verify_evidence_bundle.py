@@ -220,7 +220,11 @@ def main() -> int:
                     max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries,
                     max_total_artifact_bytes=args.max_total_artifact_bytes)
     if args.json:
-        print(json.dumps({"valid": not errors, "errors": errors}, sort_keys=True))
+        print(json.dumps({"valid": not errors, "error_count": len(errors), "errors": errors,
+                          "limits": {"max_artifact_bytes": args.max_artifact_bytes,
+                                     "max_manifest_bytes": args.max_manifest_bytes,
+                                     "max_entries": args.max_entries,
+                                     "max_total_artifact_bytes": args.max_total_artifact_bytes}}, sort_keys=True))
         return 1 if errors else 0
     if errors:
         print("\n".join(errors), file=sys.stderr); return 1

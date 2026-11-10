@@ -55,3 +55,5 @@ Readiness output is capped at 16 MiB by default; constrained environments can
 override this with `--max-report-bytes`.
 Automation can pass `--json` to receive the complete readiness object on
 stdout while retaining the normal readiness exit status.
+The JSON object also includes `error_count` and the effective `limits`, making
+resource policy observable to qualification automation.
