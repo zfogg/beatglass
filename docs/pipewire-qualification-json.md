@@ -306,6 +306,9 @@ nested platform identity structures.
 The boolean-platform regression in
 `tests/unit/check_native_host_provenance_platform_bool.py` rejects JSON boolean
 values rather than treating them as platform aliases.
+The float-platform regression in
+`tests/unit/check_native_host_provenance_platform_float.py` rejects fractional
+platform values rather than coercing them into canonical labels.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
