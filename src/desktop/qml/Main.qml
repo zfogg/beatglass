@@ -1515,6 +1515,10 @@ ApplicationWindow {
         window.handleOverlayShowAction()
     }
     function handleOverlayShowAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Choose an available display before showing the overlay.", overlayDisplay)
+            return false
+        }
         const restored = window.showOverlayAndHideControls()
         if (!restored) {
             window.overlayCaptureEvidenceStale = true
