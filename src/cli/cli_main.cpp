@@ -507,6 +507,35 @@ std::string join_history(const std::vector<std::string>& values) {
   }
   return joined;
 }
+struct TonalEstimate { std::string key; std::string chord; };
+TonalEstimate estimate_tonal_labels(const std::vector<float>& spectrum, std::uint32_t sample_rate) {
+  static constexpr std::array<const char*, 12> names{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+  if (spectrum.size() < 4 || sample_rate == 0) return {};
+  std::array<float, 12> pitch{};
+  constexpr float window = static_cast<float>(beatglass::VisualizationFrame::window_size);
+  for (std::size_t bin = 1; bin < spectrum.size(); ++bin) {
+    const auto frequency = static_cast<float>(bin) * static_cast<float>(sample_rate) / window;
+    if (frequency < 55.0f || frequency > 1760.0f) continue;
+    const auto midi = 69.0f + 12.0f * std::log2(frequency / 440.0f);
+    const auto pitch_class = static_cast<int>(std::lround(midi)) % 12;
+    pitch[static_cast<std::size_t>((pitch_class + 12) % 12)] += spectrum[bin];
+  }
+  const auto strongest = std::distance(pitch.begin(), std::max_element(pitch.begin(), pitch.end()));
+  if (pitch[static_cast<std::size_t>(strongest)] <= 0.001f) return {};
+  static constexpr std::array<float, 12> major{6.35f, 2.23f, 3.48f, 2.33f, 4.38f, 4.09f, 2.52f, 5.19f, 2.39f, 3.66f, 2.29f, 2.88f};
+  static constexpr std::array<float, 12> minor{6.33f, 2.68f, 3.52f, 5.38f, 2.60f, 3.53f, 2.54f, 4.75f, 3.98f, 2.69f, 3.34f, 3.17f};
+  auto score = [&](const auto& profile, int root) { float value = 0.0f; for (int i = 0; i < 12; ++i) value += pitch[static_cast<std::size_t>((i + root) % 12)] * profile[static_cast<std::size_t>(i)]; return value; };
+  int major_root = 0, minor_root = 0; float major_score = -1.0f, minor_score = -1.0f;
+  for (int root = 0; root < 12; ++root) { if (const auto value = score(major, root); value > major_score) major_score = value, major_root = root; if (const auto value = score(minor, root); value > minor_score) minor_score = value, minor_root = root; }
+  const auto minor_mode = minor_score > major_score;
+  const auto root = minor_mode ? minor_root : major_root;
+  std::array<std::pair<float, int>, 12> ranked{};
+  for (int i = 0; i < 12; ++i) ranked[static_cast<std::size_t>(i)] = {pitch[static_cast<std::size_t>(i)], i};
+  std::ranges::sort(ranked, std::greater<>{});
+  const auto third = ranked[1].second;
+  const auto fifth = ranked[2].second;
+  return {std::string(names[root]) + (minor_mode ? " minor" : " major"), std::string(names[root]) + "–" + names[third] + "–" + names[fifth] + " (provisional FFT)"};
+}
 #ifdef _WIN32
 std::optional<std::filesystem::path> choose_audio_folder() {
   const auto init = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
@@ -871,10 +900,10 @@ int main(int argc, char** argv) {
   std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
   std::unique_ptr<beatglass::CausalMusicReplay> live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
+#endif
   std::optional<std::string> live_key;
   std::optional<std::string> live_chord;
   std::vector<std::string> live_tonal_history;
-#endif
   std::string live_status = "Capture stopped.";
   std::optional<float> live_bpm;
   beatglass::PresentationState live_presentation;
@@ -917,10 +946,10 @@ int main(int argc, char** argv) {
   std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
   std::unique_ptr<beatglass::CausalMusicReplay> live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
+#endif
   std::optional<std::string> live_key;
   std::optional<std::string> live_chord;
   std::vector<std::string> live_tonal_history;
-#endif
   std::string live_status = "Native loopback capture is unavailable in this build.";
   std::optional<float> live_bpm;
   beatglass::PresentationState live_presentation;
@@ -941,6 +970,15 @@ int main(int argc, char** argv) {
   std::uint64_t live_visualization_revision = 0;
   beatglass::VisualizationProcessor live_visualization([](void*) noexcept {}, nullptr);
 #endif
+  auto update_fft_tonal = [&] {
+    if (live_key && live_chord) return;
+    const auto estimate = estimate_tonal_labels(live_spectrum, live_sample_rate);
+    if (estimate.key.empty() || estimate.chord.empty()) return;
+    live_key = estimate.key;
+    live_chord = estimate.chord;
+    live_tonal_history.push_back(estimate.chord);
+    if (live_tonal_history.size() > 8) live_tonal_history.erase(live_tonal_history.begin());
+  };
   auto screen = ScreenInteractive::TerminalOutput();
   auto analyze_paths = [&](std::vector<std::filesystem::path> paths) {
     if (busy) {
@@ -1351,11 +1389,9 @@ int main(int argc, char** argv) {
   };
   auto clear_live_evidence = [&] {
     live_bpm.reset();
-#ifdef BEATGLASS_CLI_MUSIC_REPLAY
     live_key.reset();
     live_chord.reset();
     live_tonal_history.clear();
-#endif
     live_tracking_state = beatglass::TrackingState::stopped;
     live_sample_rate = 0;
     live_observed_frames = 0;
@@ -1495,8 +1531,8 @@ int main(int argc, char** argv) {
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
     live_music_replay = std::make_unique<beatglass::CausalMusicReplay>();
-    live_key.reset(); live_chord.reset(); live_tonal_history.clear();
 #endif
+    live_key.reset(); live_chord.reset(); live_tonal_history.clear();
     clear_live_evidence();
     live_tracking_state = beatglass::TrackingState::reacquiring;
     set_live_presentation_state(beatglass::TrackingState::reacquiring);
@@ -1571,16 +1607,9 @@ int main(int argc, char** argv) {
     const auto displayed_live_status = live_presentation.stale ? live_status + "  [stale evidence — reacquiring]" : live_status;
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(displayed_live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(displayed_live_status) | color(Color::GrayLight) | italic;
     const auto corrected_bpm = live_presentation.stale || !live_bpm ? std::optional<float>{} : std::optional<float>{*live_bpm * live_bpm_multiplier};
-#ifdef BEATGLASS_CLI_MUSIC_REPLAY
-    const auto live_key_label = live_presentation.key;
-    const auto live_chord_label = live_presentation.chord;
-    const auto& shared_tonal_history = live_presentation.tonal_history;
-    const auto live_tonal_label = live_presentation.stale ? std::string("stale evidence — waiting for fresh tonal windows") : shared_tonal_history.empty() ? (live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history)) : join_history(shared_tonal_history);
-#else
-    const std::string live_key_label = "—";
-    const std::string live_chord_label = "—";
-    const std::string live_tonal_label = "Tonal analysis: unavailable in the standard build; enable Essentia music-replay";
-#endif
+    const auto live_key_label = live_presentation.stale ? std::string("—") : live_presentation.key != "—" ? live_presentation.key : live_key.value_or("—");
+    const auto live_chord_label = live_presentation.stale ? std::string("—") : live_presentation.chord != "—" ? live_presentation.chord : live_chord.value_or("—");
+    const auto live_tonal_label = live_presentation.stale ? std::string("stale evidence — waiting for fresh tonal windows") : live_presentation.tonal_history.empty() ? (live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history)) : join_history(live_presentation.tonal_history);
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
     const auto shared_confidence = live_presentation.stale
         ? std::optional<float>{}
@@ -1772,6 +1801,7 @@ int main(int argc, char** argv) {
               }
               live_spectrum_history.push_back(live_spectrum);
               if (live_spectrum_history.size() > 12) live_spectrum_history.erase(live_spectrum_history.begin());
+              update_fft_tonal();
             }
             live_status = "Receiving OS sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) {
@@ -1835,7 +1865,7 @@ int main(int argc, char** argv) {
             std::vector<float> mono(packet_frames);
             for (std::size_t frame = 0; frame < mono.size(); ++frame) { float sum = 0.0f; for (std::uint32_t channel = 0; channel < packet_channels; ++channel) sum += packet.samples[frame * packet.channels + channel]; mono[frame] = sum / static_cast<float>(packet_channels); }
             for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) { const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset); if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate, std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) { const auto revision = ++live_visualization_revision; if (live_visualization_presentation.accept(frame->epoch, revision, *frame)) live_visualization_frame = std::move(frame); } }
-            if (live_visualization_frame) { const auto& frame = *live_visualization_frame; for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) { const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size())); live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source])); } for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) { const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size())); live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f); } live_spectrum_history.push_back(live_spectrum); if (live_spectrum_history.size() > 12) live_spectrum_history.erase(live_spectrum_history.begin()); }
+            if (live_visualization_frame) { const auto& frame = *live_visualization_frame; for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) { const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size())); live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source])); } for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) { const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size())); live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f); } live_spectrum_history.push_back(live_spectrum); if (live_spectrum_history.size() > 12) live_spectrum_history.erase(live_spectrum_history.begin()); update_fft_tonal(); }
             live_status =
 #ifdef __APPLE__
               "Receiving CoreAudio output-tap audio; analysis is worker-owned and discontinuity-safe.";
