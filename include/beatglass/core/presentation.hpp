@@ -6,6 +6,12 @@
 #include <iomanip>
 #include <sstream>
 namespace beatglass {
+/** Format one positive BPM estimate with the same precision used by all adapters. */
+inline std::string format_presentation_bpm(float bpm) {
+  std::ostringstream value;
+  value << std::fixed << std::setprecision(1) << bpm;
+  return value.str();
+}
 // Immutable shared snapshots may be handed to a presentation thread; the
 // publisher bounds timeline lengths before publication. GUI types stay local.
 /** Shared immutable snapshot; the publisher is responsible for bounding timeline lengths before publication. */
@@ -38,9 +44,7 @@ inline PresentationState present_snapshot(const Snapshot& snapshot) {
   if (snapshot.state != TrackingState::tracking) { result.tonal_history.clear(); result.beat_frames.clear(); return result; }
   if (snapshot.confidence && std::isfinite(*snapshot.confidence) && *snapshot.confidence >= 0.0f && *snapshot.confidence <= 1.0f) result.confidence = *snapshot.confidence;
   if (snapshot.bpm && std::isfinite(*snapshot.bpm) && *snapshot.bpm > 0) {
-    std::ostringstream value;
-    value << std::fixed << std::setprecision(1) << *snapshot.bpm;
-    result.tempo = value.str();
+    result.tempo = format_presentation_bpm(*snapshot.bpm);
   }
   if (!snapshot.key_candidates.empty() && !snapshot.key_candidates.front().label.empty())
     result.key = snapshot.key_candidates.front().label;

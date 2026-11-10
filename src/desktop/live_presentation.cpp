@@ -17,7 +17,7 @@ bool LivePresentation::apply(beatglass::PresentationUpdate update) {
   stale_ = displayed.stale;
   tempo_history_.clear();
   for (const auto bpm : displayed.tempo_history) {
-    if (std::isfinite(bpm) && bpm > 0.0f) tempo_history_.push_back(QString::number(bpm, 'f', 1));
+    if (std::isfinite(bpm) && bpm > 0.0f) tempo_history_.push_back(QString::fromStdString(beatglass::format_presentation_bpm(bpm)));
   }
   tonal_history_.clear();
   for (const auto& label : displayed.tonal_history) tonal_history_.push_back(QString::fromStdString(label));
