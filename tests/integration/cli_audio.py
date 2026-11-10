@@ -47,7 +47,12 @@ with tempfile.TemporaryDirectory() as directory:
         target.writeframes(source.readframes(prefix_frames))
     prefix_output = subprocess.run([exe, "--replay", str(prefix)], capture_output=True, text=True, check=True).stdout
     prefix_lines = [line for line in prefix_output.splitlines() if line.startswith("observed frame:")]
-    assert prefix_lines == lines[:len(prefix_lines)], "future samples changed an earlier estimate"
+    def causal_fields(line):
+        # Duration is metadata for the complete input, not a causal analysis field.
+        return re.sub(r" duration seconds: [0-9.]+", "", line)
+    assert [causal_fields(line) for line in prefix_lines] == [
+        causal_fields(line) for line in lines[:len(prefix_lines)]
+    ], "future samples changed an earlier estimate"
     assert result.split("tempo: ")[-1] == replay.split("tempo: ")[-1], (result, replay[-500:])
     transition_file = root / "silence-after-clicks.wav"
     with wave.open(str(clicks), "rb") as source, wave.open(str(transition_file), "wb") as target:
