@@ -89,6 +89,16 @@ TEST_CASE("stale file publication can retry the same run after restoration") {
  REQUIRE(cache.find(identity.key, result)); CHECK(result == "second");
 }
 
+TEST_CASE("cancelled publication preserves the prior cached result") {
+ Fixture f; SqliteCache cache(":memory:");
+ const auto identity = cache_identity_from_file(f.path, "e", "c", "offline");
+ REQUIRE(identity.status == FingerprintStatus::ok);
+ REQUIRE(publish_file_result(cache, "run", identity.key, f.path, "first") == Publish::committed);
+ std::stop_source stop; stop.request_stop();
+ CHECK(publish_file_result(cache, "cancelled", identity.key, f.path, "second", stop.get_token()) == Publish::cancelled);
+ std::string result; REQUIRE(cache.find(identity.key, result)); CHECK(result == "first");
+}
+
 TEST_CASE("stale catalog rows are removed only after failed identity validation") {
  Fixture f; SqliteCache cache(":memory:");
  const auto identity = cache_identity_from_file(f.path, "e", "c", "offline");
