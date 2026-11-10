@@ -224,3 +224,5 @@ If present, host `clock_drift_ppm` must be a numeric clock drift measurement;
 boolean values are invalid.
 If present, host `clock_jitter_ns` must be a non-negative numeric jitter
 measurement; boolean values are invalid.
+If present, host `clock_leap_state` must be a non-empty string describing leap
+second handling during qualification.
