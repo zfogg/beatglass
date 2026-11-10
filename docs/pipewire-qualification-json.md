@@ -198,3 +198,5 @@ If present, host `cloud_provider` must be a non-empty string identifying the
 cloud or hosting provider.
 If present, host `region` must be a non-empty string identifying the provider
 region or site.
+If present, host `availability_zone` must be a non-empty string identifying
+the provider availability zone or physical site.
