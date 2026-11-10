@@ -59,6 +59,7 @@ struct CliPreferences {
   int seek_step{5};
   std::string visual_mode{"combined"};
   int playback_device_id{-1};
+  int bpm_multiplier{0};
 };
 
 std::filesystem::path preferences_path() {
@@ -87,6 +88,7 @@ CliPreferences load_preferences() {
     }
     else if (key == "visual_mode" && (value == "waveform" || value == "spectrum" || value == "combined" || value == "beat_grid" || value == "tonal_history")) preferences.visual_mode = value;
     else if (key == "playback_device_id") { try { preferences.playback_device_id = std::stoi(value); } catch (...) {} }
+    else if (key == "bpm_multiplier") { try { preferences.bpm_multiplier = std::clamp(std::stoi(value), -1, 1); } catch (...) {} }
   }
   return preferences;
 }
@@ -98,7 +100,7 @@ void save_preferences(const CliPreferences& preferences) {
   std::filesystem::create_directories(path.parent_path(), error);
   if (error) return;
   std::ofstream output(path, std::ios::trunc);
-  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\n";
+  if (output) output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\n";
 }
 using namespace ftxui;
 
@@ -442,7 +444,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> live_endpoints;
   std::vector<std::string> live_endpoint_ids;
   std::string live_error;
-  float live_bpm_multiplier = 1.0f;
+  float live_bpm_multiplier = preferences.bpm_multiplier < 0 ? 0.5f : preferences.bpm_multiplier > 0 ? 2.0f : 1.0f;
 #ifdef BEATGLASS_CLI_LIBRARY
   std::unique_ptr<beatglass::library::StorageOwner> library_storage = std::make_unique<beatglass::library::StorageOwner>();
   std::string library_storage_status;
@@ -758,7 +760,8 @@ int main(int argc, char** argv) {
       return -1;
 #endif
     }();
-    try { save_preferences(CliPreferences{reduce_motion, std::clamp(std::stoi(seek_step_text), 1, 60), visual_mode, selected_device_id}); } catch (...) { save_preferences(CliPreferences{reduce_motion, 5, visual_mode, selected_device_id}); }
+    const auto bpm_setting = live_bpm_multiplier < 1.0f ? -1 : live_bpm_multiplier > 1.0f ? 1 : 0;
+    try { save_preferences(CliPreferences{reduce_motion, std::clamp(std::stoi(seek_step_text), 1, 60), visual_mode, selected_device_id, bpm_setting}); } catch (...) { save_preferences(CliPreferences{reduce_motion, 5, visual_mode, selected_device_id, bpm_setting}); }
   };
   bool last_saved_reduce_motion = reduce_motion;
   std::string last_saved_seek_step = seek_step_text;
