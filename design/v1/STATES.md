@@ -366,3 +366,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Beat pulse accessibility contract | Overlay beat pulse is active, idle, invalid, or reduced-motion disabled | Expose a non-color Status value describing pulse state, valid BPM tracking, and reduced-motion suppression. |
 | Recovery pause focus contract | Recovery pause/safe-mode state focuses a follow-up control | Return whether the requested focus target was available after announcing stale/current evidence. |
 | Availability recovery focus contract | Native overlay/display availability fails and a fallback control is requested | Return whether the fallback target was focused after announcing retained settings and evidence freshness. |
+| Restored-state focus contract | Overlay restoration succeeds and a follow-up control is requested | Return whether the restored-state target was focused after announcing fresh-capture readiness. |
