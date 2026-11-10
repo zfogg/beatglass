@@ -4845,14 +4845,14 @@ ApplicationWindow {
                     visible: window.overlayBridge !== null
                     Accessible.name: "Overlay actions"
                     Accessible.value: window.overlayBridge && window.overlayBridge.available
-                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings retained; revision " + window.overlaySettingsRevision
-                        : "unavailable; control-window fallback active; settings retained"
+                        ? (window.overlayHiddenByUser ? "available; hidden by user" : "available") + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + "; settings retained; revision " + window.overlaySettingsRevision + "; Ctrl+Alt+Shift+B focuses beat pulse status"
+                        : "unavailable; control-window fallback active; settings retained; Ctrl+Alt+Shift+B focuses beat pulse status"
                     Accessible.role: Accessible.Grouping
                     Accessible.description: window.overlayLaunchFallbackActive
                         ? "Show, unlock, or hide the DJ overlay window; native overlay launch fallback is active, the control window remains available, and overlay settings are retained."
                         : window.overlayDisplayRecoveryPending
                         ? "Show, unlock, or hide the DJ overlay window; recovery is pending, the control-window fallback remains available, and persisted settings are retained."
-                        : "Show, unlock, or hide the DJ overlay window."
+                        : "Show, unlock, or hide the DJ overlay window. Ctrl+Alt+Shift+B focuses beat pulse status."
                     ToolTip.text: window.overlayBridge && window.overlayBridge.available
                         ? (window.overlayHiddenByUser ? "Overlay actions are available; hidden by user" : (window.overlayDisplayRecoveryPending ? "Overlay actions are available; recovery is pending" : "Overlay window actions are available"))
                         : "Overlay window actions are unavailable; control-window fallback is active; overlay settings are retained"

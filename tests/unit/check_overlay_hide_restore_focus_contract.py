@@ -1255,6 +1255,12 @@ def test_live_evidence_group_name_discloses_pulse_status_shortcut():
     assert 'Accessible.name: "Overlay live evidence; Ctrl+Alt+Shift+B focuses beat pulse status"' in body
 
 
+def test_overlay_actions_disclose_pulse_status_shortcut():
+    start = QML.index('objectName: "overlayActions"')
+    body = QML[start : QML.index('objectName: "overlayShortcutHelp"', start)]
+    assert "Ctrl+Alt+Shift+B focuses beat pulse status" in body
+
+
 def test_overlay_keyboard_recovery_status_discloses_pulse_shortcut():
     start = QML.index('objectName: "overlayKeyboardRecoveryStatus"')
     body = QML[start : QML.index('objectName: "overlayRoutingControls"', start)]
