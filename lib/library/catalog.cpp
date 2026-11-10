@@ -49,8 +49,9 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
     const auto& entry = *it;
     // Library browsing is intentionally one level deep; do not follow links
     // into unrelated trees or expose a linked source under a misleading path.
-    if (entry.is_symlink(error)) {
-      if (error) break;
+    const auto link_status = entry.symlink_status(error);
+    if (error) break;
+    if (link_status.type() == std::filesystem::file_type::symlink) {
       continue;
     }
     const bool directory = entry.is_directory(error);
@@ -114,7 +115,12 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
   for (; it != end && !error; it.increment(error)) {
     if (stop.stop_requested()) { result.entries.clear(); result.cancelled = true; result.diagnostic = "catalog query cancelled"; return result; }
     const auto& entry = *it;
-    if (entry.is_symlink(error)) { if (error) break; it.disable_recursion_pending(); continue; }
+    const auto link_status = entry.symlink_status(error);
+    if (error) break;
+    if (link_status.type() == std::filesystem::file_type::symlink) {
+      it.disable_recursion_pending();
+      continue;
+    }
     const bool directory = entry.is_directory(error);
     if (error) break;
     if (!directory && (!entry.is_regular_file(error) || !supported_audio(entry.path()))) {
