@@ -776,6 +776,13 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = true
         window.focusOverlayRestoreFailure(message, target)
     }
+    function focusOverlayDisplayRecoveryFailure(message, target) {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayLaunchFallbackActive = true
+        window.overlayCaptureEvidenceStale = true
+        window.focusOverlayRestoreFailure(message, target)
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -1436,31 +1443,19 @@ ApplicationWindow {
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
                 || window.overlayBridge.screenNames.length === 0) {
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
+            window.focusOverlayDisplayRecoveryFailure("No usable display is available for overlay recovery; choose an available display before restoring the overlay.", overlayDisplay)
             return false
         }
         const savedNameIndex = window.overlayPreferredDisplayName !== ""
             ? window.overlayBridge.screenNames.indexOf(window.overlayPreferredDisplayName) : -1
         const savedIndex = savedNameIndex >= 0 ? savedNameIndex : window.overlayPreferredScreenIndex
         if (savedIndex < 0 || savedIndex >= window.overlayBridge.screenNames.length) {
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
-            window.overlayCaptureEvidenceStale = true
-            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay. Live evidence is stale until fresh capture arrives.")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayDisplayRecoveryFailure("Overlay display selection is stale; choose an available display before restoring the overlay.", overlayDisplay)
             return false
         }
         if (!window.overlayBridge.moveToScreen(savedIndex)
                 || !window.restoreOverlayVisualStateFromBridge()) {
-            window.overlayDisplayRecoveryPending = true
-            window.overlayDisplaySelectionRequired = true
-            window.overlayLaunchFallbackActive = true
-            window.overlayCaptureEvidenceStale = true
-            window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied. Live evidence is stale until fresh capture arrives.")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayDisplayRecoveryFailure("DJ overlay display restored, but persisted visual state could not be reapplied.", overlayDisplay)
             return false
         }
         window.overlayPreferredScreenIndex = savedIndex

@@ -52,3 +52,11 @@ def test_persisted_settings_failures_share_stale_recovery_focus():
     assert "overlayCaptureEvidenceStale = true" in body
     settings = QML[QML.index("function reapplyOverlaySettingsAndRestore") : QML.index("    function recoverOverlayAfterDisplayChange")]
     assert settings.count("window.focusOverlaySettingsRecoveryFailure(") == 3
+
+
+def test_display_recovery_failures_share_selection_focus():
+    start = QML.index("function focusOverlayDisplayRecoveryFailure")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    recovery = QML[QML.index("function recoverOverlayAfterDisplayChange") : QML.index("    function forgetUnavailableOverlayDisplay")]
+    assert recovery.count("window.focusOverlayDisplayRecoveryFailure(") == 3
