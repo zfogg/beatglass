@@ -655,7 +655,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> library_labels;
   std::vector<int> library_indices;
   int library_visible_selected = 0;
-#if defined(_WIN32) || defined(__APPLE__)
+#ifdef _WIN32
   beatglass::SourceEpochAllocator live_epochs;
   std::unique_ptr<beatglass::windows::LoopbackSession> live_session;
   std::unique_ptr<beatglass::CausalTempoReplay> live_replay = std::make_unique<beatglass::CausalTempoReplay>();
