@@ -600,3 +600,12 @@ def test_hide_action_requires_available_overlay():
     assert "focusOverlayAvailabilityRecovery" in body
     assert "showOverlay" in body
     assert "return" in body
+
+
+def test_show_action_requires_available_display():
+    start = QML.index("function handleOverlayShowAction")
+    body = QML[start : QML.index("    function focusOverlayDisplayShortcut", start)]
+    assert "overlayDisplaySelectionRequired" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return false" in body
