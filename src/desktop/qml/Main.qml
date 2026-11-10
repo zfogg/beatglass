@@ -3143,7 +3143,7 @@ ApplicationWindow {
                         id: analyzeRecursiveResults
                         objectName: "analyzeRecursiveResults"
                         anchors.left: parent.left; anchors.bottom: parent.bottom
-                        text: "Analyze first files (" + window.recursiveAudioResultCount + ")"
+                        text: "Analyze first files (up to 2 of " + window.recursiveAudioResultCount + ")"
                         enabled: window.analysisJobBridge !== null && window.analysisJobBridge.submitSelectedFiles !== undefined && window.recursiveAudioResultCount > 0 && window.analysisJobBridge.status !== "Queued" && window.analysisJobBridge.status !== "Running"
                         Accessible.value: enabled ? "available; " + window.recursiveAudioResultCount + " audio results found" : "unavailable; no audio results or analysis is active"
                         Accessible.name: "Analyze recursive audio results"
