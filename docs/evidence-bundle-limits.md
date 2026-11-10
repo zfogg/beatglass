@@ -100,6 +100,8 @@ Manifest byte-limit violations are grouped under `manifest_size` in JSON
 output for direct input-capacity triage.
 Artifact-count limit violations are grouped under `entry_count` for direct
 bundle-cardinality triage.
+Unsupported artifact fields are grouped under `artifact_schema` for direct
+manifest-contract triage.
 Timestamp format, timezone, and future-capture failures are grouped under
 `temporal` in JSON output for clear freshness and clock-discipline reporting.
 Missing retained evidence for a required scenario is grouped under
