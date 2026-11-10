@@ -936,6 +936,8 @@ ApplicationWindow {
             || window.overlayBridge.screenNames.length === 0 || savedIndex < 0
         window.overlayDisplayRecoveryPending = window.overlayBridge.screenNames.length === 0 || window.overlayDisplaySelectionRequired
         window.overlayLaunchFallbackActive = window.overlayDisplaySelectionRequired
+        if (window.overlayDisplaySelectionRequired)
+            window.overlayCaptureEvidenceStale = true
         return window.overlayBridge.available && savedIndex >= 0
     }
     function restoreOverlayVisualStateFromBridge() {

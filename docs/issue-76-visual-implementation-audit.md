@@ -978,6 +978,8 @@ Display recovery now commits the native bridge's canonical display identity afte
 
 Reapply now rejects a persisted display index that is outside the currently enumerated displays before calling the native bridge, returning focus to destination recovery instead of attempting an invalid restore.
 
+When no destination display is enumerated, display-selection recovery now explicitly marks overlay evidence stale so the live status matches the unavailable native destination.
+
 The output endpoint empty state now uses live status semantics alongside endpoint discovery and recovery guidance, so missing-device remediation is announced consistently.
 
 The output-device selector is explicitly keyboard reachable, keeping monitoring setup usable from the same keyboard recovery path as endpoint refresh and status guidance.
