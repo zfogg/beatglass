@@ -625,6 +625,7 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Retained settings remain available."))
         if (target)
             target.forceActiveFocus()
+        return target !== null && target !== undefined
     }
     function focusOverlayBridgeSettingsFailure(message, target) {
         window.overlayLaunchFallbackActive = true
