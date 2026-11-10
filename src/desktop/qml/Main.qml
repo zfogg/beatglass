@@ -4597,6 +4597,7 @@ ApplicationWindow {
                             : "Overlay capture retry is unavailable; settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description
                         onClicked: {
+                            window.overlayCaptureEvidenceStale = true
                             window.captureMonitorBridge.start()
                             window.announceCaptureRecoveryState("Overlay capture retry requested; waiting for a fresh accepted snapshot.")
                             overlayLiveMonitoringState.forceActiveFocus()
