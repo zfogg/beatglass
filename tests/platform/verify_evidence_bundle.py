@@ -86,6 +86,7 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if (
             not isinstance(relative, str)
             or not isinstance(expected, str)
+            or raw_expected != expected
             or not re.fullmatch(r"[0-9a-f]{64}", expected)
             or (isinstance(relative, str) and "\x00" in relative)
             or not canonical

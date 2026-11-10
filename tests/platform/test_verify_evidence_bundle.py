@@ -54,6 +54,17 @@ class EvidenceBundleTest(unittest.TestCase):
             errors = module.verify(root, manifest)
             self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
 
+    def test_artifact_hash_must_be_lowercase(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); artifact = root / "capture.txt"; artifact.write_text("x\n", encoding="utf-8")
+            manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "2020-01-01T00:00:00Z",
+                    "environment": "test", "artifacts": [{"path": "capture.txt", "sha256": "A" * 64, "role": "capture"}],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
+
     def test_capture_timestamp_must_be_timezone_aware_iso8601(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
