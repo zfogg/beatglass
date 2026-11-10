@@ -1230,15 +1230,39 @@ int main(int argc, char** argv) {
       live_button_label = " Start monitoring ";
       return;
     }
-    if (!live_pipewire || live_endpoint_ids.empty()) { live_status = "No PipeWire output sink is available."; return; }
-    if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoint_ids.size())) { live_status = "Select an available output sink first."; return; }
+    if (!live_pipewire || live_endpoint_ids.empty()) { live_status =
+#ifdef __APPLE__
+      "No macOS output source is available."
+#else
+      "No PipeWire output sink is available."
+#endif
+      ;
+      return; }
+    if (live_selected < 0 || live_selected >= static_cast<int>(live_endpoint_ids.size())) { live_status =
+#ifdef __APPLE__
+      "Select an available macOS output source first."
+#else
+      "Select an available output sink first."
+#endif
+      ;
+      return; }
     if (live_pipewire->start_stream(live_endpoint_ids[static_cast<std::size_t>(live_selected)], ++live_pipewire_epoch, 48000, 2)) {
       set_live_presentation_state(beatglass::TrackingState::reacquiring);
       live_last_packet = std::chrono::steady_clock::now();
       live_has_packet = false;
-      live_status = "Starting PipeWire monitor…";
+      live_status =
+#ifdef __APPLE__
+        "Starting CoreAudio output tap…";
+#else
+        "Starting PipeWire monitor…";
+#endif
       live_button_label = " Stop monitoring ";
-    } else live_status = "PipeWire monitor could not start; refresh sinks and retry.";
+    } else live_status =
+#ifdef __APPLE__
+      "CoreAudio output tap could not start; check recording permission.";
+#else
+      "PipeWire monitor could not start; refresh sinks and retry.";
+#endif
 #else
     live_status = "Native loopback capture is unavailable in this build.";
 #endif
@@ -1637,7 +1661,12 @@ int main(int argc, char** argv) {
             for (std::size_t frame = 0; frame < mono.size(); ++frame) { float sum = 0.0f; for (std::uint32_t channel = 0; channel < packet_channels; ++channel) sum += packet.samples[frame * packet.channels + channel]; mono[frame] = sum / static_cast<float>(packet_channels); }
             for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) { const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset); if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate, std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) { const auto revision = ++live_visualization_revision; if (live_visualization_presentation.accept(frame->epoch, revision, *frame)) live_visualization_frame = std::move(frame); } }
             if (live_visualization_frame) { const auto& frame = *live_visualization_frame; for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) { const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size())); live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source])); } for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) { const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size())); live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f); } live_spectrum_history.push_back(live_spectrum); if (live_spectrum_history.size() > 12) live_spectrum_history.erase(live_spectrum_history.begin()); }
-            live_status = "Receiving PipeWire sink audio; analysis is worker-owned and discontinuity-safe.";
+            live_status =
+#ifdef __APPLE__
+              "Receiving CoreAudio output-tap audio; analysis is worker-owned and discontinuity-safe.";
+#else
+              "Receiving PipeWire sink audio; analysis is worker-owned and discontinuity-safe.";
+#endif
           } catch (const std::exception& error) { live_tracking_state = beatglass::TrackingState::error; live_status = std::string("Live analysis failed: ") + error.what(); live_pipewire->stop(); }
         }
         const auto pipewire_status = live_pipewire->poll_status();
@@ -1646,8 +1675,20 @@ int main(int argc, char** argv) {
         // failed stream; only loss of activity, restart, overflow, or an error
         // requires clearing evidence and reacquiring. MonitorStatus::requires_reacquisition
         // remains the broad contract; this UI path distinguishes its boundary marker.
-        if (!pipewire_status.active || pipewire_status.needs_restart || pipewire_status.overflowed || pipewire_status.has_error()) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status = "PipeWire capture needs reacquisition; restart monitoring for a fresh epoch."; }
-        if (live_has_packet && std::chrono::steady_clock::now() - live_last_packet > std::chrono::milliseconds(1500)) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status = "Capture is running but no fresh PipeWire packets arrived; reacquiring…"; live_has_packet = false; }
+        if (!pipewire_status.active || pipewire_status.needs_restart || pipewire_status.overflowed || pipewire_status.has_error()) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status =
+#ifdef __APPLE__
+          "CoreAudio capture needs reacquisition; restart monitoring for a fresh epoch.";
+#else
+          "PipeWire capture needs reacquisition; restart monitoring for a fresh epoch.";
+#endif
+        }
+        if (live_has_packet && std::chrono::steady_clock::now() - live_last_packet > std::chrono::milliseconds(1500)) { clear_live_evidence(); live_tracking_state = beatglass::TrackingState::reacquiring; set_live_presentation_state(beatglass::TrackingState::reacquiring); live_status =
+#ifdef __APPLE__
+          "Capture is running but no fresh CoreAudio packets arrived; reacquiring…";
+#else
+          "Capture is running but no fresh PipeWire packets arrived; reacquiring…";
+#endif
+          live_has_packet = false; }
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
