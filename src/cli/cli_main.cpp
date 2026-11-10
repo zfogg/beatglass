@@ -272,6 +272,16 @@ void save_preferences(const CliPreferences& preferences) {
 }
 using namespace ftxui;
 
+std::string shell_quote(const std::string& value) {
+  std::string quoted = "'";
+  for (const char character : value) {
+    if (character == '\'') quoted += "'\\''";
+    else quoted += character;
+  }
+  quoted += "'";
+  return quoted;
+}
+
 bool open_folder_in_file_manager(const std::filesystem::path& folder, std::string& error) {
   if (folder.empty() || !std::filesystem::is_directory(folder)) {
     error = "Folder unavailable: " + folder.string();
@@ -284,17 +294,13 @@ bool open_folder_in_file_manager(const std::filesystem::path& folder, std::strin
     return false;
   }
 #elif defined(__APPLE__)
-  std::ostringstream quoted_path;
-  quoted_path << std::quoted(folder.string());
-  const auto command = "open -- " + quoted_path.str();
+  const auto command = "open -- " + shell_quote(folder.string());
   if (std::system(command.c_str()) != 0) {
     error = "macOS could not open the folder.";
     return false;
   }
 #else
-  std::ostringstream quoted_path;
-  quoted_path << std::quoted(folder.string());
-  const auto command = "xdg-open -- " + quoted_path.str();
+  const auto command = "xdg-open -- " + shell_quote(folder.string());
   if (std::system(command.c_str()) != 0) {
     error = "The desktop could not open the folder (xdg-open failed).";
     return false;
