@@ -2463,7 +2463,7 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = true
         window.overlayDisplaySelectionRequired = true
         window.overlayCaptureEvidenceStale = true
-        window.focusOverlayAvailabilityRecovery("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.", overlayDisplay)
+        return window.focusOverlayAvailabilityRecovery("DJ overlay display disappeared; overlay actions disabled and controls restored until a display is available.", overlayDisplay)
     }
     function announceOverlayGeometryState() {
         if (!window.overlayBridge || !window.overlayBridge.geometry || window.overlayBridge.geometry.width <= 0)
@@ -2475,7 +2475,7 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = true
         window.overlayDisplaySelectionRequired = true
         window.overlayCaptureEvidenceStale = true
-        window.focusOverlayAvailabilityRecovery("Overlay geometry changed, but retained settings could not be synchronized; choose a display before retrying.", overlayDisplay)
+        return window.focusOverlayAvailabilityRecovery("Overlay geometry changed, but retained settings could not be synchronized; choose a display before retrying.", overlayDisplay)
     }
     function focusOverlayDisplaySelectionRequired() {
         window.overlayDisplaySelectionRequired = true
