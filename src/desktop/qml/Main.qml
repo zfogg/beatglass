@@ -4675,10 +4675,10 @@ ApplicationWindow {
                         activeFocusOnTab: true
                         enabled: visible
                         Accessible.name: text
-                        Accessible.value: (window.overlayDisplayRecoveryPending ? "recovery pending" : "settings retained") + "; settings revision " + window.overlaySettingsRevision
+                        Accessible.value: (window.overlayCaptureEvidenceStale ? "evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "recovery pending" : "settings retained") + "; settings revision " + window.overlaySettingsRevision
                         Accessible.role: Accessible.Button
                         Accessible.description: window.overlayDisplayRecoveryPending
-                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending; current settings revision " + window.overlaySettingsRevision + "."
+                            ? "Focus the overlay settings-retention status to review persisted settings while recovery is pending; current settings revision " + window.overlaySettingsRevision + (window.overlayCaptureEvidenceStale ? ". Previously displayed evidence is stale until fresh capture arrives." : ".")
                             : "Focus the overlay settings-retention status to review persisted display, geometry, opacity, and interaction settings; current settings revision " + window.overlaySettingsRevision + "."
                         ToolTip.text: Accessible.description + " Current settings revision: " + window.overlaySettingsRevision + "."
                         onClicked: {
