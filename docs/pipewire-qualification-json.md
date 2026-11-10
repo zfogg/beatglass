@@ -288,6 +288,9 @@ host identities out of otherwise well-formed timing evidence.
 Platform identifiers are also case-sensitive; the regression in
 `tests/unit/check_native_host_provenance_platform_case.py` prevents aliases such
 as `Linux` from being mistaken for the canonical `linux` value.
+The whitespace regression in
+`tests/unit/check_native_host_provenance_platform_whitespace.py` similarly
+rejects padded platform identifiers instead of normalizing producer errors.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
