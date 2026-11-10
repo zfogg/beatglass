@@ -303,6 +303,9 @@ platform identity rather than treating it as an unknown alias.
 The null-name regression in
 `tests/unit/check_native_host_provenance_name_null.py` keeps absent host identity
 fail-closed even when platform and timing evidence are present.
+The name-type regression in
+`tests/unit/check_native_host_provenance_name_type.py` rejects numeric identity
+values rather than coercing them into display text.
 The schema title is `Beatglass native host provenance` and its required
 identity fields are exactly `platform` and `name`.
 The host schema platform enum is exactly `linux`, `windows`, and `macos`,
