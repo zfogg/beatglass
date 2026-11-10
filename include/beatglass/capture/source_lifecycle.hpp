@@ -55,9 +55,9 @@ public:
   SourceState state() const noexcept { return state_; }
   /** Current epoch, absent unless running. */
   std::optional<std::uint64_t> epoch() const noexcept { return epoch_; }
-  /** Begin an attempt from stopped or error; generation exhaustion fails. */
+  /** Begin an attempt from stopped, interrupted, or error; generation exhaustion fails. */
   std::optional<SourceAttempt> start() noexcept {
-    if ((state_ != SourceState::stopped && state_ != SourceState::error) || generation_ == std::numeric_limits<std::uint64_t>::max()) return std::nullopt;
+    if ((state_ != SourceState::stopped && state_ != SourceState::interrupted && state_ != SourceState::error) || generation_ == std::numeric_limits<std::uint64_t>::max()) return std::nullopt;
     ++generation_; last_sequence_ = 0; epoch_.reset(); state_ = SourceState::starting; return SourceAttempt{generation_};
   }
   /** Apply an ordered transition. Running requires a fresh, nonzero epoch; other states require no epoch.
