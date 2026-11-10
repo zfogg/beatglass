@@ -18,6 +18,11 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has an invalid platform")
         if not isinstance(host.get("name"), str) or not host["name"].strip():
             raise SystemExit("transition host provenance has no host name")
+        if host.get("node_id") is not None and (
+                not isinstance(host["node_id"], int)
+                or isinstance(host["node_id"], bool)
+                or host["node_id"] <= 0):
+            raise SystemExit("transition host provenance has an invalid node id")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
