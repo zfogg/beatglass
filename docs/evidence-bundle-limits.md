@@ -99,3 +99,6 @@ configuration that marks every retained bundle stale.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.
+JSON output groups these pre-parse failures under `input_topology`, allowing
+qualification dashboards to distinguish workspace setup errors from content
+validation failures.
