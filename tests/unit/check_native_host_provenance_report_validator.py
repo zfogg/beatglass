@@ -62,3 +62,22 @@ with tempfile.TemporaryDirectory() as directory:
     assert result.returncode != 0
     assert "invalid checked fields" in result.stderr
 print("Native host provenance type rejection verified")
+
+with tempfile.TemporaryDirectory() as directory:
+    report = Path(directory) / "unknown-field.json"
+    report.write_text(json.dumps({
+        "schema": "beatglass-native-host-provenance-v1",
+        "valid": True,
+        "platform": "linux",
+        "name": "qualification-host",
+        "checked_fields": ["name", "platform"],
+        "unexpected": "not part of the report contract",
+    }), encoding="utf-8")
+    result = subprocess.run(
+        ["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "unsupported fields" in result.stderr
+print("Native host provenance unknown-field rejection verified")

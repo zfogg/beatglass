@@ -8,6 +8,8 @@ if len(sys.argv) != 2:
 report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 if not isinstance(report, dict) or report.get("schema") != "beatglass-native-host-provenance-v1":
     raise SystemExit("host provenance report has an unsupported schema")
+if set(report) != {"schema", "valid", "platform", "name", "checked_fields"}:
+    raise SystemExit("host provenance report has unsupported fields")
 if report.get("valid") is not True:
     raise SystemExit("host provenance report is not valid")
 if report.get("platform") not in ("linux", "windows", "macos"):
