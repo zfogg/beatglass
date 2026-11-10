@@ -16,6 +16,8 @@ if isinstance(payload, dict):
     if host is not None:
         if not isinstance(host, dict) or host.get("platform") not in ("linux", "windows", "macos"):
             raise SystemExit("transition host provenance has an invalid platform")
+        if not isinstance(host.get("name"), str) or not host["name"].strip():
+            raise SystemExit("transition host provenance has no host name")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
