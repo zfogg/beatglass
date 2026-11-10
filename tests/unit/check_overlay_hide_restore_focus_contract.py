@@ -44,3 +44,11 @@ def test_unlock_workflow_centralizes_success_and_failure_focus():
     unlock = QML[QML.index("function unlockOverlayAndRestoreFocus") : QML.index("    function reapplyOverlaySettingsAndRestore")]
     assert unlock.count("window.focusOverlayUnlockState(") == 2
     assert "setClickThrough(false)" in unlock
+
+
+def test_persisted_settings_failures_share_stale_recovery_focus():
+    start = QML.index("function focusOverlaySettingsRecoveryFailure")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "overlayCaptureEvidenceStale = true" in body
+    settings = QML[QML.index("function reapplyOverlaySettingsAndRestore") : QML.index("    function recoverOverlayAfterDisplayChange")]
+    assert settings.count("window.focusOverlaySettingsRecoveryFailure(") == 3
