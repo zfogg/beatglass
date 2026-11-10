@@ -156,3 +156,11 @@ def test_geometry_recovery_preserves_stale_state_and_focuses_next_action():
     assert "recoverOverlayAfterDisplayChange()" in body
     assert "retryOverlay.forceActiveFocus()" in body
     assert "handleOverlayGeometryRecovery()" in QML[QML.index("function onGeometryChanged") : start]
+
+
+def test_geometry_status_announcement_preserves_stale_boundary():
+    start = QML.index("function announceOverlayGeometryState")
+    body = QML[start : QML.index("    function focusOverlayDisplaySelectionRequired", start)]
+    assert "overlayCaptureEvidenceStale = true" in body
+    assert "Live evidence remains stale until fresh capture arrives." in body
+    assert "announceOverlayGeometryState()" in QML[QML.index("function onGeometryChanged") : start]
