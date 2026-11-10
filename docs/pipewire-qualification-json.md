@@ -276,6 +276,9 @@ The core timing summary fields are typed as integers too: `clock_accuracy_ns`
 is non-negative and `clock_source_count` is positive. These constraints define
 the evidence shape only; validation does not manufacture timing measurements,
 and native qualification still requires actual host evidence.
+Runtime host validation rejects negative, fractional, boolean, and string values
+for these timing counters, preserving the schema's integer contract before a
+report is emitted.
 Optional `secure_boot` and `tpm_present` schema properties are boolean-typed,
 matching runtime rejection of numeric sentinels.
 The host schema permits additional properties for forward-compatible native
