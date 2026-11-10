@@ -1356,11 +1356,12 @@ ApplicationWindow {
     function handleOverlayUnlockAction() {
         if (!window.overlayBridge || !window.overlayBridge.available || !window.overlayBridge.clickThrough) {
             window.focusOverlayAvailabilityRecovery("Overlay unlock is unavailable because click-through mode is not active or the native overlay is unavailable.", unlockOverlay)
-            return
+            return false
         }
         const restored = window.unlockOverlayAndRestoreFocus()
         if (restored)
             overlayInteractionMode.forceActiveFocus()
+        return restored
     }
     function focusOverlaySummaryReviewShortcut() {
         navigation.currentIndex = 1

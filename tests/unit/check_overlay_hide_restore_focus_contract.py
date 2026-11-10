@@ -624,3 +624,11 @@ def test_reapply_button_respects_native_result_focus():
     assert "const reapplied" in body
     assert "if (reapplied)" in body
     assert "reapplyOverlaySettings.forceActiveFocus()" in body
+
+def test_unlock_action_returns_native_restoration_result():
+    start = QML.index("function handleOverlayUnlockAction")
+    body = QML[start : QML.index("    function focusOverlaySummaryReviewShortcut", start)]
+    assert "const restored" in body
+    assert "if (restored)" in body
+    assert "return restored" in body
+    assert "return false" in body
