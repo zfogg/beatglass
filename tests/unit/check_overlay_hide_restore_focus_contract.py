@@ -1141,6 +1141,13 @@ def test_overlay_pulse_status_reports_capture_state():
     assert "captureMonitorBridge.status" in label
 
 
+def test_overlay_pulse_visible_status_includes_capture_lifecycle():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert '"capture unavailable"' in label
+    assert "captureMonitorBridge.status" in label
+
+
 def test_overlay_pulse_status_label_exposes_running_state():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
