@@ -7,6 +7,10 @@ from pathlib import Path
 if len(sys.argv) not in (2, 4) or (len(sys.argv) == 4 and sys.argv[2] != "--summary"):
     raise SystemExit("usage: qualification_matrix.py OUTPUT.json [--summary SUMMARY.json]")
 output = Path(sys.argv[1])
+if output.is_symlink():
+    raise SystemExit("qualification matrix output is a symbolic link")
+if output.exists() and not output.is_file():
+    raise SystemExit("qualification matrix output is not a regular file")
 if len(sys.argv) == 4:
     try:
         summary = json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
