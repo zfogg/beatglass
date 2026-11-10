@@ -498,6 +498,17 @@ def test_display_selection_recovery_keeps_selector_focused():
     assert 'window.focusOverlayDisplaySelectionRecovery("Overlay display selection could not be applied' in QML
 
 
+def test_resume_recovery_routes_button_and_shortcut_to_shared_action():
+    start = QML.index("function handleOverlayResumeRecoveryAction")
+    body = QML[start : QML.index("    function handleOverlayClearSafeModeShortcut", start)]
+    assert "overlayRecoveryPausedByUser = false" in body
+    assert "overlayRecoveryAttemptCount = 1" in body
+    assert "showOverlayAndHideControls()" in body
+    assert "overlayDisplayStatus.forceActiveFocus()" in body
+    assert "window.handleOverlayResumeRecoveryAction()" in QML
+    assert "onClicked: window.handleOverlayResumeRecoveryAction()" in QML
+
+
 def test_size_recovery_keeps_selector_focused():
     start = QML.index("function focusOverlaySizeRecovery")
     body = QML[start : QML.index("    function handleOverlayClickThroughButtonAction", start)]
