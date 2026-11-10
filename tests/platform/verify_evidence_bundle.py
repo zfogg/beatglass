@@ -128,6 +128,8 @@ def verify(root: Path, manifest: Path) -> list[str]:
         if "role" in entry and len(entry["role"]) > 128:
             errors.append(f"artifact role exceeds 128 characters: {relative}"); continue
         seen.add(canonical.casefold())
+        if (root / canonical).is_symlink():
+            errors.append(f"artifact must not be a symlink: {relative}"); continue
         path = (root / canonical).resolve()
         if root.resolve() not in path.parents:
             errors.append(f"artifact escapes bundle: {relative}"); continue
