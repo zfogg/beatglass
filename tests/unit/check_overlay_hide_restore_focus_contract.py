@@ -321,3 +321,11 @@ def test_safe_mode_clear_shortcut_focuses_retry():
     assert "resetOverlayRecoveryAttempts()" in body
     assert "retryOverlay.forceActiveFocus()" in body
     assert "overlayCaptureEvidenceStale" in body
+
+
+def test_stop_shortcut_pauses_and_focuses_resume():
+    start = QML.index("function handleOverlayStopShortcut")
+    body = QML[start : QML.index("    function recoverOverlayAfterDisplayChange", start)]
+    assert "stopOverlayRecoveryAttempts()" in body
+    assert "resumeOverlayRecovery.forceActiveFocus()" in body
+    assert "Live evidence remains stale" in body
