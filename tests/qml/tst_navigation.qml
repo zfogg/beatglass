@@ -2142,6 +2142,21 @@ TestCase {
         app.destroy()
         fakeOverlay.geometry = ({ x: 120, y: 80, width: 430, height: 240 })
     }
+    function test_reapplyRejectsPersistedDisplayIndexOutsideAvailableDisplays() {
+        fakeOverlay.available = true
+        fakeOverlay.screenNames = ["Display"]
+        fakeOverlay.screenIndex = 4
+        let app = shellWithOverlay.createObject(null)
+        app.overlayPreferredDisplayName = "Disconnected"
+        app.hideOverlayAndRestoreControls()
+        findChild(app, "reapplyOverlaySettings").clicked()
+        verify(app.overlayDisplayRecoveryPending)
+        verify(app.overlayDisplaySelectionRequired)
+        verify(app.overlayLaunchFallbackActive)
+        verify(app.overlayRecoveryAnnouncement.indexOf("no longer available") >= 0)
+        app.destroy()
+        fakeOverlay.screenIndex = -1
+    }
     function test_reapplyGeometryRecoveryCanRetryWithoutResettingSettings() {
         fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)

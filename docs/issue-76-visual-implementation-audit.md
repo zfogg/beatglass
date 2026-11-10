@@ -976,6 +976,8 @@ The overlay display selector is now explicitly keyboard reachable as well, ensur
 
 Display recovery now commits the native bridge's canonical display identity after geometry and visual-state synchronization succeeds, preventing a stale picker label from being retained across relaunch while keeping the control-window fallback transactional on failure.
 
+Reapply now rejects a persisted display index that is outside the currently enumerated displays before calling the native bridge, returning focus to destination recovery instead of attempting an invalid restore.
+
 The output endpoint empty state now uses live status semantics alongside endpoint discovery and recovery guidance, so missing-device remediation is announced consistently.
 
 The output-device selector is explicitly keyboard reachable, keeping monitoring setup usable from the same keyboard recovery path as endpoint refresh and status guidance.
