@@ -329,6 +329,8 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertFalse(report["valid"])
             self.assertEqual(report["error_count"], len(report["errors"]))
             self.assertIn("max_total_artifact_bytes", report["limits"])
+            self.assertEqual(report["artifact_count"], 0)
+            self.assertEqual(report["artifact_bytes"], 0)
 
     def test_custom_artifact_limit_is_enforced(self):
         with tempfile.TemporaryDirectory() as tmp:
