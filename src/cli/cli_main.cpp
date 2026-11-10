@@ -58,6 +58,13 @@ Element metric(std::string label, std::string value, Color accent) {
 Element action(Element element, Color accent) {
   return element | color(accent) | bold;
 }
+Element progress_meter(std::uint64_t percent) {
+  constexpr std::size_t width = 36;
+  const auto filled = std::min<std::size_t>(width, static_cast<std::size_t>(percent * width / 100));
+  return hbox({text("["), text(std::string(filled, '#')) | color(Color::GreenLight) | bold,
+               text(std::string(width - filled, '-')) | color(Color::GrayDark), text("] ") ,
+               text(std::to_string(percent) + "%") | color(Color::YellowLight) | bold});
+}
 struct AnalysisView {
   beatglass::TempoResult result;
   std::vector<float> waveform;
@@ -598,7 +605,7 @@ int main(int argc, char** argv) {
     const auto completed = batch_completed.load(std::memory_order_acquire);
     const auto total = batch_total.load(std::memory_order_acquire);
     const auto batch_label = total > 1 ? "  [" + std::to_string(completed) + "/" + std::to_string(total) + " tracks]" : "";
-    auto status_view = busy ? hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + batch_label + (progress_total ? "  " + std::to_string(progress) + "%" : ""))}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(status) | color(Color::GrayLight) | italic;
+    auto status_view = busy ? vbox({hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + batch_label)}) | color(Color::YellowLight), progress_total ? progress_meter(progress) : text("Preparing decoder…") | color(Color::GrayLight) | italic}) | bgcolor(Color::RGB(43, 36, 16)) : text(status) | color(Color::GrayLight) | italic;
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
     const auto playback_status =
 #ifdef _WIN32
