@@ -348,3 +348,13 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertEqual(ingest.ingest(root, root / "manifest.json"), [])
             data = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(data["captured_at"], "2026-01-01T06:00:00Z")
+
+    def test_generated_manifest_is_written_atomically_without_temp_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=2026-01-01T00:00:00Z\n", encoding="utf-8")
+            (root / "qualification-artifacts.sha256").write_text("", encoding="utf-8")
+            output = root / "manifest.json"
+            self.assertEqual(ingest.ingest(root, output), [])
+            self.assertTrue(output.is_file())
+            self.assertEqual(list(root.glob(".manifest.json.*.tmp")), [])
