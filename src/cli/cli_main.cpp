@@ -1199,7 +1199,8 @@ int main(int argc, char** argv) {
 #ifdef BEATGLASS_CLI_MUSIC_REPLAY
     const auto live_key_label = live_presentation.key;
     const auto live_chord_label = live_presentation.chord;
-    const auto live_tonal_label = live_presentation.stale ? std::string("stale evidence — waiting for fresh tonal windows") : live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history);
+    const auto& shared_tonal_history = live_presentation.tonal_history;
+    const auto live_tonal_label = live_presentation.stale ? std::string("stale evidence — waiting for fresh tonal windows") : shared_tonal_history.empty() ? (live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history)) : join_history(shared_tonal_history);
 #else
     const std::string live_key_label = "—";
     const std::string live_chord_label = "—";

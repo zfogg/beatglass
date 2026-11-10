@@ -5,7 +5,7 @@
 LivePresentation::LivePresentation(QObject* parent) : QObject(parent) {}
 bool LivePresentation::apply(beatglass::PresentationUpdate update) {
   if (!gate_.apply(std::move(update))) return false;
-  const auto displayed = gate_.current() ? beatglass::present_snapshot(*gate_.current()) : beatglass::PresentationState{"Stopped", "—", "—", "—", 0, 0, 0, std::nullopt, false};
+  const auto displayed = gate_.current() ? beatglass::present_snapshot(*gate_.current()) : beatglass::PresentationState{"Stopped", "—", "—", "—", 0, 0, 0, std::nullopt, {}, {}, false};
   status_ = QString::fromStdString(displayed.status);
   tempo_ = QString::fromStdString(displayed.tempo);
   key_ = QString::fromStdString(displayed.key);
@@ -19,6 +19,8 @@ bool LivePresentation::apply(beatglass::PresentationUpdate update) {
   for (const auto bpm : displayed.tempo_history) {
     if (std::isfinite(bpm) && bpm > 0.0f) tempo_history_.push_back(QString::number(bpm, 'f', 1));
   }
+  tonal_history_.clear();
+  for (const auto& label : displayed.tonal_history) tonal_history_.push_back(QString::fromStdString(label));
   emit changed();
   return true;
 }

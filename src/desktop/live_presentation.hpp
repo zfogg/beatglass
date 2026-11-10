@@ -26,6 +26,7 @@ class LivePresentation : public QObject {
   Q_PROPERTY(double confidence READ confidence NOTIFY changed)
   Q_PROPERTY(bool stale READ stale NOTIFY changed)
   Q_PROPERTY(QStringList tempoHistory READ tempoHistory NOTIFY changed)
+  Q_PROPERTY(QStringList tonalHistory READ tonalHistory NOTIFY changed)
 public:
   /** Construct on the owning GUI thread; parent, if any, has the same thread. */
   explicit LivePresentation(QObject* parent = nullptr);
@@ -51,6 +52,8 @@ public:
   bool stale() const { return stale_; }
   /** Recent causal tempo labels, oldest first. */
   QStringList tempoHistory() const { return tempo_history_; }
+  /** Recent causal chord labels, oldest first. */
+  QStringList tonalHistory() const { return tonal_history_; }
 signals:
   /** Emitted on the owning thread when a newer update is applied. */
   void changed();
@@ -62,4 +65,5 @@ private:
   double confidence_ = -1.0;
   bool stale_ = false;
   QStringList tempo_history_;
+  QStringList tonal_history_;
 };
