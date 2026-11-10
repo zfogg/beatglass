@@ -132,6 +132,8 @@ Invalid scenario status values are grouped under `status` for direct result
 state triage.
 Malformed scenario evidence references are grouped under `scenario_reference`
 for direct retained-evidence naming triage.
+Malformed scenario evidence paths are grouped under `scenario_path` for direct
+scenario-boundary triage.
 Unsupported scenario fields are grouped under `scenario_schema` for direct
 manifest-contract triage.
 Shared scenario evidence ownership is grouped under `scenario_identity` for
