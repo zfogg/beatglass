@@ -114,6 +114,8 @@ Commit identifier format failures are grouped under `commit` for direct build
 provenance triage.
 Invalid scenario status values are grouped under `status` for direct result
 state triage.
+Malformed scenario evidence references are grouped under `scenario_reference`
+for direct retained-evidence naming triage.
 The verifier also rejects symlinked bundle roots and manifest inputs, and
 requires the root to be a directory and manifest to be a regular file before
 parsing.
