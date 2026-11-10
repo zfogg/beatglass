@@ -45,6 +45,11 @@ struct JobExecutor::Impl {
   std::condition_variable ready;
   std::deque<Job> queue;
   bool stopping = false;
+  void prune_cancelled() {
+    queue.erase(std::remove_if(queue.begin(), queue.end(), [](const Job& job) {
+      return job.handle && job.handle->state() == TrackedState::cancelled;
+    }), queue.end());
+  }
   std::jthread worker;
 };
 JobExecutor::JobExecutor(std::size_t capacity) : impl_(std::make_unique<Impl>(capacity)) {}
@@ -52,6 +57,7 @@ JobExecutor::~JobExecutor() { shutdown(); }
 bool JobExecutor::submit(int priority, Work work) {
   if (!work) return false;
   std::lock_guard lock(impl_->mutex);
+  impl_->prune_cancelled();
   if (impl_->stopping || impl_->queue.size() >= impl_->capacity) return false;
   auto pos = std::find_if(impl_->queue.begin(), impl_->queue.end(), [priority](const Impl::Job& job) { return job.priority < priority; });
   impl_->queue.insert(pos, Impl::Job{priority, std::move(work), {}});
@@ -76,6 +82,7 @@ std::shared_ptr<JobHandle> JobExecutor::submit_tracked(int priority, TrackedWork
     std::lock_guard lock(state->mutex); state->status = result;
   };
   std::lock_guard lock(impl_->mutex);
+  impl_->prune_cancelled();
   if (impl_->stopping || impl_->queue.size() >= impl_->capacity) return {};
   auto pos = std::find_if(impl_->queue.begin(), impl_->queue.end(), [priority](const Impl::Job& job) { return job.priority < priority; });
   impl_->queue.insert(pos, Impl::Job{priority, std::move(wrapped), handle});
