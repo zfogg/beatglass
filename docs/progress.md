@@ -981,3 +981,15 @@ runtime, packaged dependencies, real playback/output routing, and retained
 Windows/macOS/Linux qualification bundles remain open; no headless result in
 this update advances those gates.
 
+## Integrated local gate — 2026-11-10
+
+On Windows x64, the isolated `C:\Temp\beatglass-self` checkout at `origin/main`
+commit `33b554cd2` configured with `cmake -S . -B build-direct -DBUILD_TESTING=ON`.
+`cmake --build build-direct -j 4` completed all configured targets, including
+the analysis-runner and Windows endpoint executables. `ctest --test-dir
+build-direct --output-on-failure` passed **231/231 tests**; the only non-run
+case was the expected unavailable-native-device scenario. This validates the
+portable build, unit/integration contracts, documentation checks, and issue-76
+QML contract locally. It does not qualify real WASAPI, Core Audio, PipeWire,
+desktop overlay, packaging, or native device behavior.
+
