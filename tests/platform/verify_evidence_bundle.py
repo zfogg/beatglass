@@ -246,7 +246,7 @@ def main() -> int:
                 category = "schema"
             elif error.startswith(("invalid or duplicate artifact entry", "duplicate artifact")):
                 category = "identity"
-            elif error.startswith(("artifact path", "scenario evidence path")):
+            elif error.startswith(("artifact path", "artifact escapes bundle", "scenario evidence path")):
                 category = "path"
             elif error.startswith("scenario evidence"):
                 category = "scenario_evidence"
