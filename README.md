@@ -65,7 +65,7 @@ cmake --build build --target beatglass_all_tests --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For example on Ubuntu 22.04:
+The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; run `beatglass-tui [audio-folder]` to browse local files and launch real analysis. For example on Ubuntu 22.04:
 
 ```sh
 sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript

@@ -20,6 +20,10 @@
     }
   ],
   "features": {
+    "tui": {
+      "description": "FTXUI terminal interface for beatglass-cli",
+      "dependencies": ["ftxui"]
+    },
     "desktop": {
       "description": "Qt Quick metadata shell",
       "dependencies": [
