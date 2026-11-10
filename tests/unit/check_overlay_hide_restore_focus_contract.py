@@ -1246,6 +1246,7 @@ def test_live_evidence_group_discloses_pulse_status_shortcut():
     start = QML.index('objectName: "overlayLiveEvidenceGroup"')
     body = QML[start : QML.index('objectName: "overlayEscapeHint"', start)]
     assert "Ctrl+Alt+Shift+B focuses the beat pulse status" in body
+    assert "; Ctrl+Alt+Shift+B focuses beat pulse status" in body
 
 
 def test_overlay_pulse_status_exposes_tempo_period():
