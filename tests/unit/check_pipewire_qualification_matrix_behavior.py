@@ -149,4 +149,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(control_commit), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "invalid commit provenance" not in result.stderr + result.stdout:
         raise SystemExit("control-character commit provenance was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": ["evidence\u0001.zip"], "pending_reason": "host unavailable"}), encoding="utf-8")
+    control_artifact = root / "control-artifact-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(control_artifact), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid native_artifacts" not in result.stderr + result.stdout:
+        raise SystemExit("control-character native artifact was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
