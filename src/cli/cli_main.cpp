@@ -1191,8 +1191,13 @@ int main(int argc, char** argv) {
     if (selected < 0 || selected >= static_cast<int>(tracks.size())) { status = "Select a supported audio file first."; return; }
     analyze_paths({tracks[selected].path});
   };
-  auto analyze_selected_button = Button(" Analyze selected ", analyze);
-  auto retry_analysis_button = Button(" Retry failed ", [&] {
+  ButtonOption compact_button_option;
+  compact_button_option.transform = [](const EntryState& state) {
+    auto label = text(state.label) | color(state.focused ? Color::White : Color::GrayLight);
+    return state.focused ? label | bgcolor(Color::RGB(25, 92, 112)) | bold : label;
+  };
+  auto analyze_selected_button = Button("Analyze selected", analyze, compact_button_option);
+  auto retry_analysis_button = Button("Retry failed", [&] {
     if (selected < 0 || selected >= static_cast<int>(tracks.size()) || !analysis_errors.contains(tracks[selected].path)) {
       status = "Select a failed track before retrying.";
       return;
@@ -1200,9 +1205,9 @@ int main(int argc, char** argv) {
     analysis_errors.erase(tracks[selected].path);
     status = "Retrying failed analysis…";
     analyze();
-  });
+  }, compact_button_option);
 #ifdef BEATGLASS_CLI_LIBRARY
-  auto recover_persisted_button = Button(" Recover persisted ", [&] {
+  auto recover_persisted_button = Button("Recover persisted", [&] {
     if (!library_storage) { status = "Persistent recovery is unavailable; SQLite storage is not open."; return; }
     const auto runs = library_storage->retryable_runs(1);
     if (runs.empty()) { status = "No persisted retryable analysis is waiting for recovery."; return; }
@@ -1213,7 +1218,7 @@ int main(int argc, char** argv) {
     analysis_errors.erase(path);
     status = "Recovering persisted analysis for " + found->title + "…";
     analyze_paths({path});
-  });
+  }, compact_button_option);
 #endif
   auto refresh = [&] {
     const auto cancelling = busy;
@@ -1240,7 +1245,7 @@ int main(int argc, char** argv) {
   };
   auto filter_input = Input(&filter, "Search library");
   auto folder_input = Input(&folder_text, "Audio folder");
-  auto clear_search_button = Button(" Clear search ", [&] { filter.clear(); status = "Library search cleared."; });
+  auto clear_search_button = Button("Clear search", [&] { filter.clear(); status = "Library search cleared."; }, compact_button_option);
   auto search_bar = Renderer(Container::Horizontal(Components{filter_input, clear_search_button}), [&] {
     return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 20) | borderRounded, text(" "), action(clear_search_button->Render(), Color::Cyan)});
   });
@@ -1280,31 +1285,31 @@ int main(int argc, char** argv) {
   std::string last_saved_visual_mode = visual_mode;
   int last_saved_playback_device = playback_device_selected;
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
-  auto refresh_button = Button(" Refresh ", refresh);
+  auto refresh_button = Button("Refresh", refresh, compact_button_option);
   std::string sort_button_label = " Sort: title ";
   auto sort_button = Button(&sort_button_label, [&] {
     sort_by_path = !sort_by_path;
     sort_button_label = sort_by_path ? " Sort: path " : " Sort: title ";
     refresh();
     status = std::string("Sorted visible Library by ") + (sort_by_path ? "path." : "title.");
-  });
-  auto cancel_analysis_button = Button(" Cancel analysis ", [&] {
+  }, compact_button_option);
+  auto cancel_analysis_button = Button("Cancel analysis", [&] {
     if (!busy) return;
     analysis_cancelled.store(true, std::memory_order_release);
     analysis_stop.request_stop();
     status = "Cancelling analysis…";
-  });
-  auto analyze_all_button = Button(" Analyze all ", [&] {
+  }, compact_button_option);
+  auto analyze_all_button = Button("Analyze all", [&] {
     std::vector<std::filesystem::path> paths;
     for (const auto index : library_indices) paths.push_back(tracks[static_cast<std::size_t>(index)].path);
     analyze_paths(std::move(paths));
-  });
-  auto open_folder_button = Button(" Open folder ", [&] {
+  }, compact_button_option);
+  auto open_folder_button = Button("Open folder", [&] {
     const std::filesystem::path requested(folder_text);
     std::string error;
     if (!open_folder_in_file_manager(requested, error)) { status = std::move(error); return; }
     root = requested; recursive = true; refresh(); persist_preferences(); status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
-  });
+  }, compact_button_option);
   std::vector<std::string> library_root_labels;
   int library_root_selected = 0;
   auto sync_library_root_labels = [&] {
@@ -1314,15 +1319,15 @@ int main(int argc, char** argv) {
     library_root_selected = std::clamp(library_root_selected, 0, static_cast<int>(library_root_labels.size()) - 1);
   };
   sync_library_root_labels();
-  auto add_folder_button = Button(" Add directory ", [&] {
+  auto add_folder_button = Button("Add directory", [&] {
     const std::filesystem::path requested(folder_text);
     if (requested.empty() || !std::filesystem::is_directory(requested)) { status = "Directory unavailable: " + requested.string(); return; }
     const auto normalized = std::filesystem::weakly_canonical(requested);
     if (std::ranges::any_of(library_roots, [&](const auto& folder) { return std::filesystem::weakly_canonical(folder) == normalized; })) { status = "Directory is already in the Library list."; return; }
     library_roots.push_back(normalized); root = normalized; recursive = true; sync_library_root_labels(); refresh(); persist_preferences();
     status = "Added " + normalized.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
-  });
-  auto choose_folder_button = Button(" Choose folder… ", [&] {
+  }, compact_button_option);
+  auto choose_folder_button = Button("Choose folder…", [&] {
 #ifdef _WIN32
     if (const auto chosen = choose_audio_folder()) {
       folder_text = chosen->string();
@@ -1333,8 +1338,8 @@ int main(int argc, char** argv) {
 #else
     status = "Native folder picker is unavailable; edit the path and press Add directory.";
 #endif
-  });
-  auto remove_folder_button = Button(" Remove selected directory ", [&] {
+  }, compact_button_option);
+  auto remove_folder_button = Button("Remove selected directory", [&] {
     if (library_roots.empty() || library_root_selected < 0 || library_root_selected >= static_cast<int>(library_roots.size())) { status = "No library directory is configured."; return; }
     const auto removed = library_roots[static_cast<std::size_t>(library_root_selected)];
     library_roots.erase(library_roots.begin() + library_root_selected);
@@ -1342,7 +1347,7 @@ int main(int argc, char** argv) {
     library_root_selected = std::min(library_root_selected, static_cast<int>(library_roots.size()) - 1);
     root = library_roots[static_cast<std::size_t>(library_root_selected)]; folder_text = root.string(); sync_library_root_labels(); refresh(); persist_preferences();
     status = "Removed " + removed.string() + "; Library now indexes " + std::to_string(tracks.size()) + " tracks.";
-  });
+  }, compact_button_option);
   RadioboxOption library_root_option;
   library_root_option.on_change = [&] {
     if (library_root_selected < 0 || library_root_selected >= static_cast<int>(library_roots.size())) return;
@@ -1352,7 +1357,7 @@ int main(int argc, char** argv) {
     status = "Selected Library directory: " + root.string();
   };
   auto library_root_picker = Radiobox(&library_root_labels, &library_root_selected, library_root_option);
-  auto play_button = Button(" Play ", [&] {
+  auto play_button = Button("Play", [&] {
     if (selected < 0 || selected >= static_cast<int>(tracks.size())) {
       status = "Select a supported audio file before starting playback.";
       return;
@@ -1371,19 +1376,19 @@ int main(int argc, char** argv) {
 #else
     status = "Native playback is unavailable in this build; analysis remains available.";
 #endif
-  });
-  auto pause_button = Button(" Pause ", [&] {
+  }, compact_button_option);
+  auto pause_button = Button("Pause", [&] {
 #if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
     playback.pause();
     status = "Playback pause requested.";
 #else
     if (playback.pause()) status = "Playback paused.";
 #endif
-  });
-  auto stop_button = Button(" Stop ", [&] {
+  }, compact_button_option);
+  auto stop_button = Button("Stop", [&] {
     playback.stop();
     status = "Playback stopped.";
-  });
+  }, compact_button_option);
   auto select_relative = [&](int direction) {
     if (library_indices.empty()) return;
     auto current = std::find(library_indices.begin(), library_indices.end(), selected);
@@ -1407,24 +1412,24 @@ int main(int argc, char** argv) {
     status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
-  auto previous_button = Button(" Prev ", [&] { select_relative(-1); });
-  auto next_button = Button(" Next ", [&] { select_relative(1); });
-  auto seek_back_button = Button(" − ", [&] {
+  auto previous_button = Button("Prev", [&] { select_relative(-1); }, compact_button_option);
+  auto next_button = Button("Next", [&] { select_relative(1); }, compact_button_option);
+  auto seek_back_button = Button("−", [&] {
 #if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
     playback.seek_seconds(-seek_step());
     status = "Playback seek backward requested.";
 #else
     status = "Native playback seek is unavailable in this build.";
 #endif
-  });
-  auto seek_forward_button = Button(" + ", [&] {
+  }, compact_button_option);
+  auto seek_forward_button = Button("+", [&] {
 #if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
     playback.seek_seconds(seek_step());
     status = "Playback seek forward requested.";
 #else
     status = "Native playback seek is unavailable in this build.";
 #endif
-  });
+  }, compact_button_option);
   MenuOption library_menu_option;
   library_menu_option.on_change = [&] {
     if (library_visible_selected < 0 || library_visible_selected >= static_cast<int>(library_indices.size())) return;
