@@ -2859,6 +2859,7 @@ ApplicationWindow {
                         id: addFolderRecursively
                         text: "Add folder recursively"; objectName: "addFolderRecursively"; activeFocusOnTab: true
                         enabled: window.libraryCatalogBridge !== null && window.browseFolder.toString() !== ""
+                        Accessible.value: enabled ? "available" : "choose a folder first"
                         Accessible.name: "Add folder recursively"; Accessible.role: Accessible.Button
                         Accessible.description: "Enumerate supported audio files in this folder and all descendant folders without following links."
                         ToolTip.text: "Enumerate supported audio files in this folder and all descendant folders"
