@@ -379,6 +379,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Beat pulse idle explanation contract | Pulse is idle because capture bridge, BPM, or motion conditions are unmet | Explain the capture-bridge requirement in the accessible status rather than presenting an ambiguous idle state. |
 | Beat pulse stale label contract | Pulse is idle while live evidence is stale | Show an explicit stale qualifier in the visible status, preserving non-color recovery communication. |
 | Beat pulse reduced label contract | Reduced motion suppresses the visual pulse | Show an explicit reduced qualifier in the visible status, preserving the accessibility preference state. |
+| Beat pulse capture-state label contract | Capture is Monitoring, Reacquiring, Silent, Error, or unavailable | Include capture lifecycle state in the pulse status so idle/recovery reasons are observable without color. |
 | Recovery pause focus contract | Recovery pause/safe-mode state focuses a follow-up control | Return whether the requested focus target was available after announcing stale/current evidence. |
 | Availability recovery focus contract | Native overlay/display availability fails and a fallback control is requested | Return whether the fallback target was focused after announcing retained settings and evidence freshness. |
 | Restored-state focus contract | Overlay restoration succeeds and a follow-up control is requested | Return whether the restored-state target was focused after announcing fresh-capture readiness. |

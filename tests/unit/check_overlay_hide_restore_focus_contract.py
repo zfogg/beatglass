@@ -1134,6 +1134,13 @@ def test_overlay_pulse_visible_status_marks_reduced_motion():
     assert "themePreferencesBridge.reduceMotion" in label
 
 
+def test_overlay_pulse_status_reports_capture_state():
+    start = QML.index('objectName: "overlayPulseStatus"')
+    label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
+    assert '"; capture "' in label
+    assert "captureMonitorBridge.status" in label
+
+
 def test_overlay_pulse_status_label_exposes_running_state():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]
