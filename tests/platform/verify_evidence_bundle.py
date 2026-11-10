@@ -13,9 +13,15 @@ REQUIRED_SCENARIOS = {"capture", "recovery", "output", "display", "playback", "o
 REQUIRED_PROVENANCE = ("platform", "commit", "captured_at", "environment")
 SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
 MAX_ARTIFACT_BYTES = 1 << 30
+MAX_MANIFEST_BYTES = 16 << 20
 
 
 def verify(root: Path, manifest: Path) -> list[str]:
+    try:
+        if manifest.stat().st_size > MAX_MANIFEST_BYTES:
+            return ["manifest exceeds 16 MiB"]
+    except OSError as error:
+        return [f"invalid manifest JSON: {error}"]
     try:
         data = json.loads(manifest.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
