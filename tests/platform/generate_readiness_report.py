@@ -119,6 +119,7 @@ def main() -> int:
     parser.add_argument("bundles", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--max-report-bytes", type=int, default=MAX_REPORT_BYTES)
+    parser.add_argument("--json", action="store_true", help="emit the generated report on stdout")
     args = parser.parse_args()
     report = build_report(args.bundles)
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -138,7 +139,10 @@ def main() -> int:
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
-    print(f"wrote conservative readiness report: {args.output}")
+    if args.json:
+        print(serialized, end="")
+    else:
+        print(f"wrote conservative readiness report: {args.output}")
     return 0
 
 

@@ -40,6 +40,13 @@ class GenerateReadinessReportTest(unittest.TestCase):
                 self.assertEqual(module.main(), 1)
             self.assertFalse(output.exists())
 
+    def test_cli_json_emits_generated_report(self):
+        root = Path(__file__).parent / "fixtures/readiness-bundles"
+        with tempfile.TemporaryDirectory() as temp, mock.patch("sys.argv", ["generate_readiness_report.py", str(root), str(Path(temp) / "report.json"), "--json"]):
+            with mock.patch("builtins.print") as printer:
+                self.assertEqual(module.main(), 0)
+                self.assertTrue(printer.called)
+
     def test_missing_artifact_remains_fail_closed(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
