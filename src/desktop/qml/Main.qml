@@ -616,6 +616,7 @@ ApplicationWindow {
             window.announceCaptureRecoveryState(message + " " + (stale ? "Live evidence is stale until fresh capture arrives." : "Fresh accepted capture is available."))
         if (focusTarget)
             focusTarget.forceActiveFocus()
+        return focusTarget !== null && focusTarget !== undefined
     }
     function focusOverlayAvailabilityRecovery(message, target) {
         navigation.currentIndex = 1
