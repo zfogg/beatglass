@@ -31,7 +31,7 @@ Minimal C integration (using the installed C adapter) looks like:
 #include <stdlib.h>
 
 int main(void) {
-    return system("beatglass-cli --json song.wav");
+    return system("beatglass-tool --json song.wav");
 }
 ```
 
@@ -65,14 +65,14 @@ cmake --build build --target beatglass_all_tests --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; run `beatglass-tui [audio-folder]` to browse local files and launch real analysis. For example on Ubuntu 22.04:
+The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; run `beatglass-cli [audio-folder]` to browse local files and launch real analysis. The single-file utility is named `beatglass-tool`. For example on Ubuntu 22.04:
 
 ```sh
 sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript
 cmake -S . -B build -DBUILD_TESTING=ON -DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON -DBEATGLASS_TEST_V1_CODECS=OFF
 cmake --build build
 ctest --test-dir build --output-on-failure
-./build/beatglass-cli /path/to/file.wav
+./build/beatglass-tool /path/to/file.wav
 ./build/beatglass-desktop
 ```
 
@@ -110,23 +110,23 @@ with a nonzero exit status and report errors on stderr.
 
 ### Binary command-line flags
 
-These are the only options accepted by the shipped `beatglass-cli` and
+These are the only options accepted by the shipped `beatglass-tool` and
 `beatglass-desktop` binaries. They are separate from the developer and
 qualification-script flags below.
 
-Usage: `beatglass-cli [--help] [--version] [--replay] [--json] [--] <audio-file>`.
+Usage: `beatglass-tool [--help] [--version] [--replay] [--json] [--] <audio-file>`.
 The music analysis binary uses `beatglass-music-cli [--help] [--version] <audio-file>`.
 
 | Binary | Argument | Meaning |
 | --- | --- | --- |
-| `beatglass-cli` | `<audio-file>` (required) | Analyze one audio file without modifying it. |
-| `beatglass-cli` | `--help`, `-h` | Print usage and exit successfully. |
-| `beatglass-cli` | `--version`, `-V` | Print the project version and exit successfully. |
+| `beatglass-tool` | `<audio-file>` (required) | Analyze one audio file without modifying it. |
+| `beatglass-tool` | `--help`, `-h` | Print usage and exit successfully. |
+| `beatglass-tool` | `--version`, `-V` | Print the project version and exit successfully. |
 | `beatglass-music-cli` | `--version`, `-V` | Print the project version and exit successfully. |
 | `beatglass-music-cli` | `--help`, `-h` | Print usage and exit successfully. |
-| `beatglass-cli` | `--replay <file>` | Run causal replay without real-time pacing. |
-| `beatglass-cli` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
-| `beatglass-cli` | `--` | End option parsing so a filename beginning with `-` is accepted. |
+| `beatglass-tool` | `--replay <file>` | Run causal replay without real-time pacing. |
+| `beatglass-tool` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
+| `beatglass-tool` | `--` | End option parsing so a filename beginning with `-` is accepted. |
 | `beatglass-desktop` | `--database <path>` | Select the SQLite storage path; the first occurrence wins. |
 
 Unknown options, missing values, duplicate `--replay`/`--json`, and a missing
@@ -141,10 +141,10 @@ shipped binaries.
 
 | Command | Option | Default / values | Behavior and interactions |
 | --- | --- | --- | --- |
-| `beatglass-cli` | `<audio-file>` | required positional path | Analyzes one input; the input is never modified. |
-| `beatglass-cli` | `--replay <file>` | off | Emits incremental causal estimates without real-time pacing; may end with a partial JSON-Lines stream on error. |
-| `beatglass-cli` | `--json` | off | Emits one JSON result, or JSON Lines with `--replay`; `bpm` may be `null`. |
-| `beatglass-cli` | `--` | none | Ends option parsing so an input beginning with `-` is treated as a path. |
+| `beatglass-tool` | `<audio-file>` | required positional path | Analyzes one input; the input is never modified. |
+| `beatglass-tool` | `--replay <file>` | off | Emits incremental causal estimates without real-time pacing; may end with a partial JSON-Lines stream on error. |
+| `beatglass-tool` | `--json` | off | Emits one JSON result, or JSON Lines with `--replay`; `bpm` may be `null`. |
+| `beatglass-tool` | `--` | none | Ends option parsing so an input beginning with `-` is treated as a path. |
 | `beatglass-desktop` | `--database <path>` | application default | Selects the SQLite storage path; the first occurrence wins and later arguments are passed to Qt. |
 
 Unknown CLI options, missing values, duplicate `--replay`/`--json`, and a

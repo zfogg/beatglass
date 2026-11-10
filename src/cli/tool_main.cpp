@@ -7,7 +7,7 @@
 #include <string_view>
 
 namespace {
-void usage() { std::cout << "Usage: beatglass-cli [--help] [--version] [--replay] [--json] [--] <audio-file>\n"; }
+void usage() { std::cout << "Usage: beatglass-tool [--help] [--version] [--replay] [--json] [--] <audio-file>\n"; }
 void json_string(std::string_view s) {
   constexpr char hex[] = "0123456789abcdef";
   std::cout << '"';
