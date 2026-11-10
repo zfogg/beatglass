@@ -392,3 +392,10 @@ def test_show_action_keeps_retry_focusable_on_failure():
     assert "showOverlayAndHideControls()" in body
     assert "overlayCaptureEvidenceStale = true" in body
     assert "retryOverlay.forceActiveFocus()" in body
+
+
+def test_hide_toggle_routes_restore_and_hide_through_action_helpers():
+    start = QML.index("function handleOverlayHideToggleShortcut")
+    body = QML[start : QML.index("    function handleOverlayRestoreAction", start)]
+    assert "handleOverlayRestoreAction()" in body
+    assert "handleOverlayHideAction()" in body

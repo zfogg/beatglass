@@ -1510,11 +1510,17 @@ ApplicationWindow {
     }
     function handleOverlayHideToggleShortcut() {
         if (window.overlayHiddenByUser) {
-            window.announceCaptureRecoveryState("Restoring the user-hidden DJ overlay; persisted settings will be reapplied." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
-            window.handleOverlayShowAction()
+            window.handleOverlayRestoreAction()
         } else {
-            window.hideOverlayAndRestoreControls()
+            window.handleOverlayHideAction()
         }
+    }
+    function handleOverlayRestoreAction() {
+        window.announceCaptureRecoveryState("Restoring the user-hidden DJ overlay; persisted settings will be reapplied." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        window.handleOverlayShowAction()
+    }
+    function handleOverlayHideAction() {
+        window.hideOverlayAndRestoreControls()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
