@@ -3079,7 +3079,6 @@ ApplicationWindow {
                                 visible: window.playbackBridge !== null && window.playbackBridge.source.toString() !== ""
                                 text: visible ? (window.playbackMatchesSelection ? "Playback source identity: selected Library source" : "Playback source identity: differs from selected Library source") : ""
                                 Accessible.name: "Playback source identity: " + text
-                                Accessible.value: visible ? text : ""
                                 Accessible.role: Accessible.Status
                                 Accessible.description: visible ? text + ". Reopen selected playback when the identities differ; source audio remains unchanged." : "No playback source identity is available."
                                 ToolTip.text: "Playback source identity compared with Library selection"
