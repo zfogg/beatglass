@@ -1937,7 +1937,7 @@ ApplicationWindow {
                 objectName: "beatPulse"
                 repeat: true
                 interval: { var bpm = Number(window.liveBridge.tempo); return isFinite(bpm) && bpm > 0 ? Math.max(120, 60000 / bpm) : 1000 }
-                running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0
+                running: djOverlay.visible && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion) && !window.overlayCaptureEvidenceStale && (!window.captureMonitorBridge || window.captureMonitorBridge.status === "Monitoring") && window.liveBridge.status === "Tracking" && isFinite(Number(window.liveBridge.tempo)) && Number(window.liveBridge.tempo) > 0
                 onTriggered: { overlaySurface.pulseOpacity = 1.0; pulseFade.restart() }
             }
             Timer { id: pulseFade; interval: 120; onTriggered: overlaySurface.pulseOpacity = 0.0 }
@@ -1959,7 +1959,7 @@ ApplicationWindow {
                 target: window.liveBridge
                 function onChanged() {
                     const bpm = Number(window.liveBridge.tempo)
-                    const tracking = window.liveBridge.status === "Tracking" && isFinite(bpm) && bpm > 0
+                    const tracking = window.liveBridge.status === "Tracking" && !window.overlayCaptureEvidenceStale && (!window.captureMonitorBridge || window.captureMonitorBridge.status === "Monitoring") && isFinite(bpm) && bpm > 0
                     if (tracking && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion))
                         beatPulse.restart()
                     else {
