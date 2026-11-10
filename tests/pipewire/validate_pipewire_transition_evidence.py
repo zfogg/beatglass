@@ -93,6 +93,8 @@ if not isinstance(error_event.get("error_code"), int) or isinstance(error_event.
     raise SystemExit("transition evidence has no native error code")
 if not isinstance(start.get("serial"), str) or not start["serial"].strip():
     raise SystemExit("start event has no sink serial")
+if error_event.get("serial") is not None and error_event.get("serial") != start.get("serial"):
+    raise SystemExit("error event serial does not match active sink")
 if not any(isinstance(event.get("sample_count"), int) and not isinstance(event.get("sample_count"), bool) and event["sample_count"] > 0
            and event.get("epoch") == start.get("epoch") for event in events if event.get("event") == "process"):
     raise SystemExit("process evidence has no captured samples")
