@@ -359,7 +359,7 @@ ApplicationWindow {
         sequence: "Escape"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryPausedByUser && (!window.overlayBridge || !window.overlayBridge.clickThrough)
-        onActivated: window.focusOverlayRecoveryAction("Paused overlay recovery; Resume recovery focused.")
+        onActivated: window.handleOverlayPausedFocusShortcut()
     }
     Shortcut {
         objectName: "overlayPausedRecoveryPageShortcut"
@@ -1497,6 +1497,9 @@ ApplicationWindow {
     }
     function handleOverlayPausedPageShortcut() {
         window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready. Live evidence remains stale until fresh capture arrives.")
+    }
+    function handleOverlayPausedFocusShortcut() {
+        window.focusOverlayRecoveryAction("Paused overlay recovery; Resume recovery focused. Live evidence remains stale until fresh capture arrives.")
     }
     function handleOverlayHideToggleShortcut() {
         if (window.overlayHiddenByUser) {
