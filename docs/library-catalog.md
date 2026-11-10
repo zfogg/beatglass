@@ -19,3 +19,7 @@ entries after filtering. If enumeration would return more entries than the
 budget, the result is fail-closed: `entries` is empty and `diagnostic` is
 `catalog entry limit exceeded`. Callers can surface that diagnostic and ask
 the user to narrow the folder or search instead of rendering a partial list.
+
+For programmatic handling, `CatalogResult::status` reports `CatalogStatus::ok`,
+`invalid_root`, `filesystem_error`, or `entry_limit_exceeded`. The diagnostic
+remains intended for user-facing detail and is not a stable error key.

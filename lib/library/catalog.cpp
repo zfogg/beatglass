@@ -31,6 +31,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
   CatalogResult result;
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
+    result.status = error ? CatalogStatus::filesystem_error : CatalogStatus::invalid_root;
     result.diagnostic = error ? error.message() : "not a directory";
     return result;
   }
@@ -67,7 +68,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
     // until the analysis/metadata worker supplies decoded duration.
     result.entries.push_back({entry.path(), name, title, {}, directory, bytes, std::move(format), -1.0});
   }
-  if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
+  if (error) { result.entries.clear(); result.status = CatalogStatus::filesystem_error; result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
     const auto af = folded(a.name), bf = folded(b.name);
     if (af != bf) return af < bf;
@@ -76,6 +77,7 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search,
   });
   if (result.entries.size() > max_entries) {
     result.entries.clear();
+    result.status = CatalogStatus::entry_limit_exceeded;
     result.diagnostic = "catalog entry limit exceeded";
   }
   return result;
@@ -86,6 +88,7 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
   CatalogResult result;
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
+    result.status = error ? CatalogStatus::filesystem_error : CatalogStatus::invalid_root;
     result.diagnostic = error ? error.message() : "not a directory";
     return result;
   }
@@ -113,7 +116,7 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
     result.entries.push_back({entry.path(), name, entry.path().stem().string(), {}, directory,
                               bytes, std::move(format), -1.0});
   }
-  if (error) { result.entries.clear(); result.diagnostic = error.message(); return result; }
+  if (error) { result.entries.clear(); result.status = CatalogStatus::filesystem_error; result.diagnostic = error.message(); return result; }
   std::sort(result.entries.begin(), result.entries.end(), [](const auto& a, const auto& b) {
     const auto af = folded(a.path.string()), bf = folded(b.path.string());
     if (af != bf) return af < bf;
@@ -121,6 +124,7 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
   });
   if (result.entries.size() > max_entries) {
     result.entries.clear();
+    result.status = CatalogStatus::entry_limit_exceeded;
     result.diagnostic = "catalog entry limit exceeded";
   }
   return result;
