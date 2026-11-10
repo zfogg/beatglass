@@ -234,7 +234,9 @@ def main() -> int:
                 category = "parse"
             elif error.startswith(("bundle root must ", "manifest must ")):
                 category = "input_topology"
-            elif error.startswith(("manifest exceeds ", "artifact exceeds ", "artifacts exceed ", "total artifact bytes exceed ", "too many artifacts")):
+            elif error.startswith("artifact exceeds "):
+                category = "size"
+            elif error.startswith(("manifest exceeds ", "artifacts exceed ", "total artifact bytes exceed ", "too many artifacts")):
                 category = "resource_limit"
             elif error.startswith("missing provenance field"):
                 category = "provenance"
