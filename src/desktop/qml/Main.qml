@@ -1594,6 +1594,10 @@ ApplicationWindow {
         window.handleOverlayRestoreButtonAction()
     }
     function handleOverlayRestoreButtonAction() {
+        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
+            window.focusOverlayDisplayRecoveryFailure("Choose an available display before restoring the overlay.", overlayDisplay)
+            return
+        }
         window.announceCaptureRecoveryState("Restoring the user-hidden DJ overlay; persisted settings will be reapplied." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
         window.handleOverlayShowAction()
     }
