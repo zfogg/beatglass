@@ -461,6 +461,18 @@ class EvidenceBundleTest(unittest.TestCase):
             payload = json.loads(result.stdout)
             self.assertGreaterEqual(payload["error_categories"].get("artifact_symlink", 0), 1)
 
+    def test_json_groups_bundle_symlink_errors(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); target = parent / "bundle"; target.mkdir(); root = parent / "link"
+            try:
+                root.symlink_to(target, target_is_directory=True)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unavailable")
+            manifest = parent / "manifest.json"; manifest.write_text("{}", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(Path(module.__file__)), "--root", str(root), "--manifest", str(manifest), "--json"], capture_output=True, text=True, check=False)
+            payload = json.loads(result.stdout)
+            self.assertGreaterEqual(payload["error_categories"].get("bundle_symlink", 0), 1)
+
     def test_json_groups_platform_errors(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"

@@ -232,6 +232,8 @@ def main() -> int:
         for error in errors:
             if error.startswith("invalid manifest JSON"):
                 category = "parse"
+            elif error == "bundle root must not be a symlink":
+                category = "bundle_symlink"
             elif error.startswith(("bundle root must ", "manifest must ")):
                 category = "input_topology"
             elif error.startswith("artifact exceeds "):
