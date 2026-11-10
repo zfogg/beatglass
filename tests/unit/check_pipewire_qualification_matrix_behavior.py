@@ -122,4 +122,15 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(malformed_summary), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "malformed native qualification summary" not in result.stderr + result.stdout:
         raise SystemExit("malformed summary JSON was not reported cleanly")
+    outside = root / "outside-matrix.json"
+    outside.write_text("existing", encoding="utf-8")
+    linked_output = root / "linked-matrix.json"
+    try:
+        linked_output.symlink_to(outside)
+    except OSError:
+        pass
+    else:
+        result = subprocess.run([sys.executable, str(script), str(linked_output)], capture_output=True, text=True)
+        if result.returncode == 0 or "symbolic link" not in result.stderr + result.stdout:
+            raise SystemExit("symbolic-link matrix output was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")

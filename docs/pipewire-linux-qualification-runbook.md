@@ -43,6 +43,8 @@ The summary itself must be a JSON object; arrays and scalar JSON values fail
 with a controlled validation error before matrix generation.
 Malformed, unreadable, or non-UTF-8 summary files likewise fail with a
 controlled handoff error rather than exposing a parser traceback.
+Matrix output paths must be regular files; symbolic-link and non-file outputs
+are rejected before generation to avoid overwriting unrelated targets.
 Every artifact entry must be a non-empty string path; numeric or blank entries
 fail before matrix generation.
 Artifact paths must also be unique so one retained file cannot be counted twice
