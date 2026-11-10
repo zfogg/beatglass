@@ -120,6 +120,8 @@ Duplicate or conflicting artifact identities are grouped under `identity` in
 JSON output for direct manifest deduplication triage.
 Traversal, separator, and canonicalization failures are grouped under `path`
 for direct workspace-boundary triage.
+Artifact paths escaping the evidence root are grouped under `artifact_path`
+for direct retained-file boundary triage.
 Unsupported platform identifiers are grouped under `platform` for direct
 qualification-environment triage.
 Environment descriptor length, whitespace, and control-character failures
