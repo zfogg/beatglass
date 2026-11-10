@@ -1241,7 +1241,7 @@ int main(int argc, char** argv) {
           }
         }
         if (live_has_packet && std::chrono::steady_clock::now() - live_last_packet > std::chrono::milliseconds(1500)) {
-          live_signal_confidence = 0.0f;
+          clear_live_evidence();
           live_tracking_state = beatglass::TrackingState::reacquiring;
           set_live_presentation_state(beatglass::TrackingState::reacquiring);
           live_status = "Capture is running but no fresh packets arrived; reacquiring…";
