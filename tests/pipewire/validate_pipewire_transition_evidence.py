@@ -272,7 +272,13 @@ if reacquisition is not None:
                and event["sample_count"] > 0 for event in events[restart_index + 1:]):
         raise SystemExit("reacquisition evidence has no post-restart samples")
 fmt = restart.get("format")
-if not isinstance(fmt, dict) or fmt.get("sample_rate", 0) <= 0 or fmt.get("channels", 0) <= 0:
+if (not isinstance(fmt, dict)
+        or not isinstance(fmt.get("sample_rate"), int)
+        or isinstance(fmt.get("sample_rate"), bool)
+        or fmt["sample_rate"] <= 0
+        or not isinstance(fmt.get("channels"), int)
+        or isinstance(fmt.get("channels"), bool)
+        or fmt["channels"] <= 0):
     raise SystemExit("restart event has no negotiated format")
 for event in events:
     event_format = event.get("format")
