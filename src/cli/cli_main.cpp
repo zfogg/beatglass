@@ -26,6 +26,7 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <map>
 #include <optional>
 #include <sstream>
 #include <string>
@@ -49,6 +50,9 @@ Element metric(std::string label, std::string value, Color accent) {
 struct AnalysisView {
   beatglass::TempoResult result;
   std::vector<float> waveform;
+};
+struct AnalysisBatch {
+  std::vector<std::pair<std::filesystem::path, AnalysisView>> results;
 };
 std::vector<float> decode_waveform(const std::filesystem::path& path, std::stop_token cancel = {}) {
   beatglass::FileReader reader(path, 1);
@@ -279,13 +283,14 @@ int main(int argc, char** argv) {
 #endif
   std::uint64_t playback_epoch = 0;
   int spinner_frame = 0;
-  std::future<AnalysisView> analysis_future;
+  std::future<AnalysisBatch> analysis_future;
   std::stop_source analysis_stop;
   std::atomic_bool analysis_cancelled{false};
   std::atomic<std::uint64_t> analysis_frames{0};
   std::atomic<std::uint64_t> analysis_total{0};
   std::atomic<std::size_t> batch_completed{0};
   std::atomic<std::size_t> batch_total{0};
+  std::map<std::filesystem::path, AnalysisView> completed_analyses;
   std::vector<std::string> library_labels;
   std::vector<int> library_indices;
   int library_visible_selected = 0;
@@ -329,18 +334,19 @@ int main(int argc, char** argv) {
     const auto focus_path = selected >= 0 && selected < static_cast<int>(tracks.size()) ? tracks[selected].path : paths.front();
     analysis_path = focus_path;
     const auto stop_token = analysis_stop.get_token();
-    analysis_future = std::async(std::launch::async, [paths = std::move(paths), focus_path, stop_token, &analysis_frames, &analysis_total, &batch_completed] {
-      AnalysisView focused{};
+    analysis_future = std::async(std::launch::async, [paths = std::move(paths), stop_token, &analysis_frames, &analysis_total, &batch_completed] {
+      AnalysisBatch batch;
       for (const auto& path : paths) {
         if (stop_token.stop_requested()) break;
         const auto metadata = beatglass::read_metadata(path);
         analysis_total.store(metadata.frames, std::memory_order_release);
         const auto result = beatglass::replay_file(path, [&](std::uint64_t observed, const beatglass::TempoResult&) { analysis_frames.store(observed, std::memory_order_release); }, {}, stop_token);
         auto waveform = decode_waveform(path, stop_token);
-        if (path == focus_path) focused = AnalysisView{result, std::move(waveform)};
+        if (stop_token.stop_requested()) break;
+        batch.results.emplace_back(path, AnalysisView{result, std::move(waveform)});
         batch_completed.fetch_add(1, std::memory_order_acq_rel);
       }
-      return focused;
+      return batch;
     });
   };
   auto analyze = [&] {
@@ -364,6 +370,7 @@ int main(int argc, char** argv) {
     }
     if (selected < 0 && !tracks.empty()) selected = 0;
     result.reset(); waveform.clear();
+    completed_analyses.clear();
     status = std::to_string(tracks.size()) + " tracks indexed; selection preserved by path." +
         (cancelling ? " Cancelling the previous analysis." : "");
   };
@@ -445,6 +452,10 @@ int main(int argc, char** argv) {
     selected = library_indices[static_cast<std::size_t>(visible)];
     library_visible_selected = visible;
     result.reset(); waveform.clear();
+    if (const auto cached = completed_analyses.find(tracks[selected].path); cached != completed_analyses.end()) {
+      result = cached->second.result;
+      waveform = cached->second.waveform;
+    }
     status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
@@ -478,6 +489,10 @@ int main(int argc, char** argv) {
     }
     selected = next;
     result.reset(); waveform.clear();
+    if (const auto cached = completed_analyses.find(tracks[selected].path); cached != completed_analyses.end()) {
+      result = cached->second.result;
+      waveform = cached->second.waveform;
+    }
     status = "Selected " + tracks[selected].title + " — press Enter to analyze or Space to play." +
         (cancelling ? " Cancelling analysis because the selected track changed." : "");
   };
@@ -736,7 +751,7 @@ int main(int argc, char** argv) {
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-        try { auto analysis = analysis_future.get(); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; select the track and press Enter to retry."; } else if (selection_changed) { result.reset(); waveform.clear(); status = "Analysis finished for a previous track; select it to view the result."; } else { result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
+        try { auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); const auto selection_changed = selected < 0 || selected >= static_cast<int>(tracks.size()) || tracks[selected].path != analysis_path; const auto cached = !selection_changed && completed_analyses.find(analysis_path) != completed_analyses.end(); if (analysis_cancelled.load(std::memory_order_acquire)) { status = "Analysis cancelled; completed track results remain available."; } else if (!cached) { result.reset(); waveform.clear(); status = "Analysis finished for a previous track; select a completed track to view its result."; } else { result = completed_analyses.at(analysis_path).result; waveform = completed_analyses.at(analysis_path).waveform; status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; } }
         catch (const std::exception& error) { result.reset(); waveform.clear(); status = std::string("Analysis failed: ") + error.what(); }
         busy = false;
       }
@@ -755,7 +770,7 @@ int main(int argc, char** argv) {
         return 2;
       }
     }
-    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
+    if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); for (auto& entry : analysis.results) completed_analyses.insert_or_assign(entry.first, std::move(entry.second)); if (const auto cached = completed_analyses.find(analysis_path); cached != completed_analyses.end()) { result = cached->second.result; waveform = cached->second.waveform; } status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
     std::cout << rendered.ToString();
