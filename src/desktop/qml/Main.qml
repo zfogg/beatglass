@@ -1538,11 +1538,13 @@ ApplicationWindow {
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
-            window.overlayDisplayRecoveryPending = true
-            window.announceCaptureRecoveryState("Overlay display selected, but persisted visual state could not be reapplied.")
+            window.markOverlayRecoveryStale("Overlay display selected, but persisted visual state could not be reapplied.")
+            window.overlayDisplaySelectionRequired = true
+            window.overlayLaunchFallbackActive = true
             window.show()
             window.raise()
             window.requestActivate()
+            overlayDisplay.forceActiveFocus()
             return false
         }
         window.syncOverlaySettingsStateFromBridge()
