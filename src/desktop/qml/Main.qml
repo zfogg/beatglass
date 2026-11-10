@@ -5595,6 +5595,7 @@ ApplicationWindow {
     FolderDialog {
         id: folderPicker
         title: "Choose a folder to browse"
+        currentFolder: window.browseFolder
         onAccepted: {
             window.browseFolder = selectedFolder
             window.catalogDiagnostic = ""
