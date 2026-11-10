@@ -26,3 +26,5 @@ reserved characters, and invalid Unicode before files are hashed.
 Identity fields are canonicalized at ingestion as well: platform names must
 be supported lowercase values, commits must be lowercase SHA-1 values, and
 environment strings must be trimmed, bounded, and free of control characters.
+Capture timestamps must include a timezone and cannot be more than five minutes
+in the future, preventing stale clock metadata from entering the bundle.
