@@ -1857,7 +1857,10 @@ ApplicationWindow {
             id: overlaySurface
             anchors.fill: parent; radius: 12
             color: window.themeBackgrounds[window.selectedThemeIndex]
-            border.color: window.themeAccentColors[window.selectedThemeIndex]
+            property color pulseColor: (window.selectedTheme === "Light" || window.selectedTheme === "Yellow")
+                ? Qt.darker(window.themeBackgrounds[window.selectedThemeIndex], 1.35)
+                : Qt.lighter(window.themeBackgrounds[window.selectedThemeIndex], 1.35)
+            border.color: pulseOpacity > 0 ? pulseColor : window.themeAccentColors[window.selectedThemeIndex]
             property real pulseOpacity: 0.0
             border.width: 1 + pulseOpacity * 3
             Behavior on border.width { enabled: !window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion; NumberAnimation { duration: 100 } }
@@ -1887,8 +1890,15 @@ ApplicationWindow {
             Connections {
                 target: window.liveBridge
                 function onChanged() {
-                    if (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion)
+                    const bpm = Number(window.liveBridge.tempo)
+                    const tracking = window.liveBridge.status === "Tracking" && isFinite(bpm) && bpm > 0
+                    if (tracking && (!window.themePreferencesBridge || !window.themePreferencesBridge.reduceMotion))
                         beatPulse.restart()
+                    else {
+                        beatPulse.stop()
+                        pulseFade.stop()
+                        overlaySurface.pulseOpacity = 0.0
+                    }
                 }
             }
             MouseArea {
