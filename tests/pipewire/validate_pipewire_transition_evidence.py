@@ -171,6 +171,9 @@ if reacquisition is not None:
             raise SystemExit("reacquisition evidence has an invalid artifact digest")
         if isinstance(payload, dict) and payload.get("artifact_sha256") is not None and reacquisition["artifact_sha256"] != payload["artifact_sha256"]:
             raise SystemExit("reacquisition artifact digest does not match artifact")
+    if reacquisition.get("daemon_version") is not None:
+        if not isinstance(reacquisition["daemon_version"], str) or not reacquisition["daemon_version"].strip():
+            raise SystemExit("reacquisition evidence has an empty daemon version")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
