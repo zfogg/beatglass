@@ -16,6 +16,7 @@
 #include "../desktop/platform/windows_endpoints.hpp"
 #include "../desktop/platform/windows_loopback_session.hpp"
 #include "../desktop/platform/windows_playback_session.hpp"
+#include "../desktop/platform/windows_waveout_devices.hpp"
 #endif
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -283,6 +284,7 @@ public:
   void pause() { request(Command::pause); }
   void seek_seconds(std::int64_t seconds) { { std::lock_guard lock(mutex_); seek_delta_seconds_ = seconds; command_ = Command::seek; } condition_.notify_one(); }
   void stop() { request(Command::stop); }
+  void set_device(UINT device_id) { std::lock_guard lock(mutex_); device_id_ = device_id; }
   beatglass::PlaybackState state() const noexcept { return state_.load(std::memory_order_acquire); }
   std::uint64_t epoch() const noexcept { return epoch_.load(std::memory_order_acquire); }
   std::uint64_t current_frame() const noexcept { return current_frame_.load(std::memory_order_acquire); }
@@ -313,7 +315,7 @@ private:
           const auto& metadata = reader->metadata();
           current_frame_.store(0, std::memory_order_release);
           total_frames_.store(metadata.frames, std::memory_order_release);
-          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
+          if (!output.start_device(device_id_, metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) { set_status("Playback unavailable: " + error); reader.reset(); continue; }
           epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playing decoded PCM through native output.");
         } catch (const std::exception& error) { set_status(std::string("Playback failed: ") + error.what()); reader.reset(); continue; }
       } else if (command == Command::pause) {
@@ -328,7 +330,7 @@ private:
               : std::min<std::uint64_t>(metadata.frames, current_frame + static_cast<std::uint64_t>(delta));
           output.stop(); reader->seek(target, ++next_epoch);
           std::string error;
-          if (!output.start(metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
+          if (!output.start_device(device_id_, metadata.sample_rate, static_cast<std::uint16_t>(metadata.channels), decoded.size(), next_epoch, error)) throw std::runtime_error(error);
           current_frame = target; epoch_.store(next_epoch, std::memory_order_release); state_.store(beatglass::PlaybackState::playing, std::memory_order_release); set_status("Playback seeked to frame " + std::to_string(target) + ".");
           current_frame_.store(target, std::memory_order_release);
         } catch (const std::exception& error) { set_status(std::string("Playback seek failed: ") + error.what()); }
@@ -366,6 +368,7 @@ private:
   std::atomic<std::uint64_t> current_frame_{};
   std::atomic<std::uint64_t> total_frames_{};
   std::int64_t seek_delta_seconds_{};
+  UINT device_id_{WAVE_MAPPER};
 };
 #endif
 }  // namespace
@@ -434,6 +437,10 @@ int main(int argc, char** argv) {
   bool reduce_motion = preferences.reduce_motion;
 #ifdef _WIN32
   CliPlayback playback;
+  const auto playback_devices = beatglass::windows::enumerate_waveout_devices();
+  std::vector<std::string> playback_device_labels;
+  for (const auto& device : playback_devices) playback_device_labels.push_back(std::to_string(device.id) + ": " + device.name);
+  int playback_device_selected = 0;
 #else
   beatglass::PlaybackSession playback;
 #endif
@@ -687,6 +694,7 @@ int main(int argc, char** argv) {
       return;
     }
 #ifdef _WIN32
+    if (!playback_devices.empty() && playback_device_selected >= 0 && playback_device_selected < static_cast<int>(playback_devices.size())) playback.set_device(playback_devices[static_cast<std::size_t>(playback_device_selected)].id);
     playback.play(tracks[selected].path);
     status = "Playing " + tracks[selected].title + " through the selected output.";
 #else
@@ -950,7 +958,8 @@ int main(int argc, char** argv) {
   auto waveform_mode_button = Button(" Waveform ", [&] { visual_mode = "waveform"; });
   auto spectrum_mode_button = Button(" Spectrum ", [&] { visual_mode = "spectrum"; });
   auto combined_mode_button = Button(" Combined ", [&] { visual_mode = "combined"; });
-  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button}), [&] {
+  auto playback_device_picker = Radiobox(&playback_device_labels, &playback_device_selected);
+  auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input, waveform_mode_button, spectrum_mode_button, combined_mode_button, playback_device_picker}), [&] {
     return vbox({text("SETTINGS") | bold | underlined | color(Color::Cyan), separator(), text("SESSION") | bold | color(Color::YellowLight),
       text("Library folder: " + root.string()), text("Analysis engine: aubio / file analyzer"),
       text("Tonal engine: optional Essentia music-replay build (disabled in this standard CLI build).") | color(Color::GrayLight) | italic,
@@ -960,6 +969,8 @@ int main(int argc, char** argv) {
       text("PLAYBACK") | bold | underlined, hbox({text("Seek step (1–60 seconds): ") | italic, seek_step_input->Render() | size(WIDTH, LESS_THAN, 8)}),
       text("LIVE VISUALIZATION") | bold | underlined,
       hbox({text("Mode: " + visual_mode + "  ") | italic, action(waveform_mode_button->Render(), Color::GreenLight), text(" "), action(spectrum_mode_button->Render(), Color::MagentaLight), text(" "), action(combined_mode_button->Render(), Color::Cyan)}),
+      text("PLAYBACK OUTPUT") | bold | underlined,
+      playback_device_labels.empty() ? text("No waveOut output devices discovered; the native mapper will be used.") | color(Color::YellowLight) : playback_device_picker->Render() | frame | vscroll_indicator,
       separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."),
       text("Live capture requires an explicit platform source."), filler(), text("Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
