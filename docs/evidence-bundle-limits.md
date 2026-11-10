@@ -83,3 +83,5 @@ Report generators reject symlinked output parents so a qualification command
 cannot redirect a report outside its intended workspace.
 The readiness checker enforces the same symlink-free parent-path rule for its
 `--report` output.
+Its `--max-age-hours` value must be positive, preventing accidental
+configuration that marks every retained bundle stale.
