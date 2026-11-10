@@ -743,6 +743,24 @@ ApplicationWindow {
         if (target)
             target.forceActiveFocus()
     }
+    function focusOverlayHiddenState(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Retained settings remain available."))
+        if (target)
+            target.forceActiveFocus()
+    }
+    function focusOverlayRestoreFailure(message, target) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " Live evidence is stale until a fresh capture arrives.")
+        if (target)
+            target.forceActiveFocus()
+    }
     Connections {
         target: typeof storageRecovery !== "undefined" ? storageRecovery : null
         function onStatusChanged() {
@@ -1341,14 +1359,14 @@ ApplicationWindow {
             window.markOverlayRecoveryStale("DJ overlay unavailable; control window remains available as the tray/taskbar fallback.")
             const savedDisplay = window.overlayPreferredDisplayName !== "" ? window.overlayPreferredDisplayName : "the saved display"
             window.restoreOverlayFallbackControls("DJ overlay unavailable; control window remains available as the tray/taskbar fallback. Persisted settings for " + savedDisplay + " remain retained for the next retry.")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayRestoreFailure("DJ overlay unavailable; control window remains available as the tray/taskbar fallback and persisted settings remain retained.", overlayDisplay)
             return false
         }
         if (!window.restoreOverlayVisualStateFromBridge()) {
             window.overlayLaunchFallbackActive = true
             window.markOverlayRecoveryStale("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback.")
             window.restoreOverlayFallbackControls("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayRestoreFailure("DJ overlay visual state unavailable; control window remains available as the tray/taskbar fallback and overlay settings remain retained.", overlayDisplay)
             return false
         }
         window.overlayWasVisibleBeforeAvailabilityLoss = false
@@ -1356,9 +1374,8 @@ ApplicationWindow {
         if (!window.overlayBridge.showOverlay()) {
             window.overlayLaunchFallbackActive = true
             window.markOverlayRecoveryStale("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
-            window.announceCaptureRecoveryState("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.")
             window.restoreOverlayFallbackControls("")
-            overlayDisplay.forceActiveFocus()
+            window.focusOverlayRestoreFailure("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.", overlayDisplay)
             return false
         }
         const restoredGeometry = window.overlayBridge.geometry
@@ -1569,13 +1586,10 @@ ApplicationWindow {
             window.overlayLaunchFallbackActive = true
             window.overlayDisplayRecoveryPending = true
         }
-        window.announceCaptureRecoveryState(hidden
+        const message = hidden
             ? (window.overlayBridge ? "DJ overlay hidden; output monitoring remains available in the control window." : "DJ overlay bridge unavailable; control window restored as the fallback.")
-            : "DJ overlay could not be hidden; control-window fallback remains active.")
-        window.show()
-        window.raise()
-        window.requestActivate()
-        hideOverlay.forceActiveFocus()
+            : "DJ overlay could not be hidden; control-window fallback remains active."
+        window.focusOverlayHiddenState(message, hidden ? restoreOverlay : hideOverlay)
     }
     function resetOverlayRecoveryAttempts() {
         window.overlayRecoveryAttemptCount = 0
@@ -4450,7 +4464,7 @@ ApplicationWindow {
                     Button { text: window.overlayHiddenByUser ? "Restore hidden overlay" : "Restore overlay"; objectName: "restoreOverlay"; Accessible.name: "Restore DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "hidden by user" : (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available")) : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user using its persisted display, position, size, and opacity." : "Restore the DJ overlay using its persisted display, position, size, and opacity") : (window.overlayDisplaySelectionRequired ? "Choose an available display before restoring the overlay" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? (window.overlayHiddenByUser ? "Restore the overlay hidden by the user with persisted settings" : "Restore the overlay with persisted settings") : (window.overlayDisplaySelectionRequired ? "Choose a display before restoring the overlay" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.announceCaptureRecoveryState("DJ overlay restore requested; reapplying persisted display, geometry, and opacity."); window.showOverlayAndHideControls() } }
                     Button { text: "Reapply saved settings"; objectName: "reapplyOverlaySettings"; Accessible.name: "Reapply saved overlay settings"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : (window.overlayDisplaySelectionRequired ? "choose a display first" : "unavailable; control-window fallback active"); Accessible.description: enabled ? "Reapply the saved display, position, size, and opacity before restoring the DJ overlay" : (window.overlayDisplaySelectionRequired ? "Choose an available display before reapplying saved settings" : "Native overlay unavailable; control-window fallback remains available"); ToolTip.text: enabled ? "Reapply saved overlay display, geometry, and opacity" : (window.overlayDisplaySelectionRequired ? "Choose a display before reapplying settings" : "Overlay unavailable; control-window fallback is active"); enabled: window.overlayBridge && window.overlayBridge.available && !window.overlayDisplaySelectionRequired && window.overlayBridge.screenNames.length > 0; onClicked: { window.reapplyOverlaySettingsAndRestore(); overlayDisplayStatus.forceActiveFocus() } }
                     Button { id: unlockOverlay; text: "Unlock overlay"; objectName: "unlockOverlay"; Accessible.name: "Unlock DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayCaptureEvidenceStale ? "available; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "available; recovery pending" : "available") : "unavailable"; Accessible.description: enabled ? "Restore keyboard and pointer access to the overlay" + (window.overlayCaptureEvidenceStale ? ". Live evidence is stale until fresh capture arrives." : "") : "Overlay is not in click-through mode or is unavailable"; ToolTip.text: enabled ? "Restore keyboard and pointer access to the overlay" : "Overlay is not in click-through mode"; enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.clickThrough; onClicked: { const restored = window.unlockOverlayAndRestoreFocus(); if (restored) overlayInteractionMode.forceActiveFocus() } }
-                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "already hidden" : "available") : "unavailable"; Accessible.description: enabled ? "Hide the DJ overlay window and restore the control window" : "Native overlay unavailable; control-window fallback is active"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: { window.announceCaptureRecoveryState("DJ overlay hidden; control-window fallback restored and overlay settings retained."); window.hideOverlayAndRestoreControls(); restoreOverlay.forceActiveFocus() } }
+                    Button { text: "Hide overlay"; objectName: "hideOverlay"; Accessible.name: "Hide DJ overlay"; Accessible.role: Accessible.Button; Accessible.value: enabled ? (window.overlayHiddenByUser ? "already hidden" : "available") : "unavailable"; Accessible.description: enabled ? "Hide the DJ overlay window and restore the control window" : "Native overlay unavailable; control-window fallback is active"; ToolTip.text: "Hide the DJ overlay and restore the control window"; enabled: window.overlayBridge && window.overlayBridge.available; onClicked: window.hideOverlayAndRestoreControls() }
                     Button { text: "Quit Beatglass"; objectName: "quitBeatglass"; Accessible.name: "Quit Beatglass"; Accessible.role: Accessible.Button; Accessible.value: "available; overlay settings retained"; Accessible.description: "Hide the DJ overlay and quit Beatglass while retaining persisted settings"; ToolTip.text: "Quit Beatglass and retain overlay settings"; onClicked: { window.announceCaptureRecoveryState("Beatglass quitting; overlay display, geometry, size, opacity, and interaction settings are retained."); window.quitApplication() } }
                 }
                 Label {
