@@ -229,6 +229,16 @@ private:
 
 int main(int argc, char** argv) {
   using namespace ftxui;
+  if (argc == 2 && (std::string_view(argv[1]) == "--version" || std::string_view(argv[1]) == "-V")) {
+    std::cout << "beatglass-cli " << BEATGLASS_VERSION << "\n";
+    return 0;
+  }
+  if (argc == 2 && (std::string_view(argv[1]) == "--help" || std::string_view(argv[1]) == "-h")) {
+    std::cout << "Usage: beatglass-cli [audio-folder]\n"
+                 "       beatglass-cli --snapshot <audio-folder> [tab]\n"
+                 "\nTabs: 1 Library  2 Live  3 Settings\n";
+    return 0;
+  }
   const bool snapshot = argc > 1 && std::string(argv[1]) == "--snapshot";
   std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::current_path()) : (argc > 1 ? argv[1] : std::filesystem::current_path());
   auto tracks = discover(root, true);
