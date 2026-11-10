@@ -2364,7 +2364,7 @@ ApplicationWindow {
         window.overlayDisplayRecoveryPending = true
         window.overlayDisplaySelectionRequired = true
         window.overlayCaptureEvidenceStale = true
-        window.focusOverlayAvailabilityRecovery("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.", overlayDisplay)
+        return window.focusOverlayAvailabilityRecovery("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.", overlayDisplay)
     }
         function onScreensChanged() {
             if (window.overlayBridge && window.overlayBridge.displayName !== "")
