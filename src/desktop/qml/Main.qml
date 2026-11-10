@@ -946,6 +946,7 @@ ApplicationWindow {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
+            window.overlayCaptureEvidenceStale = true
             return false
         }
         if (window.overlayBridge.displayName !== "")
@@ -1440,7 +1441,8 @@ ApplicationWindow {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay.")
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("Overlay display selection is stale; choose an available display before restoring the overlay. Live evidence is stale until fresh capture arrives.")
             overlayDisplay.forceActiveFocus()
             return false
         }
@@ -1449,7 +1451,8 @@ ApplicationWindow {
             window.overlayDisplayRecoveryPending = true
             window.overlayDisplaySelectionRequired = true
             window.overlayLaunchFallbackActive = true
-            window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied.")
+            window.overlayCaptureEvidenceStale = true
+            window.announceCaptureRecoveryState("DJ overlay display restored, but persisted visual state could not be reapplied. Live evidence is stale until fresh capture arrives.")
             overlayDisplay.forceActiveFocus()
             return false
         }
