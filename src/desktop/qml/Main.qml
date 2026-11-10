@@ -1607,9 +1607,10 @@ ApplicationWindow {
                 objectName: "overlayLiveEvidenceGroup"
                 anchors.fill: parent; anchors.margins: 14; spacing: 4
                 Accessible.name: "Overlay live evidence"
-                Accessible.value: window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable"
+                Accessible.value: (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable")
+                    + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "")
                 Accessible.role: Accessible.Grouping
-                Accessible.description: "Current live status, tempo, harmony, capture state, and recovery action for the DJ overlay."
+                Accessible.description: "Current live status, tempo, harmony, capture state, and recovery action for the DJ overlay." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "")
                 ToolTip.text: "Overlay live evidence and capture recovery"
                 RowLayout {
                     Layout.fillWidth: true

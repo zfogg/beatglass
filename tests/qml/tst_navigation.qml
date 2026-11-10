@@ -408,10 +408,12 @@ TestCase {
         fakeCapture.status = "Error"
         let tempo = findChild(app, "overlayTempo")
         let captureStatus = findChild(app, "overlayCaptureStatus")
+        let liveGroup = findChild(app, "overlayLiveEvidenceGroup")
         verify(findChild(app, "overlayCaptureRecoveryAction").activeFocus)
         verify(app.overlayCaptureEvidenceStale)
         verify(tempo.Accessible.value.indexOf("stale until fresh capture") >= 0)
         verify(captureStatus.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
+        verify(liveGroup.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
         let retry = findChild(app, "overlayCaptureRecoveryAction")
         verify(retry.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("fresh snapshot") >= 0)
