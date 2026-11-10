@@ -85,5 +85,8 @@ integer identifying the native capture node.
 Reacquisition evidence may include `source_name`; when supplied it must be a
 non-empty native source name.
 
+Reacquisition evidence may include `commit`; when supplied it must be non-empty
+and match the top-level artifact commit.
+
 Reacquisition evidence may include `sample_position`; when supplied it must be a
 non-negative integer, preserving a valid timeline coordinate for recovery samples.
