@@ -193,21 +193,25 @@ std::vector<float> decode_waveform(const std::filesystem::path& path, std::stop_
 }
 Element waveform_chart(const std::vector<float>& waveform, const std::vector<std::uint64_t>& beat_frames, std::uint64_t total_frames, float playback_fraction = -1.0f) {
   constexpr int width = 72;
-  const std::vector<std::string> levels = {".", ":", "-", "=", "+", "*", "#", "%", "@"};
-  Elements bars;
-  bars.reserve(width);
+  // Keep the chart compact enough that Live retains all controls in a normal
+  // 36-row terminal snapshot; the outer TUI grows it only when space exists.
+  constexpr int height = 2;
+  std::vector<int> points(static_cast<std::size_t>(width), 1);
   for (int x = 0; x < width; ++x) {
     const auto sample = waveform.empty() ? 0.08f : waveform[std::min<std::size_t>(waveform.size() - 1, static_cast<std::size_t>(x * waveform.size() / width))];
     // Square-root companding keeps quiet real-world PCM detail visible without changing analysis input.
-    const auto display_sample = std::sqrt(std::clamp(sample, 0.0f, 1.0f));
-    const auto level = std::clamp(static_cast<int>(display_sample * static_cast<float>(levels.size() - 1)), 1, static_cast<int>(levels.size() - 1));
-    const auto beat_marker = !waveform.empty() && total_frames > 0 && std::ranges::any_of(beat_frames, [&](const auto frame) { return static_cast<int>(frame * width / total_frames) == x; });
-    const auto cursor = playback_fraction >= 0.0f && x == std::clamp(static_cast<int>(playback_fraction * width), 0, width - 1);
-    const auto accent = cursor ? Color::Cyan : beat_marker ? Color::YellowLight : Color::GreenLight;
-    bars.push_back(text(levels[static_cast<std::size_t>(level)] + (cursor ? "|" : "")) | color(accent) | bold);
+    points[static_cast<std::size_t>(x)] = std::clamp(static_cast<int>(std::sqrt(std::clamp(sample, 0.0f, 1.0f)) * height), 1, height);
   }
-  return vbox({text("WAVEFORM") | bold | underlined | color(Color::GreenLight),
-               hbox(std::move(bars)) | bgcolor(Color::RGB(8, 28, 25)) | borderRounded}) | flex;
+  const auto graph_view = graph([points = std::move(points)](int graph_width, int graph_height) {
+    std::vector<int> graph_points(static_cast<std::size_t>(std::max(1, graph_width)), 1);
+    for (int x = 0; x < graph_width; ++x) {
+      const auto source = std::min<std::size_t>(points.size() - 1, static_cast<std::size_t>(x * points.size() / std::max(1, graph_width)));
+      graph_points[static_cast<std::size_t>(x)] = std::clamp(points[source], 1, std::max(1, graph_height - 1));
+    }
+    return graph_points;
+  }) | color(Color::GreenLight) | bgcolor(Color::RGB(8, 28, 25)) | borderRounded | size(WIDTH, EQUAL, width) | size(HEIGHT, EQUAL, height);
+  return vbox({text("WAVEFORM") | bold | underlined | color(Color::GreenLight), graph_view,
+               text("beats: " + std::to_string(beat_frames.size()) + "   playback: " + (playback_fraction >= 0.0f ? "^" : "—")) | color(Color::YellowLight) | italic}) | flex;
 }
 
 Element spectrum_chart(const std::vector<float>& spectrum) {
