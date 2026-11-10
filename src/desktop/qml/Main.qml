@@ -445,17 +445,7 @@ ApplicationWindow {
         onActivated: {
             const resetOpacity = 0.9
             const applied = window.overlayBridge.setOpacity(resetOpacity)
-            if (applied) {
-                window.overlayOpacityEditInFlight = true
-                window.overlayPendingOpacity = resetOpacity
-                window.overlaySettingsRevision += 1
-                window.announceCaptureRecoveryState("DJ overlay opacity reset to 90 percent.")
-                overlayOpacityControl.forceActiveFocus()
-            } else {
-                window.syncOverlaySettingsStateFromBridge()
-                window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active.")
-                overlayOpacityControl.forceActiveFocus()
-            }
+            window.handleOverlayOpacityResetResult(applied, resetOpacity)
         }
     }
     Shortcut {
@@ -1460,6 +1450,19 @@ ApplicationWindow {
         window.requestActivate()
         overlayOpacityControl.forceActiveFocus()
         window.announceCaptureRecoveryState("Overlay opacity control focused; current value is " + Math.round(window.overlayBridge.opacity * 100) + " percent." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+    }
+    function handleOverlayOpacityResetResult(applied, resetOpacity) {
+        if (applied) {
+            window.overlayOpacityEditInFlight = true
+            window.overlayPendingOpacity = resetOpacity
+            window.overlaySettingsRevision += 1
+            window.announceCaptureRecoveryState("DJ overlay opacity reset to 90 percent.")
+        } else {
+            window.overlayCaptureEvidenceStale = true
+            window.syncOverlaySettingsStateFromBridge()
+            window.announceCaptureRecoveryState("DJ overlay opacity could not be reset; persisted opacity remains active. Live evidence remains stale until fresh capture arrives.")
+        }
+        overlayOpacityControl.forceActiveFocus()
     }
     function recoverOverlayAfterDisplayChange() {
         if (!window.overlayBridge || !window.overlayBridge.available
