@@ -357,7 +357,17 @@ int main(int argc, char** argv) {
   });
   auto root_component = CatchEvent(Container::Vertical({tab_bar, tabs}), [&](Event event) {
     if (event == Event::Character("q") || event == Event::Escape) { screen.Exit(); return true; }
+    if (event == Event::Character("1")) { tab = 0; return true; }
+    if (event == Event::Character("2")) { tab = 1; return true; }
+    if (event == Event::Character("3")) { tab = 2; return true; }
     if (event == Event::Return && tab == 0) { analyze(); return true; }
+    if (event == Event::Character(" ")) {
+      if (tab == 0) {
+        if (playback.state() == beatglass::PlaybackState::playing) pause_button->OnEvent(Event::Return);
+        else play_button->OnEvent(Event::Return);
+      } else if (tab == 1) live_button->OnEvent(Event::Return);
+      return true;
+    }
     if (event == Event::Custom) {
       if (!reduce_motion) ++spinner_frame;
 #ifdef _WIN32
