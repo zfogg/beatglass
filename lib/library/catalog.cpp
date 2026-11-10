@@ -26,7 +26,8 @@ namespace {
 bool supported_audio(const std::filesystem::path& path) { return !audio_format_for_path(path).empty(); }
 }
 
-CatalogResult browse(const std::filesystem::path& folder, std::string search) {
+CatalogResult browse(const std::filesystem::path& folder, std::string search,
+                     std::size_t max_entries) {
   CatalogResult result;
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
@@ -73,10 +74,15 @@ CatalogResult browse(const std::filesystem::path& folder, std::string search) {
     if (a.name != b.name) return a.name < b.name;
     return a.path.string() < b.path.string();
   });
+  if (result.entries.size() > max_entries) {
+    result.entries.clear();
+    result.diagnostic = "catalog entry limit exceeded";
+  }
   return result;
 }
 
-CatalogResult browse_recursive(const std::filesystem::path& folder, std::string search) {
+CatalogResult browse_recursive(const std::filesystem::path& folder, std::string search,
+                               std::size_t max_entries) {
   CatalogResult result;
   std::error_code error;
   if (!std::filesystem::is_directory(folder, error)) {
@@ -113,6 +119,10 @@ CatalogResult browse_recursive(const std::filesystem::path& folder, std::string 
     if (af != bf) return af < bf;
     return a.path.string() < b.path.string();
   });
+  if (result.entries.size() > max_entries) {
+    result.entries.clear();
+    result.diagnostic = "catalog entry limit exceeded";
+  }
   return result;
 }
 } // namespace beatglass::library
