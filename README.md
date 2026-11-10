@@ -65,7 +65,7 @@ cmake --build build --target beatglass_all_tests --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```
 
-The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; run `beatglass-cli [audio-folder]` to browse local files and launch real analysis. The single-file utility is named `beatglass-tool`. For example on Ubuntu 22.04:
+The default builds the dependency-light foundation tests. To build the CLI and desktop prototype, install aubio, libsndfile, SQLite, and Qt 6 development packages and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_DESKTOP=ON`. For the issue #4320 terminal prototype, enable the vcpkg `tui` feature and configure with `-DBEATGLASS_BUILD_SLICE=ON -DBEATGLASS_BUILD_TUI=ON`; persistent SQLite Library storage is enabled by default (set `-DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=OFF` only for a dependency-light build without cache/recovery), and `beatglass-cli [audio-folder]` browses local files and launches real analysis. The single-file utility is named `beatglass-tool`. For example on Ubuntu 22.04:
 
 ```sh
 sudo apt-get install libaubio-dev libsndfile1-dev qt6-declarative-dev libgl1-mesa-dev qml6-module-qt-labs-folderlistmodel qml6-module-qttest qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qtquick-layouts qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtqml qml6-module-qtqml-models qml6-module-qtqml-workerscript
@@ -349,7 +349,7 @@ The experimental worker-only aubio beat tracker is not connected to the CLI or s
 
 ## Provisional library storage increment
 
-`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables private, not yet product-wired SQLite and job-executor primitives. SQLite is declared in the pinned vcpkg manifest for reproducible development toolchains. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
+`BEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON` enables the SQLite and job-executor primitives used by the CLI Library cache/recovery path. It is now the default; set it explicitly when configuring a qualification build. SQLite is declared in the pinned vcpkg manifest for reproducible development toolchains. On WSL Ubuntu 22.04, install `libsqlite3-dev`, then configure and test as follows (the Catch2 override is optional when network download is available):
 
 ```sh
 cmake -S . -B /tmp/beatglass-library-phase1 -DBUILD_TESTING=ON -DBEATGLASS_BUILD_LIBRARY_PROTOTYPE=ON -DFETCHCONTENT_SOURCE_DIR_CATCH2=/tmp/beatglass-slice/_deps/catch2-src

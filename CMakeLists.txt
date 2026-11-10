@@ -147,7 +147,7 @@ add_library(beatglass_core STATIC lib/core/snapshot_publisher.cpp lib/core/offli
 target_compile_features(beatglass_core PUBLIC cxx_std_20)
 target_include_directories(beatglass_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 option(BEATGLASS_BUILD_LIBRARY_FINGERPRINT "Build provisional SHA-256 file evidence" OFF)
-option(BEATGLASS_BUILD_LIBRARY_PROTOTYPE "Build provisional SQLite library primitives" OFF)
+option(BEATGLASS_BUILD_LIBRARY_PROTOTYPE "Build provisional SQLite library primitives" ON)
 option(BEATGLASS_FETCH_SQLITE3 "Fetch the pinned SQLite amalgamation when no system package is available" OFF)
 option(BEATGLASS_BUILD_DESKTOP_ANALYSIS "Link desktop metadata target with SQLite analysis worker" OFF)
 if(BEATGLASS_BUILD_DESKTOP_ANALYSIS AND NOT BEATGLASS_BUILD_LIBRARY_PROTOTYPE)
