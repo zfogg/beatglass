@@ -3161,7 +3161,7 @@ ApplicationWindow {
                             const accepted = window.analysisJobBridge.submitSelectedFiles(paths)
                             if (accepted > 0)
                                 window.clearVisualizationForCaptureState("Recursive analysis queued; previous visualization evidence is stale until fresh accepted analysis.")
-                            window.announceVisualizationRecovery(accepted + " recursive audio files accepted for analysis; " + window.analysisJobBridge.batchRejectedCount + " rejected.")
+                            window.announceVisualizationRecovery(accepted + " recursive audio files accepted for analysis; " + window.analysisJobBridge.batchRejectedCount + " rejected; queue capacity " + window.analysisJobBridge.batchCapacity + ".")
                             recursiveResultsView.forceActiveFocus()
                         }
                     }
