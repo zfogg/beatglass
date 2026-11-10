@@ -2049,7 +2049,7 @@ ApplicationWindow {
             ColumnLayout {
                 objectName: "overlayLiveEvidenceGroup"
                 anchors.fill: parent; anchors.margins: 14; spacing: 4
-                Accessible.name: "Overlay live evidence"
+                Accessible.name: "Overlay live evidence; Ctrl+Alt+Shift+B focuses beat pulse status"
                 Accessible.value: (window.captureMonitorBridge ? window.captureMonitorBridge.status : "unavailable")
                     + (window.overlayCaptureEvidenceStale ? "; evidence stale until fresh capture" : "")
                     + "; beat pulse " + (beatPulse.running ? "active" : "idle")
