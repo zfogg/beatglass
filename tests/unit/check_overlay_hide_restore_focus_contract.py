@@ -115,3 +115,11 @@ def test_endpoint_changes_share_overlay_stale_recovery_handler():
     assert "endpointSelector.forceActiveFocus()" in body
     connections = QML[QML.index("target: window.endpointSelectionBridge") : start]
     assert "window.handleOverlayEndpointChanged()" in connections
+
+
+def test_overlay_recovery_without_display_uses_availability_focus():
+    start = QML.index("function focusOverlayNoDisplayRecovery")
+    body = QML[start : QML.index("    function focusOverlayRecoveryAction", start)]
+    assert "overlayDisplaySelectionRequired = true" in body
+    assert "focusOverlayAvailabilityRecovery" in body
+    assert "focusOverlayNoDisplayRecovery()" in QML[QML.index("onAvailableChanged") : start]

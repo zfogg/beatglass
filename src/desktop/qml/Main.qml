@@ -2039,10 +2039,7 @@ ApplicationWindow {
                 clickThroughToggle.checked = window.overlayBridge.clickThrough
                 window.syncOverlaySettingsStateFromBridge()
                 if (window.overlayBridge.screenNames.length === 0) {
-                    window.overlayDisplayRecoveryPending = true
-                    window.overlayDisplaySelectionRequired = true
-                    window.announceCaptureRecoveryState("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.")
-                    overlayDisplay.forceActiveFocus()
+                    window.focusOverlayNoDisplayRecovery()
                 } else if (window.overlayDisplaySelectionRequired) {
                     window.focusOverlayAvailabilityRecovery("DJ overlay recovered; choose a display to re-enable overlay actions.", overlayDisplay)
                 } else {
@@ -2051,6 +2048,12 @@ ApplicationWindow {
                 }
             }
         }
+    function focusOverlayNoDisplayRecovery() {
+        window.overlayDisplayRecoveryPending = true
+        window.overlayDisplaySelectionRequired = true
+        window.overlayCaptureEvidenceStale = true
+        window.focusOverlayAvailabilityRecovery("DJ overlay recovered without a display; overlay actions remain disabled until a display is selected.", overlayDisplay)
+    }
         function onScreensChanged() {
             if (window.overlayBridge && window.overlayBridge.displayName !== "")
                 window.overlayPreferredDisplayName = window.overlayBridge.displayName
