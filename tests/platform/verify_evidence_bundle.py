@@ -15,11 +15,13 @@ SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
 MAX_ARTIFACT_BYTES = 1 << 30
 MAX_MANIFEST_BYTES = 16 << 20
 MAX_ENTRIES = 1000
+MAX_TOTAL_ARTIFACT_BYTES = 8 << 30
 
 
 def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_BYTES,
-           max_manifest_bytes: int = MAX_MANIFEST_BYTES, max_entries: int = MAX_ENTRIES) -> list[str]:
-    if max_artifact_bytes <= 0 or max_manifest_bytes <= 0 or max_entries <= 0:
+           max_manifest_bytes: int = MAX_MANIFEST_BYTES, max_entries: int = MAX_ENTRIES,
+           max_total_artifact_bytes: int = MAX_TOTAL_ARTIFACT_BYTES) -> list[str]:
+    if max_artifact_bytes <= 0 or max_manifest_bytes <= 0 or max_entries <= 0 or max_total_artifact_bytes <= 0:
         return ["resource limits must be positive"]
     try:
         if manifest.stat().st_size > max_manifest_bytes:
@@ -90,6 +92,7 @@ def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT
     if duplicate_scenarios:
         errors.append(f"duplicate scenarios: {duplicate_scenarios}")
     seen = set()
+    total_artifact_bytes = 0
     for entry in artifacts or []:
         if not isinstance(entry, dict):
             errors.append(f"invalid artifact entry: {entry}")
@@ -153,6 +156,9 @@ def verify(root: Path, manifest: Path, *, max_artifact_bytes: int = MAX_ARTIFACT
             errors.append(f"artifact must be a regular file: {relative}"); continue
         if path.stat().st_size > max_artifact_bytes:
             errors.append(f"artifact exceeds {max_artifact_bytes} bytes: {relative}"); continue
+        total_artifact_bytes += path.stat().st_size
+        if total_artifact_bytes > max_total_artifact_bytes:
+            errors.append(f"artifacts exceed total {max_total_artifact_bytes} bytes"); continue
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
             errors.append(f"hash mismatch: {relative}")
@@ -207,9 +213,11 @@ def main() -> int:
     parser.add_argument("--max-artifact-bytes", type=int, default=MAX_ARTIFACT_BYTES)
     parser.add_argument("--max-manifest-bytes", type=int, default=MAX_MANIFEST_BYTES)
     parser.add_argument("--max-entries", type=int, default=MAX_ENTRIES)
+    parser.add_argument("--max-total-artifact-bytes", type=int, default=MAX_TOTAL_ARTIFACT_BYTES)
     args = parser.parse_args()
     errors = verify(args.root, args.manifest, max_artifact_bytes=args.max_artifact_bytes,
-                    max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries)
+                    max_manifest_bytes=args.max_manifest_bytes, max_entries=args.max_entries,
+                    max_total_artifact_bytes=args.max_total_artifact_bytes)
     if errors:
         print("\n".join(errors), file=sys.stderr); return 1
     print("evidence bundle verified")
