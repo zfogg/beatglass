@@ -1521,7 +1521,7 @@ ApplicationWindow {
             window.overlayCaptureEvidenceStale = true
             window.announceCaptureRecoveryState("DJ overlay input mode could not be changed; current interaction mode remains active. Live evidence remains stale until fresh capture arrives.")
             clickThroughToggle.forceActiveFocus()
-            return
+            return false
         }
         window.overlayCaptureEvidenceStale = true
         window.announceCaptureRecoveryState("DJ overlay click-through enabled; press Escape to unlock interaction. Live evidence remains stale until fresh capture arrives.")
@@ -1563,7 +1563,7 @@ ApplicationWindow {
             return
         }
         window.announceCaptureRecoveryState("DJ overlay launch requested on the selected display; restoring persisted settings." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
-        window.handleOverlayShowAction()
+        return window.handleOverlayShowAction()
     }
     function handleOverlayShowAction() {
         if (window.overlayDisplaySelectionRequired || !window.overlayBridge || window.overlayBridge.screenNames.length === 0) {
@@ -1575,6 +1575,7 @@ ApplicationWindow {
             window.overlayCaptureEvidenceStale = true
             retryOverlay.forceActiveFocus()
         }
+        return restored
     }
     function focusOverlayDisplayShortcut() {
         navigation.currentIndex = 1
