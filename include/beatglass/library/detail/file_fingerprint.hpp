@@ -26,6 +26,10 @@ inline const char* fingerprint_status_label(FingerprintStatus status) noexcept {
 inline bool fingerprint_status_is_retryable(FingerprintStatus status) noexcept {
   return status == FingerprintStatus::cancelled || status == FingerprintStatus::error;
 }
+/** Return whether cached identity must be refreshed before another attempt. */
+inline bool fingerprint_status_requires_refresh(FingerprintStatus status) noexcept {
+  return status == FingerprintStatus::changed;
+}
 /** SHA-256 evidence for the bytes observed by one read, with file attributes around that read. It is not an opened-decoder identity or immunity to concurrent mutation. */
 struct FileFingerprint {
   /** Outcome; only ok permits use of remaining fields. */ FingerprintStatus status{FingerprintStatus::error};

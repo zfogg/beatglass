@@ -19,3 +19,7 @@ detail rather than machine-readable keys.
 Only `cancelled` and `error` are retryable outcomes. A `changed` result means
 the source identity must be refreshed before another attempt; it is not a
 transient failure and must not be blindly retried against the old identity.
+
+Callers can use `fingerprint_status_requires_refresh` to make this distinction
+explicit: only a `changed` result requires refreshing the cached identity;
+`cancelled` and `error` remain retryable without discarding a known identity.
