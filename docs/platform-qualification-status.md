@@ -2,8 +2,8 @@
 
 ## Current portable CLI/library evidence (2026-11-10)
 
-Issue #4320 CLI evidence: the Windows x64 FTXUI build passes the focused TUI
-contract and snapshot tests (2/2). A GCC/FTXUI 7.0.0 build in WSL Ubuntu
+Issue #4320 CLI evidence: the Windows x64 FTXUI build passes the focused TUI,
+generated-audio, codec and snapshot tests (4/4). A GCC/FTXUI 7.0.0 build in WSL Ubuntu
 successfully compiles and links the CLI, and Library/Live/Settings snapshots
 plus generated-audio and TUI-contract checks pass. These are development and
 cross-compiler preparation results, not native Linux qualification: WSL did
