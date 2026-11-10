@@ -29,11 +29,13 @@ private slots:
     QCOMPARE(model.confidence(), 0.75);
     QCOMPARE(model.tempoHistory(), QStringList({"120.0", "123.4"}));
     QCOMPARE(model.tonalHistory(), QStringList({"Am"}));
+    QCOMPARE(model.beatFrames(), QVariantList({QVariant::fromValue<qulonglong>(1)}));
     auto silent = std::make_shared<beatglass::Snapshot>(*snapshot);
     silent->state = beatglass::TrackingState::silent;
     QVERIFY(model.apply({2, silent}));
     QCOMPARE(model.tempo(), QStringLiteral("\u2014"));
     QVERIFY(model.tonalHistory().isEmpty());
+    QVERIFY(model.beatFrames().isEmpty());
     QVERIFY(model.apply({3, {}}));
     QVERIFY(!model.apply({2, snapshot}));
     QCOMPARE(spy.count(), 3);

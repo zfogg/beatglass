@@ -21,6 +21,8 @@ bool LivePresentation::apply(beatglass::PresentationUpdate update) {
   }
   tonal_history_.clear();
   for (const auto& label : displayed.tonal_history) tonal_history_.push_back(QString::fromStdString(label));
+  beat_frames_.clear();
+  for (const auto frame : displayed.beat_frames) beat_frames_.push_back(QVariant::fromValue<qulonglong>(frame));
   emit changed();
   return true;
 }
