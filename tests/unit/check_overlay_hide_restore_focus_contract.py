@@ -1073,6 +1073,14 @@ def test_overlay_pulse_requires_finite_positive_bpm_to_run():
     assert "Number(window.liveBridge.tempo) > 0" in body
 
 
+def test_overlay_pulse_requires_fresh_monitoring_evidence():
+    start = QML.index("id: beatPulse")
+    body = QML[start : QML.index("            onTriggered", start)]
+    assert "!window.overlayCaptureEvidenceStale" in body
+    assert "captureMonitorBridge.status === \"Monitoring\"" in body
+    assert "tracking = window.liveBridge.status" in body
+
+
 def test_overlay_pulse_status_label_exposes_running_state():
     start = QML.index('objectName: "overlayPulseStatus"')
     label = QML[start : QML.index('objectName: "overlayHarmony"', start)]

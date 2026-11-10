@@ -371,6 +371,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Beat pulse period status contract | Valid BPM drives a running pulse | Expose the computed millisecond beat period in the visible/accessibility status for timing transparency. |
 | Live evidence timing description contract | Assistive technology enters the overlay live-evidence group | Name beat-pulse timing alongside tempo, harmony, capture, and recovery context. |
 | Beat pulse direction status contract | Active theme selects lightening or darkening contrast direction | Expose the theme-dependent pulse direction in visible and accessible status text. |
+| Beat pulse capture validity contract | Capture monitoring is Monitoring, Reacquiring, Silent, or Error | Run the visual metronome only with fresh Monitoring evidence and stop it during stale/reacquisition states. |
 | Recovery pause focus contract | Recovery pause/safe-mode state focuses a follow-up control | Return whether the requested focus target was available after announcing stale/current evidence. |
 | Availability recovery focus contract | Native overlay/display availability fails and a fallback control is requested | Return whether the fallback target was focused after announcing retained settings and evidence freshness. |
 | Restored-state focus contract | Overlay restoration succeeds and a follow-up control is requested | Return whether the restored-state target was focused after announcing fresh-capture readiness. |
