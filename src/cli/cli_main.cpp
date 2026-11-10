@@ -1218,7 +1218,7 @@ int main(int argc, char** argv) {
     const std::filesystem::path requested(folder_text);
     std::string error;
     if (!open_folder_in_file_manager(requested, error)) { status = std::move(error); return; }
-    root = requested; recursive = true; refresh(); status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
+    root = requested; recursive = true; refresh(); persist_preferences(); status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
   });
   auto choose_folder_button = Button(" Choose folder… ", [&] {
 #ifdef _WIN32
@@ -1227,6 +1227,7 @@ int main(int argc, char** argv) {
       root = *chosen;
       recursive = true;
       refresh();
+      persist_preferences();
       status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
     } else {
       status = "Folder selection cancelled; current Library folder is unchanged.";
