@@ -110,3 +110,6 @@ workspace topology and capacity problems.
 Missing provenance metadata is grouped under `provenance` in JSON output, so
 qualification dashboards can identify incomplete build/environment identity
 separately from other manifest-shape errors.
+Required-scenario omissions are grouped under `scenario` in JSON output, so
+qualification dashboards can distinguish incomplete test coverage from other
+schema failures.
