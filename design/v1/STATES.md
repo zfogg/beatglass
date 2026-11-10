@@ -214,6 +214,7 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Resume shortcut tooltip stale state | User hovers the keyboard shortcut for resuming paused recovery | Keep shortcut guidance aligned with stale live evidence. |
 | Shared recovery evidence state | Multiple recovery/accessibility surfaces render simultaneously | Derive one shared evidence label from the stale flag so status, actions, and announcements use the same fresh-capture boundary. |
 | Recovery focus workflow | Keyboard entry opens recovery from multiple paths | Route focus through one helper that activates the page, focuses Resume, and announces the evidence boundary. |
+| Recovery keyboard transition | Escape or the paused-page shortcut enters manual recovery | Use one focus transition that activates the page, focuses Resume, and announces freshness consistently. |
 | Resume recovery tooltip stale state | User hovers manual resume after pausing native overlay recovery | Keep the action hint aligned with the stale-evidence boundary. |
 | Paused display recovery tooltip stale state | User hovers pending display recovery status while resume remains manual | Keep the pending-display hint aligned with stale live evidence. |
 | Settings summary review stale state | User invokes the consolidated summary review action during recovery | Keep review focus actionable while identifying stale live evidence until fresh capture. |

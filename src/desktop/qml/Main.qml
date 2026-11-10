@@ -87,6 +87,15 @@ ApplicationWindow {
             if (recursiveCatalogRows[i].audio) ++count
         return count
     }
+    function focusOverlayRecoveryAction(message) {
+        navigation.currentIndex = 1
+        window.show()
+        window.raise()
+        window.requestActivate()
+        window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Live evidence is current."))
+        resumeOverlayRecovery.forceActiveFocus()
+    }
+
     Shortcut {
         objectName: "libraryFilterFocusShortcut"
         sequence: "Ctrl+L"
@@ -411,24 +420,14 @@ ApplicationWindow {
         sequence: "Escape"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryPausedByUser && (!window.overlayBridge || !window.overlayBridge.clickThrough)
-        onActivated: {
-            window.announceCaptureRecoveryState("Paused overlay recovery; Resume recovery focused.")
-            resumeOverlayRecovery.forceActiveFocus()
-        }
+        onActivated: window.focusOverlayRecoveryAction("Paused overlay recovery; Resume recovery focused.")
     }
     Shortcut {
         objectName: "overlayPausedRecoveryPageShortcut"
         sequence: "Ctrl+Alt+Shift+Pause"
         context: Qt.ApplicationShortcut
         enabled: window.overlayRecoveryPausedByUser
-        onActivated: {
-            navigation.currentIndex = 1
-            window.show()
-            window.raise()
-            window.requestActivate()
-            window.announceCaptureRecoveryState("Paused overlay recovery page opened; Resume recovery is ready.")
-            resumeOverlayRecovery.forceActiveFocus()
-        }
+        onActivated: window.focusOverlayRecoveryAction("Paused overlay recovery page opened; Resume recovery is ready.")
     }
     Shortcut {
         objectName: "overlayDisplayFocusShortcut"
