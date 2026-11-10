@@ -982,3 +982,12 @@ def test_resume_recovery_requires_available_overlay():
     assert "screenNames.length === 0" in body
     assert "focusOverlayDisplayRecoveryFailure" in body
     assert "return false" in body
+
+
+def test_retry_button_requires_available_overlay():
+    start = QML.index("function handleOverlayRetryButtonAction")
+    body = QML[start : QML.index("    function handleOverlayShowButtonAction", start)]
+    assert "overlayBridge.available" in body
+    assert "screenNames.length === 0" in body
+    assert "focusOverlayDisplayRecoveryFailure" in body
+    assert "return false" in body
