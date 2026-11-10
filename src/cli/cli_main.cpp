@@ -1003,6 +1003,7 @@ int main(int argc, char** argv) {
   std::vector<std::vector<float>> live_spectrum_history;
   std::vector<float> live_tempo_history;
   std::chrono::steady_clock::time_point live_last_packet{};
+  std::chrono::steady_clock::time_point live_next_reacquire{};
   bool live_has_packet = false;
   std::optional<beatglass::VisualizationFrame> live_visualization_frame;
   beatglass::VisualizationPresentation live_visualization_presentation;
@@ -1049,6 +1050,7 @@ int main(int argc, char** argv) {
   std::vector<std::vector<float>> live_spectrum_history;
   std::vector<float> live_tempo_history;
   std::chrono::steady_clock::time_point live_last_packet{};
+  std::chrono::steady_clock::time_point live_next_reacquire{};
   bool live_has_packet = false;
   std::optional<beatglass::VisualizationFrame> live_visualization_frame;
   beatglass::VisualizationPresentation live_visualization_presentation;
@@ -2053,6 +2055,26 @@ int main(int argc, char** argv) {
           "Capture is running but no fresh PipeWire packets arrived; reacquiring…";
 #endif
           live_has_packet = false; }
+      }
+      if (live_pipewire && live_button_label == " Stop monitoring " && !live_pipewire->selected_active() &&
+          std::chrono::steady_clock::now() >= live_next_reacquire &&
+          live_selected >= 0 && live_selected < static_cast<int>(live_endpoint_ids.size())) {
+        clear_live_evidence();
+        live_tracking_state = beatglass::TrackingState::reacquiring;
+        set_live_presentation_state(beatglass::TrackingState::reacquiring);
+        const auto reacquired = live_pipewire->reacquire(live_endpoint_ids[static_cast<std::size_t>(live_selected)], ++live_pipewire_epoch, 48000, 2);
+        live_next_reacquire = std::chrono::steady_clock::now() + (reacquired ? std::chrono::milliseconds(1500) : std::chrono::milliseconds(750));
+        live_status = reacquired ?
+#ifdef __APPLE__
+          "CoreAudio output tap lost its stream; reacquiring a fresh epoch…" :
+#else
+          "PipeWire monitor lost its stream; reacquiring a fresh epoch…" :
+#endif
+#ifdef __APPLE__
+          "CoreAudio reacquisition failed; retrying…";
+#else
+          "PipeWire reacquisition failed; retrying…";
+#endif
       }
 #endif
       if (busy && analysis_future.valid() && analysis_future.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
