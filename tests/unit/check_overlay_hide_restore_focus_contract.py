@@ -1259,6 +1259,8 @@ def test_overlay_actions_disclose_pulse_status_shortcut():
     start = QML.index('objectName: "overlayActions"')
     body = QML[start : QML.index('objectName: "overlayShortcutHelp"', start)]
     assert "Ctrl+Alt+Shift+B focuses beat pulse status" in body
+    assert "native overlay launch fallback is active" in body
+    assert "recovery is pending" in body
 
 
 def test_overlay_keyboard_recovery_status_discloses_pulse_shortcut():
