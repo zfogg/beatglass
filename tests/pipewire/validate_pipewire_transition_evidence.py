@@ -88,6 +88,11 @@ if isinstance(payload, dict):
                 not isinstance(host["clock_drift_ppm"], (int, float))
                 or isinstance(host["clock_drift_ppm"], bool)):
             raise SystemExit("transition host provenance has invalid clock drift")
+        if host.get("clock_jitter_ns") is not None and (
+                not isinstance(host["clock_jitter_ns"], (int, float))
+                or isinstance(host["clock_jitter_ns"], bool)
+                or host["clock_jitter_ns"] < 0):
+            raise SystemExit("transition host provenance has invalid clock jitter")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
