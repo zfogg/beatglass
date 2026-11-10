@@ -46,7 +46,8 @@ FileMetadata read_metadata(const std::filesystem::path& path);
  * @return The latest state and uncalibrated tempo estimate.
  * @throws std::exception on decoder, invalid PCM or estimator errors.
  */
-TempoResult analyze_file(const std::filesystem::path& path);
+/** Analyze a file with optional cooperative cancellation. */
+TempoResult analyze_file(const std::filesystem::path& path, std::stop_token cancel = {});
 /** Observer called synchronously after each fully observed decoded block.
  * The first argument is the exclusive frame position within the file's epoch;
  * the second is borrowed only for the call. Observers must copy retained data.

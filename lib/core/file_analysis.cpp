@@ -32,5 +32,7 @@ TempoResult replay_file(const std::filesystem::path& path, const ReplayObserver&
   }
   return result;
 }
-TempoResult analyze_file(const std::filesystem::path& path) { return replay_file(path, {}); }
+TempoResult analyze_file(const std::filesystem::path& path, std::stop_token cancel) {
+  return replay_file(path, {}, {}, cancel);
+}
 }
