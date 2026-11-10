@@ -5241,6 +5241,7 @@ ApplicationWindow {
                     ComboBox {
                         id: overlaySize
                         objectName: "overlaySize"
+                        activeFocusOnTab: true
                         model: ["Compact", "Medium", "Large"]; currentIndex: window.overlayPreferredSizeIndex
                         enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
                         onActivated: if (window.overlayBridge) {
