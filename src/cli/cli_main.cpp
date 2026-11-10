@@ -461,6 +461,7 @@ int main(int argc, char** argv) {
   std::uint64_t live_observed_frames = 0;
   std::uint64_t live_discontinuities = 0;
   std::uint64_t live_beats = 0;
+  float live_signal_confidence = 0.0f;
   std::vector<float> live_waveform(160, 0.0f);
   std::vector<float> live_spectrum(32, 0.0f);
   std::vector<float> live_tempo_history;
@@ -470,6 +471,7 @@ int main(int argc, char** argv) {
     live_tracking_state = beatglass::TrackingState::reacquiring;
     live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
     live_beats = 0; live_tempo_history.clear(); live_spectrum.assign(live_spectrum.size(), 0.0f);
+    live_signal_confidence = 0.0f;
   });
 #else
   std::string live_status = "Native loopback capture is unavailable in this build.";
@@ -479,6 +481,7 @@ int main(int argc, char** argv) {
   std::uint32_t live_sample_rate = 0;
   std::uint64_t live_observed_frames = 0;
   std::uint64_t live_discontinuities = 0;
+  float live_signal_confidence = 0.0f;
   std::vector<float> live_waveform(160, 0.0f);
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
@@ -934,7 +937,7 @@ int main(int argc, char** argv) {
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
     std::vector<std::string> tempo_labels;
     for (const auto bpm : live_tempo_history) tempo_labels.push_back(format_bpm(bpm));
-    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({action(live_button->Render(), Color::GreenLight), text(" "), action(refresh_live_button->Render(), Color::Cyan), text(" "), action(reset_live_button->Render(), Color::YellowLight)}), hbox({text("Tempo interpretation: ") | italic, action(half_bpm_button->Render(), Color::YellowLight), text(" "), action(normal_bpm_button->Render(), Color::GreenLight), text(" "), action(double_bpm_button->Render(), Color::YellowLight), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   beats " + std::to_string(live_beats) + "   discontinuities " + std::to_string(live_discontinuities)), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), text("Tempo history: " + (tempo_labels.empty() ? std::string("waiting for tracking") : join_history(tempo_labels))) | color(Color::YellowLight), text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum), text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, live_observed_frames), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
+    return vbox({text("LIVE") | bold | underlined | color(Color::Cyan), separator(), text("OS AUDIO SINKS") | bold | color(Color::YellowLight), text("Choose a render endpoint before monitoring.") | italic, separator(), endpoint_picker->Render() | frame | vscroll_indicator, live_error.empty() ? text("Endpoint discovery ready.") | color(Color::GreenLight) : text("Endpoint status: " + live_error) | color(Color::YellowLight), separator(), hbox({action(live_button->Render(), Color::GreenLight), text(" "), action(refresh_live_button->Render(), Color::Cyan), text(" "), action(reset_live_button->Render(), Color::YellowLight)}), hbox({text("Tempo interpretation: ") | italic, action(half_bpm_button->Render(), Color::YellowLight), text(" "), action(normal_bpm_button->Render(), Color::GreenLight), text(" "), action(double_bpm_button->Render(), Color::YellowLight), text("  active ") | color(Color::GrayLight), text(multiplier_label) | bold | color(Color::YellowLight)}), live_status_view, separator(), text("LIVE ANALYSIS") | bold | underlined, text("Tempo: " + (corrected_bpm ? format_bpm(corrected_bpm) + " BPM" : "— BPM")) | bold | color(Color::GreenLight), text("Signal: " + (live_sample_rate ? std::to_string(live_sample_rate) + " Hz" : "—") + "   observed " + std::to_string(live_observed_frames) + " frames   beats " + std::to_string(live_beats) + "   discontinuities " + std::to_string(live_discontinuities)), text("Signal confidence: " + std::to_string(static_cast<int>(live_signal_confidence * 100.0f)) + "% (RMS/peak health)") | color(Color::MagentaLight), text("Key: —    Chord: —") | italic, text("Tonal analysis: unavailable in the standard build; enable the Essentia music-replay option for Key/Chord.") | color(Color::GrayLight) | italic, text("Capture state: " + std::string(live_state)), text("Tempo history: " + (tempo_labels.empty() ? std::string("waiting for tracking") : join_history(tempo_labels))) | color(Color::YellowLight), text("Spectrum") | bold | color(Color::MagentaLight), spectrum_chart(live_spectrum), text("Waveform") | bold | color(Color::GreenLight), waveform_chart(live_waveform, {}, live_observed_frames), filler(), text("↑↓ choose sink   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   auto reduce_motion_checkbox = Checkbox("Reduce motion", &reduce_motion);
   auto settings = Renderer(Container::Vertical({reduce_motion_checkbox, seek_step_input}), [&] {
@@ -1016,6 +1019,16 @@ int main(int argc, char** argv) {
             live_sample_rate = packet.sample_rate;
             live_observed_frames = packet.first_frame + packet.sample_count;
             if (packet.discontinuity) ++live_discontinuities;
+            double energy = 0.0;
+            float peak = 0.0f;
+            for (std::size_t sample = 0; sample < packet.sample_count; sample += std::max<std::uint32_t>(1, packet.channels)) {
+              const auto value = std::abs(packet.samples[sample]);
+              energy += static_cast<double>(value) * value;
+              peak = std::max(peak, value);
+            }
+            const auto sample_count = std::max<std::size_t>(1, (packet.sample_count + std::max<std::uint32_t>(1, packet.channels) - 1) / std::max<std::uint32_t>(1, packet.channels));
+            const auto rms = static_cast<float>(std::sqrt(energy / static_cast<double>(sample_count)));
+            live_signal_confidence = std::clamp(std::max(rms, peak * 0.35f) * 2.0f, 0.0f, 1.0f);
             const auto state = live_replay->process(block);
             live_bpm = state.bpm;
             live_tracking_state = state.state;
