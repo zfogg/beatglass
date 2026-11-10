@@ -195,6 +195,12 @@ TEST_CASE("catalog reports a file path as an invalid browse root") {
  const auto result = beatglass::library::browse(dir.path / "track.wav");
  CHECK(result.entries.empty());
  CHECK_FALSE(result.diagnostic.empty());
+ CHECK(result.status == beatglass::library::CatalogStatus::invalid_root);
+}
+TEST_CASE("catalog exposes a stable status for entry limits") {
+ TempDir dir; dir.file("one.wav"); dir.file("two.flac");
+ const auto result = beatglass::library::browse(dir.path, {}, 1);
+ CHECK(result.status == beatglass::library::CatalogStatus::entry_limit_exceeded);
 }
 TEST_CASE("catalog fails closed when the entry budget is exceeded") {
  TempDir dir; dir.file("one.wav"); dir.file("two.flac");

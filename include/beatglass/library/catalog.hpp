@@ -29,6 +29,14 @@ struct CatalogEntry {
   double duration_seconds{-1.0};
 };
 
+/** Machine-readable outcome of a synchronous catalog query. */
+enum class CatalogStatus {
+  ok,
+  invalid_root,
+  filesystem_error,
+  entry_limit_exceeded,
+};
+
 /** Result of a synchronous folder query performed by a non-audio worker.
  * On filesystem failure, entries is empty and diagnostic contains the
  * platform error. The query never follows directory entries recursively.
@@ -36,6 +44,7 @@ struct CatalogEntry {
 struct CatalogResult {
   std::vector<CatalogEntry> entries;
   std::string diagnostic;
+  CatalogStatus status{CatalogStatus::ok};
 };
 
 /** Return the canonical display format for a supported audio path.
