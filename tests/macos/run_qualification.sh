@@ -126,7 +126,10 @@ for bundle in "$tap_bundle" "$recovery_bundle"; do
   fi
 done
 validate_bundle_executable() {
-  local bundle="$1" expected="$2" plist="$bundle/Contents/Info.plist" actual
+  local bundle expected plist actual
+  bundle="$1"
+  expected="$2"
+  plist="$bundle/Contents/Info.plist"
   actual="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
   if [[ "$actual" != "$expected" ]]; then
     echo "Bundle executable mismatch in $plist: expected $expected, got $actual" >&2
