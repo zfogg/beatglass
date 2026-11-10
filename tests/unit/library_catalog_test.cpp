@@ -207,6 +207,13 @@ TEST_CASE("catalog exposes root-relative identity paths") {
  REQUIRE(recursive.entries.size() == 2);
  CHECK(recursive.entries.back().relative_path == std::filesystem::path("nested"));
 }
+TEST_CASE("catalog relative identity is computed without throwing") {
+ TempDir dir; dir.file("track.wav");
+ const auto result = beatglass::library::browse(dir.path);
+ REQUIRE(result.entries.size() == 1);
+ CHECK(result.status == beatglass::library::CatalogStatus::ok);
+ CHECK(result.entries.front().relative_path == std::filesystem::path("track.wav"));
+}
 TEST_CASE("recursive catalog ordering is rooted in relative identity") {
  TempDir dir; std::filesystem::create_directories(dir.path / "z");
  std::ofstream(dir.path / "z" / "track.wav") << "x";

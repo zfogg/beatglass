@@ -17,6 +17,9 @@ unlike `path`, it contains no machine-specific drive or absolute-root prefix.
 For recursive scans it preserves descendant components (for example,
 `nested/track.wav`). It is an identity hint, not permission to access a file;
 callers must continue using the absolute `path` for filesystem operations.
+Relative-key conversion uses the non-throwing filesystem API. If the platform
+cannot compute a key, the query returns an empty result with a filesystem
+error diagnostic rather than allowing an exception to escape the worker.
 Recursive results are ordered by this relative identity (case-folded, then
 exact spelling), so ordering does not depend on the drive letter or absolute
 root used for the scan.
