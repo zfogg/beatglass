@@ -317,6 +317,11 @@ for event in process_events:
             or isinstance(event["sample_rate"], bool)
             or event["sample_rate"] <= 0):
         raise SystemExit("process sample rates must be positive integers")
+    if event.get("channels") is not None and (
+            not isinstance(event["channels"], int)
+            or isinstance(event["channels"], bool)
+            or event["channels"] <= 0):
+        raise SystemExit("process channel counts must be positive integers")
     if event.get("sample_position") is not None and (
             not isinstance(event["sample_position"], int)
             or isinstance(event["sample_position"], bool)
