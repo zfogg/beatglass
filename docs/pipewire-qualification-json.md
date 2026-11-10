@@ -312,6 +312,9 @@ platform values rather than coercing them into canonical labels.
 The non-finite-platform regression in
 `tests/unit/check_native_host_provenance_platform_nan.py` rejects NaN platform
 values before they can enter qualification.
+The infinity-platform regression in
+`tests/unit/check_native_host_provenance_platform_infinity.py` rejects the other
+non-finite numeric platform form as well.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
