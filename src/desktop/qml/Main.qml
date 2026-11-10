@@ -735,6 +735,11 @@ ApplicationWindow {
         if (target)
             target.forceActiveFocus()
     }
+    function focusOverlayBridgeSettingsFailure(message, target) {
+        window.overlayLaunchFallbackActive = true
+        window.overlayDisplayRecoveryPending = true
+        window.focusOverlayAvailabilityRecovery(message + " Persisted settings remain retained for retry.", target)
+    }
     function focusOverlayRestoredState(message, target) {
         window.show()
         window.raise()
@@ -922,13 +927,7 @@ ApplicationWindow {
                 if (synced) {
                     window.announceCaptureRecoveryState("Overlay actions restored; native display settings are available.")
                 } else {
-                    window.overlayLaunchFallbackActive = true
-                    window.overlayDisplayRecoveryPending = true
-                    window.announceCaptureRecoveryState("Overlay bridge recovered, but settings remain unavailable; control-window fallback remains active.")
-                    window.show()
-                    window.raise()
-                    window.requestActivate()
-                    retryOverlay.forceActiveFocus()
+                    window.focusOverlayBridgeSettingsFailure("Overlay bridge recovered, but settings remain unavailable; control-window fallback remains active.", retryOverlay)
                 }
                 if (synced && window.overlayWasVisibleBeforeAvailabilityLoss) {
                     window.overlayWasVisibleBeforeAvailabilityLoss = false
