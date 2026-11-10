@@ -270,6 +270,8 @@ The host evidence root must be a JSON object; scalar, null, and array roots are
 rejected before provenance fields are inspected.
 Host `name` must contain visible non-whitespace text; empty and whitespace-only
 names are rejected as unusable provenance.
+The platform value is a case-sensitive enum (`linux`, `windows`, or `macos`);
+unknown, empty, and differently cased values are rejected.
 `node_id` must be a positive integer; JSON booleans are explicitly rejected
 even though some language runtimes represent them as integers.
 Zero and negative node IDs are rejected as well; `1` is the minimum accepted
