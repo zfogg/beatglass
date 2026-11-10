@@ -25,9 +25,9 @@ struct PresentationState { std::string status, tempo, key, chord; std::uint64_t 
  */
 inline PresentationState present_snapshot(const Snapshot& snapshot) {
   PresentationState result{"Stopped", "—", "—", "—", 0, snapshot.observed_through.frame, snapshot.analysis_delay_frames, std::nullopt, {}, {}, {}, false};
-  result.beat_count = snapshot.beats.size();
   for (const auto& beat : snapshot.beats) if (beat.time.epoch == snapshot.observed_through.epoch) result.beat_frames.push_back(beat.time.frame);
   if (result.beat_frames.size() > 64) result.beat_frames.erase(result.beat_frames.begin(), result.beat_frames.end() - 64);
+  result.beat_count = result.beat_frames.size();
   result.tempo_history = snapshot.tempo_history;
   if (result.tempo_history.size() > 32) result.tempo_history.erase(result.tempo_history.begin(), result.tempo_history.end() - 32);
   for (const auto& chord : snapshot.chords) if (!chord.chord.label.empty()) result.tonal_history.push_back(chord.chord.label);

@@ -16,6 +16,7 @@ private slots:
     model.publish(snapshot);
 
     QCOMPARE(model.bpm(), QStringLiteral("128.2"));
+    QCOMPARE(model.beatCount(), qulonglong(2));
     QCOMPARE(model.tempoHistory(), QStringList({"126.0", "128.2"}));
     QCOMPARE(model.tonalHistory(), QStringList({"Am", "F"}));
     QCOMPARE(model.beatFrames(), QVariantList({QVariant::fromValue<qulonglong>(1000), QVariant::fromValue<qulonglong>(2000)}));
