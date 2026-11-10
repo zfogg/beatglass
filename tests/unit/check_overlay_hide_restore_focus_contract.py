@@ -1273,6 +1273,8 @@ def test_overlay_shows_stale_evidence_banner():
     assert "prior evidence is stale until the new endpoint" in QML
     assert "monitoring restarted" in QML
     assert "captureMonitorBridge.start()" in QML
+    assert 'status === "Stopped"' in QML
+    assert "Output monitoring stopped" in QML
     assert "themeForegrounds[window.selectedThemeIndex]" in body
     assert "font.bold: true" in body
     assert "; combined output may be ambiguous" in body
