@@ -3781,9 +3781,7 @@ ApplicationWindow {
                                 title: "Run fresh analysis?"
                                 modal: true
                                 standardButtons: Dialog.Cancel | Dialog.Ok
-                                Accessible.name: "Run fresh analysis confirmation"
-                                Accessible.description: "Confirm invalidating this cache identity and queueing fresh analysis. Source audio is not changed."
-                                contentItem: Label { text: "This invalidates the selected cached identity and queues fresh analysis. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.role: Accessible.StaticText }
+                                contentItem: Label { text: "This invalidates the selected cached identity and queues fresh analysis. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Run fresh analysis confirmation"; Accessible.description: "Confirm invalidating this cache identity and queueing fresh analysis. Source audio is not changed."; Accessible.role: Accessible.StaticText }
                                 onOpened: { window.announceVisualizationRecovery("Confirm fresh analysis; source audio remains unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
                                 onAccepted: { storageRecovery.reanalyze("reanalyze-" + cacheContent.text, window.selectedAudioUrl.toLocalFile(), cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Fresh analysis queued; source audio was not changed."); reanalyzeCacheDialog.close(); reanalyzeInvalidatedCache.forceActiveFocus() }
                                 onRejected: reanalyzeInvalidatedCache.forceActiveFocus()
@@ -3794,9 +3792,7 @@ ApplicationWindow {
                                 title: "Forget cached analysis?"
                                 modal: true
                                 standardButtons: Dialog.Cancel | Dialog.Ok
-                                Accessible.name: "Forget cached analysis confirmation"
-                                Accessible.description: "Confirm removal of the selected completed cache identity. Source audio is not modified."
-                                contentItem: Label { text: "This removes only the completed cached result for the entered identity. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.role: Accessible.StaticText }
+                                contentItem: Label { text: "This removes only the completed cached result for the entered identity. The source audio file is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Forget cached analysis confirmation"; Accessible.description: "Confirm removal of the selected completed cache identity. Source audio is not modified."; Accessible.role: Accessible.StaticText }
                                 onOpened: { window.announceVisualizationRecovery("Confirm forgetting the cached result; source audio remains unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
                                 onAccepted: { storageRecovery.invalidateCached(cacheContent.text, cacheEngine.text, cacheConfig.text, cacheMode.text); window.announceVisualizationRecovery("Cached analysis identity forgotten; source audio was not changed."); invalidateCacheDialog.close(); invalidateAnalysisCache.forceActiveFocus() }
                                 onRejected: invalidateAnalysisCache.forceActiveFocus()
@@ -3899,11 +3895,12 @@ ApplicationWindow {
                                 title: "Discard all saved analysis runs?"
                                 modal: true
                                 standardButtons: Dialog.Ok | Dialog.Cancel
-                                Accessible.name: "Discard all saved recovery runs confirmation"
-                                Accessible.description: "Confirm removing every persisted retry record currently shown. Source audio files are never changed. Cancel is safe."
                                 contentItem: Label {
                                     text: "This removes " + (typeof storageRecovery !== "undefined" ? storageRecovery.retryableRunIds.length : 0) + " saved retry record(s). Source audio files are not changed."
                                     wrapMode: Text.WordWrap
+                                    Accessible.name: "Discard all saved recovery runs confirmation"
+                                    Accessible.description: "Confirm removing every persisted retry record currently shown. Source audio files are never changed. Cancel is safe."
+                                    Accessible.role: Accessible.StaticText
                                 }
                                 onAccepted: { if (window.storageReopenPending || storageRecovery.status === "Storage closed" || storageRecovery.status.indexOf("Storage error:") === 0) { window.announceVisualizationRecovery("Storage became unavailable; bulk discard was canceled. Reopen storage to refresh recovery runs."); reopenStorage.forceActiveFocus() } else { storageRecovery.discardRuns(storageRecovery.retryableRunIds); window.announceVisualizationRecovery("All saved recovery runs discarded."); discardAllPersistedRecovery.forceActiveFocus() } }
                                 onRejected: discardAllPersistedRecovery.forceActiveFocus()
@@ -3917,14 +3914,14 @@ ApplicationWindow {
                                     : "Discard saved analysis run?"
                                 modal: true
                                 standardButtons: Dialog.Ok | Dialog.Cancel
-                                Accessible.role: Accessible.Dialog
-                                Accessible.name: "Discard saved analysis run confirmation"
-                                Accessible.description: "Confirm to remove only the selected retry record. Cancel is focused first; press Tab to reach the destructive OK action, Enter confirms, and Escape cancels. The source audio file is never changed. Cancel returns focus to the discard control."
                                 contentItem: Label {
                                     text: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                         ? "This removes only retry record " + storageRecovery.selectedRunId + ". The source audio file is not changed."
                                         : "This removes only the retry record. The source audio file is not changed."
                                     wrapMode: Text.WordWrap
+                                    Accessible.name: "Discard saved analysis run confirmation"
+                                    Accessible.description: "Confirm to remove only the selected retry record. Cancel is focused first; press Tab to reach the destructive OK action, Enter confirms, and Escape cancels. The source audio file is never changed. Cancel returns focus to the discard control."
+                                    Accessible.role: Accessible.StaticText
                                     Accessible.name: typeof storageRecovery !== "undefined" && storageRecovery.selectedRunId !== ""
                                         ? "Discard retryable run " + storageRecovery.selectedRunId + " confirmation"
                                         : "Discard retryable run confirmation"
@@ -3986,10 +3983,7 @@ ApplicationWindow {
                                 modal: true
                                 title: "Discard analysis batch?"
                                 standardButtons: Dialog.Ok | Dialog.Cancel
-                                Accessible.role: Accessible.Dialog
-                                Accessible.name: "Discard analysis batch confirmation"
-                                Accessible.description: "Clear the retained batch recovery state without changing source audio. Cancel is focused first; Tab reaches the destructive OK action."
-                                contentItem: Label { text: "This clears the retained batch recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis batch confirmation"; Accessible.role: Accessible.StaticText }
+                                contentItem: Label { text: "This clears the retained batch recovery state. Source audio is not changed."; wrapMode: Text.WordWrap; Accessible.name: "Discard analysis batch confirmation"; Accessible.description: "Clear the retained batch recovery state without changing source audio. Cancel is focused first; Tab reaches the destructive OK action."; Accessible.role: Accessible.StaticText }
                                 onOpened: { window.announceVisualizationRecovery("Confirm discard of the analysis batch; source audio will remain unchanged."); standardButton(Dialog.Cancel).forceActiveFocus() }
                                 onAccepted: { if (!window.analysisJobBridge || (window.analysisJobBridge.status !== "Failed" && window.analysisJobBridge.status !== "Cancelled")) { window.announceVisualizationRecovery("Analysis batch is no longer discardable; no batch recovery was discarded."); retryAnalysisBatchButton.forceActiveFocus() } else { window.analysisJobBridge.discardBatch(); window.clearVisualizationForCaptureState("Analysis batch recovery discarded; previous visualization evidence is stale until a new accepted result."); window.announceVisualizationRecovery("Analysis batch recovery discarded; focus remains on the recovery controls."); discardAnalysisBatchButton.forceActiveFocus() } analysisBatchStatus.forceActiveFocus() }
                                 onRejected: discardAnalysisBatchButton.forceActiveFocus()
