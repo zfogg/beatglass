@@ -212,6 +212,15 @@ TestCase {
         app.destroy()
         app.overlayHiddenByUser = false
     }
+    function test_opacityResetRejectsDuplicateInFlightActivation() {
+        let app = shellWithOverlay.createObject(null)
+        app.overlayOpacityEditInFlight = true
+        let before = fakeOverlay.opacity
+        verify(!app.handleOverlayOpacityResetAction(0.9))
+        compare(fakeOverlay.opacity, before)
+        verify(app.overlayRecoveryAnnouncement.indexOf("already pending") >= 0)
+        app.destroy()
+    }
     function test_overlayAvailabilityFailureRestoresControls() {
         fakeOverlay.hides = 0; fakeOverlay.available = true
         let app = shellWithOverlay.createObject(null)
