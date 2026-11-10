@@ -65,3 +65,5 @@ The JSON object also includes `error_count` and the effective `limits`, making
 resource policy observable to qualification automation.
 Verifier JSON also reports retained `artifact_count` and `artifact_bytes`
 metrics, enabling consumers to compare evidence volume with configured limits.
+Errors include an `error_categories` count map for dashboards without requiring
+clients to parse human-readable diagnostic strings.
