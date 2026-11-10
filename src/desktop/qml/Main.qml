@@ -2949,7 +2949,6 @@ ApplicationWindow {
                     visible: window.playbackBridge !== null && window.selectedAudioUrl.toString() !== ""
                     text: visible ? ("Library playback: " + window.playbackBridge.state + (window.playbackMatchesSelection ? " · selected source" : " · another source is open")) : ""
                     Accessible.name: "Library playback recovery status"
-                    Accessible.value: visible ? text : ""
                     Accessible.role: Accessible.Status
                     Accessible.description: visible && !window.playbackMatchesSelection ? text + ". Reopen selected playback to align the source before seeking." : visible ? text + ". Playback controls operate on the selected source." : "Playback status is unavailable."
                     ToolTip.text: visible ? Accessible.description : "Library playback recovery status"
