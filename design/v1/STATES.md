@@ -75,6 +75,7 @@
 | Analysis queue retrying | Recoverable worker or source error is being retried | Show retry progress, preserve completed evidence, and replace it only after a fresh run is accepted for the same source identity. |
 | DJ paused | User paused capture intentionally | Show no new estimates, preserve existing Library evidence, and offer resume/reacquire. |
 | Overlay recovery paused | User paused native overlay retries after a display or compositor failure | Keep monitoring active, mark live overlay evidence as stale, announce that recovery is paused, and require an explicit bounded Resume recovery action. |
+| Overlay safe mode | Native overlay retries reached the bounded attempt limit | Keep monitoring available without the overlay, mark overlay evidence stale, explain the limit accessibly, and require Clear safe mode before another retry. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
 | Jobs | Running progress, completed and changed source | Cancel current or remaining jobs, retry and explain changed source; prioritize live work. |
 | DJ | Monitoring selected output, activity and combined-mix caveat | Start/stop, select default or explicit output, half/double BPM, reset/reacquire. |
