@@ -102,4 +102,9 @@ with tempfile.TemporaryDirectory() as directory:
     result = subprocess.run([sys.executable, str(script), str(retained_blockers), "--summary", str(summary)], capture_output=True, text=True)
     if result.returncode == 0 or "retains execution blockers" not in result.stderr + result.stdout:
         raise SystemExit("qualified summary with execution blockers was accepted")
+    summary.write_text(json.dumps({"qualified": False, "native_artifacts": [], "pending_reason": "host unavailable", "commit": 42}), encoding="utf-8")
+    invalid_commit = root / "invalid-commit-matrix.json"
+    result = subprocess.run([sys.executable, str(script), str(invalid_commit), "--summary", str(summary)], capture_output=True, text=True)
+    if result.returncode == 0 or "invalid commit provenance" not in result.stderr + result.stdout:
+        raise SystemExit("malformed pending commit provenance was accepted")
 print("PipeWire qualification matrix behavior passed (2 scenarios)")
