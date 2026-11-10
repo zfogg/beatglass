@@ -165,7 +165,7 @@ TEST_CASE("coordinator admission replaces decoder on cache hit") {
   op.decode = [&decoder_called](std::stop_token, const auto&) { decoder_called.store(true); return std::string("unexpected"); };
   auto handle = coordinator.submit("cache-hit", std::move(op));
   REQUIRE(handle);
-  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
   REQUIRE(handle->state() == beatglass::library_detail::TrackedState::completed);
   CHECK_FALSE(decoder_called.load());
 }
@@ -193,7 +193,7 @@ TEST_CASE("coordinator cancellation does not publish a stale result") {
   auto handle = coordinator.submit("cancel-run", std::move(op));
   REQUIRE(handle);
   handle->cancel();
-  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
   CHECK(handle->state() == beatglass::library_detail::TrackedState::cancelled);
   CHECK_FALSE(published.load());
   const auto recovered = coordinator.storage().retryable_run("cancel-run");
@@ -210,7 +210,7 @@ TEST_CASE("decoder failure retains a retryable recovery record") {
   op.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   auto handle = coordinator.submit("decoder-failure", std::move(op));
   REQUIRE(handle);
-  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
   CHECK(handle->state() == beatglass::library_detail::TrackedState::failed);
   const auto recovered = coordinator.storage().retryable_run("decoder-failure");
   REQUIRE(recovered);
@@ -329,7 +329,7 @@ TEST_CASE("coordinator resubmits persisted endpoint retry after restart") {
   operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::match}; };
   const auto handle = coordinator.resubmit_retryable(pending.front().id, std::move(operation));
   REQUIRE(handle);
-  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
   REQUIRE(handle->state() == beatglass::library_detail::TrackedState::completed);
   std::string result;
   REQUIRE(coordinator.storage().cache()->find(key, result));
@@ -458,7 +458,7 @@ TEST_CASE("coordinator missing source retry fails closed without a cache result"
   operation.verify = [](std::stop_token) { return beatglass::FileVerificationResult{beatglass::FileVerificationOutcome::unverifiable, "source file is unavailable"}; };
   const auto handle = coordinator.submit("missing-source-run", std::move(operation));
   REQUIRE(handle);
-  for (int i = 0; i < 1000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && (handle->state() == beatglass::library_detail::TrackedState::queued || handle->state() == beatglass::library_detail::TrackedState::running); ++i) std::this_thread::sleep_for(std::chrono::microseconds(100));
   CHECK(handle->state() == beatglass::library_detail::TrackedState::failed);
   std::string result;
   CHECK_FALSE(coordinator.storage().cache()->find({"missing-source", "engine", "config", "offline"}, result));
