@@ -1402,10 +1402,15 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available) {
+            window.focusOverlayAvailabilityRecovery("Hide overlay is unavailable because the native overlay is not available; control-window fallback remains active.", showOverlay)
+            return false
+        }
         if (window.overlayHiddenByUser)
             restoreOverlay.forceActiveFocus()
         else
             hideOverlay.forceActiveFocus()
+        return true
         window.announceCaptureRecoveryState("Hide overlay control focused; " + (window.overlayHiddenByUser ? "Restore is ready." : "Hide is ready.") + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
     }
     function focusOverlaySizeShortcut() {
