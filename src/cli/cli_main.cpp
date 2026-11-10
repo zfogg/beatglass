@@ -111,6 +111,24 @@ private:
   std::int64_t seek_delta_seconds_{};
 };
 #endif
+
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(BEATGLASS_HAS_PIPEWIRE)
+#include <filesystem>
+#include <string>
+class CliPlayback final {
+public:
+  void play(const std::filesystem::path&) noexcept {}
+  void resume() noexcept {}
+  void pause() noexcept {}
+  void seek_seconds(std::int64_t) noexcept {}
+  void stop() noexcept {}
+  beatglass::PlaybackState state() const noexcept { return beatglass::PlaybackState::stopped; }
+  std::uint64_t epoch() const noexcept { return 0; }
+  std::uint64_t current_frame() const noexcept { return 0; }
+  std::uint64_t total_frames() const noexcept { return 0; }
+  std::string status() const { return "Native playback is unavailable in this build."; }
+};
+#endif
 #include "state_label.hpp"
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -770,7 +788,7 @@ int main(int argc, char** argv) {
   std::filesystem::path analysis_path;
   bool busy = false;
   bool reduce_motion = preferences.reduce_motion;
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
   CliPlayback playback;
 #ifdef _WIN32
   const auto playback_devices = beatglass::windows::enumerate_waveout_devices();
@@ -1108,7 +1126,7 @@ int main(int argc, char** argv) {
       status = "Select a supported audio file before starting playback.";
       return;
     }
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
 #ifdef _WIN32
     if (!playback_devices.empty() && playback_device_selected >= 0 && playback_device_selected < static_cast<int>(playback_devices.size())) playback.set_device(playback_devices[static_cast<std::size_t>(playback_device_selected)].id);
 #endif
@@ -1119,12 +1137,12 @@ int main(int argc, char** argv) {
       playback.play(tracks[selected].path);
       status = "Playing " + tracks[selected].title + " through the selected output.";
     }
-#elif !defined(__APPLE__)
+#else
     status = "Native playback is unavailable in this build; analysis remains available.";
 #endif
   });
   auto pause_button = Button(" Pause ", [&] {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
     playback.pause();
     status = "Playback pause requested.";
 #else
@@ -1161,7 +1179,7 @@ int main(int argc, char** argv) {
   auto previous_button = Button(" Prev ", [&] { select_relative(-1); });
   auto next_button = Button(" Next ", [&] { select_relative(1); });
   auto seek_back_button = Button(" − ", [&] {
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
     playback.seek_seconds(-seek_step());
     status = "Playback seek backward requested.";
 #else
@@ -1169,7 +1187,7 @@ int main(int argc, char** argv) {
 #endif
   });
   auto seek_forward_button = Button(" + ", [&] {
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
     playback.seek_seconds(seek_step());
     status = "Playback seek forward requested.";
 #else
@@ -1252,14 +1270,14 @@ int main(int argc, char** argv) {
     auto status_view = busy ? vbox({hbox({spinner(6, static_cast<size_t>(spinner_frame)), text(" "), text(status + batch_label)}) | color(Color::YellowLight), progress_total ? progress_meter(progress) : text("Preparing decoder…") | color(Color::GrayLight) | italic}) | bgcolor(Color::RGB(43, 36, 16)) : text(status) | color(Color::GrayLight) | italic;
     const auto playback_label = playback.state() == beatglass::PlaybackState::playing ? "playing" : playback.state() == beatglass::PlaybackState::paused ? "paused" : "stopped";
     const auto playback_status =
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
         playback.status();
 #else
         std::string{};
 #endif
     std::string playback_position = "—";
     float playback_fraction = -1.0f;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__) || defined(BEATGLASS_HAS_PIPEWIRE)
     const auto playback_total = playback.total_frames();
     const auto playback_frame = std::min(playback.current_frame(), playback_total);
     if (result && result->metadata.sample_rate != 0 && playback_total != 0) {
