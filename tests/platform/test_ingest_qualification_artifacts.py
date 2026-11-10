@@ -331,3 +331,11 @@ class QualificationIngestTest(unittest.TestCase):
             self.assertIn("source commit identity must be lowercase", errors)
             self.assertIn("invalid platform identity", errors)
             self.assertIn("invalid environment identity", errors)
+
+    def test_future_capture_timestamp_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            future = (ingest.datetime.now(ingest.timezone.utc) + ingest.timedelta(hours=1)).isoformat()
+            (root / "qualification-manifest.txt").write_text("commit=" + "a" * 40 + "\ncaptured_at=" + future + "\n", encoding="utf-8")
+            errors = ingest.ingest(root, root / "manifest.json")
+            self.assertIn("capture timestamp cannot be in the future", errors)

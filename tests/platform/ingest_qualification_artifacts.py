@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import re
 import unicodedata
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 SCENARIOS = ("capture", "recovery", "output", "display", "playback", "overlay")
 SUPPORTED_PLATFORMS = {"linux", "windows", "macos", "fixture"}
@@ -56,6 +56,8 @@ def ingest(root: Path, output: Path, *, max_artifact_bytes: int = MAX_ARTIFACT_B
             captured_at = datetime.fromisoformat(identity["captured_at"].replace("Z", "+00:00"))
             if captured_at.tzinfo is None:
                 errors.append("capture timestamp must include timezone")
+            elif captured_at > datetime.now(timezone.utc) + timedelta(minutes=5):
+                errors.append("capture timestamp cannot be in the future")
         except ValueError:
             errors.append("invalid capture timestamp")
     artifacts = []
