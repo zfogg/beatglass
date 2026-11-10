@@ -304,6 +304,8 @@ class EvidenceBundleTest(unittest.TestCase):
             self.assertTrue(report["errors"])
             self.assertEqual(report["error_count"], len(report["errors"]))
             self.assertIn("max_total_artifact_bytes", report["limits"])
+            self.assertEqual(report["artifact_count"], 0)
+            self.assertEqual(report["artifact_bytes"], 0)
             self.assertNotEqual(result.returncode, 0)
 
     def test_oversized_manifests_are_rejected(self):
