@@ -23,6 +23,15 @@ def test_hide_workflow_focuses_restore_or_retry_deterministically():
     assert "overlayDisplayRecoveryPending = true" in body
 
 
+def test_restore_failures_share_an_activated_stale_focus_path():
+    start = QML.index("function focusOverlayRestoreFailure")
+    body = QML[start : QML.index("    Connections", start)]
+    assert "navigation.currentIndex = 1" in body
+    assert "Live evidence is stale until a fresh capture arrives." in body
+    restore = QML[QML.index("function showOverlayAndHideControls") : QML.index("    function restoreOverlayVisualStateFromBridge")]
+    assert restore.count("window.focusOverlayRestoreFailure(") == 3
+
+
 def test_design_state_documents_hide_restore_focus_contract():
     assert "Overlay hide/restore focus workflow" in STATES
 
