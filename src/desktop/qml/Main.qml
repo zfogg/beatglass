@@ -4578,6 +4578,7 @@ ApplicationWindow {
                                 window.overlayCaptureEvidenceStale = true
                                 window.announceCaptureRecoveryState("Overlay monitoring stopped; overlay settings remain available.")
                             } else {
+                                window.overlayCaptureEvidenceStale = true
                                 window.captureMonitorBridge.start()
                                 window.announceCaptureRecoveryState("Overlay monitoring requested; waiting for accepted output data.")
                             }
