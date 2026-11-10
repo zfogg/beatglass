@@ -135,6 +135,11 @@ if reacquisition is not None:
             raise SystemExit("reacquisition evidence has an invalid timestamp")
         if isinstance(restart.get("timestamp_ns"), int) and reacquisition["timestamp_ns"] < restart["timestamp_ns"]:
             raise SystemExit("reacquisition timestamp precedes restart")
+    if reacquisition.get("drop_count") is not None:
+        if (not isinstance(reacquisition["drop_count"], int)
+                or isinstance(reacquisition["drop_count"], bool)
+                or reacquisition["drop_count"] < 0):
+            raise SystemExit("reacquisition evidence has an invalid drop count")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
     if reacquisition.get("device_id") is not None:
