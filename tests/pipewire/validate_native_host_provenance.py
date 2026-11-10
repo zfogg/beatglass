@@ -43,6 +43,12 @@ if len(sys.argv) == 3:
             os.fsync(temporary.fileno())
             temporary_path = Path(temporary.name)
         os.replace(temporary_path, destination)
+        if os.name != "nt":
+            directory_fd = os.open(destination.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+            finally:
+                os.close(directory_fd)
     except OSError as error:
         if "temporary_path" in locals():
             temporary_path.unlink(missing_ok=True)
