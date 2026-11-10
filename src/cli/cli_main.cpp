@@ -175,8 +175,9 @@ private:
 int main(int argc, char** argv) {
   using namespace ftxui;
   const bool snapshot = argc > 1 && std::string(argv[1]) == "--snapshot";
-  const std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::current_path()) : (argc > 1 ? argv[1] : std::filesystem::current_path());
+  std::filesystem::path root = snapshot ? (argc > 2 ? argv[2] : std::filesystem::current_path()) : (argc > 1 ? argv[1] : std::filesystem::current_path());
   auto tracks = discover(root, true);
+  std::string folder_text = root.string();
   std::string filter;
   bool recursive = true;
   std::vector<std::string> live_endpoints;
@@ -240,10 +241,17 @@ int main(int argc, char** argv) {
     const auto path = tracks[selected].path;
     analysis_future = std::async(std::launch::async, [path] { return AnalysisView{beatglass::analyze_file(path), decode_waveform(path)}; });
   };
-  auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); status = std::to_string(tracks.size()) + " tracks indexed."; };
+  auto refresh = [&] { tracks = discover(root, recursive); selected = tracks.empty() ? -1 : std::min(selected, static_cast<int>(tracks.size()) - 1); result.reset(); waveform.clear(); status = std::to_string(tracks.size()) + " tracks indexed."; };
   auto filter_input = Input(&filter, "Filter songs");
+  auto folder_input = Input(&folder_text, "Audio folder");
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
   auto refresh_button = Button(" Refresh ", refresh);
+  auto open_folder_button = Button(" Open folder ", [&] {
+    const std::filesystem::path requested(folder_text);
+    std::error_code error;
+    if (!std::filesystem::is_directory(requested, error)) { status = "Folder unavailable: " + folder_text; return; }
+    root = requested; refresh(); status = "Opened " + root.string() + " — " + std::to_string(tracks.size()) + " tracks indexed.";
+  });
   auto play_button = Button(" Play ", [&] {
     if (selected >= 0 && selected < static_cast<int>(tracks.size())) {
 #ifdef _WIN32
@@ -272,7 +280,7 @@ int main(int argc, char** argv) {
     if (library_visible_selected >= 0 && library_visible_selected < static_cast<int>(library_indices.size())) selected = library_indices[static_cast<std::size_t>(library_visible_selected)];
   };
   auto library_menu = Menu(&library_labels, &library_visible_selected, library_menu_option);
-  auto library_controls = Container::Horizontal({filter_input, recursive_checkbox, refresh_button, play_button, pause_button, stop_button});
+  auto library_controls = Container::Vertical({Container::Horizontal({folder_input, open_folder_button, recursive_checkbox, refresh_button}), Container::Horizontal({filter_input, play_button, pause_button, stop_button})});
   auto library_container = Container::Vertical({library_controls, library_menu});
   auto library = Renderer(library_container, [&] {
     Elements rows;
@@ -301,7 +309,7 @@ int main(int argc, char** argv) {
         std::string{};
 #endif
     auto detail = vbox({text("TRACK ANALYSIS") | bold | color(Color::Cyan), text(name) | color(Color::White), separator(), hbox(cards) | size(HEIGHT, LESS_THAN, 7), separator(), waveform_chart(result ? waveform : std::vector<float>{}, result ? result->beats : 0), separator(), text(result ? "Format: " + result->metadata.format : "Select a track, then press Enter") | bold, text(result ? "Sample rate: " + std::to_string(result->metadata.sample_rate) + " Hz   Channels: " + std::to_string(result->metadata.channels) + "   Duration: " + duration : "Real decoder and aubio analysis will populate this view."), text("Playback: " + std::string(playback_label) + "  epoch " + std::to_string(playback.epoch())), text(playback_status), separator(), status_view});
-    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), text(root.string()) | color(Color::GrayLight), hbox({text("Filter: "), filter_input->Render() | flex, text("  "), recursive_checkbox->Render(), text("  "), refresh_button->Render()}), hbox({play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
+    return vbox({text("LIBRARY") | bold | color(Color::Cyan), separator(), hbox({text("Folder: "), folder_input->Render() | flex, text(" "), open_folder_button->Render(), text(" "), recursive_checkbox->Render(), text(" "), refresh_button->Render()}), hbox({text("Filter: "), filter_input->Render() | flex, text(" "), play_button->Render(), text(" "), pause_button->Render(), text(" "), stop_button->Render()}), separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter analyze   Tab switch tab   q quit") | color(Color::GrayDark)}) | borderRounded | flex;
   });
   auto toggle_live = [&] {
 #ifdef _WIN32
