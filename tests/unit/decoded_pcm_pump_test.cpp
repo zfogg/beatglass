@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_approx.hpp>
 #include "beatglass/capture/decoded_pcm_pump.hpp"
 #include <array>
 #include <chrono>
