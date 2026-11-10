@@ -1155,7 +1155,11 @@ int main(int argc, char** argv) {
 #endif
     }();
     const auto bpm_setting = live_bpm_multiplier < 1.0f ? -1 : live_bpm_multiplier > 1.0f ? 1 : 0;
-    CliPreferences updated{reduce_motion, 5, visual_mode, selected_device_id, bpm_setting, {}, {}, root.string()};
+    // Preserve the last known endpoint identity when discovery is temporarily
+    // unavailable.  Rebuilding preferences with empty endpoint fields here
+    // used to silently forget the user's selected sink on exit.
+    CliPreferences updated{reduce_motion, 5, visual_mode, selected_device_id, bpm_setting,
+                           live_endpoint_preference, live_endpoint_name_preference, root.string()};
     try { updated.seek_step = std::clamp(std::stoi(seek_step_text), 1, 60); } catch (...) {}
     if (live_selected >= 0 && live_selected < static_cast<int>(live_endpoint_ids.size())) {
       updated.live_endpoint_id = live_endpoint_ids[static_cast<std::size_t>(live_selected)];
