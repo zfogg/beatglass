@@ -364,3 +364,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Hide focus destination contract | Hide-focus shortcut runs after destination display loss | Reject focus transition, preserve control-window fallback, and return explicit failure until a display is available. |
 | Paused recovery focus helper contract | Paused recovery page/focus shortcuts invoke shared recovery focus | Return a successful focus result after announcing recovery evidence and focusing Resume. |
 | Beat pulse accessibility contract | Overlay beat pulse is active, idle, invalid, or reduced-motion disabled | Expose a non-color Status value describing pulse state, valid BPM tracking, and reduced-motion suppression. |
+| Recovery pause focus contract | Recovery pause/safe-mode state focuses a follow-up control | Return whether the requested focus target was available after announcing stale/current evidence. |

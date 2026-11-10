@@ -1861,6 +1861,7 @@ ApplicationWindow {
         window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Live evidence is current."))
         if (target)
             target.forceActiveFocus()
+        return target !== null && target !== undefined
     }
     function resetOverlayRecoveryAttempts() {
         window.overlayRecoveryAttemptCount = 0
