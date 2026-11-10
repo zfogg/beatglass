@@ -4536,7 +4536,7 @@ ApplicationWindow {
                         Accessible.role: Accessible.Status
                         Accessible.description: visible && window.liveBridge.status === "Tracking"
                             ? text + ". Estimates are attributed to the monitored combined output." + (window.overlayCaptureEvidenceStale ? " Previously displayed evidence is stale until fresh capture arrives." : "") + (window.overlayDisplayRecoveryPending ? " The selected endpoint remains retained while recovery is pending." : "")
-                            : visible ? text + ". The overlay remains available while capture recovers; the selected endpoint remains retained." : text
+                            : visible ? text + ". The overlay remains available while capture recovers; the selected endpoint remains retained." + (window.overlayCaptureEvidenceStale ? " Live overlay evidence is stale until fresh capture arrives." : "") : text
                         ToolTip.text: visible ? Accessible.description : "Overlay monitoring state"
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
