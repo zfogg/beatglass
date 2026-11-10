@@ -116,6 +116,7 @@
 | Opacity value stale state | User reviews the current opacity value during capture recovery | Keep the presentation value readable while marking the underlying live evidence stale. |
 | Geometry status stale state | User reviews persisted overlay geometry during capture recovery | Keep persisted geometry readable while marking live evidence stale until fresh capture. |
 | Interaction mode stale state | User reviews click-through or interactive mode during capture recovery | Keep pointer mode semantics clear while announcing stale live evidence. |
+| Unlock action stale state | User restores keyboard and pointer access while capture recovers | Keep interaction recovery actionable while marking live evidence stale until fresh capture. |
 | Overlay recovery stopped | User stops native overlay retries before the bounded limit | Keep monitoring available, state that overlay evidence remains stale, and expose Resume/retry recovery explicitly. |
 | Overlay summary recovery | User reviews consolidated overlay settings while recovery is pending | Include the stale-evidence boundary in the summary status and keep settings revision/provenance visible before retry or restore. |
 | Track | File-attributed detail with unknown track key, separately timestamped provisional tonal window, alternatives, tempo and chord timeline | Play/seek synchronized to results; clear prior evidence on selection change. |
