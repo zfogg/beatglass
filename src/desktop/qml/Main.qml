@@ -3280,7 +3280,6 @@ ApplicationWindow {
                             activeFocusOnTab: true
                             enabled: visible && !window.metadataRetryPending
                             Accessible.name: "Retry metadata"
-                            Accessible.value: enabled ? "available; " + window.metadataStatus : "unavailable; retry cooldown active"
                             Accessible.role: Accessible.Button
                             Accessible.description: "Retry reading metadata for the selected audio source after an error. Current status: " + window.metadataStatus
                             ToolTip.text: "Retry metadata for the selected source"
