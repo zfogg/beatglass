@@ -1054,3 +1054,12 @@ def test_paused_recovery_focus_helper_reports_success():
     body = QML[start : QML.index("    function restoreOverlayDisplaySelectionFromBridge", start)]
     assert "resumeOverlayRecovery.forceActiveFocus()" in body
     assert "return true" in body
+
+
+def test_overlay_pulse_exposes_non_color_accessible_status():
+    start = QML.index("id: overlaySurface")
+    body = QML[start : QML.index("            Timer", start)]
+    assert 'Accessible.name: "Overlay beat pulse"' in body
+    assert "Accessible.value: pulseOpacity > 0 ? \"active\" : \"idle\"" in body
+    assert "valid live BPM" in body
+    assert "reduced motion disables pulsing" in body
