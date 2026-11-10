@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Beatglass native host provenance",
+  "type": "object",
+  "required": ["platform", "name"],
+  "properties": {
+    "platform": {"enum": ["linux", "windows", "macos"]},
+    "name": {"type": "string", "minLength": 1},
+    "node_id": {"type": "integer", "minimum": 1},
+    "secure_boot": {"type": "boolean"},
+    "tpm_present": {"type": "boolean"},
+    "clock_accuracy_ns": {"type": "integer", "minimum": 0},
+    "clock_source_count": {"type": "integer", "minimum": 1}
+  },
+  "additionalProperties": true
+}

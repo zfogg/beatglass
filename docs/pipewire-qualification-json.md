@@ -258,6 +258,12 @@ If present, host `clock_source_last_switch_ns` must be a non-negative integer
 timestamp for the latest synchronization-source switch.
 If present, host `clock_source_health` must be a non-empty string describing
 the selected source's health.
+
+The machine-readable host contract is captured in
+`tests/pipewire/native_host_provenance_schema.json`; validator behavior remains
+the qualification authority and native execution evidence is still required.
+Before packaging a native run, validate the extracted host object directly:
+`python tests/pipewire/validate_native_host_provenance.py HOST.json`.
 If present, host `clock_source_latency_ns` must be a non-negative numeric
 measurement of source latency; boolean values are invalid.
 If present, host `clock_source_noise_ns` must be a non-negative numeric
