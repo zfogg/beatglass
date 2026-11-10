@@ -303,6 +303,9 @@ platform values instead of accepting a list containing a canonical alias.
 The object-platform regression in
 `tests/unit/check_native_host_provenance_platform_object.py` similarly rejects
 nested platform identity structures.
+The boolean-platform regression in
+`tests/unit/check_native_host_provenance_platform_bool.py` rejects JSON boolean
+values rather than treating them as platform aliases.
 The empty-value regression in
 `tests/unit/check_native_host_provenance_platform_empty.py` rejects blank
 platform identity rather than treating it as an unknown alias.
