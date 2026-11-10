@@ -620,7 +620,16 @@ int main(int argc, char** argv) {
     return false;
   });
   if (snapshot) {
-    if (argc > 3) tab = std::clamp(std::stoi(argv[3]), 0, 2);
+    if (argc > 3) {
+      const std::string requested_tab(argv[3]);
+      if (requested_tab == "library" || requested_tab == "1") tab = 0;
+      else if (requested_tab == "live" || requested_tab == "2") tab = 1;
+      else if (requested_tab == "settings" || requested_tab == "3") tab = 2;
+      else {
+        std::cerr << "Invalid snapshot tab: " << requested_tab << " (use library, live, or settings)\n";
+        return 2;
+      }
+    }
     if (tab == 0) { analyze(); if (analysis_future.valid()) { analysis_future.wait(); auto analysis = analysis_future.get(); result = std::move(analysis.result); waveform = std::move(analysis.waveform); status = "Analysis complete — decoder PCM drives the waveform and analyzer drives the estimates."; busy = false; } }
     auto rendered = Screen::Create(Dimension::Fixed(120), Dimension::Fixed(36));
     Render(rendered, root_component->Render());
