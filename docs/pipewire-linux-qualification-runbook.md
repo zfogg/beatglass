@@ -57,6 +57,8 @@ Qualified summaries must include a non-empty `commit` value so native evidence
 cannot be detached from the code identity that produced it.
 If a pending summary includes `commit`, it must still be a non-empty string;
 malformed provenance is rejected rather than silently omitted.
+When present, `host_os` must match the runner host generating the matrix, so
+evidence cannot be attributed to the wrong platform.
 Qualified summaries must also set `native_execution_attempted` to `true`; a
 portable or pending-only result cannot claim qualification.
 Qualified summaries must not retain execution blockers; any remaining blocker
