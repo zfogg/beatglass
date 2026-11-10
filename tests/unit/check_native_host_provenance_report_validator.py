@@ -1,7 +1,28 @@
 from pathlib import Path
+import json
+import subprocess
+import tempfile
 
 source = Path("tests/pipewire/validate_native_host_provenance_report.py").read_text()
 assert "host provenance report has an unsupported schema" in source
 assert "host provenance report has invalid checked fields" in source
 assert "host provenance report omits required provenance fields" in source
 print("Native host provenance report validator verified")
+
+with tempfile.TemporaryDirectory() as directory:
+    report = Path(directory) / "invalid-report.json"
+    report.write_text(json.dumps({
+        "schema": "beatglass-native-host-provenance-v1",
+        "valid": True,
+        "platform": "linux",
+        "name": "qualification-host",
+        "checked_fields": ["name"],
+    }), encoding="utf-8")
+    result = subprocess.run(
+        ["python", "tests/pipewire/validate_native_host_provenance_report.py", str(report)],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode != 0
+    assert "required provenance fields" in result.stderr
+print("Native host provenance report rejection verified")
