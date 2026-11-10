@@ -1007,6 +1007,15 @@ Catch2 rebuild was not completed in this run; Core Audio smoke discovery also
 did not produce a bounded report in the non-interactive invocation. Real
 permission, endpoint capture, overlay and long-session checks remain pending.
 
+The follow-up native pass on the same machine completed the full configured
+build at 100% and ran all 441 CTest cases. PR #4572 corrected stale test API
+namespaces, prototype-library linkage, Catch2 matcher includes, and several
+generated QML syntax/binding defects. The targeted QML suite is now reduced to
+remaining duplicate-binding/test-fixture issues being worked through; the
+aggregate run still has platform-sensitive catalog/symlink, timing, CLI codec,
+and native overlay failures. The desktop bundle continues to link and validate
+as Mach-O x86_64. No native qualification gate is claimed complete yet.
+
 ## Design-system rendering evidence — 2026-11-10
 
 In `design/v1`, `npm install`, `npm run check`, and `npm run render output`
