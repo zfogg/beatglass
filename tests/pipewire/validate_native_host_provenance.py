@@ -38,6 +38,10 @@ if host.get("secure_boot") is not None and not isinstance(host["secure_boot"], b
     raise SystemExit("host provenance has an invalid secure boot flag")
 if host.get("tpm_present") is not None and not isinstance(host["tpm_present"], bool):
     raise SystemExit("host provenance has an invalid TPM flag")
+if host.get("clock_accuracy_ns") is not None and (not isinstance(host["clock_accuracy_ns"], int) or isinstance(host["clock_accuracy_ns"], bool) or host["clock_accuracy_ns"] < 0):
+    raise SystemExit("host provenance has invalid clock accuracy")
+if host.get("clock_source_count") is not None and (not isinstance(host["clock_source_count"], int) or isinstance(host["clock_source_count"], bool) or host["clock_source_count"] < 1):
+    raise SystemExit("host provenance has invalid clock source count")
 if len(sys.argv) == 3:
     report = {"schema": "beatglass-native-host-provenance-v1", "valid": True, "platform": host["platform"], "name": host["name"], "checked_fields": sorted(host)}
     temporary_path = None
