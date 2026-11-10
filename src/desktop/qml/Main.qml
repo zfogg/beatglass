@@ -2802,12 +2802,14 @@ ApplicationWindow {
                             themePreviews.children[0].forceActiveFocus()
                             event.accepted = true
                         }
-                        Keys.onEndPressed: {
-                            const lastIndex = window.themeNames.length - 1
-                            window.selectThemeIndex(lastIndex)
-                            themeSelector.currentIndex = lastIndex
-                            themePreviews.children[lastIndex].forceActiveFocus()
-                            event.accepted = true
+                        Keys.onPressed: {
+                            if (event.key === Qt.Key_End) {
+                                const lastIndex = window.themeNames.length - 1
+                                window.selectThemeIndex(lastIndex)
+                                themeSelector.currentIndex = lastIndex
+                                themePreviews.children[lastIndex].forceActiveFocus()
+                                event.accepted = true
+                            }
                         }
                         Keys.onEscapePressed: {
                             themeSelector.forceActiveFocus()
