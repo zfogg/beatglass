@@ -54,6 +54,19 @@ class EvidenceBundleTest(unittest.TestCase):
             errors = module.verify(root, manifest)
             self.assertTrue(any("invalid or duplicate artifact entry" in error for error in errors))
 
+    def test_capture_timestamp_must_be_timezone_aware_iso8601(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); manifest = root / "manifest.json"
+            data = {"platform": "windows", "commit": "0" * 40, "captured_at": "not-a-time",
+                    "environment": "test", "artifacts": [],
+                    "scenarios": [{"id": scenario, "status": "PENDING"} for scenario in module.REQUIRED_SCENARIOS]}
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            errors = module.verify(root, manifest)
+            self.assertIn("captured_at must be ISO-8601", errors)
+            data["captured_at"] = "2020-01-01T00:00:00"
+            manifest.write_text(json.dumps(data), encoding="utf-8")
+            self.assertIn("captured_at must include timezone", module.verify(root, manifest))
+
     def test_scenario_id_must_be_hashable_string(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); manifest = root / "manifest.json"
