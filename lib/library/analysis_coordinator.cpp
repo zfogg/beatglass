@@ -8,6 +8,10 @@ std::shared_ptr<RetryableAnalysis> AnalysisCoordinator::submit(std::string run_i
   if (admission.cached) {
     const auto cached = *admission.cached;
     operation.decode = [cached](std::stop_token, const std::function<void(std::uint64_t)>&) { return cached; };
+    // A cache hit is replayed through the decoder-shaped worker path. Keep the
+    // mutually-exclusive operation contract valid after replacing the source
+    // of the serialized result.
+    operation.serialize = {};
   }
   const auto recovery_id = run_id;
   const library_detail::CacheKey recovery_key{operation.identity.content_hash, operation.identity.engine_version, operation.identity.configuration_id, operation.identity.mode};
