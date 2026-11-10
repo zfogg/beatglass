@@ -22,6 +22,8 @@ def main() -> int:
         raise SystemExit("CLI Library folder preference is not restored on startup")
     if "live_spectrum_history" not in tui or "FFT history" not in tui:
         raise SystemExit("CLI Live spectrum does not expose bounded FFT history")
+    if '"source changed") != std::string::npos ? "  [stale]"' not in tui:
+        raise SystemExit("CLI Library does not distinguish stale source analysis from failed analysis")
     if 'Button(" Recover persisted "' not in tui:
         raise SystemExit("CLI Library does not expose persisted recovery action")
     for marker in ("live_endpoint_id", "live_endpoint_name", "live_endpoint_preference", "updated.live_endpoint_id", "updated.live_endpoint_name"):

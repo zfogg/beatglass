@@ -965,7 +965,7 @@ int main(int argc, char** argv) {
       const auto searchable = lower(tracks[i].title + " " + tracks[i].path.filename().string() + " " + tracks[i].path.string());
       if (!query.empty() && searchable.find(query) == std::string::npos) continue;
       auto label = tracks[i].title + "  •  " + tracks[i].path.filename().string();
-      if (analysis_errors.contains(tracks[i].path)) label += "  [failed]";
+      if (const auto failed = analysis_errors.find(tracks[i].path); failed != analysis_errors.end()) label += failed->second.find("source changed") != std::string::npos ? "  [stale]" : "  [failed]";
       else if (const auto analyzed = completed_analyses.find(tracks[i].path); analyzed != completed_analyses.end()) label += analyzed->second.from_persistent_cache ? "  [cached]" : "  [analyzed]";
       if (tracks[i].metadata) label += "  " + format_duration(*tracks[i].metadata);
       library_labels.push_back(std::move(label)); library_indices.push_back(i);
