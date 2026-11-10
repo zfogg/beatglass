@@ -47,6 +47,8 @@ if isinstance(payload, dict):
             raise SystemExit("transition host provenance has an invalid TPM flag")
         if host.get("attestation") is not None and (not isinstance(host["attestation"], str) or not host["attestation"].strip()):
             raise SystemExit("transition host provenance has no attestation")
+        if host.get("firmware") is not None and (not isinstance(host["firmware"], str) or not host["firmware"].strip()):
+            raise SystemExit("transition host provenance has no firmware")
         if not isinstance(host.get("daemon_version"), str) or not host["daemon_version"].strip():
             raise SystemExit("transition host provenance has no daemon version")
         if not isinstance(host.get("capture_command"), str) or not host["capture_command"].strip():
