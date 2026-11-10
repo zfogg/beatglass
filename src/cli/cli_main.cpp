@@ -441,7 +441,7 @@ int main(int argc, char** argv) {
     status = std::to_string(tracks.size()) + " tracks indexed; selection preserved by path." +
         (cancelling ? " Cancelling the previous analysis." : "");
   };
-  auto filter_input = Input(&filter, "Filter songs");
+  auto filter_input = Input(&filter, "Search library");
   auto folder_input = Input(&folder_text, "Audio folder");
   std::string seek_step_text = "5";
   auto seek_step_input = Input(&seek_step_text, "seconds");
@@ -450,6 +450,7 @@ int main(int argc, char** argv) {
     catch (...) { return 5; }
   };
   auto recursive_checkbox = Checkbox("Recursive", &recursive);
+  auto clear_search_button = Button(" Clear search ", [&] { filter.clear(); status = "Library search cleared."; });
   auto refresh_button = Button(" Refresh ", refresh);
   std::string sort_button_label = " Sort: title ";
   auto sort_button = Button(&sort_button_label, [&] {
@@ -473,15 +474,16 @@ int main(int argc, char** argv) {
     const std::filesystem::path requested(folder_text);
     std::error_code error;
     if (!std::filesystem::is_directory(requested, error)) { status = "Folder unavailable: " + folder_text; return; }
-    root = requested; refresh(); status = "Opened " + root.string() + " — " + std::to_string(tracks.size()) + " tracks indexed.";
+    root = requested; recursive = true; refresh(); status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
   });
   auto choose_folder_button = Button(" Choose folder… ", [&] {
 #ifdef _WIN32
     if (const auto chosen = choose_audio_folder()) {
       folder_text = chosen->string();
       root = *chosen;
+      recursive = true;
       refresh();
-      status = "Opened " + root.string() + " — " + std::to_string(tracks.size()) + " tracks indexed.";
+      status = "Opened " + root.string() + " recursively — " + std::to_string(tracks.size()) + " tracks indexed.";
     } else {
       status = "Folder selection cancelled; current Library folder is unchanged.";
     }
@@ -584,7 +586,8 @@ int main(int argc, char** argv) {
     const auto query = lower(filter);
     library_labels.clear(); library_indices.clear();
     for (int i = 0; i < static_cast<int>(tracks.size()); ++i) {
-      if (!query.empty() && lower(tracks[i].title).find(query) == std::string::npos) continue;
+      const auto searchable = lower(tracks[i].title + " " + tracks[i].path.filename().string() + " " + tracks[i].path.string());
+      if (!query.empty() && searchable.find(query) == std::string::npos) continue;
       auto label = tracks[i].title + "  •  " + tracks[i].path.filename().string();
       if (analysis_errors.contains(tracks[i].path)) label += "  [failed]";
       else if (completed_analyses.contains(tracks[i].path)) label += "  [analyzed]";
