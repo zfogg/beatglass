@@ -130,6 +130,9 @@ def main() -> int:
     parser.add_argument("--json", action="store_true", help="emit the generated report on stdout")
     args = parser.parse_args()
     report = build_report(args.bundles)
+    if args.output.parent.is_symlink():
+        print("readiness report output parent must not be a symlink")
+        return 1
     args.output.parent.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.max_report_bytes <= 0:
