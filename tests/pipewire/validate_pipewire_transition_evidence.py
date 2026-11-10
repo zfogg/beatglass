@@ -247,6 +247,8 @@ if reacquisition is not None:
             raise SystemExit("reacquisition evidence has an invalid reason code")
     if not isinstance(reacquisition.get("serial"), str) or not reacquisition["serial"].strip():
         raise SystemExit("reacquisition evidence has no sink serial")
+    if reacquisition["serial"] != restart.get("serial"):
+        raise SystemExit("reacquisition sink serial does not match restart")
     if reacquisition.get("device_id") is not None:
         if not isinstance(reacquisition["device_id"], str) or not reacquisition["device_id"].strip():
             raise SystemExit("reacquisition evidence has an empty device identity")
