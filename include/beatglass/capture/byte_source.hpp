@@ -60,7 +60,7 @@ public:
    * Reject underflow, overflow and positions past EOF without changing position.
    */
   bool seek_relative(std::int64_t displacement, ByteSeekOrigin origin) {
-    if (failed_) return false;
+    if (failed_ || source_.size() != snapshot_size_) { failed_ = true; return false; }
     const auto size = snapshot_size_;
     std::uint64_t base;
     switch (origin) {
