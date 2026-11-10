@@ -1101,3 +1101,11 @@ def test_restore_failure_focus_helper_reports_target_result():
     assert "target.forceActiveFocus()" in body
     assert "Live evidence is stale until a fresh capture arrives." in body
     assert "return target !== null && target !== undefined" in body
+
+
+def test_unlock_state_focus_helper_reports_target_result():
+    start = QML.index("function focusOverlayUnlockState")
+    body = QML[start : QML.index("    function focusOverlaySettingsRecoveryFailure", start)]
+    assert "target.forceActiveFocus()" in body
+    assert "Interaction state is current." in body
+    assert "return target !== null && target !== undefined" in body

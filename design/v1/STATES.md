@@ -369,3 +369,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Restored-state focus contract | Overlay restoration succeeds and a follow-up control is requested | Return whether the restored-state target was focused after announcing fresh-capture readiness. |
 | Hidden-state focus contract | Overlay hide succeeds and a follow-up control is requested | Return whether the hidden-state target was focused while announcing retained settings and evidence freshness. |
 | Restore-failure focus contract | Overlay restore fails and a recovery target is requested | Return whether the recovery target was focused after announcing stale live evidence. |
+| Unlock-state focus contract | Overlay interaction is restored or unlock fails with a recovery target | Return whether the unlock/recovery target was focused after announcing current or stale interaction state. |
