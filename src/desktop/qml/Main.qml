@@ -1376,8 +1376,13 @@ ApplicationWindow {
         window.show()
         window.raise()
         window.requestActivate()
+        if (!window.overlayBridge || !window.overlayBridge.available || !window.overlayBridge.clickThrough) {
+            window.focusOverlayAvailabilityRecovery("Unlock overlay is unavailable because click-through mode is not active or the native overlay is unavailable.", unlockOverlay)
+            return false
+        }
         unlockOverlay.forceActiveFocus()
         window.announceCaptureRecoveryState("Unlock overlay control focused; press Enter to restore interaction." + (window.overlayCaptureEvidenceStale ? " Live evidence remains stale until fresh capture arrives." : ""))
+        return true
     }
     function focusOverlayShowShortcut() {
         navigation.currentIndex = 1

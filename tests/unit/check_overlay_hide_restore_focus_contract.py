@@ -645,6 +645,12 @@ def test_click_through_shortcut_handles_missing_bridge():
     start = QML.index("function handleOverlayClickThroughShortcut")
     body = QML[start : QML.index("    function handleOverlayRetryShortcut", start)]
     assert "if (!window.overlayBridge)" in body
+
+def test_unlock_focus_shortcut_requires_available_click_through_overlay():
+    start = QML.index("function focusOverlayUnlockShortcut")
+    body = QML[start : QML.index("    function focusOverlayShowShortcut", start)]
+    assert "overlayBridge.available" in body
+    assert "clickThrough" in body
     assert "focusOverlayAvailabilityRecovery" in body
     assert "return false" in body
     assert "return true" in body
