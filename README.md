@@ -76,7 +76,33 @@ ctest --test-dir build --output-on-failure
 ./build/beatglass-desktop
 ```
 
-For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. An experimental LLVM/Clang toolchain can also be installed with Scoop (`scoop install llvm`) and selected through CMake's `-T ClangCL` generator toolset or an explicit `CMAKE_CXX_COMPILER`; this is a development option, not a pinned qualification environment. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below. The CLI accepts one file, prints an aubio estimate or unknown, and never modifies the input. The Library page displays basic decoded metadata; it does not launch analysis. The DJ page reports that capture is unavailable. On macOS it also exposes an experimental overlay; its native behavior is unqualified and described in [macOS overlay status](docs/macos-overlay.md). The native evidence procedure is [the macOS qualification checklist](docs/macos-qualification.md). Actual support depends on decoder build options. No GUI, capture or overlay has been qualified on any platform.
+For Windows the experimental CLI was built with MSVC and vcpkg's `aubio[core]` and `libsndfile[core]` packages by passing `-DCMAKE_PREFIX_PATH=<vcpkg>/installed/x64-windows` and the options above; use matching Debug or Release configuration for build and CTest. An experimental LLVM/Clang toolchain can also be installed with Scoop (`scoop install llvm`) and selected through CMake's `-T ClangCL` generator toolset or an explicit `CMAKE_CXX_COMPILER`; this is a development option, not a pinned qualification environment. Ubuntu 22.04 ships a libsndfile older than the 1.1.0 MP3 support baseline; this example skips the v1 codec integration test and is not format qualification. This system-installed dependency setup is not pinned and these are development instructions, not a release recipe; the experimental manifest pins a separate configuration below.
+
+The terminal prototype has two distinct executables. `beatglass-tool` is the
+single-file analyzer, while `beatglass-cli` is the FTXUI application:
+
+```text
+beatglass-tool [--help] [--version] [--replay] [--json] [--] <audio-file>
+beatglass-cli [audio-folder]
+beatglass-cli --snapshot <audio-folder> [library|live|settings]
+```
+
+The TUI opens with Library, Live, and Settings tabs. Library recursively browses
+supported files, runs real decoder/aubio analysis asynchronously, renders a
+colored PCM waveform with beat markers and playback position, and exposes native
+folder selection and Windows playback controls. Live discovers Windows render
+sinks, captures the selected OS output through native loopback, and displays
+real tempo, telemetry, and a colored live waveform. Settings controls reduced
+motion and the seek step. Mouse tab selection and `Tab`/`1`/`2`/`3` keyboard
+navigation are supported; terminals below 100 columns or 28 rows show a clear
+resize prompt. Key/Chord remain explicitly unavailable unless the optional
+Essentia music-replay build is enabled.
+
+The TUI never writes tags or modifies source audio. On macOS and Linux, native
+loopback capture is not yet implemented in this prototype and the Live tab says
+so explicitly. Native desktop, capture, playback, and overlay qualification
+remain platform-specific work; see [macOS overlay status](docs/macos-overlay.md)
+and [the macOS qualification checklist](docs/macos-qualification.md).
 
 On Linux, `-DBEATGLASS_BUILD_PIPEWIRE=ON` builds experimental PipeWire sink discovery and its CTest coverage; install the PipeWire development package first (for Ubuntu, `libpipewire-0.3-dev`). This does not yet provide capture or a DJ workflow. See [Linux platform status](docs/linux-platform-increment.md).
 
