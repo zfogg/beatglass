@@ -4880,8 +4880,8 @@ ApplicationWindow {
                     text: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
                         ? "Overlay position/size: " + window.overlayBridge.geometry.x + "," + window.overlayBridge.geometry.y + " · " + window.overlayBridge.geometry.width + "×" + window.overlayBridge.geometry.height
                         : "Overlay geometry unavailable; control-window fallback remains active."
-                    Accessible.name: "Overlay geometry status: " + text + (window.overlayDisplayRecoveryPending ? " (recovery pending)" : "")
-                    Accessible.value: text + "; geometry revision " + window.overlayGeometryRevision + (window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
+                    Accessible.name: "Overlay geometry status: " + text + (window.overlayCaptureEvidenceStale ? " (live evidence stale until fresh capture)" : window.overlayDisplayRecoveryPending ? " (recovery pending)" : "")
+                    Accessible.value: text + "; geometry revision " + window.overlayGeometryRevision + (window.overlayCaptureEvidenceStale ? "; live evidence stale until fresh capture" : window.overlayDisplayRecoveryPending ? "; recovery pending" : "") + (window.overlayHiddenByUser ? "; hidden by user" : "")
                     Accessible.role: Accessible.Status
                     Accessible.description: window.overlayBridge && window.overlayBridge.geometry && window.overlayBridge.geometry.width > 0
                         ? "Persisted overlay position and size: " + text + (window.overlayDisplayRecoveryPending ? ". Recovery is pending; settings are retained." : "") + (window.overlayHiddenByUser ? " The overlay is hidden by user request." : ".")
