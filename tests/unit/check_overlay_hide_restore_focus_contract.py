@@ -407,3 +407,11 @@ def test_reapply_button_and_shortcut_share_action():
     assert "reapplyOverlaySettingsAndRestore()" in body
     assert "reapplyOverlaySettings.forceActiveFocus()" in body
     assert "onClicked: window.handleOverlayReapplyAction()" in QML
+
+
+def test_unlock_button_shares_unlock_focus_action():
+    start = QML.index("function handleOverlayUnlockAction")
+    body = QML[start : QML.index("    function focusOverlaySummaryReviewShortcut", start)]
+    assert "unlockOverlayAndRestoreFocus()" in body
+    assert "overlayInteractionMode.forceActiveFocus()" in body
+    assert "onClicked: window.handleOverlayUnlockAction()" in QML

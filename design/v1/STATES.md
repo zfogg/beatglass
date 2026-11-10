@@ -286,3 +286,4 @@ The overlay's default track-metadata state is unavailable: combined system outpu
 | Show action contract | Hide/restore toggle requests the hidden overlay become visible | Keep recovery fallback actionable on failure and focus Retry while evidence is stale. |
 | Hide/restore action contract | Keyboard hide/restore action branches on user-hidden state | Route Restore and Hide through explicit action helpers while preserving stale-evidence guidance. |
 | Reapply action contract | Keyboard and button reapply actions are both available | Route both surfaces through one persisted-settings reapply/focus action. |
+| Unlock action contract | Unlock button restores pointer/keyboard interaction | Route the button through one unlock/focus action and preserve recovery focus on success. |
