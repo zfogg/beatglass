@@ -3,6 +3,7 @@
 #include "beatglass/core/audio.hpp"
 #include "beatglass/core/presentation.hpp"
 #include "beatglass/core/visualization.hpp"
+#include "beatglass/core/visualization_presentation.hpp"
 #include "beatglass/capture/file_reader.hpp"
 #include "beatglass/core/playback_session.hpp"
 #if defined(BEATGLASS_HAS_PIPEWIRE)
@@ -541,6 +542,8 @@ int main(int argc, char** argv) {
   std::chrono::steady_clock::time_point live_last_packet{};
   bool live_has_packet = false;
   std::optional<beatglass::VisualizationFrame> live_visualization_frame;
+  beatglass::VisualizationPresentation live_visualization_presentation;
+  std::uint64_t live_visualization_revision = 0;
   beatglass::VisualizationProcessor live_visualization([](void*) noexcept {}, nullptr);
   live_session = std::make_unique<beatglass::windows::LoopbackSession>(live_epochs, [&] {
     live_replay = std::make_unique<beatglass::CausalTempoReplay>();
@@ -549,6 +552,8 @@ int main(int argc, char** argv) {
     live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
     live_beats = 0; live_tempo_history.clear(); live_spectrum.assign(live_spectrum.size(), 0.0f);
     live_visualization.reset(); live_visualization_frame.reset();
+    live_visualization_presentation.clear();
+    live_visualization_revision = 0;
     live_signal_confidence = 0.0f;
   });
 #else
@@ -578,6 +583,8 @@ int main(int argc, char** argv) {
   std::chrono::steady_clock::time_point live_last_packet{};
   bool live_has_packet = false;
   std::optional<beatglass::VisualizationFrame> live_visualization_frame;
+  beatglass::VisualizationPresentation live_visualization_presentation;
+  std::uint64_t live_visualization_revision = 0;
   beatglass::VisualizationProcessor live_visualization([](void*) noexcept {}, nullptr);
 #endif
   auto screen = ScreenInteractive::TerminalOutput();
@@ -991,6 +998,8 @@ int main(int argc, char** argv) {
     live_has_packet = false;
     live_visualization.reset();
     live_visualization_frame.reset();
+    live_visualization_presentation.clear();
+    live_visualization_revision = 0;
     set_live_presentation_state(beatglass::TrackingState::stopped);
   };
   auto toggle_live = [&] {
@@ -1315,7 +1324,10 @@ int main(int argc, char** argv) {
             for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) {
               const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset);
               if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate,
-                                                          std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) live_visualization_frame = std::move(frame);
+                                                          std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) {
+                const auto revision = ++live_visualization_revision;
+                if (live_visualization_presentation.accept(frame->epoch, revision, *frame)) live_visualization_frame = std::move(frame);
+              }
             }
             if (live_visualization_frame) {
               const auto& frame = *live_visualization_frame;
@@ -1388,7 +1400,7 @@ int main(int argc, char** argv) {
             if (live_bpm) { live_tempo_history.push_back(*live_bpm); if (live_tempo_history.size() > 12) live_tempo_history.erase(live_tempo_history.begin()); }
             std::vector<float> mono(packet_frames);
             for (std::size_t frame = 0; frame < mono.size(); ++frame) { float sum = 0.0f; for (std::uint32_t channel = 0; channel < packet_channels; ++channel) sum += packet.samples[frame * packet.channels + channel]; mono[frame] = sum / static_cast<float>(packet_channels); }
-            for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) { const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset); if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate, std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) live_visualization_frame = std::move(frame); }
+            for (std::size_t offset = 0; offset < mono.size(); offset += beatglass::VisualizationProcessor::max_input_frames) { const auto count = std::min<std::size_t>(beatglass::VisualizationProcessor::max_input_frames, mono.size() - offset); if (auto frame = live_visualization.process(packet.epoch, packet.first_frame + offset, packet.sample_rate, std::span<const float>(mono.data() + offset, count), packet.discontinuity && offset == 0)) { const auto revision = ++live_visualization_revision; if (live_visualization_presentation.accept(frame->epoch, revision, *frame)) live_visualization_frame = std::move(frame); } }
             if (live_visualization_frame) { const auto& frame = *live_visualization_frame; for (std::size_t bin = 0; bin < live_waveform.size(); ++bin) { const auto source = std::min<unsigned>(frame.waveform_size - 1, static_cast<unsigned>(bin * frame.waveform_size / live_waveform.size())); live_waveform[bin] = std::max(std::abs(frame.minimum[source]), std::abs(frame.maximum[source])); } for (std::size_t bin = 0; bin < live_spectrum.size(); ++bin) { const auto source = std::min<unsigned>(frame.spectrum_size - 1, static_cast<unsigned>(bin * frame.spectrum_size / live_spectrum.size())); live_spectrum[bin] = std::clamp(frame.magnitude[source] * 8.0f, 0.0f, 1.0f); } }
             live_status = "Receiving PipeWire sink audio; analysis is worker-owned and discontinuity-safe.";
           } catch (const std::exception& error) { live_tracking_state = beatglass::TrackingState::error; live_status = std::string("Live analysis failed: ") + error.what(); live_pipewire->stop(); }
