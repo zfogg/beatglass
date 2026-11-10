@@ -382,15 +382,16 @@ int main(int argc, char** argv) {
 #endif
   });
   auto play_button = Button(" Play ", [&] {
-    if (selected >= 0 && selected < static_cast<int>(tracks.size())) {
-#ifdef _WIN32
-      playback.play(tracks[selected].path);
-#else
-      ++playback_epoch;
-      playback.start(playback_epoch);
-#endif
-      status = "Playing " + tracks[selected].title + " through the selected output.";
+    if (selected < 0 || selected >= static_cast<int>(tracks.size())) {
+      status = "Select a supported audio file before starting playback.";
+      return;
     }
+#ifdef _WIN32
+    playback.play(tracks[selected].path);
+    status = "Playing " + tracks[selected].title + " through the selected output.";
+#else
+    status = "Native playback is unavailable in this build; analysis remains available.";
+#endif
   });
   auto pause_button = Button(" Pause ", [&] {
 #ifdef _WIN32
