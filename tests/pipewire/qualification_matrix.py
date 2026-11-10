@@ -88,6 +88,12 @@ try:
         handle.flush()
         os.fsync(handle.fileno())
     os.replace(temporary, output)
+    if os.name != "nt":
+        directory_fd = os.open(output.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
 except OSError as error:
     if temporary is not None:
         temporary.unlink(missing_ok=True)
