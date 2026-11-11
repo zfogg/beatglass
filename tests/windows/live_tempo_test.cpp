@@ -94,7 +94,9 @@ TEST_CASE("Generated playback reaches live aubio tempo through WASAPI", "[.][nat
   REQUIRE(gate.apply(*clear));
   REQUIRE(tempo.start(endpoint->id));
   for (int i = 0; i < 300 && tempo.state() == beatglass::SourceState::starting; ++i) {
-    REQUIRE(tempo.pump());
+    const auto pumped = tempo.pump();
+    CAPTURE(tempo.error_code());
+    REQUIRE(pumped);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   REQUIRE(tempo.state() == beatglass::SourceState::running);
@@ -116,7 +118,9 @@ TEST_CASE("Generated playback reaches live aubio tempo through WASAPI", "[.][nat
   REQUIRE(waveOutWrite(output, &playback.header, sizeof(playback.header)) == MMSYSERR_NOERROR);
   std::optional<beatglass::PresentationUpdate> prior_snapshot;
   for (int i = 0; i < 2000 && !tempo.bpm(); ++i) {
-    REQUIRE(tempo.pump());
+    const auto pumped = tempo.pump();
+    CAPTURE(tempo.error_code(), tempo.state());
+    REQUIRE(pumped);
     REQUIRE(follower.tick(std::chrono::steady_clock::now()));
     if (auto update = follower.takeUpdate()) { if (update->snapshot) prior_snapshot = *update; gate.apply(*update); }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

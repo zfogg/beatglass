@@ -44,7 +44,7 @@ bool LiveTempo::pump() {
   try {
     session_.poll();
     LoopbackPacket packet;
-    for (unsigned blocks = 0; blocks < 16 && session_.pop(packet); ++blocks) {
+    for (unsigned blocks = 0; blocks < 64 && session_.pop(packet); ++blocks) {
       if (!packet.epoch || !packet.channels || !packet.sample_count || packet.sample_count > packet.max_samples || packet.sample_count % packet.channels || !packet.sample_rate || packet.first_frame > std::numeric_limits<std::uint64_t>::max() - packet.sample_count / packet.channels) { clear(); analysis_error_ = true; session_.stop(); return false; }
       const auto fresh = [&] {
         if (!clock_) throw std::runtime_error("capture clock unavailable");
@@ -95,5 +95,6 @@ std::shared_ptr<const LoopbackLossToken> LiveTempo::lossToken() const noexcept {
 std::optional<std::uint64_t> LiveTempo::lossStamp() const noexcept { return loss_stamp_; }
 std::uint64_t LiveTempo::invalidationGeneration() const { return invalidation_generation_; }
 SourceState LiveTempo::state() const { return session_.state(); }
+std::int32_t LiveTempo::error_code() const { return session_.error_code(); }
 void LiveTempo::stop() { session_.stop(); clear(); }
 }

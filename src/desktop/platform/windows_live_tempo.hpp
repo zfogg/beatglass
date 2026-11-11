@@ -48,6 +48,8 @@ public:
   std::uint64_t invalidationGeneration() const;
   /** Return the source lifecycle state on the owning thread. */
   SourceState state() const;
+  /** Return the most recent native capture error, or zero when unavailable. */
+  std::int32_t error_code() const;
   /** Clear tempo and stop/join capture on the owning thread. */
   void stop();
 private:

@@ -40,7 +40,10 @@ std::wstring widen(const std::string& text) {
 }
 struct Loopback::Impl {
   static_assert(std::atomic<unsigned>::is_always_lock_free && std::atomic<std::uint64_t>::is_always_lock_free);
-  static constexpr unsigned slots = 16;
+  // Keep enough bounded headroom for a control-loop tick while preserving the
+  // allocation-free capture path.  WASAPI periods can be substantially shorter
+  // than the CLI's 10 ms refresh interval on shared-mode endpoints.
+  static constexpr unsigned slots = 64;
   std::array<LoopbackPacket, slots> queue{};
   std::atomic<unsigned> read{0}, write{0};
   std::atomic<std::uint64_t> dropped{0};
