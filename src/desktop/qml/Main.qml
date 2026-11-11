@@ -930,6 +930,7 @@ ApplicationWindow {
         }
     }
     Component.onCompleted: {
+        console.log("DBG completed availability", window.overlayBridge ? window.overlayBridge.available : null)
         if (overlayBridge && !overlayBridge.attach(djOverlay, window)) {
             window.focusOverlayAttachFailure("Native overlay attachment failed; control-window fallback remains active.")
         } else {
