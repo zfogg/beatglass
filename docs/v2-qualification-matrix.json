@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "evidencePolicy": "design-only does not qualify native behavior",
+  "fixtures": [
+    { "id": "gui-library", "surface": "gui", "nativeScenario": "library-navigation", "status": "design-only", "evidence": [] },
+    { "id": "gui-library-fft", "surface": "gui", "nativeScenario": "visualization-source-pcm", "status": "design-only", "evidence": [] },
+    { "id": "gui-library-folder-popup", "surface": "gui", "nativeScenario": "library-folder-popup", "status": "design-only", "evidence": [] },
+    { "id": "gui-dj", "surface": "gui", "nativeScenario": "dj-live-overlay", "status": "design-only", "evidence": [] },
+    { "id": "gui-dj-fft", "surface": "gui", "nativeScenario": "visualization-live-source", "status": "design-only", "evidence": [] },
+    { "id": "gui-dj-output-popup", "surface": "gui", "nativeScenario": "output-device-picker", "status": "design-only", "evidence": [] },
+    { "id": "cli-live", "surface": "cli", "nativeScenario": "cli-live-workflow", "status": "design-only", "evidence": [] },
+    { "id": "cli-library", "surface": "cli", "nativeScenario": "cli-library-workflow", "status": "design-only", "evidence": [] },
+    { "id": "cli-palette", "surface": "cli", "nativeScenario": "cli-command-palette", "status": "design-only", "evidence": [] },
+    { "id": "cli-settings", "surface": "cli", "nativeScenario": "cli-settings-workflow", "status": "design-only", "evidence": [] }
+  ]
+}
