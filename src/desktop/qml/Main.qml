@@ -92,6 +92,12 @@ ApplicationWindow {
     readonly property string overlayRecoveryEvidenceLabel: overlayCaptureEvidenceStale ? "Live evidence stale until fresh capture" : "Live evidence current"
     property string overlayRecoveryAnnouncement: ""
     property bool overlayInvalidOpacityRecoveryPending: false
+    property bool overlayCalibrationOpen: false
+    property bool overlayCalibrationPreviewActive: false
+    property int overlayCalibrationSavedScreenIndex: -1
+    property int overlayCalibrationSavedSizeIndex: 1
+    property real overlayCalibrationSavedOpacity: 0.9
+    property bool overlayCalibrationSavedClickThrough: false
     property string overlayPulseAnnouncement: "Beat pulse is idle until fresh Monitoring capture and valid BPM are available."
     readonly property bool playbackMatchesSelection: playbackBridge && selectedAudioUrl.toString() !== ""
         && playbackBridge.source.toString() === selectedAudioUrl.toString()
@@ -433,6 +439,12 @@ ApplicationWindow {
         onActivated: {
             window.handleOverlaySizeShortcut()
         }
+    }
+    Shortcut {
+        objectName: "overlayCalibrationShortcut"
+        sequence: "Ctrl+Alt+Shift+Enter"
+        context: Qt.ApplicationShortcut
+        onActivated: window.openOverlayCalibration()
     }
     Shortcut {
         objectName: "playbackPauseShortcut"
@@ -1672,6 +1684,46 @@ ApplicationWindow {
         const resized = window.overlayBridge.resizeOverlay(sizes[nextIndex][0], sizes[nextIndex][1])
         window.handleOverlaySizeChangeResult(resized, nextIndex)
         return resized
+    }
+
+    function openOverlayCalibration() {
+        if (!window.overlayBridge) return false
+        window.overlayCalibrationSavedScreenIndex = window.overlayBridge.screenIndex
+        window.overlayCalibrationSavedSizeIndex = window.overlayPreferredSizeIndex
+        window.overlayCalibrationSavedOpacity = Number(window.overlayBridge.opacity)
+        window.overlayCalibrationSavedClickThrough = Boolean(window.overlayBridge.clickThrough)
+        window.overlayCalibrationPreviewActive = false
+        window.overlayCalibrationOpen = true
+        overlayCalibrationDialog.open()
+        return true
+    }
+
+    function rollbackOverlayCalibration() {
+        if (!window.overlayBridge) return false
+        window.overlayBridge.setClickThrough(false)
+        const sizes = [[250, 110], [310, 130], [430, 180]]
+        if (window.overlayCalibrationSavedScreenIndex >= 0)
+            window.overlayBridge.moveToScreen(window.overlayCalibrationSavedScreenIndex)
+        window.overlayBridge.resizeOverlay(sizes[window.overlayCalibrationSavedSizeIndex][0], sizes[window.overlayCalibrationSavedSizeIndex][1])
+        window.overlayBridge.setOpacity(window.overlayCalibrationSavedOpacity)
+        window.overlayPreferredSizeIndex = window.overlayCalibrationSavedSizeIndex
+        if (window.overlayCalibrationSavedClickThrough)
+            window.overlayBridge.setClickThrough(true)
+        window.overlayCalibrationPreviewActive = false
+        window.overlayCalibrationOpen = false
+        return true
+    }
+
+    function saveOverlayCalibration() {
+        if (!window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0)
+            return window.rollbackOverlayCalibration()
+        if (window.overlayCalibrationSavedClickThrough && !window.overlayBridge.setClickThrough(true))
+            return window.rollbackOverlayCalibration()
+        window.overlayCalibrationPreviewActive = false
+        window.overlayCalibrationOpen = false
+        window.overlaySettingsRevision += 1
+        window.announceCaptureRecoveryState("Overlay calibration saved; display, size, opacity, position, and click-through settings are retained.")
+        return true
     }
     function focusOverlayOpacityEditRecovery(message) {
         overlayOpacityControl.forceActiveFocus()
@@ -5060,6 +5112,78 @@ ApplicationWindow {
                         function forceActiveFocus() { restoreOverlayButton.forceActiveFocus(); focusRequested = true }
                         function clicked() { return window.handleOverlayRestoreAction() }
                     }
+                }
+                Button {
+                    objectName: "overlayCalibrationButton"
+                    visible: window.overlayBridge !== null
+                    enabled: window.overlayBridge && window.overlayBridge.available && window.overlayBridge.screenNames.length > 0
+                    text: "Calibrate overlay…"
+                    activeFocusOnTab: true
+                    Accessible.name: "Open overlay calibration"
+                    Accessible.description: "Preview display, size, opacity, position, and click-through changes before saving. Shortcut Ctrl+Alt+Shift+Enter."
+                    ToolTip.text: Accessible.description
+                    onClicked: window.openOverlayCalibration()
+                }
+                Dialog {
+                    id: overlayCalibrationDialog
+                    objectName: "overlayCalibrationDialog"
+                    title: "Overlay calibration"
+                    modal: true
+                    standardButtons: Dialog.NoButton
+                    width: Math.min(window.width - 48, 560)
+                    contentItem: ColumnLayout {
+                        spacing: 10
+                        Label { text: "Preview changes, then Save or Cancel. Invalid native settings are rolled back automatically."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        Label { text: "Display"; font.bold: true }
+                        ComboBox {
+                            id: overlayCalibrationDisplay
+                            objectName: "overlayCalibrationDisplay"
+                            model: window.overlayBridge ? window.overlayBridge.screenNames : []
+                            currentIndex: window.overlayBridge && window.overlayBridge.screenIndex >= 0 ? window.overlayBridge.screenIndex : 0
+                            onActivated: if (window.overlayBridge && !window.overlayBridge.moveToScreen(currentIndex)) window.rollbackOverlayCalibration()
+                            Layout.fillWidth: true
+                        }
+                        Label { text: "Size"; font.bold: true }
+                        ComboBox {
+                            id: overlayCalibrationSize
+                            objectName: "overlayCalibrationSize"
+                            model: ["Compact", "Medium", "Large"]
+                            currentIndex: window.overlayPreferredSizeIndex
+                            onActivated: {
+                                const sizes = [[250, 110], [310, 130], [430, 180]]
+                                if (!window.overlayBridge || !window.overlayBridge.resizeOverlay(sizes[currentIndex][0], sizes[currentIndex][1])) window.rollbackOverlayCalibration()
+                                else window.overlayPreferredSizeIndex = currentIndex
+                            }
+                            Layout.fillWidth: true
+                        }
+                        RowLayout {
+                            Label { text: "Opacity"; font.bold: true }
+                            Slider {
+                                id: overlayCalibrationOpacity
+                                objectName: "overlayCalibrationOpacity"
+                                from: 0.2; to: 1.0; stepSize: 0.05
+                                value: window.overlayBridge ? window.overlayBridge.opacity : 0.9
+                                onMoved: if (window.overlayBridge && !window.overlayBridge.setOpacity(value)) window.rollbackOverlayCalibration()
+                                Layout.fillWidth: true
+                            }
+                            Label { text: Math.round(overlayCalibrationOpacity.value * 100) + "%" }
+                        }
+                        CheckBox {
+                            id: overlayCalibrationClickThrough
+                            objectName: "overlayCalibrationClickThrough"
+                            text: "Click through"
+                            checked: window.overlayBridge ? window.overlayBridge.clickThrough : false
+                            onClicked: if (window.overlayBridge && !window.overlayBridge.setClickThrough(checked)) { checked = !checked; window.rollbackOverlayCalibration() }
+                        }
+                        Label { text: "Position: use the native overlay drag handle while preview is active; the selected display and clamped position are retained."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                        RowLayout {
+                            Layout.alignment: Qt.AlignRight
+                            Button { objectName: "overlayCalibrationPreview"; text: "Preview"; onClicked: { window.overlayCalibrationPreviewActive = true; if (window.overlayBridge) window.overlayBridge.showOverlay() } }
+                            Button { objectName: "overlayCalibrationCancel"; text: "Cancel"; onClicked: { window.rollbackOverlayCalibration(); overlayCalibrationDialog.close() } }
+                            Button { objectName: "overlayCalibrationSave"; text: "Save"; highlighted: true; onClicked: { if (window.saveOverlayCalibration()) overlayCalibrationDialog.close() } }
+                        }
+                    }
+                    onClosed: if (window.overlayCalibrationOpen) window.rollbackOverlayCalibration()
                 }
                 Label {
                     objectName: "overlayShortcutHelp"
