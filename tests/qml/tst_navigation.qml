@@ -79,6 +79,8 @@ TestCase {
         property int shows: 0
         property int hides: 0
         property var screenNames: ["Display"]
+        signal screensChanged()
+        onScreenNamesChanged: screensChanged()
         property string displayName: "Display"
         property int screenIndex: -1
         property int selectedScreen: -1
@@ -149,7 +151,7 @@ TestCase {
         verify(app.overlayCaptureEvidenceStale)
         let monitoring = findChild(app, "overlayLiveMonitoringState")
         tryVerify(() => monitoring.activeFocus)
-        verify(monitoring.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
+        verify(monitoring.Accessible.description.indexOf("evidence is stale until fresh capture") >= 0)
         tryVerify(() => app.overlayRecoveryAnnouncement.indexOf("reacquiring") >= 0)
         fakeCapture.status = "Monitoring"
         app.destroy()
