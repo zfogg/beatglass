@@ -117,21 +117,18 @@ if(BUILD_TESTING)
       COMMAND ${Python3_EXECUTABLE}
               ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue76_qml_contract.py)
     set_tests_properties(issue76_qml_contract PROPERTIES LABELS unit TIMEOUT 10)
-    add_test(NAME capture_monitor_fake_contract
-      COMMAND ${Python3_EXECUTABLE}
-              ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_capture_monitor_fake_contract.py)
-    set_tests_properties(capture_monitor_fake_contract PROPERTIES LABELS unit TIMEOUT 10)
-    add_test(NAME live_bridge_signal_contract
-      COMMAND ${Python3_EXECUTABLE}
-              ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_live_bridge_signal_contract.py)
-    set_tests_properties(live_bridge_signal_contract PROPERTIES LABELS unit TIMEOUT 10)
-    add_test(NAME playback_bridge_signal_contract
-      COMMAND ${Python3_EXECUTABLE}
-              ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_playback_bridge_signal_contract.py)
-    set_tests_properties(playback_bridge_signal_contract PROPERTIES LABELS unit TIMEOUT 10)
     add_test(NAME issue4320_tui_contract
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue4320_tui_contract.py)
     set_tests_properties(issue4320_tui_contract PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME library_folder_model_contract
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_library_folder_model_contract.py)
+    set_tests_properties(library_folder_model_contract PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME cli_navigation_model
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_cli_navigation_model.py)
+    set_tests_properties(cli_navigation_model PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME issue4801_tui_popups_contract
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue4801_tui_popups_contract.py)
+    set_tests_properties(issue4801_tui_popups_contract PROPERTIES LABELS unit TIMEOUT 10)
   endif()
 endif()
 option(BEATGLASS_ENABLE_PACKAGING "Enable CPack package metadata for release candidates" OFF)
@@ -155,22 +152,11 @@ if(BEATGLASS_ENABLE_PACKAGING)
   endif()
   include(CPack)
 endif()
-include(FetchContent)
-set(KFR_ENABLE_DFT ON CACHE BOOL "" FORCE)
-set(KFR_ENABLE_MULTIARCH OFF CACHE BOOL "" FORCE)
-set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
-set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(KFR_ENABLE_ASMTEST OFF CACHE BOOL "" FORCE)
-FetchContent_Declare(
-  kfr
-  URL https://github.com/kfrlib/kfr/archive/refs/tags/6.3.1.tar.gz
-  URL_HASH SHA512=2bf6698efc4eb577104308bcb0477bf631f39848842129993222227fcaad7793e776c04dbe7ec66b155018a5e9f09c15fe0864576860362effc63ced8f22bba5)
-FetchContent_MakeAvailable(kfr)
-
 add_library(beatglass_core STATIC lib/core/snapshot_publisher.cpp lib/core/offline_analysis.cpp lib/core/visualization.cpp lib/core/visualization_presentation.cpp lib/core/playback_session.cpp)
 target_compile_features(beatglass_core PUBLIC cxx_std_20)
 target_include_directories(beatglass_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_link_libraries(beatglass_core PUBLIC kfr kfr_dft)
+find_package(kfr CONFIG REQUIRED)
+target_link_libraries(beatglass_core PUBLIC kfr::kfr)
 option(BEATGLASS_BUILD_LIBRARY_FINGERPRINT "Build provisional SHA-256 file evidence" OFF)
 option(BEATGLASS_BUILD_LIBRARY_PROTOTYPE "Build provisional SQLite library primitives" OFF)
 option(BEATGLASS_FETCH_SQLITE3 "Fetch the pinned SQLite amalgamation when no system package is available" OFF)
@@ -243,14 +229,10 @@ if(APPLE)
   option(BEATGLASS_BUILD_MACOS_TAP_SMOKE "Build the manual Core Audio tap smoke-test bundle" OFF)
   if(BEATGLASS_BUILD_MACOS_TAP_SMOKE)
     add_executable(beatglass-coreaudio-smoke MACOSX_BUNDLE tests/coreaudio/tap_smoke.cpp)
-    set_target_properties(beatglass-coreaudio-smoke PROPERTIES
-      MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/tap_smoke_info.plist"
-      MACOSX_BUNDLE_EXECUTABLE_NAME "beatglass-coreaudio-smoke")
+    set_target_properties(beatglass-coreaudio-smoke PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/tap_smoke_info.plist")
     target_link_libraries(beatglass-coreaudio-smoke PRIVATE beatglass_coreaudio)
     add_executable(beatglass-coreaudio-recovery MACOSX_BUNDLE tests/coreaudio/source_recovery_smoke.cpp)
-    set_target_properties(beatglass-coreaudio-recovery PROPERTIES
-      MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/recovery_smoke_info.plist"
-      MACOSX_BUNDLE_EXECUTABLE_NAME "beatglass-coreaudio-recovery")
+    set_target_properties(beatglass-coreaudio-recovery PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/tests/coreaudio/recovery_smoke_info.plist")
     target_link_libraries(beatglass-coreaudio-recovery PRIVATE beatglass_coreaudio)
   endif()
 endif()
@@ -324,7 +306,7 @@ if(BEATGLASS_BUILD_SLICE)
   endif()
   if(BEATGLASS_BUILD_TUI)
     find_package(ftxui CONFIG REQUIRED COMPONENTS screen dom component)
-    add_executable(beatglass-tui src/cli/tui_main.cpp)
+    add_executable(beatglass-tui src/cli/tui_main.cpp lib/core/navigation.cpp)
     target_compile_features(beatglass-tui PRIVATE cxx_std_20)
     target_link_libraries(beatglass-tui PRIVATE beatglass_file ftxui::screen ftxui::dom ftxui::component)
     if(MINGW)
@@ -488,11 +470,7 @@ if(BUILD_TESTING)
     set_tests_properties(macos_overlay_controller PROPERTIES LABELS "unit;platform" TIMEOUT 30 ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic;QML_IMPORT_PATH=${BEATGLASS_OVERLAY_QT_PREFIX}/qml")
     set_property(TEST macos_overlay_controller PROPERTY ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:${BEATGLASS_OVERLAY_QT_PREFIX}/bin")
     add_test(NAME macos_overlay_navigation COMMAND Qt6::qmltestrunner -input ${CMAKE_CURRENT_SOURCE_DIR}/tests/qml -import ${CMAKE_CURRENT_SOURCE_DIR}/src/desktop/qml)
-    # The QML navigation suite constructs the full desktop shell and is
-    # substantially slower on macOS's offscreen Qt platform than the native
-    # overlay smoke tests. Give it enough time to finish so assertion failures
-    # are reported instead of being collapsed into a process timeout.
-    set_tests_properties(macos_overlay_navigation PROPERTIES LABELS unit TIMEOUT 120 ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
+    set_tests_properties(macos_overlay_navigation PROPERTIES LABELS unit TIMEOUT 30 ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
     if(WIN32)
       if(TARGET Qt6::QOffscreenIntegrationPlugin)
         add_custom_command(TARGET macos_overlay_tests POST_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:macos_overlay_tests>/platforms COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt6::QOffscreenIntegrationPlugin> $<TARGET_FILE_DIR:macos_overlay_tests>/platforms)

@@ -126,7 +126,6 @@ int main(int argc, char** argv) {
       return true;
     }
     if (event == Event::Escape) { screen.Exit(); return true; }
-    if (event == Event::Character("/")) { navigation.toggle_palette(); return true; }
     if (event == Event::Character("q")) { screen.Exit(); return true; }
     if (event == Event::Character("f")) { popup = Popup::folder; draft_folder = root.string(); return true; }
     if (event == Event::Character("o")) { popup = Popup::output; return true; }
