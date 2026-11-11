@@ -1069,3 +1069,11 @@ successful results from other roots. Unit coverage covers recursion,
 duplicates, missing roots, progress, and cancellation. Native desktop and
 cross-platform qualification remain unrun for this change.
 
+### Source detail and analysis state model (issue #4790)
+
+Added a dependency-light, copyable source-detail contract for GUI and CLI
+presentations. Availability, analysis lifecycle, freshness, bounded progress,
+and diagnostics are explicit; current analysis evidence is exposed only for an
+available source with complete, known-fresh analysis. The model performs no
+filesystem I/O and does not create placeholder results.
+
