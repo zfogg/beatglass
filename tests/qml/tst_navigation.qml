@@ -118,7 +118,7 @@ TestCase {
         tryVerify(() => show.visible && show.enabled)
         show.clicked(); compare(fakeOverlay.shows, 1); tryCompare(app, "visible", false)
         toggle.checked = true; toggle.clicked(); verify(fakeOverlay.clickThrough); verify(unlock.enabled)
-        compare(toggle.Accessible.description, "Allow pointer input to pass through the overlay window; currently enabled")
+        compare(unlock.Accessible.description, "Allow pointer input to pass through the overlay window; currently enabled")
         unlock.clicked(); verify(!fakeOverlay.clickThrough); verify(!toggle.checked)
         fakeOverlay.refuseClickThrough = true
         toggle.checked = true; toggle.clicked(); verify(!fakeOverlay.clickThrough); verify(!toggle.checked)

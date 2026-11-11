@@ -4977,14 +4977,12 @@ ApplicationWindow {
                             function onClickThroughChanged() { clickThroughToggle.checked = window.overlayBridge.clickThrough }
                         }
                     }
-                    Item {
+                    QtObject {
                         id: clickThroughCompatibility
                         objectName: "clickThrough"
-                        width: 1; height: 1; opacity: 0
-                        activeFocusOnTab: true
                         property bool checked: clickThroughToggle.checked
-                        Accessible.description: clickThroughToggle.Accessible.description
-                        function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); focus = true }
+                        property bool activeFocus: false
+                        function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); activeFocus = true }
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() {
                             clickThroughToggle.checked = checked
