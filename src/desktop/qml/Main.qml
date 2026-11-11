@@ -4925,6 +4925,7 @@ ApplicationWindow {
                         id: showOverlay
                         objectName: "showOverlay"
                         property bool focusRequested: false
+                        readonly property bool visible: showOverlayButton.visible
                         readonly property bool activeFocus: focusRequested || showOverlayButton.activeFocus
                         readonly property bool enabled: showOverlayButton.enabled
                         readonly property string text: showOverlayButton.text
