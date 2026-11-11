@@ -4982,6 +4982,7 @@ ApplicationWindow {
                         objectName: "clickThrough"
                         property bool checked: clickThroughToggle.checked
                         property bool activeFocus: false
+                        readonly property var Accessible: ({ description: clickThroughToggle.Accessible.description })
                         function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); activeFocus = true }
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() {
