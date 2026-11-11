@@ -1753,9 +1753,10 @@ int main(int argc, char** argv) {
 #ifdef _WIN32
     if (live_session && live_session->state() != beatglass::SourceState::stopped) {
       live_session->stop();
-      live_tracking_state = beatglass::TrackingState::stopped;
-      live_bpm.reset();
-      live_sample_rate = 0; live_observed_frames = 0; live_discontinuities = 0;
+      // Endpoint changes retire the old source epoch. Clear every shared
+      // presentation field, not just tempo counters, so key/chord/FFT history
+      // from the previous sink cannot survive into the next acquisition.
+      clear_live_evidence();
       live_button_label = " Start monitoring ";
       live_status = "Capture stopped because the selected sink changed.";
       return;
