@@ -14,6 +14,12 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
         cache_env["APPDATA"] = config_dir
     else:
         cache_env["XDG_CONFIG_HOME"] = config_dir
+    settings_dir = pathlib.Path(config_dir) / ("Beatglass" if os.name == "nt" else "beatglass")
+    settings_dir.mkdir(parents=True, exist_ok=True)
+    (settings_dir / ("beatglass-cli.settings" if os.name == "nt" else "settings")).write_text(
+        "reduce_motion 1\nseek_step 17\nvisual_mode beat_grid\nbpm_multiplier 1\n",
+        encoding="utf-8",
+    )
     first = subprocess.run(
         [exe, "--snapshot", str(root), "library"],
         capture_output=True, text=True, encoding="utf-8", errors="replace", env=cache_env,
@@ -59,6 +65,10 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
                 assert control in plain, (tab, control, result.stdout)
             assert "Capture state: Stopped" in plain
             assert "Key: —    Chord: —" in plain
+        if tab == "settings":
+            assert "Seek step (1–60 seconds): 17" in plain
+            assert "Mode: beat_grid" in plain
+            assert "Spinner animation paused" in plain
 
     invalid = subprocess.run(
         [exe, "--snapshot", str(root), "not-a-tab"],
