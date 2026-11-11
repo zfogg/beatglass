@@ -14,7 +14,16 @@ TestCase {
         function inspect(url) { lastFile = url }
     }
     QtObject { id: fakeLive; property string status: "Stopped"; property string tempo: "—"; property string key: "—"; property string chord: "—" }
-    QtObject { id: fakeCapture; property string status: "Monitoring"; property int starts: 0; property int stops: 0; function stop() { stops++; status = "Stopped" } function start() { starts++; status = "Monitoring" } }
+    QtObject {
+        id: fakeCapture
+        property string status: "Monitoring"
+        property int starts: 0
+        property int stops: 0
+        signal changed()
+        onStatusChanged: changed()
+        function stop() { stops++; status = "Stopped" }
+        function start() { starts++; status = "Monitoring" }
+    }
     QtObject {
         id: fakePlayback
         property string state: "Stopped"
