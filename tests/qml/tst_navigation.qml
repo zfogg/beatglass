@@ -107,7 +107,7 @@ TestCase {
     Component { id: shellWithOverlayPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay; captureMonitorBridge: fakeCapture; themePreferencesBridge: fakeThemePreferences } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
     function test_overlayControlsUseBridge() {
-        fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = -1; fakeOverlay.screenIndex = 0; fakeOverlay.displayName = "Display"; fakeOverlay.requestedWidth = 0
+        fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = 0; fakeOverlay.screenIndex = 0; fakeOverlay.displayName = "Display"; fakeOverlay.requestedWidth = 0
         let app = shellWithOverlay.createObject(null)
         verify(app !== null); compare(fakeOverlay.attaches, 1)
         findChild(app, "navigation").currentIndex = 1
