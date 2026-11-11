@@ -632,6 +632,7 @@ ApplicationWindow {
             window.announceCaptureRecoveryState(message + " " + (stale ? "Live evidence is stale until fresh capture arrives." : "Fresh accepted capture is available."))
         if (focusTarget) {
             if (stale) {
+                navigation.currentIndex = 1
                 window.show()
                 window.requestActivate()
             }
@@ -1650,14 +1651,14 @@ ApplicationWindow {
         clickThroughToggle.checked = window.overlayBridge.clickThrough
         if (!applied || clickThroughToggle.checked !== requestedClickThrough) {
             window.overlayCaptureEvidenceStale = true
-            window.announceCaptureRecoveryState("DJ overlay could not change input mode; keep the control window available and try again. Live evidence remains stale until fresh capture arrives.")
+            window.announceCaptureRecoveryState("DJ overlay click-through could not be " + (requestedClickThrough ? "enabled" : "disabled") + "; keep the control window available and try again. Live evidence remains stale until fresh capture arrives.")
         } else {
             window.overlaySettingsRevision += 1
             window.overlayLaunchFallbackActive = false
             window.overlayDisplayRecoveryPending = false
             window.announceCaptureRecoveryState(requestedClickThrough ? "DJ overlay click-through enabled; press Escape or use Unlock overlay to restore interaction." : "DJ overlay interaction restored; keyboard and pointer input are available.")
         }
-        overlayInteractionMode.forceActiveFocus()
+        clickThroughCompatibility.forceActiveFocus()
         return applied && clickThroughToggle.checked === requestedClickThrough
     }
     function handleOverlayClickThroughShortcutAction() {
@@ -2469,6 +2470,10 @@ ApplicationWindow {
     Connections {
         target: window.playbackBridge
         function onChanged() {
+            if (window.playbackBridge.state === "Stopped") {
+                window.clearVisualizationForCaptureState("Playback stopped; accepted visualization snapshot cleared.")
+                return
+            }
             if (visualizationCanvas.acceptedPlaybackSource !== ""
                     && window.playbackBridge.source.toString() !== visualizationCanvas.acceptedPlaybackSource) {
                 window.clearVisualizationForCaptureState("Selection cleared because the playback source changed.")
@@ -2509,7 +2514,7 @@ ApplicationWindow {
         if (!window.captureMonitorBridge)
             return
         if (window.captureMonitorBridge.status === "Error") {
-            window.transitionCaptureEvidence(true, "No output device or permission; retry monitoring to acquire a fresh snapshot.", overlayCaptureRecoveryAction)
+            window.transitionCaptureEvidence(true, "No output device or permission; retry monitoring to acquire a fresh snapshot.", retryOverlayButton)
         } else if (window.captureMonitorBridge.status === "Starting") {
             window.transitionCaptureEvidence(true, "Overlay capture starting; live evidence remains stale until fresh audio arrives.", overlayLiveMonitoringState)
         } else if (window.captureMonitorBridge.status === "Reacquiring") {
@@ -2568,8 +2573,15 @@ ApplicationWindow {
                         window.overlayDisplayRecoveryPending = false
                         window.focusOverlayAvailabilityRecovery("DJ overlay display restored; recovery remains paused until Resume recovery is chosen.", resumeOverlayRecovery)
                     }
-                    if (!window.overlayRecoveryPausedByUser)
-                        retryOverlay.forceActiveFocus()
+                    if (!window.overlayRecoveryPausedByUser) {
+                        navigation.currentIndex = 1
+                        if (window.overlayBridge.clickThrough) {
+                            clickThroughToggle.forceActiveFocus()
+                            clickThroughCompatibility.forceActiveFocus()
+                        } else {
+                            retryOverlay.forceActiveFocus()
+                        }
+                    }
                 } else {
                     window.focusOverlayDisplaySelectionRequired()
                 }
@@ -4913,6 +4925,7 @@ ApplicationWindow {
                         id: showOverlay
                         objectName: "showOverlay"
                         property bool focusRequested: false
+                        readonly property bool visible: showOverlayButton.visible
                         readonly property bool activeFocus: focusRequested || showOverlayButton.activeFocus
                         readonly property bool enabled: showOverlayButton.enabled
                         readonly property string text: showOverlayButton.text
@@ -4968,10 +4981,13 @@ ApplicationWindow {
                         id: clickThroughCompatibility
                         objectName: "clickThrough"
                         property bool checked: clickThroughToggle.checked
-                        property bool activeFocus: clickThroughToggle.activeFocus
+                        property bool activeFocus: false
                         function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); activeFocus = true }
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
-                        function clicked() { clickThroughToggle.toggle() }
+                        function clicked() {
+                            clickThroughToggle.checked = checked
+                            window.handleOverlayClickThroughButtonAction(checked)
+                        }
                     }
                     Slider {
                         id: overlayOpacityControl
@@ -5044,6 +5060,7 @@ ApplicationWindow {
                         }
                     }
                     Label {
+                        id: overlayLiveMonitoringState
                         objectName: "overlayLiveMonitoringState"
                         activeFocusOnTab: true
                         visible: window.overlayBridge !== null
