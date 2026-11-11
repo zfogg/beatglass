@@ -2110,7 +2110,7 @@ TestCase {
         app.hideOverlayAndRestoreControls()
         verify(app.overlayDisplayRecoveryPending)
         tryVerify(() => restore.activeFocus)
-        compare(restore.Accessible.name, "Restore DJ overlay")
+        compare(findChild(app, "restoreOverlayAction").Accessible.name, "Restore DJ overlay")
         fakeOverlay.refuseHide = false
         app.destroy()
     }
