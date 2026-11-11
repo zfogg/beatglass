@@ -114,7 +114,7 @@ These are the only options accepted by the shipped `beatglass-cli` and
 `beatglass-desktop` binaries. They are separate from the developer and
 qualification-script flags below.
 
-Usage: `beatglass-cli [--help] [--version] [--replay] [--json] [--] <audio-file>`.
+Usage: `beatglass-cli [--help] [--version] [--replay] [--json] [--low-color <#rrggbb>] [--mid-color <#rrggbb>] [--high-color <#rrggbb>] [--] <audio-file>`.
 The music analysis binary uses `beatglass-music-cli [--help] [--version] <audio-file>`.
 
 | Binary | Argument | Meaning |
