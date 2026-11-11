@@ -2527,6 +2527,7 @@ ApplicationWindow {
             return
         if (window.captureMonitorBridge.status === "Error") {
             window.transitionCaptureEvidence(true, "No output device or permission; retry monitoring to acquire a fresh snapshot.", retryOverlayButton)
+            retryOverlayButton.forceActiveFocus()
         } else if (window.captureMonitorBridge.status === "Starting") {
             window.transitionCaptureEvidence(true, "Overlay capture starting; live evidence remains stale until fresh audio arrives.", overlayLiveMonitoringState)
         } else if (window.captureMonitorBridge.status === "Reacquiring") {
