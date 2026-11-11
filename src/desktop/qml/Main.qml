@@ -2558,7 +2558,14 @@ ApplicationWindow {
                     window.focusOverlayAvailabilityRecovery("DJ overlay recovered; choose a display to re-enable overlay actions.", overlayDisplay)
                 } else {
                     window.overlayDisplayRecoveryPending = false
-                    window.focusOverlayRestoredState("DJ overlay recovered; Show, Restore, and Reapply actions are available.", overlaySettingsRetentionReviewAction)
+                    if (window.overlayHiddenByUser) {
+                        const retainedGeometry = window.overlayBridge.geometry
+                        const geometrySummary = retainedGeometry && retainedGeometry.width > 0 && retainedGeometry.height > 0
+                            ? " at position " + retainedGeometry.x + ", " + retainedGeometry.y + ", size " + retainedGeometry.width + " by " + retainedGeometry.height + " pixels" : ""
+                        window.focusOverlayRestoredState("DJ overlay display recovered" + geometrySummary + "; it remains hidden by user request. Use Restore overlay when ready.", restoreOverlay)
+                    } else {
+                        window.focusOverlayRestoredState("DJ overlay recovered; Show, Restore, and Reapply actions are available.", overlaySettingsRetentionReviewAction)
+                    }
                 }
             }
         }
