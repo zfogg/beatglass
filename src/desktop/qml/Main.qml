@@ -4984,8 +4984,8 @@ ApplicationWindow {
                         function forceActiveFocus() { clickThroughToggle.forceActiveFocus(); activeFocus = true }
                         onCheckedChanged: if (clickThroughToggle.checked !== checked) clickThroughToggle.checked = checked
                         function clicked() {
-                            clickThroughToggle.toggle()
-                            window.handleOverlayClickThroughButtonAction(clickThroughToggle.checked)
+                            clickThroughToggle.checked = checked
+                            window.handleOverlayClickThroughButtonAction(checked)
                         }
                     }
                     Slider {
