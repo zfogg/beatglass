@@ -2468,12 +2468,6 @@ ApplicationWindow {
     }
     Connections {
         target: window.playbackBridge
-        function onSourceChanged() { window.clearVisualizationForCaptureState("Selection cleared because the playback source changed.") }
-        function onEpochChanged() { window.clearVisualizationForCaptureState("Selection cleared because the playback epoch changed.") }
-        function onStateChanged() {
-            if (window.playbackBridge.state === "Stopped")
-                window.clearVisualizationForCaptureState("Playback stopped; accepted visualization snapshot cleared.")
-        }
         function onChanged() {
             if (visualizationCanvas.acceptedPlaybackSource !== ""
                     && window.playbackBridge.source.toString() !== visualizationCanvas.acceptedPlaybackSource) {

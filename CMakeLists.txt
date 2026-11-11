@@ -125,6 +125,10 @@ if(BUILD_TESTING)
       COMMAND ${Python3_EXECUTABLE}
               ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_live_bridge_signal_contract.py)
     set_tests_properties(live_bridge_signal_contract PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME playback_bridge_signal_contract
+      COMMAND ${Python3_EXECUTABLE}
+              ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_playback_bridge_signal_contract.py)
+    set_tests_properties(playback_bridge_signal_contract PROPERTIES LABELS unit TIMEOUT 10)
     add_test(NAME issue4320_tui_contract
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue4320_tui_contract.py)
     set_tests_properties(issue4320_tui_contract PROPERTIES LABELS unit TIMEOUT 10)
