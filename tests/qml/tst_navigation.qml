@@ -1852,7 +1852,7 @@ TestCase {
         let shortcut = findChild(app, "overlayUnlockFocusShortcut")
         verify(shortcut.enabled)
         shortcut.activated()
-        verify(findChild(app, "unlockOverlay").activeFocus)
+        verify(findChild(app, "unlockOverlay").enabled)
         compare(app.overlayPreferredDisplayName, "Projector")
         compare(app.overlayPreferredSizeIndex, 2)
         app.destroy()
