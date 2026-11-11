@@ -1416,7 +1416,7 @@ ApplicationWindow {
             window.overlayLaunchFallbackActive = true
             window.markOverlayRecoveryStale("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback.")
             window.restoreOverlayFallbackControls("")
-            window.focusOverlayRestoreFailure("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.", overlayDisplay)
+            window.focusOverlayRestoreFailure("DJ overlay could not be restored; control window remains available as the tray/taskbar fallback and overlay settings are retained.", retryOverlay)
             return false
         }
         const restoredGeometry = window.overlayBridge.geometry
