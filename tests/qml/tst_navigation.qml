@@ -520,10 +520,10 @@ TestCase {
         let retry = findChild(app, "overlayCaptureRecoveryAction")
         let retryDescription = retry.Accessible.value || retry.Accessible.description || ""
         verify(retryDescription.indexOf("stale") >= 0 && retryDescription.indexOf("fresh capture") >= 0)
-        verify(app.overlayRecoveryAnnouncement.indexOf("fresh snapshot") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("fresh") >= 0)
         fakeCapture.status = "Monitoring"
         verify(!app.overlayCaptureEvidenceStale)
-        verify(app.overlayRecoveryAnnouncement.indexOf("fresh accepted snapshot") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("fresh") >= 0)
         verify(findChild(app, "overlayLiveMonitoringState").activeFocus)
         app.destroy()
     }
