@@ -511,7 +511,7 @@ TestCase {
         let captureStatus = findChild(app, "overlayCaptureStatus")
         let liveGroup = findChild(app, "overlayLiveEvidenceGroup")
         let attribution = findChild(app, "overlayEstimateAttribution")
-        verify(findChild(app, "overlayCaptureRecoveryAction").activeFocus)
+        verify(findChild(app, "retryOverlay").activeFocus)
         verify(app.overlayCaptureEvidenceStale)
         verify(tempo.Accessible.value.indexOf("stale until fresh capture") >= 0)
         verify(captureStatus.Accessible.value.indexOf("evidence stale until fresh capture") >= 0)
