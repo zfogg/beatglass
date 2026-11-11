@@ -941,6 +941,12 @@ ApplicationWindow {
         if (window.overlayBridge && !window.captureMonitorBridge) {
             window.focusOverlayCaptureStartupFailure()
         }
+        if (window.overlayBridge && !window.overlayBridge.available) {
+            window.overlayDisplayRecoveryPending = true
+            window.overlayDisplaySelectionRequired = true
+            window.overlayCaptureEvidenceStale = true
+            window.focusOverlayAvailabilityRecovery("DJ overlay is unavailable; control-window fallback remains active until the display recovers.", retryOverlay)
+        }
         refreshCatalog()
         if (typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== "") {
             browseFolder = libraryPreferences.folder
