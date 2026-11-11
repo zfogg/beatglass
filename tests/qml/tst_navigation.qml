@@ -2108,7 +2108,6 @@ TestCase {
         let app = shellWithOverlay.createObject(null)
         let restore = findChild(app, "restoreOverlay")
         app.hideOverlayAndRestoreControls()
-        console.log("HIDE_RECOVERY", app.overlayDisplayRecoveryPending, restore.activeFocus)
         verify(app.overlayDisplayRecoveryPending)
         tryVerify(() => restore.activeFocus)
         compare(restore.Accessible.name, "Restore DJ overlay")
