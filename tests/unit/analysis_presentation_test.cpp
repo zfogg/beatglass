@@ -23,6 +23,24 @@ private slots:
     QCOMPARE(model.tonalHistory(), QStringList({"Am", "F"}));
     QCOMPARE(model.beatFrames(), QVariantList({QVariant::fromValue<qulonglong>(1000), QVariant::fromValue<qulonglong>(2000)}));
   }
+
+  void clearsBeatCountWhenEvidenceBecomesStale() {
+    AnalysisPresentation model;
+    beatglass::Snapshot tracking;
+    tracking.state = beatglass::TrackingState::tracking;
+    tracking.observed_through = {1, 5000};
+    tracking.beats = {{{1, 4000}, 1.0f}};
+    model.publish(tracking);
+    QCOMPARE(model.beatCount(), qulonglong(1));
+
+    beatglass::Snapshot reacquiring;
+    reacquiring.state = beatglass::TrackingState::reacquiring;
+    reacquiring.observed_through = {1, 5000};
+    model.publish(reacquiring);
+    QVERIFY(model.stale());
+    QCOMPARE(model.beatCount(), qulonglong(0));
+    QCOMPARE(model.beatFrames(), QVariantList{});
+  }
 };
 
 QTEST_GUILESS_MAIN(AnalysisPresentationTest)

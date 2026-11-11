@@ -44,7 +44,13 @@ inline PresentationState present_snapshot(const Snapshot& snapshot) {
   // A reacquiring/silent/error snapshot is an invalidation boundary for every
   // time-varying estimate, including history. Keeping old tempo samples here
   // makes the GUI and TUI appear to track audio that is no longer fresh.
-  if (snapshot.state != TrackingState::tracking) { result.tempo_history.clear(); result.tonal_history.clear(); result.beat_frames.clear(); return result; }
+  if (snapshot.state != TrackingState::tracking) {
+    result.tempo_history.clear();
+    result.tonal_history.clear();
+    result.beat_frames.clear();
+    result.beat_count = 0;
+    return result;
+  }
   if (snapshot.confidence && std::isfinite(*snapshot.confidence) && *snapshot.confidence >= 0.0f && *snapshot.confidence <= 1.0f) result.confidence = *snapshot.confidence;
   if (snapshot.bpm && std::isfinite(*snapshot.bpm) && *snapshot.bpm > 0) {
     result.tempo = format_presentation_bpm(*snapshot.bpm);
