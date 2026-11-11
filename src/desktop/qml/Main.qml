@@ -5371,7 +5371,7 @@ ApplicationWindow {
                         objectName: "overlayDisplayEmptyState"
                         visible: window.overlayBridge && window.overlayBridge.screenNames.length === 0
                         text: "No displays are available for the overlay."
-                        Accessible.name: "Overlay display empty state, live evidence stale until fresh capture"
+                        Accessible.name: "Overlay display empty state"
                         Accessible.role: Accessible.Status
                         Accessible.description: text + " Live overlay evidence is stale while no display is available; monitoring continues in the control window. Connect a display before choosing an overlay destination."
                         ToolTip.text: "Connect a display before choosing an overlay destination"
