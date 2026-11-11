@@ -1421,6 +1421,7 @@ ApplicationWindow {
         }
         const restoredGeometry = window.overlayBridge.geometry
         window.overlayRecoveryPausedByUser = false
+        window.overlayWasVisibleBeforeAvailabilityLoss = true
         window.announceCaptureRecoveryState(restoredGeometry && restoredGeometry.width > 0
             ? "DJ overlay relaunched at its persisted position and size."
             : "DJ overlay shown; output monitoring remains bound to the selected display.")
