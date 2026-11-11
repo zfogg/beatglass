@@ -886,6 +886,7 @@ ApplicationWindow {
             }
         }
         function onAvailableChanged() {
+            console.log("DBG available changed", window.overlayBridge ? window.overlayBridge.available : null, window.overlayDisplayRecoveryPending)
             if (!window.overlayBridge)
                 return
             if (!window.overlayBridge.available) {
