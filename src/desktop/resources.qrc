@@ -1,1 +1,1 @@
-<RCC><qresource prefix="/"><file alias="Main.qml">qml/Main.qml</file></qresource></RCC>
+<RCC><qresource prefix="/"><file alias="Main.qml">qml/Main.qml</file><file alias="qml/V2Tokens.qml">qml/V2Tokens.qml</file><file alias="qml/qmldir">qml/qmldir</file></qresource></RCC>
