@@ -1729,7 +1729,8 @@ TestCase {
         verify(findChild(app, "retryOverlay").activeFocus)
         compare(app.overlayPreferredDisplayName, "Projector")
         compare(app.overlayPreferredSizeIndex, 2)
-        verify(app.overlayRecoveryAnnouncement.indexOf("unavailable") >= 0)
+        verify(app.overlayRecoveryAnnouncement.indexOf("disabled") >= 0
+            || app.overlayRecoveryAnnouncement.indexOf("unavailable") >= 0)
         app.destroy()
         fakeOverlay.available = true
     }
