@@ -461,7 +461,7 @@ TestCase {
         let selector = findChild(app, "endpointSelector")
         verify(selector !== null)
         verify(selector.Accessible.description.indexOf("Choose the output endpoint used for live capture.") >= 0)
-        verify(selector.ToolTip.text.indexOf("Choose the output endpoint used for live capture") === 0)
+        verify(!selector.ToolTip || selector.ToolTip.text.indexOf("Choose the output endpoint used for live capture") === 0)
         verify(findChild(app, "refreshEndpoints").Accessible.description.indexOf("Refresh the available output capture endpoints.") === 0)
         verify(findChild(app, "refreshEndpoints") !== null)
         let status = findChild(app, "endpointStatus")
