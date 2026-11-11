@@ -64,6 +64,9 @@ void ThemePreferences::setHighColor(const QString& value) {
 void ThemePreferences::reset() {
   setThemeIndex(0);
   setReduceMotion(false);
+  setLowColor(QStringLiteral("#38bdf8"));
+  setMidColor(QStringLiteral("#a78bfa"));
+  setHighColor(QStringLiteral("#f472b6"));
   // Re-write defaults even when the in-memory value was already default; this
   // repairs a settings store containing an invalid or stale representation.
   if (settings_) {
