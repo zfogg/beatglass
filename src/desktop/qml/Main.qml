@@ -889,9 +889,12 @@ ApplicationWindow {
                 window.overlayDisplayRecoveryPending = true
                 window.overlayDisplaySelectionRequired = true
                 window.announceCaptureRecoveryState("Overlay actions disabled; control-window fallback remains available until the native overlay recovers.")
-                window.overlayWasVisibleBeforeAvailabilityLoss = djOverlay.visible
-                if (djOverlay.visible) {
-                    window.hideOverlayAndRestoreControls()
+                window.overlayWasVisibleBeforeAvailabilityLoss = window.overlayWasVisibleBeforeAvailabilityLoss || djOverlay.visible
+                if (window.overlayWasVisibleBeforeAvailabilityLoss || djOverlay.visible) {
+                    if (window.overlayBridge.hideOverlay)
+                        window.overlayBridge.hideOverlay()
+                    window.overlayHiddenByUser = false
+                    window.show()
                     window.overlayHiddenByUser = false
                     window.overlayDisplayRecoveryPending = true
                     window.overlayDisplaySelectionRequired = true
@@ -1421,6 +1424,7 @@ ApplicationWindow {
         }
         const restoredGeometry = window.overlayBridge.geometry
         window.overlayRecoveryPausedByUser = false
+        window.overlayWasVisibleBeforeAvailabilityLoss = true
         window.announceCaptureRecoveryState(restoredGeometry && restoredGeometry.width > 0
             ? "DJ overlay relaunched at its persisted position and size."
             : "DJ overlay shown; output monitoring remains bound to the selected display.")
@@ -5148,7 +5152,9 @@ ApplicationWindow {
                     Button {
                         id: retryOverlayButton
                         objectName: "overlayCaptureRecoveryAction"
-                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring")
+                        visible: window.overlayBridge !== null && window.captureMonitorBridge !== null
+                            && (window.captureMonitorBridge.status === "Error" || window.captureMonitorBridge.status === "Reacquiring"
+                                || window.overlayDisplayRecoveryPending || window.overlayLaunchFallbackActive)
                         text: "Retry overlay capture"
                         enabled: visible && window.captureMonitorBridge.start !== undefined
                         Accessible.name: text
@@ -5168,6 +5174,7 @@ ApplicationWindow {
                         id: retryOverlay
                         objectName: "retryOverlay"
                         property bool focusRequested: false
+                        readonly property bool visible: retryOverlayButton.visible
                         readonly property bool activeFocus: focusRequested || retryOverlayButton.activeFocus
                         readonly property bool enabled: retryOverlayButton.enabled
                         readonly property string text: retryOverlayButton.text
