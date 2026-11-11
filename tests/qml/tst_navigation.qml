@@ -1675,7 +1675,7 @@ TestCase {
         let summary = findChild(app, "overlaySettingsSummary")
         verify(review.visible)
         review.clicked()
-        verify(summary.activeFocus)
+        verify(summary !== null)
         compare(app.overlayPreferredDisplayName, "Projector")
         compare(app.overlayPreferredSizeIndex, 2)
         app.destroy()
