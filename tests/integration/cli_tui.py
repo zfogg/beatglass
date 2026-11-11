@@ -57,6 +57,8 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
         if tab == "live":
             for control in ("Reset / reacquire", "½ BPM", "Normal BPM", "2× BPM"):
                 assert control in plain, (tab, control, result.stdout)
+            assert "Capture state: Stopped" in plain
+            assert "Key: —    Chord: —" in plain
 
     invalid = subprocess.run(
         [exe, "--snapshot", str(root), "not-a-tab"],

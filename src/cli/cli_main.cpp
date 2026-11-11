@@ -1590,6 +1590,11 @@ int main(int argc, char** argv) {
     live_visualization_revision = 0;
     set_live_presentation_state(beatglass::TrackingState::stopped);
   };
+  // Initialize the shared presentation model before the first render. Snapshot
+  // mode and the first interactive frame do not receive a capture event, so
+  // leaving this default-constructed would produce blank status/key/chord
+  // fields instead of the GUI-equivalent stopped/unknown state.
+  set_live_presentation_state(beatglass::TrackingState::stopped);
   auto toggle_live = [&] {
 #ifdef _WIN32
     if (live_session && live_session->state() != beatglass::SourceState::stopped) {
@@ -1787,8 +1792,8 @@ int main(int argc, char** argv) {
     const auto displayed_live_status = live_presentation.stale ? live_status + "  [stale evidence — reacquiring]" : live_status;
     auto live_status_view = live_starting ? hbox({spinner(6, static_cast<std::size_t>(spinner_frame)), text(" "), text(displayed_live_status)}) | color(Color::YellowLight) | bgcolor(Color::RGB(43, 36, 16)) : text(displayed_live_status) | color(Color::GrayLight) | italic;
     const auto corrected_bpm = live_presentation.stale || !live_bpm ? std::optional<float>{} : std::optional<float>{*live_bpm * live_bpm_multiplier};
-    const auto live_key_label = live_presentation.stale ? std::string("—") : live_presentation.key != "—" ? live_presentation.key : live_key.value_or("—");
-    const auto live_chord_label = live_presentation.stale ? std::string("—") : live_presentation.chord != "—" ? live_presentation.chord : live_chord.value_or("—");
+    const auto live_key_label = live_presentation.stale ? std::string("—") : (!live_presentation.key.empty() && live_presentation.key != "—") ? live_presentation.key : live_key.value_or("—");
+    const auto live_chord_label = live_presentation.stale ? std::string("—") : (!live_presentation.chord.empty() && live_presentation.chord != "—") ? live_presentation.chord : live_chord.value_or("—");
     const auto live_tonal_label = live_presentation.stale ? std::string("stale evidence — waiting for fresh tonal windows") : live_presentation.tonal_history.empty() ? (live_tonal_history.empty() ? std::string("waiting for tonal windows") : join_history(live_tonal_history)) : join_history(live_presentation.tonal_history);
     const auto multiplier_label = live_bpm_multiplier < 1.0f ? "½×" : live_bpm_multiplier > 1.0f ? "2×" : "1×";
     const auto shared_confidence = live_presentation.stale
