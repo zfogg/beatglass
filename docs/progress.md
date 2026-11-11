@@ -1049,3 +1049,14 @@ were run locally with the pinned Playwright dependency. The checker passed all
 gitignored `design/v1/output/` directory. These are visual design artifacts,
 not native Qt desktop qualification evidence.
 
+### Multi-root recursive library scan (issue #4787)
+
+The library catalog now exposes `scan_roots`, a worker-thread-friendly
+recursive scanner for configured roots. It uses a bounded pending-directory
+queue, cooperative cancellation with an all-or-nothing published snapshot,
+deterministic normalized-path duplicate suppression, progress snapshots, and
+per-root diagnostics so a missing or disappearing root does not discard
+successful results from other roots. Unit coverage covers recursion,
+duplicates, missing roots, progress, and cancellation. Native desktop and
+cross-platform qualification remain unrun for this change.
+

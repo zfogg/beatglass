@@ -280,3 +280,38 @@ TEST_CASE("catalog skips symlinked files and directories") {
   CHECK(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "nested"; }));
   CHECK_FALSE(std::ranges::any_of(result.entries, [](const auto& entry) { return entry.name == "linked.wav" || entry.name == "linked-nested"; }));
 }
+
+TEST_CASE("multi-root scan recursively reports progress and suppresses duplicates") {
+  TempDir dir;
+  std::filesystem::create_directories(dir.path / "nested");
+  std::ofstream(dir.path / "nested" / "song.wav") << "x";
+  std::vector<beatglass::library::CatalogScanProgress> progress;
+  beatglass::library::CatalogScanOptions options;
+  options.progress = [&](auto value) { progress.push_back(value); };
+  const auto result = beatglass::library::scan_roots({dir.path, dir.path / "nested"}, options);
+  REQUIRE(result.entries.size() == 2);
+  REQUIRE(result.roots.size() == 2);
+  CHECK(result.roots[0].status == beatglass::library::CatalogStatus::ok);
+  CHECK(result.roots[1].status == beatglass::library::CatalogStatus::ok);
+  CHECK(progress.back().roots_completed == 2);
+  CHECK(progress.back().entries_seen == 2);
+}
+
+TEST_CASE("multi-root scan reports a disappearing or missing root without losing other roots") {
+  TempDir dir;
+  dir.file("kept.flac");
+  const auto result = beatglass::library::scan_roots({dir.path, dir.path / "gone"});
+  REQUIRE(result.entries.size() == 1);
+  REQUIRE(result.roots.size() == 2);
+  CHECK(result.roots[1].status == beatglass::library::CatalogStatus::invalid_root);
+  CHECK_FALSE(result.roots[1].diagnostic.empty());
+}
+
+TEST_CASE("multi-root scan cancellation publishes no partial snapshot") {
+  TempDir dir; dir.file("track.wav");
+  std::stop_source stop; stop.request_stop();
+  const auto result = beatglass::library::scan_roots({dir.path}, {}, stop.get_token());
+  CHECK(result.cancelled);
+  CHECK(result.entries.empty());
+  CHECK(result.diagnostic == "catalog scan cancelled");
+}

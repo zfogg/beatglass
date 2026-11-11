@@ -5,6 +5,7 @@
 #include <string>
 #include <stop_token>
 #include <vector>
+#include <functional>
 
 namespace beatglass::library {
 
@@ -54,6 +55,40 @@ struct CatalogResult {
   bool cancelled{};
 };
 
+/** Progress reported by a multi-root scan. Values are snapshots owned by the
+ * caller; the callback runs on the scanning worker and must not block. */
+struct CatalogScanProgress {
+  std::size_t roots_completed{};
+  std::size_t roots_total{};
+  std::size_t entries_seen{};
+};
+
+/** Outcome for one configured root. A missing root is reported here while
+ * other roots continue; no entries from a failed root are published. */
+struct CatalogRootResult {
+  std::filesystem::path root;
+  CatalogStatus status{CatalogStatus::ok};
+  std::string diagnostic;
+  std::size_t entries_seen{};
+};
+
+/** Combined result of scanning configured roots recursively. */
+struct CatalogScanResult {
+  std::vector<CatalogEntry> entries;
+  std::vector<CatalogRootResult> roots;
+  std::string diagnostic;
+  bool cancelled{};
+};
+
+/** Scan options for scan_roots(). The work queue is bounded by
+ * max_pending_directories; roots are processed in input order. */
+struct CatalogScanOptions {
+  std::size_t max_entries{10000};
+  std::size_t max_pending_directories{256};
+  std::string search;
+  std::function<void(CatalogScanProgress)> progress;
+};
+
 /** Return the canonical display format for a supported audio path.
  * The result is one of `WAV`, `FLAC`, `MP3`, or `AIFF`; an empty string means
  * the extension is not part of the qualified catalog set. This is a pure
@@ -80,5 +115,13 @@ CatalogResult browse_recursive(const std::filesystem::path& folder,
                                std::string search = {},
                                std::size_t max_entries = 10000,
                                std::stop_token stop = {});
+
+/** Recursively scan all roots, suppressing duplicate files by normalized
+ * absolute path and preserving the first root's result. Missing or
+ * disappearing roots are returned as per-root filesystem errors. Results are
+ * empty when cancellation or the global entry budget is observed. */
+CatalogScanResult scan_roots(const std::vector<std::filesystem::path>& roots,
+                             CatalogScanOptions options = {},
+                             std::stop_token stop = {});
 
 } // namespace beatglass::library
