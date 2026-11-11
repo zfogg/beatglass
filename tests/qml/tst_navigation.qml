@@ -117,7 +117,7 @@ TestCase {
         let hide = findChild(app, "hideOverlay")
         tryVerify(() => show.visible && show.enabled)
         show.clicked(); compare(fakeOverlay.shows, 1); tryCompare(app, "visible", false)
-        toggle.checked = true; toggle.clicked(); verify(fakeOverlay.clickThrough); verify(unlock.enabled)
+        verify(app.handleOverlayClickThroughButtonAction(true)); verify(fakeOverlay.clickThrough); verify(unlock.enabled)
         verify(unlock.Accessible.description.indexOf("Allow pointer input to pass through the overlay window; currently enabled") === 0)
         unlock.clicked(); verify(!fakeOverlay.clickThrough); verify(!toggle.checked)
         fakeOverlay.refuseClickThrough = true
