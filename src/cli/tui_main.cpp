@@ -90,6 +90,18 @@ int main(int argc, char** argv) {
   });
   auto now_playing = Renderer([&] { return vbox({text("NOW PLAYING") | bold | color(Color::Cyan), separator(), text(result && selected >= 0 ? tracks[selected].title : "Nothing loaded") | bold, text("Playback controls are staged for the next slice."), separator(), hbox({text("  ◀  ") | borderRounded, text("  ▶  ") | borderRounded, text("  ■  ") | borderRounded}) | center, filler(), text("Tab switch view   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto tabs = Container::Tab({library, analysis, now_playing}, &tab);
+  auto rail = Renderer([&] {
+    const auto item = [&](int index, std::string label) {
+      auto row = text((tab == index ? "▸ " : "  ") + std::move(label));
+      return tab == index ? row | color(Color::Cyan) | bold : row | color(Color::GrayLight);
+    };
+    return vbox({text("BEATGLASS") | bold | color(Color::Cyan), separator(), item(0, "Library"), item(1, "Live"), item(2, "Settings"), filler(), text("v2 workspace") | color(Color::GrayDark)}) | borderRounded;
+  });
+  auto workspace = Renderer([&] {
+    if (tab == 0 && navigation.layout() == beatglass::cli::Layout::two_column)
+      return hbox({library->Render(), analysis->Render()}) | flex;
+    return tabs->Render() | flex;
+  });
   auto screen = ScreenInteractive::TerminalOutput();
   auto popup_view = Renderer([&] {
     if (popup == Popup::none) return text("");
@@ -157,6 +169,8 @@ int main(int argc, char** argv) {
       if (event == Event::Escape) { navigation.dismiss_modal(); return true; }
       if (event == Event::ArrowDown) { navigation.move_command(1); return true; }
       if (event == Event::ArrowUp) { navigation.move_command(-1); return true; }
+      if (event == Event::Backspace) { auto query = navigation.query(); if (!query.empty()) { query.pop_back(); navigation.set_query(query); } return true; }
+      if (event.is_character()) { navigation.set_query(navigation.query() + event.character()); return true; }
       return true;
     }
     if (event == Event::Escape) { screen.Exit(); return true; }
@@ -174,5 +188,5 @@ int main(int argc, char** argv) {
     if (event == Event::ArrowUp && tab == 0 && !tracks.empty()) { selected = std::max(selected - 1, 0); return true; }
     return false;
   });
-  screen.Loop(Renderer(root_component, [&] { return dbox({tabs->Render(), popup_view->Render(), palette_view->Render()}); })); return 0;
+  screen.Loop(Renderer(root_component, [&] { return dbox({hbox({rail->Render() | size(WIDTH, LESS_THAN, 18), workspace->Render()}), popup_view->Render(), palette_view->Render()}); })); return 0;
 }
