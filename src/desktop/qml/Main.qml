@@ -628,8 +628,14 @@ ApplicationWindow {
     }
     function transitionCaptureEvidence(stale, message, focusTarget) {
         window.overlayCaptureEvidenceStale = stale
-        if (message !== "")
-            window.announceCaptureRecoveryState(message + " " + (stale ? "Live evidence is stale until fresh capture arrives." : "Fresh accepted capture is available."))
+        if (message !== "") {
+            const freshness = stale
+                    ? ((window.overlayBridge && !window.overlayBridge.available)
+                        ? "Live evidence is stale until native recovery completes and fresh capture arrives."
+                        : "Live evidence is stale until fresh capture arrives.")
+                    : "Fresh accepted capture is available."
+            window.announceCaptureRecoveryState(message + " " + freshness)
+        }
         if (focusTarget) {
             if (stale) {
                 navigation.currentIndex = 1
