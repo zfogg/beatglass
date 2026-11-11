@@ -52,6 +52,8 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
             assert "Sort title/path" in plain
             assert "Source: " in plain
             assert "[analyzed]" in plain or "[cached]" in plain
+            assert "WAVEFORM" in plain
+            assert any(glyph in plain for glyph in ("▁", "▂", "▃", "▄", "▅", "▆", "▇", "█")), "snapshot lost colored waveform glyphs"
         if tab == "live":
             for control in ("Reset / reacquire", "½ BPM", "Normal BPM", "2× BPM"):
                 assert control in plain, (tab, control, result.stdout)
