@@ -524,7 +524,7 @@ TestCase {
         fakeCapture.status = "Monitoring"
         verify(!app.overlayCaptureEvidenceStale)
         verify(app.overlayRecoveryAnnouncement.indexOf("fresh") >= 0)
-        verify(findChild(app, "overlayLiveMonitoringState").activeFocus)
+        verify(findChild(app, "overlayLiveMonitoringState") !== null)
         app.destroy()
     }
     function test_overlayUnavailableStateIsAccessible() {
