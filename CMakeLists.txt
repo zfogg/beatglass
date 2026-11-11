@@ -132,6 +132,9 @@ if(BUILD_TESTING)
     add_test(NAME issue4320_tui_contract
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue4320_tui_contract.py)
     set_tests_properties(issue4320_tui_contract PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME issue4795_cli_colors_contract
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_issue4795_cli_colors_contract.py)
+    set_tests_properties(issue4795_cli_colors_contract PROPERTIES LABELS unit TIMEOUT 10)
   endif()
 endif()
 option(BEATGLASS_ENABLE_PACKAGING "Enable CPack package metadata for release candidates" OFF)
