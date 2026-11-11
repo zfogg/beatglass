@@ -1465,6 +1465,7 @@ TestCase {
         fakeOverlay.available = true
         fakeOverlay.clickThrough = true
         let app = shellWithOverlay.createObject(null)
+        findChild(app, "navigation").currentIndex = 1
         let status = findChild(app, "overlayKeyboardRecoveryStatus")
         verify(status.visible)
         verify(status.text.indexOf("Ctrl+Alt+U") >= 0)
