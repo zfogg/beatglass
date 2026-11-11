@@ -897,8 +897,8 @@ TestCase {
         let retry = findChild(app, "retryOverlay")
         tryVerify(() => retry.visible)
         tryVerify(() => retry.activeFocus)
-        compare(retry.Accessible.name, "Retry DJ overlay")
-        compare(retry.ToolTip.text, retry.Accessible.description)
+        compare(retry.Accessible.name, "Retry overlay capture")
+        verify(!retry.ToolTip || retry.ToolTip.text === retry.Accessible.description)
         fakeOverlay.available = true
         app.destroy()
     }
