@@ -627,11 +627,17 @@ ApplicationWindow {
         }
     }
     function transitionCaptureEvidence(stale, message, focusTarget) {
-        window.overlayCaptureEvidenceStale = stale
-        if (message !== "")
-            window.announceCaptureRecoveryState(message + " " + (stale ? "Live evidence is stale until fresh capture arrives." : "Fresh accepted capture is available."))
+        const nativeRecoveryPending = window.overlayBridge && !window.overlayBridge.available
+        const effectiveStale = stale || nativeRecoveryPending
+        window.overlayCaptureEvidenceStale = effectiveStale
+        if (message !== "") {
+            const freshness = effectiveStale
+                    ? "Live evidence is stale until native recovery completes and fresh capture arrives."
+                    : "Fresh accepted capture is available."
+            window.announceCaptureRecoveryState(message + " " + freshness)
+        }
         if (focusTarget) {
-            if (stale) {
+            if (effectiveStale) {
                 navigation.currentIndex = 1
                 window.show()
                 window.requestActivate()
@@ -2297,6 +2303,8 @@ ApplicationWindow {
             visualizationCanvas.forceActiveFocus()
     }
     function announceCaptureRecoveryState(message) {
+        if (window.overlayCaptureEvidenceStale && message.indexOf("native recovery completes") < 0)
+            message += " Live evidence is stale until native recovery completes and fresh capture arrives."
         if (window.overlayInvalidOpacityRecoveryPending && message.indexOf("90 percent opacity") < 0)
             message += " Invalid opacity was replaced with safe 90 percent opacity."
         window.overlayRecoveryAnnouncement = message
