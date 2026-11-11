@@ -115,6 +115,7 @@ TestCase {
         let toggle = findChild(app, "clickThrough")
         let unlock = findChild(app, "unlockOverlay")
         let hide = findChild(app, "hideOverlay")
+        console.log("SHOW_STATE", show.visible, show.enabled, app.overlayDisplaySelectionRequired, app.overlayBridge.screenIndex, app.overlayBridge.selectedScreen)
         tryVerify(() => show.visible && show.enabled)
         show.clicked(); compare(fakeOverlay.shows, 1); tryCompare(app, "visible", false)
         toggle.checked = true; toggle.clicked(); verify(fakeOverlay.clickThrough); verify(unlock.enabled)
