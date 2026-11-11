@@ -5555,6 +5555,28 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                 }
+                Label {
+                    objectName: "overlayRecoveryPausedStatus"
+                    visible: window.overlayRecoveryPausedByUser
+                    text: "Recovery paused · monitoring continues"
+                    Accessible.name: "Overlay recovery paused"
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "Native overlay recovery is paused by user choice; start another retry when ready."
+                    ToolTip.text: Accessible.description
+                    Layout.fillWidth: true
+                }
+                Label {
+                    objectName: "overlayRecoveryPausedDisplayStatus"
+                    visible: window.overlayRecoveryPausedByUser
+                    text: window.overlayBridge && window.overlayBridge.displayName !== ""
+                        ? "Paused recovery target: " + window.overlayBridge.displayName
+                        : "Paused recovery target unavailable; persisted display settings remain retained."
+                    Accessible.name: "Paused overlay recovery target"
+                    Accessible.role: Accessible.Status
+                    Accessible.description: "The selected display and retained geometry remain unchanged while overlay recovery is paused."
+                    ToolTip.text: Accessible.description
+                    Layout.fillWidth: true
+                }
                 Button { id: resumeOverlayRecoveryButton; objectName: "resumeOverlayRecoveryAction"; visible: window.overlayRecoveryPausedByUser; text: "Resume recovery"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Resume overlay recovery"; Accessible.role: Accessible.Button; Accessible.description: "Resume native overlay recovery with a new bounded attempt while keeping monitoring available; live evidence is stale until fresh capture arrives"; ToolTip.text: "Resume native overlay recovery; live evidence is stale until fresh capture"; onClicked: window.handleOverlayResumeRecoveryAction() }
                 QtObject { id: resumeOverlayRecovery; objectName: "resumeOverlayRecovery"; property bool focusRequested: false; readonly property bool activeFocus: focusRequested || resumeOverlayRecoveryButton.activeFocus; readonly property bool enabled: resumeOverlayRecoveryButton.enabled; readonly property string text: resumeOverlayRecoveryButton.text; function forceActiveFocus() { resumeOverlayRecoveryButton.forceActiveFocus(); focusRequested = true } function clicked() { return window.handleOverlayResumeRecoveryAction() } }
                 Label { objectName: "overlayRecoveryAttemptStatus"; visible: window.overlayRecoveryAttemptCount > 0; text: "Recovery attempts: " + window.overlayRecoveryAttemptCount + "/" + window.overlayRecoveryAttemptLimit; Accessible.name: "Overlay recovery attempt progress"; Accessible.role: Accessible.Status; Accessible.description: "Bounded native overlay recovery attempt progress"; ToolTip.text: Accessible.description; Layout.fillWidth: true }
