@@ -77,6 +77,7 @@ ApplicationWindow {
     property string themePreferenceAnnouncement: ""
     property string catalogDiagnostic: ""
     property url pendingAddFolder: ""
+    property string pendingRemoveFolder: ""
     property int addFolderScanProgress: 0
     property string addFolderState: "ready"
     readonly property bool libraryAnalysisResultReady: selectedName !== ""
@@ -5909,7 +5910,7 @@ ApplicationWindow {
                                     activeFocusOnTab: true
                                     Accessible.name: "Remove Library directory " + modelData
                                     Accessible.description: "Remove this directory from the Library scan list; source audio is not changed."
-                                    onClicked: { libraryPreferences.removeFolder(index); window.announceVisualizationRecovery("Library directory removed; remaining directories stay configured."); forceActiveFocus() }
+                                    onClicked: { window.pendingRemoveFolder = modelData; removeFolderDialog.open() }
                                 }
                             }
                         }
@@ -6019,6 +6020,14 @@ ApplicationWindow {
                             Accessible.description: text
                             ToolTip.text: "Audio capture permission and recovery guidance"
                         }
+                        Button {
+                            objectName: "openCapturePermissionRecovery"
+                            text: "Review capture access…"
+                            activeFocusOnTab: true
+                            Accessible.name: "Review audio capture access"
+                            Accessible.description: "Review permission guidance and retry capture without changing the selected output device."
+                            onClicked: capturePermissionDialog.open()
+                        }
                     }
                 }
                 GroupBox {
@@ -6093,6 +6102,42 @@ ApplicationWindow {
             }
         }
         onOpened: addFolderConfirm.forceActiveFocus()
+    }
+    Dialog {
+        id: removeFolderDialog
+        objectName: "removeFolderDialog"
+        title: "Remove Library directory?"
+        modal: true
+        width: Math.min(window.width - 48, 560)
+        contentItem: ColumnLayout {
+            spacing: 12
+            Label { objectName: "removeFolderPath"; text: window.pendingRemoveFolder; elide: Text.ElideMiddle; Layout.fillWidth: true; Accessible.name: "Directory to remove: " + text }
+            Label { text: "This removes the directory from Beatglass's scan list. Source audio and files are not changed."; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            RowLayout { Layout.fillWidth: true
+                Button { id: removeFolderConfirm; objectName: "removeFolderConfirm"; text: "Remove directory"; onClicked: { if (typeof libraryPreferences !== "undefined") libraryPreferences.removeFolder(window.pendingRemoveFolder); window.announceVisualizationRecovery("Library directory removed; remaining directories stay configured."); removeFolderDialog.close(); addLibraryDirectory.forceActiveFocus() } }
+                Button { id: removeFolderCancel; objectName: "removeFolderCancel"; text: "Cancel"; onClicked: { removeFolderDialog.close(); addLibraryDirectory.forceActiveFocus() } }
+            }
+        }
+        onOpened: removeFolderCancel.forceActiveFocus()
+        onRejected: { removeFolderDialog.close(); addLibraryDirectory.forceActiveFocus() }
+    }
+    Dialog {
+        id: capturePermissionDialog
+        objectName: "capturePermissionDialog"
+        title: "Capture access and recovery"
+        modal: true
+        width: Math.min(window.width - 48, 620)
+        contentItem: ColumnLayout {
+            spacing: 12
+            Label { objectName: "capturePermissionStatus"; text: window.endpointSelectionBridge && window.endpointSelectionBridge.status.indexOf("Error") >= 0 ? "Capture access or endpoint discovery needs attention." : "Capture access is required for live monitoring."; wrapMode: Text.WordWrap; Layout.fillWidth: true; Accessible.role: Accessible.Status }
+            Label { text: permissionGuidance.text; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            RowLayout { Layout.fillWidth: true
+                Button { id: capturePermissionRetry; objectName: "capturePermissionRetry"; text: "Retry capture"; onClicked: { if (window.endpointSelectionBridge) window.endpointSelectionBridge.refresh(); if (window.captureMonitorBridge && window.captureMonitorBridge.start) window.captureMonitorBridge.start(); capturePermissionDialog.close(); openOutputPicker.forceActiveFocus() } }
+                Button { id: capturePermissionCancel; objectName: "capturePermissionCancel"; text: "Cancel"; onClicked: { capturePermissionDialog.close(); openCapturePermissionRecovery.forceActiveFocus() } }
+            }
+        }
+        onOpened: capturePermissionCancel.forceActiveFocus()
+        onRejected: { capturePermissionDialog.close(); openCapturePermissionRecovery.forceActiveFocus() }
     }
     FolderDialog {
         id: folderPicker
