@@ -3,11 +3,13 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import Qt.labs.folderlistmodel
+import "qml" as BeatglassDesign
 
 ApplicationWindow {
     property alias unlockOverlay: clickThroughToggle
     property alias navigation: navigation
     id: window
+    readonly property var v2Tokens: BeatglassDesign.V2Tokens
     objectName: "mainWindow"
     visible: true
     width: 1000; height: 700
