@@ -112,6 +112,19 @@ int main(int argc, char** argv) {
     if (!popup_message.empty()) body.push_back(text(popup_message) | color(Color::YellowLight));
     return vbox({text(popup_title()) | bold | color(Color::Cyan), separator(), vbox(body), separator(), text("Escape always cancels this popup") | color(Color::GrayDark)}) | borderDouble | size(WIDTH, GREATER_THAN, 58) | center;
   });
+  auto palette_view = Renderer([&] {
+    if (navigation.modal() != beatglass::cli::Modal::command_palette) return text("");
+    Elements commands;
+    const auto visible = navigation.visible_commands();
+    for (std::size_t i = 0; i < visible.size(); ++i) {
+      auto row = text(visible[i].shortcut + "  " + visible[i].label);
+      if (static_cast<int>(i) == navigation.command_index()) row = row | color(Color::Cyan) | bold;
+      commands.push_back(row);
+    }
+    if (commands.empty()) commands.push_back(text("No matching commands.") | color(Color::GrayLight));
+    return vbox({text("COMMAND PALETTE") | bold | color(Color::Cyan), separator(), text("Type to filter; ↑↓ move; Enter run; Escape close") | color(Color::GrayLight), vbox(commands)})
+      | borderDouble | size(WIDTH, GREATER_THAN, 58) | center;
+  });
   auto root_component = CatchEvent(tabs, [&](Event event) {
     if (popup != Popup::none) {
       if (event == Event::Escape) { popup = Popup::none; popup_message.clear(); return true; }
@@ -139,8 +152,14 @@ int main(int argc, char** argv) {
       if (popup == Popup::folder && event.is_character()) { draft_folder += event.character(); return true; }
       return true;
     }
-    if (event == Event::Escape) { screen.Exit(); return true; }
     if (event == Event::Character("/")) { navigation.toggle_palette(); return true; }
+    if (navigation.modal() == beatglass::cli::Modal::command_palette) {
+      if (event == Event::Escape) { navigation.dismiss_modal(); return true; }
+      if (event == Event::ArrowDown) { navigation.move_command(1); return true; }
+      if (event == Event::ArrowUp) { navigation.move_command(-1); return true; }
+      return true;
+    }
+    if (event == Event::Escape) { screen.Exit(); return true; }
     if (event == Event::Character("q")) { screen.Exit(); return true; }
     if (event == Event::Character("f")) { popup = Popup::folder; draft_folder = root.string(); return true; }
     if (event == Event::Character("o")) { popup = Popup::output; return true; }
@@ -155,5 +174,5 @@ int main(int argc, char** argv) {
     if (event == Event::ArrowUp && tab == 0 && !tracks.empty()) { selected = std::max(selected - 1, 0); return true; }
     return false;
   });
-  screen.Loop(Renderer(root_component, [&] { return dbox({tabs->Render(), popup_view->Render()}); })); return 0;
+  screen.Loop(Renderer(root_component, [&] { return dbox({tabs->Render(), popup_view->Render(), palette_view->Render()}); })); return 0;
 }
