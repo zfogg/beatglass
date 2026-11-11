@@ -6,6 +6,14 @@
 #include <algorithm>
 #include <cctype>
 #include <system_error>
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#include <fcntl.h>
+#include <io.h>
+#endif
 namespace beatglass {
 namespace {
 bool unsupported_extension(const std::filesystem::path& path) {
@@ -32,7 +40,18 @@ struct FileReader::Impl {
   }
   Impl(const std::filesystem::path& path, std::uint64_t initial) : path(path), epoch(initial) {
 #ifdef _WIN32
-    handle = sf_wchar_open(path.c_str(), SFM_READ, &info);
+    // Open with delete-sharing so Library refresh/replacement can atomically
+    // swap a source while this reader retains the old file identity. The
+    // reader still verifies size and mtime before every operation, so sharing
+    // the rename does not weaken stale-file detection.
+    const auto native = CreateFileW(path.c_str(), GENERIC_READ,
+                                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                    nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (native != INVALID_HANDLE_VALUE) {
+      const auto descriptor = _open_osfhandle(reinterpret_cast<intptr_t>(native), _O_RDONLY | _O_BINARY);
+      if (descriptor >= 0) handle = sf_open_fd(descriptor, SFM_READ, &info, SF_TRUE);
+      else CloseHandle(native);
+    }
 #else
     handle = sf_open(path.c_str(), SFM_READ, &info);
 #endif
