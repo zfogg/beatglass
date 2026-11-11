@@ -135,6 +135,9 @@ if(BUILD_TESTING)
     add_test(NAME cli_navigation_model
       COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_cli_navigation_model.py)
     set_tests_properties(cli_navigation_model PROPERTIES LABELS unit TIMEOUT 10)
+    add_test(NAME library_folder_model_contract
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/unit/check_library_folder_model_contract.py)
+    set_tests_properties(library_folder_model_contract PROPERTIES LABELS unit TIMEOUT 10)
   endif()
 endif()
 option(BEATGLASS_ENABLE_PACKAGING "Enable CPack package metadata for release candidates" OFF)
