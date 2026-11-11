@@ -29,6 +29,8 @@ public:
   std::shared_ptr<const LoopbackLossToken> lossToken() const noexcept;
   /** Read lifecycle state on the control thread. */
   SourceState state() const;
+  /** Return the native HRESULT for the most recent failed or interrupted stream, or zero when unavailable. */
+  std::int32_t error_code() const;
 private:
   void invalidate();
   SourceEpochAllocator& epochs_;

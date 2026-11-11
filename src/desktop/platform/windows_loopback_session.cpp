@@ -74,4 +74,5 @@ void LoopbackSession::stop() {
 }
 std::shared_ptr<const LoopbackLossToken> LoopbackSession::lossToken() const noexcept { return backend_ ? backend_->lossToken() : nullptr; }
 SourceState LoopbackSession::state() const { return lifecycle_.state(); }
+std::int32_t LoopbackSession::error_code() const { return backend_ ? backend_->error_code() : 0; }
 }

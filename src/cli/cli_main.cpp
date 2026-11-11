@@ -1904,6 +1904,15 @@ int main(int argc, char** argv) {
 #ifdef _WIN32
       if (live_session && live_session->state() != beatglass::SourceState::stopped) {
         live_session->poll();
+        if (live_session->state() == beatglass::SourceState::error) {
+          std::ostringstream diagnostic;
+          diagnostic << "WASAPI loopback failed (HRESULT 0x" << std::hex << static_cast<std::uint32_t>(live_session->error_code()) << "). Refresh sinks and retry.";
+          clear_live_evidence();
+          live_tracking_state = beatglass::TrackingState::error;
+          set_live_presentation_state(beatglass::TrackingState::error);
+          live_status = diagnostic.str();
+          live_button_label = " Start monitoring ";
+        }
         beatglass::windows::LoopbackPacket packet;
         while (live_session->pop(packet)) {
           const auto layout = packet.channels == 1 ? beatglass::ChannelLayout::mono : packet.channels == 2 ? beatglass::ChannelLayout::stereo : beatglass::ChannelLayout::multichannel;
