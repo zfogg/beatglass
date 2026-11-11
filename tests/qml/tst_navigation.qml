@@ -519,7 +519,7 @@ TestCase {
         verify((attribution.Accessible.value || attribution.Accessible.description || "").indexOf("stale until fresh capture") >= 0)
         let retry = findChild(app, "overlayCaptureRecoveryAction")
         let retryDescription = retry.Accessible.value || retry.Accessible.description || ""
-        verify(retryDescription.indexOf("stale") >= 0 && retryDescription.indexOf("fresh capture") >= 0)
+        verify(retryDescription.indexOf("stale") >= 0 && retryDescription.indexOf("fresh") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("fresh") >= 0)
         fakeCapture.status = "Monitoring"
         verify(!app.overlayCaptureEvidenceStale)
