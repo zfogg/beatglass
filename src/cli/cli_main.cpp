@@ -27,11 +27,13 @@
 #include <mutex>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <utility>
 #include <vector>
 #endif
 
+#include <array>
 #include <cstdlib>
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -482,23 +484,29 @@ std::vector<float> decode_waveform(const std::filesystem::path& path, std::stop_
 Element waveform_chart(const std::vector<float>& waveform, const std::vector<std::uint64_t>& beat_frames, std::uint64_t total_frames, float playback_fraction = -1.0f) {
   constexpr int width = 72;
   // Keep the chart compact enough that Live retains all controls in a normal
-  // 36-row terminal snapshot; the outer TUI grows it only when space exists.
-  constexpr int height = 2;
+  // 36-row terminal snapshot, while making the signal legible without a
+  // graphical terminal. Beat markers and the playback cursor use independent
+  // rows so they never erase the amplitude shape.
+  static constexpr std::array<std::string_view, 9> levels = {" ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"};
   std::vector<int> points(static_cast<std::size_t>(width), 1);
   for (int x = 0; x < width; ++x) {
     const auto sample = waveform.empty() ? 0.08f : waveform[std::min<std::size_t>(waveform.size() - 1, static_cast<std::size_t>(x * waveform.size() / width))];
     // Square-root companding keeps quiet real-world PCM detail visible without changing analysis input.
-    points[static_cast<std::size_t>(x)] = std::clamp(static_cast<int>(std::sqrt(std::clamp(sample, 0.0f, 1.0f)) * height), 1, height);
+    points[static_cast<std::size_t>(x)] = std::clamp(static_cast<int>(std::sqrt(std::clamp(sample, 0.0f, 1.0f)) * 8.0f), 1, 8);
   }
-  const auto graph_view = graph([points = std::move(points)](int graph_width, int graph_height) {
-    std::vector<int> graph_points(static_cast<std::size_t>(std::max(1, graph_width)), 1);
-    for (int x = 0; x < graph_width; ++x) {
-      const auto source = std::min<std::size_t>(points.size() - 1, static_cast<std::size_t>(x * points.size() / std::max(1, graph_width)));
-      graph_points[static_cast<std::size_t>(x)] = std::clamp(points[source], 1, std::max(1, graph_height - 1));
-    }
-    return graph_points;
-  }) | color(Color::GreenLight) | bgcolor(Color::RGB(8, 28, 25)) | borderRounded | size(WIDTH, EQUAL, width) | size(HEIGHT, EQUAL, height);
-  return vbox({text("WAVEFORM") | bold | underlined | color(Color::GreenLight), graph_view,
+  Elements waveform_cells, marker_cells;
+  waveform_cells.reserve(width); marker_cells.reserve(width);
+  for (int x = 0; x < width; ++x) {
+    const auto point = points[static_cast<std::size_t>(x)];
+    waveform_cells.push_back(text(std::string(levels[static_cast<std::size_t>(point)])) | color(point > 5 ? Color::GreenLight : Color::Cyan) | bgcolor(Color::RGB(8, 28, 25)));
+    bool beat = false;
+    if (total_frames) for (const auto frame : beat_frames) if (static_cast<std::uint64_t>(x) * total_frames / width <= frame && frame < static_cast<std::uint64_t>(x + 1) * total_frames / width) { beat = true; break; }
+    const auto cursor = playback_fraction >= 0.0f && playback_fraction <= 1.0f && x == std::clamp(static_cast<int>(playback_fraction * width), 0, width - 1);
+    marker_cells.push_back(text(cursor ? "◆" : beat ? "│" : " ") | color(cursor ? Color::Cyan : Color::YellowLight) | bgcolor(Color::RGB(8, 28, 25)));
+  }
+  return vbox({text("WAVEFORM") | bold | underlined | color(Color::GreenLight),
+               hbox(std::move(waveform_cells)) | borderRounded,
+               hbox(std::move(marker_cells)),
                text("beats: " + std::to_string(beat_frames.size()) + "   playback: " + (playback_fraction >= 0.0f ? "^" : "—")) | color(Color::YellowLight) | italic}) | flex;
 }
 
@@ -1544,7 +1552,10 @@ int main(int argc, char** argv) {
     const auto library_seek = hbox({action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)});
     const auto directory_actions = hbox({text("Directory: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(add_folder_button->Render(), Color::GreenLight), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)});
     const auto summary_search = hbox({library_summary | flex, text("  "), search_bar->Render()});
-    const auto command_strip = vbox({library_navigation, hbox({library_recovery, text("  "), library_seek})});
+    // Keep the command area to one dense row.  The Library list and analysis
+    // pane are the primary content; controls should not consume several rows
+    // before either one is visible.
+    const auto command_strip = hbox({library_navigation, text("  "), library_recovery, text("  "), library_seek}) | frame;
     return vbox({text("LIBRARY") | bold | underlined | color(Color::Cyan), separator(), directory_actions, summary_search, command_strip, separator(), hbox({vbox(rows) | flex, separator(), detail | flex}) | flex, separator(), text("↑↓ / mouse select   Enter/analyze selected   Analyze all visible (a)   Sort title/path (s)   Refresh (r)   Add directory (o)   Tab switch tab   q quit") | color(Color::GrayDark) | italic}) | borderRounded | bgcolor(Color::RGB(10, 15, 22)) | flex;
   });
   std::string live_button_label = " Start monitoring ";
