@@ -21,6 +21,8 @@ public slots: void setFolder(const QString& folder);
   void clearFolder();
   Q_INVOKABLE QString addFolder(const QString& path, const QString& label = {});
   Q_INVOKABLE bool removeFolder(const QString& sourceId);
+  /** Move one configured root by one position and persist the new order. */
+  Q_INVOKABLE bool moveFolder(const QString& sourceId, int delta);
   Q_INVOKABLE bool setFolderLabel(const QString& sourceId, const QString& label);
   Q_INVOKABLE bool setFolderScanState(const QString& sourceId, const QString& state, const QString& error = {});
 signals: void folderChanged();

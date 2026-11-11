@@ -65,6 +65,12 @@ bool LibraryPreferences::removeFolder(const QString& id) {
   }
   return false;
 }
+bool LibraryPreferences::moveFolder(const QString& id, int delta) {
+  const int from = [&] { for (int i = 0; i < roots_.size(); ++i) if (roots_[i].toMap().value(QStringLiteral("sourceId")).toString() == id) return i; return -1; }();
+  const int to = from + delta;
+  if (from < 0 || delta == 0 || to < 0 || to >= roots_.size()) return false;
+  roots_.move(from, to); persist(); emit rootsChanged(); emit foldersChanged(); return true;
+}
 
 bool LibraryPreferences::setFolderLabel(const QString& id, const QString& label) { for (auto& value : roots_) if (value.toMap().value(QStringLiteral("sourceId")).toString() == id) { auto map = value.toMap(); map[QStringLiteral("label")] = label.trimmed(); value = map; persist(); emit rootsChanged(); return true; } return false; }
 bool LibraryPreferences::setFolderScanState(const QString& id, const QString& state, const QString& error) { for (auto& value : roots_) if (value.toMap().value(QStringLiteral("sourceId")).toString() == id) { auto map = value.toMap(); map[QStringLiteral("scanState")] = state; map[QStringLiteral("lastError")] = error; value = map; persist(); emit rootsChanged(); return true; } return false; }
