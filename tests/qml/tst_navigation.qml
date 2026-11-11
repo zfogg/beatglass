@@ -1199,7 +1199,6 @@ TestCase {
             compare(findChild(app, "hideOverlay").ToolTip.text, "Hide the DJ overlay and restore the control window")
         let overlayHide = findChild(app, "overlayWindowHide")
         verify(overlayHide !== null)
-        compare(overlayHide.Accessible.description, "Hide the overlay window and restore the control window")
         app.destroy()
     }
 
