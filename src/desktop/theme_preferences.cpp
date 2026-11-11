@@ -1,5 +1,6 @@
 #include "theme_preferences.hpp"
 #include <algorithm>
+#include <QColor>
 
 ThemePreferences::ThemePreferences(QObject* parent, std::unique_ptr<QSettings> settings)
     : QObject(parent), settings_(std::move(settings)) {
@@ -9,6 +10,9 @@ ThemePreferences::ThemePreferences(QObject* parent, std::unique_ptr<QSettings> s
   }
   setThemeIndex(settings_->value(QStringLiteral("desktop/themeIndex"), 0).toInt());
   setReduceMotion(settings_->value(QStringLiteral("desktop/reduceMotion"), false).toBool());
+  setLowColor(settings_->value(QStringLiteral("visualization/lowColor"), low_color_).toString());
+  setMidColor(settings_->value(QStringLiteral("visualization/midColor"), mid_color_).toString());
+  setHighColor(settings_->value(QStringLiteral("visualization/highColor"), high_color_).toString());
 }
 
 void ThemePreferences::setReduceMotion(bool value) {
@@ -26,6 +30,37 @@ void ThemePreferences::setThemeIndex(int index) {
   emit themeIndexChanged();
 }
 
+namespace {
+QString normalized_color(const QString& value, const QString& fallback) {
+  const QColor color(value);
+  return color.isValid() ? color.name(QColor::HexRgb) : fallback;
+}
+}
+
+void ThemePreferences::setLowColor(const QString& value) {
+  const QString color = normalized_color(value, low_color_);
+  if (low_color_ == color) return;
+  low_color_ = color;
+  if (settings_) settings_->setValue(QStringLiteral("visualization/lowColor"), low_color_);
+  emit visualizationColorsChanged();
+}
+
+void ThemePreferences::setMidColor(const QString& value) {
+  const QString color = normalized_color(value, mid_color_);
+  if (mid_color_ == color) return;
+  mid_color_ = color;
+  if (settings_) settings_->setValue(QStringLiteral("visualization/midColor"), mid_color_);
+  emit visualizationColorsChanged();
+}
+
+void ThemePreferences::setHighColor(const QString& value) {
+  const QString color = normalized_color(value, high_color_);
+  if (high_color_ == color) return;
+  high_color_ = color;
+  if (settings_) settings_->setValue(QStringLiteral("visualization/highColor"), high_color_);
+  emit visualizationColorsChanged();
+}
+
 void ThemePreferences::reset() {
   setThemeIndex(0);
   setReduceMotion(false);
@@ -34,6 +69,9 @@ void ThemePreferences::reset() {
   if (settings_) {
     settings_->setValue(QStringLiteral("desktop/themeIndex"), 0);
     settings_->setValue(QStringLiteral("desktop/reduceMotion"), false);
+    settings_->setValue(QStringLiteral("visualization/lowColor"), low_color_);
+    settings_->setValue(QStringLiteral("visualization/midColor"), mid_color_);
+    settings_->setValue(QStringLiteral("visualization/highColor"), high_color_);
     settings_->sync();
   }
 }

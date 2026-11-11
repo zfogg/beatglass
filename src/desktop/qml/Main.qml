@@ -805,6 +805,9 @@ ApplicationWindow {
     readonly property var themeBackgrounds: ["#f2f4ef", "#10151c", "#000000", "#251f3e", "#102c43", "#332a1b"]
     readonly property var themeForegrounds: ["#142c2c", "#f1f6f7", "#ffffff", "#f9f5ff", "#effaff", "#fff9e8"]
     readonly property var themeAccentColors: ["#126f60", "#8ee5cc", "#8cffe2", "#d4a8ff", "#75d9ff", "#ffd45e"]
+    readonly property string visualizationLowColor: themePreferencesBridge ? themePreferencesBridge.lowColor : "#38bdf8"
+    readonly property string visualizationMidColor: themePreferencesBridge ? themePreferencesBridge.midColor : "#a78bfa"
+    readonly property string visualizationHighColor: themePreferencesBridge ? themePreferencesBridge.highColor : "#f472b6"
     property int selectedThemeIndex: themePreferencesBridge ? themePreferencesBridge.themeIndex : 0
     function selectThemeIndex(index) {
         const nextIndex = Math.max(0, Math.min(window.themeNames.length - 1, index))
@@ -2753,6 +2756,36 @@ ApplicationWindow {
                     window.selectThemeIndex(currentIndex)
                 }
             }
+            Label {
+                text: "Visualization colors"
+                objectName: "visualizationColorsLabel"
+                Accessible.role: Accessible.Heading
+                Accessible.name: "Visualization colors"
+                Accessible.description: "Choose the low, mid, and high frequency colors used by waveform and FFT views."
+            }
+            Row {
+                id: visualizationColorControls
+                objectName: "visualizationColorControls"
+                spacing: 4
+                Button {
+                    id: lowColorButton; objectName: "lowVisualizationColor"; text: "Low"; activeFocusOnTab: true
+                    Accessible.name: "Low frequency visualization color"; ToolTip.text: "Choose the low-frequency color"
+                    background: Rectangle { color: window.visualizationLowColor; radius: 4; border.color: window.themeForegrounds[window.selectedThemeIndex]; border.width: 1 }
+                    onClicked: lowColorDialog.open()
+                }
+                Button {
+                    id: midColorButton; objectName: "midVisualizationColor"; text: "Mid"; activeFocusOnTab: true
+                    Accessible.name: "Mid frequency visualization color"; ToolTip.text: "Choose the mid-frequency color"
+                    background: Rectangle { color: window.visualizationMidColor; radius: 4; border.color: window.themeForegrounds[window.selectedThemeIndex]; border.width: 1 }
+                    onClicked: midColorDialog.open()
+                }
+                Button {
+                    id: highColorButton; objectName: "highVisualizationColor"; text: "High"; activeFocusOnTab: true
+                    Accessible.name: "High frequency visualization color"; ToolTip.text: "Choose the high-frequency color"
+                    background: Rectangle { color: window.visualizationHighColor; radius: 4; border.color: window.themeForegrounds[window.selectedThemeIndex]; border.width: 1 }
+                    onClicked: highColorDialog.open()
+                }
+            }
             Switch {
                 id: reduceMotion
                 objectName: "reduceMotion"
@@ -2900,6 +2933,9 @@ ApplicationWindow {
             }
         }
     }
+    ColorDialog { id: lowColorDialog; title: "Choose low-frequency visualization color"; selectedColor: window.visualizationLowColor; onAccepted: if (window.themePreferencesBridge) window.themePreferencesBridge.lowColor = selectedColor }
+    ColorDialog { id: midColorDialog; title: "Choose mid-frequency visualization color"; selectedColor: window.visualizationMidColor; onAccepted: if (window.themePreferencesBridge) window.themePreferencesBridge.midColor = selectedColor }
+    ColorDialog { id: highColorDialog; title: "Choose high-frequency visualization color"; selectedColor: window.visualizationHighColor; onAccepted: if (window.themePreferencesBridge) window.themePreferencesBridge.highColor = selectedColor }
     background: Rectangle { color: window.themeBackgrounds[window.selectedThemeIndex] }
     StackLayout {
         anchors.fill: parent
@@ -4209,6 +4245,11 @@ ApplicationWindow {
                         return peak
                     }
                     readonly property real spectrumPeakMagnitude: spectrumPeakIndex >= 0 ? Math.max(0, Number(renderedSpectrum[spectrumPeakIndex])) : 0
+                    function visualizationBandColor(ratio) {
+                        if (ratio < 1 / 3) return window.visualizationLowColor
+                        if (ratio < 2 / 3) return window.visualizationMidColor
+                        return window.visualizationHighColor
+                    }
                     readonly property string acceptedResultIdentity: window.acceptedAnalysisIdentity
                     readonly property bool reducedMotion: window.themePreferencesBridge !== null && window.themePreferencesBridge.reduceMotion
                     readonly property bool playbackSnapshotAligned: presentationReady
@@ -4313,22 +4354,23 @@ ApplicationWindow {
                         var wave = renderedWaveform
                         var spec = renderedSpectrum
                         if (viewMode === "waveform") {
-                            ctx.strokeStyle = window.themeAccentColors[window.selectedThemeIndex]; ctx.beginPath()
                             for (var i = 0; i < wave.length; ++i) {
                                 if (!wave[i] || wave[i].length < 2 || !isFinite(wave[i][0]) || !isFinite(wave[i][1]))
                                     continue
                                 var x = i * width / Math.max(1, wave.length - 1)
                                 var lo = Math.max(-1, Math.min(1, Number(wave[i][0])))
                                 var hi = Math.max(-1, Math.min(1, Number(wave[i][1])))
+                                ctx.strokeStyle = visualizationCanvas.visualizationBandColor(i / Math.max(1, wave.length - 1)); ctx.beginPath()
                                 ctx.moveTo(x, height * (0.5 - hi * 0.4)); ctx.lineTo(x, height * (0.5 - lo * 0.4))
+                                ctx.stroke()
                             }
-                            ctx.stroke()
                         } else {
-                            ctx.fillStyle = window.themeAccentColors[window.selectedThemeIndex]; var bar = width / Math.max(1, spec.length)
+                            var bar = width / Math.max(1, spec.length)
                             for (var k = 0; k < spec.length; ++k) {
                                 if (!isFinite(spec[k]))
                                     continue
                                 const magnitude = Math.max(0, spec[k])
+                                ctx.fillStyle = visualizationCanvas.visualizationBandColor(k / Math.max(1, spec.length - 1))
                                 ctx.fillRect(k * bar, height, Math.max(1, bar - 1), -Math.min(height * 0.45, magnitude * height * 2))
                             }
                             if (selectedSpectrumBin >= 0 && selectedSpectrumBin < spec.length) {
