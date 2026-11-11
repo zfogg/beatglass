@@ -1,4 +1,5 @@
 #include "beatglass/core/visualization.hpp"
+#include <kfr/dft.hpp>
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -31,33 +32,23 @@ std::optional<VisualizationFrame> VisualizationProcessor::process(std::uint64_t 
     samples_[count_++] = sample; ++next_frame_; high_next_ = next_frame_;
     if (count_ != n) continue;
     VisualizationFrame frame; frame.epoch = epoch_; frame.first_frame = window_start_; frame.end_frame = next_frame_; frame.sample_rate = rate;
-    std::array<std::complex<double>, n> fft{};
+    kfr::dft_plan_real<float> fft_plan(n, kfr::dft_pack_format::CCs);
+    kfr::univector<float, n> fft_input;
+    kfr::univector<kfr::complex<float>> fft_output(fft_plan.complex_size());
+    kfr::univector<kfr::u8> fft_scratch(fft_plan.temp_size);
     double sum = 0;
     for (unsigned i = 0; i < n; ++i) {
       const double w = 0.5 - 0.5 * std::cos(2 * std::numbers::pi * i / (n - 1));
-      sum += w; fft[i] = static_cast<double>(samples_[i]) * w;
+      sum += w; fft_input[i] = static_cast<float>(samples_[i] * w);
     }
     for (unsigned bucket = 0; bucket < frame.waveform_size; ++bucket) {
       auto begin = samples_.begin() + bucket * (n / frame.waveform_size);
       auto [lo, hi] = std::minmax_element(begin, begin + n / frame.waveform_size);
       frame.minimum[bucket] = *lo; frame.maximum[bucket] = *hi;
     }
-    for (unsigned i = 1, j = 0; i < n; ++i) {
-      unsigned bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit;
-      if (i < j) std::swap(fft[i], fft[j]);
-    }
-    for (unsigned len = 2; len <= n; len <<= 1) {
-      const auto step = std::polar(1.0, -2 * std::numbers::pi / len);
-      for (unsigned i = 0; i < n; i += len) {
-        std::complex<double> w{1, 0};
-        for (unsigned j = 0; j < len / 2; ++j) {
-          const auto a = fft[i+j], b = fft[i+j+len/2] * w;
-          fft[i+j] = a+b; fft[i+j+len/2] = a-b; w *= step;
-        }
-      }
-    }
+    fft_plan.execute(fft_output, fft_input, fft_scratch.data());
     for (unsigned k = 0; k < frame.spectrum_size; ++k)
-      frame.magnitude[k] = static_cast<float>(std::abs(fft[k]) * ((k == 0 || k == n/2) ? 1.0 : 2.0) / sum);
+      frame.magnitude[k] = std::abs(fft_output[k]) * static_cast<float>((k == 0 || k == n/2) ? 1.0 : 2.0) / static_cast<float>(sum);
     result = frame; count_ = 0;
   }
   return result;

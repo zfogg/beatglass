@@ -17,6 +17,10 @@
     },
     {
       "name": "sqlite3"
+    },
+    {
+      "name": "kfr",
+      "features": ["dft"]
     }
   ],
   "features": {

@@ -6,6 +6,7 @@
 - Do not average stereo blindly. The experimental slice selects the loudest channel per block and tests anti-phase input; switching artifacts and resampling remain open.
 - libsndfile is the decoder for the experimental file slice; the final distribution choice remains open. AAC/M4A, platform codec and licensing coverage remain unverified. aubio and Essentia licensing and buildability remain open; the local vcpkg catalog contains aubio but no Essentia port. Do not infer distribution compatibility from this observation.
 - PipeWire, Core Audio taps, WASAPI loopback, and compositor/window behavior require upstream/API, version and native verification. No platform support is claimed.
+- The visualization spectrum now uses KFR 6.3.1's DFT feature through vcpkg, replacing the in-house radix-2 transform. The worker keeps the Hann window and single-sided amplitude normalization; KFR's real DFT uses caller-owned scratch storage for each transform. KFR's vcpkg build may exceed MSVC's heap limit in multi-architecture builds and still needs qualification on each supported toolchain. KFR is GPLv2+/commercial, so distribution licensing remains an open release decision.
 
 ## Experimental file slice
 
