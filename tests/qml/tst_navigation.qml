@@ -1874,6 +1874,7 @@ TestCase {
         app.overlayPreferredDisplayName = "Projector"
         app.overlayPreferredSizeIndex = 2
         verify(!app.unlockOverlayAndRestoreFocus())
+        console.log("UNLOCK_STATE", findChild(app, "unlockOverlay").enabled, findChild(app, "unlockOverlay").visible, findChild(app, "unlockOverlay").activeFocus)
         verify(findChild(app, "unlockOverlay").activeFocus)
         compare(app.overlayPreferredDisplayName, "Projector")
         compare(app.overlayPreferredSizeIndex, 2)
