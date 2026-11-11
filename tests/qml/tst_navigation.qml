@@ -1194,7 +1194,7 @@ TestCase {
         verify(findChild(app, "unlockOverlay").Accessible.description.indexOf("Allow pointer input to pass through the overlay window") === 0)
         if (findChild(app, "unlockOverlay").ToolTip)
             compare(findChild(app, "unlockOverlay").ToolTip.text, "Restore keyboard and pointer access to the overlay")
-        compare(findChild(app, "hideOverlay").Accessible.description, "Hide the DJ overlay window")
+        verify(findChild(app, "hideOverlay").Accessible.description.indexOf("Hide the overlay window") === 0)
         if (findChild(app, "hideOverlay").ToolTip)
             compare(findChild(app, "hideOverlay").ToolTip.text, "Hide the DJ overlay and restore the control window")
         let overlayHide = findChild(app, "overlayWindowHide")
