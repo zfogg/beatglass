@@ -19,7 +19,7 @@ New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
 Start-Transcript -Path (Join-Path $OutputDirectory "qualification.log") -Force | Out-Null
 try {
   "Beatglass Windows qualification evidence"
-  Get-Date -AsUTC -Format o
+  (Get-Date).ToUniversalTime().ToString("o")
   git -C $repoRoot rev-parse HEAD
   "Repository: $repoRoot"
   "Output directory: $OutputDirectory"
@@ -27,7 +27,7 @@ try {
   "Architecture: $([Environment]::Is64BitOperatingSystem)"
   $topologyPath = Join-Path $OutputDirectory "display-topology.json"
   $topology = @{
-    captured_at = (Get-Date -AsUTC -Format o)
+    captured_at = (Get-Date).ToUniversalTime().ToString("o")
     monitors = @(Get-CimInstance Win32_DesktopMonitor | Select-Object Name, MonitorType, ScreenHeight, ScreenWidth, PNPDeviceID)
     adapters = @(Get-CimInstance Win32_VideoController | Select-Object Name, DriverVersion, VideoModeDescription)
   }
@@ -35,7 +35,7 @@ try {
   if ((Get-Item -LiteralPath $topologyPath).Length -eq 0) { throw "Display topology evidence is empty" }
   "Display topology evidence: $topologyPath"
   $audioInventoryPath = Join-Path $OutputDirectory "audio-endpoints.json"
-  $audioInventory = @{ captured_at = (Get-Date -AsUTC -Format o); endpoints = @(Get-CimInstance Win32_SoundDevice | Select-Object Name, Status, PNPDeviceID) }
+  $audioInventory = @{ captured_at = (Get-Date).ToUniversalTime().ToString("o"); endpoints = @(Get-CimInstance Win32_SoundDevice | Select-Object Name, Status, PNPDeviceID) }
   $audioInventory | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $audioInventoryPath -Encoding utf8
   if ((Get-Item -LiteralPath $audioInventoryPath).Length -eq 0) { throw "Audio endpoint inventory is empty" }
   "Audio endpoint inventory: $audioInventoryPath"
@@ -114,7 +114,15 @@ try {
   $manifestPath = Join-Path $OutputDirectory "qualification-artifacts.sha256"
   $hashLines = foreach ($path in $required) {
     $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $path
-    $relativePath = [IO.Path]::GetRelativePath($OutputDirectory, $path).Replace('\', '/')
+    # Windows PowerShell 5.1 does not expose [IO.Path]::GetRelativePath.
+    # All required artifacts are created under $OutputDirectory, so a
+    # normalized prefix removal is both compatible and fail-closed.
+    $outputPrefix = $OutputDirectory.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+    $absolutePath = [IO.Path]::GetFullPath($path)
+    if (-not $absolutePath.StartsWith($outputPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+      throw "Qualification artifact escaped output directory: $absolutePath"
+    }
+    $relativePath = $absolutePath.Substring($outputPrefix.Length).Replace('\', '/')
     "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), $relativePath
   }
   $hashLines | Set-Content -LiteralPath $manifestPath -Encoding utf8
