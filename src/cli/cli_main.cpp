@@ -1551,7 +1551,11 @@ int main(int argc, char** argv) {
       text(" "), action(play_button->Render(), Color::Cyan), text(" "), action(pause_button->Render(), Color::YellowLight), text(" "), action(stop_button->Render(), Color::RedLight), text(" "), action(cancel_analysis_button->Render(), Color::RedLight)});
     const auto library_seek = hbox({action(seek_back_button->Render(), Color::GrayLight), text(" "), action(seek_forward_button->Render(), Color::GrayLight)});
     const auto directory_actions = hbox({text("Directory: ") | italic, folder_input->Render() | flex, text(" "), action(choose_folder_button->Render(), Color::Cyan), text(" "), action(add_folder_button->Render(), Color::GreenLight), text(" "), action(open_folder_button->Render(), Color::Cyan), text(" "), recursive_checkbox->Render(), text(" "), action(sort_button->Render(), Color::YellowLight), text(" "), action(refresh_button->Render(), Color::GreenLight)});
-    const auto summary_search = hbox({library_summary | flex, text("  "), search_bar->Render()});
+    // Keep the search field visible at the contract/small-terminal width.
+    // The action buttons remain a single dense strip below this utility row;
+    // putting every control into one row clips the search input before the
+    // Library content can use the reclaimed space.
+    const auto summary_search = hbox({library_summary | flex, text("  "), search_bar->Render()}) | frame;
     // Keep the command area to one dense row.  The Library list and analysis
     // pane are the primary content; controls should not consume several rows
     // before either one is visible.
