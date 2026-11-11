@@ -51,6 +51,10 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
         for shortcut in ("[1] Library", "[2] Live", "[3] Settings"):
             assert shortcut in plain, (tab, shortcut, result.stdout)
         if tab == "library":
+            assert "Search: Search library" in plain
+            assert "Clear search" in plain
+            assert "Choose folder" in plain
+            assert "Open folder" in plain
             assert "Analyze all" in plain
             assert "Analyze selected" in plain
             assert "Analyze all visible" in plain
@@ -70,6 +74,8 @@ with tempfile.TemporaryDirectory(prefix="beatglass-cli-cache-") as config_dir:
             assert "Seek step (1–60 seconds): 17" in plain
             assert "Mode: beat_grid" in plain
             assert "Spinner animation paused" in plain
+            for mode in ("Waveform", "Spectrum", "Combined", "Beat grid", "Tonal history"):
+                assert mode in plain, (tab, mode, result.stdout)
 
     invalid = subprocess.run(
         [exe, "--snapshot", str(root), "not-a-tab"],
