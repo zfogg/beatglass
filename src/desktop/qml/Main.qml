@@ -1902,6 +1902,7 @@ ApplicationWindow {
                 const hiddenGeometrySummary = hiddenGeometry && hiddenGeometry.width > 0 && hiddenGeometry.height > 0
                     ? " at position " + hiddenGeometry.x + ", " + hiddenGeometry.y + ", size " + hiddenGeometry.width + " by " + hiddenGeometry.height + " pixels" : ""
                 window.focusOverlayRestoredState("DJ overlay display recovered" + hiddenGeometrySummary + "; it remains hidden by user request. Use Restore overlay when ready.", restoreOverlay)
+                console.log("DBG hidden", window.overlayRecoveryAnnouncement, hiddenGeometry.x, hiddenGeometry.y, hiddenGeometry.width, hiddenGeometry.height)
                 return true
             }
             if (!window.overlayBridge.showOverlay()) {
