@@ -274,6 +274,14 @@ CliPreferences load_preferences() {
       if (!folder.empty()) preferences.library_folders.push_back(std::move(folder));
       continue;
     }
+    if (key == "live_endpoint_id") {
+      fields >> std::quoted(preferences.live_endpoint_id);
+      continue;
+    }
+    if (key == "live_endpoint_name") {
+      fields >> std::quoted(preferences.live_endpoint_name);
+      continue;
+    }
     if (!(fields >> value)) continue;
     if (key == "reduce_motion") preferences.reduce_motion = value == "1";
     else if (key == "seek_step") {
@@ -282,8 +290,6 @@ CliPreferences load_preferences() {
     else if (key == "visual_mode" && (value == "waveform" || value == "spectrum" || value == "combined" || value == "beat_grid" || value == "tonal_history")) preferences.visual_mode = value;
     else if (key == "playback_device_id") { try { preferences.playback_device_id = std::stoi(value); } catch (...) {} }
     else if (key == "bpm_multiplier") { try { preferences.bpm_multiplier = std::clamp(std::stoi(value), -1, 1); } catch (...) {} }
-    else if (key == "live_endpoint_id") preferences.live_endpoint_id = value;
-    else if (key == "live_endpoint_name") preferences.live_endpoint_name = value;
   }
   return preferences;
 }
@@ -296,7 +302,7 @@ void save_preferences(const CliPreferences& preferences) {
   if (error) return;
   std::ofstream output(path, std::ios::trunc);
   if (output) {
-    output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << preferences.live_endpoint_id << "\nlive_endpoint_name " << preferences.live_endpoint_name << "\nlibrary_folder " << std::quoted(preferences.library_folder) << "\n";
+    output << "reduce_motion " << (preferences.reduce_motion ? 1 : 0) << "\nseek_step " << preferences.seek_step << "\nvisual_mode " << preferences.visual_mode << "\nplayback_device_id " << preferences.playback_device_id << "\nbpm_multiplier " << preferences.bpm_multiplier << "\nlive_endpoint_id " << std::quoted(preferences.live_endpoint_id) << "\nlive_endpoint_name " << std::quoted(preferences.live_endpoint_name) << "\nlibrary_folder " << std::quoted(preferences.library_folder) << "\n";
     for (const auto& folder : preferences.library_folders) output << "library_folder_entry " << std::quoted(folder) << "\n";
   }
 }
