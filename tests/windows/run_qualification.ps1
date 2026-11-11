@@ -77,7 +77,7 @@ try {
     $ctestRun = Join-Path $OutputDirectory "ctest-run.log"
     $testArgs = @("--test-dir", $buildDirectory, "-C", "Release", "--output-on-failure")
     if ($TuiOnly) {
-      $testArgs += @("-R", "issue4320_tui_contract|cli_generated_audio|cli_v1_codecs|cli_tui_snapshots")
+      $testArgs += @("-R", "issue4320_tui_contract|cli_generated_audio|cli_v1_codecs|cli_tui_snapshots|windows_endpoint_tests")
     }
     "ctest $($testArgs -join ' ')"
     & ctest @testArgs 2>&1 | Tee-Object -FilePath $ctestRun
@@ -98,7 +98,10 @@ try {
   }
 
   $required = if ($TuiOnly) {
-    @((Join-Path $buildDirectory "Release/beatglass-cli.exe"))
+    @(
+      (Join-Path $buildDirectory "Release/beatglass-cli.exe"),
+      (Join-Path $buildDirectory "Release/windows_endpoint_tests.exe")
+    )
   } else {
     @(
       (Join-Path $buildDirectory "Release/beatglass-desktop.exe"),
@@ -167,7 +170,7 @@ try {
   ) | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $overlayEvidencePath -Encoding utf8
   "Native overlay evidence template: $overlayEvidencePath"
   if ($TuiOnly) {
-    "UNRUN: native WASAPI routing, endpoint removal/recovery, and interactive TUI cases require a logged-in Windows session."
+    "UNRUN: endpoint removal/recovery and interactive TUI cases require a logged-in Windows session; the native endpoint discovery/start/stop suite is included above."
   } else {
     "UNRUN: native WASAPI routing, endpoint removal/recovery, overlay, DPI, and interactive UI cases require a logged-in Windows session."
   }
