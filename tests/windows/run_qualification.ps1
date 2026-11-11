@@ -82,6 +82,13 @@ try {
     "ctest $($testArgs -join ' ')"
     & ctest @testArgs 2>&1 | Tee-Object -FilePath $ctestRun
     if ($LASTEXITCODE -ne 0) { throw "CTest execution failed with exit code $LASTEXITCODE" }
+    if ($TuiOnly) {
+      $endpointTest = Join-Path $buildDirectory "Release/windows_endpoint_tests.exe"
+      $endpointLog = Join-Path $OutputDirectory "windows-endpoint-tests.log"
+      "Running native Windows endpoint test executable: $endpointTest"
+      & $endpointTest "Selected active render endpoint starts and stops loopback when available" 2>&1 | Tee-Object -FilePath $endpointLog
+      if ($LASTEXITCODE -ne 0) { throw "Native Windows endpoint test failed with exit code $LASTEXITCODE" }
+    }
   } else {
     "UNRUN: CTest execution (pass -RunTests to execute the discovered Windows tests)."
   }
