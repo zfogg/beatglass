@@ -2442,7 +2442,7 @@ ApplicationWindow {
     }
     Connections {
         target: window.liveBridge
-        function onStatusChanged() {
+        function onChanged() {
             if (window.liveBridge.status === "Stopped" || window.liveBridge.status === "Error"
                     || window.liveBridge.status === "Starting"
                     || window.liveBridge.status === "Reacquiring")
