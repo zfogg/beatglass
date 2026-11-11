@@ -4940,8 +4940,8 @@ ApplicationWindow {
                         enabled: window.overlayBridge !== null && !window.overlayDisplaySelectionRequired
                         Accessible.name: text
                         Accessible.role: Accessible.Button
-                        Accessible.description: "Show the DJ overlay and hide the control window after applying retained display settings."
-                        ToolTip.text: Accessible.description
+                        Accessible.description: "Show the DJ overlay window"
+                        ToolTip.text: "Show the DJ overlay and hide the control window"
                         onClicked: window.showOverlayAndHideControls()
                     }
                     Button {
