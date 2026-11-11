@@ -53,6 +53,32 @@ private slots:
     QCOMPARE(repaired.value(QStringLiteral("desktop/themeIndex")).toInt(), 0);
     QVERIFY(!repaired.value(QStringLiteral("desktop/reduceMotion")).toBool());
   }
+
+  void visualizationColorsPersistValidateAndReset() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("colors.ini"));
+    {
+      auto settings = std::make_unique<QSettings>(path, QSettings::IniFormat);
+      ThemePreferences prefs(nullptr, std::move(settings));
+      prefs.setLowColor(QStringLiteral("#112233"));
+      prefs.setMidColor(QStringLiteral("#ABCDEF"));
+      prefs.setHighColor(QStringLiteral("not-a-color"));
+      QCOMPARE(prefs.lowColor(), QStringLiteral("#112233"));
+      QCOMPARE(prefs.midColor(), QStringLiteral("#abcdef"));
+      QCOMPARE(prefs.highColor(), QStringLiteral("#f472b6"));
+    }
+    {
+      auto settings = std::make_unique<QSettings>(path, QSettings::IniFormat);
+      ThemePreferences prefs(nullptr, std::move(settings));
+      QCOMPARE(prefs.lowColor(), QStringLiteral("#112233"));
+      QCOMPARE(prefs.midColor(), QStringLiteral("#abcdef"));
+      prefs.reset();
+      QCOMPARE(prefs.lowColor(), QStringLiteral("#38bdf8"));
+      QCOMPARE(prefs.midColor(), QStringLiteral("#a78bfa"));
+      QCOMPARE(prefs.highColor(), QStringLiteral("#f472b6"));
+    }
+  }
 };
 
 QTEST_MAIN(ThemePreferencesTest)

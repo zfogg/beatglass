@@ -35,7 +35,7 @@ public:
   QString highColor() const { return high_color_; }
   /** Store a valid high-frequency visualization color as a CSS color. */
   void setHighColor(const QString& value);
-  /** Restore the portable presentation defaults and persist both values. */
+  /** Restore the theme, motion, and visualization-color defaults and persist all values. */
   Q_INVOKABLE void reset();
 signals:
   /** Emitted after a new clamped theme index is stored. */
