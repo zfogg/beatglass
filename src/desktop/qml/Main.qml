@@ -645,8 +645,10 @@ ApplicationWindow {
         window.raise()
         window.requestActivate()
         window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence is stale until fresh capture arrives." : "Retained settings remain available."))
-        if (target)
+        if (target) {
             target.forceActiveFocus()
+            Qt.callLater(function() { if (target) target.forceActiveFocus() })
+        }
         return target !== null && target !== undefined
     }
     function focusOverlayBridgeSettingsFailure(message, target) {
@@ -689,8 +691,10 @@ ApplicationWindow {
         window.raise()
         window.requestActivate()
         window.announceCaptureRecoveryState(message + " " + (window.overlayCaptureEvidenceStale ? "Live evidence remains stale until fresh capture." : "Interaction state is current."))
-        if (target)
+        if (target) {
             target.forceActiveFocus()
+            Qt.callLater(function() { if (target) target.forceActiveFocus() })
+        }
         return target !== null && target !== undefined
     }
     function focusOverlaySettingsRecoveryFailure(message, target) {

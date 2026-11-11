@@ -2385,7 +2385,6 @@ TestCase {
         app.overlayDisplayRecoveryPending = true
         fakeOverlay.screenNames = ["Laptop", "Projector"]
         verify(!app.unlockOverlayAndRestoreFocus())
-        console.log("UNLOCK_RECOVERY", app.overlayDisplayRecoveryPending, findChild(app, "unlockOverlay").activeFocus, app.navigation.currentIndex)
         verify(findChild(app, "unlockOverlay").activeFocus)
         verify(app.overlayDisplayRecoveryPending)
         compare(app.overlayPreferredDisplayName, "Projector")
