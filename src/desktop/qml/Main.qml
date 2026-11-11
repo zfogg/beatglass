@@ -2297,6 +2297,8 @@ ApplicationWindow {
             visualizationCanvas.forceActiveFocus()
     }
     function announceCaptureRecoveryState(message) {
+        if (window.overlayCaptureEvidenceStale && message.indexOf("native recovery completes") < 0)
+            message += " Live evidence is stale until native recovery completes and fresh capture arrives."
         if (window.overlayInvalidOpacityRecoveryPending && message.indexOf("90 percent opacity") < 0)
             message += " Invalid opacity was replaced with safe 90 percent opacity."
         window.overlayRecoveryAnnouncement = message
