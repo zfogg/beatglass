@@ -886,7 +886,6 @@ ApplicationWindow {
             }
         }
         function onAvailableChanged() {
-            console.log("DBG available changed", window.overlayBridge ? window.overlayBridge.available : null, window.overlayDisplayRecoveryPending)
             if (!window.overlayBridge)
                 return
             if (!window.overlayBridge.available) {
@@ -931,7 +930,6 @@ ApplicationWindow {
         }
     }
     Component.onCompleted: {
-        console.log("DBG completed availability", window.overlayBridge ? window.overlayBridge.available : null)
         if (overlayBridge && !overlayBridge.attach(djOverlay, window)) {
             window.focusOverlayAttachFailure("Native overlay attachment failed; control-window fallback remains active.")
         } else {
@@ -948,7 +946,6 @@ ApplicationWindow {
             window.overlayDisplaySelectionRequired = true
             window.overlayCaptureEvidenceStale = true
             window.focusOverlayAvailabilityRecovery("DJ overlay is unavailable; control-window fallback remains active until the display recovers.", retryOverlay)
-            console.log("DBG pending set", window.overlayDisplayRecoveryPending)
         }
         refreshCatalog()
         if (typeof libraryPreferences !== "undefined" && libraryPreferences.folder !== "") {

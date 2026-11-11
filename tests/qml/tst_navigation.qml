@@ -243,7 +243,7 @@ TestCase {
         let app = shellWithOverlay.createObject(null)
         fakeOverlay.geometry = ({ x: 640, y: 120, width: 620, height: NaN })
         verify(!app.announceOverlayGeometryState())
-        verify(app.overlayDisplayRecoveryPending)
+        tryVerify(() => app.overlayDisplayRecoveryPending)
         verify(app.overlayDisplaySelectionRequired)
         verify(app.overlayRecoveryAnnouncement.indexOf("geometry changed") >= 0)
         app.destroy()
@@ -1684,7 +1684,7 @@ TestCase {
         verify(app.overlayDisplayRecoveryPending)
         fakeOverlay.available = true
         tryCompare(app, "visible", true)
-        verify(findChild(app, "overlaySettingsRetentionReviewAction").activeFocus)
+        tryVerify(() => findChild(app, "overlaySettingsRetentionReviewAction").activeFocus)
         verify(app.overlayRecoveryAnnouncement.indexOf("Show, Restore, and Reapply") >= 0)
         app.destroy()
     }
