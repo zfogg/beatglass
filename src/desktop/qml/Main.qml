@@ -2552,7 +2552,7 @@ ApplicationWindow {
                 window.syncOverlaySettingsStateFromBridge()
                 if (window.overlayBridge.screenNames.length === 0) {
                     window.focusOverlayNoDisplayRecovery()
-                } else if (window.overlayDisplaySelectionRequired) {
+                } else if (window.overlayDisplaySelectionRequired && !window.restoreOverlayDisplaySelectionFromBridge()) {
                     window.focusOverlayAvailabilityRecovery("DJ overlay recovered; choose a display to re-enable overlay actions.", overlayDisplay)
                 } else {
                     window.overlayDisplayRecoveryPending = false
