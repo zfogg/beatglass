@@ -1,4 +1,5 @@
 #include "beatglass/core/file_analysis.hpp"
+#include "beatglass/cli/navigation.hpp"
 #include "state_label.hpp"
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -15,6 +16,7 @@
 namespace {
 using namespace ftxui;
 struct Track { std::filesystem::path path; std::string title; };
+enum class Popup { none, folder, output, colors, settings, permissions, recovery, confirm_remove };
 std::string format_bpm(const std::optional<float>& bpm) {
   if (!bpm) return "—";
   std::ostringstream out; out << std::fixed << std::setprecision(1) << *bpm; return out.str();
@@ -37,10 +39,27 @@ std::vector<Track> discover(const std::filesystem::path& root) {
 int main(int argc, char** argv) {
   using namespace ftxui;
   const std::filesystem::path root = argc > 1 ? argv[1] : std::filesystem::current_path();
+  beatglass::cli::NavigationModel navigation;
   auto tracks = discover(root);
   int tab = 0, selected = tracks.empty() ? -1 : 0;
   std::string status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   std::optional<beatglass::TempoResult> result; bool busy = false;
+  Popup popup = Popup::none;
+  std::string popup_message;
+  std::string draft_folder = root.string();
+  auto popup_title = [&] {
+    switch (popup) {
+      case Popup::folder: return std::string("ADD LIBRARY FOLDER");
+      case Popup::output: return std::string("OUTPUT DEVICE");
+      case Popup::colors: return std::string("COLORS");
+      case Popup::settings: return std::string("SETTINGS");
+      case Popup::permissions: return std::string("PERMISSIONS");
+      case Popup::recovery: return std::string("DEVICE RECOVERY");
+      case Popup::confirm_remove: return std::string("REMOVE LIBRARY FOLDER?");
+      case Popup::none: return std::string();
+    }
+    return std::string();
+  };
   auto analyze = [&] {
     if (selected < 0 || selected >= static_cast<int>(tracks.size()) || busy) return;
     busy = true; status = "Analyzing " + tracks[selected].title + "…";
@@ -65,12 +84,62 @@ int main(int argc, char** argv) {
   auto now_playing = Renderer([&] { return vbox({text("NOW PLAYING") | bold | color(Color::Cyan), separator(), text(result && selected >= 0 ? tracks[selected].title : "Nothing loaded") | bold, text("Playback controls are staged for the next slice."), separator(), hbox({text("  ◀  ") | borderRounded, text("  ▶  ") | borderRounded, text("  ■  ") | borderRounded}) | center, filler(), text("Tab switch view   q quit") | color(Color::GrayDark)}) | borderRounded | flex; });
   auto tabs = Container::Tab({library, analysis, now_playing}, &tab);
   auto screen = ScreenInteractive::TerminalOutput();
+  auto popup_view = Renderer([&] {
+    if (popup == Popup::none) return text("");
+    Elements body;
+    if (popup == Popup::folder) {
+      body = {text("Enter a folder path, then press Enter to open it."), text(draft_folder) | border, text("Enter open   Escape cancel") | color(Color::GrayLight)};
+    } else if (popup == Popup::output) {
+      body = {text("No output device is currently selected."), text("Refresh devices or choose an available system output."), text("Enter refresh   Escape cancel") | color(Color::GrayLight)};
+    } else if (popup == Popup::colors) {
+      body = {text("Theme: Default"), text("Accent: Cyan"), text("Enter apply   Escape cancel") | color(Color::GrayLight)};
+    } else if (popup == Popup::settings) {
+      body = {text("Analysis: real file analyzer"), text("Reduce motion: off"), text("Audio files are never modified."), text("Enter save   Escape cancel") | color(Color::GrayLight)};
+    } else if (popup == Popup::permissions) {
+      body = {text("Permissions are requested only by the selected platform backend."), text("No permission request is pending."), text("Escape close") | color(Color::GrayLight)};
+    } else if (popup == Popup::recovery) {
+      body = {text("The selected output device is unavailable."), text("Reconnect it or choose another output, then retry."), text("Enter retry   Escape cancel") | color(Color::GrayLight)};
+    } else {
+      body = {text("This removes the folder from the library only."), text("User audio files will not be deleted."), text("Enter remove   Escape cancel") | color(Color::YellowLight)};
+    }
+    if (!popup_message.empty()) body.push_back(text(popup_message) | color(Color::YellowLight));
+    return vbox({text(popup_title()) | bold | color(Color::Cyan), separator(), vbox(body), separator(), text("Escape always cancels this popup") | color(Color::GrayDark)}) | borderDouble | size(WIDTH, GREATER_THAN, 58) | center;
+  });
   auto root_component = CatchEvent(tabs, [&](Event event) {
-    if (event == Event::Character("q") || event == Event::Escape) { screen.Exit(); return true; }
+    if (popup != Popup::none) {
+      if (event == Event::Escape) { popup = Popup::none; popup_message.clear(); return true; }
+      if (event == Event::Return) {
+        if (popup == Popup::folder) {
+          const std::filesystem::path chosen(draft_folder);
+          if (!std::filesystem::is_directory(chosen)) { popup_message = "Folder is unavailable; choose an existing directory."; return true; }
+          popup = Popup::none; popup_message.clear();
+        } else if (popup == Popup::confirm_remove) {
+          popup = Popup::none; popup_message.clear();
+        } else if (popup == Popup::recovery) {
+          popup_message = "Retry requested; reconnect the device if it remains unavailable.";
+        } else {
+          popup = Popup::none; popup_message.clear();
+        }
+        return true;
+      }
+      if (popup == Popup::folder && event.is_character()) { draft_folder += event.character(); return true; }
+      return true;
+    }
+    if (event == Event::Escape) { screen.Exit(); return true; }
+    if (event == Event::Character("/")) { navigation.toggle_palette(); return true; }
+    if (event == Event::Character("q")) { screen.Exit(); return true; }
+    if (event == Event::Character("f")) { popup = Popup::folder; draft_folder = root.string(); return true; }
+    if (event == Event::Character("o")) { popup = Popup::output; return true; }
+    if (event == Event::Character("c")) { popup = Popup::colors; return true; }
+    if (event == Event::Character("s")) { popup = Popup::settings; return true; }
+    if (event == Event::Character("p")) { popup = Popup::permissions; return true; }
+    if (event == Event::Character("r")) { popup = Popup::recovery; return true; }
+    if (event == Event::Character("d")) { popup = Popup::confirm_remove; return true; }
+    if (event == Event::Tab) { tab = (tab + 1) % 3; navigation.select(static_cast<beatglass::cli::Pane>(tab)); return true; }
     if (event == Event::Return && tab == 0) { analyze(); return true; }
     if (event == Event::ArrowDown && tab == 0 && !tracks.empty()) { selected = std::min(selected + 1, static_cast<int>(tracks.size()) - 1); return true; }
     if (event == Event::ArrowUp && tab == 0 && !tracks.empty()) { selected = std::max(selected - 1, 0); return true; }
     return false;
   });
-  screen.Loop(root_component); return 0;
+  screen.Loop(Renderer(root_component, [&] { return dbox({tabs->Render(), popup_view->Render()}); })); return 0;
 }
