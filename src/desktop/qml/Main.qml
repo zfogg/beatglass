@@ -632,6 +632,7 @@ ApplicationWindow {
             window.announceCaptureRecoveryState(message + " " + (stale ? "Live evidence is stale until fresh capture arrives." : "Fresh accepted capture is available."))
         if (focusTarget) {
             if (stale) {
+                navigation.currentIndex = 1
                 window.show()
                 window.requestActivate()
             }
@@ -2573,6 +2574,7 @@ ApplicationWindow {
                         window.focusOverlayAvailabilityRecovery("DJ overlay display restored; recovery remains paused until Resume recovery is chosen.", resumeOverlayRecovery)
                     }
                     if (!window.overlayRecoveryPausedByUser) {
+                        navigation.currentIndex = 1
                         if (window.overlayBridge.clickThrough) {
                             clickThroughToggle.forceActiveFocus()
                             clickThroughCompatibility.forceActiveFocus()
