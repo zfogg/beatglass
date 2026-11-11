@@ -893,7 +893,8 @@ ApplicationWindow {
                 if (window.overlayWasVisibleBeforeAvailabilityLoss || djOverlay.visible) {
                     if (window.overlayBridge.hideOverlay)
                         window.overlayBridge.hideOverlay()
-                    window.hideOverlayAndRestoreControls()
+                    window.overlayHiddenByUser = false
+                    window.show()
                     window.overlayHiddenByUser = false
                     window.overlayDisplayRecoveryPending = true
                     window.overlayDisplaySelectionRequired = true
