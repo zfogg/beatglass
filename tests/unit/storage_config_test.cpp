@@ -1,3 +1,4 @@
+#include <fstream>
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/storage_config.hpp"
 #include "beatglass/library/storage_owner.hpp"
