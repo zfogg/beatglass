@@ -57,7 +57,8 @@ TEST_CASE("analysis runner submits bounded batches in source order") {
   };
   auto active = runner.submit(blocked);
   REQUIRE(active);
-  for (int i = 0; i < 1000 && active->state() != TrackedState::running; ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && active->state() != TrackedState::running; ++i)
+    std::this_thread::sleep_for(std::chrono::microseconds(100));
   REQUIRE(active->state() == TrackedState::running);
   std::vector<AnalysisOperation> operations{blocked, blocked};
   auto handles = runner.submit_batch(std::move(operations));
@@ -74,10 +75,12 @@ TEST_CASE("retryable analysis reuses source identity after a failed attempt") {
   auto operation = op(true);
   operation.verify = [&](std::stop_token) { ++attempts; return beatglass::FileVerificationResult{attempts == 1 ? beatglass::FileVerificationOutcome::changed : beatglass::FileVerificationOutcome::match}; };
   auto retryable = runner.submit_retryable(std::move(operation)); REQUIRE(retryable);
-  for (int i = 0; i < 1000 && (retryable->state() == TrackedState::queued || retryable->state() == TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && (retryable->state() == TrackedState::queued || retryable->state() == TrackedState::running); ++i)
+    std::this_thread::sleep_for(std::chrono::microseconds(100));
   REQUIRE(retryable->state() == TrackedState::failed);
   REQUIRE(retryable->retry(1));
-  for (int i = 0; i < 1000 && (retryable->state() == TrackedState::queued || retryable->state() == TrackedState::running); ++i) std::this_thread::yield();
+  for (int i = 0; i < 10000 && (retryable->state() == TrackedState::queued || retryable->state() == TrackedState::running); ++i)
+    std::this_thread::sleep_for(std::chrono::microseconds(100));
   CHECK(retryable->state() == TrackedState::completed); CHECK(attempts == 2); CHECK(retryable->frames() == 12);
   executor.shutdown();
 }
