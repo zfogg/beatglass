@@ -106,6 +106,33 @@ TestCase {
     Component { id: shellWithOverlayWithoutCapture; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay } }
     Component { id: shellWithOverlayPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; overlayBridge: fakeOverlay; captureMonitorBridge: fakeCapture; themePreferencesBridge: fakeThemePreferences } }
     Component { id: shellWithPreferences; Main { visible: true; metadataBridge: fakeMetadata; liveBridge: fakeLive; themePreferencesBridge: fakeThemePreferences } }
+    function test_v2ShellBreakpointsAndEntryPoints() {
+        let app = shell.createObject(null)
+        verify(app !== null)
+        compare(app.v2LayoutMode, "wide")
+        verify(app.librarySplitView)
+        compare(findChild(app, "navigation").shellStyle, "v2-rail")
+        verify(findChild(app, "djTab").Accessible.description.indexOf("Live workspace entry") >= 0)
+        app.width = 820
+        tryCompare(app, "v2LayoutMode", "narrow")
+        verify(!app.librarySplitView)
+        app.width = 700
+        tryCompare(app, "v2LayoutMode", "compact")
+        compare(app.v2RailWidth, 56)
+        app.destroy()
+    }
+
+    function test_v2ResizePreservesPageAndSelection() {
+        let app = shell.createObject(null)
+        let nav = findChild(app, "navigation")
+        nav.currentIndex = 1
+        app.selectedName = "Resize-safe source"
+        app.selectedAudioUrl = Qt.resolvedUrl("fixtures/resize-safe.wav")
+        app.width = 700
+        compare(nav.currentIndex, 1)
+        compare(app.selectedName, "Resize-safe source")
+        app.destroy()
+    }
     function test_overlayControlsUseBridge() {
         fakeOverlay.attaches = 0; fakeOverlay.shows = 0; fakeOverlay.hides = 0; fakeOverlay.clickThrough = false; fakeOverlay.refuseClickThrough = false; fakeOverlay.selectedScreen = 0; fakeOverlay.screenIndex = 0; fakeOverlay.displayName = "Display"; fakeOverlay.requestedWidth = 0
         let app = shellWithOverlay.createObject(null)
