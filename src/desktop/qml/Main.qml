@@ -4865,10 +4865,18 @@ ApplicationWindow {
                     ToolTip.text: "DJ monitoring state, estimates, and evidence quality"
                     Label {
                         objectName: "djStatus"; text: "Status: " + window.liveBridge.status
+                        Accessible.name: "DJ monitoring status"
+                        Accessible.role: Accessible.Status
+                        Accessible.description: text
+                        ToolTip.text: "Current DJ monitoring status"
                     }
                     Label {
                         objectName: "djEstimates"
                         text: "BPM: " + window.liveBridge.tempo + "    Key: " + window.liveBridge.key + "    Chord: " + window.liveBridge.chord
+                        Accessible.name: "DJ estimates"
+                        Accessible.role: Accessible.Status
+                        Accessible.description: text
+                        ToolTip.text: "Current BPM, key, and chord estimates"
                     }
                     Label {
                      objectName: "djEvidenceStatus"
@@ -4880,11 +4888,23 @@ ApplicationWindow {
                          if (state === "Error") return "Output capture error; live evidence is unavailable. Check the selected endpoint and retry monitoring."
                          return "Live evidence is unavailable until output monitoring starts."
                      }
-                     Accessible.name: "DJ evidence status: " + text
+                     Accessible.name: "DJ evidence status"
                      Accessible.role: Accessible.StaticText
                      Accessible.description: text
                      ToolTip.text: "Live evidence quality and recovery status"
                      wrapMode: Text.WordWrap; Layout.fillWidth: true
+                    }
+                    Label {
+                        objectName: "monitoringGuidance"
+                        text: window.liveBridge.status === "Tracking"
+                            ? "Monitoring is active; estimates update from the selected output mix."
+                            : "Start monitoring the selected output to receive live BPM, key, and chord estimates."
+                        Accessible.name: "Monitoring guidance"
+                        Accessible.role: Accessible.StaticText
+                        Accessible.description: text
+                        ToolTip.text: "Monitoring guidance and next action"
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
                     }
                 }
                 RowLayout {
