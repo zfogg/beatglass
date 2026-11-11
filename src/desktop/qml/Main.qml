@@ -1721,7 +1721,7 @@ ApplicationWindow {
         window.overlayRecoveryPausedByUser = false
         window.announceCaptureRecoveryState("DJ overlay retry requested (attempt " + window.overlayRecoveryAttemptCount + "); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
         const retried = window.showOverlayAndHideControls()
-        overlayDisplayStatus.forceActiveFocus()
+        overlayDisplay.forceActiveFocus()
         return retried
     }
     function handleOverlayShowButtonAction() {
@@ -1784,15 +1784,11 @@ ApplicationWindow {
             window.focusOverlayRecoveryPauseState("Overlay recovery is no longer paused; no resume request was sent.", retryOverlay)
             return false
         }
-        if (window.overlayDisplaySelectionRequired || !window.overlayBridge || !window.overlayBridge.available || window.overlayBridge.screenNames.length === 0) {
-            window.focusOverlayDisplayRecoveryFailure("Overlay recovery cannot resume until the native overlay and a destination display are ready.", overlayDisplay)
-            return false
-        }
         window.overlayRecoveryPausedByUser = false
         window.overlayRecoveryAttemptCount = 1
         window.announceCaptureRecoveryState("DJ overlay recovery resumed (attempt 1); control window remains visible until the overlay is restored. Live evidence remains stale until fresh capture arrives.")
         const resumed = window.showOverlayAndHideControls()
-        overlayDisplayStatus.forceActiveFocus()
+        overlayDisplay.forceActiveFocus()
         return resumed
     }
     function handleOverlayClearSafeModeShortcut() {
@@ -5556,7 +5552,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                 }
                 Button { id: resumeOverlayRecoveryButton; objectName: "resumeOverlayRecoveryAction"; visible: window.overlayRecoveryPausedByUser; text: "Resume recovery"; activeFocusOnTab: true; enabled: window.overlayBridge && window.overlayBridge.screenNames.length > 0 && !window.overlayDisplaySelectionRequired; Accessible.name: "Resume overlay recovery"; Accessible.role: Accessible.Button; Accessible.description: "Resume native overlay recovery with a new bounded attempt while keeping monitoring available; live evidence is stale until fresh capture arrives"; ToolTip.text: "Resume native overlay recovery; live evidence is stale until fresh capture"; onClicked: window.handleOverlayResumeRecoveryAction() }
-                QtObject { id: resumeOverlayRecovery; objectName: "resumeOverlayRecovery"; property bool focusRequested: false; readonly property bool activeFocus: focusRequested || resumeOverlayRecoveryButton.activeFocus; readonly property bool enabled: resumeOverlayRecoveryButton.enabled; readonly property string text: resumeOverlayRecoveryButton.text; function forceActiveFocus() { resumeOverlayRecoveryButton.forceActiveFocus(); focusRequested = true } function clicked() { return window.handleOverlayResumeRecoveryAction() } }
+                QtObject { id: resumeOverlayRecovery; objectName: "resumeOverlayRecovery"; property bool focusRequested: false; readonly property bool visible: resumeOverlayRecoveryButton.visible; readonly property bool activeFocus: focusRequested || resumeOverlayRecoveryButton.activeFocus; readonly property bool enabled: resumeOverlayRecoveryButton.enabled; readonly property string text: resumeOverlayRecoveryButton.text; function forceActiveFocus() { resumeOverlayRecoveryButton.forceActiveFocus(); focusRequested = true } function clicked() { return window.handleOverlayResumeRecoveryAction() } }
                 Label { objectName: "overlayRecoveryAttemptStatus"; visible: window.overlayRecoveryAttemptCount > 0; text: "Recovery attempts: " + window.overlayRecoveryAttemptCount + "/" + window.overlayRecoveryAttemptLimit; Accessible.name: "Overlay recovery attempt progress"; Accessible.role: Accessible.Status; Accessible.description: "Bounded native overlay recovery attempt progress"; ToolTip.text: Accessible.description; Layout.fillWidth: true }
                 Button { id: stopOverlayRecovery; visible: window.overlayRecoveryAttemptCount > 0 && window.overlayRecoveryAttemptCount < window.overlayRecoveryAttemptLimit; text: "Stop recovery"; objectName: "stopOverlayRecovery"; activeFocusOnTab: true; enabled: true; Accessible.name: "Stop overlay recovery"; Accessible.role: Accessible.Button; Accessible.description: "Pause native overlay recovery attempts while keeping monitoring available; live overlay evidence remains stale until recovery succeeds"; ToolTip.text: "Stop retrying and keep monitoring; overlay evidence remains stale"; onClicked: window.handleOverlayStopRecoveryAction() }
                 Button { id: clearOverlaySafeMode; visible: window.overlayRecoveryAttemptCount >= window.overlayRecoveryAttemptLimit; text: "Clear safe mode"; objectName: "clearOverlaySafeMode"; activeFocusOnTab: true; enabled: true; Accessible.name: "Clear overlay safe mode"; Accessible.role: Accessible.Button; Accessible.description: "Clear the native overlay retry limit and make Retry overlay available again"; ToolTip.text: "Clear safe mode and allow another overlay retry"; onClicked: window.handleOverlayClearSafeModeAction() }
