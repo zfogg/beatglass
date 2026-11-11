@@ -1888,8 +1888,10 @@ int main(int argc, char** argv) {
     else settings_render = settings_render | color(Color::GrayLight);
     return hbox({library_render, text(" "), live_render, text(" "), settings_render}) | center;
   });
+  std::atomic_bool compact_layout{false};
   auto body = Renderer(Container::Vertical(Components{tab_bar, tabs}), [&]() -> Element {
     const auto compact = !snapshot && (screen.dimx() < 100 || screen.dimy() < 28);
+    compact_layout.store(compact, std::memory_order_release);
     if (compact) {
       return vbox({tab_bar->Render(), separator(), filler(),
                    text("Beatglass CLI needs more room") | bold | underlined | color(Color::YellowLight) | center,
@@ -2210,7 +2212,16 @@ int main(int argc, char** argv) {
     return 0;
   }
   std::atomic_bool running{true};
-  std::thread ticker([&] { while (running.load()) { std::this_thread::sleep_for(std::chrono::milliseconds(100)); screen.PostEvent(Event::Custom); } });
+  std::thread ticker([&] {
+    while (running.load()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      // The compact warning is static until a resize event arrives. Avoid
+      // repainting it ten times per second, which floods narrow PTYs and can
+      // make the warning look broken. Once the layout fits, Custom events
+      // resume for live capture, playback, progress and spinner updates.
+      if (!compact_layout.load(std::memory_order_acquire)) screen.PostEvent(Event::Custom);
+    }
+  });
   screen.Loop(root_component);
   running.store(false);
   ticker.join();
