@@ -3022,6 +3022,35 @@ ApplicationWindow {
             }
         }
     }
+    Dialog {
+        id: outputPickerDialog
+        objectName: "outputPickerDialog"
+        title: "Choose output device"
+        modal: true
+        standardButtons: Dialog.Cancel
+        width: Math.min(window.width - 48, 620)
+        onOpened: { outputPickerSearch.forceActiveFocus(); if (window.endpointSelectionBridge) window.endpointSelectionBridge.refresh() }
+        contentItem: ColumnLayout {
+            spacing: 8
+            TextField { id: outputPickerSearch; objectName: "outputPickerSearch"; placeholderText: "Search output devices"; activeFocusOnTab: true; Layout.fillWidth: true; Accessible.name: "Search output devices"; Accessible.description: "Filter enumerated output devices by name." }
+            Label { objectName: "outputPickerState"; text: !window.endpointSelectionBridge ? "Output discovery unavailable." : window.endpointSelectionBridge.error !== "" ? "Permission or discovery error: " + window.endpointSelectionBridge.error : window.endpointSelectionBridge.endpoints.length === 0 ? "No output devices available. Check permissions, then refresh." : "Select an output device for monitor-only capture."; Accessible.name: "Output picker state"; Accessible.role: Accessible.Status; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+            ListView {
+                id: outputPickerList; objectName: "outputPickerList"; Layout.fillWidth: true; Layout.preferredHeight: 220; clip: true
+                model: window.endpointSelectionBridge ? window.endpointSelectionBridge.endpoints : []
+                delegate: ItemDelegate {
+                    width: outputPickerList.width
+                    visible: outputPickerSearch.text === "" || String(modelData.name).toLowerCase().indexOf(outputPickerSearch.text.toLowerCase()) >= 0
+                    height: visible ? implicitHeight : 0
+                    text: String(modelData.name) + (modelData.default ? " · default" : "") + (window.endpointSelectionBridge && window.endpointSelectionBridge.selectedEndpoint === modelData.id ? " · selected" : "")
+                    activeFocusOnTab: visible
+                    Accessible.name: text
+                    onClicked: { const accepted = window.endpointSelectionBridge && window.endpointSelectionBridge.select(modelData.id); window.overlayCaptureEvidenceStale = true; if (accepted && window.captureMonitorBridge) window.captureMonitorBridge.start(); if (accepted) outputPickerDialog.close() }
+                }
+                Keys.onEscapePressed: outputPickerDialog.reject()
+            }
+            Button { objectName: "refreshOutputPicker"; text: "Refresh devices"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh output devices"; Accessible.description: "Re-enumerate output devices after a permission change or device connection."; onClicked: window.endpointSelectionBridge.refresh() }
+        }
+    }
     ColorDialog { id: lowColorDialog; title: "Choose low-frequency visualization color"; selectedColor: window.visualizationLowColor; onAccepted: if (window.themePreferencesBridge) window.themePreferencesBridge.lowColor = selectedColor }
     ColorDialog { id: midColorDialog; title: "Choose mid-frequency visualization color"; selectedColor: window.visualizationMidColor; onAccepted: if (window.themePreferencesBridge) window.themePreferencesBridge.midColor = selectedColor }
     ColorDialog { id: highColorDialog; title: "Choose high-frequency visualization color"; selectedColor: window.visualizationHighColor; onAccepted: if (window.themePreferencesBridge) window.themePreferencesBridge.highColor = selectedColor }
@@ -5918,6 +5947,7 @@ ApplicationWindow {
                                     onActivated: { window.overlayCaptureEvidenceStale = true; if (window.endpointSelectionBridge) window.endpointSelectionBridge.select(currentValue.id); if (window.captureMonitorBridge && window.captureMonitorBridge.start) window.captureMonitorBridge.start(); window.announceVisualizationRecovery("Output endpoint selected; monitoring restarted and prior evidence is stale until the new endpoint provides a fresh accepted snapshot."); endpointSelector.forceActiveFocus() }
                                 }
                                 Button { text: "Refresh"; objectName: "refreshEndpoints"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Refresh capture endpoints"; Accessible.role: Accessible.Button; Accessible.description: "Refresh the available output capture endpoints." + (window.overlayDisplayRecoveryPending ? " Overlay recovery is pending." : " Overlay is ready."); ToolTip.text: "Refresh available output capture endpoints; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); onClicked: { window.endpointSelectionBridge.refresh(); window.announceVisualizationRecovery("Output endpoint refresh requested; focus remains on endpoint recovery controls."); endpointSelector.forceActiveFocus() } }
+                                Button { text: "Choose device…"; objectName: "openOutputPicker"; activeFocusOnTab: true; enabled: window.endpointSelectionBridge !== null; Accessible.name: "Open output device picker"; Accessible.description: "Open the searchable output device picker with default, selected, unavailable, and permission states."; ToolTip.text: Accessible.description; onClicked: outputPickerDialog.open() }
                             }
                             Label {
                                 objectName: "endpointEmptyState"
