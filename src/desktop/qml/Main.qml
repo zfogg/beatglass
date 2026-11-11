@@ -4887,7 +4887,7 @@ ApplicationWindow {
                          if (state === "Error") return "Output capture error; live evidence is unavailable. Check the selected endpoint and retry monitoring."
                          return "Live evidence is unavailable until output monitoring starts."
                      }
-                     Accessible.name: "DJ evidence status: " + text
+                     Accessible.name: "DJ evidence status"
                      Accessible.role: Accessible.StaticText
                      Accessible.description: text
                      ToolTip.text: "Live evidence quality and recovery status"
