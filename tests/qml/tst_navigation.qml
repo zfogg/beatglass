@@ -2099,11 +2099,11 @@ TestCase {
         fakeOverlay.available = true
         fakeOverlay.refuseHide = true
         let app = shellWithOverlay.createObject(null)
+        let restore = findChild(app, "restoreOverlay")
         app.hideOverlayAndRestoreControls()
         verify(app.overlayDisplayRecoveryPending)
-        let restore = findChild(app, "restoreOverlay")
         tryVerify(() => restore.activeFocus)
-        compare(restore.Accessible.name, "Restore DJ overlay")
+        compare(findChild(app, "restoreOverlayAction").Accessible.name, "Restore overlay")
         fakeOverlay.refuseHide = false
         app.destroy()
     }

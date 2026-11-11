@@ -1973,7 +1973,7 @@ ApplicationWindow {
         const message = hidden
             ? (window.overlayBridge ? "DJ overlay hidden; output monitoring remains available in the control window." : "DJ overlay bridge unavailable; control window restored as the fallback.")
             : "DJ overlay could not be hidden; control-window fallback remains active."
-        window.focusOverlayHiddenState(message, hidden ? restoreOverlay : hideOverlay)
+        window.focusOverlayHiddenState(message, restoreOverlay)
     }
     function focusOverlayRecoveryPauseState(message, target) {
         navigation.currentIndex = 1
