@@ -8,5 +8,5 @@
   <text x="112" y="470" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">On resume</text>
   <text x="144" y="516" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="516" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Audio capture starts again</text>
   <text x="144" y="560" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="560" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Waveform and FFT update live</text>
-  <rect x="112" y="616" width="242" height="58" rx="14" fill="#56d38b"/><text x="233" y="652" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Resume monitoring</text><text x="1088" y="652" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Esc to keep paused</text>
+  <rect x="112" y="616" width="242" height="58" rx="14" fill="#56d38b"/><text x="233" y="645" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Resume monitoring</text><text x="1088" y="652" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Esc to keep paused</text>
 </svg>

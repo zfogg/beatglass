@@ -8,5 +8,5 @@
   <text x="112" y="464" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">What stays safe</text>
   <text x="144" y="510" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="510" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Position, size, and opacity</text>
   <text x="144" y="554" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="554" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Selected output preference</text>
-  <rect x="112" y="618" width="188" height="54" rx="14" fill="#56d38b"/><text x="206" y="652" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Retry now</text><rect x="322" y="618" width="188" height="54" rx="14" fill="#2a3444"/><text x="416" y="652" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Open controls</text>
+  <rect x="112" y="618" width="188" height="54" rx="14" fill="#56d38b"/><text x="206" y="645" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Retry now</text><rect x="322" y="618" width="188" height="54" rx="14" fill="#2a3444"/><text x="416" y="652" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Open controls</text>
 </svg>

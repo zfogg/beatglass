@@ -5,6 +5,6 @@
   <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Output capture</text><rect x="548" y="48" width="126" height="30" rx="15" fill="#172554" stroke="#60a5fa"/><text x="572" y="68" fill="#bfdbfe" font-family="sans-serif" font-size="13" font-weight="700">REACQUIRING</text>
   <text x="60" y="130" fill="#cbd5e1" font-family="sans-serif" font-size="15">Selected source</text><text x="270" y="130" fill="#f8fafc" font-family="sans-serif" font-size="15">Studio Monitor</text>
   <text x="60" y="172" fill="#cbd5e1" font-family="sans-serif" font-size="15">Generation</text><text x="270" y="172" fill="#f8fafc" font-family="sans-serif" font-size="15">42 · epoch 7</text>
-  <rect x="60" y="208" width="148" height="42" rx="9" fill="#2563eb"/><text x="95" y="234" fill="#eff6ff" font-family="sans-serif" font-size="14" font-weight="700">Retry monitoring</text>
+  <rect x="60" y="208" width="148" height="42" rx="9" fill="#2563eb"/><text x="134" y="229" fill="#eff6ff" font-family="sans-serif" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle">Retry monitoring</text>
   <text x="232" y="234" fill="#94a3b8" font-family="sans-serif" font-size="13">Live estimates resume when output is reacquired.</text>
 </svg>

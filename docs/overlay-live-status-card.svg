@@ -8,10 +8,9 @@
   <text x="144" y="270" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">CURRENT OUTPUT</text>
   <text x="144" y="323" fill="#f2f6fb" font-family="Inter,Arial" font-size="28" font-weight="700">Built-in Speakers</text>
   <text x="144" y="357" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Monitoring · 48 kHz · stable</text>
-  <rect x="838" y="278" width="206" height="58" rx="29" fill="#56d38b"/><text x="941" y="315" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Open controls</text>
+  <rect x="838" y="278" width="206" height="58" rx="29" fill="#56d38b"/><text x="941" y="307" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Open controls</text>
   <text x="112" y="454" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">Signal health</text>
-  <rect x="112" y="486" width="976" height="12" rx="6" fill="#2b3646"/><rect x="112" y="486" width="794" height="12" rx="6" fill="#56d38b"/>
-  <text x="112" y="538" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">No interruptions detected in the last 10 minutes</text>
+  <rect x="112" y="486" width="976" height="12" rx="6" fill="#2b3646"/><rect x="112" y="486" width="794" height="12" rx="6" fill="#56d38b"/><text x="509" y="492" fill="#b8c4d2" font-family="Inter,Arial" font-size="17" text-anchor="middle" dominant-baseline="middle">No interruptions detected in the last 10 minutes</text>
   <rect x="112" y="592" width="286" height="64" rx="16" fill="#2a3444"/><text x="255" y="632" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Hide overlay</text>
   <rect x="416" y="592" width="286" height="64" rx="16" fill="#2a3444"/><text x="559" y="632" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Change output</text>
   <text x="1088" y="682" fill="#7f8da0" font-family="Inter,Arial" font-size="14" text-anchor="end">Last refreshed just now</text>

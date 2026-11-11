@@ -2,7 +2,7 @@
   <title id="title">Overlay visualization card</title>
   <desc id="desc">A visualization card showing waveform mode, capture ready status, and an empty-state prompt.</desc>
   <rect width="760" height="360" rx="22" fill="#0f172a"/><rect x="32" y="28" width="696" height="304" rx="18" fill="#111827" stroke="#475569"/>
-  <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Waveform</text><rect x="548" y="48" width="126" height="30" rx="15" fill="#163b2b" stroke="#4ade80"/><text x="571" y="68" fill="#bbf7d0" font-family="sans-serif" font-size="13" font-weight="700">CAPTURE READY</text>
+  <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Waveform</text><rect x="548" y="48" width="126" height="30" rx="15" fill="#163b2b" stroke="#4ade80"/><text x="611" y="63" fill="#bbf7d0" font-family="sans-serif" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle">CAPTURE READY</text>
   <rect x="60" y="102" width="614" height="132" rx="12" fill="#1e293b" stroke="#334155"/>
   <path d="M78 170 C110 145 130 195 160 170 S210 145 240 170 S290 195 320 170 S370 145 400 170 S450 195 480 170 S530 145 560 170 S610 195 650 170" fill="none" stroke="#60a5fa" stroke-width="4"/>
   <text x="60" y="270" fill="#cbd5e1" font-family="sans-serif" font-size="15">No waveform sample selected</text><text x="60" y="298" fill="#94a3b8" font-family="sans-serif" font-size="13">Start monitoring or choose a visualization position to populate the readout.</text>

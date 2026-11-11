@@ -2,7 +2,7 @@
   <title id="title">Overlay reduced motion preference card</title>
   <desc id="desc">A preference card showing reduced motion enabled and a static visualization treatment.</desc>
   <rect width="760" height="300" rx="22" fill="#0f172a"/><rect x="32" y="28" width="696" height="244" rx="18" fill="#1e293b" stroke="#475569"/>
-  <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Motion preference</text><rect x="548" y="48" width="126" height="30" rx="15" fill="#163b2b" stroke="#4ade80"/><text x="571" y="68" fill="#bbf7d0" font-family="sans-serif" font-size="13" font-weight="700">ENABLED</text>
+  <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Motion preference</text><rect x="548" y="48" width="126" height="30" rx="15" fill="#163b2b" stroke="#4ade80"/><text x="611" y="63" fill="#bbf7d0" font-family="sans-serif" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle">ENABLED</text>
   <text x="60" y="132" fill="#f8fafc" font-family="sans-serif" font-size="16">Reduced motion</text><text x="60" y="160" fill="#cbd5e1" font-family="sans-serif" font-size="14">Static visualization snapshots remain available.</text>
-  <rect x="60" y="196" width="190" height="42" rx="9" fill="#334155" stroke="#94a3b8"/><text x="99" y="222" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="700">Keep static view</text>
+  <rect x="60" y="196" width="190" height="42" rx="9" fill="#334155" stroke="#94a3b8"/><text x="155" y="217" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">Keep static view</text>
 </svg>

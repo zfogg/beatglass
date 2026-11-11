@@ -9,9 +9,9 @@
   <rect x="202" y="337" width="780" height="50" rx="12" fill="#202938"/><text x="226" y="369" fill="#f2f6fb" font-family="Inter,Arial" font-size="17">Built-in Speakers</text><text x="952" y="369" fill="#56d38b" font-family="Inter,Arial" font-size="16" text-anchor="end">Ready</text>
   <circle cx="150" cy="438" r="28" fill="#56d38b"/><text x="150" y="447" fill="#10131a" font-family="Inter,Arial" font-size="20" font-weight="700" text-anchor="middle">2</text>
   <text x="202" y="435" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">Choose a size</text><text x="202" y="467" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Compact keeps the signal visible without taking over.</text>
-  <rect x="202" y="489" width="236" height="52" rx="12" fill="#56d38b"/><text x="320" y="522" fill="#10131a" font-family="Inter,Arial" font-size="17" font-weight="700" text-anchor="middle">Compact</text>
+  <rect x="202" y="489" width="236" height="52" rx="12" fill="#56d38b"/><text x="320" y="515" fill="#10131a" font-family="Inter,Arial" font-size="17" font-weight="700" text-anchor="middle" dominant-baseline="middle">Compact</text>
   <rect x="454" y="489" width="236" height="52" rx="12" fill="#2a3444"/><text x="572" y="522" fill="#f2f6fb" font-family="Inter,Arial" font-size="17" text-anchor="middle">Medium</text>
   <circle cx="150" cy="602" r="28" fill="#56d38b"/><text x="150" y="611" fill="#10131a" font-family="Inter,Arial" font-size="20" font-weight="700" text-anchor="middle">3</text>
   <text x="202" y="599" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">Start monitoring</text><text x="202" y="631" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">You can change these choices later in Controls.</text>
-  <rect x="840" y="592" width="242" height="58" rx="14" fill="#56d38b"/><text x="961" y="628" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Start monitoring</text>
+  <rect x="840" y="592" width="242" height="58" rx="14" fill="#56d38b"/><text x="961" y="621" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Start monitoring</text>
 </svg>

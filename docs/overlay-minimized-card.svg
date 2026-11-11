@@ -7,7 +7,7 @@
   <rect x="112" y="258" width="976" height="152" rx="18" fill="#202938"/><rect x="144" y="297" width="74" height="74" rx="18" fill="#2a3444"/><path d="M164 334h34M181 317v34" stroke="#56d38b" stroke-width="6" stroke-linecap="round"/><text x="254" y="318" fill="#f2f6fb" font-family="Inter,Arial" font-size="23" font-weight="700">Live monitoring is on</text><text x="254" y="354" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Built-in Speakers · 48 kHz · 12 ms latency</text><text x="254" y="382" fill="#56d38b" font-family="Inter,Arial" font-size="16" font-weight="700">0 dropped frames</text>
   <text x="112" y="476" fill="#f2f6fb" font-family="Inter,Arial" font-size="22" font-weight="700">Bring it back when you need it</text>
   <text x="112" y="512" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">The overlay keeps its position, size, and opacity while minimized.</text>
-  <rect x="112" y="570" width="236" height="58" rx="14" fill="#56d38b"/><text x="230" y="606" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Show overlay</text>
+  <rect x="112" y="570" width="236" height="58" rx="14" fill="#56d38b"/><text x="230" y="599" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Show overlay</text>
   <rect x="372" y="570" width="196" height="58" rx="14" fill="#2a3444"/><text x="470" y="606" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Open controls</text>
   <text x="1088" y="606" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">Ctrl + Shift + H</text>
 </svg>

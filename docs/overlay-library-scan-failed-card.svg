@@ -12,7 +12,7 @@
   <text x="192" y="307" fill="#a7b4c9" font-family="sans-serif" font-size="14">The source folder is still available to retry.</text>
   <text x="168" y="363" fill="#ffb0b4" font-family="sans-serif" font-size="16">Could not read one or more files.</text>
   <text x="168" y="390" fill="#a7b4c9" font-family="sans-serif" font-size="15">Check the folder permissions or review diagnostics.</text>
-  <rect x="168" y="438" width="148" height="48" rx="12" fill="#56d38b"/><text x="242" y="469" text-anchor="middle" fill="#07130d" font-family="sans-serif" font-size="16" font-weight="700">Retry scan</text>
+  <rect x="168" y="438" width="148" height="48" rx="12" fill="#56d38b"/><text x="242" y="462" text-anchor="middle" fill="#07130d" font-family="sans-serif" font-size="16" font-weight="700" dominant-baseline="middle">Retry scan</text>
   <rect x="332" y="438" width="168" height="48" rx="12" fill="#24344f" stroke="#3b4d6d"/><text x="416" y="469" text-anchor="middle" fill="#f7fafc" font-family="sans-serif" font-size="16">View diagnostics</text>
   <text x="168" y="548" fill="#718096" font-family="sans-serif" font-size="14">Beatglass · Library</text>
 </svg>

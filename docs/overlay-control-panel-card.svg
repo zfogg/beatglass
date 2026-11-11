@@ -12,13 +12,13 @@
   <rect x="616" y="254" width="472" height="178" rx="18" fill="#202938"/>
   <text x="648" y="299" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">PLACEMENT</text>
   <text x="648" y="344" fill="#f2f6fb" font-family="Inter,Arial" font-size="21" font-weight="700">Position</text>
-  <rect x="648" y="363" width="90" height="42" rx="12" fill="#56d38b"/><text x="693" y="390" fill="#10131a" font-family="Inter,Arial" font-size="16" text-anchor="middle">Top</text>
+  <rect x="648" y="363" width="90" height="42" rx="12" fill="#56d38b"/><text x="693" y="384" fill="#10131a" font-family="Inter,Arial" font-size="16" text-anchor="middle" dominant-baseline="middle">Top</text>
   <rect x="748" y="363" width="90" height="42" rx="12" fill="#2a3444"/><text x="793" y="390" fill="#f2f6fb" font-family="Inter,Arial" font-size="16" text-anchor="middle">Bottom</text>
   <rect x="848" y="363" width="90" height="42" rx="12" fill="#2a3444"/><text x="893" y="390" fill="#f2f6fb" font-family="Inter,Arial" font-size="16" text-anchor="middle">Free</text>
   <rect x="112" y="470" width="976" height="116" rx="18" fill="#202938"/>
   <text x="144" y="516" fill="#f2f6fb" font-family="Inter,Arial" font-size="21" font-weight="700">Interaction</text>
   <text x="144" y="552" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Click-through is on while locked.</text>
   <rect x="874" y="503" width="170" height="54" rx="27" fill="#2a3444"/><circle cx="902" cy="530" r="18" fill="#718096"/><text x="958" y="536" fill="#f2f6fb" font-family="Inter,Arial" font-size="17" text-anchor="middle">Locked</text>
-  <rect x="112" y="620" width="232" height="56" rx="14" fill="#56d38b"/><text x="228" y="655" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Apply changes</text>
+  <rect x="112" y="620" width="232" height="56" rx="14" fill="#56d38b"/><text x="228" y="648" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Apply changes</text>
   <rect x="360" y="620" width="180" height="56" rx="14" fill="#2a3444"/><text x="450" y="655" fill="#f2f6fb" font-family="Inter,Arial" font-size="18" text-anchor="middle">Cancel</text>
 </svg>

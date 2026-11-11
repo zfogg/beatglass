@@ -6,6 +6,6 @@
   <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="25" font-weight="700">Overlay interaction</text>
   <rect x="60" y="98" width="240" height="34" rx="17" fill="#172554" stroke="#60a5fa"/><text x="84" y="121" fill="#bfdbfe" font-family="sans-serif" font-size="14" font-weight="700">CLICK-THROUGH ENABLED</text>
   <text x="60" y="172" fill="#cbd5e1" font-family="sans-serif" font-size="15">Pointer input passes through the overlay.</text>
-  <rect x="60" y="202" width="144" height="42" rx="9" fill="#2563eb"/><text x="94" y="228" fill="#eff6ff" font-family="sans-serif" font-size="15" font-weight="700">Unlock overlay</text>
+  <rect x="60" y="202" width="144" height="42" rx="9" fill="#2563eb"/><text x="132" y="223" fill="#eff6ff" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">Unlock overlay</text>
   <text x="236" y="228" fill="#94a3b8" font-family="sans-serif" font-size="13">Keyboard and pointer interaction restored.</text>
 </svg>

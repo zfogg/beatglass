@@ -4,11 +4,11 @@
   <rect width="760" height="420" rx="22" fill="#0f172a"/>
   <rect x="32" y="28" width="696" height="364" rx="18" fill="#1e293b" stroke="#475569"/>
   <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="25" font-weight="700">Overlay settings</text>
-  <rect x="60" y="94" width="110" height="32" rx="16" fill="#163b2b" stroke="#4ade80"/><text x="84" y="116" fill="#bbf7d0" font-family="sans-serif" font-size="14" font-weight="700">READY</text>
+  <rect x="60" y="94" width="110" height="32" rx="16" fill="#163b2b" stroke="#4ade80"/><text x="115" y="110" fill="#bbf7d0" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">READY</text>
   <text x="60" y="162" fill="#cbd5e1" font-family="sans-serif" font-size="15">Display</text><text x="280" y="162" fill="#f8fafc" font-family="sans-serif" font-size="15">Studio Monitor</text>
   <text x="60" y="202" fill="#cbd5e1" font-family="sans-serif" font-size="15">Size</text><text x="280" y="202" fill="#f8fafc" font-family="sans-serif" font-size="15">Medium · 310 × 130</text>
   <text x="60" y="242" fill="#cbd5e1" font-family="sans-serif" font-size="15">Opacity</text><text x="280" y="242" fill="#f8fafc" font-family="sans-serif" font-size="15">90% · revision 13</text>
-  <rect x="60" y="286" width="210" height="46" rx="10" fill="#334155" stroke="#94a3b8"/><text x="107" y="315" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="700">Review summary</text>
+  <rect x="60" y="286" width="210" height="46" rx="10" fill="#334155" stroke="#94a3b8"/><text x="165" y="309" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="700" text-anchor="middle" dominant-baseline="middle">Review summary</text>
   <rect x="286" y="286" width="150" height="46" rx="10" fill="#475569"/><text x="331" y="315" fill="#f8fafc" font-family="sans-serif" font-size="15" font-weight="700">Hide overlay</text>
   <text x="60" y="365" fill="#94a3b8" font-family="sans-serif" font-size="13">Persisted display, size, and opacity are applied.</text>
 </svg>

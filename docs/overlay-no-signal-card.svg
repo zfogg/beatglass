@@ -11,6 +11,6 @@
   <text x="244" y="397" fill="#b8c4d2" font-family="Inter,Arial" font-size="17">Start playback to see waveform and frequency activity.</text>
   <rect x="112" y="474" width="470" height="118" rx="18" fill="#202938"/><text x="144" y="518" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">READY STATE</text><text x="144" y="557" fill="#f2f6fb" font-family="Inter,Arial" font-size="20" font-weight="700">Overlay remains visible</text>
   <rect x="616" y="474" width="472" height="118" rx="18" fill="#202938"/><text x="648" y="518" fill="#9ba9bb" font-family="Inter,Arial" font-size="15" letter-spacing="2">NEXT STEP</text><text x="648" y="557" fill="#f2f6fb" font-family="Inter,Arial" font-size="20" font-weight="700">Play audio, then watch</text>
-  <rect x="112" y="628" width="208" height="54" rx="14" fill="#56d38b"/><text x="216" y="662" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Open controls</text>
+  <rect x="112" y="628" width="208" height="54" rx="14" fill="#56d38b"/><text x="216" y="655" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Open controls</text>
   <text x="1088" y="662" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">No data is an expected state</text>
 </svg>

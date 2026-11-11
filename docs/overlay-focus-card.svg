@@ -3,6 +3,6 @@
   <desc id="desc">A recovery action card with a visible focus ring and keyboard navigation guidance.</desc>
   <rect width="760" height="300" rx="22" fill="#0f172a"/><rect x="32" y="28" width="696" height="244" rx="18" fill="#1e293b" stroke="#475569"/>
   <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="24" font-weight="700">Keyboard focus</text><text x="60" y="112" fill="#cbd5e1" font-family="sans-serif" font-size="14">Focus remains visible while reviewing overlay recovery.</text>
-  <rect x="56" y="146" width="204" height="52" rx="12" fill="none" stroke="#facc15" stroke-width="4"/><rect x="62" y="152" width="192" height="40" rx="8" fill="#2563eb"/><text x="101" y="178" fill="#eff6ff" font-family="sans-serif" font-size="14" font-weight="700">Review recovery</text>
+  <rect x="56" y="146" width="204" height="52" rx="12" fill="none" stroke="#facc15" stroke-width="4"/><rect x="62" y="152" width="192" height="40" rx="8" fill="#2563eb"/><text x="158" y="172" fill="#eff6ff" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">Review recovery</text>
   <text x="292" y="178" fill="#fef3c7" font-family="sans-serif" font-size="14">Tab order · visible 4px focus ring</text><text x="60" y="238" fill="#94a3b8" font-family="sans-serif" font-size="13">The focused action announces the next recovery step.</text>
 </svg>

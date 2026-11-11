@@ -12,6 +12,6 @@
   <rect x="112" y="466" width="976" height="104" rx="18" fill="#202938"/>
   <text x="144" y="510" fill="#f2f6fb" font-family="Inter,Arial" font-size="19" font-weight="700">Resume behavior</text>
   <text x="144" y="543" fill="#b8c4d2" font-family="Inter,Arial" font-size="16">Reconnect to the selected output and continue where you left off.</text>
-  <rect x="830" y="490" width="214" height="56" rx="14" fill="#56d38b"/><text x="937" y="525" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Resume monitoring</text>
+  <rect x="830" y="490" width="214" height="56" rx="14" fill="#56d38b"/><text x="937" y="518" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Resume monitoring</text>
   <rect x="112" y="614" width="176" height="52" rx="14" fill="#2a3444"/><text x="200" y="647" fill="#f2f6fb" font-family="Inter,Arial" font-size="17" text-anchor="middle">Open controls</text>
 </svg>

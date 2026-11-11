@@ -9,5 +9,5 @@
   <text x="144" y="506" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="506" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Overlay window created</text>
   <text x="144" y="552" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="552" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Output selected</text>
   <text x="144" y="598" fill="#56d38b" font-family="Inter,Arial" font-size="18">✓</text><text x="184" y="598" fill="#f2f6fb" font-family="Inter,Arial" font-size="18">Ready for live audio</text>
-  <rect x="112" y="630" width="204" height="54" rx="14" fill="#56d38b"/><text x="214" y="664" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle">Show overlay</text><text x="1088" y="664" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">You can change settings later</text>
+  <rect x="112" y="630" width="204" height="54" rx="14" fill="#56d38b"/><text x="214" y="657" fill="#10131a" font-family="Inter,Arial" font-size="18" font-weight="700" text-anchor="middle" dominant-baseline="middle">Show overlay</text><text x="1088" y="664" fill="#7f8da0" font-family="Inter,Arial" font-size="15" text-anchor="end">You can change settings later</text>
 </svg>

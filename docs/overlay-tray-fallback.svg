@@ -4,8 +4,8 @@
   <rect width="760" height="330" rx="22" fill="#0f172a"/>
   <rect x="32" y="28" width="696" height="274" rx="18" fill="#1e293b" stroke="#475569"/>
   <text x="60" y="72" fill="#f8fafc" font-family="sans-serif" font-size="25" font-weight="700">Control window fallback</text>
-  <rect x="60" y="98" width="180" height="34" rx="17" fill="#3b2f12" stroke="#fbbf24"/><text x="84" y="121" fill="#fde68a" font-family="sans-serif" font-size="14" font-weight="700">MONITORING ACTIVE</text>
+  <rect x="60" y="98" width="180" height="34" rx="17" fill="#3b2f12" stroke="#fbbf24"/><text x="150" y="115" fill="#fde68a" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">MONITORING ACTIVE</text>
   <text x="60" y="170" fill="#f8fafc" font-family="sans-serif" font-size="16">Live output monitoring remains available.</text><text x="60" y="196" fill="#cbd5e1" font-family="sans-serif" font-size="14">Persisted overlay settings are retained for recovery.</text>
-  <rect x="60" y="226" width="170" height="42" rx="9" fill="#2563eb"/><text x="102" y="252" fill="#eff6ff" font-family="sans-serif" font-size="14" font-weight="700">Review recovery</text>
-  <rect x="248" y="226" width="130" height="42" rx="9" fill="#334155" stroke="#94a3b8"/><text x="286" y="252" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="700">Retry overlay</text>
+  <rect x="60" y="226" width="170" height="42" rx="9" fill="#2563eb"/><text x="145" y="247" fill="#eff6ff" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">Review recovery</text>
+  <rect x="248" y="226" width="130" height="42" rx="9" fill="#334155" stroke="#94a3b8"/><text x="313" y="247" fill="#f8fafc" font-family="sans-serif" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">Retry overlay</text>
 </svg>

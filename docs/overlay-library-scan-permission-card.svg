@@ -12,7 +12,7 @@
   <text x="192" y="309" fill="#718096" font-family="sans-serif" font-size="14">Read-only indexing · no files are modified</text>
   <text x="168" y="372" fill="#d8e3f5" font-family="sans-serif" font-size="16">Choose how to continue</text>
   <text x="168" y="400" fill="#a7b4c9" font-family="sans-serif" font-size="15">You can change this permission later in settings.</text>
-  <rect x="168" y="438" width="180" height="48" rx="12" fill="#56d38b"/><text x="258" y="469" text-anchor="middle" fill="#07130d" font-family="sans-serif" font-size="16" font-weight="700">Allow folder</text>
+  <rect x="168" y="438" width="180" height="48" rx="12" fill="#56d38b"/><text x="258" y="462" text-anchor="middle" fill="#07130d" font-family="sans-serif" font-size="16" font-weight="700" dominant-baseline="middle">Allow folder</text>
   <rect x="364" y="438" width="148" height="48" rx="12" fill="#24344f" stroke="#3b4d6d"/><text x="438" y="469" text-anchor="middle" fill="#f7fafc" font-family="sans-serif" font-size="16">Not now</text>
   <text x="168" y="548" fill="#718096" font-family="sans-serif" font-size="14">Beatglass · Library</text>
 </svg>
