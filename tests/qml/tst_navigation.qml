@@ -112,7 +112,7 @@ TestCase {
         verify(app !== null); compare(fakeOverlay.attaches, 1)
         findChild(app, "navigation").currentIndex = 1
         let show = findChild(app, "showOverlay")
-        let toggle = findChild(app, "clickThrough")
+        let toggle = findChild(app, "unlockOverlay")
         let unlock = findChild(app, "unlockOverlay")
         let hide = findChild(app, "hideOverlay")
         tryVerify(() => show.visible && show.enabled)
