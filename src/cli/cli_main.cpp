@@ -1243,11 +1243,17 @@ int main(int argc, char** argv) {
     status = std::to_string(tracks.size()) + " tracks indexed; selection preserved by path." +
         (cancelling ? " Cancelling the previous analysis." : "");
   };
-  auto filter_input = Input(&filter, "Search library");
+  InputOption search_input_option;
+  search_input_option.placeholder = "Search library";
+  search_input_option.multiline = false;
+  search_input_option.transform = [](InputState state) {
+    return state.element | color(state.focused ? Color::White : Color::GrayLight) | bgcolor(Color::RGB(18, 24, 31));
+  };
+  auto filter_input = Input(&filter, search_input_option);
   auto folder_input = Input(&folder_text, "Audio folder");
   auto clear_search_button = Button("Clear search", [&] { filter.clear(); status = "Library search cleared."; }, compact_button_option);
   auto search_bar = Renderer(Container::Horizontal(Components{filter_input, clear_search_button}), [&] {
-    return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 20) | borderRounded, text(" "), action(clear_search_button->Render(), Color::Cyan)});
+    return hbox({text("Search: ") | bold | color(Color::Cyan), filter_input->Render() | size(WIDTH, GREATER_THAN, 20), text(" "), action(clear_search_button->Render(), Color::Cyan)});
   });
   std::string seek_step_text = std::to_string(preferences.seek_step);
   std::string visual_mode = preferences.visual_mode;
