@@ -5150,7 +5150,7 @@ ApplicationWindow {
                         readonly property bool activeFocus: focusRequested || retryOverlayButton.activeFocus
                         readonly property bool enabled: retryOverlayButton.enabled
                         readonly property string text: retryOverlayButton.text
-                        function clicked() { retryOverlayButton.clicked() }
+                        function clicked() { return window.handleOverlayRetryButtonAction() }
                         function forceActiveFocus() { retryOverlayButton.forceActiveFocus(); focusRequested = true }
                     }
                     Button {
