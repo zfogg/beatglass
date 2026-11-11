@@ -305,6 +305,7 @@ TestCase {
         let tabs = findChild(app, "navigation")
         let library = findChild(app, "libraryPage")
         let dj = findChild(app, "djPage")
+        tabs.currentIndex = 0
         verify(library.visible)
         verify(!dj.visible)
         tabs.currentIndex = 1
