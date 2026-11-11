@@ -4885,6 +4885,18 @@ ApplicationWindow {
                      ToolTip.text: "Live evidence quality and recovery status"
                      wrapMode: Text.WordWrap; Layout.fillWidth: true
                     }
+                    Label {
+                        objectName: "monitoringGuidance"
+                        text: window.liveBridge.status === "Tracking"
+                            ? "Monitoring is active; estimates update from the selected output mix."
+                            : "Start monitoring the selected output to receive live BPM, key, and chord estimates."
+                        Accessible.name: "Monitoring guidance"
+                        Accessible.role: Accessible.StaticText
+                        Accessible.description: text
+                        ToolTip.text: "Monitoring guidance and next action"
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
+                    }
                 }
                 RowLayout {
                     objectName: "overlayActions"
