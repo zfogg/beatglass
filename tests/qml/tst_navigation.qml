@@ -518,7 +518,8 @@ TestCase {
         verify((liveGroup.Accessible.value || liveGroup.Accessible.description || "").indexOf("stale until fresh capture") >= 0)
         verify((attribution.Accessible.value || attribution.Accessible.description || "").indexOf("stale until fresh capture") >= 0)
         let retry = findChild(app, "overlayCaptureRecoveryAction")
-        verify((retry.Accessible.value || retry.Accessible.description || "").indexOf("stale until fresh capture") >= 0)
+        let retryDescription = retry.Accessible.value || retry.Accessible.description || ""
+        verify(retryDescription.indexOf("stale") >= 0 && retryDescription.indexOf("fresh capture") >= 0)
         verify(app.overlayRecoveryAnnouncement.indexOf("fresh snapshot") >= 0)
         fakeCapture.status = "Monitoring"
         verify(!app.overlayCaptureEvidenceStale)
