@@ -80,7 +80,10 @@ if not any(item.startswith("libpipewire-0.3") or item.startswith("pkg-config") f
 if missing:
     finish("missing", missing)
     print("Missing Linux PipeWire prerequisites: " + ", ".join(missing), file=sys.stderr)
-    print("Install PipeWire development headers and rerun CMake with BEATGLASS_BUILD_PIPEWIRE=ON", file=sys.stderr)
+    if any(item in {"running PipeWire daemon", "valid pw-dump JSON"} for item in missing):
+        print("Start a logged-in PipeWire desktop session with an output sink, then rerun the native qualification", file=sys.stderr)
+    if any(item.startswith("libpipewire-0.3") or item.startswith("pkg-config") for item in missing):
+        print("Install PipeWire development headers/pkg-config metadata and rerun CMake with BEATGLASS_BUILD_PIPEWIRE=ON", file=sys.stderr)
     raise SystemExit(1)
 version = subprocess.run(["pkg-config", "--modversion", "libpipewire-0.3"], check=False,
                          stdout=subprocess.PIPE, text=True).stdout.strip()
