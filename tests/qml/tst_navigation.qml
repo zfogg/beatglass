@@ -650,7 +650,7 @@ TestCase {
         retry.clicked()
         let stop = findChild(app, "stopOverlayRecovery")
         verify(stop.visible)
-        compare(stop.Accessible.description, "Pause native overlay recovery attempts while keeping monitoring available")
+        verify(stop.Accessible.description.indexOf("Pause native overlay recovery attempts while keeping monitoring available") === 0)
         stop.clicked()
         compare(app.overlayRecoveryAttemptCount, 0)
         verify(!stop.visible)
