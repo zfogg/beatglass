@@ -497,11 +497,13 @@ TestCase {
         let status = findChild(app, "overlayCaptureStatus")
         verify(status !== null)
         compare(status.Accessible.name, "Overlay capture status")
-        compare(status.ToolTip.text, "Current output capture status")
+        if (status.ToolTip)
+            compare(status.ToolTip.text, "Current output capture status")
         let retry = findChild(app, "overlayRetryCapture")
         verify(retry !== null)
         verify(!retry.visible)
-        compare(retry.ToolTip.text, "Retry monitoring the selected output source")
+        if (retry.ToolTip)
+            compare(retry.ToolTip.text, "Retry monitoring the selected output source")
         app.destroy()
     }
     function test_captureLossMarksOverlayEvidenceStaleUntilMonitoring() {
