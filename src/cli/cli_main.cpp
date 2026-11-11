@@ -1797,6 +1797,10 @@ int main(int argc, char** argv) {
   auto combined_mode_button = Button("Combined", [&] { set_visual_mode("combined"); }, compact_button_option);
   auto beat_grid_mode_button = Button("Beat grid", [&] { set_visual_mode("beat_grid"); }, compact_button_option);
   auto tonal_history_mode_button = Button("Tonal history", [&] { set_visual_mode("tonal_history"); }, compact_button_option);
+  auto visualization_mode_action = [&](Component button, const std::string& mode, Color accent) {
+    auto rendered = button->Render() | color(visual_mode == mode ? Color::White : accent);
+    return visual_mode == mode ? rendered | bgcolor(accent) | bold : rendered;
+  };
   RadioboxOption playback_device_option;
   playback_device_option.on_change = [&] {
     persist_preferences();
@@ -1821,7 +1825,7 @@ int main(int argc, char** argv) {
       text(reduce_motion ? "Spinner animation paused; status still updates." : "Spinner animation enabled while work is active.") | color(Color::GrayLight) | italic,
       text("PLAYBACK") | bold | underlined, hbox({text("Seek step (1–60 seconds): ") | italic, seek_step_input->Render() | size(WIDTH, LESS_THAN, 8)}),
       text("LIVE VISUALIZATION") | bold | underlined,
-      hbox({text("Mode: " + visual_mode + "  ") | italic, action(waveform_mode_button->Render(), Color::GreenLight), text(" "), action(spectrum_mode_button->Render(), Color::MagentaLight), text(" "), action(combined_mode_button->Render(), Color::Cyan), text(" "), action(beat_grid_mode_button->Render(), Color::YellowLight), text(" "), action(tonal_history_mode_button->Render(), Color::BlueLight)}),
+      hbox({text("Mode: " + visual_mode + "  ") | italic, visualization_mode_action(waveform_mode_button, "waveform", Color::GreenLight), text(" "), visualization_mode_action(spectrum_mode_button, "spectrum", Color::MagentaLight), text(" "), visualization_mode_action(combined_mode_button, "combined", Color::Cyan), text(" "), visualization_mode_action(beat_grid_mode_button, "beat_grid", Color::YellowLight), text(" "), visualization_mode_action(tonal_history_mode_button, "tonal_history", Color::BlueLight)}),
       text("PLAYBACK OUTPUT") | bold | underlined,
       playback_device_labels.empty() ? text("No waveOut output devices discovered; the native mapper will be used.") | color(Color::YellowLight) : playback_device_picker->Render() | frame | vscroll_indicator,
       separator(), text("OUTPUT SAFETY") | bold, text("Beatglass never writes tags or modifies source audio."),
