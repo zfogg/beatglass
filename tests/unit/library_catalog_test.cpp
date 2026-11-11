@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include "beatglass/library/catalog.hpp"
+#include "beatglass/library/source_detail.hpp"
 #include <chrono>
 #include <fstream>
 #include <algorithm>
@@ -314,4 +315,29 @@ TEST_CASE("multi-root scan cancellation publishes no partial snapshot") {
   CHECK(result.cancelled);
   CHECK(result.entries.empty());
   CHECK(result.diagnostic == "catalog scan cancelled");
+}
+
+TEST_CASE("source detail only exposes fresh complete evidence for an available source") {
+  beatglass::library::SourceDetail detail;
+  detail.availability = beatglass::library::SourceAvailability::available;
+  detail.analysis = beatglass::library::SourceAnalysisState::complete;
+  detail.freshness_known = true;
+  detail.fresh = true;
+  detail.frames_processed = 120;
+  detail.total_frames = 100;
+  CHECK(beatglass::library::source_detail_has_current_analysis(detail));
+  CHECK(beatglass::library::source_detail_progress(detail) == 1.0);
+  detail.fresh = false;
+  CHECK_FALSE(beatglass::library::source_detail_has_current_analysis(detail));
+  detail.availability = beatglass::library::SourceAvailability::missing;
+  CHECK_FALSE(beatglass::library::source_detail_has_current_analysis(detail));
+}
+
+TEST_CASE("source detail labels and indeterminate progress are stable") {
+  using namespace beatglass::library;
+  SourceDetail detail;
+  detail.frames_processed = 5;
+  CHECK(source_detail_progress(detail) == -1.0);
+  CHECK(std::string(source_availability_label(SourceAvailability::unreadable)) == "unreadable");
+  CHECK(std::string(source_analysis_state_label(SourceAnalysisState::stale)) == "stale");
 }
