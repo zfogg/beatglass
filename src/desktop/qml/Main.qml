@@ -627,6 +627,7 @@ ApplicationWindow {
         }
     }
     function transitionCaptureEvidence(stale, message, focusTarget) {
+        console.log("DBG transition", stale, message)
         window.overlayCaptureEvidenceStale = stale
         if (message !== "") {
             const freshness = stale
@@ -2297,6 +2298,7 @@ ApplicationWindow {
             visualizationCanvas.forceActiveFocus()
     }
     function announceCaptureRecoveryState(message) {
+        console.log("DBG announce before", window.overlayCaptureEvidenceStale, message)
         if (window.overlayCaptureEvidenceStale && message.indexOf("native recovery completes") < 0)
             message += " Live evidence is stale until native recovery completes and fresh capture arrives."
         if (window.overlayInvalidOpacityRecoveryPending && message.indexOf("90 percent opacity") < 0)
