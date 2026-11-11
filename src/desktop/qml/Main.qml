@@ -5942,6 +5942,17 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     ColumnLayout {
                         anchors.fill: parent; spacing: 8
+                        ComboBox {
+                            id: captureSourceMode
+                            objectName: "captureSourceMode"
+                            model: ["Microphone", "Room audio", "System output"]
+                            currentIndex: 2
+                            activeFocusOnTab: true
+                            Accessible.name: "Capture source mode"
+                            Accessible.description: "Choose microphone, room audio, or system output. Changing source starts a new capture epoch and discontinuity, marking prior evidence stale."
+                            onActivated: { window.overlayCaptureEvidenceStale = true; window.announceVisualizationRecovery("Capture source changed to " + currentText + "; prior waveform evidence is stale until fresh capture arrives."); if (window.captureMonitorBridge && window.captureMonitorBridge.start) window.captureMonitorBridge.start() }
+                        }
+                        Label { objectName: "captureSourceAttribution"; text: "Source: " + captureSourceMode.currentText + " · " + (window.captureMonitorBridge ? window.captureMonitorBridge.status : "Unavailable") + (window.overlayCaptureEvidenceStale ? " · stale until fresh capture" : ""); Accessible.name: "Capture source attribution: " + text; Accessible.role: Accessible.Status; Layout.fillWidth: true }
                         Label { text: "Output device"; font.bold: true; Accessible.name: "Output device settings, " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready"); Accessible.role: Accessible.Heading; ToolTip.text: "Choose the system output device used for monitoring; " + (window.overlayDisplayRecoveryPending ? "overlay recovery pending" : "overlay ready") }
                             RowLayout {
                                 ComboBox {
