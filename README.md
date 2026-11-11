@@ -116,7 +116,7 @@ These are the only options accepted by the shipped `beatglass-cli` and
 `beatglass-desktop` binaries. They are separate from the developer and
 qualification-script flags below.
 
-Usage: `beatglass-cli [--help] [--version] [--replay] [--json] [--low-color <#rrggbb>] [--mid-color <#rrggbb>] [--high-color <#rrggbb>] [--] <audio-file>`.
+Usage: `beatglass-cli [--help] [--version] [--show-colors|--preview-colors|--reset-colors] [--replay] [--json] [--low-color <#rrggbb>] [--mid-color <#rrggbb>] [--high-color <#rrggbb>] [--] <audio-file>`.
 The music analysis binary uses `beatglass-music-cli [--help] [--version] <audio-file>`.
 
 | Binary | Argument | Meaning |
@@ -128,6 +128,8 @@ The music analysis binary uses `beatglass-music-cli [--help] [--version] <audio-
 | `beatglass-music-cli` | `--help`, `-h` | Print usage and exit successfully. |
 | `beatglass-cli` | `--replay <file>` | Run causal replay without real-time pacing. |
 | `beatglass-cli` | `--json` | Emit one JSON result, or JSON Lines when combined with `--replay`. |
+| `beatglass-cli` | `--show-colors`, `--preview-colors` | Print the effective low/mid/high visualization colors without requiring an audio file; combine with `--json` for a machine-readable object. |
+| `beatglass-cli` | `--reset-colors` | Print the GUI-parity default visualization colors (`#38bdf8`, `#a78bfa`, `#f472b6`) without requiring an audio file. |
 | `beatglass-cli` | `--` | End option parsing so a filename beginning with `-` is accepted. |
 | `beatglass-desktop` | `--database <path>` | Select the SQLite storage path; the first occurrence wins. |
 
