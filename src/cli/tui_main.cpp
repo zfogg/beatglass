@@ -38,7 +38,7 @@ std::vector<Track> discover(const std::filesystem::path& root) {
 
 int main(int argc, char** argv) {
   using namespace ftxui;
-  const std::filesystem::path root = argc > 1 ? argv[1] : std::filesystem::current_path();
+  std::filesystem::path root = argc > 1 ? argv[1] : std::filesystem::current_path();
   beatglass::cli::NavigationModel navigation;
   auto tracks = discover(root);
   int tab = 0, selected = tracks.empty() ? -1 : 0;
@@ -66,6 +66,13 @@ int main(int argc, char** argv) {
     try { result = beatglass::analyze_file(tracks[selected].path); status = "Analysis complete — estimates are backed by the file analyzer."; }
     catch (const std::exception& error) { result.reset(); status = std::string("Analysis failed: ") + error.what(); }
     busy = false;
+  };
+  auto reload_folder = [&](const std::filesystem::path& folder) {
+    root = folder;
+    tracks = discover(root);
+    selected = tracks.empty() ? -1 : 0;
+    result.reset();
+    status = tracks.empty() ? "Choose a folder with audio files to begin." : "Ready to analyze a track.";
   };
   auto library = Renderer([&] {
     Elements rows;
@@ -112,14 +119,21 @@ int main(int argc, char** argv) {
         if (popup == Popup::folder) {
           const std::filesystem::path chosen(draft_folder);
           if (!std::filesystem::is_directory(chosen)) { popup_message = "Folder is unavailable; choose an existing directory."; return true; }
+          reload_folder(chosen);
           popup = Popup::none; popup_message.clear();
         } else if (popup == Popup::confirm_remove) {
+          reload_folder({});
+          status = "Library folder removed. User audio files were not deleted.";
           popup = Popup::none; popup_message.clear();
         } else if (popup == Popup::recovery) {
           popup_message = "Retry requested; reconnect the device if it remains unavailable.";
         } else {
           popup = Popup::none; popup_message.clear();
         }
+        return true;
+      }
+      if (popup == Popup::folder && event == Event::Backspace) {
+        if (!draft_folder.empty()) draft_folder.pop_back();
         return true;
       }
       if (popup == Popup::folder && event.is_character()) { draft_folder += event.character(); return true; }
